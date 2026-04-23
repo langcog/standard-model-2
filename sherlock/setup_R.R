@@ -50,15 +50,25 @@ for (pkg in names(gh_pkgs)) {
 cat("\nPackages installed. rstan version:\n")
 print(packageVersion("rstan"))
 
-## Pre-compile the Stan model so the first fit doesn't pay compile cost.
-if (file.exists("model/stan/log_irt.stan")) {
-  suppressPackageStartupMessages(library(rstan))
-  rstan_options(auto_write = TRUE)
-  message("Pre-compiling Stan models...")
-  stan_model("model/stan/log_irt.stan")
-  if (file.exists("model/stan/log_irt_long.stan")) {
-    stan_model("model/stan/log_irt_long.stan")
-  }
+## Pre-compile the Stan models so the first fit doesn't pay compile cost.
+## This requires ~8 GB RAM per model; if the dev session doesn't have that
+## memory (OOM -> "Killed signal terminated program cc1plus"), skip it and
+## the first SLURM fit will compile (SLURM scripts reserve more RAM).
+maybe_compile <- function(path) {
+  if (!file.exists(path)) return(invisible(NULL))
+  message("Pre-compiling ", path, " ...")
+  tryCatch({
+    suppressPackageStartupMessages(library(rstan))
+    rstan_options(auto_write = TRUE)
+    stan_model(path)
+    message("  OK")
+  }, error = function(e) {
+    message("  SKIPPED (", conditionMessage(e), ")")
+    message("  This is usually an OOM in the dev session. It's fine:")
+    message("  the first SLURM fit will compile the model and cache it.")
+  })
 }
+maybe_compile("model/stan/log_irt.stan")
+maybe_compile("model/stan/log_irt_long.stan")
 
 cat("\nSetup complete.\n")
