@@ -22,6 +22,13 @@ if (!dir.exists(user_lib)) dir.create(user_lib, recursive = TRUE)
 cat("User library:", user_lib, "\n")
 cat("Library paths:\n"); print(.libPaths())
 
+# Core packages needed for fitting + analysis. We deliberately DO NOT
+# install wordbankr / childesr on Sherlock:
+#   * wordbankr depends on RMySQL, which needs mysql dev headers that
+#     Sherlock's environment doesn't provide.
+#   * childesr requires R >= 4.4; Sherlock ships R 4.2 as the default module.
+# Data pulls using those packages happen on the laptop; the resulting
+# .rds files are committed to the repo so Sherlock can just read them.
 cran_pkgs <- c(
   "rstan", "posterior", "dplyr", "tidyr", "ggplot2", "tibble",
   "patchwork", "MASS", "arrow", "remotes", "purrr"
@@ -33,18 +40,6 @@ if (length(needed) > 0) {
   message("Installing CRAN packages to ", user_lib, ": ",
           paste(needed, collapse = ", "))
   install.packages(needed, lib = user_lib)
-}
-
-gh_pkgs <- list(
-  wordbankr = "langcog/wordbankr",
-  childesr  = "langcog/childesr"
-)
-for (pkg in names(gh_pkgs)) {
-  if (!requireNamespace(pkg, quietly = TRUE)) {
-    message(sprintf("Installing %s from GitHub...", pkg))
-    remotes::install_github(gh_pkgs[[pkg]], upgrade = "never",
-                            lib = user_lib)
-  }
 }
 
 cat("\nPackages installed. rstan version:\n")

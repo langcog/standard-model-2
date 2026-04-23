@@ -27,23 +27,29 @@ exit                     # back to login node
 
 ## Transferring data
 
-Small inputs (fit bundles and CHILDES/input-rate CSVs) are tracked in
-the repo. If you pull fresh Wordbank data, do it locally or in an
-interactive session on Sherlock (the cluster's compute nodes have no
-outbound internet by default):
+**Do the Wordbank / CHILDES pulls LOCALLY on your laptop**, not on Sherlock.
+Two reasons:
+
+1. `wordbankr` depends on `RMySQL`, which needs mysql headers not available on
+   Sherlock.
+2. `childesr` requires R ≥ 4.4; Sherlock's R module is 4.2.
+
+The pulled intermediate files (`model/fits/long_ws_items.rds`,
+`model/fits/norwegian_word_freq.rds`) are committed to the repo, so on
+Sherlock you just do:
 
 ```bash
-# On Sherlock login node, which does have internet:
+# Prepare the Stan-ready bundles (reads the committed intermediate files):
+cd $HOME/standard_model_2
 ml R
-Rscript model/scripts/pull_longitudinal.R
-# outputs long_ws_items.rds in model/fits/
+Rscript model/scripts/prepare_longitudinal_data.R 'English (American)' 500 1000
+Rscript model/scripts/prepare_longitudinal_norwegian.R 500 1000
 ```
 
-Then prepare a subset:
-```bash
-Rscript model/scripts/prepare_longitudinal_data.R 'English (American)' 600 200
-Rscript model/scripts/prepare_longitudinal_norwegian.R 600 200
-```
+If you need to refresh the intermediate files (e.g., new Wordbank release),
+re-run `pull_longitudinal.R` and `pull_norwegian_freq.R` on your laptop,
+`git add model/fits/long_ws_items.rds model/fits/norwegian_word_freq.rds`,
+commit, push, and `git pull` on Sherlock.
 
 ## Submitting a fit
 

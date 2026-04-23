@@ -33,6 +33,11 @@ model/figs/*.png
 # But keep the directories themselves so scripts don't have to mkdir
 !model/fits/.gitkeep
 !model/figs/.gitkeep
+# And keep the pulled raw data — these need wordbankr/childesr (R >= 4.4
+# and mysql headers) which Sherlock's R 4.2 can't handle. Commit the
+# intermediate files so Sherlock can skip those packages.
+!model/fits/long_ws_items.rds
+!model/fits/norwegian_word_freq.rds
 
 # Compiled Stan model objects (auto-generated)
 model/*.rds
