@@ -68,7 +68,10 @@
       "Bash(git -c commit.gpgsign=false commit -m \"Initial commit: standard_model_2 Bayesian accumulator model of early word learning. Includes: - Cross-sectional log-linear IRT + 2PL + per-child slopes - Longitudinal Stan model \\(log_irt_long.stan\\) - PPC suite \\(variance-by-age, spaghetti marginal, RQ plots\\) - sigma_r sensitivity sweep - Sherlock SLURM scripts for remote fitting - Experiments log + durable model explainer \")",
       "Bash(Rscript -e 'source\\(\"model/R/config.R\"\\); source\\(\"model/R/datasets.R\"\\); for \\(k in names\\(DATASETS\\)\\) cat\\(sprintf\\(\"%s -> %s \\(exists=%s\\)\\\\n\", k, get_dataset\\(k\\)$path, file.exists\\(get_dataset\\(k\\)$path\\)\\)\\)')",
       "Bash(chmod +x /Users/mcfrank/Projects/standard_model_2/sherlock/*.sh)",
-      "Bash(git -c commit.gpgsign=false commit -m 'Parameterize longitudinal pipeline by dataset key; add auth/sync helpers *)"
+      "Bash(git -c commit.gpgsign=false commit -m 'Parameterize longitudinal pipeline by dataset key; add auth/sync helpers *)",
+      "Bash(git -c commit.gpgsign=false commit -m 'setup_R.R: install into user R library explicitly *)",
+      "Bash(git push *)",
+      "Bash(grep -nA2 \"chosen_items\" /Users/mcfrank/Projects/standard_model_2/model/scripts/prepare_longitudinal_data.R)"
     ]
   }
 }

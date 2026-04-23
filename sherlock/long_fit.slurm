@@ -2,9 +2,9 @@
 #SBATCH --job-name=long_fit
 #SBATCH --output=%x_%j.out
 #SBATCH --error=%x_%j.err
-#SBATCH --time=08:00:00
+#SBATCH --time=36:00:00
 #SBATCH --cpus-per-task=4
-#SBATCH --mem=32G
+#SBATCH --mem=48G
 #SBATCH --partition=normal
 
 # Usage:

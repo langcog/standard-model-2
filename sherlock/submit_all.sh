@@ -7,13 +7,11 @@
 set -euo pipefail
 cd "$HOME/standard_model_2"
 
-echo "Submitting longitudinal variants (English)..."
-for v in long_baseline long_2pl long_slopes long_2pl_slopes; do
-  jid=$(sbatch --parsable sherlock/long_fit.slurm "$v" english)
-  echo "  $v/english -> job $jid"
-done
+echo "Submitting longitudinal 2PL+slopes, English (500 kids x all items)..."
+jid=$(sbatch --parsable sherlock/long_fit.slurm long_2pl_slopes english)
+echo "  long_2pl_slopes/english -> job $jid"
 
-echo "Submitting longitudinal variants (Norwegian)..."
+echo "Submitting longitudinal 2PL+slopes, Norwegian (500 kids x all items)..."
 jid=$(sbatch --parsable sherlock/long_fit.slurm long_2pl_slopes norwegian)
 echo "  long_2pl_slopes/norwegian -> job $jid"
 
