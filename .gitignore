@@ -49,6 +49,15 @@ model/log_irt_v2.stan
 *.log.gz
 /tmp_*
 
+# --- Local-only credentials and config
+# Anything matching .env* except the example template.
+.env
+.env.local
+.env.*.local
+!.env.example
+# Per-user secrets dir
+secrets/
+
 # --- Optional: the large Wordbank preprocessed file that the original
 # standard_model codebase uses. Keep it for convenience on dev; Sherlock
 # users can regenerate it via preprocess_word_freq.R.

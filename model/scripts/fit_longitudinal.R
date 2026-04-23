@@ -1,66 +1,68 @@
 ## Fit the longitudinal log-linear IRT accumulator model.
 ##
-## Usage:   Rscript model/scripts/fit_longitudinal.R [variant]
-## Variants (via sigma_lambda_prior_sd and sigma_zeta_prior_sd):
-##   long_2pl         -- 2PL, no per-child slopes
-##   long_2pl_slopes  -- 2PL + per-child slopes (default)
-##   long_slopes      -- Rasch + per-child slopes
-##   long_baseline    -- Rasch, no slopes
+## Usage:
+##   Rscript model/scripts/fit_longitudinal.R <variant> [dataset]
 ##
-## Reads:   model/fits/long_subset_data.rds
-## Writes:  model/fits/<variant>.rds
+## Variants (2PL on/off, slopes on/off):
+##   long_baseline    -- Rasch, no per-child slopes
+##   long_2pl         -- 2PL, no slopes
+##   long_slopes      -- Rasch + per-child slopes
+##   long_2pl_slopes  -- 2PL + per-child slopes  (default)
+##
+## Dataset keys are defined in model/R/datasets.R; default = "english".
+## Run tag = <variant>[_<dataset>] unless dataset is "english".
+##
+## Examples:
+##   Rscript model/scripts/fit_longitudinal.R long_2pl_slopes
+##   Rscript model/scripts/fit_longitudinal.R long_2pl_slopes norwegian
+##   Rscript model/scripts/fit_longitudinal.R long_slopes norwegian
 
 source("model/R/config.R")
 source("model/R/helpers.R")
+source("model/R/datasets.R")
 
-args <- commandArgs(trailingOnly = TRUE)
-nm <- if (length(args) >= 1) args[1] else "long_2pl_slopes"
+args       <- commandArgs(trailingOnly = TRUE)
+variant    <- if (length(args) >= 1) args[1] else "long_2pl_slopes"
+dataset    <- if (length(args) >= 2) args[2] else "english"
 
-# A trailing "_nor" in the variant name selects the Norwegian bundle;
-# otherwise use the English longitudinal bundle. The core variant
-# identity (baseline / 2pl / slopes / 2pl_slopes) is derived by
-# stripping the language suffix.
-if (grepl("_nor$", nm)) {
-  data_file <- file.path(PATHS$fits_dir, "long_subset_data_nor.rds")
-  base_nm   <- sub("_nor$", "", nm)
-} else {
-  data_file <- file.path(PATHS$fits_dir, "long_subset_data.rds")
-  base_nm   <- nm
-}
+bundle_info <- get_dataset(dataset)
+bundle      <- load_dataset_bundle(dataset)
+base_data   <- bundle$stan_data
 
-bundle <- readRDS(data_file)
-base_data <- bundle$stan_data
-cat(sprintf("Data bundle: %s (language=%s, I=%d, A=%d, J=%d, N=%d)\n",
-            data_file,
-            ifelse(is.null(bundle$language), "?", bundle$language),
+# Output tag: variant alone for English, variant_<key> otherwise, so
+# pre-existing English fits (long_2pl_slopes.rds) don't need renaming.
+out_tag <- if (dataset == "english") variant
+           else sprintf("%s_%s", variant, dataset)
+
+cat(sprintf("Dataset: %s (%s)  I=%d, A=%d, J=%d, N=%d\n",
+            dataset, bundle$language,
             base_data$I, base_data$A, base_data$J, base_data$N))
 
-overrides <- switch(base_nm,
+overrides <- switch(variant,
   long_baseline    = list(),
   long_2pl         = list(sigma_lambda_prior_sd = 1),
   long_slopes      = list(sigma_zeta_prior_sd = 1),
   long_2pl_slopes  = list(sigma_lambda_prior_sd = 1,
                           sigma_zeta_prior_sd = 1),
-  stop(sprintf("Unknown longitudinal variant: %s", base_nm))
+  stop(sprintf("Unknown longitudinal variant: %s", variant))
 )
-
 stan_data <- modifyList(base_data, overrides)
 
-cat(sprintf("\n===== Longitudinal variant: %s =====\n", nm))
-cat("Overrides:\n"); str(overrides)
+cat(sprintf("\n===== Fitting %s on %s =====\n", variant, dataset))
+cat("Hyperprior overrides:\n"); str(overrides)
 
 cfg <- modifyList(DEFAULT_FIT_CONFIG,
                   list(chains = 4, iter = 1500, warmup = 750,
                        adapt_delta = 0.95))
 
-fit <- fit_variant(stan_data, tag = nm,
+fit <- fit_variant(stan_data, tag = out_tag,
                    cfg = cfg,
                    model_path = file.path(PROJECT_ROOT,
                                           "model/stan/log_irt_long.stan"))
 
 pars <- c("sigma_alpha", "pi_alpha", "sigma_xi", "s", "delta",
           "sigma_zeta", "rho_xi_zeta")
-if (grepl("2pl", nm)) pars <- c(pars, "sigma_lambda")
+if (grepl("2pl", variant)) pars <- c(pars, "sigma_lambda")
 print(summarize_fit(fit, pars = pars), digits = 3)
 
-cat(sprintf("\nSaved: model/fits/%s.rds\n", nm))
+cat(sprintf("\nSaved: model/fits/%s.rds\n", out_tag))

@@ -68,9 +68,15 @@ longitudinal-data:
 	$(RSCRIPT) $(R_FLAGS) $(SCRIPTS)/prepare_longitudinal_data.R \
 	    $${LANG:-English (American)} $${N_CHILDREN:-600} $${N_ITEMS:-200}
 
-# Fit: make longitudinal-fit VARIANT=long_2pl_slopes
+# Fit: make longitudinal-fit VARIANT=long_2pl_slopes [DATASET=norwegian]
 longitudinal-fit:
-	$(RSCRIPT) $(R_FLAGS) $(SCRIPTS)/fit_longitudinal.R $${VARIANT:-long_2pl_slopes}
+	$(RSCRIPT) $(R_FLAGS) $(SCRIPTS)/fit_longitudinal.R \
+	    $${VARIANT:-long_2pl_slopes} $${DATASET:-english}
+
+# Analyze: make longitudinal-analyze VARIANT=long_2pl_slopes [DATASET=norwegian]
+longitudinal-analyze:
+	$(RSCRIPT) $(R_FLAGS) $(SCRIPTS)/analyze_longitudinal.R \
+	    $${VARIANT:-long_2pl_slopes} $${DATASET:-english}
 
 # Sensitivity on sigma_r: make sensitivity VARIANT=2pl [SIGMA_R=0.3,0.53,0.8,1.0]
 sensitivity: data

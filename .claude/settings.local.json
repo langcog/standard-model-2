@@ -62,7 +62,13 @@
       "Bash(mv analyze_wordbank.R fit_diagnostics.R fit_wordbank.R recovery_test.R recovery_test_v2.R simulate.R log_irt.stan log_irt_v2.stan _old/)",
       "Bash(rm -f log_irt.rds log_irt_v2.rds recovery_fit.rds recovery_sim.rds wordbank_data_subset.rds wordbank_fit_subset.rds recovery_log_alpha.png recovery_psi.png wordbank_class_means.png wordbank_delta.png wordbank_pi_alpha.png wordbank_psi_vs_logp.png wordbank_s.png)",
       "Bash(git init *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(xargs du *)",
+      "Bash(git config *)",
+      "Bash(git -c commit.gpgsign=false commit -m \"Initial commit: standard_model_2 Bayesian accumulator model of early word learning. Includes: - Cross-sectional log-linear IRT + 2PL + per-child slopes - Longitudinal Stan model \\(log_irt_long.stan\\) - PPC suite \\(variance-by-age, spaghetti marginal, RQ plots\\) - sigma_r sensitivity sweep - Sherlock SLURM scripts for remote fitting - Experiments log + durable model explainer \")",
+      "Bash(Rscript -e 'source\\(\"model/R/config.R\"\\); source\\(\"model/R/datasets.R\"\\); for \\(k in names\\(DATASETS\\)\\) cat\\(sprintf\\(\"%s -> %s \\(exists=%s\\)\\\\n\", k, get_dataset\\(k\\)$path, file.exists\\(get_dataset\\(k\\)$path\\)\\)\\)')",
+      "Bash(chmod +x /Users/mcfrank/Projects/standard_model_2/sherlock/*.sh)",
+      "Bash(git -c commit.gpgsign=false commit -m 'Parameterize longitudinal pipeline by dataset key; add auth/sync helpers *)"
     ]
   }
 }

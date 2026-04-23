@@ -8,15 +8,17 @@
 #SBATCH --partition=normal
 
 # Usage:
-#   sbatch sherlock/long_fit.slurm <variant>
+#   sbatch sherlock/long_fit.slurm <variant> [dataset]
 # Examples:
-#   sbatch sherlock/long_fit.slurm long_2pl_slopes           # English
-#   sbatch sherlock/long_fit.slurm long_2pl_slopes_nor       # Norwegian
-#   sbatch sherlock/long_fit.slurm long_baseline             # Rasch, no slopes
+#   sbatch sherlock/long_fit.slurm long_2pl_slopes              # English (default)
+#   sbatch sherlock/long_fit.slurm long_2pl_slopes norwegian
+#   sbatch sherlock/long_fit.slurm long_baseline english
+# Dataset keys are defined in model/R/datasets.R.
 
 set -euo pipefail
 
 VARIANT="${1:-long_2pl_slopes}"
+DATASET="${2:-english}"
 
 # Move into the project root (assumes $HOME/standard_model_2)
 cd "$HOME/standard_model_2"
@@ -41,7 +43,7 @@ echo
 # Override PATHS$fits_dir for this job so outputs go to $SCRATCH
 export STANDARD_MODEL_FITS_DIR="$RESULTS_DIR/fits"
 
-Rscript model/scripts/fit_longitudinal.R "$VARIANT"
+Rscript model/scripts/fit_longitudinal.R "$VARIANT" "$DATASET"
 
 echo
 echo "End: $(date)"
