@@ -22,16 +22,16 @@ if (!dir.exists(user_lib)) dir.create(user_lib, recursive = TRUE)
 cat("User library:", user_lib, "\n")
 cat("Library paths:\n"); print(.libPaths())
 
-# Core packages needed for fitting + analysis. We deliberately DO NOT
-# install wordbankr / childesr on Sherlock:
-#   * wordbankr depends on RMySQL, which needs mysql dev headers that
-#     Sherlock's environment doesn't provide.
-#   * childesr requires R >= 4.4; Sherlock ships R 4.2 as the default module.
-# Data pulls using those packages happen on the laptop; the resulting
-# .rds files are committed to the repo so Sherlock can just read them.
+# Core packages needed for fitting + analysis. Deliberately excluded:
+#   * wordbankr / childesr — wordbankr needs mysql dev headers, childesr
+#     needs R >= 4.4. Data pulls happen on the laptop; intermediates
+#     (long_ws_items.rds, norwegian_word_freq.rds) ship in the repo.
+#   * arrow — only used by local-only exploration scripts that read
+#     .feather files; the fit pipeline doesn't need it, and the package
+#     fails to compile on Sherlock without libarrow.
 cran_pkgs <- c(
   "rstan", "posterior", "dplyr", "tidyr", "ggplot2", "tibble",
-  "patchwork", "MASS", "arrow", "remotes", "purrr"
+  "patchwork", "MASS", "remotes", "purrr"
 )
 
 installed <- rownames(installed.packages())
