@@ -1,0 +1,7 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+standard-model-currdirs.Rproj
+scripts/data/lmer_1pl_LC_tokmo_lifetok.Rds
+scripts/data/lmer_lexical_class_age_class.Rds

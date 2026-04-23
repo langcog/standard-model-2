@@ -1,0 +1,126 @@
+dataset,sample,mother_child_tokens_hr,all_tokens_hr,adult_child_tokens_hr
+Sperry,South Baltimore,830,1508,1094
+Sperry,South Baltimore,726,975,850
+Sperry,South Baltimore,1628,2373,1840
+Sperry,Alabama,1654,4568,4092
+Sperry,Alabama,2440,3642,2962
+Sperry,Alabama,3356,3824,3554
+Sperry,Alabama,2020,2618,2136
+Sperry,Alabama,2302,3420,2892
+Sperry,Alabama,1780,2690,2380
+Sperry,Alabama,706,1966,1404
+Sperry,Alabama,1070,5432,3446
+Sperry,Alabama,1018,1042,1032
+Sperry,Alabama,2998,4012,3374
+Sperry,Alabama,872,2024,1400
+Sperry,Indiana,1362,4146,1892
+Sperry,Indiana,1078,1684,1250
+Sperry,Indiana,1494,3878,1782
+Sperry,Indiana,384,2298,752
+Sperry,Indiana,1518,1572,1538
+Sperry,Indiana,512,1544,946
+Sperry,Indiana,480,1172,686
+Sperry,Indiana,2018,2534,2110
+Sperry,Indiana,2856,4624,3244
+Sperry,Indiana,362,1842,790
+Sperry,Indiana,796,2670,1470
+Sperry,Indiana,558,3496,1186
+Sperry,Indiana,988,1386,1102
+Sperry,Indiana,844,1898,1108
+Sperry,Indiana,468,2614,994
+Sperry,Daly Park,2106,2204,2112
+Sperry,Daly Park,2208,2274,2210
+Sperry,Daly Park,478,1630,582
+Sperry,Daly Park,1086,1506,1086
+Sperry,Daly Park,360,978,648
+Sperry,Daly Park,1170,1678,1250
+Sperry,Daly Park,2046,2492,2202
+Sperry,Longwood,1762,3758,2204
+Sperry,Longwood,998,1574,1412
+Sperry,Longwood,3206,3410,3310
+Sperry,Longwood,470,1536,766
+Sperry,Longwood,648,1692,858
+Sperry,Longwood,1862,3006,2114
+Hart & Risley,KC Professional,3504,NA,NA
+Hart & Risley,KC Professional,2845,NA,NA
+Hart & Risley,KC Professional,2635,NA,NA
+Hart & Risley,KC Professional,2573,NA,NA
+Hart & Risley,KC Professional,2501,NA,NA
+Hart & Risley,KC Professional,2310,NA,NA
+Hart & Risley,KC Professional,2195,NA,NA
+Hart & Risley,KC Professional,2134,NA,NA
+Hart & Risley,KC Professional,1956,NA,NA
+Hart & Risley,KC Professional,1495,NA,NA
+Hart & Risley,KC Professional,1422,NA,NA
+Hart & Risley,KC Professional,1397,NA,NA
+Hart & Risley,KC Professional,1019,NA,NA
+Hart & Risley,KC Middle Class,3618,NA,NA
+Hart & Risley,KC Middle Class,2671,NA,NA
+Hart & Risley,KC Middle Class,1677,NA,NA
+Hart & Risley,KC Middle Class,1468,NA,NA
+Hart & Risley,KC Middle Class,1025,NA,NA
+Hart & Risley,KC Middle Class,930,NA,NA
+Hart & Risley,KC Middle Class,830,NA,NA
+Hart & Risley,KC Middle Class,828,NA,NA
+Hart & Risley,KC Middle Class,808,NA,NA
+Hart & Risley,KC Middle Class,143,NA,NA
+Hart & Risley,KC Working Class,2353,NA,NA
+Hart & Risley,KC Working Class,2088,NA,NA
+Hart & Risley,KC Working Class,1912,NA,NA
+Hart & Risley,KC Working Class,1697,NA,NA
+Hart & Risley,KC Working Class,1221,NA,NA
+Hart & Risley,KC Working Class,948,NA,NA
+Hart & Risley,KC Working Class,862,NA,NA
+Hart & Risley,KC Working Class,828,NA,NA
+Hart & Risley,KC Working Class,826,NA,NA
+Hart & Risley,KC Working Class,805,NA,NA
+Hart & Risley,KC Working Class,526,NA,NA
+Hart & Risley,KC Working Class,443,NA,NA
+Hart & Risley,KC Working Class,268,NA,NA
+Hart & Risley,KC Poor,947,NA,NA
+Hart & Risley,KC Poor,761,NA,NA
+Hart & Risley,KC Poor,752,NA,NA
+Hart & Risley,KC Poor,606,NA,NA
+Hart & Risley,KC Poor,400,NA,NA
+Hart & Risley,KC Poor,231,NA,NA
+Soderstrom & Wittebolle,Home,NA,944.4,NA
+Soderstrom & Wittebolle,Home,NA,1076.4,NA
+Soderstrom & Wittebolle,Home,NA,1100.4,NA
+Soderstrom & Wittebolle,Home,NA,1455.6,NA
+Soderstrom & Wittebolle,Home,NA,1437.6,NA
+Soderstrom & Wittebolle,Home,NA,428.4,NA
+Soderstrom & Wittebolle,Daycare,NA,780,NA
+Soderstrom & Wittebolle,Daycare,NA,456,NA
+Soderstrom & Wittebolle,Daycare,NA,1867.2,NA
+Soderstrom & Wittebolle,Daycare,NA,956.4,NA
+Soderstrom & Wittebolle,Daycare,NA,849.6,NA
+Soderstrom & Wittebolle,Daycare,NA,1233.6,NA
+Weisleder & Fernald,low-SES Spanish-speaking,727.901821917068,843.055630642807,NA
+Weisleder & Fernald,low-SES Spanish-speaking,198.609386640179,257.164142041222,NA
+Weisleder & Fernald,low-SES Spanish-speaking,844.820601119186,880.409186438103,NA
+Weisleder & Fernald,low-SES Spanish-speaking,579.546798029557,1544.27586206897,NA
+Weisleder & Fernald,low-SES Spanish-speaking,1039.91692627207,1424.54828660436,NA
+Weisleder & Fernald,low-SES Spanish-speaking,309.455451792024,1508.9916708733,NA
+Weisleder & Fernald,low-SES Spanish-speaking,1251.10421759763,1601.78318302278,NA
+Weisleder & Fernald,low-SES Spanish-speaking,166.618538839157,539.127923765521,NA
+Weisleder & Fernald,low-SES Spanish-speaking,752.47426516185,1211.45975443383,NA
+Weisleder & Fernald,low-SES Spanish-speaking,431.892026993252,437.590602349413,NA
+Weisleder & Fernald,low-SES Spanish-speaking,605.794939886138,906.782589716074,NA
+Weisleder & Fernald,low-SES Spanish-speaking,943.333223129566,1598.83624822296,NA
+Weisleder & Fernald,low-SES Spanish-speaking,613.028980939268,1306.68038021931,NA
+Weisleder & Fernald,low-SES Spanish-speaking,714.630103962634,955.552207322585,NA
+Weisleder & Fernald,low-SES Spanish-speaking,975.163242791974,1312.47204746713,NA
+Weisleder & Fernald,low-SES Spanish-speaking,67.1597041774935,201.718968618829,NA
+Weisleder & Fernald,low-SES Spanish-speaking,437.000871839582,795.536181342633,NA
+Weisleder & Fernald,low-SES Spanish-speaking,537.038520060863,1929.04620805638,NA
+Weisleder & Fernald,low-SES Spanish-speaking,1217.91964093872,1439.44421897009,NA
+Weisleder & Fernald,low-SES Spanish-speaking,75.3508771929825,561.929824561404,NA
+Weisleder & Fernald,low-SES Spanish-speaking,298.192771084337,737.530120481928,NA
+Weisleder & Fernald,low-SES Spanish-speaking,296.819787985866,624.519895529267,NA
+Weisleder & Fernald,low-SES Spanish-speaking,1124.15720455745,2871.30880025015,NA
+Weisleder & Fernald,low-SES Spanish-speaking,392.970591249103,884.311917204632,NA
+Weisleder & Fernald,low-SES Spanish-speaking,1026.95512147308,1116.85220191836,NA
+Weisleder & Fernald,low-SES Spanish-speaking,109.163083030103,705.788951372808,NA
+Weisleder & Fernald,low-SES Spanish-speaking,130.025951265546,590.677766168987,NA
+Weisleder & Fernald,low-SES Spanish-speaking,1027.6154084478,1584.79809976247,NA
+Weisleder & Fernald,low-SES Spanish-speaking,447.390223695112,1066.94283347142,NA

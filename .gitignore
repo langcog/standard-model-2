@@ -1,0 +1,56 @@
+# --- R / environment
+.Rhistory
+.Rproj.user/
+.RData
+.Renviron
+*.Rproj
+*.pkl
+
+# --- Stan
+*.rds.stan        # occasionally left behind
+stan_cache/
+
+# --- LaTeX aux
+*.aux
+*.log
+*.out
+*.toc
+*.blg
+*.bbl
+
+# --- OS / editor
+.DS_Store
+.vscode/
+.idea/
+*~
+*.swp
+
+# --- Outputs we don't want in the repo
+# Large Stan fits and figs — regenerable, take a lot of space.
+# Intermediate data (subsets) are reproducible from scripts.
+model/fits/**/*.rds
+model/figs/*.png
+# But keep the directories themselves so scripts don't have to mkdir
+!model/fits/.gitkeep
+!model/figs/.gitkeep
+
+# Compiled Stan model objects (auto-generated)
+model/*.rds
+model/stan/*.rds
+model/stan/*.rds.stan
+
+# Local-only pre-refactor stuff
+model/log_irt.rds
+model/log_irt.stan
+model/log_irt_v2.rds
+model/log_irt_v2.stan
+
+# Scratch / tmp logs
+*.log.gz
+/tmp_*
+
+# --- Optional: the large Wordbank preprocessed file that the original
+# standard_model codebase uses. Keep it for convenience on dev; Sherlock
+# users can regenerate it via preprocess_word_freq.R.
+# (Uncomment if you want to keep it out of the repo entirely.)
+# standard_model/scripts/data/engWS_preprocessed.Rdata

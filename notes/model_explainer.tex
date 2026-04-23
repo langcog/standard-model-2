@@ -1,0 +1,462 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1.1in]{geometry}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{mathtools}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{parskip}
+\usepackage{xcolor}
+\hypersetup{colorlinks=true, urlcolor=blue, linkcolor=black}
+
+\title{A Log-Linear IRT Accumulator Model\\ of Early Word Learning}
+\author{Draft specification (revised: 2PL extension)}
+\date{\today}
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\Bern}{\mathrm{Bernoulli}}
+\newcommand{\Norm}{\mathcal{N}}
+\newcommand{\HN}{\mathrm{HalfNormal}}
+\newcommand{\logit}{\mathrm{logit}}
+\newcommand{\sigmoid}{\sigma}
+
+\begin{document}
+\maketitle
+
+\section{Research questions driving the modeling}
+
+The model is organized to answer four research questions. The baseline model
+is the minimal specification that lets each be posed and answered; each
+planned variant exists to sharpen one of them.
+
+\begin{enumerate}[leftmargin=1.3em, label=\textbf{RQ\arabic*.}]
+\item \textbf{How well do frequencies reconstruct word difficulties?}
+  Braginsky et al.\ (2019) showed frequency is only modestly related to AoA
+  within lexical classes. We test this within our model by asking: how much
+  of word-level residual difficulty \(\psi_j\) does \(\log p_j\) explain?
+
+\item \textbf{Does accumulation start near birth, or later?}
+  Mollica \& Piantadosi (2017) estimated \(s \approx 2\) months for
+  comprehension. We re-examine \(s\) in the CDI production data, where we
+  expect \(s\) to be larger but still informative.
+
+\item \textbf{Is an acceleration term needed?} Bergelson (2020) argued that
+  older infants are ``better learners'' — they extract more from the same
+  input. We test this by freeing \(\delta\), the age rate-change exponent;
+  \(\delta > 0\) would corroborate a comprehension-boost-like rate
+  increase.
+
+\item \textbf{How much of child-level outcome variance is input-driven?}
+  This is the $\sigma_\alpha$ question: once we pin the variance of CDS
+  input rate \(r_i\) from external data, how much residual child variance
+  must be absorbed by a learning-efficiency term \(\alpha_i\)?
+\end{enumerate}
+
+Each RQ becomes a posterior summary or a planned model comparison. The
+mapping from RQ to model structure is in Table \ref{tab:rq-map}.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+RQ & Quantity & How answered \\
+\midrule
+1 & \(r(\hat\psi_j, \log p_j)\), \(R^2_{\psi \sim \log p}\) &
+  Posterior in baseline; confirmed with free \(\beta\), \(\beta_c\) variants \\
+2 & \(s\) & Posterior in baseline with prior \(\Norm(4.5, 2^2)\) truncated \\
+3 & \(\delta\) & Posterior in baseline with prior \(\Norm(0, 0.5^2)\) \\
+4 & \(\pi_\alpha = \sigma_\alpha^2/(\sigma_r^2 + \sigma_\alpha^2)\) &
+  Derived posterior; \(\sigma_r^2\) pinned from external data \\
+\bottomrule
+\end{tabular}
+\caption{Mapping from research questions to model quantities.}
+\label{tab:rq-map}
+\end{table}
+
+\section{One-paragraph summary}
+
+A child \(i\) of age \(a_i\) has, on average, heard word \(j\) approximately
+\(T_{ij} = r_i\,p_j\,H\,(a_i - s)\) times, where \(r_i\) is the child's
+tokens-per-hour of CDS, \(p_j\) is the word's corpus probability, \(H\) is
+waking hours per month, and \(s\) is the global start time for
+accumulation. The child produces word \(j\) on the CDI with probability
+\(\sigmoid(\log T_{ij} + \log \alpha_i - \psi_j)\) under a canonical
+Rasch/IRT logit link (\(\sigmoid(x) = 1/(1+e^{-x})\)), where \(\alpha_i\)
+is the child's learning-efficiency multiplier and \(\psi_j\) is the
+word's log-threshold. Every quantity lives on a log-token scale with
+\(O(1)\) priors, so Stan is well-conditioned. The crucial move is that
+\(r_i\)'s population distribution is pinned by external data
+(Sperry/HR/WF), so \(\sigma_\alpha\) is identifiable and Question 4 has an
+answer. Questions 1--3 are posterior summaries of the baseline;
+planned variants sharpen them.
+
+\section{Quantities}
+
+\begin{center}
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+Symbol & Meaning & Units \\
+\midrule
+\(r_i\)         & Child \(i\)'s CDS input rate                & tokens / hour \\
+\(\alpha_i\)    & Child \(i\)'s learning-efficiency multiplier & dimensionless \\
+\(p_j\)         & Word \(j\)'s corpus probability (CHILDES)   & dimensionless, \(\sum_j p_j = 1\) \\
+\(H\)           & Waking hours per month (fixed)              & hours / month \\
+\(a_i\)         & Age at CDI assessment                       & months \\
+\(s\)           & Global start time (accumulation onset)      & months \\
+\(\psi_j\)      & Log expected tokens of word \(j\) to acquisition & log-tokens \\
+\(\delta\)      & Age rate-change exponent                    & dimensionless \\
+\(\lambda_j\)   & Word \(j\)'s 2PL discrimination             & dimensionless ($>0$) \\
+\(a_0\)         & Reference age (fixed)                       & months \\
+\(y_{ij}\)      & Child \(i\) produces word \(j\) on CDI      & \(\{0, 1\}\) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Fixed constants.} \(H = 12 \times 30.44 \approx 365\) hours/month
+(12 waking hours/day). \(a_0 = 20\) months.
+
+\section{Generative model}
+
+\subsection{Linear predictor}
+
+For child \(i\), word \(j\), age \(a_i > s\):
+\begin{equation}
+\eta_{ij}
+= \lambda_j \cdot \Big[ \log r_i + \log \alpha_i
++ \log p_j + \log H
++ (1+\delta)\,\log\!\left(\tfrac{a_i - s}{a_0}\right)
+- \psi_j \Big].
+\label{eq:eta}
+\end{equation}
+
+Here \(\lambda_j \ge 0\) is a word-specific \emph{discrimination} parameter
+(2PL). With \(\lambda_j \equiv 1\) the model collapses to the Rasch form
+\(\eta_{ij} = \log(r_i \alpha_i p_j H (a_i - s)) - \psi_j\) — the log
+ratio of tokens heard to tokens needed, with unit logit-per-log-token
+gain. With \(\lambda_j\) free, each word has its own gain; high
+\(\lambda_j\) produces a sharp transition near \(\psi_j\), low
+\(\lambda_j\) a gradual one. Section \ref{sec:twopl} motivates the
+extension in terms of the accumulator and in terms of model fit.
+
+\subsection{Likelihood}
+
+Canonical Rasch/IRT logit link:
+\begin{equation}
+y_{ij} \mid \eta_{ij} \sim \Bern\big(\sigmoid(\eta_{ij})\big),
+\qquad \sigmoid(x) = \frac{1}{1 + e^{-x}}.
+\label{eq:likelihood}
+\end{equation}
+
+The logit link is the standard ``log-linear IRT'' choice and is
+numerically well-behaved in Stan. \(\psi_j\) is interpretable as the
+log-threshold in log-tokens on the logit scale (the scale factor is
+absorbed implicitly; \(\exp(\psi_j)\) is proportional to, not exactly,
+the expected number of tokens to 50\%-acquisition).
+
+Edge case: when \(a_i \le s\), set \(\Prob(y_{ij}=1) = \varepsilon\) and
+exclude these cells from the log-age term (in the code this is
+implemented by flooring $a_i - s$ at $0.01$ inside the $\log$).
+
+\subsection{Priors}
+
+\paragraph{Child-level latent (collapsed).}
+The likelihood depends on \(\log r_i\) and \(\log \alpha_i\) only through
+their sum, so we sample a single child-level latent
+\[ \xi_i \coloneqq \log r_i + \log \alpha_i \sim \Norm\!\big(\mu_r,\; \sigma_r^2 + \sigma_\alpha^2\big). \]
+Here \(\mu_r = \log 1198\) and \(\sigma_r^2 = \Var(\log r)_{\text{Sperry/HR/WF}}\)
+are \emph{pinned} from external data (this is the identifiability lever
+for RQ4), while \(\sigma_\alpha\) is free:
+\begin{equation}
+\sigma_\alpha \sim \HN(0, 1).
+\end{equation}
+
+The per-child \(\log \alpha_i\) is a \emph{derived} quantity with closed-form
+posterior conditional on \(\xi_i\):
+\[
+\log \alpha_i \mid \xi_i \;\sim\;
+\Norm\!\left(\frac{\sigma_\alpha^2}{\sigma_r^2 + \sigma_\alpha^2}\,(\xi_i - \mu_r),
+\;\frac{\sigma_r^2 \sigma_\alpha^2}{\sigma_r^2 + \sigma_\alpha^2}\right),
+\]
+reported in generated quantities. (Rationale for this collapsed form is
+in \S\ref{sec:identifiability}: sampling both latents individually
+over-parameterizes the model and creates bad posterior geometry in HMC.)
+
+\paragraph{Word thresholds by lexical class.}
+\begin{equation}
+\psi_j \mid \mathrm{class}(j) = c \sim \Norm(\mu_c, \tau_c^2),
+\quad \mu_c \sim \Norm(8, 3^2), \quad \tau_c \sim \HN(0, 1).
+\end{equation}
+
+\textbf{Note on \(\mu_c\).} The earlier value \(\log 1000\) was a
+back-of-envelope centering. A more principled choice: tokens heard of a
+typical word by age 20~mo spans roughly \(e^5\) (rare words) to \(e^{12}\)
+(function words), so \(\mu_c \sim \Norm(8, 3^2)\) is weakly informative
+across the relevant range and dominated by the data.
+
+\paragraph{Global start time (RQ2).}
+\begin{equation}
+s \sim \Norm(4.5, 2^2) \text{ truncated to } [0, 15].
+\end{equation}
+
+One $s$ for the whole model, per your decision. The prior is centered at
+4.5~mo — M\&P's comprehension estimate was \(\sim\)2~mo; production is
+likely later. \(s\) close to 0 would indicate accumulation begins near
+birth.
+
+\paragraph{Age rate-change (RQ3).}
+\begin{equation}
+\delta \sim \Norm(0, 0.5^2).
+\end{equation}
+
+\paragraph{Word discrimination (2PL).}
+\begin{equation}
+\log \lambda_j \sim \Norm(0, \sigma_\lambda^2),
+\quad \sigma_\lambda \sim \HN(0, 1).
+\end{equation}
+
+Setting \(\sigma_\lambda \to 0\) (via a near-zero prior SD passed as data)
+pins every \(\lambda_j = 1\) and recovers the Rasch model. This is the
+toggle used in code: one Stan file serves both Rasch and 2PL variants.
+Scale identifiability (the classic \(\lambda_j \leftrightarrow 1/\lambda_j\),
+\(\psi_j, \xi_i \leftrightarrow \lambda_j \psi_j, \lambda_j \xi_i\)
+ambiguity of 2PL) is resolved by our pinning of \(\sigma_r\): the
+\(\xi\) scale is fixed externally, so \(\psi_j\) and \(\lambda_j\) are
+separately identified.
+
+\(\delta = 0\) is the pure cumulative null. \(\delta > 0\) indicates older
+children accumulate faster — a formal test of the Bergelson
+comprehension-boost claim.
+
+\section{How each RQ is answered}
+
+\subsection*{RQ1 — frequency and word difficulty}
+
+The baseline has coefficient 1 on \(\log p_j\) (the pure-accumulator
+assumption). Posterior samples \(\hat\psi_j^{(s)}\) are residual word
+difficulty after frequency. We report:
+
+\begin{itemize}[leftmargin=1.3em]
+\item Posterior correlation \(r(\hat\psi_j, \log p_j)\) and its 95\% CrI.
+\item \(R^2\) of \(\hat\psi_j \sim \log p_j\) — what fraction of
+  between-word variance in residual difficulty is explainable by
+  frequency.
+\item Posterior class means \(\hat\mu_c\) — does class structure persist
+  after frequency is accounted for?
+\end{itemize}
+
+\textbf{Planned variant (model~B).} Free global slope \(\beta\) on
+\(\log p_j\); prior \(\beta \sim \Norm(1, 0.5)\). Posterior on \(\beta\)
+directly tests the unit-coefficient assumption.
+
+\textbf{Planned variant (model~C).} Class-specific slopes \(\beta_c\);
+answers whether frequency matters differently for nouns vs.\ verbs
+vs.\ closed class.
+
+The three models form a progression (baseline \(\subset\) B \(\subset\) C).
+LOO-CV selects among them. Our headline RQ1 number is the pair
+(correlation in baseline, posterior on \(\beta\) in B) — one tells us
+\emph{whether} frequency fully accounts for difficulty, the other
+\emph{by how much} it under/over-weights.
+
+\subsection*{RQ2 — start time}
+
+Single parameter \(s\). Headline posterior: \(\hat s\) with CrI. Close
+to 0 $\Rightarrow$ accumulation starts at birth.  Close to 12+
+$\Rightarrow$ delayed onset. The CDI is a production measure, so larger
+\(s\) than M\&P's \(\sim\)2 months (comprehension) is expected.
+
+\subsection*{RQ3 — acceleration}
+
+Single parameter \(\delta\). Headline posterior: \(\hat\delta\) with CrI.
+Zero-excluded CrI $\Rightarrow$ rate change over age is needed.
+
+\subsection*{RQ4 — input- vs.\ efficiency-driven variance}
+\label{sec:identifiability}
+
+The linear predictor contains \(\log r_i + \log \alpha_i\) as a sum,
+unidentifiable from Wordbank alone. We break the degeneracy by pinning
+\(\sigma_r^2\) at its externally-measured value (from Sperry, Hart \&
+Risley, and Weisleder \& Fernald pooled). The child-level latent
+\(\xi_i = \log r_i + \log \alpha_i\) is then identified from the data,
+with implied distribution
+\(\xi_i \sim \Norm(\mu_r,\, \sigma_r^2 + \sigma_\alpha^2)\).
+Subtracting the pinned \(\sigma_r^2\) from the inferred \(\Var(\xi_i)\)
+identifies \(\sigma_\alpha^2\), giving
+
+\begin{equation}
+\pi_\alpha \;\coloneqq\; \frac{\sigma_\alpha^2}{\sigma_r^2 + \sigma_\alpha^2}
+\end{equation}
+
+as a well-defined derived posterior quantity: the proportion of
+child-level outcome variance attributable to learning efficiency rather
+than input rate. Its complement, \(1 - \pi_\alpha\), is the input-driven
+fraction.
+
+\textbf{Why the collapsed parameterization matters practically.} Sampling
+\(\log r_i\) and \(\log \alpha_i\) individually — each with its own
+non-centered \(\Norm(0, 1)\) prior and a scale parameter — leaves the
+posterior with a flat ridge: any rotation of the pair that preserves
+\(\xi_i\) has the same likelihood. Only the priors break the degeneracy,
+at the cost of 2I parameters where I are identified. In HMC this
+manifests as chains getting stuck in bad regions (we observed one chain
+running 28+ minutes on a sim the others cleared in 3). Sampling
+\(\xi_i\) directly, with \(\sigma_\alpha\) entering only through
+\(\sigma_{\xi_i}^2 = \sigma_r^2 + \sigma_\alpha^2\), eliminates this
+geometry entirely. Parameter recovery on a 250-child \(\times\) 150-word
+synthetic dataset: \(\pi_\alpha\) posterior 0.62 [0.50, 0.72] against
+true 0.61.
+
+\textbf{Sensitivity analysis.} Refit with
+\(\sigma_r^2 \in \{0.5, 1, 2\} \cdot \sigma_r^{2,\text{obs}}\).
+Stability of \(\pi_\alpha\) across these indicates how much the claim
+depends on trusting the external estimate.
+
+\section{Why 2PL: one-token-one-drop is too strong}
+\label{sec:twopl}
+
+The Rasch version of (\ref{eq:eta}) (i.e.\ with \(\lambda_j \equiv 1\))
+implies every word has the same logit-per-log-token gain. For a fixed
+word, the predicted slope of \(\mathrm{logit}\,p_{ij}\) with respect to
+age is \((1+\delta)/(a_i - s)\) — on the order of \(0.08\) logits per
+month at typical observed ages. Real CDI words transition from
+\(\sim\)5\% to \(\sim\)95\% acquired over roughly six months (about 6
+logits), which is \(\sim\)12\(\times\) faster than the Rasch slope can
+produce.
+
+When we fit Rasch to Wordbank (500 children \(\times\) 200 items), the
+posterior finds this mismatch in a predictable way: it cranks every
+available steepening lever — \(\delta\) rises to \(\sim 2.3\), \(s\)
+pushes to \(\sim 12\) months, and crucially \(\sigma_\alpha\) inflates
+to \(\sim 2\) — implying children differ by \(\sim 50\times\) in
+learning efficiency, and \(\pi_\alpha \approx 0.93\). This pattern is
+stable across the s/\(\delta\) identifiability, suggesting misspecification
+rather than genuine individual-difference variance.
+
+\paragraph{The 2PL fix.} Adding word-specific discrimination
+\(\lambda_j\) gives each word its own slope around threshold: the
+per-word logit derivative becomes \(\lambda_j(1+\delta)/(a_i - s)\).
+Words whose referents are highly diagnostic of their meaning (``ball''
+when you see a ball; concrete nouns generally) can have large
+\(\lambda_j\) and transition sharply; words whose meaning is more
+distributional or context-dependent (function words, abstracts) have
+small \(\lambda_j\) and gradual transitions. This is the standard
+two-parameter logistic IRT extension and is strongly preferred over
+1PL for CDI data in prior work (Kachergis, Marchman, Dale, Mankewitz,
+\& Frank, 2022, \emph{JSLHR}).
+
+\paragraph{Three accumulator interpretations of \(\lambda_j\) (all
+observationally equivalent from CDI alone).}
+\begin{enumerate}[leftmargin=1.3em]
+\item \textbf{Information per token.} \(\lambda_j\) is the per-token
+shift in the child's certainty about word \(j\). High \(\lambda_j\):
+each exposure is diagnostic.
+\item \textbf{Sharpness of the cognitive threshold.} \(\lambda_j\) is
+the inverse width of the band over which evidence must accumulate for
+acquisition to occur.
+\item \textbf{ELI-to-token ratio (bridge to Mollica \& Piantadosi).} If
+only a fraction of heard tokens are effective learning instances and the
+rest are background noise, \(\lambda_j\) is proportional to that
+fraction for word \(j\).
+\end{enumerate}
+
+\paragraph{Falsification checks.} The hierarchical prior on
+\(\log \lambda_j\) (pooled via \(\sigma_\lambda\)) regularizes: one
+unusual word can't take over. Two further checks protect against
+freely flexible fit-to-noise:
+\begin{enumerate}[leftmargin=1.3em]
+\item \(\sigma_\alpha\) should \emph{decrease substantially} under 2PL.
+If the Rasch inflation was misspecification dressed as person variance,
+2PL should absorb it into \(\lambda_j\) and drop \(\sigma_\alpha\) toward
+a more reasonable value (e.g.\ \(\sim\)0.7), sharpening our answer to
+RQ4.
+\item \(\lambda_j\) should correlate with measurable word properties:
+higher for concrete nouns, lower for function words and abstract
+adjectives. If \(\lambda_j\) is uncorrelated with any external
+measurement, we have over-fit rather than learned.
+\end{enumerate}
+
+\paragraph{What this changes for the RQs.}
+RQ1 (frequency-vs-difficulty) unchanged: we still report the posterior
+correlation of \(\psi_j\) with \(\log p_j\). RQ2 (start time), RQ3
+(\(\delta\)) unchanged at the structural level, but the extreme
+posteriors observed under Rasch should moderate. RQ4 (variance
+decomposition) sharpens substantially: \(\pi_\alpha\) becomes the
+proportion of child variance after item-level discrimination has been
+accounted for, which is the quantity we really want.
+
+\section{Assumptions, listed}
+
+\begin{enumerate}[leftmargin=1.3em]
+\item \textbf{Pure accumulation.} Exposure accumulates linearly at a
+  per-token rate independent of prior knowledge. No leveraged learning
+  (Mitchell \& McMurray 2009 showed leverage cannot \emph{create}
+  acceleration that is not already present).
+\item \textbf{Per-word evidence gain \(\lambda_j\).} In 2PL mode each
+  token contributes \(\lambda_j\) units of logit-scale evidence;
+  \(\lambda_j = 1\) reduces to the Rasch ``one token, one drop'' rule.
+  Per-child gain is \emph{not} modeled: all children receive the same
+  \(\lambda_j\) for a given word. This is relaxable by adding a random
+  slope, which we defer.
+\item \textbf{Logit link with fixed scale.} Canonical Rasch/2PL IRT.
+  Equivalent (up to a \(\sim\!1.7\) scale factor) to a probit model;
+  approximates the Gamma cumulative of Mollica \& Piantadosi for typical
+  parameter values.
+\item \textbf{Cross-sectional data.} Each child observed once.
+\item \textbf{CDS only.} Overheard speech ignored in v1.
+\item \textbf{Same input distribution as reference studies.} Our CDI
+  sample has the Sperry/HR/WF distribution of $r_i$; SES moderators not
+  modeled in v1.
+\item \textbf{Global $s$.} One start time for all words. Per-class or
+  per-word $s$ is a planned extension.
+\item \textbf{CHILDES frequencies as truth.} Sampling noise in $p_j$
+  ignored; defensible for common words.
+\item \textbf{Lexical class only via thresholds.} Class enters through
+  the hierarchical prior on $\psi_j$; class-specific frequency slopes or
+  start times are variants, not baseline.
+\end{enumerate}
+
+\section{What we deliver}
+
+\begin{enumerate}[leftmargin=1.3em]
+\item \textbf{RQ-addressed posteriors}: \(\pi_\alpha\), \(s\),
+  \(\delta\), and \(r(\hat\psi_j, \log p_j)\) all with credible intervals.
+\item \textbf{Per-word \(\psi_j\)}: absolute log-token thresholds for all
+  680 CDI items.
+\item \textbf{Per-child \(\log \alpha_i\)}: child-level efficiency
+  estimates.
+\item \textbf{Counterfactual simulator}: given hypothetical
+  \((r, \alpha, a)\), predicted vocabulary size with CrI.
+\item \textbf{Planned model comparisons}: LOO-CV across the baseline
+  plus variants for each RQ (see §8).
+\end{enumerate}
+
+\section{Planned variants}
+
+The baseline is extended via small data-flag toggles in one shared Stan
+file. Each variant targets one question and adds at most a handful of
+parameters.
+
+\begin{center}
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+Variant & Added parameters & Question addressed \\
+\midrule
+2PL & \(\lambda_j,\, \sigma_\lambda\) & Are words uniform in discrimination? \\
+per-child slopes & \(\zeta_i,\, \sigma_\zeta\) & Do children vary in growth rate? \\
+correlated (ξ, ζ) & \(\rho_{\xi\zeta}\) via LKJ & Are intercept and slope coupled? \\
+free \(\beta\) on \(\log p\) & 1 or per-class & Does frequency count 1-to-1? \\
+comp vs.\ prod joint & bivariate ξ & Is ability a single construct? \\
+longitudinal & admin-level indexing & Does within-child data change decomposition? \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The running log of which variants have been fit, their posteriors, and
+what they revealed is in \texttt{notes/experiments.md}.
+
+\end{document}
