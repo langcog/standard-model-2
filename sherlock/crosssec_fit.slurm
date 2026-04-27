@@ -19,6 +19,14 @@ cd "$HOME/standard_model_2"
 
 RESULTS_DIR="$SCRATCH/standard_model_2"
 mkdir -p "$RESULTS_DIR/fits" "$RESULTS_DIR/logs"
+
+# Symlink repo-side input bundles into scratch fits dir
+for f in "$HOME/standard_model_2/model/fits"/*.rds; do
+  [ -e "$f" ] || continue
+  base="$(basename "$f")"
+  [ -e "$RESULTS_DIR/fits/$base" ] || ln -s "$f" "$RESULTS_DIR/fits/$base"
+done
+
 export RSTAN_AUTO_WRITE_CACHE_DIR="$RESULTS_DIR/stan_cache"
 mkdir -p "$RSTAN_AUTO_WRITE_CACHE_DIR"
 

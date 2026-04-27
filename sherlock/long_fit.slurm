@@ -27,6 +27,14 @@ cd "$HOME/standard_model_2"
 RESULTS_DIR="$SCRATCH/standard_model_2"
 mkdir -p "$RESULTS_DIR/fits" "$RESULTS_DIR/logs"
 
+# Make repo input bundles visible from $SCRATCH/.../fits (where Stan reads).
+# Symlink any .rds in the repo's model/fits that isn't already in scratch.
+for f in "$HOME/standard_model_2/model/fits"/*.rds; do
+  [ -e "$f" ] || continue
+  base="$(basename "$f")"
+  [ -e "$RESULTS_DIR/fits/$base" ] || ln -s "$f" "$RESULTS_DIR/fits/$base"
+done
+
 # Point rstan's auto_write cache at $SCRATCH so we don't rebuild each time
 export RSTAN_AUTO_WRITE_CACHE_DIR="$RESULTS_DIR/stan_cache"
 mkdir -p "$RSTAN_AUTO_WRITE_CACHE_DIR"
