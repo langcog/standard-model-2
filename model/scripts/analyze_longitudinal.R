@@ -21,7 +21,7 @@ args    <- commandArgs(trailingOnly = TRUE)
 variant <- if (length(args) >= 1) args[1] else "long_2pl_slopes"
 dataset <- if (length(args) >= 2) args[2] else "english"
 
-tag     <- if (dataset == "english") variant else sprintf("%s_%s", variant, dataset)
+tag     <- if (dataset == "english") { variant } else { sprintf("%s_%s", variant, dataset) }
 fit_path <- file.path(PATHS$fits_dir, sprintf("%s.rds", tag))
 if (!file.exists(fit_path))
   stop(sprintf("Fit not found at %s. Run the fit first.", fit_path))
@@ -109,15 +109,12 @@ psi_cols <- grep("^psi\\[",    names(d100), value = TRUE)
 lam_cols <- grep("^lambda\\[", names(d100), value = TRUE)
 
 psi_mat  <- as.matrix(d100[, psi_cols])
-lam_mat  <- if (length(lam_cols) > 0) as.matrix(d100[, lam_cols])
-            else matrix(1, nrow = nrow(d100), ncol = J)
+lam_mat  <- if (length(lam_cols) > 0) { as.matrix(d100[, lam_cols]) } else { matrix(1, nrow = nrow(d100), ncol = J) }
 s_d      <- d100$s
 del_d    <- d100$delta
 sig_xi_d <- d100$sigma_xi
-sig_z_d  <- if ("sigma_zeta" %in% names(d100)) d100$sigma_zeta
-            else rep(0, nrow(d100))
-rho_d    <- if ("rho_xi_zeta" %in% names(d100)) d100$rho_xi_zeta
-            else rep(0, nrow(d100))
+sig_z_d  <- if ("sigma_zeta" %in% names(d100)) { d100$sigma_zeta } else { rep(0, nrow(d100)) }
+rho_d    <- if ("rho_xi_zeta" %in% names(d100)) { d100$rho_xi_zeta } else { rep(0, nrow(d100)) }
 mu_r     <- sd_$mu_r
 
 age_per_obs <- sd_$admin_age[sd_$aa]
@@ -201,10 +198,8 @@ ggsave(fig_prefix("4_ppc_variance_marginal.png"),
 
 ## ---- 5. Marginal spaghetti PPC ----
 target <- c(sigma_xi = median(draws$sigma_xi),
-            sigma_zeta = if ("sigma_zeta" %in% names(draws))
-                           median(draws$sigma_zeta) else 0,
-            rho = if ("rho_xi_zeta" %in% names(draws))
-                    median(draws$rho_xi_zeta) else 0,
+            sigma_zeta = if ("sigma_zeta" %in% names(draws)) { median(draws$sigma_zeta) } else { 0 },
+            rho = if ("rho_xi_zeta" %in% names(draws)) { median(draws$rho_xi_zeta) } else { 0 },
             s = median(draws$s),
             delta = median(draws$delta))
 dist2 <- with(draws,
@@ -218,13 +213,12 @@ dist2 <- with(draws,
 d_idx <- which.min(dist2)
 
 psi_v <- as.numeric(draws[d_idx, psi_cols])
-lam_v <- if (length(lam_cols) > 0) as.numeric(draws[d_idx, lam_cols])
-         else rep(1, J)
+lam_v <- if (length(lam_cols) > 0) { as.numeric(draws[d_idx, lam_cols]) } else { rep(1, J) }
 s_v   <- draws$s[d_idx]
 del_v <- draws$delta[d_idx]
 sx    <- draws$sigma_xi[d_idx]
-sz    <- if ("sigma_zeta" %in% names(draws)) draws$sigma_zeta[d_idx] else 0
-rh    <- if ("rho_xi_zeta" %in% names(draws)) draws$rho_xi_zeta[d_idx] else 0
+sz    <- if ("sigma_zeta" %in% names(draws)) { draws$sigma_zeta[d_idx] } else { 0 }
+rh    <- if ("rho_xi_zeta" %in% names(draws)) { draws$rho_xi_zeta[d_idx] } else { 0 }
 
 schedules <- obs_df |>
   dplyr::arrange(ii, age) |>

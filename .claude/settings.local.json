@@ -75,7 +75,9 @@
       "Bash(git -c commit.gpgsign=false commit -m 'setup_R.R: make Stan pre-compile OOM-tolerant *)",
       "Bash(git -c commit.gpgsign=false commit -m 'Sherlock: commit wordbankr/childesr pull outputs, strip them from setup *)",
       "Bash(git -c commit.gpgsign=false commit -m 'setup_R.R: drop arrow \\(only used by local-only exploration scripts\\) *)",
-      "Bash(git -c commit.gpgsign=false commit -m 'SLURM: auto-symlink repo input bundles into scratch fits dir *)"
+      "Bash(git -c commit.gpgsign=false commit -m 'SLURM: auto-symlink repo input bundles into scratch fits dir *)",
+      "Bash(Rscript -e 'parse\\(file=\"model/scripts/fit_longitudinal.R\"\\); cat\\(\"fit_longitudinal.R: OK\\\\n\"\\)')",
+      "Bash(Rscript -e 'parse\\(file=\"model/scripts/analyze_longitudinal.R\"\\); cat\\(\"analyze_longitudinal.R: OK\\\\n\"\\)')"
     ]
   }
 }

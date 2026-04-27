@@ -31,8 +31,11 @@ base_data   <- bundle$stan_data
 
 # Output tag: variant alone for English, variant_<key> otherwise, so
 # pre-existing English fits (long_2pl_slopes.rds) don't need renaming.
-out_tag <- if (dataset == "english") variant
-           else sprintf("%s_%s", variant, dataset)
+out_tag <- if (dataset == "english") {
+  variant
+} else {
+  sprintf("%s_%s", variant, dataset)
+}
 
 cat(sprintf("Dataset: %s (%s)  I=%d, A=%d, J=%d, N=%d\n",
             dataset, bundle$language,
