@@ -7,6 +7,10 @@
 set -euo pipefail
 cd "$HOME/standard_model_2"
 
+echo "Linking input bundles into \$SCRATCH..."
+./sherlock/sync_inputs.sh
+
+echo
 echo "Submitting longitudinal 2PL+slopes, English (500 kids x all items)..."
 jid=$(sbatch --parsable sherlock/long_fit.slurm long_2pl_slopes english)
 echo "  long_2pl_slopes/english -> job $jid"

@@ -32,7 +32,9 @@ mkdir -p "$RESULTS_DIR/fits" "$RESULTS_DIR/logs"
 for f in "$HOME/standard_model_2/model/fits"/*.rds; do
   [ -e "$f" ] || continue
   base="$(basename "$f")"
-  ln -sfn "$f" "$RESULTS_DIR/fits/$base"
+  dst="$RESULTS_DIR/fits/$base"
+  if [ -L "$dst" ] && [ "$(readlink "$dst")" = "$f" ]; then continue; fi
+  ln -sfn "$f" "$dst" 2>/dev/null || true
 done
 
 # Point rstan's auto_write cache at $SCRATCH so we don't rebuild each time

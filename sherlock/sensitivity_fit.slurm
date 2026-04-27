@@ -21,11 +21,13 @@ cd "$HOME/standard_model_2"
 RESULTS_DIR="$SCRATCH/standard_model_2"
 mkdir -p "$RESULTS_DIR/fits" "$RESULTS_DIR/logs"
 
-# Symlink repo-side input bundles into scratch fits dir
+# Symlink repo-side input bundles into scratch fits dir (race-tolerant)
 for f in "$HOME/standard_model_2/model/fits"/*.rds; do
   [ -e "$f" ] || continue
   base="$(basename "$f")"
-  ln -sfn "$f" "$RESULTS_DIR/fits/$base"
+  dst="$RESULTS_DIR/fits/$base"
+  if [ -L "$dst" ] && [ "$(readlink "$dst")" = "$f" ]; then continue; fi
+  ln -sfn "$f" "$dst" 2>/dev/null || true
 done
 
 export RSTAN_AUTO_WRITE_CACHE_DIR="$RESULTS_DIR/stan_cache"
