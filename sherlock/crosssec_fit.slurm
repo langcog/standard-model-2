@@ -24,7 +24,7 @@ mkdir -p "$RESULTS_DIR/fits" "$RESULTS_DIR/logs"
 for f in "$HOME/standard_model_2/model/fits"/*.rds; do
   [ -e "$f" ] || continue
   base="$(basename "$f")"
-  [ -e "$RESULTS_DIR/fits/$base" ] || ln -s "$f" "$RESULTS_DIR/fits/$base"
+  ln -sfn "$f" "$RESULTS_DIR/fits/$base"
 done
 
 export RSTAN_AUTO_WRITE_CACHE_DIR="$RESULTS_DIR/stan_cache"

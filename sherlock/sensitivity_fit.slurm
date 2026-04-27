@@ -2,9 +2,9 @@
 #SBATCH --job-name=sens
 #SBATCH --output=%x_%j.out
 #SBATCH --error=%x_%j.err
-#SBATCH --time=02:00:00
-#SBATCH --cpus-per-task=2
-#SBATCH --mem=16G
+#SBATCH --time=06:00:00
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=24G
 #SBATCH --partition=normal
 
 # One sigma_r sensitivity fit at a single value.
@@ -25,7 +25,7 @@ mkdir -p "$RESULTS_DIR/fits" "$RESULTS_DIR/logs"
 for f in "$HOME/standard_model_2/model/fits"/*.rds; do
   [ -e "$f" ] || continue
   base="$(basename "$f")"
-  [ -e "$RESULTS_DIR/fits/$base" ] || ln -s "$f" "$RESULTS_DIR/fits/$base"
+  ln -sfn "$f" "$RESULTS_DIR/fits/$base"
 done
 
 export RSTAN_AUTO_WRITE_CACHE_DIR="$RESULTS_DIR/stan_cache"

@@ -32,7 +32,7 @@ mkdir -p "$RESULTS_DIR/fits" "$RESULTS_DIR/logs"
 for f in "$HOME/standard_model_2/model/fits"/*.rds; do
   [ -e "$f" ] || continue
   base="$(basename "$f")"
-  [ -e "$RESULTS_DIR/fits/$base" ] || ln -s "$f" "$RESULTS_DIR/fits/$base"
+  ln -sfn "$f" "$RESULTS_DIR/fits/$base"
 done
 
 # Point rstan's auto_write cache at $SCRATCH so we don't rebuild each time
