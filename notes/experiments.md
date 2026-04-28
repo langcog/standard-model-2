@@ -131,10 +131,12 @@ higher current vocab AND faster vocab growth" finding.
 
 ---
 
-## 🟢 4. σ_r sensitivity sweep (2PL, σ_r ∈ {0.3, 0.53, 0.8, 1.2})
+## 🟢 4. σ_r sensitivity sweep (2PL)
 
-**Setup:** Refit the 2PL variant on the same 500 × 200 subsample under
-four values of the externally-pinned σ_r. 2 chains × 1500 iter each.
+Two passes: (4a) on the small laptop subset, (4b) replicated on the
+full CDI:WS data on Sherlock. Both tell the same story.
+
+### 4a. Laptop subset (500 × 200, 2 chains × 1500 iter)
 
 | σ_r | σ_α | π_α | σ_xi² |
 |---:|---:|---:|---:|
@@ -143,22 +145,62 @@ four values of the externally-pinned σ_r. 2 chains × 1500 iter each.
 | 0.80 | 2.05 | **0.868** | 4.84 |
 | 1.20 | 1.83 | **0.699** | 4.79 |
 
-**Key finding:** total child-level variance σ_xi² = 4.8 is tightly
-identified by the data. Its **decomposition into input vs. efficiency
-is entirely determined by σ_r**. π_α ranges from 0.70 to 0.98 across
-plausible σ_r values. Even at the widest σ_r = 1.2, input explains at
-most 30 % of child-level variance — a robust lower bound on the
+### 4b. Full CDI:WS replication (Sherlock, 4 chains × 1500 iter)
+
+Quantitatively almost identical — confirms the decomposition is robust
+to sample size and well-mixed:
+
+| σ_r | σ_α | π_α |
+|---:|---:|---:|
+| 0.30 | 2.18 | **0.98** |
+| 0.53 | 2.13 | **0.94** |
+| 0.80 | 2.05 | **0.87** |
+| 1.20 | 1.83 | **0.70** |
+
+CrI ribbons on π_α are very tight at every σ_r (±0.02–0.04); σ_α has
+overlapping CrIs across σ_r values, indicating that the data identify
+σ_xi² ≈ 4.8 regardless of how the prior splits it.
+
+### Key finding
+
+Total child-level variance σ_xi² = 4.8 is **tightly identified** by
+the data, **but the decomposition into input vs. efficiency is
+entirely determined by σ_r**. π_α ranges from 0.70 to 0.98 across
+plausible σ_r values. **Even at the widest σ_r = 1.2, input explains at
+most 30% of child-level variance** — a robust lower bound on the
 efficiency share.
 
-**Paper-ready phrasing:**
+The shape of the curve is informative: π_α moves only gently between
+σ_r = 0.3–0.8, then steepens. This is the geometry of σ_α²/(σ_α²+σ_r²):
+when σ_α ≫ σ_r, doubling σ_r barely shifts the proportion; when σ_r
+approaches σ_α, π_α becomes more sensitive.
+
+### Paper-ready phrasing
 
 > Depending on how much input rates vary across the population the
 > CDI sample represents (σ_r ∈ [0.3, 1.2]), individual differences in
-> learning efficiency account for 70–98 % of between-child variance in
-> vocabulary size at 16–30 months. The total child-level variance is
-> tightly identified; its decomposition is prior-bound.
+> learning efficiency account for **70–98% of between-child variance in
+> vocabulary size at 16–30 months**, with input rate explaining the
+> complement. Total child-level variance on the logit scale is tightly
+> identified at σ_xi² ≈ 4.8; its decomposition between input and
+> efficiency is prior-bound.
 
-**Artifacts:** `model/fits/sensitivity_sigma_r_2pl.rds`,
+### What this rules in / out
+
+- **Rules out**: "child differences are mostly about input quantity" —
+  that requires σ_r ≳ 2, far outside any defensible value from
+  Sperry / Hart & Risley / Weisleder & Fernald.
+- **Rules in**: "child differences are predominantly individual
+  differences in how efficiently exposure becomes vocabulary." Matches
+  the Peekbank picture of stable processing-speed traits being the
+  dominant axis of individual variation.
+- **Open**: the specific number (70 vs 94%) hinges on what σ_r really
+  is for a Wordbank-like sample. Tightening this is the BabyView /
+  Seedlings within-vs-between-child input decomposition in the backlog.
+
+**Artifacts:**
+`model/fits/sensitivity_sigma_r_2pl.rds`,
+`model/fits/wordbank_2pl_sigmaR_*.rds` (full-data replication),
 `model/figs/sensitivity_*_2pl.png`.
 
 ---
