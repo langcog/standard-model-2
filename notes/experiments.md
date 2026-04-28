@@ -2,7 +2,10 @@
 
 A running record of fits, findings, and backlog for the standard-model
 project. For the durable model specification, see
-[`model_explainer.pdf`](model_explainer.pdf).
+[`model_explainer.pdf`](model_explainer.pdf). The shared
+**child- and item-sampling strategy** (used identically across Wordbank
+longitudinal, BabyView, and future datasets) is documented in §
+"Sampling strategy: children and items" of the explainer.
 
 ---
 

@@ -88,7 +88,8 @@
       "Bash(Rscript -e 'suppressPackageStartupMessages\\(library\\(rstan\\)\\); rstan_options\\(auto_write = TRUE\\); m <- stan_model\\(\"model/stan/log_irt_io.stan\"\\); cat\\(\"\\\\nlog_irt_io.stan compiled OK.\\\\n\"\\)')",
       "Bash(git -c commit.gpgsign=false commit -m 'BabyView pipeline: input-observed model + data prep + fit + SLURM *)",
       "Bash(git rm *)",
-      "Bash(git -c commit.gpgsign=false commit --amend --no-edit)"
+      "Bash(git -c commit.gpgsign=false commit --amend --no-edit)",
+      "Bash(git -c commit.gpgsign=false commit -m 'Document child/item sampling strategy in the explainer *)"
     ]
   }
 }

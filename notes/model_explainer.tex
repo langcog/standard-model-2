@@ -419,6 +419,65 @@ accounted for, which is the quantity we really want.
   start times are variants, not baseline.
 \end{enumerate}
 
+\section{Sampling strategy: children and items}
+\label{sec:sampling}
+
+The data we fit is large enough that we always work on a subsample.
+The strategy is the same across pipelines (Wordbank longitudinal,
+BabyView, future Seedlings) so results are directly comparable.
+
+\paragraph{Children.}
+\begin{enumerate}[leftmargin=1.3em]
+\item Filter to children with \(\geq 2\) admins (longitudinal coverage).
+\item Compute each child's \emph{median admin age} as their
+  representative age.
+\item Bin children into \(N_{\text{age}}=4\) age quantile bins.
+\item Within each bin, take the top kids by number of admins, then by
+  age span. (Tie-breaking on richer longitudinal data.)
+\item Top up uniformly at random if any bin is short (rare).
+\end{enumerate}
+
+This replaces an earlier, biased "top-by-priority" rule that just
+maximized \(n_{\text{admin}} + \text{span}/5\); that rule overweighted
+data-rich kids in narrow age windows. The age-stratified rule
+guarantees coverage across the whole 16--30 mo developmental window.
+
+\paragraph{Items.}
+\begin{enumerate}[leftmargin=1.3em]
+\item Filter to items with non-zero CHILDES probability \(p_j\).
+\item For each lexical class, bin items into \(N_{\text{diff}}=4\)
+  difficulty quartiles based on \(\log p_j\).
+\item Sample uniformly within each (class, difficulty-quartile) cell
+  --- 16 cells for 4 classes \(\times\) 4 quartiles.
+\item Top up at random if any cell is short.
+\end{enumerate}
+
+The earlier item-sampling rule stratified only on lexical class, which
+oversampled high-frequency words (those are dense in the CHILDES
+distribution). The class-by-difficulty grid ensures we have hard,
+medium, and easy words within \emph{each} class, which sharpens the
+identification of \(\psi_j\) and \(\beta_c\) when they enter as
+parameters.
+
+\paragraph{Per-pipeline application.}
+\begin{itemize}[leftmargin=1.3em]
+\item \textbf{Wordbank longitudinal (English / Norwegian).} 200
+children \(\times\) 200 items per dataset. English: median 3 admins,
+12 mo span; Norwegian: median 8 admins, 14 mo span (Norwegian has the
+much denser Kristoffersen contributor).
+\item \textbf{BabyView.} 20 longitudinal English subjects (the entire
+available pool) \(\times\) 200 items, with input rate observed via
+5\,688 videos. No child-side subsampling: we use everyone.
+\end{itemize}
+
+\paragraph{Cross-sectional Wordbank (single CDI per child).}
+The subset used for the cross-sectional and \(\sigma_r\) sensitivity
+fits (500 children, 200 items) was sampled by uniform random selection
+within age bins (5 monthly groups) and within lexical class (5 classes,
+40 items each). Stratification on item difficulty was not used in that
+sample; results are robust to this because all 5 classes span the
+full frequency range when sampled uniformly within each.
+
 \section{What we deliver}
 
 \begin{enumerate}[leftmargin=1.3em]
