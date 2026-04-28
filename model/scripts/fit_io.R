@@ -23,8 +23,11 @@ dataset <- if (length(args) >= 2) args[2] else "babyview"
 bundle    <- load_dataset_bundle(dataset)
 base_data <- bundle$stan_data
 
-out_tag <- if (dataset == "babyview") variant
-           else sprintf("%s_%s", variant, dataset)
+out_tag <- if (dataset == "babyview") {
+  variant
+} else {
+  sprintf("%s_%s", variant, dataset)
+}
 
 cat(sprintf("Dataset: %s (%s)  I=%d, A=%d, J=%d, V=%d, N=%d\n",
             dataset, bundle$language,
