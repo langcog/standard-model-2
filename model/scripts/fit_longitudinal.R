@@ -54,9 +54,16 @@ stan_data <- modifyList(base_data, overrides)
 cat(sprintf("\n===== Fitting %s on %s =====\n", variant, dataset))
 cat("Hyperprior overrides:\n"); str(overrides)
 
-cfg <- modifyList(DEFAULT_FIT_CONFIG,
-                  list(chains = 4, iter = 1500, warmup = 750,
-                       adapt_delta = 0.95))
+# Defaults for longitudinal fits; overridable via env vars so SLURM
+# scripts can dial them without touching code.
+cfg <- modifyList(DEFAULT_FIT_CONFIG, list(
+  chains      = as.integer(Sys.getenv("STAN_CHAINS",      unset = "4")),
+  iter        = as.integer(Sys.getenv("STAN_ITER",        unset = "1500")),
+  warmup      = as.integer(Sys.getenv("STAN_WARMUP",      unset = "750")),
+  adapt_delta = as.numeric(Sys.getenv("STAN_ADAPT_DELTA", unset = "0.95"))
+))
+cat(sprintf("Stan config: chains=%d iter=%d warmup=%d adapt_delta=%.2f\n",
+            cfg$chains, cfg$iter, cfg$warmup, cfg$adapt_delta))
 
 fit <- fit_variant(stan_data, tag = out_tag,
                    cfg = cfg,

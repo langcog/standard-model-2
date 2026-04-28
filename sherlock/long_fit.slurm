@@ -14,6 +14,9 @@
 #   sbatch sherlock/long_fit.slurm long_2pl_slopes norwegian
 #   sbatch sherlock/long_fit.slurm long_baseline english
 # Dataset keys are defined in model/R/datasets.R.
+#
+# Stan iteration count is overridable via env vars:
+#   sbatch --export=STAN_ITER=1000,STAN_WARMUP=500 sherlock/long_fit.slurm ...
 
 set -euo pipefail
 
