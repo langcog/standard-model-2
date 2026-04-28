@@ -92,7 +92,8 @@
       "Bash(git -c commit.gpgsign=false commit -m 'Document child/item sampling strategy in the explainer *)",
       "Bash(git -c commit.gpgsign=false commit -m 'Commit prepared Stan bundles \\(incl. babyview\\); skip running prep on Sherlock *)",
       "Bash(Rscript -e 'parse\\(file=\"model/scripts/fit_io.R\"\\); cat\\(\"fit_io.R OK\\\\n\"\\)')",
-      "Bash(git -c commit.gpgsign=false commit -m \"fit_io.R: same bare-else parse bug, fix with braces\")"
+      "Bash(git -c commit.gpgsign=false commit -m \"fit_io.R: same bare-else parse bug, fix with braces\")",
+      "Bash(git -c commit.gpgsign=false commit -m 'smoke test: parse-check every R script *)"
     ]
   }
 }

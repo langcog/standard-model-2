@@ -26,4 +26,21 @@ for (v in c("baseline", "fix_delta", "fix_s", "both_fixed",
     cat(sprintf("  %-18s = %s\n", k, overrides[[k]]))
 }
 
+## Parse-check every R script in the project to catch bare-else and
+## other Rscript-specific parse failures before they hit a SLURM queue.
+cat("\nParse-checking all R scripts...\n")
+all_R <- c(list.files("model/R", pattern = "\\.R$", full.names = TRUE),
+           list.files("model/scripts", pattern = "\\.R$", full.names = TRUE))
+ok_count <- 0
+for (f in all_R) {
+  res <- tryCatch(parse(file = f), error = function(e) e)
+  if (inherits(res, "error")) {
+    cat(sprintf("  FAIL  %s\n          %s\n", f, conditionMessage(res)))
+  } else {
+    ok_count <- ok_count + 1
+  }
+}
+cat(sprintf("  parsed %d / %d scripts OK\n", ok_count, length(all_R)))
+if (ok_count < length(all_R)) stop("Some scripts failed to parse.")
+
 cat("\nSmoke test OK.\n")
