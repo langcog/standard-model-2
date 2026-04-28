@@ -25,8 +25,13 @@ DATASETS <- list(
     bundle         = "long_subset_data_nor.rds",
     prepare_script = "model/scripts/prepare_longitudinal_norwegian.R",
     description    = "Norwegian CDI:WS longitudinal subset"
+  ),
+  babyview = list(
+    bundle         = "babyview_subset_data.rds",
+    prepare_script = "model/scripts/prepare_babyview.R",
+    description    = "BabyView English: longitudinal CDI + observed video input rates"
   )
-  # Add e.g. 'peekbank_en' here when we build that pipeline.
+  # Add e.g. 'seedlings' here when we build that pipeline.
 )
 
 ## Resolve a dataset key to (key, bundle path, bundle object).

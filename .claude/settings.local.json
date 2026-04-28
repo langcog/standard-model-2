@@ -83,7 +83,12 @@
       "Bash(Rscript model/scripts/prepare_longitudinal_data.R 'English \\(American\\)' 200 200)",
       "Bash(Rscript model/scripts/prepare_longitudinal_norwegian.R 200 200)",
       "Bash(git -c commit.gpgsign=false commit -m 'Stratified longitudinal sampling: kids by age, items by class x difficulty *)",
-      "Bash(git -c commit.gpgsign=false commit -m 'Lower default longitudinal fit iterations: 1000/500 for exploration *)"
+      "Bash(git -c commit.gpgsign=false commit -m 'Lower default longitudinal fit iterations: 1000/500 for exploration *)",
+      "Bash(Rscript model/scripts/prepare_babyview.R 200)",
+      "Bash(Rscript -e 'suppressPackageStartupMessages\\(library\\(rstan\\)\\); rstan_options\\(auto_write = TRUE\\); m <- stan_model\\(\"model/stan/log_irt_io.stan\"\\); cat\\(\"\\\\nlog_irt_io.stan compiled OK.\\\\n\"\\)')",
+      "Bash(git -c commit.gpgsign=false commit -m 'BabyView pipeline: input-observed model + data prep + fit + SLURM *)",
+      "Bash(git rm *)",
+      "Bash(git -c commit.gpgsign=false commit --amend --no-edit)"
     ]
   }
 }

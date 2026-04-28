@@ -78,6 +78,15 @@ longitudinal-analyze:
 	$(RSCRIPT) $(R_FLAGS) $(SCRIPTS)/analyze_longitudinal.R \
 	    $${VARIANT:-long_2pl_slopes} $${DATASET:-english}
 
+# ---- Input-observed pipeline (BabyView, eventually Seedlings) ----
+babyview-data:
+	$(RSCRIPT) $(R_FLAGS) $(SCRIPTS)/prepare_babyview.R $${N_ITEMS:-200}
+
+# Fit: make io-fit VARIANT=io_2pl_slopes [DATASET=babyview]
+io-fit:
+	$(RSCRIPT) $(R_FLAGS) $(SCRIPTS)/fit_io.R \
+	    $${VARIANT:-io_2pl_slopes} $${DATASET:-babyview}
+
 # Sensitivity on sigma_r: make sensitivity VARIANT=2pl [SIGMA_R=0.3,0.53,0.8,1.0]
 sensitivity: data
 	@if [ -z "$(VARIANT)" ]; then echo "Usage: make sensitivity VARIANT=<name> [SIGMA_R=a,b,c]"; exit 1; fi
