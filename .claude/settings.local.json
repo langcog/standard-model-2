@@ -89,7 +89,8 @@
       "Bash(git -c commit.gpgsign=false commit -m 'BabyView pipeline: input-observed model + data prep + fit + SLURM *)",
       "Bash(git rm *)",
       "Bash(git -c commit.gpgsign=false commit --amend --no-edit)",
-      "Bash(git -c commit.gpgsign=false commit -m 'Document child/item sampling strategy in the explainer *)"
+      "Bash(git -c commit.gpgsign=false commit -m 'Document child/item sampling strategy in the explainer *)",
+      "Bash(git -c commit.gpgsign=false commit -m 'Commit prepared Stan bundles \\(incl. babyview\\); skip running prep on Sherlock *)"
     ]
   }
 }

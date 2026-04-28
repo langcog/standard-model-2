@@ -2,6 +2,11 @@
 ## input-observed model. Builds a Stan-ready bundle that includes the
 ## standard CDI side AND per-video log-token-rate observations.
 ##
+## RUN LOCALLY ONLY. The 875 MB merged_transcripts_parsed.csv is too
+## big to ship to Sherlock. The prepared bundle
+## `model/fits/babyview_subset_data.rds` is small (~500 KB) and is
+## committed to the repo, so Sherlock just reads it directly.
+##
 ## Usage:   Rscript model/scripts/prepare_babyview.R [n_items]
 ## Default: n_items = 200 (stratified by class x difficulty quartile)
 ##

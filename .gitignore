@@ -38,6 +38,13 @@ model/figs/*.png
 # intermediate files so Sherlock can skip those packages.
 !model/fits/long_ws_items.rds
 !model/fits/norwegian_word_freq.rds
+# Also keep the prepared Stan bundles — small (~few MB each), and they
+# need raw inputs (e.g., the 875 MB BabyView transcripts) that aren't
+# on Sherlock. Building them once locally and committing avoids that.
+!model/fits/long_subset_data.rds
+!model/fits/long_subset_data_nor.rds
+!model/fits/babyview_subset_data.rds
+!model/fits/subset_data.rds
 
 # Compiled Stan model objects (auto-generated)
 model/*.rds
