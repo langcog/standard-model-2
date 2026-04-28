@@ -7,9 +7,12 @@ source("model/R/config.R")
 source("model/R/helpers.R")
 
 args <- commandArgs(trailingOnly = TRUE)
-n_children <- as.integer(if (length(args) >= 1) args[1] else 600)
+n_children <- as.integer(if (length(args) >= 1) args[1] else 200)
 n_items    <- as.integer(if (length(args) >= 2) args[2] else 200)
-SEED <- 20260423
+N_AGE_BINS  <- 4
+N_DIFF_BINS <- 4
+MIN_ADMINS  <- 2
+SEED <- 20260428
 
 message(sprintf("Preparing Norwegian longitudinal subset: children=%d, items=%d",
                 n_children, n_items))
@@ -59,28 +62,64 @@ if (sum(is.na(d$prob)) > 0) {
   d <- d %>% mutate(prob = dplyr::coalesce(prob, min_prob))
 }
 
-# Stratify sample
+# Drop items without freq (prob = 0 / NA) before stratification
+d <- d %>% filter(prob > 0)
+
+## Stratified sampling: kids x age, items x (class x difficulty quartile).
 set.seed(SEED)
+
+# --- Children ---
 child_summary <- d %>%
   distinct(child_id, age) %>%
   group_by(child_id) %>%
-  summarise(n_admin = n(), span = max(age) - min(age), .groups = "drop")
-chosen_children <- child_summary %>%
-  mutate(priority = n_admin + span / 5) %>%
-  arrange(desc(priority)) %>%
-  head(n_children) %>%
-  pull(child_id)
+  summarise(n_admin = n(),
+            median_age = median(age),
+            span = max(age) - min(age),
+            .groups = "drop") %>%
+  filter(n_admin >= MIN_ADMINS) %>%
+  mutate(age_bin = ntile(median_age, N_AGE_BINS))
 
-# Stratify items by lexical_category
-# Note: drop prob = 0 items before stratification
-d <- d %>% filter(prob > 0)
-chosen_items <- d %>%
-  distinct(item, lexical_category) %>%
+per_bin_kids <- max(1, floor(n_children / N_AGE_BINS))
+chosen_children <- child_summary %>%
+  group_by(age_bin) %>%
+  arrange(desc(n_admin), desc(span)) %>%
+  slice_head(n = per_bin_kids) %>%
+  ungroup() %>%
+  pull(child_id)
+if (length(chosen_children) < n_children) {
+  extras <- setdiff(child_summary$child_id, chosen_children)
+  need <- min(n_children - length(chosen_children), length(extras))
+  if (need > 0) chosen_children <- c(chosen_children, sample(extras, need))
+}
+message(sprintf("  children: %d kept (median admins=%.1f, median span=%.1f mo)",
+                length(chosen_children),
+                median(child_summary$n_admin[child_summary$child_id %in% chosen_children]),
+                median(child_summary$span[child_summary$child_id %in% chosen_children])))
+
+# --- Items ---
+item_summary <- d %>%
+  distinct(item, lexical_category, prob) %>%
+  mutate(log_p = log(prob)) %>%
   group_by(lexical_category) %>%
-  slice_sample(n = max(1, floor(n_items / length(unique(d$lexical_category))))) %>%
+  mutate(diff_bin = ntile(log_p, N_DIFF_BINS)) %>%
+  ungroup()
+
+n_classes <- length(unique(item_summary$lexical_category))
+per_cell  <- max(1, floor(n_items / (n_classes * N_DIFF_BINS)))
+chosen_items <- item_summary %>%
+  group_by(lexical_category, diff_bin) %>%
+  slice_sample(n = per_cell) %>%
   ungroup() %>%
   pull(item)
-if (length(chosen_items) > n_items) chosen_items <- sample(chosen_items, n_items)
+if (length(chosen_items) > n_items)
+  chosen_items <- sample(chosen_items, n_items)
+if (length(chosen_items) < n_items) {
+  extras <- setdiff(item_summary$item, chosen_items)
+  need <- min(n_items - length(chosen_items), length(extras))
+  if (need > 0) chosen_items <- c(chosen_items, sample(extras, need))
+}
+message(sprintf("  items: %d kept across %d classes x %d difficulty bins",
+                length(chosen_items), n_classes, N_DIFF_BINS))
 
 d <- d %>% filter(child_id %in% chosen_children, item %in% chosen_items)
 message(sprintf("  subset: %d rows, %d children, %d items",

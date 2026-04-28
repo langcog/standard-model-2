@@ -79,7 +79,10 @@
       "Bash(Rscript -e 'parse\\(file=\"model/scripts/fit_longitudinal.R\"\\); cat\\(\"fit_longitudinal.R: OK\\\\n\"\\)')",
       "Bash(Rscript -e 'parse\\(file=\"model/scripts/analyze_longitudinal.R\"\\); cat\\(\"analyze_longitudinal.R: OK\\\\n\"\\)')",
       "Bash(git -c commit.gpgsign=false commit -m 'SLURM: ln -sfn \\(force\\) so repeat job submissions don'\\\\''t fail on existing symlinks *)",
-      "Bash(git -c commit.gpgsign=false commit -m 'Make Stan iteration count overridable via env vars *)"
+      "Bash(git -c commit.gpgsign=false commit -m 'Make Stan iteration count overridable via env vars *)",
+      "Bash(Rscript model/scripts/prepare_longitudinal_data.R 'English \\(American\\)' 200 200)",
+      "Bash(Rscript model/scripts/prepare_longitudinal_norwegian.R 200 200)",
+      "Bash(git -c commit.gpgsign=false commit -m 'Stratified longitudinal sampling: kids by age, items by class x difficulty *)"
     ]
   }
 }
