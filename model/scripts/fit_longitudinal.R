@@ -56,10 +56,13 @@ cat("Hyperprior overrides:\n"); str(overrides)
 
 # Defaults for longitudinal fits; overridable via env vars so SLURM
 # scripts can dial them without touching code.
+# Defaults tuned for quick exploration: 1000 iter / 500 warmup gives
+# ~500 sampling iter x 4 chains = 2000 effective samples, plenty for
+# posterior summaries. Bump to 1500/750 for publication-grade runs.
 cfg <- modifyList(DEFAULT_FIT_CONFIG, list(
   chains      = as.integer(Sys.getenv("STAN_CHAINS",      unset = "4")),
-  iter        = as.integer(Sys.getenv("STAN_ITER",        unset = "1500")),
-  warmup      = as.integer(Sys.getenv("STAN_WARMUP",      unset = "750")),
+  iter        = as.integer(Sys.getenv("STAN_ITER",        unset = "1000")),
+  warmup      = as.integer(Sys.getenv("STAN_WARMUP",      unset = "500")),
   adapt_delta = as.numeric(Sys.getenv("STAN_ADAPT_DELTA", unset = "0.95"))
 ))
 cat(sprintf("Stan config: chains=%d iter=%d warmup=%d adapt_delta=%.2f\n",

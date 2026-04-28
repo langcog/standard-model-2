@@ -82,7 +82,8 @@
       "Bash(git -c commit.gpgsign=false commit -m 'Make Stan iteration count overridable via env vars *)",
       "Bash(Rscript model/scripts/prepare_longitudinal_data.R 'English \\(American\\)' 200 200)",
       "Bash(Rscript model/scripts/prepare_longitudinal_norwegian.R 200 200)",
-      "Bash(git -c commit.gpgsign=false commit -m 'Stratified longitudinal sampling: kids by age, items by class x difficulty *)"
+      "Bash(git -c commit.gpgsign=false commit -m 'Stratified longitudinal sampling: kids by age, items by class x difficulty *)",
+      "Bash(git -c commit.gpgsign=false commit -m 'Lower default longitudinal fit iterations: 1000/500 for exploration *)"
     ]
   }
 }
