@@ -1,54 +1,58 @@
-# SEEDLingS data staged for the io-model pipeline
+# SEEDLingS raw data
 
-## Public files (already in this folder)
+Two source streams:
+1. **Per-recording LENA + per-child CDI totals** from the Egan-Dailey
+   & Bergelson (2025) paper.
+2. **Item-level CDI** from a separate Bergelson lab repository
+   (Dong & Bergelson 2026 working materials).
 
-- `lena_data.csv` — per-recording LENA stats (560 rows, 44 kids × ~13 monthly
-  audio recordings 0;6–1;5). Columns: `subj`, `month`, `duration_hrs`,
-  `awc_perhr`, `cvc_perhr`, `ctc_perhr`, outlier flags. Source:
-  https://github.com/ShannonDailey/EganDailey_DevPsy_2025
-- `seedlings_data.csv` — per-child summary used in Egan-Dailey & Bergelson
-  (2025): aggregated input measures + CDI totals + later assessments.
-  Same source.
-- `all_vocab.csv` — per-child CDI totals at 8/12/18 months + later
-  language scores. Same source.
+## Provenance
 
-These are sufficient for a between-child correlational analysis but
-**not** for fitting the input-observed model — that needs item-level
-CDI responses, which the public data do not include.
+### Per-recording LENA + per-child CDI totals
+- `lena_data.csv`, `seedlings_data.csv`, `all_vocab.csv`
+- Source: <https://github.com/ShannonDailey/EganDailey_DevPsy_2025>
+  (specifically `data/`).
+- Publication: Egan-Dailey, S. & Bergelson, E. (2025). Early child
+  measures outpredict input measures of preschool language skills in
+  U.S. English learners. *Developmental Psychology* (advance online
+  publication). DOI: `10.1037/dev0002019`.
+- The 44 SEEDLingS children were enrolled 2014-2015 in Rochester, NY
+  and recorded monthly from 0;6 to 1;5 plus a 4;6 follow-up.
 
-## Missing file: `cdi_items_long.csv` (item-level CDI)
+### Item-level CDI (`cdi_ht_raw_temp.csv`)
+- Source: <https://github.com/BergelsonLab/WordExposure/blob/main/data/ht/cdi_ht_raw_temp.csv>
+- Publication: from Dong & Bergelson (2026) working materials.
+- Wide-format export with `Talk_<item>` (production) and
+  `Understand_<item>` (comprehension) columns plus `subj`, `month`,
+  `CDIcomp`, `CDIprod`, `Date_Completed`, and a
+  `SeedlingsFinalSample` flag. Longitudinal: rows for every monthly
+  admin from ~6 to ~18 mo per child.
+- **Caveat (still being verified):** the `subj` column appears to
+  use sequential integer IDs that should match the "01".."44"
+  convention in `seedlings_data.csv`. Mike is confirming this
+  alignment before we trust the linkage.
 
-`prepare_seedlings.R` will refuse to build a bundle until this file
-exists. It must be in long format with exactly these columns:
+## Files
 
-| column     | type    | description                                     |
-|------------|---------|-------------------------------------------------|
-| subject_id | char    | "01".."44", matching `subj` in `lena_data.csv`  |
-| age        | numeric | age in months at the CDI admin (~12 or ~18)     |
-| form       | char    | "WG" (only WG is collected at these ages)       |
-| item       | char    | CDI item-definition string (matches Wordbank)   |
-| produces   | 0/1     | 1 if parent endorsed "produces", else 0         |
+| file | what it contains |
+|---|---|
+| `lena_data.csv` | per-recording LENA stats (560 rows, 44 kids × ~13 monthly audio recordings 0;6-1;5). Columns: `subj`, `month`, `duration_hrs`, `awc_perhr`, `cvc_perhr`, `ctc_perhr`, outlier flags |
+| `seedlings_data.csv` | per-child summary used in Egan-Dailey 2025: aggregated input measures + CDI totals + later assessments |
+| `all_vocab.csv` | per-child CDI totals at 8/12/18 months + later language scores |
+| `cdi_ht_raw_temp.csv` | wide-format CDI item-level data, longitudinal (Dong & Bergelson 2026 working file) |
 
-One row per (subject, age, form, item) cell. Expected size:
-44 children × 2 ages × ~396 WG items ≈ 35K rows.
+## What's NOT here
 
-## How to obtain it
+- Manual noun-token annotations (the high-fidelity input measure from
+  Bergelson et al.). Available in
+  <https://github.com/BergelsonLab/seedlings-nouns> (~46 MB raw)
+  if/when we want to add a manual-input sensitivity check.
+- Raw audio / video recordings — Databrary-restricted
+  (<https://databrary.org/party/61>).
 
-The Bergelson lab maintains a private `cdi_spreadsheet` repository
-(loaded by `blabr::get_cdi_spreadsheet()`). A one-shot export of
-SEEDLingS WG admins at 1;0 and 1;6 in long item-level format is what
-we need — equivalent to:
+## Pipeline
 
-```r
-library(blabr)
-cdi <- get_cdi_spreadsheet(version = '<latest>', type = 'csv')
-# ... or, from a raw WebCDI export csv:
-seedlings_wg <- wrangle_web_cdi(filepath = "<seedlings.csv>",
-                                form = "WG", table = "wordlevel")
-```
-
-The `wordlevel` table from `wrangle_web_cdi()` has columns
-`study_name`, `subject_id`, `repeat_num`, `item`, `response`. We just
-need rows where `study_name` is the SEEDLingS study and
-`response %in% c("produces", "understands", "neither")`, recoded to
-the 0/1 `produces` column above.
+`model/scripts/prepare_seedlings.R` consumes `lena_data.csv` for
+per-recording `log_r_obs` and (once subject-ID alignment is verified)
+will pivot `cdi_ht_raw_temp.csv` into the long item-level format
+`cdi_items_long.csv` expected by the io-model bundle builder.
