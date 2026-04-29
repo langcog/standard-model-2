@@ -152,6 +152,8 @@ variant_hyperpriors <- function(name) {
     free_s_slopes = list(s_prior_mean = 4.5, s_prior_sd = 2,
                          sigma_zeta_prior_sd = 1),
     fix_delta     = list(delta_prior_mean = 0, delta_prior_sd = 0.001),
+    fix_delta_slopes = list(delta_prior_mean = 0, delta_prior_sd = 0.001,
+                            sigma_zeta_prior_sd = 1),
     # Legacy variants for re-loading old fits / explicit comparison
     fix_s         = list(s_prior_mean = 2, s_prior_sd = 0.001),
     both_fixed    = list(delta_prior_mean = 0, delta_prior_sd = 0.001,
