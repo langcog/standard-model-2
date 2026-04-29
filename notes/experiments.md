@@ -291,6 +291,97 @@ distribution (not using any real child's inferred posterior):
 
 ---
 
+## 🟢 6. Pivot to lean baseline + variant grammar refactor
+
+**What changed.** After §5 we had a working `long_2pl_slopes` fit but
+diagnostic clutter: 2PL discrimination averaged out at the population
+level, start time `s` was poorly identified, and per-child slopes
+needed longitudinal data to identify. We rewrote `DEFAULT_PRIORS` so
+the new lean baseline is Rasch + frequency + per-class psi + free δ,
+with `s`, `σ_λ`, `σ_ζ` all pinned at zero via tight priors. Variants
+opt in to extra components (see explainer §"Lean baseline + opt-in
+variants").
+
+**Implementation.** `variant_hyperpriors()` in `helpers.R` is the
+single source of truth; the `long_` and `io_` prefixes are stripped
+inside so all pipelines share variant names.
+
+**Artifacts:** explainer `Lean baseline + opt-in variants` and
+`Datasets and observation channels` sections.
+
+---
+
+## 🟡 7. Cross-language ablation set (Wordbank longitudinal, lean)
+
+**Setup.** Lean baseline + three ablations (drop slopes, pin δ=0,
+free s) × two languages (English, Norwegian). Plus the existing
+`long_2pl_slopes` fit on disk for the 2PL comparison. 4 chains × 1000
+iter × 500 warm-up, adapt_delta 0.95 throughout. Submitted via
+`sherlock/submit_ablations.sh`.
+
+| dataset | variant | reference vs. ablation | status |
+|---|---|---|---|
+| english | `long_slopes` | reference | 🟢 done (3:13) |
+| english | `long_baseline` | drops ζ_i | 🟢 done (3:16) |
+| english | `long_fix_delta_slopes` | pins δ=0 | 🟡 running |
+| english | `long_free_s_slopes` | frees s | 🟡 running |
+| english | `long_2pl_slopes` | adds λ_j | 🟢 from §5 |
+| norwegian | `long_slopes` | reference | 🟡 running (~7 hr) |
+| norwegian | `long_baseline` | drops ζ_i | 🟡 running |
+| norwegian | `long_fix_delta_slopes` | pins δ=0 | 🟡 running |
+| norwegian | `long_free_s_slopes` | frees s | 🟡 running |
+| norwegian | `long_2pl_slopes` | adds λ_j | 🟢 already on disk |
+
+**Bug history.** First submission crashed: cross-sectional bundle
+build had a J/cc dimension mismatch (item-class vector longer than J)
+because WG and WS forms have item-name collisions. Fixed in
+`prepare_longitudinal_data.R` by deduplicating `word_info` to one row
+per `jj`. Second issue: `s_prior_mean = 0` was on the parameter
+boundary, blowing up Stan's bounded-parameter transform; fixed to
+`(0.5, 0.05)`. See commits `329b8e4` and `d6d0fad`.
+
+**Pending analysis.** Once all six are in: cross-language comparison
+plot of fitted vs. observed admin-level vocab vs. age, with each
+ablation as a separate panel. Confirms whether the lean baseline
+captures population structure as well as the heavier `long_2pl_slopes`,
+and whether the ablations break in the expected directions.
+
+---
+
+## 🟡 8. Input-observed fits (BabyView + SEEDLingS)
+
+**Setup.** Same lean baseline + slopes (`io_slopes` variant), but
+running on the input-observed Stan model `log_irt_io.stan` which
+adds a per-recording measurement layer on `log r_obs` for each
+child. Per-bundle differences:
+
+- **BabyView** (head-mounted video, on-camera observer):
+  β_react ~ N(0.4, 0.4) — active inflation parameter.
+- **SEEDLingS** (LENA all-day audio, passive observation):
+  β_react pinned at 0 via N(0, 0.001). Critical correction: passive
+  recording has no observer effect, so reactivity inflation does
+  not apply. Caught after submitting the first version with the
+  BabyView prior (cancelled at 5:50 elapsed; resubmitted with the
+  fix).
+
+**BabyView (`io_slopes/babyview`, 23140187):** 🟢 done in 41 min.
+20 children × 101 admins × 200 items × 5 688 video recordings.
+Posterior medians: σ_α = 1.20, π_α = 0.86, β_react = 0.31 (95% CrI
+[-0.42, +1.04]; barely identified given small N), σ_within = 0.70.
+
+**SEEDLingS (`io_slopes/seedlings`, 23177145):** 🟡 pending. 44
+children × 514 CDI admins × 200 items × 525 LENA recordings. CDI
+input-data path: `cdi_ht_raw_temp.csv` from
+[BergelsonLab/WordExposure](https://github.com/BergelsonLab/WordExposure)
+(Dong & Bergelson 2026); auto-mapper resolves all 396 WG short
+codes; SeedlingsFinalSample filter restricts to the canonical 44
+Egan-Dailey subjects.
+
+**Artifacts:** `model/fits/io_slopes.rds` (BabyView), pending
+`io_slopes_seedlings.rds`.
+
+---
+
 ## Backlog (⚪)
 
 ### Data / robustness
