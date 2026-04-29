@@ -27,7 +27,10 @@ PATTERN="${1:-*}"
 
 # Use single quotes on the remote path so $SCRATCH expands on Sherlock.
 echo "Pulling $PATTERN from $SHERLOCK_HOST:$SHERLOCK_FITS_DIR ..."
-rsync -avz --progress \
+# -L dereferences symlinks: the Sherlock SLURM scripts symlink input
+# bundles into $SCRATCH/.../fits, and we want their actual contents
+# pulled back, not the (broken-on-laptop) symlink itself.
+rsync -avzL --progress \
     "${SHERLOCK_HOST}:${SHERLOCK_FITS_DIR}/${PATTERN}" \
     model/fits/
 

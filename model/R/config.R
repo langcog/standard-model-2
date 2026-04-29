@@ -59,8 +59,11 @@ MODEL_CONSTANTS <- list(
 DEFAULT_PRIORS <- list(
   mu_mu_c          = 8,
   sigma_mu_c       = 3,
-  s_prior_mean     = 0,
-  s_prior_sd       = 0.001,        # s pinned at 0
+  # s effectively pinned near 0; we don't quite use 0 to avoid putting
+  # the prior mode exactly on the parameter's lower boundary (Stan's
+  # bounded transform blows up there).
+  s_prior_mean     = 0.5,
+  s_prior_sd       = 0.05,
   delta_prior_mean = 0,
   delta_prior_sd   = 0.5,
   sigma_lambda_prior_sd = 0.001,   # no 2PL by default
