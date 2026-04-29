@@ -198,7 +198,11 @@ write_csv(map_df, file.path(OUT_DIR, "cdi_seedlings_short_code_map.csv"))
 d_meta <- d %>%
   mutate(subject_id_int = suppressWarnings(as.integer(subj)),
          subject_id = sprintf("%02d", subject_id_int)) %>%
-  filter(!is.na(subject_id_int), subject_id_int >= 1, subject_id_int <= 99) %>%
+  # Keep only Egan-Dailey final-sample subjects (drops subj 24, who was
+  # enrolled but excluded from the published sample)
+  filter(!is.na(subject_id_int),
+         subject_id_int >= 1, subject_id_int <= 99,
+         SeedlingsFinalSample == "Y") %>%
   select(subject_id, age = month, raw_subj = subj, all_of(talk_cols))
 
 cat(sprintf("\nAfter subject-id filter: %d admins (%d unique subjects)\n",

@@ -201,10 +201,12 @@ stan_data <- c(
     mu_r_prior_sd   = 1,
     sigma_r_prior_sd = 1,
 
-    # Reactivity prior weaker than BabyView: at-home audio recording
-    # has less observer effect than a body-cam video.
-    beta_react_prior_mean = 0.1,
-    beta_react_prior_sd   = 0.4,
+    # Reactivity inflation OFF: SEEDLingS audio recordings are passive
+    # (no on-camera observer), so there is no body-cam reactivity to
+    # account for. Pin beta_react at 0 via a tight prior; the io Stan
+    # model is shared with BabyView, where this parameter is active.
+    beta_react_prior_mean = 0,
+    beta_react_prior_sd   = 0.001,
 
     sigma_within_prior_sd = 1
   ),

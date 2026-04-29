@@ -556,4 +556,69 @@ trading off strongly with \(\delta\); (c) per-child slopes
 (needed longitudinal). The lean default is the smallest model that
 addresses every RQ; the variants exist to test specific claims.
 
+\section{Datasets and observation channels}
+\label{sec:channels}
+
+The variant grammar (\S\,Lean baseline) toggles \emph{model
+components}. Independent of that, each dataset comes with its own
+\emph{observation channels} that determine which auxiliary parameters
+are appropriate. We separate the two levers in code so they can't be
+mixed by accident.
+
+\paragraph{Lever~1 — variant grammar (per-fit toggles).}
+Tight-prior switches on \(\sigma_\lambda\), \(\sigma_\zeta\),
+\(s\), \(\delta\). Implemented in
+\texttt{variant\_hyperpriors()} (\texttt{model/R/helpers.R}); identical
+across pipelines (the \texttt{long\_}, \texttt{io\_} prefixes are
+stripped inside).
+
+\paragraph{Lever~2 — dataset-level design choices (per-bundle constants).}
+Properties inherent to the observation channel of a given dataset.
+Baked into \texttt{stan\_data} by the \texttt{prepare\_*.R} script;
+not a choice a researcher makes per fit. Two examples currently:
+
+\begin{itemize}[leftmargin=1.3em]
+\item \emph{Reactivity inflation \(\beta_{\text{react}}\).} Per-child
+  observed input rate \(\log r^{\mathrm{obs}}_{iv}\) for video~\(v\) of
+  child~\(i\) is
+  \(\log r_i + \beta_{\text{react}} + \varepsilon_{iv}\). The bias
+  \(\beta_{\text{react}}\) absorbs systematic differences between
+  observed input and ``true'' input.
+  \begin{itemize}
+  \item \textbf{BabyView} (head-mounted video, on-camera observer
+    effect): \(\beta_{\text{react}} \sim \mathcal{N}(0.4,\,0.4)\) ---
+    active, with the prior centered around \(\sim\!1.5\)x inflation.
+  \item \textbf{SEEDLingS} (LENA all-day audio, no on-camera observer):
+    \(\beta_{\text{react}} \sim \mathcal{N}(0,\,0.001)\) --- pinned at
+    zero. Passive-recording channel, so no inflation.
+  \end{itemize}
+\item \emph{Per-recording weighting.} Currently uniform; planned
+  hook in \texttt{stan\_data\$log\_r\_obs\_weight} for downweighting
+  short or contaminated recordings. Off by default.
+\end{itemize}
+
+\paragraph{Stan model files form a partial order.} Each file
+\emph{adds} components on top of the previous, all toggleable via
+tight priors:
+
+\begin{center}
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+File & Adds & Used by \\
+\midrule
+\texttt{log\_irt.stan} & cross-sectional baseline \(\xi_i\) & Wordbank cross-sectional fits \\
+\texttt{log\_irt\_long.stan} & admin\(\to\)child indexing, \(\zeta_i\), bivariate prior & Wordbank longitudinal fits \\
+\texttt{log\_irt\_io.stan} & per-recording \(\log r^{\mathrm{obs}}\) measurement layer, \(\beta_{\text{react}}\) & BabyView, SEEDLingS \\
+\texttt{log\_irt\_proc.stan} \emph{(planned)} & noisy-\(\alpha\) observation from LWL RT/accuracy & Peekbank-linked Stanford datasets \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The result is a small partial order of model files, not a
+combinatorial explosion. Adding a new dataset usually means writing
+a \texttt{prepare\_<dataset>.R} script that reuses an existing Stan
+file with appropriate dataset-level constants; only when a genuinely
+new \emph{observation channel} appears do we add a Stan file.
+
 \end{document}
