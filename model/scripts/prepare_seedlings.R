@@ -9,15 +9,15 @@
 ## Default: n_items = 200 (stratified by class x difficulty quartile)
 ##
 ## Public inputs (already in repo):
-##   model/data_seedlings/lena_data.csv      Per-recording LENA AWC
-##                                           (44 kids x 13 monthly recordings)
-##   model/data_seedlings/seedlings_data.csv Per-child summary (used for QA)
+##   data/raw_data/seedlings/lena_data.csv      Per-recording LENA AWC
+##                                              (44 kids x 13 monthly recordings)
+##   data/raw_data/seedlings/seedlings_data.csv Per-child summary (used for QA)
 ##
 ## NOT YET PUBLIC, must be obtained from Bergelson lab:
-##   model/data_seedlings/cdi_items_long.csv Item-level CDI WG responses at
-##                                           1;0 and 1;6 for the 44 SEEDLingS
-##                                           subjects. See README in the same
-##                                           folder for the expected schema.
+##   data/raw_data/seedlings/cdi_items_long.csv Item-level CDI WG responses at
+##                                              1;0 and 1;6 for the 44 SEEDLingS
+##                                              subjects. See README in the same
+##                                              folder for the expected schema.
 ##
 ## Reused inputs:
 ##   model/fits/long_items.rds  (English CHILDES p_j and lexical_category)
@@ -36,7 +36,7 @@ n_items <- as.integer(if (length(args) >= 1) args[1] else 200)
 # ---- Constants ----
 N_DIFF_BINS <- 4
 SEED        <- 20260429
-SD_DIR      <- file.path(PROJECT_ROOT, "model/data_seedlings")
+SD_DIR      <- file.path(PROJECT_ROOT, "data/raw_data/seedlings")
 CDI_LONG    <- file.path(SD_DIR, "cdi_items_long.csv")
 
 message(sprintf("Preparing Seedlings bundle (n_items=%d)", n_items))
@@ -64,7 +64,7 @@ if (!file.exists(CDI_LONG)) {
     "We have only CDI totals from the public Egan-Dailey github. ",
     "Item-level CDI for SEEDLingS lives in the private cdi_spreadsheet ",
     "repo at BergelsonLab. Once you have a wordlevel-format export, ",
-    "drop it at the path above (see model/data_seedlings/README.md ",
+    "drop it at the path above (see data/raw_data/seedlings/README.md ",
     "for expected schema) and rerun."), CDI_LONG))
 }
 

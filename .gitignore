@@ -61,8 +61,8 @@ model/log_irt_v2.stan
 *.log.gz
 /tmp_*
 
-# --- BabyView raw data (huge CSVs, kept locally only) ---
-babyview/merged_transcripts_parsed.csv
+# --- Raw data (huge CSVs, kept locally only) ---
+data/raw_data/babyview/merged_transcripts_parsed.csv
 # Smaller files (video metadata, CDI items) are tracked.
 
 # --- Local-only credentials and config
