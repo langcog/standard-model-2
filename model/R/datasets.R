@@ -35,6 +35,11 @@ DATASETS <- list(
     bundle         = "seedlings_subset_data.rds",
     prepare_script = "model/scripts/prepare_seedlings.R",
     description    = "SEEDLingS (Bergelson): WG CDI at 12+18mo + LENA AWC per recording"
+  ),
+  stanford_linked = list(
+    bundle         = "stanford_linked_subset_data.rds",
+    prepare_script = "model/scripts/prepare_stanford_linked.R",
+    description    = "Stanford TotLot 3 (Adams 2018) item-level CDI joined with Peekbank LWL processing"
   )
 )
 
