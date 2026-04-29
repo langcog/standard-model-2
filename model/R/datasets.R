@@ -30,8 +30,12 @@ DATASETS <- list(
     bundle         = "babyview_subset_data.rds",
     prepare_script = "model/scripts/prepare_babyview.R",
     description    = "BabyView English: longitudinal CDI + observed video input rates"
+  ),
+  seedlings = list(
+    bundle         = "seedlings_subset_data.rds",
+    prepare_script = "model/scripts/prepare_seedlings.R",
+    description    = "SEEDLingS (Bergelson): WG CDI at 12+18mo + LENA AWC per recording"
   )
-  # Add e.g. 'seedlings' here when we build that pipeline.
 )
 
 ## Resolve a dataset key to (key, bundle path, bundle object).
