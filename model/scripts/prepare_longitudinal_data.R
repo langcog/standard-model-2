@@ -120,7 +120,13 @@ d <- d %>%
          cc = as.integer(factor(lexical_category)))
 
 admin_info <- d %>% distinct(aa, ii, age, admin_key) %>% arrange(aa)
-word_info  <- d %>% distinct(jj, item, prob, cc) %>% arrange(jj)
+# One row per item: when the same word appears across WG and WS with
+# slightly different prob or lexical_category, keep the first occurrence
+# so length(cc) == J.
+word_info  <- d %>% group_by(jj) %>%
+  summarise(item = first(item), prob = first(prob), cc = first(cc),
+            .groups = "drop") %>%
+  arrange(jj)
 class_levels <- levels(factor(d$lexical_category))
 
 I <- max(d$ii); A <- max(d$aa); J <- max(d$jj); C <- max(d$cc)

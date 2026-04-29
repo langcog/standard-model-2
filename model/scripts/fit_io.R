@@ -37,7 +37,9 @@ cat(sprintf("Dataset: %s (%s)  I=%d, A=%d, J=%d, V=%d, N=%d\n",
 # Defer to shared variant_hyperpriors() registry (the "io_" prefix is
 # stripped inside, so io_slopes -> slopes etc.)
 overrides <- variant_hyperpriors(variant)
-stan_data <- modifyList(base_data, overrides)
+# Re-apply DEFAULT_PRIORS at fit time so stale priors baked into older
+# bundles (e.g., the s-prior boundary bug) are overridden by config.R.
+stan_data <- modifyList(modifyList(base_data, DEFAULT_PRIORS), overrides)
 
 cat(sprintf("\n===== Fitting %s on %s =====\n", variant, dataset))
 cat("Hyperprior overrides:\n"); str(overrides)
