@@ -1,0 +1,397 @@
+short,item_definition,status
+Talk_baabaa,baa baa,manual_disambig
+Talk_choochoo,choo choo,manual_disambig
+Talk_cockadoodledoo,cock-a-doodle-doo,manual_disambig
+Talk_grr,grrr,manual_disambig
+Talk_meow,meow,auto_exact
+Talk_moo,moo,auto_exact
+Talk_ouch,ouch,auto_exact
+Talk_quackquack,quack quack,manual_disambig
+Talk_uhoh,uh oh,manual_disambig
+Talk_vroom,vroom,auto_exact
+Talk_woofwoof,woof woof,manual_disambig
+Talk_yumyum,yum yum,manual_disambig
+Talk_animal,animal,auto_exact
+Talk_bear,bear,auto_exact
+Talk_bee,bee,auto_exact
+Talk_bird,bird,auto_exact
+Talk_bug,bug,auto_exact
+Talk_bunny,bunny,auto_exact
+Talk_butterfly,butterfly,auto_exact
+Talk_cat,cat,auto_exact
+Talk_chicken_animal,chicken (animal),manual_disambig
+Talk_cow,cow,auto_exact
+Talk_deer,deer,auto_exact
+Talk_dog,dog,auto_exact
+Talk_donkey,donkey,auto_exact
+Talk_duck,duck,auto_exact
+Talk_elephant,elephant,auto_exact
+Talk_fish_animal,fish (animal),manual_disambig
+Talk_frog,frog,auto_exact
+Talk_giraffe,giraffe,auto_exact
+Talk_goose,goose,auto_exact
+Talk_horse,horse,auto_exact
+Talk_kitty,kitty,auto_exact
+Talk_lamb,lamb,auto_exact
+Talk_lion,lion,auto_exact
+Talk_monkey,monkey,auto_exact
+Talk_mouse,mouse,auto_exact
+Talk_owl,owl,auto_exact
+Talk_penguin,penguin,auto_exact
+Talk_pig,pig,auto_exact
+Talk_pony,pony,auto_exact
+Talk_puppy,puppy,auto_exact
+Talk_sheep,sheep,auto_exact
+Talk_squirrel,squirrel,auto_exact
+Talk_teddybear,teddy bear,manual_disambig
+Talk_tiger,tiger,auto_exact
+Talk_turkey,turkey,auto_exact
+Talk_turtle,turtle,auto_exact
+Talk_airplane,airplane,auto_exact
+Talk_bicycle,bicycle,auto_exact
+Talk_bus,bus,auto_exact
+Talk_car,car,auto_exact
+Talk_firetruck,fire truck,manual_disambig
+Talk_motorcycle,motorcycle,auto_exact
+Talk_stroller,stroller,auto_exact
+Talk_train,train,auto_exact
+Talk_truck,truck,auto_exact
+Talk_ball,ball,auto_exact
+Talk_balloon,balloon,auto_exact
+Talk_block,block,auto_exact
+Talk_book,book,auto_exact
+Talk_bubbles,bubbles,auto_exact
+Talk_doll,doll,auto_exact
+Talk_pen,pen,auto_exact
+Talk_toy,toy (object),manual_disambig
+Talk_apple,apple,auto_exact
+Talk_banana,banana,auto_exact
+Talk_bread,bread,auto_exact
+Talk_butter,butter,auto_exact
+Talk_cake,cake,auto_exact
+Talk_candy,candy,auto_exact
+Talk_carrots,carrots,auto_exact
+Talk_cereal,cereal,auto_exact
+Talk_cheerios,cheerios,auto_exact
+Talk_cheese,cheese,auto_exact
+Talk_chicken_food,chicken (food),manual_disambig
+Talk_coffee,coffee,auto_exact
+Talk_cookie,cookie,auto_exact
+Talk_cracker,cracker,auto_exact
+Talk_drink_beverage,drink (beverage),manual_disambig
+Talk_egg,egg,auto_exact
+Talk_fish_food,fish (food),manual_disambig
+Talk_food,food,auto_exact
+Talk_icecream,ice cream,manual_disambig
+Talk_juice,juice,auto_exact
+Talk_meat,meat,auto_exact
+Talk_milk,milk,auto_exact
+Talk_noodles,noodles,auto_exact
+Talk_orange,orange (food),manual_disambig
+Talk_peas,peas,auto_exact
+Talk_pizza,pizza,auto_exact
+Talk_raisin,raisin,auto_exact
+Talk_spaghetti,spaghetti,auto_exact
+Talk_toast,toast,auto_exact
+Talk_water_food,water (beverage),manual_disambig
+Talk_beads,beads,auto_exact
+Talk_bib,bib,auto_exact
+Talk_boots,boots,auto_exact
+Talk_button,button,auto_exact
+Talk_coat,coat,auto_exact
+Talk_diaper,diaper,auto_exact
+Talk_dress,dress (object),manual_disambig
+Talk_hat,hat,auto_exact
+Talk_jacket,jacket,auto_exact
+Talk_jeans,jeans,auto_exact
+Talk_necklace,necklace,auto_exact
+Talk_pajamas,pajamas,auto_exact
+Talk_pants,pants,auto_exact
+Talk_shirt,shirt,auto_exact
+Talk_shoe,shoe,auto_exact
+Talk_shorts,shorts,auto_exact
+Talk_sock,sock,auto_exact
+Talk_sweater,sweater,auto_exact
+Talk_zipper,zipper,auto_exact
+Talk_arm,arm,auto_exact
+Talk_bellybutton,belly button,manual_disambig
+Talk_cheek,cheek,auto_exact
+Talk_ear,ear,auto_exact
+Talk_eye,eye,auto_exact
+Talk_face,face,auto_exact
+Talk_foot,foot,auto_exact
+Talk_finger,finger,auto_exact
+Talk_hair,hair,auto_exact
+Talk_hand,hand,auto_exact
+Talk_head,head,auto_exact
+Talk_knee,knee,auto_exact
+Talk_leg,leg,auto_exact
+Talk_mouth,mouth,auto_exact
+Talk_nose,nose,auto_exact
+Talk_booboo,owie/boo boo,manual_disambig
+Talk_tooth,tooth,auto_exact
+Talk_toe,toe,auto_exact
+Talk_tongue,tongue,auto_exact
+Talk_tummy,tummy,auto_exact
+Talk_bathroom,bathroom,auto_exact
+Talk_bathtub,bathtub,auto_exact
+Talk_bed,bed,auto_exact
+Talk_bedroom,bedroom,auto_exact
+Talk_chair,chair,auto_exact
+Talk_couch,couch,auto_exact
+Talk_crib,crib,auto_exact
+Talk_door,door,auto_exact
+Talk_drawer,drawer,auto_exact
+Talk_garage,garage,auto_exact
+Talk_highchair,high chair,manual_disambig
+Talk_kitchen,kitchen,auto_exact
+Talk_livingroom,living room,manual_disambig
+Talk_oven,oven,auto_exact
+Talk_playpen,play pen,auto_exact
+Talk_potty,potty,auto_exact
+Talk_refrigerator,refrigerator,auto_exact
+Talk_rockingchair,rocking chair,manual_disambig
+Talk_sink,sink,auto_exact
+Talk_stairs,stairs,auto_exact
+Talk_stove,stove,auto_exact
+Talk_table,table,auto_exact
+Talk_tv,TV,auto_exact
+Talk_window,window,auto_exact
+Talk_blanket,blanket,auto_exact
+Talk_bottle,bottle,auto_exact
+Talk_bowl,bowl,auto_exact
+Talk_box,box,auto_exact
+Talk_broom,broom,auto_exact
+Talk_brush,brush,auto_exact
+Talk_clock,clock,auto_exact
+Talk_comb,comb,auto_exact
+Talk_cup,cup,auto_exact
+Talk_dish,dish,auto_exact
+Talk_fork,fork,auto_exact
+Talk_glass,glass,auto_exact
+Talk_glasses,glasses,auto_exact
+Talk_hammer,hammer,auto_exact
+Talk_keys,keys,auto_exact
+Talk_lamp,lamp,auto_exact
+Talk_light,light,auto_exact
+Talk_medicine,medicine,auto_exact
+Talk_money,money,auto_exact
+Talk_paper,paper,auto_exact
+Talk_penny,penny,auto_exact
+Talk_picture,picture,auto_exact
+Talk_pillow,pillow,auto_exact
+Talk_plant,plant,auto_exact
+Talk_plate,plate,auto_exact
+Talk_purse,purse,auto_exact
+Talk_radio,radio,auto_exact
+Talk_scissors,scissors,auto_exact
+Talk_soap,soap,auto_exact
+Talk_spoon,spoon,auto_exact
+Talk_telephone,telephone,auto_exact
+Talk_toothbrush,toothbrush,auto_exact
+Talk_towel,towel,auto_exact
+Talk_trash,trash,auto_exact
+Talk_vacuum,vacuum,auto_exact
+Talk_watch_object,watch (object),manual_disambig
+Talk_backyard,backyard,auto_exact
+Talk_beach,beach,auto_exact
+Talk_church,church*,manual_disambig
+Talk_flower,flower,auto_exact
+Talk_garden,garden,auto_exact
+Talk_home,home,auto_exact
+Talk_house,house,auto_exact
+Talk_moon,moon,auto_exact
+Talk_outside,outside,auto_exact
+Talk_park,park,auto_exact
+Talk_party,party,auto_exact
+Talk_pool,pool,auto_exact
+Talk_rain,rain,auto_exact
+Talk_rock,rock,auto_exact
+Talk_school,school,auto_exact
+Talk_shovel,shovel,auto_exact
+Talk_sky,sky,auto_exact
+Talk_slide,slide (object),manual_disambig
+Talk_snow,snow,auto_exact
+Talk_star,star,auto_exact
+Talk_store,store,auto_exact
+Talk_sun,sun,auto_exact
+Talk_swing_outside,swing (object),manual_disambig
+Talk_tree,tree,auto_exact
+Talk_water_outside,water (not beverage),manual_disambig
+Talk_work,work (place),manual_disambig
+Talk_zoo,zoo,auto_exact
+Talk_aunt,aunt,auto_exact
+Talk_baby,baby,auto_exact
+Talk_babysitter,babysitter,manual_disambig
+Talk_babysittername,babysitter's name,manual_disambig
+Talk_boy,boy,auto_exact
+Talk_brother,brother,auto_exact
+Talk_child,child,auto_exact
+Talk_daddy,daddy*,manual_disambig
+Talk_girl,girl,auto_exact
+Talk_grandma,grandma*,manual_disambig
+Talk_grandpa,grandpa*,manual_disambig
+Talk_lady,lady,auto_exact
+Talk_man,man,auto_exact
+Talk_mommy,mommy*,manual_disambig
+Talk_childname,child's own name,manual_disambig
+Talk_people,people,auto_exact
+Talk_person,person,auto_exact
+Talk_sister,sister,auto_exact
+Talk_teacher,teacher,auto_exact
+Talk_uncle,uncle,auto_exact
+Talk_bath,bath,auto_exact
+Talk_breakfast,breakfast,auto_exact
+Talk_bye,bye,auto_exact
+Talk_dinner,dinner,auto_exact
+Talk_dont,don't,manual_disambig
+Talk_hello,hello,auto_exact
+Talk_hi,hi,auto_exact
+Talk_lunch,lunch,auto_exact
+Talk_nap,nap,auto_exact
+Talk_nightnight,night night,manual_disambig
+Talk_no,no,auto_exact
+Talk_pattycake,patty cake,manual_disambig
+Talk_peekaboo,peekaboo,manual_disambig
+Talk_please,please,auto_exact
+Talk_shh,shh/shush/hush,manual_disambig
+Talk_thankyou,thank you,manual_disambig
+Talk_wait,wait,auto_exact
+Talk_wanna,wanna/want to,manual_disambig
+Talk_yes,yes,auto_exact
+Talk_bite,bite,auto_exact
+Talk_blow,blow,auto_exact
+Talk_break,break,auto_exact
+Talk_bring,bring,auto_exact
+Talk_bump,bump,auto_exact
+Talk_clean_action,clean (action),manual_disambig
+Talk_close,close,auto_exact
+Talk_cry,cry,auto_exact
+Talk_dance,dance,auto_exact
+Talk_draw,draw,auto_exact
+Talk_drink_action,drink (action),manual_disambig
+Talk_drive,drive,auto_exact
+Talk_eat,eat,auto_exact
+Talk_fall,fall,auto_exact
+Talk_feed,feed,auto_exact
+Talk_finish,finish,auto_exact
+Talk_get,get,auto_exact
+Talk_give,give,auto_exact
+Talk_go,go,auto_exact
+Talk_help,help,auto_exact
+Talk_hit,hit,auto_exact
+Talk_hug,hug,auto_exact
+Talk_hurry,hurry,auto_exact
+Talk_jump,jump,auto_exact
+Talk_kick,kick,auto_exact
+Talk_kiss,kiss,auto_exact
+Talk_look,look,auto_exact
+Talk_love,love,auto_exact
+Talk_open,open,auto_exact
+Talk_play,play,auto_exact
+Talk_pull,pull,auto_exact
+Talk_push,push,auto_exact
+Talk_put,put,auto_exact
+Talk_read,read,auto_exact
+Talk_ride,ride,auto_exact
+Talk_run,run,auto_exact
+Talk_say,say,auto_exact
+Talk_see,see,auto_exact
+Talk_show,show,auto_exact
+Talk_sing,sing,auto_exact
+Talk_sleep,sleep,auto_exact
+Talk_smile,smile,auto_exact
+Talk_splash,splash,auto_exact
+Talk_stop,stop,auto_exact
+Talk_swim,swim,auto_exact
+Talk_swing_action,swing (action),manual_disambig
+Talk_take,take,auto_exact
+Talk_throw,throw,auto_exact
+Talk_tickle,tickle,auto_exact
+Talk_touch,touch,auto_exact
+Talk_watch_action,watch (action),manual_disambig
+Talk_walk,walk,auto_exact
+Talk_wash,wash,auto_exact
+Talk_wipe,wipe,auto_exact
+Talk_write,write,auto_exact
+Talk_day,day,auto_exact
+Talk_later,later,auto_exact
+Talk_morning,morning,auto_exact
+Talk_night,night,auto_exact
+Talk_now,now,auto_exact
+Talk_today,today,auto_exact
+Talk_tomorrow,tomorrow,auto_exact
+Talk_tonight,tonight,auto_exact
+Talk_allgone,all gone,auto_exact
+Talk_asleep,asleep,auto_exact
+Talk_bad,bad,auto_exact
+Talk_big,big,auto_exact
+Talk_blue,blue,auto_exact
+Talk_broken,broken,auto_exact
+Talk_careful,careful,auto_exact
+Talk_clean_descriptor,clean (description),manual_disambig
+Talk_cold,cold,auto_exact
+Talk_cute,cute,auto_exact
+Talk_dark,dark,auto_exact
+Talk_dirty,dirty,auto_exact
+Talk_dry,dry (description),manual_disambig
+Talk_empty,empty,auto_exact
+Talk_fast,fast,auto_exact
+Talk_fine,fine,auto_exact
+Talk_gentle,gentle,auto_exact
+Talk_good,good,auto_exact
+Talk_happy,happy,auto_exact
+Talk_hard,hard,auto_exact
+Talk_hot,hot,auto_exact
+Talk_hungry,hungry,auto_exact
+Talk_hurt,hurt,auto_exact
+Talk_little,little (description),manual_disambig
+Talk_naughty,naughty,auto_exact
+Talk_nice,nice,auto_exact
+Talk_old,old,auto_exact
+Talk_pretty,pretty,auto_exact
+Talk_red,red,auto_exact
+Talk_scared,scared,auto_exact
+Talk_sick,sick,auto_exact
+Talk_sleepy,sleepy,auto_exact
+Talk_soft,soft,auto_exact
+Talk_thirsty,thirsty,auto_exact
+Talk_tired,tired,auto_exact
+Talk_wet,wet,auto_exact
+Talk_yucky,yucky,auto_exact
+Talk_his,his,auto_exact
+Talk_her,her,auto_exact
+Talk_i,I,auto_exact
+Talk_me,me,auto_exact
+Talk_it,it,auto_exact
+Talk_mine,mine,auto_exact
+Talk_my,my,auto_exact
+Talk_that,that,auto_exact
+Talk_this,this,auto_exact
+Talk_you,you,auto_exact
+Talk_your,your,auto_exact
+Talk_how,how,auto_exact
+Talk_what,what,auto_exact
+Talk_when,when,auto_exact
+Talk_where,where,auto_exact
+Talk_who,who,auto_exact
+Talk_why,why,auto_exact
+Talk_away,away,auto_exact
+Talk_back,back,auto_exact
+Talk_down,down,auto_exact
+Talk_in,in,manual_disambig
+Talk_inside,inside,manual_disambig
+Talk_off,off,auto_exact
+Talk_on,on,auto_exact
+Talk_out,out,auto_exact
+Talk_there,there,auto_exact
+Talk_under,under,manual_disambig
+Talk_up,up,manual_disambig
+Talk_all,all,manual_disambig
+Talk_another,another,auto_exact
+Talk_more,more,auto_exact
+Talk_none,none,auto_exact
+Talk_not,not,manual_disambig
+Talk_other,other,auto_exact
+Talk_same,same,auto_exact
+Talk_some,some,auto_exact

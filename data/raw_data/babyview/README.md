@@ -6,13 +6,13 @@ daily lives, with auto-transcribed speech and parent-report CDI data.
 ## Provenance
 
 - Release: BabyView **2025.1**.
-- Source: Stanford BabyView project (langcog / BabyView lab, internal
-  release).
-
-> **TODO (Mike to confirm):** add the canonical citation /
-> publication / OSF / Databrary URL for BabyView release 2025.1.
-> Best guess pending: BabyView platform paper (Long et al.) +
-> internal release notes; not yet verified.
+- Source: Stanford BabyView project (langcog / BabyView lab).
+- Citation: Long, B. L., Sparks, R. Z., Xiang, V., Stojanov, S., Yin, Z.,
+  Keene, G., Tan, A. W. M., Feng, S. Y., Nag, A., Zhuang, C.,
+  Marchman, V. A., Yamins, D. L. K., & Frank, M. C. (2025). The
+  BabyView dataset: High-resolution egocentric videos of infants'
+  and young children's everyday experiences. In *Proceedings of the
+  Cognitive Computational Neuroscience Conference* (8-page track).
 
 The BabyView release contains:
 - Per-video metadata (subject, age, recording length, English content
