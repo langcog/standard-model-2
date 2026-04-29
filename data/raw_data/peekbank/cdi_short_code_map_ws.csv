@@ -1,0 +1,681 @@
+short,item_definition,status
+baabaa,baa baa,manual_disambig
+choochoo,choo choo,manual_disambig
+cockddld,cock-a-doodle-doo,manual_disambig
+grr,grrr,manual_disambig
+meow,meow,auto_exact
+moo,moo,auto_exact
+ouch,ouch,auto_exact
+quackqck,quack quack,manual_disambig
+uhoh,uh oh,manual_disambig
+vroom,vroom,auto_exact
+woofwoof,woof woof,manual_disambig
+yumyum,yum yum,manual_disambig
+alligatr,alligator,manual_disambig
+animal,animal,auto_exact
+ant,ant,auto_exact
+bear,bear,auto_exact
+bee,bee,auto_exact
+bird,bird,auto_exact
+bug,bug,auto_exact
+bunny,bunny,auto_exact
+buttrfly,butterfly,manual_disambig
+cat,cat,auto_exact
+chicken1,chicken (animal),manual_disambig
+cow,cow,auto_exact
+deer,deer,auto_exact
+dog,dog,auto_exact
+donkey,donkey,auto_exact
+duck,duck,auto_exact
+elephant,elephant,auto_exact
+fish1,fish (animal),manual_disambig
+frog,frog,auto_exact
+giraffe,giraffe,auto_exact
+goose,goose,auto_exact
+hen,hen,auto_exact
+horse,horse,auto_exact
+kitty,kitty,auto_exact
+lamb,lamb,auto_exact
+lion,lion,auto_exact
+monkey,monkey,auto_exact
+moose,moose,auto_exact
+mouse,mouse,auto_exact
+owl,owl,auto_exact
+penguin,penguin,auto_exact
+pig,pig,auto_exact
+pony,pony,auto_exact
+puppy,puppy,auto_exact
+rooster,rooster,auto_exact
+sheep,sheep,auto_exact
+squirrel,squirrel,manual_disambig
+teddyber,teddy bear,manual_disambig
+tiger,tiger,auto_exact
+turkey,turkey,auto_exact
+turtle,turtle,auto_exact
+wolf,wolf,auto_exact
+zebra,zebra,auto_exact
+airplane,airplane,auto_exact
+bicycle,bicycle,manual_disambig
+boat,boat,auto_exact
+bus,bus,auto_exact
+car,car,auto_exact
+firetrck,fire truck,manual_disambig
+helicptr,helicopter,manual_disambig
+motrcycl,motorcycle,manual_disambig
+sled,sled,auto_exact
+stroller,stroller,auto_exact
+tractor,tractor,auto_exact
+train,train,auto_exact
+tricycle,tricycle,auto_exact
+truck,truck,auto_exact
+ball,ball,auto_exact
+balloon,balloon,auto_exact
+bat,bat,auto_exact
+block,block,auto_exact
+book,book,auto_exact
+bubbles,bubbles,auto_exact
+chalk,chalk,auto_exact
+crayon,crayon,auto_exact
+doll,doll,auto_exact
+game,game,auto_exact
+glue,glue,auto_exact
+pen,pen,auto_exact
+pencil,pencil,auto_exact
+playdogh,play dough,manual_disambig
+present,present,auto_exact
+puzzle,puzzle,auto_exact
+story,story,auto_exact
+toy,toy (object),manual_disambig
+apple,apple,auto_exact
+applesac,apple sauce,manual_disambig
+banana,banana,auto_exact
+beans,beans,auto_exact
+bread,bread,auto_exact
+butter,butter,auto_exact
+cake,cake,auto_exact
+candy,candy,auto_exact
+carrots,carrots,auto_exact
+cereal,cereal,auto_exact
+cheerios,cheerios,auto_exact
+cheese,cheese,auto_exact
+chicken2,chicken (food),manual_disambig
+chocolat,chocolate,manual_disambig
+coffee,coffee,auto_exact
+coke,coke,auto_exact
+cookie,cookie,auto_exact
+corn,corn,auto_exact
+cracker,cracker,auto_exact
+donut,donut,auto_exact
+drink1,drink (beverage),manual_disambig
+egg,egg,auto_exact
+fish2,fish (food),manual_disambig
+food,food,auto_exact
+frnchfrs,french fries,manual_disambig
+grapes,grapes,auto_exact
+greenbns,green beans,manual_disambig
+gum,gum,auto_exact
+hamburgr,hamburger,manual_disambig
+ice,ice,auto_exact
+icecream,ice cream,auto_exact
+jello,jello,auto_exact
+jelly,jelly,auto_exact
+juice,juice,auto_exact
+lollipop,lollipop,auto_exact
+meat,meat,auto_exact
+melon,melon,auto_exact
+milk,milk,auto_exact
+muffin,muffin,auto_exact
+noodles,noodles,auto_exact
+nuts,nuts,auto_exact
+orange1,orange (food),manual_disambig
+pancake,pancakes,manual_disambig
+pentbttr,peanut butter,manual_disambig
+peas,peas,auto_exact
+pickle,pickle,auto_exact
+pizza,pizza,auto_exact
+popcorn,popcorn,manual_disambig
+popsicle,popsicle,manual_disambig
+potato,potato,auto_exact
+potatchp,potato chips,manual_disambig
+pretzel,pretzel,manual_disambig
+pudding,pudding,auto_exact
+pumpkin,pumpkin,manual_disambig
+raisin,raisin,manual_disambig
+salt,salt,auto_exact
+sandwich,sandwich,manual_disambig
+sauce,sauce,auto_exact
+soda,soda/pop,manual_disambig
+soup,soup,auto_exact
+spaghett,spaghetti,manual_disambig
+strwbrry,strawberry,manual_disambig
+toast,toast,auto_exact
+tuna,tuna,auto_exact
+vanilla,vanilla,auto_exact
+vitamins,vitamins,manual_disambig
+water1,water (beverage),manual_disambig
+yogurt,yogurt,auto_exact
+beads,beads,auto_exact
+belt,belt,auto_exact
+bib,bib,auto_exact
+boots,boots,auto_exact
+button,button,auto_exact
+coat,coat,auto_exact
+diaper,diaper,auto_exact
+dress,dress (object),manual_disambig
+gloves,gloves,auto_exact
+hat,hat,auto_exact
+jacket,jacket,auto_exact
+jeans,jeans,auto_exact
+mittens,mittens,manual_disambig
+necklace,necklace,manual_disambig
+pajamas,pajamas,manual_disambig
+pants,pants,auto_exact
+scarf,scarf,auto_exact
+shirt,shirt,auto_exact
+shoe,shoe,auto_exact
+shorts,shorts,auto_exact
+slipper,slipper,manual_disambig
+sneaker,sneaker,manual_disambig
+snowsuit,snowsuit,manual_disambig
+sock,sock,auto_exact
+sweater,sweater,auto_exact
+tights,tights,auto_exact
+undrpnts,underpants,manual_disambig
+zipper,zipper,auto_exact
+ankle,ankle,auto_exact
+arm,arm,auto_exact
+bllybttn,belly button,manual_disambig
+buttocks,buttocks/bottom*,manual_disambig
+cheek,cheek,auto_exact
+chin,chin,auto_exact
+ear,ear,auto_exact
+eye,eye,auto_exact
+face,face,auto_exact
+feet,foot,manual_disambig
+finger,finger,auto_exact
+hair,hair,auto_exact
+hand,hand,auto_exact
+head,head,auto_exact
+knee,knee,auto_exact
+leg,leg,auto_exact
+lips,lips,auto_exact
+mouth,mouth,auto_exact
+nose,nose,auto_exact
+owie,owie/boo boo,manual_disambig
+penis,penis*,manual_disambig
+shoulder,shoulder,auto_exact
+tooth,tooth,auto_exact
+toe,toe,auto_exact
+tongue,tongue,auto_exact
+tummy,tummy,auto_exact
+vagina,vagina*,manual_disambig
+basket,basket,auto_exact
+blanket,blanket,auto_exact
+bottle,bottle,auto_exact
+box,box,auto_exact
+bowl,bowl,auto_exact
+broom,broom,auto_exact
+brush,brush,auto_exact
+bucket,bucket,auto_exact
+camera,camera,auto_exact
+can1,can (object),manual_disambig
+clock,clock,auto_exact
+comb,comb,manual_disambig
+cup,cup,auto_exact
+dish,dish,auto_exact
+fork,fork,auto_exact
+garbage,garbage,manual_disambig
+glass,glass,auto_exact
+glasses,glasses,manual_disambig
+hammer,hammer,manual_disambig
+jar,jar,auto_exact
+keys,keys,auto_exact
+knife,knife,auto_exact
+lamp,lamp,auto_exact
+light,light,auto_exact
+medicine,medicine,auto_exact
+money,money,auto_exact
+mop,mop,auto_exact
+nail,nail,auto_exact
+napkin,napkin,manual_disambig
+paper,paper,auto_exact
+penny,penny,auto_exact
+picture,picture,manual_disambig
+pillow,pillow,manual_disambig
+plant,plant,auto_exact
+plate,plate,auto_exact
+purse,purse,auto_exact
+radio,radio,auto_exact
+scissors,scissors,manual_disambig
+soap,soap,auto_exact
+spoon,spoon,auto_exact
+tape,tape,auto_exact
+telephon,telephone,manual_disambig
+tissue,tissue/kleenex,manual_disambig
+tothbrsh,toothbrush,manual_disambig
+towel,towel,auto_exact
+trash,trash,auto_exact
+tray,tray,auto_exact
+vacuum,vacuum,auto_exact
+walker,walker,manual_disambig
+watch1,watch (object),manual_disambig
+basement,basement,auto_exact
+bathroom,bathroom,auto_exact
+bathtub,bathtub,auto_exact
+bed,bed,auto_exact
+bedroom,bedroom,auto_exact
+bench,bench,auto_exact
+chair,chair,auto_exact
+closet,closet,auto_exact
+couch,couch,auto_exact
+crib,crib,auto_exact
+door,door,auto_exact
+drawer,drawer,auto_exact
+dryer,dryer,auto_exact
+garage,garage,auto_exact
+highchar,high chair,manual_disambig
+kitchen,kitchen,auto_exact
+livingrm,living room,manual_disambig
+oven,oven,auto_exact
+playpen,play pen,auto_exact
+porch,porch,auto_exact
+potty,potty,auto_exact
+refrigerator,refrigerator,manual_disambig
+rockingchair,rocking chair,manual_disambig
+room,room,auto_exact
+shower,shower,auto_exact
+sink,sink,auto_exact
+sofa,sofa,auto_exact
+stairs,stairs,auto_exact
+stove,stove,auto_exact
+table,table,auto_exact
+tv,TV,auto_exact
+washingmachine,washing machine,manual_disambig
+window,window,auto_exact
+backyard,backyard,auto_exact
+cloud,cloud,auto_exact
+flag,flag,auto_exact
+flower,flower,auto_exact
+garden,garden,auto_exact
+grass,grass,auto_exact
+hose,hose,auto_exact
+ladder,ladder,auto_exact
+lawnmowr,lawn mower,manual_disambig
+moon,moon,auto_exact
+pool,pool,auto_exact
+rain,rain,auto_exact
+rock,rock,auto_exact
+roof,roof,auto_exact
+sandbox,sandbox,auto_exact
+shovel,shovel,auto_exact
+sidewalk,sidewalk,manual_disambig
+sky,sky,auto_exact
+slide1,slide (object),manual_disambig
+snow,snow,auto_exact
+snowman,snowman,auto_exact
+sprinklr,sprinkler,manual_disambig
+star,star,auto_exact
+stick,stick,auto_exact
+stone,stone,auto_exact
+street,street,auto_exact
+sun,sun,auto_exact
+swing1,swing (object),manual_disambig
+tree,tree,auto_exact
+water2,water (not beverage),manual_disambig
+wind,wind,auto_exact
+beach,beach,auto_exact
+camping,camping,manual_disambig
+church,church*,manual_disambig
+circus,circus,auto_exact
+country,country,auto_exact
+downtown,downtown,manual_disambig
+farm,farm,auto_exact
+gasstation,gas station,manual_disambig
+home,home,auto_exact
+house,house,auto_exact
+movie,movie,auto_exact
+outside,outside,manual_disambig
+park,park,auto_exact
+party,party,auto_exact
+picnic,picnic,manual_disambig
+playgrnd,playground,manual_disambig
+school,school,auto_exact
+store,store,auto_exact
+woods,woods,auto_exact
+work1,work (place),manual_disambig
+yard,yard,auto_exact
+zoo,zoo,auto_exact
+aunt,aunt,auto_exact
+baby,baby,auto_exact
+babysttr,babysitter,manual_disambig
+babysittername,babysitter's name,manual_disambig
+boy,boy,auto_exact
+brother,brother,auto_exact
+child,child,auto_exact
+clown,clown,auto_exact
+cowboy,cowboy,auto_exact
+daddy,daddy*,manual_disambig
+doctor,doctor,auto_exact
+fireman,fireman,auto_exact
+friend,friend,auto_exact
+girl,girl,auto_exact
+grandma,grandma*,manual_disambig
+grandpa,grandpa*,manual_disambig
+lady,lady,auto_exact
+mailman,mailman,auto_exact
+man,man,auto_exact
+mommy,mommy*,manual_disambig
+nurse,nurse,auto_exact
+childname,child's own name,manual_disambig
+people,people,auto_exact
+person,person,auto_exact
+petname,pet's name,manual_disambig
+police,police,auto_exact
+sister,sister,auto_exact
+teacher,teacher,auto_exact
+uncle,uncle,auto_exact
+bath,bath,auto_exact
+breakfst,breakfast,manual_disambig
+bye,bye,auto_exact
+callnphn,call (on phone),manual_disambig
+dinner,dinner,auto_exact
+givemefv,gimme five,manual_disambig
+gonnagty,gonna get you,manual_disambig
+gopotty,go potty,manual_disambig
+hi,hi,auto_exact
+hello,hello,auto_exact
+lunch,lunch,auto_exact
+nap,nap,auto_exact
+nghtnght,night night,manual_disambig
+no,no,auto_exact
+patycak,patty cake,manual_disambig
+peekaboo,peekaboo,manual_disambig
+please,please,auto_exact
+shh,shh/shush/hush,manual_disambig
+shopping,shopping,manual_disambig
+snack,snack,auto_exact
+sobig,so big,manual_disambig
+thankyou,thank you,manual_disambig
+thslttlp,this little piggy,manual_disambig
+turnarnd,turn around,manual_disambig
+yes,yes,auto_exact
+bite,bite,auto_exact
+blow,blow,auto_exact
+break,break,auto_exact
+bring,bring,auto_exact
+build,build,auto_exact
+bump,bump,auto_exact
+buy,buy,auto_exact
+carry,carry,auto_exact
+catch,catch,auto_exact
+chase,chase,auto_exact
+clap,clap,auto_exact
+clean1,clean (action),manual_disambig
+climb,climb,auto_exact
+close,close,auto_exact
+cook,cook,auto_exact
+cover,cover,auto_exact
+cry,cry,auto_exact
+cut,cut,auto_exact
+dance,dance,auto_exact
+draw,draw,auto_exact
+drink2,drink (action),manual_disambig
+drive,drive,auto_exact
+drop,drop,auto_exact
+dry1,dry (action),manual_disambig
+dump,dump,auto_exact
+eat,eat,auto_exact
+fall,fall,auto_exact
+feed,feed,auto_exact
+find,find,auto_exact
+finish,finish,manual_disambig
+fit,fit,auto_exact
+fix,fix,auto_exact
+get,get,auto_exact
+give,give,auto_exact
+go,go,auto_exact
+hate,hate,manual_disambig
+have,have,auto_exact
+hear,hear,auto_exact
+help,help,auto_exact
+hide,hide,auto_exact
+hit,hit,auto_exact
+hold,hold,auto_exact
+hug,hug,auto_exact
+hurry,hurry,auto_exact
+jump,jump,auto_exact
+kick,kick,auto_exact
+kiss,kiss,manual_disambig
+knock,knock,auto_exact
+lick,lick,auto_exact
+like,like,auto_exact
+listen,listen,auto_exact
+look,look,auto_exact
+love,love,auto_exact
+make,make,auto_exact
+open,open,auto_exact
+paint,paint,auto_exact
+pick,pick,auto_exact
+play,play,auto_exact
+pour,pour,auto_exact
+pretend,pretend,manual_disambig
+pull,pull,auto_exact
+push,push,auto_exact
+put,put,auto_exact
+read,read,auto_exact
+ride,ride,auto_exact
+rip,rip,auto_exact
+run,run,auto_exact
+say,say,auto_exact
+see,see,auto_exact
+shake,shake,auto_exact
+share,share,auto_exact
+show,show,auto_exact
+sing,sing,auto_exact
+sit,sit,auto_exact
+skate,skate,auto_exact
+sleep,sleep,auto_exact
+slide2,slide (action),manual_disambig
+smile,smile,auto_exact
+spill,spill,auto_exact
+splash,splash,auto_exact
+stand,stand,auto_exact
+stay,stay,auto_exact
+stop,stop,auto_exact
+sweep,sweep,auto_exact
+swim,swim,auto_exact
+swing2,swing (action),manual_disambig
+take,take,auto_exact
+talk,talk,auto_exact
+taste,taste,auto_exact
+tear,tear,auto_exact
+think,think,auto_exact
+throw,throw,auto_exact
+tickle,tickle,auto_exact
+touch,touch,auto_exact
+wait,wait,auto_exact
+wake,wake,auto_exact
+walk,walk,auto_exact
+wash,wash,auto_exact
+watch2,watch (action),manual_disambig
+wipe,wipe,auto_exact
+wish,wish,auto_exact
+work2,work (action),manual_disambig
+write,write,auto_exact
+allgone,all gone,auto_exact
+asleep,asleep,auto_exact
+awake,awake,auto_exact
+bad,bad,auto_exact
+better,better,auto_exact
+big,big,auto_exact
+black,black,auto_exact
+blue,blue,auto_exact
+broken,broken,auto_exact
+brown,brown,auto_exact
+careful,careful,auto_exact
+clean2,clean (description),manual_disambig
+cold,cold,auto_exact
+cute,cute,auto_exact
+dark,dark,auto_exact
+dirty,dirty,auto_exact
+dry2,dry (description),manual_disambig
+empty,empty,auto_exact
+fast,fast,auto_exact
+fine,fine,auto_exact
+first,first,auto_exact
+full,full,auto_exact
+gentle,gentle,auto_exact
+good,good,auto_exact
+green,green,auto_exact
+happy,happy,auto_exact
+hard,hard,auto_exact
+heavy,heavy,auto_exact
+high,high,auto_exact
+hot,hot,auto_exact
+hungry,hungry,auto_exact
+hurt,hurt,auto_exact
+last,last,auto_exact
+little,little (description),manual_disambig
+long,long,auto_exact
+loud,loud,auto_exact
+mad,mad,auto_exact
+naughty,naughty,auto_exact
+new,new,auto_exact
+nice,nice,auto_exact
+noisy,noisy,auto_exact
+old,old,auto_exact
+orange2,orange (description),manual_disambig
+poor,poor,auto_exact
+pretty,pretty,auto_exact
+quiet,quiet,auto_exact
+red,red,auto_exact
+sad,sad,auto_exact
+scared,scared,manual_disambig
+sick,sick,auto_exact
+sleepy,sleepy,auto_exact
+slow,slow,auto_exact
+soft,soft,auto_exact
+sticky,sticky,auto_exact
+stuck,stuck,auto_exact
+thirsty,thirsty,manual_disambig
+tiny,tiny,auto_exact
+tired,tired,auto_exact
+wet,wet,auto_exact
+white,white,auto_exact
+windy,windy,manual_disambig
+yellow,yellow,manual_disambig
+yucky,yucky,manual_disambig
+after,after,auto_exact
+before,before,auto_exact
+day,day,auto_exact
+later,later,auto_exact
+morning,morning,manual_disambig
+night,night,auto_exact
+now,now,auto_exact
+time,time,auto_exact
+today,today,auto_exact
+tomorrow,tomorrow,manual_disambig
+tonight,tonight,manual_disambig
+yesterdy,yesterday,manual_disambig
+he,he,auto_exact
+her,her,auto_exact
+hers,hers,auto_exact
+him,him,auto_exact
+his,his,auto_exact
+i,I,auto_exact
+it,it,auto_exact
+me,me,auto_exact
+mine,mine,auto_exact
+my,my,auto_exact
+myself,myself,manual_disambig
+our,our,auto_exact
+she,she,auto_exact
+that,that,auto_exact
+their,their,auto_exact
+them,them,auto_exact
+these,these,auto_exact
+they,they,auto_exact
+this,this,auto_exact
+those,those,auto_exact
+us,us,auto_exact
+we,we,auto_exact
+you,you,auto_exact
+your,your,auto_exact
+yourself,yourself,manual_disambig
+how,how,auto_exact
+what,what,auto_exact
+when,when,auto_exact
+where,where,auto_exact
+which,which,auto_exact
+who,who,auto_exact
+why,why,auto_exact
+about,about,auto_exact
+above,above,auto_exact
+around,around,auto_exact
+atprep,at,manual_disambig
+away,away,auto_exact
+back,back,auto_exact
+behind,behind,auto_exact
+beside,beside,auto_exact
+byprep,by,manual_disambig
+down,down,auto_exact
+for,for,auto_exact
+here,here,auto_exact
+inside,inside/in,manual_disambig
+into,into,auto_exact
+nextto,next to,manual_disambig
+of,of,auto_exact
+off,off,auto_exact
+on,on,auto_exact
+ontopof,on top of,manual_disambig
+out,out,auto_exact
+over,over,auto_exact
+there,there,auto_exact
+toprep,to,manual_disambig
+underprep,under,manual_disambig
+upprep,up,manual_disambig
+withprep,with,manual_disambig
+a,a,auto_exact
+allquant,all,manual_disambig
+alot,a lot,auto_exact
+an,an,auto_exact
+another,another,manual_disambig
+any,any,auto_exact
+each,each,auto_exact
+every,every,auto_exact
+more,more,auto_exact
+much,much,auto_exact
+notquant,not,manual_disambig
+none,none,auto_exact
+other,other,auto_exact
+same,same,auto_exact
+some,some,auto_exact
+the,the,auto_exact
+too,too,auto_exact
+am,am,auto_exact
+are,are,auto_exact
+be,be,auto_exact
+can2,can (auxiliary),manual_disambig
+could,could,auto_exact
+did,did/did ya,manual_disambig
+do,do,auto_exact
+does,does,auto_exact
+dont,don't,auto_exact
+gonna,gonna/going to,manual_disambig
+gotta,gotta/got to,manual_disambig
+hafta,hafta/have to,manual_disambig
+is,is,auto_exact
+lemme,lemme/let me,manual_disambig
+need,need/need to,manual_disambig
+try,try/try to,manual_disambig
+wanna,wanna/want to,manual_disambig
+was,was,auto_exact
+were,were,auto_exact
+will,will,auto_exact
+would,would,auto_exact
+andconn,and,manual_disambig
+because,because,auto_exact
+but,but,auto_exact
+ifconn,if,manual_disambig
+soconn,so,manual_disambig
+thenconn,then,manual_disambig

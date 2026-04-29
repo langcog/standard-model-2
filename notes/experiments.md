@@ -294,6 +294,20 @@ distribution (not using any real child's inferred posterior):
 ## Backlog (⚪)
 
 ### Data / robustness
+- **Stanford TotLot CDI mapping — hand review.** The auto-mapper in
+  [`model/scripts/parse_stanford_cdi.R`](../model/scripts/parse_stanford_cdi.R)
+  resolves all 1 076 short codes (680 WS + 396 WG) to Wordbank
+  `item_definition`s with status `auto_exact` (≈75 %) or
+  `manual_disambig` (≈25 %, mostly the deterministic Marchman
+  disambiguator suffixes: `chicken1`/`chicken2`, `ifconn`, `withprep`,
+  `notquant`, etc.). All entries are used in production. Loose end: a
+  ~20-minute eyeball pass over
+  [`data/raw_data/peekbank/cdi_short_code_map_ws.csv`](../data/raw_data/peekbank/cdi_short_code_map_ws.csv)
+  and `cdi_short_code_map_wg.csv` to confirm the manual_disambig rows
+  (especially for body-parts compounds, helping verbs with slashed
+  forms, and place-names with `*` annotations) match what the form
+  actually printed. Replace any wrong mapping in
+  `manual_overrides` and rerun.
 - **Norwegian longitudinal fit.** Data already pulled (1 562 kids,
   4.2M rows). Needs CHILDES-matched word frequencies; after the English
   longitudinal fit lands, adapt.
