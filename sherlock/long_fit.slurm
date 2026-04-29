@@ -10,9 +10,10 @@
 # Usage:
 #   sbatch sherlock/long_fit.slurm <variant> [dataset]
 # Examples:
-#   sbatch sherlock/long_fit.slurm long_2pl_slopes              # English (default)
-#   sbatch sherlock/long_fit.slurm long_2pl_slopes norwegian
-#   sbatch sherlock/long_fit.slurm long_baseline english
+#   sbatch sherlock/long_fit.slurm long_slopes                   # English (default; lean + slopes)
+#   sbatch sherlock/long_fit.slurm long_slopes norwegian
+#   sbatch sherlock/long_fit.slurm long_2pl_slopes english       # adds 2PL on top
+#   sbatch sherlock/long_fit.slurm long_baseline english         # lean Rasch, no slopes
 # Dataset keys are defined in model/R/datasets.R.
 #
 # Stan iteration count is overridable via env vars:
@@ -20,7 +21,7 @@
 
 set -euo pipefail
 
-VARIANT="${1:-long_2pl_slopes}"
+VARIANT="${1:-long_slopes}"
 DATASET="${2:-english}"
 
 # Move into the project root (assumes $HOME/standard_model_2)

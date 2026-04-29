@@ -36,7 +36,7 @@ model/figs/*.png
 # And keep the pulled raw data — these need wordbankr/childesr (R >= 4.4
 # and mysql headers) which Sherlock's R 4.2 can't handle. Commit the
 # intermediate files so Sherlock can skip those packages.
-!model/fits/long_ws_items.rds
+!model/fits/long_items.rds
 !model/fits/norwegian_word_freq.rds
 # Also keep the prepared Stan bundles — small (~few MB each), and they
 # need raw inputs (e.g., the 875 MB BabyView transcripts) that aren't

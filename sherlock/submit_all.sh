@@ -11,13 +11,13 @@ echo "Linking input bundles into \$SCRATCH..."
 ./sherlock/sync_inputs.sh
 
 echo
-echo "Submitting longitudinal 2PL+slopes, English (500 kids x all items)..."
-jid=$(sbatch --parsable sherlock/long_fit.slurm long_2pl_slopes english)
-echo "  long_2pl_slopes/english -> job $jid"
+echo "Submitting longitudinal lean+slopes, English..."
+jid=$(sbatch --parsable sherlock/long_fit.slurm long_slopes english)
+echo "  long_slopes/english -> job $jid"
 
-echo "Submitting longitudinal 2PL+slopes, Norwegian (500 kids x all items)..."
-jid=$(sbatch --parsable sherlock/long_fit.slurm long_2pl_slopes norwegian)
-echo "  long_2pl_slopes/norwegian -> job $jid"
+echo "Submitting longitudinal lean+slopes, Norwegian..."
+jid=$(sbatch --parsable sherlock/long_fit.slurm long_slopes norwegian)
+echo "  long_slopes/norwegian -> job $jid"
 
 echo
 echo "Submitting cross-sectional sensitivity sweep..."

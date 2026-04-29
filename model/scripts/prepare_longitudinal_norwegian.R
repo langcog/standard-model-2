@@ -17,7 +17,7 @@ SEED <- 20260428
 message(sprintf("Preparing Norwegian longitudinal subset: children=%d, items=%d",
                 n_children, n_items))
 
-long <- readRDS(file.path(PATHS$fits_dir, "long_ws_items.rds"))
+long <- readRDS(file.path(PATHS$fits_dir, "long_items.rds"))
 freq <- readRDS(file.path(PATHS$fits_dir, "norwegian_word_freq.rds"))
 
 # Filter to Norwegian; drop pre-existing (English-derived) `prob` column
@@ -128,7 +128,7 @@ message(sprintf("  subset: %d rows, %d children, %d items",
 
 # Build admin keys and indices
 d <- d %>%
-  mutate(admin_key = paste(child_id, age, sep = "_"),
+  mutate(admin_key = paste(child_id, age, form, sep = "_"),
          aa = as.integer(factor(admin_key)),
          ii = as.integer(factor(child_id)),
          jj = as.integer(factor(item)),

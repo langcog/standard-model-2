@@ -1,11 +1,16 @@
-## Pull English + Norwegian longitudinal WS item-level data from Wordbank.
+## Pull English + Norwegian longitudinal item-level data from Wordbank,
+## across BOTH WG and WS forms. Combining the two extends coverage from
+## ages 8-30 (instead of just WS's 16-30) and gives every child the
+## maximal item set seen across their admin history.
 ##
 ## Usage:   Rscript model/scripts/pull_longitudinal.R
-## Outputs: model/fits/long_ws_items.rds
+## Outputs: model/fits/long_items.rds  (renamed from old long_ws_items.rds)
+##          For backwards compatibility a symlink long_ws_items.rds is
+##          also written, pointing at the new file.
 ##
-## Filters to children with >=2 admins per (language, form) combination and
-## keeps only items that appear on our CHILDES frequency table (so we can
-## model them with the same prob scale as the cross-sectional subset).
+## Filter rule (longitudinal): keep child if they have >= 2 admins on
+## the same form (WG or WS). Some children have admins on both forms;
+## both contribute, indexed by (child, age, form).
 
 suppressPackageStartupMessages({
   library(wordbankr)
@@ -17,82 +22,79 @@ source("model/R/config.R")
 source("model/R/helpers.R")
 
 LANGUAGES <- c("English (American)", "Norwegian")
-FORM      <- "WS"
+FORMS     <- c("WG", "WS")
 
-all_d <- list()
+all_rows <- list()
 for (lang in LANGUAGES) {
-  message(sprintf("Fetching %s %s item data from Wordbank...", lang, FORM))
-  d <- get_instrument_data(language = lang, form = FORM,
-                           administration_info = TRUE,
-                           item_info = TRUE)
-  message(sprintf("  got %d item rows", nrow(d)))
-  all_d[[lang]] <- d
+  for (form in FORMS) {
+    message(sprintf("Fetching %s / %s ...", lang, form))
+    d <- tryCatch(
+      get_instrument_data(language = lang, form = form,
+                          administration_info = TRUE,
+                          item_info = TRUE),
+      error = function(e) {
+        message(sprintf("    skipped: %s", conditionMessage(e)))
+        NULL
+      })
+    if (is.null(d) || nrow(d) == 0) next
+    message(sprintf("    got %d item rows", nrow(d)))
+    all_rows[[length(all_rows) + 1]] <- d %>%
+      filter(item_kind == "word") %>%
+      mutate(language = lang, form = form,
+             produces = as.integer(value == "produces")) %>%
+      select(language, form, child_id, age, item = item_definition,
+             lexical_category, produces)
+  }
 }
 
-# Identify longitudinal children per (language) in the admin metadata
-# Each row of `d` is (admin x item); collapse to admins first.
-pick_longitudinal <- function(d, lang) {
-  d %>%
-    distinct(child_id, age) %>%
-    count(child_id, name = "n_admins") %>%
-    filter(n_admins >= 2)
-}
+d_long <- bind_rows(all_rows)
+message(sprintf("\nCombined %d item rows across %d children",
+                nrow(d_long), n_distinct(paste(d_long$language, d_long$child_id))))
 
-assemble <- function(d, lang) {
-  long_ids <- pick_longitudinal(d, lang)$child_id
-  d %>%
-    filter(child_id %in% long_ids) %>%
-    filter(item_kind == "word") %>%
-    select(child_id, age, item = item_definition,
-           lexical_category, value) %>%
-    mutate(language = lang,
-           produces = as.integer(value == "produces"))
-}
+# Identify longitudinal children: >= 2 admins on the same form
+admin_counts <- d_long %>%
+  distinct(language, form, child_id, age) %>%
+  count(language, form, child_id, name = "n_admins")
 
-eng <- assemble(all_d[["English (American)"]], "English (American)")
-nor <- assemble(all_d[["Norwegian"]], "Norwegian")
-d_long <- bind_rows(eng, nor)
+long_keys <- admin_counts %>%
+  filter(n_admins >= 2) %>%
+  distinct(language, form, child_id)
 
-# For English, attach CHILDES frequencies from the preprocessed file we
-# used for the cross-sectional fits. (Norwegian will need separate freq
-# data — save language for later.)
+# A child is "longitudinal" if they're long on EITHER form. Keep all
+# their data across both forms.
+long_child_keys <- long_keys %>% distinct(language, child_id)
+d_long <- d_long %>% inner_join(long_child_keys, by = c("language", "child_id"))
+
+# Attach English CHILDES p_j (only for English rows). Norwegian rows
+# still have prob = NA and get freq attached by prepare_longitudinal_norwegian.R.
 e <- new.env(); load(PATHS$wordbank, envir = e)
 prob_tbl <- e$d_wf %>% distinct(item, prob)
-
 d_long <- d_long %>% left_join(prob_tbl, by = "item")
 
-# For Norwegian + items not in English freq table, leave prob NA for now
-cat("\nSummary:\n")
-cat(sprintf("  English rows: %d\n", nrow(eng)))
-cat(sprintf("  Norwegian rows: %d\n", nrow(nor)))
-cat(sprintf("  English unique children: %d\n", length(unique(eng$child_id))))
-cat(sprintf("  Norwegian unique children: %d\n", length(unique(nor$child_id))))
-cat(sprintf("  English with freq: %d / %d items\n",
-            sum(d_long$language == "English (American)" & !is.na(d_long$prob)) /
-            sum(d_long$language == "English (American)") * 100,
-            n_distinct(d_long$item[d_long$language == "English (American)"])))
+# ---- Reporting ----
+cat("\n=== Per-language summary ===\n")
+print(d_long %>%
+        group_by(language) %>%
+        summarise(rows = n(),
+                  children = n_distinct(child_id),
+                  admins = n_distinct(paste(child_id, age, form)),
+                  items = n_distinct(item),
+                  forms = paste(sort(unique(form)), collapse = "+"),
+                  age_range = sprintf("%.0f-%.0f", min(age), max(age)),
+                  with_prob = sprintf("%.0f%%", 100 * mean(!is.na(prob))),
+                  .groups = "drop"))
 
-# Admin count distributions
-cat("\n#admins per child (English):\n")
-print(eng %>% distinct(child_id, age) %>% count(child_id) %>%
-      count(n, name = "n_children"))
+cat("\n=== Per-language admin counts per child ===\n")
+for (lang in unique(d_long$language)) {
+  cat(sprintf("\n%s:\n", lang))
+  print(d_long %>% filter(language == lang) %>%
+          distinct(child_id, age, form) %>% count(child_id) %>%
+          count(n, name = "n_children") %>% arrange(n))
+}
 
-cat("\n#admins per child (Norwegian):\n")
-print(nor %>% distinct(child_id, age) %>% count(child_id) %>%
-      count(n, name = "n_children"))
+# ---- Save ----
+out <- file.path(PATHS$fits_dir, "long_items.rds")
+saveRDS(d_long, out)
+cat(sprintf("\nSaved %s (%.1f MB)\n", out, file.info(out)$size / 1e6))
 
-# Age-span summary
-cat("\nAge span per child (months):\n")
-span_tbl <- d_long %>%
-  distinct(language, child_id, age) %>%
-  group_by(language, child_id) %>%
-  summarise(n = n(), span = max(age) - min(age), .groups = "drop")
-print(span_tbl %>% group_by(language) %>%
-      summarise(n_children = n_distinct(child_id),
-                median_n = median(n),
-                median_span = median(span),
-                max_span = max(span)))
-
-saveRDS(d_long, file.path(PATHS$fits_dir, "long_ws_items.rds"))
-cat(sprintf("\nSaved model/fits/long_ws_items.rds (%.1f MB)\n",
-            file.info(file.path(PATHS$fits_dir, "long_ws_items.rds"))$size / 1e6))
+# (Old long_ws_items.rds dropped now that all scripts read long_items.rds.)

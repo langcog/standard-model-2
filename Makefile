@@ -68,15 +68,15 @@ longitudinal-data:
 	$(RSCRIPT) $(R_FLAGS) $(SCRIPTS)/prepare_longitudinal_data.R \
 	    $${LANG:-English (American)} $${N_CHILDREN:-600} $${N_ITEMS:-200}
 
-# Fit: make longitudinal-fit VARIANT=long_2pl_slopes [DATASET=norwegian]
+# Fit: make longitudinal-fit VARIANT=long_slopes [DATASET=norwegian]
 longitudinal-fit:
 	$(RSCRIPT) $(R_FLAGS) $(SCRIPTS)/fit_longitudinal.R \
-	    $${VARIANT:-long_2pl_slopes} $${DATASET:-english}
+	    $${VARIANT:-long_slopes} $${DATASET:-english}
 
-# Analyze: make longitudinal-analyze VARIANT=long_2pl_slopes [DATASET=norwegian]
+# Analyze: make longitudinal-analyze VARIANT=long_slopes [DATASET=norwegian]
 longitudinal-analyze:
 	$(RSCRIPT) $(R_FLAGS) $(SCRIPTS)/analyze_longitudinal.R \
-	    $${VARIANT:-long_2pl_slopes} $${DATASET:-english}
+	    $${VARIANT:-long_slopes} $${DATASET:-english}
 
 # ---- Input-observed pipeline (BabyView, eventually Seedlings) ----
 babyview-data:

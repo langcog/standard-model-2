@@ -41,14 +41,10 @@ cat(sprintf("Dataset: %s (%s)  I=%d, A=%d, J=%d, N=%d\n",
             dataset, bundle$language,
             base_data$I, base_data$A, base_data$J, base_data$N))
 
-overrides <- switch(variant,
-  long_baseline    = list(),
-  long_2pl         = list(sigma_lambda_prior_sd = 1),
-  long_slopes      = list(sigma_zeta_prior_sd = 1),
-  long_2pl_slopes  = list(sigma_lambda_prior_sd = 1,
-                          sigma_zeta_prior_sd = 1),
-  stop(sprintf("Unknown longitudinal variant: %s", variant))
-)
+# Defer to the shared variant_hyperpriors() registry. The "long_"
+# prefix is stripped inside that function so longitudinal and
+# cross-sectional pipelines share the same variant grammar.
+overrides <- variant_hyperpriors(variant)
 stan_data <- modifyList(base_data, overrides)
 
 cat(sprintf("\n===== Fitting %s on %s =====\n", variant, dataset))

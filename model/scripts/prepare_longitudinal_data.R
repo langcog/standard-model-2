@@ -1,11 +1,15 @@
-## Prepare the longitudinal Wordbank WS data for Stan fitting.
+## Prepare the longitudinal Wordbank data (WG + WS combined) for Stan
+## fitting.
 ##
 ## Usage:
 ##   Rscript model/scripts/prepare_longitudinal_data.R [language] [n_children] [n_items]
-## Defaults: English, all longitudinal children, stratified subsample of 200 items.
+## Defaults: English, 200 children, stratified subsample of 200 items.
 ##
-## Reads:   model/fits/long_ws_items.rds (from pull_longitudinal.R)
+## Reads:   model/fits/long_items.rds (from pull_longitudinal.R)
 ## Writes:  model/fits/long_subset_data.rds (Stan-ready bundle)
+##
+## Each (child, age, form) combination is its own admin so a child who
+## took both WG and WS at the same age contributes two admin rows.
 
 source("model/R/config.R")
 source("model/R/helpers.R")
@@ -22,7 +26,7 @@ SEED <- 20260428
 message(sprintf("Preparing longitudinal subset: language=%s, children=%d, items=%d",
                 language, n_children, n_items))
 
-long <- readRDS(file.path(PATHS$fits_dir, "long_ws_items.rds"))
+long <- readRDS(file.path(PATHS$fits_dir, "long_items.rds"))
 d <- long %>%
   filter(language == !!language,
          !is.na(prob), prob > 0,
@@ -109,7 +113,7 @@ message(sprintf("  subset: %d rows, %d children, %d items",
 
 # Build admin keys and indices
 d <- d %>%
-  mutate(admin_key = paste(child_id, age, sep = "_"),
+  mutate(admin_key = paste(child_id, age, form, sep = "_"),
          aa = as.integer(factor(admin_key)),
          ii = as.integer(factor(child_id)),
          jj = as.integer(factor(item)),

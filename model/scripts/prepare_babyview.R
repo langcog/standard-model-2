@@ -14,7 +14,7 @@
 ##   babyview/video_metadata_processed.csv
 ##   babyview/merged_transcripts_parsed.csv
 ##   babyview/cdi_data_oct_2025/babyview-english-{ws,wg}_items.csv
-##   model/fits/long_ws_items.rds  (for English CHILDES p_j; reused)
+##   model/fits/long_items.rds  (for English CHILDES p_j; reused)
 ##
 ## Output:  model/fits/babyview_subset_data.rds
 
@@ -154,8 +154,9 @@ cdi_long <- cdi_long %>% filter(subject_id %in% keep_subjs)
 videos   <- videos %>% filter(subject_num %in% keep_subjs)
 
 # ---- 4. Attach CHILDES p_j to items ----
-# Re-use the English Wordbank long_ws_items processed prob table.
-long_ws <- readRDS(file.path(PATHS$fits_dir, "long_ws_items.rds"))
+# Re-use the Wordbank long_items processed English prob table.
+long_ws <- readRDS(file.path(PATHS$fits_dir, "long_items.rds")) %>%
+  filter(language == "English (American)")
 prob_tbl <- long_ws %>% distinct(item, prob) %>% filter(!is.na(prob), prob > 0)
 
 # BabyView item names use underscore-separated lowercase ('peanut_butter');

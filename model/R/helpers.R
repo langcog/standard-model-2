@@ -27,14 +27,28 @@ options(mc.cores = parallel::detectCores())
 # Data loading
 # ===========================================================================
 
-load_wordbank_data <- function(path = PATHS$wordbank) {
-  e <- new.env()
-  load(path, envir = e)
-  d <- e$d_wf
-  d %>%
-    select(person, age, item, lexical_class, prob, produces) %>%
-    filter(!is.na(produces), !is.na(prob), prob > 0) %>%
-    mutate(produces = as.integer(produces))
+## Load English cross-sectional Wordbank data, drawn from the
+## WG-and-WS-combined long_items.rds. One admin per (child, form):
+## the most recent admin per child in each form. Children may appear
+## twice if they have data on both WG and WS — they're treated as
+## separate "persons" for the cross-sectional fit (admin_key as id).
+##
+## This replaces the older WS-only engWS_preprocessed.Rdata.
+load_wordbank_data <- function(
+  long_items_path = file.path(PATHS$fits_dir, "long_items.rds"),
+  language = "English (American)"
+) {
+  long <- readRDS(long_items_path)
+  long %>%
+    filter(language == !!language,
+           !is.na(prob), prob > 0,
+           !is.na(produces)) %>%
+    rename(lexical_class = lexical_category) %>%
+    # Treat each (child, form, age) admin as its own "person" for
+    # cross-sectional purposes; collapses into a single row per child
+    # if they only have one admin.
+    mutate(person = paste(child_id, form, age, sep = "_")) %>%
+    select(person, age, item, lexical_class, prob, produces, child_id, form)
 }
 
 load_input_rate_prior <- function(path = PATHS$input_rate,
@@ -107,24 +121,43 @@ build_stan_data <- function(df, prior_r,
        df = df)
 }
 
-# Hyperprior overrides defining named variants.
-# Rasch (default): sigma_lambda_prior_sd = 0.001 (pins lambda=1).
-# 2PL: sigma_lambda_prior_sd = 1 (freely estimated).
+# Variants opt in to model components ABOVE the lean baseline defined
+# in DEFAULT_PRIORS (Rasch + frequency + per-class psi + free delta,
+# with s pinned at 0 and no per-child slopes).
+#
+# Naming convention: variants are named for what they ADD.
+#   baseline      - lean defaults; the cross-sectional default
+#   slopes        - + per-child slopes zeta (default for longitudinal)
+#   2pl           - + 2PL item discrimination
+#   2pl_slopes    - + both
+#   free_s        - frees the start time s (RQ2 robustness)
+#   fix_delta     - pins delta = 0 (RQ3 ablation; "no acceleration")
+#   no_freq       - drops frequency by setting beta=0 in prep (handled
+#                   in data prep, not here; left as a sentinel)
+#
+# Long-form variants (long_*) prefix is preserved for clarity in the
+# longitudinal pipeline but resolves to the same overrides.
 variant_hyperpriors <- function(name) {
-  switch(name,
-    baseline   = list(),
-    fix_delta  = list(delta_prior_mean = 0,
-                      delta_prior_sd = 0.001),
-    fix_s      = list(s_prior_mean = 2,
-                      s_prior_sd = 0.001),
-    both_fixed = list(delta_prior_mean = 0, delta_prior_sd = 0.001,
-                      s_prior_mean = 2,    s_prior_sd = 0.001),
-    `2pl`      = list(sigma_lambda_prior_sd = 1),
-    `2pl_fix_delta`  = list(sigma_lambda_prior_sd = 1,
-                            delta_prior_mean = 0, delta_prior_sd = 0.001),
-    slopes          = list(sigma_zeta_prior_sd = 1),
-    `2pl_slopes`    = list(sigma_lambda_prior_sd = 1,
-                           sigma_zeta_prior_sd = 1),
+  # Strip "long_" prefix so longitudinal and cross-sectional share the
+  # same variant grammar.
+  base <- sub("^long_", "", name)
+
+  switch(base,
+    baseline      = list(),
+    slopes        = list(sigma_zeta_prior_sd = 1),
+    `2pl`         = list(sigma_lambda_prior_sd = 1),
+    `2pl_slopes`  = list(sigma_lambda_prior_sd = 1,
+                         sigma_zeta_prior_sd = 1),
+    free_s        = list(s_prior_mean = 4.5, s_prior_sd = 2),
+    free_s_slopes = list(s_prior_mean = 4.5, s_prior_sd = 2,
+                         sigma_zeta_prior_sd = 1),
+    fix_delta     = list(delta_prior_mean = 0, delta_prior_sd = 0.001),
+    # Legacy variants for re-loading old fits / explicit comparison
+    fix_s         = list(s_prior_mean = 2, s_prior_sd = 0.001),
+    both_fixed    = list(delta_prior_mean = 0, delta_prior_sd = 0.001,
+                         s_prior_mean = 2,    s_prior_sd = 0.001),
+    `2pl_fix_delta` = list(sigma_lambda_prior_sd = 1,
+                           delta_prior_mean = 0, delta_prior_sd = 0.001),
     stop(sprintf("Unknown variant: %s", name))
   )
 }

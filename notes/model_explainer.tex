@@ -459,24 +459,28 @@ medium, and easy words within \emph{each} class, which sharpens the
 identification of \(\psi_j\) and \(\beta_c\) when they enter as
 parameters.
 
+\paragraph{Pipeline-shared item pool.} All Wordbank-based pipelines
+(cross-sectional and longitudinal, English and Norwegian) draw from
+the \emph{union of WG and WS forms}, mirroring the BabyView treatment.
+Each (child, age, form) is its own admin; a child who took both WG and
+WS at different ages contributes both. This extends English age coverage
+from the WS-only 16--30 mo to 8--30 mo and matches the cross-pipeline
+data definition.
+
 \paragraph{Per-pipeline application.}
 \begin{itemize}[leftmargin=1.3em]
 \item \textbf{Wordbank longitudinal (English / Norwegian).} 200
-children \(\times\) 200 items per dataset. English: median 3 admins,
-12 mo span; Norwegian: median 8 admins, 14 mo span (Norwegian has the
-much denser Kristoffersen contributor).
+children \(\times\) 200 items per dataset, drawn via the stratified
+sampling above. English: median 3 admins, 14 mo span; Norwegian:
+median 8 admins, 14 mo span (Norwegian has the much denser
+Kristoffersen contributor).
+\item \textbf{Wordbank cross-sectional (English).} 500 children,
+treated as the most recent (child, form) admin from \texttt{long\_items.rds}.
+Stratified the same way as the longitudinal pipeline.
 \item \textbf{BabyView.} 20 longitudinal English subjects (the entire
 available pool) \(\times\) 200 items, with input rate observed via
 5\,688 videos. No child-side subsampling: we use everyone.
 \end{itemize}
-
-\paragraph{Cross-sectional Wordbank (single CDI per child).}
-The subset used for the cross-sectional and \(\sigma_r\) sensitivity
-fits (500 children, 200 items) was sampled by uniform random selection
-within age bins (5 monthly groups) and within lexical class (5 classes,
-40 items each). Stratification on item difficulty was not used in that
-sample; results are robust to this because all 5 classes span the
-full frequency range when sampled uniformly within each.
 
 \section{What we deliver}
 
@@ -493,29 +497,63 @@ full frequency range when sampled uniformly within each.
   plus variants for each RQ (see §8).
 \end{enumerate}
 
-\section{Planned variants}
+\section{Lean baseline + opt-in variants}
 
-The baseline is extended via small data-flag toggles in one shared Stan
-file. Each variant targets one question and adds at most a handful of
-parameters.
+After running through several rounds of fits with all the bells and
+whistles attached by default, we settled on a deliberately \emph{lean}
+baseline and a small set of variants that opt in to extra parameters
+explicitly.
+
+\paragraph{Lean baseline (the default).} Includes:
+\begin{itemize}[leftmargin=1.3em]
+\item Per-child latent \(\xi_i\) (intercept; carries the
+  \(\sigma_\alpha\) / \(\pi_\alpha\) decomposition via the
+  externally-pinned \(\sigma_r\)).
+\item Per-word \(\psi_j\) with class-hierarchical prior.
+\item Frequency \(\log p_j\) entering the linear predictor with unit
+  coefficient (kept separate so RQ1 can be answered as
+  \(r(\psi_j, \log p_j)\)).
+\item Population acceleration exponent \(\delta\), free.
+\item Class means \(\mu_c\) and SDs \(\tau_c\).
+\end{itemize}
+
+\paragraph{Pinned at zero by default.} Both for parsimony and because
+they are weakly identified in cross-sectional data:
+\begin{itemize}[leftmargin=1.3em]
+\item Start time \(s = 0\) (pinned via near-zero prior SD).
+\item 2PL discrimination \(\lambda_j \equiv 1\).
+\item Per-child slope deviations \(\zeta_i \equiv 0\).
+\end{itemize}
+
+\paragraph{Variants opt in.}
 
 \begin{center}
 \small
 \begin{tabular}{@{}lll@{}}
 \toprule
-Variant & Added parameters & Question addressed \\
+Variant & Adds & Question / use \\
 \midrule
-2PL & \(\lambda_j,\, \sigma_\lambda\) & Are words uniform in discrimination? \\
-per-child slopes & \(\zeta_i,\, \sigma_\zeta\) & Do children vary in growth rate? \\
-correlated (ξ, ζ) & \(\rho_{\xi\zeta}\) via LKJ & Are intercept and slope coupled? \\
-free \(\beta\) on \(\log p\) & 1 or per-class & Does frequency count 1-to-1? \\
-comp vs.\ prod joint & bivariate ξ & Is ability a single construct? \\
-longitudinal & admin-level indexing & Does within-child data change decomposition? \\
+\texttt{slopes} & \(\zeta_i,\, \sigma_\zeta\) & Do children vary in growth rate? Default for longitudinal. \\
+\texttt{2pl} & \(\lambda_j,\, \sigma_\lambda\) & Do words vary in acquisition sharpness? \\
+\texttt{2pl\_slopes} & both & Comparison; defends dropping 2PL when it adds little. \\
+\texttt{free\_s} & free \(s\) & RQ2 robustness check. \\
+\texttt{fix\_delta} & \(\delta = 0\) & Ablation: no acceleration. \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-The running log of which variants have been fit, their posteriors, and
-what they revealed is in \texttt{notes/experiments.md}.
+The running log of fits and what each revealed is in
+\texttt{notes/experiments.md}.
+
+\paragraph{Why we changed defaults.} The earlier defaults included
+free \(s\), 2PL, and slopes. Three findings drove the simplification:
+(a) 2PL never measurably improved population-level fit even though
+\(\sigma_\lambda \approx 0.27\) is non-zero (item discrimination
+exists but the population averages it out); (b) start time \(s\) was
+poorly identified, hitting prior bounds in cross-sectional fits and
+trading off strongly with \(\delta\); (c) per-child slopes
+\(\sigma_\zeta\) were unidentifiable from cross-sectional data
+(needed longitudinal). The lean default is the smallest model that
+addresses every RQ; the variants exist to test specific claims.
 
 \end{document}

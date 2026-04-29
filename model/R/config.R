@@ -44,18 +44,27 @@ MODEL_CONSTANTS <- list(
   a0    = 20          # reference age in months
 )
 
-## Default priors (baseline variant = Rasch, s free, delta free).
-## The 2PL toggle is off by default (sigma_lambda_prior_sd ~ 0 pins lambda_j = 1).
-## The per-child-slope toggle is off by default (sigma_zeta_prior_sd ~ 0 pins zeta_i = 0).
+## Default priors define the LEAN BASELINE model:
+##   * Rasch (no 2PL discrimination)
+##   * No per-child slopes (added explicitly via 'slopes' variant for
+##     longitudinal data, where they're identifiable)
+##   * Start time s pinned at 0 (rarely identified well; opt in via
+##     'free_s' for the RQ2 robustness check)
+##   * delta (population acceleration) free — it's load-bearing
+##   * Frequency enters with unit coefficient on log p_j (separate from psi_j)
+##
+## Variants OPT IN to extra parameters via variant_hyperpriors() in
+## helpers.R. This inverts the older default (which started with the
+## full model and let variants pin parameters off).
 DEFAULT_PRIORS <- list(
   mu_mu_c          = 8,
   sigma_mu_c       = 3,
-  s_prior_mean     = 4.5,
-  s_prior_sd       = 2,
+  s_prior_mean     = 0,
+  s_prior_sd       = 0.001,        # s pinned at 0
   delta_prior_mean = 0,
   delta_prior_sd   = 0.5,
-  sigma_lambda_prior_sd = 0.001,  # Rasch mode
-  sigma_zeta_prior_sd   = 0.001   # no per-child slopes
+  sigma_lambda_prior_sd = 0.001,   # no 2PL by default
+  sigma_zeta_prior_sd   = 0.001    # no slopes by default; opt in for longitudinal
 )
 
 ## Defaults for fitting.

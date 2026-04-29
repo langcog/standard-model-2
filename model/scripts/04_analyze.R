@@ -13,7 +13,11 @@ source("model/R/ppc.R")
 args <- commandArgs(trailingOnly = TRUE)
 variants_arg <- if (length(args) >= 1) args[1] else "baseline"
 variants <- if (variants_arg == "all") {
-  c("baseline", "fix_delta", "fix_s", "both_fixed", "2pl", "2pl_fix_delta")
+  # The full set of registered variants in variant_hyperpriors().
+  # Lean default first; legacy/full variants kept for re-loading old fits.
+  c("baseline", "slopes", "2pl", "2pl_slopes",
+    "free_s", "free_s_slopes",
+    "fix_delta", "fix_s", "both_fixed", "2pl_fix_delta")
 } else if (variants_arg == "ras-2pl") {
   c("baseline", "2pl")
 } else if (variants_arg == "slopes-sweep") {
