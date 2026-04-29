@@ -17,7 +17,7 @@
 #   sbatch --export=ALL,STAN_ITER=1500,STAN_WARMUP=750 sherlock/io_fit.slurm ...
 
 set -euo pipefail
-VARIANT="${1:-io_2pl_slopes}"
+VARIANT="${1:-io_slopes}"
 DATASET="${2:-babyview}"
 
 cd "$HOME/standard_model_2"

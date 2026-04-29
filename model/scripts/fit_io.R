@@ -34,14 +34,9 @@ cat(sprintf("Dataset: %s (%s)  I=%d, A=%d, J=%d, V=%d, N=%d\n",
             base_data$I, base_data$A, base_data$J, base_data$V,
             base_data$N))
 
-overrides <- switch(variant,
-  io_baseline    = list(),
-  io_2pl         = list(sigma_lambda_prior_sd = 1),
-  io_slopes      = list(sigma_zeta_prior_sd = 1),
-  io_2pl_slopes  = list(sigma_lambda_prior_sd = 1,
-                        sigma_zeta_prior_sd = 1),
-  stop(sprintf("Unknown io variant: %s", variant))
-)
+# Defer to shared variant_hyperpriors() registry (the "io_" prefix is
+# stripped inside, so io_slopes -> slopes etc.)
+overrides <- variant_hyperpriors(variant)
 stan_data <- modifyList(base_data, overrides)
 
 cat(sprintf("\n===== Fitting %s on %s =====\n", variant, dataset))

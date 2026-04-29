@@ -138,9 +138,9 @@ build_stan_data <- function(df, prior_r,
 # Long-form variants (long_*) prefix is preserved for clarity in the
 # longitudinal pipeline but resolves to the same overrides.
 variant_hyperpriors <- function(name) {
-  # Strip "long_" prefix so longitudinal and cross-sectional share the
+  # Strip pipeline prefixes ("long_", "io_") so all pipelines share the
   # same variant grammar.
-  base <- sub("^long_", "", name)
+  base <- sub("^(long_|io_)", "", name)
 
   switch(base,
     baseline      = list(),
