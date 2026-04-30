@@ -256,22 +256,22 @@ p_traj <- ggplot() +
              aes(x = age_bin, y = obs_mean,
                  color = "observed (admin mean)"),
              size = 1.2, alpha = 0.85) +
-  facet_wrap(~variant_label, nrow = 1) +
+  facet_wrap(~variant_label, ncol = 3) +
   scale_color_manual(values = c("fitted (mean of kids)" = "steelblue",
                                 "prior MVN (mu_r, 0)" = "darkorange",
                                 "observed (admin mean)" = "firebrick"),
                      name = NULL) +
   labs(x = "age (months)", y = "mean vocab (out of J=200)",
        title = "Population vocab trajectory: fitted kids vs prior MVN vs observed",
-       subtitle = paste0("Solid steel: average of fitted kids' growth curves.  ",
+       subtitle = paste0("Solid steel: fitted-kids mean.  ",
                          "Dashed orange: hypothetical kid from prior MVN.  ",
-                         "Gap shows delta vs mean(zeta) under-identification.")) +
+                         "Steel ribbon: 80% population spread.")) +
   theme_minimal(base_size = 11) +
   theme(legend.position = "top",
         strip.text = element_text(face = "bold"))
 
 ggsave(file.path(PATHS$figs_dir, "longitudinal", "english_ablations_trajectory.png"),
-       p_traj, width = 14, height = 4, dpi = 150)
+       p_traj, width = 10, height = 6.5, dpi = 150)
 cat("Wrote english_ablations_trajectory.png\n")
 
 # ---- 4. Per-child xi-zeta scatter (only variants with slopes) ---- #

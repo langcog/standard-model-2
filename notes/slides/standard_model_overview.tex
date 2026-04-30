@@ -25,7 +25,7 @@
 \renewcommand{\arraystretch}{1.05}
 
 % Path for figures (relative to this .tex's compile dir)
-\graphicspath{{../../model/figs/}{../../model/figs/longitudinal/}{../../model/figs/io/}{../../model/figs/proc/}}
+\graphicspath{{./}{../../model/figs/}{../../model/figs/longitudinal/}{../../model/figs/io/}{../../model/figs/proc/}}
 
 % Convenience commands
 \newcommand{\pia}{\pi_{\alpha}}
@@ -102,14 +102,8 @@ discrimination).
 
 \column{0.45\textwidth}
 \centering
-\fbox{\begin{minipage}{0.95\linewidth}
-\centering\vspace{0.5em}
-\textit{[ insert bucket schematic from \\ Kachergis, Marchman, Frank 2021 ]} \\[0.4em]
-\scriptsize\color{gray}
-$r_i \cdot p_j \cdot \alpha_i \;\longrightarrow\;$ bucket $j$ for child $i$ \\[0.2em]
-fills past threshold $\psi_j$ at age $t \implies$ ``produces'' it
-\vspace{0.5em}
-\end{minipage}}
+\includegraphics[width=\linewidth]{kachergis_buckets.png} \\
+{\scriptsize Kachergis, Marchman, \& Frank (2021)}
 \end{columns}
 
 \end{frame}
@@ -209,10 +203,7 @@ $\boldsymbol{\pia}$ & \textbf{0.913 \,[0.901,\,0.926]} \\
 
 \column{0.55\textwidth}
 \centering
-\includegraphics[width=\linewidth]{english_ablations_trajectory.png} \\[-0.4em]
-\scriptsize \emph{Lean reference panel: solid steel and dashed orange
-coincide $\Rightarrow$ population MVN matches fitted-kid mean. Model
-is well-identified after sum-to-zero fix.}
+\includegraphics[width=\linewidth]{english_ablations_trajectory.png}
 \end{columns}
 
 \end{frame}
@@ -220,21 +211,28 @@ is well-identified after sum-to-zero fix.}
 % =====================================================================
 \begin{frame}{Ablations: what each component buys you}
 
+\begin{columns}[T, onlytextwidth]
+\column{0.62\textwidth}
 \centering
-\includegraphics[width=0.62\linewidth]{english_ablations_scalars.png}
+\includegraphics[width=\linewidth]{english_ablations_scalars.png}
 
-\vspace{0.1em}
+\column{0.38\textwidth}
 \footnotesize
-\begin{itemize}\setlength\itemsep{0.05em}
-\item \textbf{Pin $\delta\!=\!0$}: population MVN no longer matches
-  data; $\sigz\!\to\!35$ trying to compensate.
-  \textbf{$\delta$ is load-bearing.}
-\item \textbf{Drop slopes}: population fit preserved; slopes matter
-  for per-child trajectories, not population mean.
-\item \textbf{Free $s$}: $s$ wanders, other params little affected.
-\item \textbf{Add 2PL} ($\siglam\!\approx\!0.31$): item discrimination
-  real but population-averaged-out.
-\end{itemize}
+\textbf{Pin $\delta\!=\!0$}: population MVN no longer matches data;
+$\sigz\!\to\!35$ trying to compensate. \textbf{$\delta$ is
+load-bearing.}
+
+\vspace{0.5em}
+\textbf{Drop slopes}: population fit preserved; slopes matter for
+per-child trajectories, not population mean.
+
+\vspace{0.5em}
+\textbf{Free $s$}: $s$ wanders, other params little affected.
+
+\vspace{0.5em}
+\textbf{Add 2PL} ($\siglam\!\approx\!0.31$): item discrimination
+real but population-averaged-out.
+\end{columns}
 
 \end{frame}
 
@@ -309,8 +307,8 @@ one unobserved-input baseline: efficiency variance dominates.}
 RT/accuracy from Peekbank (247 admins, 13--20\,mo) and item-level
 CDIs at 22 + 25\,mo from the Stanford TotLot 3 cohort.
 
-\vspace{0.4em}
-\textbf{Joint model} (\texttt{log\_irt\_long\_proc.stan}):
+\vspace{0.6em}
+\textbf{Joint model.}
 \[
 \log \mathrm{rt}_{i,t} \sim \mathcal{N}\!\big(
 \mu_{rt} + \mu_{\mathrm{rtslope}}\,\ell_t
@@ -322,19 +320,17 @@ where $\ell_t = \log(t/a_0)$.
 $(\log \alpha, \zeta, \mathrm{rtslope}) \sim \mathrm{MVN}$
 with LKJ prior on the correlation matrix.
 
-\vspace{0.4em}
-\textbf{Smoke fit (laptop, 2 chains).}
-\begin{itemize}\setlength\itemsep{0.1em}
-\item $\boldsymbol{\gamma_{rt} = 0.073}$ \,[0.032,\,0.117] \;
-  -- bounded away from 0; each unit of $\log \alpha$
-   is worth \textasciitilde{}12\% lower mean RT.
-\item $\mu_{\mathrm{rtslope}} = -0.73$ \,[$-1.21$,\,$-0.28$]:
-  RT \emph{decreases} with age, expected.
+\vspace{0.6em}
+\textbf{Result.}
+\begin{itemize}\setlength\itemsep{0.2em}
+\item $\boldsymbol{\gamma_{rt} = 0.073}$ \,[0.032,\,0.117]
+  -- bounded away from zero. Each unit of $\log \alpha$ corresponds
+  to \textasciitilde{}12\% lower mean RT.
+\item $\mu_{\mathrm{rtslope}} = -0.73$: RT \emph{decreases} with age,
+  expected.
 \item $\sigma_{\mathrm{rtslope}} = 0.74$: real per-child variation in
-  how fast RT improves.
+  RT-improvement rate.
 \end{itemize}
-
-\small\textit{Production fit (4 chains, full iter) running on Sherlock.}
 
 \end{frame}
 
