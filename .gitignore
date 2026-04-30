@@ -19,6 +19,7 @@ stan_cache/
 *.bbl
 *.nav
 *.snm
+*.vrb
 
 # --- OS / editor
 .DS_Store
