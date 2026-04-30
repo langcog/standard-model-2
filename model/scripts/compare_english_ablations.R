@@ -169,14 +169,63 @@ get_population_trajectory <- function(variant) {
   bind_rows(out_rows) %>% mutate(variant = variant)
 }
 
-cat("Computing population-level trajectories...\n")
+cat("Computing population-level trajectories (prior MVN)...\n")
 set.seed(20260429)
 pop_traj <- bind_rows(lapply(names(VARIANTS), function(v) {
   cat("  ", v, "\n")
   get_population_trajectory(v)
 })) %>%
   mutate(variant_label = factor(VARIANTS[variant],
-                                levels = unname(VARIANTS)))
+                                levels = unname(VARIANTS)),
+         source = "prior MVN (mu_r, 0)")
+
+# Empirical fitted-kids trajectory: each actual kid's posterior-mean
+# growth curve, averaged at every grid age. Reveals delta vs mean(zeta)
+# under-identification when this differs from the prior-MVN curve above.
+get_empirical_trajectory <- function(variant) {
+  path <- file.path(PATHS$fits_dir, sprintf("%s.rds", variant))
+  if (!file.exists(path)) return(NULL)
+  fit <- readRDS(path)
+  draws <- as_draws_df(fit)
+  med <- function(p) median(draws[[p]])
+
+  xi_kids   <- sapply(seq_len(sd_$I),
+                       function(i) median(draws[[sprintf("xi[%d]", i)]]))
+  zeta_kids <- if ("zeta[1]" %in% names(draws))
+                 sapply(seq_len(sd_$I),
+                        function(i) median(draws[[sprintf("zeta[%d]", i)]]))
+               else rep(0, sd_$I)
+  psi <- sapply(seq_len(sd_$J),
+                function(j) median(draws[[sprintf("psi[%d]", j)]]))
+  log_lambda <- if ("log_lambda[1]" %in% names(draws)) {
+    sapply(seq_len(sd_$J),
+           function(j) median(draws[[sprintf("log_lambda[%d]", j)]]))
+  } else { rep(0, sd_$J) }
+  lambda <- exp(log_lambda)
+  s     <- med("s"); delta <- med("delta")
+  log_p <- log(bundle$word_info$prob)
+  log_H <- sd_$log_H; a0 <- sd_$a0
+
+  bind_rows(lapply(AGE_GRID, function(a) {
+    ae <- max(a - s, 0.01); la <- log(ae / a0)
+    base_n <- xi_kids + log_H + (1 + delta + zeta_kids) * la
+    eta <- outer(base_n, log_p - psi, "+")
+    eta <- sweep(eta, 2, lambda, "*")
+    vocab_per_kid <- rowSums(plogis(eta))
+    tibble(age = a, mean = mean(vocab_per_kid),
+           lo10 = quantile(vocab_per_kid, 0.10),
+           hi90 = quantile(vocab_per_kid, 0.90))
+  })) %>% mutate(variant = variant)
+}
+
+cat("Computing empirical fitted-kids trajectories...\n")
+emp_traj <- bind_rows(lapply(names(VARIANTS), function(v) {
+  cat("  ", v, "\n")
+  get_empirical_trajectory(v)
+})) %>%
+  mutate(variant_label = factor(VARIANTS[variant],
+                                levels = unname(VARIANTS)),
+         source = "fitted (mean of N kids)")
 
 # Observed: bin actual admin totals by integer age
 obs_bins <- df %>%
@@ -189,25 +238,31 @@ obs_bins <- df %>%
   filter(n >= 5)
 
 p_traj <- ggplot() +
-  geom_ribbon(data = pop_traj,
+  # Empirical fitted-kids ribbon (steel)
+  geom_ribbon(data = emp_traj,
               aes(x = age, ymin = lo10, ymax = hi90),
-              fill = "steelblue", alpha = 0.20) +
-  geom_line(data = pop_traj,
-            aes(x = age, y = mean, color = "fitted (pop. mean)"),
+              fill = "steelblue", alpha = 0.18) +
+  geom_line(data = emp_traj,
+            aes(x = age, y = mean, color = "fitted (mean of kids)"),
             linewidth = 0.8) +
+  # Prior MVN (orange dashed)
+  geom_line(data = pop_traj,
+            aes(x = age, y = mean, color = "prior MVN (mu_r, 0)"),
+            linewidth = 0.7, linetype = "dashed") +
   geom_point(data = obs_bins,
              aes(x = age_bin, y = obs_mean,
                  color = "observed (admin mean)"),
              size = 1.2, alpha = 0.85) +
   facet_wrap(~variant_label, nrow = 1) +
-  scale_color_manual(values = c("fitted (pop. mean)" = "steelblue",
+  scale_color_manual(values = c("fitted (mean of kids)" = "steelblue",
+                                "prior MVN (mu_r, 0)" = "darkorange",
                                 "observed (admin mean)" = "firebrick"),
                      name = NULL) +
   labs(x = "age (months)", y = "mean vocab (out of J=200)",
-       title = "Population mean vocab trajectory (smooth) vs observed bin means",
-       subtitle = sprintf(paste0("Fitted: posterior-median fixed effects + ",
-                                  "MVN(mu_r, Sigma) over (xi, zeta) integrated. ",
-                                  "Ribbon: 80%% population spread."))) +
+       title = "Population vocab trajectory: fitted kids vs prior MVN vs observed",
+       subtitle = paste0("Solid steel: average of fitted kids' growth curves.  ",
+                         "Dashed orange: hypothetical kid from prior MVN.  ",
+                         "Gap shows delta vs mean(zeta) under-identification.")) +
   theme_minimal(base_size = 11) +
   theme(legend.position = "top",
         strip.text = element_text(face = "bold"))

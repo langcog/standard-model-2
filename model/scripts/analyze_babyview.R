@@ -105,51 +105,136 @@ p_input <- ggplot() +
                           (exp(quantile(draws$beta_react, 0.975)) - 1) * 100)) +
   theme_minimal(base_size = 11)
 
-# ---- 3. Per-child vocab trajectory: fitted vs observed ---- #
+# ---- 3. Population vocab trajectory (smooth grid) + observed bins ---- #
 admin_info <- bundle$admin_info
 df <- bundle$df %>% as_tibble()
 
-# Compute predicted total per admin via posterior medians (cheap)
-xi_med <- sapply(seq_len(sd_$I),
-                  function(i) median(draws[[sprintf("xi[%d]", i)]]))
-zeta_med <- sapply(seq_len(sd_$I),
-                   function(i) median(draws[[sprintf("zeta[%d]", i)]]))
+# Population parameters. log_irt_io.stan keeps xi and zeta in
+# independent priors (no MVN, so rho = 0 by construction).
+# sigma_xi is not declared as a derived quantity, so reconstruct it.
+sigma_alpha <- median(draws$sigma_alpha)
+sigma_r     <- if ("sigma_r" %in% names(draws)) median(draws$sigma_r) else sd_$sigma_r
+mu_r        <- if ("mu_r" %in% names(draws)) median(draws$mu_r) else sd_$mu_r
+sigma_xi    <- sqrt(sigma_alpha^2 + sigma_r^2)
+sigma_zeta  <- median(draws$sigma_zeta)
+rho_xi_zeta <- 0    # independent in io model
+
 psi_med  <- sapply(seq_len(sd_$J),
                    function(j) median(draws[[sprintf("psi[%d]", j)]]))
+log_lambda_med <- if ("log_lambda[1]" %in% names(draws)) {
+  sapply(seq_len(sd_$J),
+         function(j) median(draws[[sprintf("log_lambda[%d]", j)]]))
+} else {
+  rep(0, sd_$J)
+}
+lambda_med <- exp(log_lambda_med)
 log_p <- log(bundle$word_info$prob)
 log_H <- sd_$log_H
 a0    <- sd_$a0
 s_med <- median(draws$s)
 delta_med <- median(draws$delta)
 
-ai <- pmax(admin_info$age - s_med, 0.01)
-log_age <- log(ai / a0)
-pred_total <- numeric(nrow(admin_info))
-obs_total  <- numeric(nrow(admin_info))
-for (k in seq_len(nrow(admin_info))) {
-  i <- admin_info$ii[k]
-  eta <- xi_med[i] + log_p + log_H +
-         (1 + delta_med + zeta_med[i]) * log_age[k] - psi_med
-  pred_total[k] <- sum(plogis(eta))
-  obs_total[k]  <- sum(df$produces[df$aa == admin_info$aa[k]])
+# Sample population children
+N_DRAWS  <- 500
+AGE_GRID <- seq(8, 32, by = 0.25)
+set.seed(20260429)
+if (sigma_zeta > 0.01) {
+  Sigma <- matrix(c(sigma_xi^2,
+                    rho_xi_zeta * sigma_xi * sigma_zeta,
+                    rho_xi_zeta * sigma_xi * sigma_zeta,
+                    sigma_zeta^2), 2, 2)
+  Z <- MASS::mvrnorm(N_DRAWS, mu = c(mu_r, 0), Sigma = Sigma)
+  xi_draws   <- Z[, 1]; zeta_draws <- Z[, 2]
+} else {
+  xi_draws   <- rnorm(N_DRAWS, mu_r, sigma_xi)
+  zeta_draws <- rep(0, N_DRAWS)
 }
 
-per_admin <- admin_info %>%
-  as_tibble() %>%
-  mutate(pred_total = pred_total, obs_total = obs_total)
+# Population trajectory under the *prior* MVN (fresh hypothetical kids):
+# this is what the model says future kids look like.
+prior_traj <- bind_rows(lapply(AGE_GRID, function(a) {
+  ae <- max(a - s_med, 0.01); la <- log(ae / a0)
+  base_n <- xi_draws + log_H + (1 + delta_med + zeta_draws) * la
+  eta <- outer(base_n, log_p - psi_med, "+")
+  eta <- sweep(eta, 2, lambda_med, "*")
+  vocab_per_draw <- rowSums(plogis(eta))
+  tibble(age = a,
+         mean = mean(vocab_per_draw),
+         lo10 = quantile(vocab_per_draw, 0.10),
+         hi90 = quantile(vocab_per_draw, 0.90))
+}))
 
-# Per-child trajectory (line per kid)
-p_traj <- ggplot(per_admin, aes(x = age, group = ii)) +
-  geom_line(aes(y = pred_total), color = "steelblue", alpha = 0.4) +
-  geom_point(aes(y = obs_total), color = "firebrick",
-             alpha = 0.6, size = 1) +
-  geom_line(aes(y = obs_total), color = "firebrick",
-            alpha = 0.4, linetype = "dotted") +
-  labs(x = "age (months)", y = "vocab (out of J=200)",
-       title = "Per-child trajectories: fitted vs observed",
-       subtitle = sprintf("Blue lines: fitted growth curves; red dots: observed admin totals (N=%d kids)",
+# Empirical "fitted-kids" trajectory: each of the I=20 actual kids'
+# fitted growth curve, averaged across kids at every age. Uses each
+# kid's posterior-mean (xi_i, zeta_i). Different from the prior MVN
+# when the model is partially under-identified between delta and
+# mean(zeta_i).
+xi_kids   <- sapply(seq_len(sd_$I),
+                    function(i) median(draws[[sprintf("xi[%d]", i)]]))
+zeta_kids <- sapply(seq_len(sd_$I),
+                    function(i) median(draws[[sprintf("zeta[%d]", i)]]))
+emp_traj <- bind_rows(lapply(AGE_GRID, function(a) {
+  ae <- max(a - s_med, 0.01); la <- log(ae / a0)
+  base_n <- xi_kids + log_H + (1 + delta_med + zeta_kids) * la
+  eta <- outer(base_n, log_p - psi_med, "+")
+  eta <- sweep(eta, 2, lambda_med, "*")
+  vocab_per_kid <- rowSums(plogis(eta))
+  tibble(age = a,
+         mean = mean(vocab_per_kid),
+         lo10 = quantile(vocab_per_kid, 0.10),
+         hi90 = quantile(vocab_per_kid, 0.90))
+}))
+
+# Observed: bin admin totals by integer age
+obs_bins <- admin_info %>% as_tibble() %>%
+  mutate(obs_total = sapply(aa,
+                            function(k) sum(df$produces[df$aa == k]))) %>%
+  mutate(age_bin = round(age)) %>%
+  group_by(age_bin) %>%
+  summarise(n = n(), obs_mean = mean(obs_total), .groups = "drop") %>%
+  filter(n >= 2)   # BabyView has fewer admins per age bin
+
+# Also show every individual admin (translucent)
+all_admins <- admin_info %>% as_tibble() %>%
+  mutate(obs_total = sapply(aa,
+                            function(k) sum(df$produces[df$aa == k])))
+
+p_traj <- ggplot() +
+  # Empirical fitted-kids ribbon
+  geom_ribbon(data = emp_traj,
+              aes(x = age, ymin = lo10, ymax = hi90),
+              fill = "steelblue", alpha = 0.20) +
+  geom_line(data = emp_traj, aes(x = age, y = mean,
+                                  color = "fitted (mean across 20 kids)"),
+            linewidth = 0.9) +
+  geom_line(data = prior_traj, aes(x = age, y = mean,
+                                    color = "prior MVN (mu_r, 0)"),
+            linewidth = 0.9, linetype = "dashed") +
+  # Observed admin totals
+  geom_point(data = all_admins,
+             aes(x = age, y = obs_total,
+                 color = "observed admin"),
+             alpha = 0.25, size = 0.9) +
+  geom_point(data = obs_bins,
+             aes(x = age_bin, y = obs_mean,
+                 color = "observed bin mean"),
+             size = 1.8) +
+  scale_color_manual(values = c("fitted (mean across 20 kids)" = "steelblue",
+                                "prior MVN (mu_r, 0)" = "darkorange",
+                                "observed admin" = "firebrick",
+                                "observed bin mean" = "firebrick"),
+                     name = NULL) +
+  labs(x = "age (months)", y = "mean vocab (out of J=200)",
+       title = "BabyView io_slopes: trajectories",
+       subtitle = sprintf(paste0("Solid steel: average of 20 actual fitted kids' ",
+                                  "growth curves.  ",
+                                  "Dashed orange: hypothetical kid drawn from ",
+                                  "prior MVN(mu_r, Sigma).  ",
+                                  "Gap reveals delta vs mean(zeta) under-",
+                                  "identification (N=%d kids)."),
                           sd_$I)) +
-  theme_minimal(base_size = 11)
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "top")
 
 # ---- 4. Compose ---- #
 out <- (p_scalars / p_input / p_traj) +
