@@ -382,6 +382,70 @@ Egan-Dailey subjects.
 
 ---
 
+## 🟡 9. Joint vocab + LWL processing channel (Stanford-linked)
+
+**Setup.** New Stan model `log_irt_long_proc.stan` extends
+`log_irt_long.stan` with a second observation channel: per-LWL admin
+log RT modeled as a function of per-child log_α and a per-child
+RT-by-log-age slope. log_α is now a free per-child latent (not a
+shrinkage estimator), drawn jointly with ζ and rtslope from a 3-D MVN
+with LKJ. log_r_dev is independent ~ N(0, σ_r), so
+ξ_i = μ_r + log_r_dev_i + log_α_i. The LWL channel breaks the log_r
+vs log_α exchangeability that holds in CDI-only fits.
+
+**Bridge.** Used `lab_subject_id` from peekbankr 2022.1 to join
+adams_marchman_2018 LWL admins to the Stanford TotLot 3 item-level
+CDIs we received from Marchman. 62 of 69 Adams kids matched (the
+seven unmatched are post-2018 enrollees not in the file we have);
+none of the fmw_2013 kids match because their lab IDs (20xxx) don't
+overlap with TotLot 2/3 (11xxx). After fixing a subject-level
+matching bug, sample is 62 kids × 247 LWL admins (ages 13-20 mo) +
+102 CDI admins × 200 stratified items.
+
+**Smoke fit (laptop, 2 chains × 200 sampling iter):**
+
+| param | mean | 95% CrI |
+|---|---:|---|
+| **γ_rt** | **0.073** | **[0.032, 0.117]** |
+| μ_rtslope | -0.73 | [-1.21, -0.28] |
+| σ_rtslope | 0.74 | [0.49, 1.03] |
+| σ_α | 1.72 | [1.42, 2.11] |
+| π_α | 0.91 | [0.88, 0.94] |
+| σ_lwl | 0.23 | [0.21, 0.26] |
+| ρ_α_ζ | -0.17 | [-0.44, +0.11] |
+| ρ_α_rtslope | -0.27 | [-0.71, +0.21] |
+
+**γ_rt is positive and bounded away from zero.** Each unit of log_α
+maps to ~0.073 of log RT; a 1-SD higher-α child (~1.7 units) has
+~12% lower mean RT. Modest but real -- this is the first quantitative
+estimate of how much LWL processing speed informs the model's
+efficiency latent.
+
+μ_rtslope = -0.73 confirms the typical declining-RT pattern in the
+13-20 mo window, and σ_rtslope = 0.74 means there is meaningful
+per-child variation in how fast RT improves.
+
+**Caveats / pre-bug-fix history.** A first version of the linkage
+script joined LWL admins to the peekbank-development d_sub records
+by (dataset, age) only -- not by subject_id -- so RT and accuracy
+attached to a kid's lab_subject_id silently came from a different
+child of the same age. Smoke fit then returned γ_rt ≈ 0 with CrI
+[-0.03, +0.03]; production submission was cancelled. Fix: pull a
+fresh per-admin LWL summary directly from peekbank 2022.1 with
+lab_subject_id attached (`pull_peekbank_lwl.R`). After fix, γ_rt
+recovers as above. Lesson: never trust an age-only fuzzy join.
+
+**Pending.** Production fit on Sherlock (job 23190113, ~30-60 min).
+Will give proper Rhat/ESS, tighter intervals, and a properly-mixed
+posterior on the 3-D MVN correlations.
+
+**Artifacts:** `model/stan/log_irt_long_proc.stan`,
+`model/fits/long_proc_slopes.rds` (smoke; will be overwritten by
+production fit), `data/raw_data/peekbank/peekbank_2022_lwl_summary.csv`,
+`data/raw_data/peekbank/peekbank_stanford_linked.csv`.
+
+---
+
 ## Backlog (⚪)
 
 ### Data / robustness
