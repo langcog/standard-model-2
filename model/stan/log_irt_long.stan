@@ -100,7 +100,13 @@ transformed parameters {
 model {
   // Priors
   to_vector(z_child) ~ std_normal();
-  sigma_child   ~ normal(0, 1);
+  // sigma_child[1] is replaced by sigma_xi (deterministic; see
+  // transformed parameters), so its raw N(0,1) prior is harmless.
+  // sigma_child[2] = sigma_zeta is the actual slopes-toggle param;
+  // route the variant-grammar prior here so `baseline` (tight prior
+  // ~0.001) actually pins zeta off, and `slopes` (~1) frees it.
+  sigma_child[1] ~ normal(0, 1);
+  sigma_child[2] ~ normal(0, sigma_zeta_prior_sd);
   L_child       ~ lkj_corr_cholesky(2);  // mild prior toward 0 corr
   sigma_alpha   ~ normal(0, 1);
 
