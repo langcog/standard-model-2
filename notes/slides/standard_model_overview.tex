@@ -20,6 +20,8 @@
 \usepackage{graphicx}
 \usepackage{tabularx}
 \usepackage{array}
+\usepackage{tikz}
+\usetikzlibrary{matrix, positioning, arrows.meta}
 
 % Compact tables
 \renewcommand{\arraystretch}{1.05}
@@ -71,7 +73,7 @@ four research questions:
 
 \vspace{0.6em}
 \small
-\textit{Successor to Kachergis, Marchman, \& Frank (2021):
+\textit{Follow-up to Kachergis, Marchman, \& Frank (2021):
 ``Toward a standard model of early language learning.''}
 
 \end{frame}
@@ -79,11 +81,11 @@ four research questions:
 % =====================================================================
 \begin{frame}{Schematic model: bucket-fill metaphor + item-response theory}
 
-\begin{columns}[T, onlytextwidth]
+\begin{columns}[c, onlytextwidth]
 \column{0.55\textwidth}
-\textbf{Two cascaded ideas:}
+\textbf{Two ideas from Kachergis et al.\ (2021):}
 \begin{enumerate}
-\item \emph{Accumulator (Kachergis et al.\ 2021).}
+\item \emph{Accumulator.}
   Each word is a bucket; child hears tokens at rate $r_i \cdot p_j$;
   efficiency $\alpha_i$ determines fraction retained.
 \item \emph{Item-Response Theory.}
@@ -91,39 +93,76 @@ four research questions:
   it takes for the child to know the word.
 \end{enumerate}
 
-\vspace{0.8em}
-\small
-Per-child latents
-$\xi_i = \log r_i + \log \alpha_i$ (input + efficiency) and
-$\zeta_i$ (per-child slope deviation).
-
-Per-word latents $\psi_j$ (difficulty) and optionally $\lambda_j$ (2PL
-discrimination).
-
 \column{0.45\textwidth}
 \centering
-\includegraphics[width=\linewidth]{kachergis_buckets.png} \\
-{\scriptsize Kachergis, Marchman, \& Frank (2021)}
+\includegraphics[width=\linewidth]{kachergis_buckets.png}
 \end{columns}
 
 \end{frame}
 
 % =====================================================================
-\begin{frame}{Model details}
+\begin{frame}[fragile]{Model: linear predictor (anatomy)}
 
-\textbf{Linear predictor (per child $i$, item $j$, age $t$):}
-\[
-\eta_{ijt} = \lambda_j \big[\,
-  \xi_i + \log p_j + \log H
-  + (1 + \delta + \zeta_i)\,\log\!\tfrac{t - s}{a_0}
-  - \psi_j
-\,\big]
-\]
-\[
-P(\text{produces}_{ijt} = 1) = \mathrm{logit}^{-1}(\eta_{ijt})
-\]
+$P(\text{produces}_{ijt} = 1) = \mathrm{logit}^{-1}(\eta_{ijt})$
+where:
 
-\vspace{0.5em}
+\vspace{1.2em}
+\centering
+\begin{tikzpicture}[
+  every node/.style={inner sep=2pt},
+  ann/.style={font=\scriptsize\itshape, color=blue!35!black, align=center},
+  arrow/.style={->, blue!25!black, semithick, shorten >=2pt, shorten <=2pt}
+]
+
+\matrix[matrix of nodes, column sep=3pt, nodes={font=\large},
+        ampersand replacement=\&] (eq) {
+  $\eta_{ijt}\!=$ \&
+  |[name=lambda]| $\lambda_j$ \&
+  $\big[$ \&
+  |[name=xi]| $\xi_i$ \&
+  $+$ \&
+  |[name=logp]| $\log p_j$ \&
+  $+$ \&
+  |[name=logH]| $\log H$ \&
+  $+$ \&
+  |[name=slope]| $(1{+}\delta{+}\zeta_i)$ \&
+  $\cdot$ \&
+  |[name=logage]| $\log\!\tfrac{t-s}{a_0}$ \&
+  $-$ \&
+  |[name=psi]| $\psi_j$ \&
+  $\big]$ \\
+};
+
+% Above-equation annotations
+\node[ann, above=3.0em of lambda] (a_lambda) {item\\discrimination\\(2PL)};
+\draw[arrow] (a_lambda) -- (lambda);
+
+\node[ann, above=3.0em of slope] (a_slope) {1 + pop.\ accel.\\$\delta$ + per-child\\slope dev.\ $\zeta_i$};
+\draw[arrow] (a_slope) -- (slope);
+
+% Below-equation annotations
+\node[ann, below=3em of xi] (a_xi) {child intercept\\$=\log r_i + \log\alpha_i$};
+\draw[arrow] (a_xi) -- (xi);
+
+\node[ann, below=2em of logp] (a_logp) {word\\frequency};
+\draw[arrow] (a_logp) -- (logp);
+
+\node[ann, below=2em of logH] (a_logH) {waking\\hours/mo};
+\draw[arrow] (a_logH) -- (logH);
+
+\node[ann, below=2em of logage] (a_logage) {log relative age\\(start time $s$)};
+\draw[arrow] (a_logage) -- (logage);
+
+\node[ann, below=3em of psi] (a_psi) {word\\difficulty};
+\draw[arrow] (a_psi) -- (psi);
+
+\end{tikzpicture}
+
+\end{frame}
+
+% =====================================================================
+\begin{frame}{Model variants}
+
 \textbf{Per-child latents.}
 $(\log\alpha_i, \zeta_i) \sim \mathrm{MVN}\!\big(0,\Sigma\big)$
 with LKJ prior on the correlation; $\log r_i \sim N(\mu_r, \sigr)$
@@ -131,13 +170,27 @@ independent. \emph{Sum-to-zero centering on each random effect}
 identifies $\delta$ (population slope) separately from
 $\mathrm{mean}(\zeta_i)$.
 
-\vspace{0.5em}
+\vspace{0.6em}
 \textbf{Lean baseline + opt-in variants.}
-Pin $s\!=\!0$, $\siglam\!=\!0$, $\sigz\!=\!0$ by default; variants
-\texttt{slopes}, \texttt{2pl}, \texttt{free\_s}, \texttt{fix\_delta}
-opt in.
+Pin $s\!=\!0$, $\siglam\!=\!0$, $\sigz\!=\!0$ by default; opt in
+explicitly:
 
-\vspace{0.5em}
+\vspace{0.4em}
+\centering
+\small
+\begin{tabular}{ll}
+\toprule
+variant & adds \\
+\midrule
+\texttt{slopes}     & $\zeta_i$, $\sigz$ \,(longitudinal default) \\
+\texttt{2pl}        & $\lambda_j$, $\siglam$ \\
+\texttt{free\_s}    & free $s$ \\
+\texttt{fix\_delta} & $\delta = 0$ \\
+\bottomrule
+\end{tabular}
+
+\flushleft
+\vspace{0.6em}
 \textbf{$\sigr$ pinned externally} from Sperry / Hart-Risley /
 Weisleder-Fernald data; lets the model decompose
 $\sigxi^2 = \sigr^2 + \siga^2$ and report $\pia$.
@@ -337,30 +390,18 @@ with LKJ prior on the correlation matrix.
 % =====================================================================
 \begin{frame}{Conclusions}
 
-\textbf{Substantive findings.}
-\begin{itemize}\setlength\itemsep{0.2em}
-\item $\pia \approx 0.86$--$0.99$ \emph{across three samples}: between-child
-  vocabulary variance is driven primarily by efficiency, not input rate.
-\item $\delta \approx 6$--$9$ \emph{across all variants}: vocabulary growth
-  genuinely accelerates with age; pinning $\delta = 0$ breaks
+\begin{itemize}\setlength\itemsep{0.6em}
+\item $\pia \approx 0.86$--$0.99$ \emph{across three samples}:
+  between-child vocabulary variance is driven primarily by efficiency,
+  not input rate.
+\item $\delta \approx 6$--$9$ \emph{across all variants}: vocabulary
+  growth genuinely accelerates with age; pinning $\delta = 0$ breaks
   population fit.
 \item LWL processing speed informs $\log\alpha$ in the expected
   direction; coupling $\gamma_{rt} > 0$ is bounded away from zero.
 \end{itemize}
 
-\vspace{0.4em}
-\textbf{Methodological contributions.}
-\begin{itemize}\setlength\itemsep{0.2em}
-\item Lean baseline + opt-in variant grammar: single Stan file fits
-  every variant via tight-prior toggles; pipelines share variants.
-\item Two-lever framework: variant grammar (per-fit toggles) vs.\
-  dataset-level constants ($\beta_{\mathrm{react}}$ on/off).
-\item Sum-to-zero centering on per-child latents: fixes
-  $(\delta, \mathrm{mean}(\zeta_i))$ under-identification that
-  inflated random-effect means.
-\end{itemize}
-
-\vspace{0.4em}
+\vspace{1em}
 \small\textit{Code, data, fits, and full explainer:
 \texttt{github.com/langcog/standard-model-2}}
 

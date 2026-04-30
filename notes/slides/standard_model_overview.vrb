@@ -1,0 +1,57 @@
+\frametitle{Model: linear predictor (anatomy)}
+
+$P(\text{produces}_{ijt} = 1) = \mathrm{logit}^{-1}(\eta_{ijt})$
+where:
+
+\vspace{1.2em}
+\centering
+\begin{tikzpicture}[
+  every node/.style={inner sep=2pt},
+  ann/.style={font=\scriptsize\itshape, color=blue!35!black, align=center},
+  arrow/.style={->, blue!25!black, semithick, shorten >=2pt, shorten <=2pt}
+]
+
+\matrix[matrix of nodes, column sep=3pt, nodes={font=\large},
+        ampersand replacement=\&] (eq) {
+  $\eta_{ijt}\!=$ \&
+  |[name=lambda]| $\lambda_j$ \&
+  $\big[$ \&
+  |[name=xi]| $\xi_i$ \&
+  $+$ \&
+  |[name=logp]| $\log p_j$ \&
+  $+$ \&
+  |[name=logH]| $\log H$ \&
+  $+$ \&
+  |[name=slope]| $(1{+}\delta{+}\zeta_i)$ \&
+  $\cdot$ \&
+  |[name=logage]| $\log\!\tfrac{t-s}{a_0}$ \&
+  $-$ \&
+  |[name=psi]| $\psi_j$ \&
+  $\big]$ \\
+};
+
+% Above-equation annotations
+\node[ann, above=3.0em of lambda] (a_lambda) {item\\discrimination\\(2PL)};
+\draw[arrow] (a_lambda) -- (lambda);
+
+\node[ann, above=3.0em of slope] (a_slope) {1 + pop.\ accel.\\$\delta$ + per-child\\slope dev.\ $\zeta_i$};
+\draw[arrow] (a_slope) -- (slope);
+
+% Below-equation annotations
+\node[ann, below=3em of xi] (a_xi) {child intercept\\$=\log r_i + \log\alpha_i$};
+\draw[arrow] (a_xi) -- (xi);
+
+\node[ann, below=2em of logp] (a_logp) {word\\frequency};
+\draw[arrow] (a_logp) -- (logp);
+
+\node[ann, below=2em of logH] (a_logH) {waking\\hours/mo};
+\draw[arrow] (a_logH) -- (logH);
+
+\node[ann, below=2em of logage] (a_logage) {log relative age\\(start time $s$)};
+\draw[arrow] (a_logage) -- (logage);
+
+\node[ann, below=3em of psi] (a_psi) {word\\difficulty};
+\draw[arrow] (a_psi) -- (psi);
+
+\end{tikzpicture}
+
