@@ -29,10 +29,11 @@ stan_cache/
 # Large Stan fits and figs — regenerable, take a lot of space.
 # Intermediate data (subsets) are reproducible from scripts.
 model/fits/**/*.rds
-model/figs/*.png
+model/figs/**/*.png
 # But keep the directories themselves so scripts don't have to mkdir
 !model/fits/.gitkeep
 !model/figs/.gitkeep
+!model/figs/**/.gitkeep
 # And keep the pulled raw data — these need wordbankr/childesr (R >= 4.4
 # and mysql headers) which Sherlock's R 4.2 can't handle. Commit the
 # intermediate files so Sherlock can skip those packages.

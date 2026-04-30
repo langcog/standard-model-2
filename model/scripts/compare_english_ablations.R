@@ -36,6 +36,9 @@ sd_    <- bundle$stan_data
 admin_info <- bundle$admin_info %>% mutate(aa = aa)
 df <- bundle$df %>% as_tibble()
 
+OUT_FIGS <- file.path(PATHS$figs_dir, "longitudinal")
+dir.create(OUT_FIGS, recursive = TRUE, showWarnings = FALSE)
+
 # ---- 1. Extract posterior summaries from every fit ---- #
 extract_scalars <- function(variant) {
   path <- file.path(PATHS$fits_dir, sprintf("%s.rds", variant))
@@ -87,7 +90,7 @@ p_scalars <- ggplot(scalars_p,
   theme(strip.text = element_text(face = "bold"),
         axis.text.y = element_text(size = 9))
 
-ggsave(file.path(PATHS$figs_dir, "english_ablations_scalars.png"),
+ggsave(file.path(PATHS$figs_dir, "longitudinal", "english_ablations_scalars.png"),
        p_scalars, width = 11, height = 6, dpi = 150)
 cat("Wrote english_ablations_scalars.png\n")
 
@@ -267,7 +270,7 @@ p_traj <- ggplot() +
   theme(legend.position = "top",
         strip.text = element_text(face = "bold"))
 
-ggsave(file.path(PATHS$figs_dir, "english_ablations_trajectory.png"),
+ggsave(file.path(PATHS$figs_dir, "longitudinal", "english_ablations_trajectory.png"),
        p_traj, width = 14, height = 4, dpi = 150)
 cat("Wrote english_ablations_trajectory.png\n")
 
@@ -306,7 +309,7 @@ if (nrow(xz) > 0) {
          subtitle = "Variants without per-child slopes are omitted") +
     theme_minimal(base_size = 11) +
     theme(strip.text = element_text(face = "bold"))
-  ggsave(file.path(PATHS$figs_dir, "english_ablations_xi_zeta.png"),
+  ggsave(file.path(PATHS$figs_dir, "longitudinal", "english_ablations_xi_zeta.png"),
          p_xz, width = 12, height = 3.5, dpi = 150)
   cat("Wrote english_ablations_xi_zeta.png\n")
 }

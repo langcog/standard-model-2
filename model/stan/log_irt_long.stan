@@ -85,8 +85,14 @@ transformed parameters {
     L_scaled[2, 2] = sigma_child[2] * L_child[2, 2];
     child_effs = (L_scaled * z_child)';
   }
-  vector[I] xi   = mu_r + child_effs[, 1];
-  vector[I] zeta = child_effs[, 2];
+  // Sum-to-zero centering on each random-effect column. Without this
+  // the (delta, mean(zeta)) split is partially unidentified: the
+  // likelihood only sees (1 + delta + zeta_i) so the random-effect
+  // mean can absorb part of the population slope. Centering forces
+  // delta to carry the full population slope and zeta_i to be
+  // deviations centered at 0. Same for xi: its mean should equal mu_r.
+  vector[I] xi   = mu_r + child_effs[, 1] - mean(child_effs[, 1]);
+  vector[I] zeta = child_effs[, 2] - mean(child_effs[, 2]);
   real<lower=0> sigma_zeta = sigma_child[2];
 
   vector[J] psi;

@@ -106,11 +106,21 @@ transformed parameters {
     matrix[3, 3] L_scaled = diag_pre_multiply(sigma_child, L_child);
     child_effs = (L_scaled * z_child)';
   }
-  vector[I] log_alpha = child_effs[, 1];
-  vector[I] zeta      = child_effs[, 2];
-  vector[I] rtslope   = child_effs[, 3];
+  // Sum-to-zero centering on every random-effect column. Without this
+  // the (delta, mean(zeta)) and (mu_rtslope, mean(rtslope)) splits
+  // are partially unidentified -- each random-effect mean can absorb
+  // part of its corresponding population fixed effect. Centering pins
+  // the means at 0 so the fixed effects carry their full intended
+  // role.
+  vector[I] log_alpha = child_effs[, 1] - mean(child_effs[, 1]);
+  vector[I] zeta      = child_effs[, 2] - mean(child_effs[, 2]);
+  vector[I] rtslope   = child_effs[, 3] - mean(child_effs[, 3]);
 
-  vector[I] log_r_dev = sigma_r * log_r_dev_raw;
+  // Center log_r_dev too so mu_r captures the full population mean
+  // input rate; otherwise log_r_dev's mean and log_alpha's mean
+  // both contribute to E[xi] - mu_r.
+  vector[I] log_r_dev_uncentered = sigma_r * log_r_dev_raw;
+  vector[I] log_r_dev = log_r_dev_uncentered - mean(log_r_dev_uncentered);
   vector[I] xi = mu_r + log_r_dev + log_alpha;
 
   vector[J] psi;

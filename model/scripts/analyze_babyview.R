@@ -19,6 +19,9 @@ bundle <- load_dataset_bundle("babyview")
 sd_    <- bundle$stan_data
 draws  <- as_draws_df(fit)
 
+OUT_FIGS <- file.path(PATHS$figs_dir, "io")
+dir.create(OUT_FIGS, recursive = TRUE, showWarnings = FALSE)
+
 cat(sprintf("BabyView io_slopes: I=%d, A=%d, V=%d, J=%d, N=%d\n",
             sd_$I, sd_$A, sd_$V, sd_$J, sd_$N))
 
@@ -239,15 +242,15 @@ p_traj <- ggplot() +
 # ---- 4. Compose ---- #
 out <- (p_scalars / p_input / p_traj) +
   plot_layout(heights = c(1, 1.2, 1.2))
-ggsave(file.path(PATHS$figs_dir, "babyview_io_summary.png"),
+ggsave(file.path(PATHS$figs_dir, "io", "babyview_io_summary.png"),
        out, width = 9, height = 12, dpi = 150)
 cat("Wrote model/figs/babyview_io_summary.png\n")
 
 # Save individual plots too for clean inclusion
-ggsave(file.path(PATHS$figs_dir, "babyview_io_scalars.png"),
+ggsave(file.path(PATHS$figs_dir, "io", "babyview_io_scalars.png"),
        p_scalars, width = 7, height = 4, dpi = 150)
-ggsave(file.path(PATHS$figs_dir, "babyview_io_input.png"),
+ggsave(file.path(PATHS$figs_dir, "io", "babyview_io_input.png"),
        p_input, width = 8, height = 5, dpi = 150)
-ggsave(file.path(PATHS$figs_dir, "babyview_io_trajectory.png"),
+ggsave(file.path(PATHS$figs_dir, "io", "babyview_io_trajectory.png"),
        p_traj, width = 8, height = 5, dpi = 150)
 cat("Wrote individual panel files too.\n")

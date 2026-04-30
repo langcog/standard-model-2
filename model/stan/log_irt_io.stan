@@ -91,9 +91,22 @@ parameters {
 }
 
 transformed parameters {
-  vector[I] log_r_true = mu_r + sigma_r * log_r_true_raw;
-  vector[I] log_alpha  = sigma_alpha * log_alpha_raw;
-  vector[I] zeta       = sigma_zeta  * zeta_raw;
+  // Sum-to-zero centering on each per-child latent. Without this the
+  // (mu_r, mean(log_r_true)) split (and (delta, mean(zeta)) split)
+  // are partially unidentified -- the random-effect means can absorb
+  // part of the corresponding population fixed effect. Centering
+  // pins those means and lets mu_r / delta carry their intended role.
+  vector[I] log_r_true_dev_uncentered = sigma_r * log_r_true_raw;
+  vector[I] log_r_true_dev = log_r_true_dev_uncentered
+                              - mean(log_r_true_dev_uncentered);
+  vector[I] log_r_true     = mu_r + log_r_true_dev;
+
+  vector[I] log_alpha_uncentered = sigma_alpha * log_alpha_raw;
+  vector[I] log_alpha = log_alpha_uncentered - mean(log_alpha_uncentered);
+
+  vector[I] zeta_uncentered = sigma_zeta * zeta_raw;
+  vector[I] zeta = zeta_uncentered - mean(zeta_uncentered);
+
   vector[I] xi         = log_r_true + log_alpha;
 
   vector[J] psi;
