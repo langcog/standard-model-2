@@ -1,0 +1,373 @@
+\documentclass[aspectratio=169,t]{beamer}
+
+% Clean academic look: white background, no decorations
+\usetheme{default}
+\setbeamertemplate{navigation symbols}{}
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{normal text}{fg=black}
+\setbeamercolor{frametitle}{fg=black}
+\setbeamerfont{frametitle}{size=\large, series=\bfseries}
+\setbeamertemplate{frametitle}{%
+  \vspace{0.6em}\hspace{0.5em}\insertframetitle\par}
+\setbeamertemplate{footline}{%
+  \hfill\scriptsize\color{gray!70}\insertframenumber\;/\;\inserttotalframenumber\hspace{1em}\vspace{0.4em}}
+\setbeamertemplate{itemize item}{\textbullet}
+\setbeamertemplate{itemize subitem}{--}
+
+\usepackage{booktabs}
+\usepackage{amsmath, amssymb}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{tabularx}
+\usepackage{array}
+
+% Compact tables
+\renewcommand{\arraystretch}{1.05}
+
+% Path for figures (relative to this .tex's compile dir)
+\graphicspath{{../../model/figs/}{../../model/figs/longitudinal/}{../../model/figs/io/}{../../model/figs/proc/}}
+
+% Convenience commands
+\newcommand{\pia}{\pi_{\alpha}}
+\newcommand{\sigxi}{\sigma_{\xi}}
+\newcommand{\siga}{\sigma_{\alpha}}
+\newcommand{\sigr}{\sigma_{r}}
+\newcommand{\sigz}{\sigma_{\zeta}}
+\newcommand{\siglam}{\sigma_{\lambda}}
+\newcommand{\delt}{\delta}
+
+\title{\bfseries A Bayesian Standard Model of Early Word Learning}
+\subtitle{Joint inference across vocabulary, input, and processing data}
+\author{Michael C.\ Frank}
+\institute{\small Stanford University}
+\date{April 2026}
+
+\begin{document}
+
+% =====================================================================
+\begin{frame}[plain]
+\titlepage
+\end{frame}
+
+% =====================================================================
+\begin{frame}{Goal: model how language input drives vocabulary learning}
+
+A unified statistical model of early word learning, organized around
+four research questions:
+
+\vspace{0.6em}
+\begin{description}
+\item[\textbf{RQ1.}] How well does word frequency reconstruct word
+  difficulty? \par
+  \emph{i.e., is $\psi_j \approx -\log p_j$ enough?}
+\item[\textbf{RQ2.}] When does word learning start? \par
+  \emph{is start time $s$ identifiable from data?}
+\item[\textbf{RQ3.}] Does vocabulary growth accelerate over development?\par
+  \emph{is $\delta$ greater than 0?}
+\item[\textbf{RQ4.}] How much of between-child vocabulary variance is
+  driven by input rate vs.\ learning efficiency? \par
+  \emph{what is $\pi_\alpha = \siga^2 / (\siga^2 + \sigr^2)$?}
+\end{description}
+
+\vspace{0.6em}
+\small
+\textit{Successor to Kachergis, Marchman, \& Frank (2021):
+``Toward a standard model of early language learning.''}
+
+\end{frame}
+
+% =====================================================================
+\begin{frame}{Schematic model: bucket-fill metaphor + item-response theory}
+
+\begin{columns}[T, onlytextwidth]
+\column{0.55\textwidth}
+\textbf{Two cascaded ideas:}
+\begin{enumerate}
+\item \emph{Accumulator (Kachergis et al.\ 2021).}
+  Each word is a bucket; child hears tokens at rate $r_i \cdot p_j$;
+  efficiency $\alpha_i$ determines fraction retained.
+\item \emph{Item-Response Theory.}
+  Per-word difficulty $\psi_j$ controls how many ``filled'' tokens
+  it takes for the child to know the word.
+\end{enumerate}
+
+\vspace{0.8em}
+\small
+Per-child latents
+$\xi_i = \log r_i + \log \alpha_i$ (input + efficiency) and
+$\zeta_i$ (per-child slope deviation).
+
+Per-word latents $\psi_j$ (difficulty) and optionally $\lambda_j$ (2PL
+discrimination).
+
+\column{0.45\textwidth}
+\centering
+\fbox{\begin{minipage}{0.95\linewidth}
+\centering\vspace{0.5em}
+\textit{[ insert bucket schematic from \\ Kachergis, Marchman, Frank 2021 ]} \\[0.4em]
+\scriptsize\color{gray}
+$r_i \cdot p_j \cdot \alpha_i \;\longrightarrow\;$ bucket $j$ for child $i$ \\[0.2em]
+fills past threshold $\psi_j$ at age $t \implies$ ``produces'' it
+\vspace{0.5em}
+\end{minipage}}
+\end{columns}
+
+\end{frame}
+
+% =====================================================================
+\begin{frame}{Model details}
+
+\textbf{Linear predictor (per child $i$, item $j$, age $t$):}
+\[
+\eta_{ijt} = \lambda_j \big[\,
+  \xi_i + \log p_j + \log H
+  + (1 + \delta + \zeta_i)\,\log\!\tfrac{t - s}{a_0}
+  - \psi_j
+\,\big]
+\]
+\[
+P(\text{produces}_{ijt} = 1) = \mathrm{logit}^{-1}(\eta_{ijt})
+\]
+
+\vspace{0.5em}
+\textbf{Per-child latents.}
+$(\log\alpha_i, \zeta_i) \sim \mathrm{MVN}\!\big(0,\Sigma\big)$
+with LKJ prior on the correlation; $\log r_i \sim N(\mu_r, \sigr)$
+independent. \emph{Sum-to-zero centering on each random effect}
+identifies $\delta$ (population slope) separately from
+$\mathrm{mean}(\zeta_i)$.
+
+\vspace{0.5em}
+\textbf{Lean baseline + opt-in variants.}
+Pin $s\!=\!0$, $\siglam\!=\!0$, $\sigz\!=\!0$ by default; variants
+\texttt{slopes}, \texttt{2pl}, \texttt{free\_s}, \texttt{fix\_delta}
+opt in.
+
+\vspace{0.5em}
+\textbf{$\sigr$ pinned externally} from Sperry / Hart-Risley /
+Weisleder-Fernald data; lets the model decompose
+$\sigxi^2 = \sigr^2 + \siga^2$ and report $\pia$.
+
+\end{frame}
+
+% =====================================================================
+\begin{frame}{Main longitudinal sample: Wordbank English + Norwegian}
+
+\textbf{Data.} Wordbank longitudinal CDIs (WG $\cup$ WS forms).
+Children with $\ge 2$ admins; both forms count toward the same child.
+
+\vspace{0.6em}
+\begin{tabular}{lrrr}
+\toprule
+ & N children & N admins & age range (mo) \\
+\midrule
+English (American) & 200 & $\sim$808 & 8--32 \\
+Norwegian          & 200 & $\sim$1\,594 & 8--32 \\
+\bottomrule
+\end{tabular}
+
+\vspace{1em}
+\textbf{Stratified subsampling.}
+\begin{itemize}
+\item \textbf{Children}: 4 age-bins on median admin age, equal $n$ per
+  bin; favor those with most admins / longest spans.
+\item \textbf{Items}: $4 \times 4$ stratification on (lexical class
+  $\times$ $\log p_j$ quartile). 200 items kept.
+\end{itemize}
+
+\vspace{0.5em}
+\textbf{Stan.} \texttt{log\_irt\_long.stan}; 4 chains $\times$ 1000
+iter $\times$ 500 warmup; adapt\_delta = 0.95; runs in 3--8 hours
+on Sherlock.
+
+\end{frame}
+
+% =====================================================================
+\begin{frame}{Results: lean baseline (English, slopes only)}
+
+\begin{columns}[T, onlytextwidth]
+\column{0.45\textwidth}
+\textbf{Headline scalars} (post.\ med.\ {[}95\% CrI{]}):
+\vspace{0.3em}
+\small
+\begin{tabular}{lr}
+\toprule
+\multicolumn{2}{l}{\textbf{Population}} \\
+\midrule
+$\siga$    & 1.83 \,[1.65,\,2.04] \\
+$\sigxi$   & 1.90 \,[1.73,\,2.11] \\
+$\sigz$    & 3.48 \,[3.05,\,3.96] \\
+$\rho_{\xi\zeta}$ & 0.40 \,[0.27,\,0.53] \\
+$\delt$    & 9.39 \,[8.58,\,10.2] \\
+$s$        & 0.52 \,(pinned) \\
+$\boldsymbol{\pia}$ & \textbf{0.913 \,[0.901,\,0.926]} \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.4em}
+\textit{Efficiency variance dominates input variance: $\pia \approx 0.91$.}
+
+\column{0.55\textwidth}
+\centering
+\includegraphics[width=\linewidth]{english_ablations_trajectory.png} \\[-0.4em]
+\scriptsize \emph{Lean reference panel: solid steel and dashed orange
+coincide $\Rightarrow$ population MVN matches fitted-kid mean. Model
+is well-identified after sum-to-zero fix.}
+\end{columns}
+
+\end{frame}
+
+% =====================================================================
+\begin{frame}{Ablations: what each component buys you}
+
+\centering
+\includegraphics[width=0.62\linewidth]{english_ablations_scalars.png}
+
+\vspace{0.1em}
+\footnotesize
+\begin{itemize}\setlength\itemsep{0.05em}
+\item \textbf{Pin $\delta\!=\!0$}: population MVN no longer matches
+  data; $\sigz\!\to\!35$ trying to compensate.
+  \textbf{$\delta$ is load-bearing.}
+\item \textbf{Drop slopes}: population fit preserved; slopes matter
+  for per-child trajectories, not population mean.
+\item \textbf{Free $s$}: $s$ wanders, other params little affected.
+\item \textbf{Add 2PL} ($\siglam\!\approx\!0.31$): item discrimination
+  real but population-averaged-out.
+\end{itemize}
+
+\end{frame}
+
+% =====================================================================
+\begin{frame}{Why we want input-observed datasets}
+
+The longitudinal fit \textbf{infers} $\sigr$ from external Sperry-style
+priors. To \emph{measure} between-child input variance directly, we
+need datasets with per-child observed input rates.
+
+\vspace{0.6em}
+\begin{tabularx}{\linewidth}{lXX}
+\toprule
+& \textbf{BabyView} (Long et al.\ 2025) &
+\textbf{SEEDLingS} (Bergelson; Egan-Dailey 2025) \\
+\midrule
+Recording channel & head-mounted body camera + transcript & passive
+LENA all-day audio \\
+Observer effect   & \textbf{yes} ($\beta_{\mathrm{react}}$ free) &
+\textbf{no} ($\beta_{\mathrm{react}}$ pinned at 0) \\
+N kids (post-link) & 20 & 44 \\
+CDI form          & WG $\cup$ WS, longitudinal & WG, 6--18\,mo \\
+Per-recording rate & $\log r^{\mathrm{obs}}_v$ from FEM/MAL tokens &
+$\log r^{\mathrm{obs}}_v$ from LENA AWC \\
+\bottomrule
+\end{tabularx}
+
+\vspace{0.4em}
+\textbf{Modeling.} Same Stan model (\texttt{log\_irt\_io.stan});
+$\beta_{\mathrm{react}}$ on/off via dataset-level prior.
+
+\end{frame}
+
+% =====================================================================
+\begin{frame}{IO results: $\pia$ replicates across samples}
+
+\begin{columns}[T, onlytextwidth]
+\column{0.5\textwidth}
+\centering
+\small\textbf{BabyView io\_slopes} (N=20)
+\includegraphics[width=\linewidth]{babyview_io_input.png}
+
+\column{0.5\textwidth}
+\centering
+\small\textbf{SEEDLingS io\_slopes} (N=44)
+\includegraphics[width=\linewidth]{seedlings_io_input.png}
+\end{columns}
+
+\vspace{0.2em}
+\centering
+\footnotesize
+\begin{tabular}{lrrrr}
+\toprule
+dataset & N kids & $\pia$ & $\delt$ & $\siga$ \\
+\midrule
+English (long\_slopes)        & 200 & 0.91 [0.90, 0.93] & 9.39 & 1.83 \\
+BabyView (io\_slopes)         &  20 & 0.86 [0.73, 0.94] & 6.40 & 1.20 \\
+SEEDLingS (io\_slopes)        &  44 & \textbf{0.99 [0.99, 1.00]} & 8.04 & 2.59 \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.1em}
+\scriptsize\textit{Three samples, two input-observation methods,
+one unobserved-input baseline: efficiency variance dominates.}
+
+\end{frame}
+
+% =====================================================================
+\begin{frame}{Peekbank experiment: LWL as a window onto $\log\alpha$}
+
+\textbf{Sample.} 62 Adams \& Marchman (2018) children with both LWL
+RT/accuracy from Peekbank (247 admins, 13--20\,mo) and item-level
+CDIs at 22 + 25\,mo from the Stanford TotLot 3 cohort.
+
+\vspace{0.4em}
+\textbf{Joint model} (\texttt{log\_irt\_long\_proc.stan}):
+\[
+\log \mathrm{rt}_{i,t} \sim \mathcal{N}\!\big(
+\mu_{rt} + \mu_{\mathrm{rtslope}}\,\ell_t
+\;-\; \boldsymbol{\gamma_{rt}}\,\log \alpha_i
+\;+\; \ell_t\,\mathrm{rtslope}_i,
+\;\sigma_{\mathrm{lwl}}\big)
+\]
+where $\ell_t = \log(t/a_0)$.
+$(\log \alpha, \zeta, \mathrm{rtslope}) \sim \mathrm{MVN}$
+with LKJ prior on the correlation matrix.
+
+\vspace{0.4em}
+\textbf{Smoke fit (laptop, 2 chains).}
+\begin{itemize}\setlength\itemsep{0.1em}
+\item $\boldsymbol{\gamma_{rt} = 0.073}$ \,[0.032,\,0.117] \;
+  -- bounded away from 0; each unit of $\log \alpha$
+   is worth \textasciitilde{}12\% lower mean RT.
+\item $\mu_{\mathrm{rtslope}} = -0.73$ \,[$-1.21$,\,$-0.28$]:
+  RT \emph{decreases} with age, expected.
+\item $\sigma_{\mathrm{rtslope}} = 0.74$: real per-child variation in
+  how fast RT improves.
+\end{itemize}
+
+\small\textit{Production fit (4 chains, full iter) running on Sherlock.}
+
+\end{frame}
+
+% =====================================================================
+\begin{frame}{Conclusions}
+
+\textbf{Substantive findings.}
+\begin{itemize}\setlength\itemsep{0.2em}
+\item $\pia \approx 0.86$--$0.99$ \emph{across three samples}: between-child
+  vocabulary variance is driven primarily by efficiency, not input rate.
+\item $\delta \approx 6$--$9$ \emph{across all variants}: vocabulary growth
+  genuinely accelerates with age; pinning $\delta = 0$ breaks
+  population fit.
+\item LWL processing speed informs $\log\alpha$ in the expected
+  direction; coupling $\gamma_{rt} > 0$ is bounded away from zero.
+\end{itemize}
+
+\vspace{0.4em}
+\textbf{Methodological contributions.}
+\begin{itemize}\setlength\itemsep{0.2em}
+\item Lean baseline + opt-in variant grammar: single Stan file fits
+  every variant via tight-prior toggles; pipelines share variants.
+\item Two-lever framework: variant grammar (per-fit toggles) vs.\
+  dataset-level constants ($\beta_{\mathrm{react}}$ on/off).
+\item Sum-to-zero centering on per-child latents: fixes
+  $(\delta, \mathrm{mean}(\zeta_i))$ under-identification that
+  inflated random-effect means.
+\end{itemize}
+
+\vspace{0.4em}
+\small\textit{Code, data, fits, and full explainer:
+\texttt{github.com/langcog/standard-model-2}}
+
+\end{frame}
+
+\end{document}
