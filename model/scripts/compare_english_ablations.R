@@ -91,96 +91,123 @@ ggsave(file.path(PATHS$figs_dir, "english_ablations_scalars.png"),
        p_scalars, width = 11, height = 6, dpi = 150)
 cat("Wrote english_ablations_scalars.png\n")
 
-# ---- 3. Per-admin predicted vocab vs observed ---- #
-# Strategy: under each fit, compute posterior-median P(produces) for
-# every (admin, item) cell, then sum within each admin to get
-# predicted total. Compare to observed admin total.
-get_admin_predictions <- function(variant) {
+# ---- 3. Population-level vocab trajectory (smooth grid) ---- #
+# For each variant, predict expected vocab at each age in a regular
+# grid by integrating over the population distribution of (xi, zeta).
+# Uses posterior medians of all parameters; samples N_DRAWS children
+# from MVN(mu_r, Sigma) where Sigma comes from sigma_xi, sigma_zeta,
+# rho_xi_zeta. This is the "fixed effects + population variance"
+# prediction, not the per-admin (which would condition on each
+# individual child's posterior).
+N_DRAWS <- 500
+AGE_GRID <- seq(11, 32, by = 0.25)
+
+get_population_trajectory <- function(variant) {
   path <- file.path(PATHS$fits_dir, sprintf("%s.rds", variant))
   if (!file.exists(path)) return(NULL)
   fit <- readRDS(path)
-  # Posterior of eta is too large; instead use posterior medians of
-  # each parameter and reconstruct eta. This is the "median fit" not
-  # a proper PPC, but cheap and adequate for trajectory inspection.
   draws <- as_draws_df(fit)
   med <- function(p) median(draws[[p]])
-  # Per-child / per-item / per-admin quantities:
-  xi   <- sapply(seq_len(sd_$I), function(i) median(draws[[sprintf("xi[%d]", i)]]))
-  zeta <- if ("zeta[1]" %in% names(draws))
-            sapply(seq_len(sd_$I),
-                   function(i) median(draws[[sprintf("zeta[%d]", i)]]))
-          else rep(0, sd_$I)
-  psi  <- sapply(seq_len(sd_$J),
-                 function(j) median(draws[[sprintf("psi[%d]", j)]]))
+
+  mu_r        <- sd_$mu_r       # data input, not a parameter
+  sigma_xi    <- med("sigma_xi")
+  has_zeta    <- "sigma_zeta" %in% names(draws) &&
+                 median(draws$sigma_zeta) > 0.01
+  sigma_zeta  <- if (has_zeta) med("sigma_zeta") else 0
+  rho_xi_zeta <- if (has_zeta && "rho_xi_zeta" %in% names(draws))
+                   med("rho_xi_zeta") else 0
+
+  psi <- sapply(seq_len(sd_$J),
+                function(j) median(draws[[sprintf("psi[%d]", j)]]))
   log_lambda <- if ("log_lambda[1]" %in% names(draws))
                   sapply(seq_len(sd_$J),
                          function(j) median(draws[[sprintf("log_lambda[%d]", j)]]))
                 else rep(0, sd_$J)
+  lambda <- exp(log_lambda)
+
   s     <- med("s")
   delta <- med("delta")
   log_p <- log(bundle$word_info$prob)
   log_H <- sd_$log_H
   a0    <- sd_$a0
 
-  # Per-admin-item linear predictor
-  # eta = lambda * (xi + log_p + log_H + (1 + delta + zeta) * log((age - s)/a0) - psi)
-  ai <- sapply(admin_info$age, function(a) max(a - s, 0.01))
-  log_age <- log(ai / a0)
-
-  # Build a per-admin total predicted score by summing inv_logit(eta)
-  ii_per_admin <- admin_info$ii
-  pred_total <- numeric(nrow(admin_info))
-  obs_total  <- numeric(nrow(admin_info))
-  for (k in seq_len(nrow(admin_info))) {
-    i <- ii_per_admin[k]
-    eta <- exp(log_lambda) * (xi[i] + log_p + log_H +
-                              (1 + delta + zeta[i]) * log_age[k] - psi)
-    pred_total[k] <- sum(plogis(eta))
-    # Observed: count of produces in this admin
-    obs_total[k] <- sum(df$produces[df$aa == admin_info$aa[k]])
+  # Sample N_DRAWS children from population distribution. If
+  # sigma_zeta is effectively pinned at 0 (no slopes), draw only xi.
+  if (sigma_zeta > 0.01) {
+    Sigma <- matrix(c(sigma_xi^2,
+                      rho_xi_zeta * sigma_xi * sigma_zeta,
+                      rho_xi_zeta * sigma_xi * sigma_zeta,
+                      sigma_zeta^2), 2, 2)
+    Z <- MASS::mvrnorm(N_DRAWS, mu = c(mu_r, 0), Sigma = Sigma)
+    xi_draws   <- Z[, 1]
+    zeta_draws <- Z[, 2]
+  } else {
+    xi_draws   <- rnorm(N_DRAWS, mu_r, sigma_xi)
+    zeta_draws <- rep(0, N_DRAWS)
   }
 
-  tibble(variant = variant,
-         age = admin_info$age,
-         pred_total = pred_total,
-         obs_total  = obs_total,
-         ii         = ii_per_admin)
+  # For each age + each draw, compute predicted vocab total
+  # Vectorize: for each age, build matrix [N_DRAWS x J] of eta values
+  out_rows <- vector("list", length(AGE_GRID))
+  for (k in seq_along(AGE_GRID)) {
+    a   <- AGE_GRID[k]
+    ae  <- max(a - s, 0.01)
+    la  <- log(ae / a0)
+    # eta_{nj} = lambda_j * (xi_n + log_p_j + log_H +
+    #                        (1 + delta + zeta_n) * la - psi_j)
+    base_n <- xi_draws + log_H + (1 + delta + zeta_draws) * la
+    # outer term: base_n  +  log_p[j] - psi[j]
+    eta <- outer(base_n, log_p - psi, "+")    # N_DRAWS x J
+    eta <- sweep(eta, 2, lambda, "*")
+    p   <- plogis(eta)
+    vocab_per_draw <- rowSums(p)
+    out_rows[[k]] <- tibble(age = a,
+                            mean = mean(vocab_per_draw),
+                            lo10 = quantile(vocab_per_draw, 0.10),
+                            hi90 = quantile(vocab_per_draw, 0.90))
+  }
+  bind_rows(out_rows) %>% mutate(variant = variant)
 }
 
-cat("Computing admin-level predictions for each variant...\n")
-preds <- bind_rows(lapply(names(VARIANTS), function(v) {
+cat("Computing population-level trajectories...\n")
+set.seed(20260429)
+pop_traj <- bind_rows(lapply(names(VARIANTS), function(v) {
   cat("  ", v, "\n")
-  get_admin_predictions(v)
+  get_population_trajectory(v)
 })) %>%
   mutate(variant_label = factor(VARIANTS[variant],
                                 levels = unname(VARIANTS)))
 
-# Population mean vocab trajectory: bin by age, mean obs and pred
-traj <- preds %>%
+# Observed: bin actual admin totals by integer age
+obs_bins <- df %>%
+  group_by(aa) %>%
+  summarise(age = first(admin_info$age[admin_info$aa == first(aa)]),
+            obs_total = sum(produces), .groups = "drop") %>%
   mutate(age_bin = round(age)) %>%
-  group_by(variant_label, age_bin) %>%
-  summarise(n = n(),
-            obs_mean  = mean(obs_total),
-            pred_mean = mean(pred_total),
-            obs_sd    = sd(obs_total),
-            pred_sd   = sd(pred_total),
-            .groups = "drop") %>%
+  group_by(age_bin) %>%
+  summarise(n = n(), obs_mean = mean(obs_total), .groups = "drop") %>%
   filter(n >= 5)
 
-p_traj <- ggplot(traj, aes(x = age_bin)) +
-  geom_ribbon(aes(ymin = pred_mean - pred_sd,
-                  ymax = pred_mean + pred_sd),
-              fill = "steelblue", alpha = 0.18) +
-  geom_line(aes(y = pred_mean, color = "fitted"), linewidth = 0.8) +
-  geom_point(aes(y = obs_mean, color = "observed"),
+p_traj <- ggplot() +
+  geom_ribbon(data = pop_traj,
+              aes(x = age, ymin = lo10, ymax = hi90),
+              fill = "steelblue", alpha = 0.20) +
+  geom_line(data = pop_traj,
+            aes(x = age, y = mean, color = "fitted (pop. mean)"),
+            linewidth = 0.8) +
+  geom_point(data = obs_bins,
+             aes(x = age_bin, y = obs_mean,
+                 color = "observed (admin mean)"),
              size = 1.2, alpha = 0.85) +
   facet_wrap(~variant_label, nrow = 1) +
-  scale_color_manual(values = c(fitted = "steelblue",
-                                observed = "firebrick"),
+  scale_color_manual(values = c("fitted (pop. mean)" = "steelblue",
+                                "observed (admin mean)" = "firebrick"),
                      name = NULL) +
   labs(x = "age (months)", y = "mean vocab (out of J=200)",
-       title = "Population mean vocab trajectory: fitted vs observed",
-       subtitle = sprintf("English longitudinal, 5 variants. Bin: rounded age, n>=5 admins")) +
+       title = "Population mean vocab trajectory (smooth) vs observed bin means",
+       subtitle = sprintf(paste0("Fitted: posterior-median fixed effects + ",
+                                  "MVN(mu_r, Sigma) over (xi, zeta) integrated. ",
+                                  "Ribbon: 80%% population spread."))) +
   theme_minimal(base_size = 11) +
   theme(legend.position = "top",
         strip.text = element_text(face = "bold"))
