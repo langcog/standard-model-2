@@ -161,6 +161,88 @@ where:
 \end{frame}
 
 % =====================================================================
+\begin{frame}[fragile]{Factorization: ability vs.\ difficulty}
+
+The same equation regrouped as a 2PL IRT factorization:
+\[
+\eta_{ijt} \;=\; \lambda_j \cdot \big(\,\theta_{it} \;-\; \beta_j\,\big)
+\]
+
+\vspace{0.4em}
+\begin{columns}[T, onlytextwidth]
+
+% ---------- Ability constellation ----------
+\column{0.50\textwidth}
+\centering
+\textbf{Ability} (child $+$ age):\\[0.3em]
+$\theta_{it} = \xi_i + (1{+}\delta{+}\zeta_i)\,\log\!\tfrac{t-s}{a_0}$
+
+\vspace{0.8em}
+\begin{tikzpicture}[
+  every node/.style={inner sep=2pt},
+  ann/.style={font=\scriptsize\itshape, color=blue!40!black, align=center},
+  arrow/.style={->, blue!25!black, semithick, shorten >=2pt, shorten <=2pt}
+]
+\matrix[matrix of nodes, column sep=2pt, nodes={font=\small},
+        ampersand replacement=\&] (eqA) {
+  |[name=Axi]| $\xi_i$ \&
+  $+$ \&
+  |[name=Aslope]| $(1{+}\delta{+}\zeta_i)$ \&
+  $\cdot$ \&
+  |[name=Aage]| $\log\!\tfrac{t-s}{a_0}$ \\
+};
+\node[ann, below=2.4em of Axi]    (aAxi)   {child intercept\\$\log r_i\!+\!\log\alpha_i$};
+\draw[arrow] (aAxi) -- (Axi);
+\node[ann, above=2.4em of Aslope] (aAslope){pop.\ accel.\ $\delta$\\$+$ per-child $\zeta_i$};
+\draw[arrow] (aAslope) -- (Aslope);
+\node[ann, below=2.4em of Aage]   (aAage)  {start time $s$};
+\draw[arrow] (aAage) -- (Aage);
+\end{tikzpicture}
+
+% ---------- Difficulty constellation ----------
+\column{0.50\textwidth}
+\centering
+\textbf{Difficulty} (item):\\[0.3em]
+$\beta_j = \psi_j - \log p_j - \log H$
+
+\vspace{0.8em}
+\begin{tikzpicture}[
+  every node/.style={inner sep=2pt},
+  ann/.style={font=\scriptsize\itshape, color=red!40!black, align=center},
+  arrow/.style={->, red!30!black, semithick, shorten >=2pt, shorten <=2pt}
+]
+\matrix[matrix of nodes, column sep=3pt, nodes={font=\small},
+        ampersand replacement=\&] (eqB) {
+  |[name=Bpsi]| $\psi_j$ \&
+  $-$ \&
+  |[name=Blogp]| $\log p_j$ \&
+  $-$ \&
+  |[name=BlogH]| $\log H$ \\
+};
+\node[ann, above=2.4em of Bpsi]  (aBpsi)  {per-word log\\threshold tokens\\(class-hierarchical)};
+\draw[arrow] (aBpsi) -- (Bpsi);
+\node[ann, below=2.4em of Blogp] (aBlogp) {corpus frequency\\(unit coefficient)};
+\draw[arrow] (aBlogp) -- (Blogp);
+\node[ann, below=2.4em of BlogH] (aBlogH) {hours/month\\(constant)};
+\draw[arrow] (aBlogH) -- (BlogH);
+\end{tikzpicture}
+
+\end{columns}
+
+\vspace{0.6em}
+\footnotesize
+\textbf{Why split it.}  $\log p_j$ and $\log H$ together convert
+``probability'' into ``expected tokens per month at unit input rate,''
+so they pair naturally on the item side.  Each ablation lives on
+exactly one side: \textit{pin $\delta=0$, free $s$, drop $\zeta_i$}
+touch \textbf{ability}; \textit{drop class hierarchy, class-specific
+$\beta_c$} (planned) touch \textbf{difficulty}; \textit{2PL}
+($\lambda_j$) is a multiplier on the $(\theta-\beta)$ gap.  LWL
+processing speed (Peekbank) informs $\theta$ via $\log\alpha_i$.
+
+\end{frame}
+
+% =====================================================================
 \begin{frame}{Model variants}
 
 \textbf{Per-child latents.}
