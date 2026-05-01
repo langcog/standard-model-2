@@ -155,6 +155,12 @@ variant_hyperpriors <- function(name) {
     fix_delta     = list(delta_prior_mean = 0, delta_prior_sd = 0.001),
     fix_delta_slopes = list(delta_prior_mean = 0, delta_prior_sd = 0.001,
                             sigma_zeta_prior_sd = 1),
+    # Difficulty-side ablations
+    class_beta        = list(beta_c_prior_sd = 0.5),
+    class_beta_slopes = list(beta_c_prior_sd = 0.5,
+                             sigma_zeta_prior_sd = 1),
+    no_class          = list(),  # data-side override; see variant_data_overrides
+    no_class_slopes   = list(sigma_zeta_prior_sd = 1),
     # Legacy variants for re-loading old fits / explicit comparison
     fix_s         = list(s_prior_mean = 2, s_prior_sd = 0.001),
     both_fixed    = list(delta_prior_mean = 0, delta_prior_sd = 0.001,
@@ -163,6 +169,21 @@ variant_hyperpriors <- function(name) {
                            delta_prior_mean = 0, delta_prior_sd = 0.001),
     stop(sprintf("Unknown variant: %s", name))
   )
+}
+
+# Some variants need to mutate stan_data structure, not just priors.
+# Currently `no_class` is the only such variant: it collapses the
+# class-hierarchical prior on psi_j into a single global N(mu, tau)
+# by overriding cc and C in stan_data. Equivalent to "C = 1 class".
+variant_data_overrides <- function(stan_data, variant) {
+  base <- sub("^(long_proc_|long_|io_)", "", variant)
+  if (base %in% c("no_class", "no_class_slopes")) {
+    stan_data$cc <- rep(1L, length(stan_data$cc))
+    stan_data$C  <- 1L
+    message(sprintf("[variant %s] data override: cc <- 1, C <- 1 (class hierarchy disabled)",
+                    variant))
+  }
+  stan_data
 }
 
 # ===========================================================================

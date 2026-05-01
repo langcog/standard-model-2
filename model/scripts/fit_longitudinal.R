@@ -48,6 +48,9 @@ overrides <- variant_hyperpriors(variant)
 # Re-apply DEFAULT_PRIORS at fit time so stale priors baked into older
 # bundles (e.g., the s-prior boundary bug) are overridden by config.R.
 stan_data <- modifyList(modifyList(base_data, DEFAULT_PRIORS), overrides)
+# Some variants need to mutate stan_data structure (e.g., no_class
+# collapses class hierarchy by overriding cc / C).
+stan_data <- variant_data_overrides(stan_data, variant)
 
 cat(sprintf("\n===== Fitting %s on %s =====\n", variant, dataset))
 cat("Hyperprior overrides:\n"); str(overrides)

@@ -446,6 +446,48 @@ production fit), `data/raw_data/peekbank/peekbank_2022_lwl_summary.csv`,
 
 ---
 
+## 🟡 10. Difficulty-side ablations (in progress)
+
+**Motivation.** A diagnostic pass over the existing ablation set
+(`compare_english_ability.R`, `compare_english_difficulty.R`) revealed
+that 4 of 5 ablations live on the **ability** side of the 2PL
+factorization
+$\eta_{ijt} = \lambda_j (\theta_{it} - \beta_j)$, with
+$\theta_{it} = \xi_i + (1{+}\delta{+}\zeta_i)\log\!((t-s)/a_0)$ and
+$\beta_j = \psi_j - \log p_j - \log H$. Only the 2PL variant touches
+the item-side, and even then through $\lambda_j$ (multiplier on the
+gap), not through the structure of $\beta_j$ itself. The diagnostic
+$\beta_j$ density across the 5 existing variants showed near-perfect
+correlation (r > 0.995) with small parallel translations: free_s
+shifts $\beta_j$ down by ~1.3 logits — a side-effect of ability-side
+changes, not a probe of difficulty structure.
+
+**Two new variants** to fill the gap:
+
+| variant | change | what it tests |
+|---|---|---|
+| `no_class_slopes` | data override: cc<-1, C<-1 (single global $\psi \sim N(\mu, \tau)$) | does lexical-class hierarchy add anything beyond per-word $\psi_j$ + frequency? |
+| `class_beta_slopes` | $\beta_c \sim N(1, 0.5)$ free per-class slope on $\log p_j$ | does frequency enter with class-specific weight (e.g., weaker for function words)? |
+
+**Implementation.** `class_beta` adds a new parameter `beta_c` to
+`log_irt_long.stan` controlled by the `beta_c_prior_sd` hyperprior in
+`DEFAULT_PRIORS` (pinned at 0.001 by default → all $\beta_c$ pinned at
+1, equivalent to the pre-change behavior). `no_class` is a data-side
+override applied via `variant_data_overrides()` in `helpers.R`.
+
+**Smoke fits** on a 30-admin English subset (2 chains × 60 iter,
+laptop) confirmed:
+- `long_slopes`: $\beta_c$ pinned at [1.00, 1.00, 1.00, 1.00] ✓
+- `long_class_beta_slopes`: $\beta_c$ freed to [0.63, 0.42, 0.33, 0.01]
+  (subset too small to interpret meaningfully; confirms identifiability)
+- `long_no_class_slopes`: data override applied (C=1), runs cleanly
+
+**Submission.** `sherlock/submit_difficulty_ablations.sh`. Will
+populate panels alongside the existing ablation comparison plots once
+fits complete.
+
+---
+
 ## Backlog (⚪)
 
 ### Data / robustness
@@ -480,8 +522,6 @@ production fit), `data/raw_data/peekbank/peekbank_2022_lwl_summary.csv`,
 - **Comprehension vs. production joint fit** on the WG form. Bivariate
   (ξ<sup>comp</sup>, ξ<sup>prod</sup>) with estimated correlation; tests
   whether "ability" has modality-specific components.
-- **Class-specific frequency slopes β_c.** Extension to RQ1 — tests
-  whether frequency matters less for function words.
 
 ### Instrumentation
 - **Observable.js app** for interactive exploration of the fitted

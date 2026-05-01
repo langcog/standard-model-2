@@ -10,8 +10,13 @@
 // - Global start time s, age rate-change exponent delta.
 //
 // Linear predictor:
-//   eta = lambda_j * [xi_i + log p_j + log H
+//   eta = lambda_j * [xi_i + beta_c[cc[j]] * log p_j + log H
 //                     + (1 + delta + zeta_i) * log((age_a - s)/a0) - psi_j]
+//
+// beta_c is a per-class log-p slope that is pinned at 1 by default
+// (tight prior beta_c_prior_sd ~ 0.001 in DEFAULT_PRIORS). The
+// `class_beta` variant frees it (e.g., 0.5) to test whether frequency
+// enters with class-specific weight.
 
 data {
   int<lower=1> N;                       // observations
@@ -45,6 +50,7 @@ data {
   real<lower=0> delta_prior_sd;
   real<lower=0> sigma_lambda_prior_sd;
   real<lower=0> sigma_zeta_prior_sd;
+  real<lower=0> beta_c_prior_sd;        // tight => beta_c pinned at 1
 }
 
 parameters {
@@ -64,6 +70,8 @@ parameters {
 
   vector[J] log_lambda_raw;
   real<lower=0> sigma_lambda;
+
+  vector[C] beta_c;                     // per-class log-p slope (pinned 1 by default)
 }
 
 transformed parameters {
@@ -126,6 +134,8 @@ model {
   log_lambda_raw ~ std_normal();
   sigma_lambda   ~ normal(0, sigma_lambda_prior_sd);
 
+  beta_c ~ normal(1, beta_c_prior_sd);
+
   // Likelihood
   vector[N] eta;
   {
@@ -141,7 +151,8 @@ model {
       zeta_per_obs[n] = zeta[ch];
     }
     vector[N] slope_per_obs = 1 + delta + zeta_per_obs;
-    vector[N] base = xi_per_obs + log_p[jj] + log_H
+    vector[N] beta_per_obs  = beta_c[cc[jj]];
+    vector[N] base = xi_per_obs + beta_per_obs .* log_p[jj] + log_H
                    + slope_per_obs .* log_age - psi[jj];
     eta = lambda[jj] .* base;
   }

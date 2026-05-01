@@ -67,7 +67,8 @@ DEFAULT_PRIORS <- list(
   delta_prior_mean = 0,
   delta_prior_sd   = 0.5,
   sigma_lambda_prior_sd = 0.001,   # no 2PL by default
-  sigma_zeta_prior_sd   = 0.001    # no slopes by default; opt in for longitudinal
+  sigma_zeta_prior_sd   = 0.001,   # no slopes by default; opt in for longitudinal
+  beta_c_prior_sd       = 0.001    # pin per-class log-p slope at 1; opt in via `class_beta`
 )
 
 ## Defaults for fitting.
