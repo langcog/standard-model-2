@@ -23,8 +23,8 @@ standard_model_2/
 │   ├── experiments.md              ← running log: each fit + backlog
 │   ├── model_summaries.md          ← literature review notes
 │   └── _archive/                   ← superseded standalone findings files
-├── sherlock/                       ← SLURM scripts for remote fits
-└── standard_model/                 ← original standard_model codebase (preproc + data)
+├── data/raw_data/                  ← raw external inputs (Sperry, BabyView, etc.)
+└── sherlock/                       ← SLURM scripts for remote fits
 ```
 
 ## Local workflow (small fits on your laptop)
@@ -60,11 +60,12 @@ cd standard_model_2
 # Local only — install R packages:
 Rscript sherlock/setup_R.R          # works both locally and on Sherlock
 
-# Locate your Wordbank preprocessed data at
-#   standard_model/scripts/data/engWS_preprocessed.Rdata
-# and hourly_tokens CSV at
-#   standard_model/scripts/data/hourly_tokens_Sperry_HartRisley.csv
-# (These ship with the original standard_model codebase.)
+# Wordbank longitudinal data is pulled by model/scripts/pull_longitudinal.R
+# (requires childesr / wordbankr; uses preprocessed bundles when available
+# at model/fits/long_subset_data.rds).
+#
+# The Sperry / Hart-Risley / Weisleder-Fernald per-recording rate CSV
+# lives at data/raw_data/sperry/hourly_tokens_Sperry_HartRisley.csv.
 
 # Sanity check
 make smoke
