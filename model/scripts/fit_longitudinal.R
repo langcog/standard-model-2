@@ -81,8 +81,13 @@ fit <- fit_variant(stan_data, tag = out_tag,
                    cfg = cfg,
                    model_path = stan_file)
 
-pars <- c("sigma_alpha", "pi_alpha", "sigma_xi", "s", "delta",
+pars <- c("sigma_alpha", "pi_alpha", "sigma_xi",
           "sigma_zeta", "rho_xi_zeta")
+if (is_lmm) {
+  pars <- c(pars, "beta_age")
+} else {
+  pars <- c(pars, "s", "delta")
+}
 if (grepl("2pl", variant)) pars <- c(pars, "sigma_lambda")
 print(summarize_fit(fit, pars = pars), digits = 3)
 

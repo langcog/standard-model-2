@@ -33,12 +33,21 @@ FITS <- list(
   list(group = "IO",        variant = "io_slopes",                  label = "BabyView"),
   list(group = "IO",        variant = "io_slopes_seedlings",        label = "SEEDLingS"),
   # Peekbank
-  list(group = "Proc",      variant = "long_proc_slopes",           label = "Stanford+LWL")
+  list(group = "Proc",      variant = "long_proc_slopes",           label = "Stanford+LWL"),
+  # Difficulty-side ablations (English & Norwegian where available)
+  list(group = "Difficulty", variant = "long_no_class_slopes",                label = "no_class (en)"),
+  list(group = "Difficulty", variant = "long_no_class_slopes_norwegian",      label = "no_class (nor)"),
+  list(group = "Difficulty", variant = "long_class_beta_slopes",              label = "class_beta (en)"),
+  list(group = "Difficulty", variant = "long_class_beta_slopes_norwegian",    label = "class_beta (nor)"),
+  # LMM (linear-in-age) comparison
+  list(group = "LMM",       variant = "long_lmm_slopes",            label = "LMM (en)"),
+  list(group = "LMM",       variant = "long_lmm_slopes_norwegian",  label = "LMM (nor)")
 )
 
 PARAMS <- c(
   "sigma_alpha", "sigma_xi", "sigma_zeta", "rho_xi_zeta",
-  "pi_alpha", "delta", "s", "sigma_lambda",
+  "pi_alpha", "delta", "s", "beta_age", "sigma_lambda",
+  "beta_c[1]", "beta_c[2]", "beta_c[3]", "beta_c[4]",
   "beta_react", "sigma_within", "sigma_r",
   "gamma_rt", "mu_rtslope", "sigma_rtslope", "sigma_lwl"
 )
@@ -85,6 +94,8 @@ print_wide("English")
 print_wide("Norwegian")
 print_wide("IO")
 print_wide("Proc")
+print_wide("Difficulty")
+print_wide("LMM")
 
 # ---- Save CSV for re-use ---- #
 out_csv <- file.path(PATHS$figs_dir, "results_summary.csv")
