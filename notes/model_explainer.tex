@@ -269,6 +269,47 @@ to 0 $\Rightarrow$ accumulation starts at birth.  Close to 12+
 $\Rightarrow$ delayed onset. The CDI is a production measure, so larger
 \(s\) than M\&P's \(\sim\)2 months (comprehension) is expected.
 
+\paragraph{Why we pin \(s\) by default.}
+Empirically, when \(s\) is freed jointly with \(\delta\), the two
+parameters trade off along a near-perfect ridge: posterior
+\(r(s, \delta) \approx -0.96\) on both English and Norwegian
+longitudinal fits.  In principle the pair is identifiable: setting
+\((1+\delta)\log(t-s) = (1+\delta')\log(t-s')\) for all \(t\) and
+differentiating in \(t\) gives
+\((1+\delta)/(t-s) = (1+\delta')/(t-s')\), forcing \(\delta=\delta'\)
+and \(s=s'\).  Practically the curve-shape difference between two
+points along the ridge is small.  For the English age range
+(16--30~mo), the ridge endpoints \((s, \delta) = (0.5, 9.4)\) and
+\((3, 8)\) produce \((1+\delta)\log\!((t-s)/a_0)\) curves that differ
+by only \(\sim 0.1\) logits in shape (after subtracting a constant
+that \(\xi_i\) absorbs). With Bernoulli observations and finite \(N\),
+that shape difference is at the noise floor. So \(s\) is
+\emph{near-non-identifiable in practice}, and the reported \(s\)
+posterior in any \texttt{free\_s} variant is only a coordinate choice
+along the ridge — it does not deliver an interpretable estimate of
+``onset of accumulation.''  We pin \(s\) at \(\sim 0\) (lean baseline)
+and treat \texttt{free\_s} as a robustness check, not a first-class
+estimate.
+
+\paragraph{Reference age \(a_0\) is dataset-specific.}
+\(a_0\) is the pivot at which \(\log_{age} = 0\) and so \(\theta_{it}
+= \xi_i\) (per-child intercept).  Setting a single global \(a_0=20\)
+across datasets makes \(\xi_i\) language-relative in a misleading way:
+when admin ages skew far from \(a_0\), the per-kid likelihood ridge in
+\((\xi_i, \zeta_i)\) is tilted by an amount proportional to
+\(\log(\bar t_i / a_0)\), pulling the marginal \(r(\xi, \zeta)\)
+across kids in one direction or the other.  We observed this as a
+spurious sign flip in \(\rho_{\xi\zeta}\) between English (median
+admin age 19; \(r=+0.39\)) and Norwegian (median admin age 26;
+\(r=-0.32\)) on the same model.  Re-evaluating each kid's \(\xi\) at
+their personal mid-observation age makes the flip vanish (Norwegian
+\(r\) becomes \(+0.08\)).  We therefore set \(a_0\) per dataset to the
+median admin age, in each \texttt{prepare\_*.R} script.  This is a
+reparameterization, not a model change: the likelihood, \(\delta\),
+and \(\zeta_i\) are invariant; only the \emph{interpretation} of
+\(\xi_i\) changes (from ``ability at 20~mo'' to ``ability at the
+dataset's median admin age'').
+
 \subsection*{RQ3 — acceleration}
 
 Single parameter \(\delta\). Headline posterior: \(\hat\delta\) with CrI.

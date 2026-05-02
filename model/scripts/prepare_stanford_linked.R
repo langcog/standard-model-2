@@ -113,6 +113,10 @@ N_lwl <- nrow(lwl)
 cat(sprintf("Bundle: I=%d, A=%d, J=%d, C=%d, N=%d, N_lwl=%d\n",
             I, A, J, C, nrow(cdi), N_lwl))
 
+# a_0 = median admin age (CDI side); used for both vocab and LWL log-age.
+a0_dataset <- round(median(admin_info$age))
+message(sprintf("  a0 (dataset median admin age) = %d", a0_dataset))
+
 prior_r <- load_input_rate_prior()
 
 stan_data <- c(
@@ -127,14 +131,14 @@ stan_data <- c(
     admin_age = admin_info$age,
     log_p = log(word_info$prob),
     log_H = MODEL_CONSTANTS$log_H,
-    a0    = MODEL_CONSTANTS$a0,
+    a0    = a0_dataset,
     mu_r = prior_r$mu_r,
     sigma_r = prior_r$sigma_r,
 
     # LWL side
     N_lwl = N_lwl,
     lwl_to_child = lwl$child_ii,
-    lwl_log_age  = log(lwl$lwl_age / MODEL_CONSTANTS$a0),
+    lwl_log_age  = log(lwl$lwl_age / a0_dataset),
     lwl_log_rt   = lwl$lwl_log_rt,
 
     # LWL priors. RT ~700 ms is typical at 22 mo, log(700) ~ 6.55.

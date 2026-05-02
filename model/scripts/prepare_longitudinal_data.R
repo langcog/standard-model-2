@@ -134,6 +134,15 @@ message(sprintf("  I=%d, A=%d, J=%d, C=%d, N=%d", I, A, J, C, nrow(d)))
 
 prior_r <- load_input_rate_prior()
 
+# a_0 is the reference age (where log_age = 0 and theta = xi). Set it to
+# the dataset's median admin age so xi is the per-child posterior at the
+# natural pivot of the data, not at an arbitrary global constant.
+# Using a global a_0 = 20 across datasets caused the per-kid (xi, zeta)
+# posterior ridge to tilt by an amount proportional to (median_age - 20),
+# producing a spurious cross-language sign flip in rho_xi_zeta.
+a0_dataset <- round(median(admin_info$age))
+message(sprintf("  a0 (dataset median admin age) = %d", a0_dataset))
+
 stan_data <- c(
   list(
     N = nrow(d),
@@ -145,7 +154,7 @@ stan_data <- c(
     admin_age = admin_info$age,
     log_p = log(word_info$prob),
     log_H = MODEL_CONSTANTS$log_H,
-    a0    = MODEL_CONSTANTS$a0,
+    a0    = a0_dataset,
     mu_r = prior_r$mu_r,
     sigma_r = prior_r$sigma_r
   ),

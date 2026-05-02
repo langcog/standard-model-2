@@ -188,7 +188,7 @@ stan_data <- c(
     admin_age = admin_info$age,
     log_p = log(word_info$prob),
     log_H = MODEL_CONSTANTS$log_H,
-    a0    = MODEL_CONSTANTS$a0,
+    a0    = round(median(admin_info$age)),  # dataset median admin age
 
     # Input-observed side: LENA AWC per recording
     V = V,

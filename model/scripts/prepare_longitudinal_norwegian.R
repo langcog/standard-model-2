@@ -152,6 +152,10 @@ message(sprintf("  I=%d, A=%d, J=%d, C=%d, N=%d", I, A, J, C, nrow(d)))
 # revisit.)
 prior_r <- load_input_rate_prior()
 
+# a_0 = dataset median admin age; see prepare_longitudinal_data.R for rationale.
+a0_dataset <- round(median(admin_info$age))
+message(sprintf("  a0 (dataset median admin age) = %d", a0_dataset))
+
 stan_data <- c(
   list(
     N = nrow(d),
@@ -163,7 +167,7 @@ stan_data <- c(
     admin_age = admin_info$age,
     log_p = log(word_info$prob),
     log_H = MODEL_CONSTANTS$log_H,
-    a0    = MODEL_CONSTANTS$a0,
+    a0    = a0_dataset,
     mu_r = prior_r$mu_r,
     sigma_r = prior_r$sigma_r
   ),

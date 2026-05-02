@@ -488,6 +488,45 @@ fits complete.
 
 ---
 
+## 🟢 11. Ability-side tradeoff diagnostics
+
+`model/scripts/ability_tradeoffs.R` produces two figures:
+
+**(A) (s, δ) joint posterior, lean_ref vs free_s, both languages.**
+With s pinned, modest negative correlation r ≈ -0.3. With s freed,
+the posterior collapses onto a 1-d ridge: r(s, δ) = -0.96 (English),
+-0.95 (Norwegian). s and δ are essentially one parameter when both
+free; (s=0.5, δ=9.4) and (s=3, δ=8.1) are equivalent points on the
+same ridge. **Practical (near-)non-identifiability.** In principle the
+pair is identifiable from the *shape* of (1+δ)·log((t-s)/a_0) — taking
+the derivative gives (1+δ)/(t-s), which depends differently on s and
+δ. Numerically over the data range (16-30 mo), shape difference
+between two ridge endpoints is ~0.1 logits — at the noise floor of
+Bernoulli observations after ξ_i absorbs the level shift. Pinning s
+in the lean baseline is therefore the right default; `free_s` is a
+robustness check, not a refinement.
+
+**(B) (ξ_i, ζ_i) per-kid scatter, English vs. Norwegian.** Raw r(ξ, ζ):
++0.39 (English), -0.32 (Norwegian). The flip survives subset filters
+(n_admins ≥ 4, no-ceiling), but **vanishes when ξ is re-centered at
+each kid's median admin age** (English +0.30, Norwegian +0.08). The
+flip is a parameterization artifact: ξ_i is "ability at a_0=20"; when
+admin ages skew far from a_0 (Norwegian median = 26 mo, 80% above
+a_0), the per-kid posterior ridge in (ξ, ζ) tilts and pulls the
+marginal r across kids. Consistent with the Wordbank-book finding
+that variance structure (MADM ≈ 1) is universal across languages.
+
+**Action taken.** All `prepare_*.R` scripts now set `a_0` to
+`round(median(admin_info$age))` per dataset, so ξ_i is the per-child
+posterior at the natural pivot of the data. This is a
+reparameterization (likelihood unchanged); existing fits are still
+valid but their ξ_i posteriors are interpretable at the old a_0=20.
+Re-fitting under the new bundles is queued for after the
+difficulty-side jobs land. See `model_explainer.tex` "Why we pin s"
+and "Reference age a_0 is dataset-specific" for the durable writeup.
+
+---
+
 ## Backlog (⚪)
 
 ### Data / robustness
