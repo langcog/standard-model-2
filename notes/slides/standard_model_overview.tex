@@ -79,6 +79,41 @@ four research questions:
 \end{frame}
 
 % =====================================================================
+\begin{frame}{Motivation: how much variation is there to explain?}
+
+\begin{columns}[T, onlytextwidth]
+
+\column{0.55\textwidth}
+Fit the simplest possible 1-PL IRT — \(P(y_{aj}=1) = \sigma(\theta_a - \beta_j)\) — to the longitudinal Wordbank data. No accumulator dynamics, just per-admin \(\theta_a\), per-item \(\beta_j\).
+
+\vspace{0.4em}
+\textbf{Population age slope:} 0.47 logits/mo.
+
+\textbf{Within-age SD}\,(\(\theta_a\)): 1.95 logits.
+
+\vspace{0.4em}
+\textbf{Translation:}
+\[
+\underbrace{\frac{\mathrm{SD}_{\mathrm{within-age}}}{\hat\beta_{\mathrm{age}}}}_{\text{months / SD}} \;=\; \frac{1.95}{0.47} \;\approx\; \mathbf{4.2~months}
+\]
+
+\textbf{And it grows with age:} 1.0 logit at 12--14\,mo (\(\sim\)2\,mo) \(\to\) 2.7 logits at 26--30\,mo (\(\sim\)5.8\,mo).  Children fan out, not converge.
+
+\column{0.45\textwidth}
+\centering
+\includegraphics[width=\linewidth]{precursor_trajectories.png}
+
+\vspace{0.6em}
+\footnotesize\textit{Per-admin \(\theta_a\) for each of \(\sim\)200 English children.  Median 4 admins/kid.  Black: pop.\ age slope.}
+\end{columns}
+
+\vspace{0.6em}
+\footnotesize
+\textbf{Why this matters for the model.}  A pure accumulator with constant per-child rate cannot produce growing spread.  We need age-varying child-level dynamics.  The remainder of this talk builds and tests a model family that does.
+
+\end{frame}
+
+% =====================================================================
 \begin{frame}{Schematic model: bucket-fill metaphor + item-response theory}
 
 \begin{columns}[c, onlytextwidth]

@@ -89,6 +89,59 @@ nested-family stages (M1--M5).}
 \label{tab:rq-map}
 \end{table}
 
+\section{Motivating the model: how much variation is there to explain?}
+\label{sec:precursor}
+
+Before fitting any accumulator model, it is worth asking how much
+between-child variation in language ability actually exists in the
+data, and how that variation relates to age-driven development. We
+ran the simplest possible 1-PL IRT —
+\(P(y_{aj} = 1) = \sigma(\theta_a - \beta_j)\), with one ability
+\(\theta_a\) per admin (\emph{not} per child) and one difficulty
+\(\beta_j\) per word — fit via \texttt{lme4::glmer} on the Wordbank
+English longitudinal sample. No time term, no frequency, no per-child
+structure. Just: how variable is ability across admins, and how does
+the population mean change with age?
+
+\paragraph{Two reference quantities.} The population-mean
+\(\theta\) rises by \(\hat \beta_{\mathrm{age}} = 0.47\) logits/month
+on this sample (a regression of admin-level \(\theta_a\) on age).
+Pooled across all admins, \(\mathrm{SD}(\theta_a) = 3.25\) logits;
+the residual within-age SD (after subtracting the linear age trend)
+is 1.95 logits.
+
+\paragraph{Translating SD into months of development.} A natural
+unit for individual differences is ``how many months of typical
+development does \(\pm 1\) SD across kids correspond to?'' On this
+sample,
+\[
+\frac{\mathrm{SD}_{\mathrm{within-age}}(\theta)}
+     {\hat \beta_{\mathrm{age}}}
+= \frac{1.95}{0.47}
+\approx 4.2~\text{months of development per SD}.
+\]
+A child one SD above the within-age mean looks, on the IRT scale,
+like a child of average ability 4 months older.
+
+\paragraph{Variation grows with development.} The within-age SD is
+not constant: it rises from \(\sim 1.0\) logit at 12--14~mo
+(\(\sim 2\) months equivalent) to \(\sim 2.7\) at 26--30~mo
+(\(\sim 5.8\) months equivalent). Children \emph{fan out} rather
+than converge as they develop — a finding that any model of
+individual differences must accommodate.
+
+\paragraph{What this implies for the model.} The variation we need
+to explain is large and increasing with age. A pure accumulator
+with constant per-child input rate cannot produce growing spread; we
+need either age-varying efficiency (per-child slope deviation
+\(\zeta_i\)) or some other mechanism. The remainder of the
+explainer builds the nested model family that makes structural
+choices about \emph{which} mechanism. Figures
+\texttt{precursor\_trajectories.png} and
+\texttt{precursor\_variation.png} (in
+\texttt{model/figs/longitudinal/}) and the script
+\texttt{model/scripts/precursor\_irt.R} reproduce these numbers.
+
 \section{One-paragraph summary}
 
 A child \(i\) of age \(a_i\) has, on average, heard word \(j\) approximately
