@@ -27,35 +27,48 @@
 
 \section{Research questions driving the modeling}
 
-The model is organized to answer four research questions. The baseline model
-is the minimal specification that lets each be posed and answered; each
-planned variant exists to sharpen one of them.
+The model is organized to answer three research questions. The baseline
+is the minimal specification that lets each be posed and answered;
+each variant in the nested family (§\ref{sec:nested}) sharpens one of
+them. A fourth question — when does accumulation start? — is posed in
+the appendix because the start-time parameter \(s\) is
+near-non-identifiable in practice (see §\ref{sec:s-non-id}).
 
 \begin{enumerate}[leftmargin=1.3em, label=\textbf{RQ\arabic*.}]
-\item \textbf{How well do frequencies reconstruct word difficulties?}
-  Braginsky et al.\ (2019) showed frequency is only modestly related to AoA
-  within lexical classes. We test this within our model by asking: how much
-  of word-level residual difficulty \(\psi_j\) does \(\log p_j\) explain?
+\item \textbf{Is there acceleration in the accumulation process?}
+  McMurray (2007) and Mitchell \& McMurray (2009) argued from theory
+  that the empirical ``vocabulary explosion'' requires acceleration in
+  the threshold distribution \(g(\tau)\): pure constant-rate
+  accumulation produces growth that's too smooth, and leveraged
+  learning shifts the curve in time but does not create acceleration
+  that isn't already present. Bergelson (2020) made the empirical
+  case: older infants are ``better learners.'' We formalize this
+  question via \(\delta\): in our linear predictor, time enters as
+  \((1 + \delta)\,\log\!((t-s)/a_0)\), where \(\delta = 0\)
+  corresponds to McMurray's pure linear accumulator (one log-token of
+  evidence per log-age unit, no acceleration). Posterior \(\delta > 0\)
+  with CrI excluding zero is a quantitative confirmation of the
+  McMurray–Mitchell acceleration claim.
 
-\item \textbf{Does accumulation start near birth, or later?}
-  Mollica \& Piantadosi (2017) estimated \(s \approx 2\) months for
-  comprehension. We re-examine \(s\) in the CDI production data, where we
-  expect \(s\) to be larger but still informative.
-
-\item \textbf{Is an acceleration term needed?} Bergelson (2020) argued that
-  older infants are ``better learners'' — they extract more from the same
-  input. We test this by freeing \(\delta\), the age rate-change exponent;
-  \(\delta > 0\) would corroborate a comprehension-boost-like rate
-  increase.
+\item \textbf{How well does frequency reconstruct word difficulty?}
+  Braginsky et al.\ (2019) showed frequency is only modestly related
+  to AoA within lexical classes. We test this within our model by
+  asking how much of word-level residual difficulty \(\psi_j\) is
+  explained by \(\log p_j\), and whether the per-class slope
+  \(\beta_c\) on \(\log p_j\) deviates from the unit-accumulator
+  baseline \(\beta_c = 1\).
 
 \item \textbf{How much of child-level outcome variance is input-driven?}
-  This is the $\sigma_\alpha$ question: once we pin the variance of CDS
-  input rate \(r_i\) from external data, how much residual child variance
-  must be absorbed by a learning-efficiency term \(\alpha_i\)?
+  This is the \(\sigma_\alpha\) question: once we pin the variance of
+  CDS input rate \(r_i\) from external data, how much residual child
+  variance must be absorbed by a learning-efficiency term
+  \(\alpha_i\)? Posterior on
+  \(\pi_\alpha = \sigma_\alpha^2 / (\sigma_r^2 + \sigma_\alpha^2)\)
+  reports the efficiency share of intercept variance.
 \end{enumerate}
 
-Each RQ becomes a posterior summary or a planned model comparison. The
-mapping from RQ to model structure is in Table \ref{tab:rq-map}.
+Each RQ maps onto a specific posterior quantity, recovered as the
+nested family is built up:
 
 \begin{table}[h]
 \centering
@@ -64,15 +77,15 @@ mapping from RQ to model structure is in Table \ref{tab:rq-map}.
 \toprule
 RQ & Quantity & How answered \\
 \midrule
-1 & \(r(\hat\psi_j, \log p_j)\), \(R^2_{\psi \sim \log p}\) &
-  Posterior in baseline; confirmed with free \(\beta\), \(\beta_c\) variants \\
-2 & \(s\) & Posterior in baseline with prior \(\Norm(4.5, 2^2)\) truncated \\
-3 & \(\delta\) & Posterior in baseline with prior \(\Norm(0, 0.5^2)\) \\
-4 & \(\pi_\alpha = \sigma_\alpha^2/(\sigma_r^2 + \sigma_\alpha^2)\) &
-  Derived posterior; \(\sigma_r^2\) pinned from external data \\
+1 & \(\delta\) & Posterior in M2 vs.\ M1; baseline (M1) pins \(\delta=0\). \\
+2 & \(\beta_c\), \(r(\hat\psi_j, \log p_j)\) &
+  Posterior in M4 (per-class \(\beta_c\)); residual correlation in M3. \\
+3 & \(\pi_\alpha = \sigma_\alpha^2/(\sigma_r^2 + \sigma_\alpha^2)\) &
+  Derived posterior in M3+; \(\sigma_r^2\) pinned externally. \\
 \bottomrule
 \end{tabular}
-\caption{Mapping from research questions to model quantities.}
+\caption{Mapping from research questions to model quantities and
+nested-family stages (M1--M5).}
 \label{tab:rq-map}
 \end{table}
 
@@ -233,89 +246,48 @@ comprehension-boost claim.
 
 \section{How each RQ is answered}
 
-\subsection*{RQ1 — frequency and word difficulty}
+\subsection*{RQ1 — is there acceleration?}
 
-The baseline has coefficient 1 on \(\log p_j\) (the pure-accumulator
-assumption). Posterior samples \(\hat\psi_j^{(s)}\) are residual word
-difficulty after frequency. We report:
+Single parameter \(\delta\), entering the time term as
+\((1 + \delta)\,\log\!((t-s)/a_0)\).  \(\delta = 0\) is McMurray's
+pure linear accumulator: each log-age unit contributes one log-token of
+evidence. \(\delta > 0\) means evidence accumulates super-linearly in
+log-age (or equivalently: tokens grow as \(t^{1+\delta}\) on the
+linear scale, faster than the linear-accumulation baseline). Headline
+posterior: \(\hat\delta\) with CrI; CrI excluding zero is a
+quantitative confirmation of the McMurray–Mitchell argument that
+acceleration is necessary to produce empirical vocabulary growth.
+
+The natural ablation is \texttt{pin\_delta=0} (M2 vs.\ M1 in the
+nested family, §\ref{sec:nested}), which forces the model back to
+the pure accumulator. If \(\delta\) is doing real work, this ablation
+should produce a substantially worse fit and force the other
+parameters into pathological regions.
+
+\subsection*{RQ2 — does frequency reconstruct word difficulty?}
+
+The Rasch baseline (M1 in §\ref{sec:nested}) sets the coefficient on
+\(\log p_j\) to 1 (the pure-accumulator assumption: each token of
+word \(j\) contributes one log-token of evidence). Posterior
+\(\hat\psi_j^{(s)}\) is then residual word difficulty after
+unit-coefficient frequency. We report:
 
 \begin{itemize}[leftmargin=1.3em]
-\item Posterior correlation \(r(\hat\psi_j, \log p_j)\) and its 95\% CrI.
-\item \(R^2\) of \(\hat\psi_j \sim \log p_j\) — what fraction of
-  between-word variance in residual difficulty is explainable by
-  frequency.
-\item Posterior class means \(\hat\mu_c\) — does class structure persist
-  after frequency is accounted for?
+\item Posterior correlation \(r(\hat\psi_j, \log p_j)\) and \(R^2\) —
+  what fraction of word-level difficulty is explainable by frequency.
+\item Posterior class means \(\hat\mu_c\) — does class structure
+  persist after frequency is accounted for?
+\item Posterior \(\beta_c\) in M4 (per-class slope on \(\log p_j\)) —
+  do classes differ in how strongly frequency contributes?
 \end{itemize}
 
-\textbf{Planned variant (model~B).} Free global slope \(\beta\) on
-\(\log p_j\); prior \(\beta \sim \Norm(1, 0.5)\). Posterior on \(\beta\)
-directly tests the unit-coefficient assumption.
+The class-specific slope variant M4 is the principal RQ2 test.
+\(\beta_c = 1\) corresponds to the unit-accumulator baseline;
+\(\beta_c < 1\) means frequency contributes less per log-unit;
+\(\beta_c \approx 0\) means frequency is uninformative once per-word
+\(\psi_j\) is free.
 
-\textbf{Planned variant (model~C).} Class-specific slopes \(\beta_c\);
-answers whether frequency matters differently for nouns vs.\ verbs
-vs.\ closed class.
-
-The three models form a progression (baseline \(\subset\) B \(\subset\) C).
-LOO-CV selects among them. Our headline RQ1 number is the pair
-(correlation in baseline, posterior on \(\beta\) in B) — one tells us
-\emph{whether} frequency fully accounts for difficulty, the other
-\emph{by how much} it under/over-weights.
-
-\subsection*{RQ2 — start time}
-
-Single parameter \(s\). Headline posterior: \(\hat s\) with CrI. Close
-to 0 $\Rightarrow$ accumulation starts at birth.  Close to 12+
-$\Rightarrow$ delayed onset. The CDI is a production measure, so larger
-\(s\) than M\&P's \(\sim\)2 months (comprehension) is expected.
-
-\paragraph{Why we pin \(s\) by default.}
-Empirically, when \(s\) is freed jointly with \(\delta\), the two
-parameters trade off along a near-perfect ridge: posterior
-\(r(s, \delta) \approx -0.96\) on both English and Norwegian
-longitudinal fits.  In principle the pair is identifiable: setting
-\((1+\delta)\log(t-s) = (1+\delta')\log(t-s')\) for all \(t\) and
-differentiating in \(t\) gives
-\((1+\delta)/(t-s) = (1+\delta')/(t-s')\), forcing \(\delta=\delta'\)
-and \(s=s'\).  Practically the curve-shape difference between two
-points along the ridge is small.  For the English age range
-(16--30~mo), the ridge endpoints \((s, \delta) = (0.5, 9.4)\) and
-\((3, 8)\) produce \((1+\delta)\log\!((t-s)/a_0)\) curves that differ
-by only \(\sim 0.1\) logits in shape (after subtracting a constant
-that \(\xi_i\) absorbs). With Bernoulli observations and finite \(N\),
-that shape difference is at the noise floor. So \(s\) is
-\emph{near-non-identifiable in practice}, and the reported \(s\)
-posterior in any \texttt{free\_s} variant is only a coordinate choice
-along the ridge — it does not deliver an interpretable estimate of
-``onset of accumulation.''  We pin \(s\) at \(\sim 0\) (lean baseline)
-and treat \texttt{free\_s} as a robustness check, not a first-class
-estimate.
-
-\paragraph{Reference age \(a_0\) is dataset-specific.}
-\(a_0\) is the pivot at which \(\log_{age} = 0\) and so \(\theta_{it}
-= \xi_i\) (per-child intercept).  Setting a single global \(a_0=20\)
-across datasets makes \(\xi_i\) language-relative in a misleading way:
-when admin ages skew far from \(a_0\), the per-kid likelihood ridge in
-\((\xi_i, \zeta_i)\) is tilted by an amount proportional to
-\(\log(\bar t_i / a_0)\), pulling the marginal \(r(\xi, \zeta)\)
-across kids in one direction or the other.  We observed this as a
-spurious sign flip in \(\rho_{\xi\zeta}\) between English (median
-admin age 19; \(r=+0.39\)) and Norwegian (median admin age 26;
-\(r=-0.32\)) on the same model.  Re-evaluating each kid's \(\xi\) at
-their personal mid-observation age makes the flip vanish (Norwegian
-\(r\) becomes \(+0.08\)).  We therefore set \(a_0\) per dataset to the
-median admin age, in each \texttt{prepare\_*.R} script.  This is a
-reparameterization, not a model change: the likelihood, \(\delta\),
-and \(\zeta_i\) are invariant; only the \emph{interpretation} of
-\(\xi_i\) changes (from ``ability at 20~mo'' to ``ability at the
-dataset's median admin age'').
-
-\subsection*{RQ3 — acceleration}
-
-Single parameter \(\delta\). Headline posterior: \(\hat\delta\) with CrI.
-Zero-excluded CrI $\Rightarrow$ rate change over age is needed.
-
-\subsection*{RQ4 — input- vs.\ efficiency-driven variance}
+\subsection*{RQ3 — input- vs.\ efficiency-driven variance}
 \label{sec:identifiability}
 
 The linear predictor contains \(\log r_i + \log \alpha_i\) as a sum,
@@ -571,8 +543,9 @@ available pool) \(\times\) 200 items, with input rate observed via
 \section{What we deliver}
 
 \begin{enumerate}[leftmargin=1.3em]
-\item \textbf{RQ-addressed posteriors}: \(\pi_\alpha\), \(s\),
-  \(\delta\), and \(r(\hat\psi_j, \log p_j)\) all with credible intervals.
+\item \textbf{RQ-addressed posteriors}: \(\delta\) (RQ1),
+  \(\beta_c\) and \(r(\hat\psi_j, \log p_j)\) (RQ2), and
+  \(\pi_\alpha\) (RQ3) — all with credible intervals.
 \item \textbf{Per-word \(\psi_j\)}: absolute log-token thresholds for all
   680 CDI items.
 \item \textbf{Per-child \(\log \alpha_i\)}: child-level efficiency
@@ -583,69 +556,117 @@ available pool) \(\times\) 200 items, with input rate observed via
   plus variants for each RQ (see §8).
 \end{enumerate}
 
-\section{Lean baseline + opt-in variants}
+\section{Nested model family}
+\label{sec:nested}
 
-After running through several rounds of fits with all the bells and
-whistles attached by default, we settled on a deliberately \emph{lean}
-baseline and a small set of variants that opt in to extra parameters
-explicitly.
+We build the model as a strictly nested progression from the simplest
+possible per-word IRT (M0) up to the full-feature variant. Each step
+adds one named component and answers one specific question; comparing
+adjacent models (LOO-CV / WAIC, posterior shifts on the structural
+parameters) attributes the marginal value of that component.
 
-\paragraph{Lean baseline (the default).} Includes:
-\begin{itemize}[leftmargin=1.3em]
-\item Per-child latent \(\xi_i\) (intercept; carries the
-  \(\sigma_\alpha\) / \(\pi_\alpha\) decomposition via the
-  externally-pinned \(\sigma_r\)).
-\item Per-word \(\psi_j\) with class-hierarchical prior.
-\item Frequency \(\log p_j\) entering the linear predictor with unit
-  coefficient (kept separate so RQ1 can be answered as
-  \(r(\psi_j, \log p_j)\)).
-\item Population acceleration exponent \(\delta\), free.
-\item Class means \(\mu_c\) and SDs \(\tau_c\).
-\end{itemize}
+The model classes \(c \in \{1, \ldots, C\}\) of word \(j\) (lexical
+category: nouns / predicates / function words / other) enter only
+through hierarchical priors on \(\psi_j\) (class-mean \(\mu_c\),
+class-SD \(\tau_c\)) and, in M4, through class-specific frequency
+slopes \(\beta_c\). Throughout, \(\xi_i = \log r_i + \log \alpha_i\)
+is the per-child intercept with prior
+\(\xi_i \sim \Norm(\mu_r, \sigma_r^2 + \sigma_\alpha^2)\) and
+\(\sigma_r\) externally pinned.
 
-\paragraph{Pinned at zero by default.} Both for parsimony and because
-they are weakly identified in cross-sectional data:
-\begin{itemize}[leftmargin=1.3em]
-\item Start time \(s = 0\) (pinned via near-zero prior SD).
-\item 2PL discrimination \(\lambda_j \equiv 1\).
-\item Per-child slope deviations \(\zeta_i \equiv 0\).
-\end{itemize}
+\paragraph{M0 — minimal IRT (no time, no frequency).}
+\[
+\eta_{ijt} = \xi_i + \log H - \psi_j.
+\]
+Per-word \(\psi_j\) absorbs all between-item variance; per-child
+\(\xi_i\) absorbs all between-child intercept variance.  No age
+effect, no frequency. This is the absolute null: vocabulary
+trajectories are flat in age, and word difficulty is a free
+per-word parameter only.
 
-\paragraph{Variants opt in.}
+\paragraph{M1 — McMurray null (add unit-coefficient frequency and
+unit-rate accumulation).}
+\[
+\eta_{ijt} = \xi_i + \log\!\tfrac{t-s}{a_0} + \log H + \log p_j - \psi_j.
+\]
+Adds the structural accumulator content: frequency enters with unit
+coefficient (one log-token of evidence per token of word \(j\)
+heard), and the time term grows at unit rate per log-age. This is
+McMurray (2007)'s pure linear accumulator. The slope on
+\(\log_{age}\) is fixed at 1, with no per-child deviation.
+\textbf{M1 vs.\ M0 quantifies whether frequency and time contribute
+beyond per-word \(\psi_j\) and per-child \(\xi_i\)} (RQ2 partial answer).
+
+\paragraph{M2 — add population acceleration \(\delta\) (RQ1).}
+\[
+\eta_{ijt} = \xi_i + (1 + \delta)\,\log\!\tfrac{t-s}{a_0} + \log H + \log p_j - \psi_j,
+\quad \delta \sim \Norm(0,\,0.5^2).
+\]
+Frees the \(\log_{age}\) slope as a deviation \(\delta\) above the
+pure-accumulator baseline. \(\delta = 0\) recovers M1.
+\textbf{M2 vs.\ M1 is the RQ1 test}: does the data require
+super-linear-in-age token accumulation?
+
+\paragraph{M3 — add per-child slope deviations \(\zeta_i\).}
+\[
+\eta_{ijt} = \xi_i + (1 + \delta + \zeta_i)\,\log\!\tfrac{t-s}{a_0} + \log H + \log p_j - \psi_j.
+\]
+Each child has their own deviation \(\zeta_i\) from the population
+slope. Joint per-child prior:
+\((\xi_i, \zeta_i) \sim \mathrm{MVN}(0,\Sigma)\) with LKJ on
+correlation; sum-to-zero centering separates \(\delta\) from
+\(\mathrm{mean}(\zeta_i)\). Requires longitudinal data for
+\(\sigma_\zeta\) to be identified. \textbf{M3 vs.\ M2 measures
+between-child variation in growth rate.}
+
+\paragraph{M4 — add class-specific frequency slope \(\beta_c\) (RQ2).}
+\[
+\eta_{ijt} = \xi_i + (1 + \delta + \zeta_i)\,\log\!\tfrac{t-s}{a_0} + \log H + \beta_{c(j)}\,\log p_j - \psi_j,
+\quad \beta_c \sim \Norm(1,\,0.5^2).
+\]
+Frequency now enters with class-specific weight. \(\beta_c = 1\) is
+M3 (unit accumulator); \(\beta_c = 0\) means frequency is uninformative
+for class \(c\) once per-word \(\psi_j\) is free.
+\textbf{M4 vs.\ M3 is the RQ2 test}: do classes differ in how
+strongly frequency contributes?
+
+\paragraph{M5 — add per-word discrimination \(\lambda_j\) (2PL).}
+\[
+\eta_{ijt} = \lambda_j\!\left[\xi_i + (1 + \delta + \zeta_i)\,\log\!\tfrac{t-s}{a_0} + \log H + \beta_{c(j)}\,\log p_j - \psi_j\right],
+\quad \log \lambda_j \sim \Norm(0,\,\sigma_\lambda^2).
+\]
+Per-word multiplicative scaling on the \((\theta - \beta)\) gap.
+\(\sigma_\lambda \to 0\) recovers M4 (Rasch).  \textbf{M5 vs.\ M4
+measures item-level sharpness variance.}
+
+\paragraph{Robustness variants (off the main spine).}
 
 \begin{center}
 \small
 \begin{tabular}{@{}lll@{}}
 \toprule
-Variant & Adds & Question / use \\
+Variant & Compared to & What it tests \\
 \midrule
-\texttt{slopes} & \(\zeta_i,\, \sigma_\zeta\) & Do children vary in growth rate? Default for longitudinal. \\
-\texttt{2pl} & \(\lambda_j,\, \sigma_\lambda\) & Do words vary in acquisition sharpness? \\
-\texttt{2pl\_slopes} & both & Comparison; defends dropping 2PL when it adds little. \\
-\texttt{free\_s} & free \(s\) & RQ2 robustness check. \\
-\texttt{fix\_delta} & \(\delta = 0\) & Ablation: no acceleration. \\
+\texttt{lmm}     & M3 & Linear-in-age (\((\beta_{age} + \zeta_i)(t - a_0)\)) instead of log-linear; tests functional-form sensitivity. \\
+\texttt{no\_class} & M3 & Drops class hierarchy on \(\psi_j\); tests whether class structure adds anything. \\
+\texttt{free\_s}  & M3 & Frees \(s\); tests \(s\)/\(\delta\) trade-off (see Appendix~\ref{sec:s-non-id}). \\
+\texttt{no\_freq} & M2 & Drops \(\log p_j\); tests whether frequency adds beyond per-word \(\psi_j\). \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-The running log of fits and what each revealed is in
+\paragraph{The variant grammar implements the family.}
+\texttt{variant\_hyperpriors()} in \texttt{model/R/helpers.R} maps a
+variant name onto the prior overrides that select a specific model in
+the family. Tight priors near zero pin a parameter off (e.g.,
+\(\sigma_\zeta \sim \Norm(0, 0.001)\) pins \(\zeta_i \equiv 0\)); loose
+priors free it. The running log of fits is in
 \texttt{notes/experiments.md}.
-
-\paragraph{Why we changed defaults.} The earlier defaults included
-free \(s\), 2PL, and slopes. Three findings drove the simplification:
-(a) 2PL never measurably improved population-level fit even though
-\(\sigma_\lambda \approx 0.27\) is non-zero (item discrimination
-exists but the population averages it out); (b) start time \(s\) was
-poorly identified, hitting prior bounds in cross-sectional fits and
-trading off strongly with \(\delta\); (c) per-child slopes
-\(\sigma_\zeta\) were unidentifiable from cross-sectional data
-(needed longitudinal). The lean default is the smallest model that
-addresses every RQ; the variants exist to test specific claims.
 
 \section{Datasets and observation channels}
 \label{sec:channels}
 
-The variant grammar (\S\,Lean baseline) toggles \emph{model
+The variant grammar (§\ref{sec:nested}) toggles \emph{model
 components}. Independent of that, each dataset comes with its own
 \emph{observation channels} that determine which auxiliary parameters
 are appropriate. We separate the two levers in code so they can't be
@@ -706,5 +727,58 @@ combinatorial explosion. Adding a new dataset usually means writing
 a \texttt{prepare\_<dataset>.R} script that reuses an existing Stan
 file with appropriate dataset-level constants; only when a genuinely
 new \emph{observation channel} appears do we add a Stan file.
+
+\appendix
+
+\section{Start time \(s\) and the \(s\)/\(\delta\) ridge}
+\label{sec:s-non-id}
+
+A natural fourth question — \emph{when} does accumulation start? — is
+deferred to this appendix because the parameter \(s\) is
+near-non-identifiable in practice. Mollica \& Piantadosi (2017)
+estimated \(s \approx 2\) months for comprehension; we attempted a
+similar estimate for production but found the data does not support
+it, for the reason described below.
+
+\paragraph{Identifiability in principle vs.\ practice.}
+When \(s\) is freed jointly with \(\delta\), the two parameters trade
+off along a near-perfect ridge: posterior
+\(r(s, \delta) \approx -0.96\) on both English and Norwegian
+longitudinal fits. In principle the pair is identifiable: setting
+\((1+\delta)\log(t-s) = (1+\delta')\log(t-s')\) for all \(t\) and
+differentiating in \(t\) gives
+\((1+\delta)/(t-s) = (1+\delta')/(t-s')\), forcing
+\(\delta = \delta'\) and \(s = s'\). Practically the curve-shape
+difference between two points along the ridge is small. For the
+English age range (16--30~mo), the ridge endpoints
+\((s, \delta) = (0.5, 9.4)\) and \((3, 8)\) produce
+\((1+\delta)\log\!((t-s)/a_0)\) curves that differ by only \(\sim 0.1\)
+logits in shape (after subtracting a constant that \(\xi_i\)
+absorbs). With Bernoulli observations and finite \(N\), that shape
+difference is at the noise floor. So \(s\) is \emph{near-non-identifiable
+in practice}, and the reported \(s\) posterior in any
+\texttt{free\_s} variant is only a coordinate choice along the ridge
+— it does not deliver an interpretable estimate of ``onset of
+accumulation.'' We pin \(s \approx 0\) in M1--M5 and treat
+\texttt{free\_s} as a robustness check, not a first-class estimate.
+
+\paragraph{Reference age \(a_0\) is dataset-specific.}
+\(a_0\) is the pivot at which \(\log_{age} = 0\) and so
+\(\theta_{it} = \xi_i\) (per-child intercept). Setting a single
+global \(a_0 = 20\) across datasets makes \(\xi_i\) language-relative
+in a misleading way: when admin ages skew far from \(a_0\), the
+per-kid likelihood ridge in \((\xi_i, \zeta_i)\) is tilted by an
+amount proportional to \(\log(\bar t_i / a_0)\), pulling the marginal
+\(r(\xi, \zeta)\) across kids in one direction or the other. We
+observed this as a spurious sign flip in \(\rho_{\xi\zeta}\) between
+English (median admin age 19; \(r = +0.39\)) and Norwegian (median
+admin age 26; \(r = -0.32\)) on the same model. Re-evaluating each
+kid's \(\xi\) at their personal mid-observation age makes the flip
+vanish (Norwegian \(r\) becomes \(+0.08\)). We therefore set \(a_0\)
+per dataset to the median admin age, in each \texttt{prepare\_*.R}
+script. This is a reparameterization, not a model change: the
+likelihood, \(\delta\), and \(\zeta_i\) are invariant; only the
+\emph{interpretation} of \(\xi_i\) changes (from ``ability at 20~mo''
+to ``ability at the dataset's median admin age'').
 
 \end{document}
