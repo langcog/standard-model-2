@@ -50,7 +50,9 @@ data {
   real<lower=0> delta_prior_sd;
   real<lower=0> sigma_lambda_prior_sd;
   real<lower=0> sigma_zeta_prior_sd;
-  real<lower=0> beta_c_prior_sd;        // tight => beta_c pinned at 1
+  real<lower=0> beta_c_prior_sd;        // tight => beta_c pinned at beta_c_prior_mean
+  real beta_c_prior_mean;               // 1 = unit accumulator; 0 = no_freq
+  real time_baseline;                   // 1 = unit-rate accumulator; 0 = no time term (M0)
 }
 
 parameters {
@@ -134,7 +136,7 @@ model {
   log_lambda_raw ~ std_normal();
   sigma_lambda   ~ normal(0, sigma_lambda_prior_sd);
 
-  beta_c ~ normal(1, beta_c_prior_sd);
+  beta_c ~ normal(beta_c_prior_mean, beta_c_prior_sd);
 
   // Likelihood
   vector[N] eta;
@@ -150,7 +152,7 @@ model {
       xi_per_obs[n]   = xi[ch];
       zeta_per_obs[n] = zeta[ch];
     }
-    vector[N] slope_per_obs = 1 + delta + zeta_per_obs;
+    vector[N] slope_per_obs = time_baseline + delta + zeta_per_obs;
     vector[N] beta_per_obs  = beta_c[cc[jj]];
     vector[N] base = xi_per_obs + beta_per_obs .* log_p[jj] + log_H
                    + slope_per_obs .* log_age - psi[jj];
@@ -162,6 +164,24 @@ model {
 generated quantities {
   real pi_alpha = square(sigma_alpha) / (square(sigma_alpha) + square(sigma_r));
   real rho_xi_zeta = L_child[2, 1];  // since L_child is 2x2 Cholesky
+
+  // Per-observation log-likelihood for LOO/WAIC across model variants.
+  // Recomputes the linear predictor; doesn't slow the sampling phase.
+  vector[N] log_lik;
+  {
+    vector[N] ae;
+    for (n in 1:N) ae[n] = fmax(admin_age[aa[n]] - s, 0.01);
+    vector[N] log_age = log(ae / a0);
+    for (n in 1:N) {
+      int ch = admin_to_child[aa[n]];
+      real slope_n = time_baseline + delta + zeta[ch];
+      real base_n = xi[ch] + beta_c[cc[jj[n]]] * log_p[jj[n]] + log_H
+                  + slope_n * log_age[n] - psi[jj[n]];
+      real eta_n = lambda[jj[n]] * base_n;
+      log_lik[n] = bernoulli_logit_lpmf(y[n] | eta_n);
+    }
+  }
+
   // posterior-expected log_alpha given xi
   vector[I] log_alpha_mean;
   for (i in 1:I) {

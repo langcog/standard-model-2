@@ -164,6 +164,22 @@ variant_hyperpriors <- function(name) {
     # LMM (linear-in-age) variants -- distinct Stan file log_irt_long_lmm.stan
     lmm               = list(),
     lmm_slopes        = list(sigma_zeta_prior_sd = 1),
+    # Nested family canonical labels (M0..M5).  M2/M3/M4 already have
+    # established names (baseline / slopes / class_beta_slopes); we
+    # add explicit aliases so the run set is uniformly named.
+    m0 = list(time_baseline = 0,
+              beta_c_prior_mean = 0,
+              delta_prior_mean = 0, delta_prior_sd = 0.001),
+    m1 = list(delta_prior_mean = 0, delta_prior_sd = 0.001),
+    m2 = list(),  # = baseline (drops slopes, frees delta)
+    m3 = list(sigma_zeta_prior_sd = 1),  # = slopes (lean ref)
+    m4 = list(sigma_zeta_prior_sd = 1, beta_c_prior_sd = 0.5),  # + class_beta
+    m5 = list(sigma_zeta_prior_sd = 1, beta_c_prior_sd = 0.5,
+              sigma_lambda_prior_sd = 1),  # + 2PL
+    # no_freq variant: drops log p_j entirely (beta_c pinned at 0)
+    no_freq        = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001),
+    no_freq_slopes = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
+                          sigma_zeta_prior_sd = 1),
     # Legacy variants for re-loading old fits / explicit comparison
     fix_s         = list(s_prior_mean = 2, s_prior_sd = 0.001),
     both_fixed    = list(delta_prior_mean = 0, delta_prior_sd = 0.001,
