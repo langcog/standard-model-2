@@ -527,6 +527,32 @@ and "Reference age a_0 is dataset-specific" for the durable writeup.
 
 ---
 
+## 🟢 12. Input rate is age-invariant (descriptive check)
+
+`model/scripts/input_rate_vs_age.R` regresses per-recording
+$\log r_{iv}^{\mathrm{obs}}$ on age within each kid, on both BabyView
+(head-cam, FEM-derived adult tokens) and SEEDLingS (LENA AWC).
+
+| dataset | n kids | n recordings | mean within-kid slope | median | SD |
+|---|---:|---:|---:|---:|---:|
+| BabyView | 20 | 5,688 | −0.006 logits/mo | −0.002 | 0.058 |
+| SEEDLingS | 44 | 525 | −0.011 logits/mo | −0.010 | 0.037 |
+
+Pooled (between+within) slope: BabyView +0.011 (p < 1e-7), SEEDLingS
+−0.012 (p ≈ 0.06). Both are an order of magnitude smaller than the
+$(1+\delta)\log_{age}$ effect over the data range (~5 logits in
+$\theta$ vs ~0.25 logits from input-rate growth).
+
+**Verdict.** The model's age-invariance assumption on $\log r_i$ is
+empirically defensible. Per-child slope variance $\sigma_\zeta$ is
+therefore mostly attributable to age-varying *efficiency*, not
+age-varying input rate. Documented in `model_explainer.tex`
+§Assumptions.
+
+**Artifacts:** `model/figs/io/input_rate_vs_age.png`.
+
+---
+
 ## Backlog (⚪)
 
 ### Data / robustness

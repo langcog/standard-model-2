@@ -337,6 +337,37 @@ child-level outcome variance attributable to learning efficiency rather
 than input rate. Its complement, \(1 - \pi_\alpha\), is the input-driven
 fraction.
 
+\paragraph{What \(\pi_\alpha\) does and does not decompose.}
+The full between-child variance in \(\theta_{it}\) at age \(t\) is
+\[
+\Var_i(\theta_{it})
+= \sigma_\xi^2
++ \log_{age}^2\,\sigma_\zeta^2
++ 2\,\rho_{\xi\zeta}\,\sigma_\xi\,\sigma_\zeta\,\log_{age}.
+\]
+At \(t = a_0\) (the pivot, where \(\log_{age} = 0\)), this collapses
+to \(\sigma_\xi^2\) and \(\pi_\alpha\) is exactly the efficiency
+share. Off-pivot, the per-child slope variance \(\sigma_\zeta^2\)
+contributes increasingly. With our fitted \(\sigma_\zeta \approx 3.5\)
+on English, at \(\log_{age} = -1\) (e.g., 7~mo when \(a_0 = 19\)) the
+slope component contributes \(\sim 5\!\times\) the intercept variance.
+
+We do not decompose \(\sigma_\zeta\) into input-rate-growth and
+efficiency-growth components, because the model treats \(\log r_i\)
+as age-invariant (see ``Age-invariance of \(\log r_i\)'' in §
+Assumptions). \(\zeta_i\) therefore acts uniformly on
+\((\log r_i + \log \alpha_i)\) — without longitudinal observations of
+\(r_i(t)\) within child, the data cannot separate it. We report
+\(\pi_\alpha\) as the intercept-share at the pivot age, and treat
+\(\sigma_\zeta\) as a third axis of between-child variation that
+exists alongside the input/efficiency intercept decomposition.
+
+The \texttt{drop\_slopes} ablation (\(\sigma_\zeta = 0\)) tests
+whether the intercept-level \(\pi_\alpha\) is robust: forced into a
+single-locus model, the data still gives \(\pi_\alpha \approx 0.92\)
+on English (vs.\ \(0.91\) with slopes free), so the headline number
+is robust to slope-vs-no-slope choices.
+
 \textbf{Why the collapsed parameterization matters practically.} Sampling
 \(\log r_i\) and \(\log \alpha_i\) individually — each with its own
 non-centered \(\Norm(0, 1)\) prior and a scale parameter — leaves the
@@ -451,6 +482,20 @@ accounted for, which is the quantity we really want.
 \item \textbf{Same input distribution as reference studies.} Our CDI
   sample has the Sperry/HR/WF distribution of $r_i$; SES moderators not
   modeled in v1.
+\item \textbf{Age-invariance of \(\log r_i\).} The model treats each
+  child's input rate as a single per-kid constant, not a function of
+  age. The per-child age-acceleration \((1 + \delta + \zeta_i)\) acts
+  on the combined product \(r_i \cdot \alpha_i\), so any age-varying
+  child-side dynamics (efficiency growth, parents talking more to
+  older kids) are absorbed into \(\delta + \zeta_i\) without
+  attribution. Empirically supported by within-kid regressions of
+  \(\log r_{iv}^{\mathrm{obs}}\) on age in BabyView (\(N=20\) kids,
+  5688 videos: mean within-kid slope \(-0.006\) logits/mo,
+  median \(-0.002\)) and SEEDLingS (\(N=44\) kids, 525 LENA
+  recordings: mean \(-0.011\) logits/mo). Both are at least an order
+  of magnitude smaller than the \((1+\delta)\,\log_{age}\) effect over
+  the same age range, so \(\sigma_\zeta\) is unlikely to be primarily
+  absorbing input-rate growth. See \texttt{model/scripts/input\_rate\_vs\_age.R}.
 \item \textbf{Global $s$.} One start time for all words. Per-class or
   per-word $s$ is a planned extension.
 \item \textbf{CHILDES frequencies as truth.} Sampling noise in $p_j$
