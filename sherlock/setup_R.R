@@ -55,6 +55,14 @@ if (!"cmdstanr" %in% rownames(installed.packages())) {
 suppressPackageStartupMessages(library(cmdstanr))
 if (is.null(tryCatch(cmdstan_path(), error = function(e) NULL))) {
   message("Installing cmdstan (one-time, ~10 min compile) ...")
+  # Stan's TBB build needs TBB_CXX_TYPE set explicitly when the
+  # compiler can't be auto-detected (Sherlock case). Sherlock loads
+  # gcc by default; override by setting TBB_CXX_TYPE in the env
+  # before calling Rscript if you want a different one.
+  if (!nzchar(Sys.getenv("TBB_CXX_TYPE"))) {
+    Sys.setenv(TBB_CXX_TYPE = "gcc")
+    message("Set TBB_CXX_TYPE=gcc (override via env var if needed).")
+  }
   install_cmdstan(cores = 4, quiet = FALSE)
 }
 cat("cmdstan path:", cmdstan_path(), "\n")
