@@ -348,11 +348,14 @@ and whether the ablations break in the expected directions.
 
 ---
 
-## 🟡 8. Input-observed fits (BabyView + SEEDLingS)
+## 🟡 8. Input-uptake fits (BabyView + SEEDLingS)
 
-**Setup.** Same lean baseline + slopes (`io_slopes` variant), but
-running on the input-observed Stan model `log_irt_io.stan` which
-adds a per-recording measurement layer on `log r_obs` for each
+**Setup.** Same lean baseline + slopes (`io_slopes` variant; note the
+`io_` code prefix is retained as engineering shorthand for the dual
+observation channels — input *and* CDI output — but the published
+naming for this experiment is *input-uptake*, following the
+literature). Runs the input-uptake Stan model `log_irt_io.stan`,
+which adds a per-recording measurement layer on `log r_obs` for each
 child. Per-bundle differences:
 
 - **BabyView** (head-mounted video, on-camera observer):
