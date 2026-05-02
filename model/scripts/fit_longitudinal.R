@@ -77,9 +77,18 @@ stan_file <- file.path(PROJECT_ROOT,
                        else "model/stan/log_irt_long.stan")
 cat(sprintf("Stan model: %s\n", stan_file))
 
-fit <- fit_variant(stan_data, tag = out_tag,
-                   cfg = cfg,
-                   model_path = stan_file)
+# Backend selection. Default is cmdstanr (faster, supports reduce_sum
+# threading); rstan available via STAN_BACKEND=rstan for emergencies.
+backend <- Sys.getenv("STAN_BACKEND", unset = "cmdstanr")
+fit_fun <- switch(backend,
+                  cmdstanr = fit_variant_cmdstanr,
+                  rstan    = fit_variant,
+                  stop(sprintf("Unknown STAN_BACKEND: %s", backend)))
+cat(sprintf("Backend: %s\n", backend))
+
+fit <- fit_fun(stan_data, tag = out_tag,
+               cfg = cfg,
+               model_path = stan_file)
 
 pars <- c("sigma_alpha", "pi_alpha", "sigma_xi",
           "sigma_zeta", "rho_xi_zeta")

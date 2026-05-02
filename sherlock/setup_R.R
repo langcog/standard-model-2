@@ -30,7 +30,7 @@ cat("Library paths:\n"); print(.libPaths())
 #     .feather files; the fit pipeline doesn't need it, and the package
 #     fails to compile on Sherlock without libarrow.
 cran_pkgs <- c(
-  "rstan", "posterior", "dplyr", "tidyr", "ggplot2", "tibble",
+  "rstan", "posterior", "loo", "dplyr", "tidyr", "ggplot2", "tibble",
   "patchwork", "MASS", "remotes", "purrr"
 )
 
@@ -42,8 +42,28 @@ if (length(needed) > 0) {
   install.packages(needed, lib = user_lib)
 }
 
+# cmdstanr lives on R-universe; install separately. cmdstan itself
+# (the C++ tool) needs install_cmdstan() to compile -- that takes
+# ~10 min and ~2 GB; uses make + clang/g++ already on Sherlock.
+if (!"cmdstanr" %in% rownames(installed.packages())) {
+  message("Installing cmdstanr from R-universe ...")
+  install.packages("cmdstanr",
+                   repos = c("https://stan-dev.r-universe.dev",
+                              getOption("repos")),
+                   lib = user_lib)
+}
+suppressPackageStartupMessages(library(cmdstanr))
+if (is.null(tryCatch(cmdstan_path(), error = function(e) NULL))) {
+  message("Installing cmdstan (one-time, ~10 min compile) ...")
+  install_cmdstan(cores = 4, quiet = FALSE)
+}
+cat("cmdstan path:", cmdstan_path(), "\n")
+cat("cmdstan version:", cmdstan_version(), "\n")
+
 cat("\nPackages installed. rstan version:\n")
 print(packageVersion("rstan"))
+cat("cmdstanr version:\n")
+print(packageVersion("cmdstanr"))
 
 ## Pre-compile the Stan models so the first fit doesn't pay compile cost.
 ## This requires ~8 GB RAM per model; if the dev session doesn't have that

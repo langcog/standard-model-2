@@ -17,6 +17,46 @@
 // (tight prior beta_c_prior_sd ~ 0.001 in DEFAULT_PRIORS). The
 // `class_beta` variant frees it (e.g., 0.5) to test whether frequency
 // enters with class-specific weight.
+//
+// reduce_sum: the per-observation likelihood is parallelized across
+// threads via reduce_sum. Each thread computes eta locally for its
+// slice of y, then evaluates bernoulli_logit_lpmf. Linear speedup with
+// `STAN_NUM_THREADS` (set in the cmdstanr sample call). The
+// per-observation Stan code is duplicated inside `partial_sum_lpmf`;
+// the unused `eta` local in the model block is retained for
+// generated_quantities (log_lik) which is single-threaded.
+
+functions {
+  real partial_sum_lpmf(array[] int y_slice,
+                        int start, int end,
+                        // observation indices
+                        array[] int aa, array[] int jj,
+                        array[] int admin_to_child, array[] int cc,
+                        // global / scalar
+                        vector admin_age, real s, real a0,
+                        real time_baseline, real delta,
+                        real log_H,
+                        // per-item / per-child
+                        vector log_p,
+                        vector psi, vector lambda,
+                        vector beta_c,
+                        vector xi, vector zeta) {
+    int n_slice = end - start + 1;
+    vector[n_slice] eta_slice;
+    for (i in 1:n_slice) {
+      int n = start + i - 1;
+      real ae = fmax(admin_age[aa[n]] - s, 0.01);
+      real log_age_n = log(ae / a0);
+      int ch = admin_to_child[aa[n]];
+      real slope_n = time_baseline + delta + zeta[ch];
+      real beta_n  = beta_c[cc[jj[n]]];
+      real base = xi[ch] + beta_n * log_p[jj[n]] + log_H
+                + slope_n * log_age_n - psi[jj[n]];
+      eta_slice[i] = lambda[jj[n]] * base;
+    }
+    return bernoulli_logit_lpmf(y_slice | eta_slice);
+  }
+}
 
 data {
   int<lower=1> N;                       // observations
@@ -138,27 +178,14 @@ model {
 
   beta_c ~ normal(beta_c_prior_mean, beta_c_prior_sd);
 
-  // Likelihood
-  vector[N] eta;
-  {
-    vector[N] ae;
-    for (n in 1:N) ae[n] = fmax(admin_age[aa[n]] - s, 0.01);
-    vector[N] log_age = log(ae / a0);
-    // map admin -> child for xi and zeta
-    vector[N] xi_per_obs;
-    vector[N] zeta_per_obs;
-    for (n in 1:N) {
-      int ch = admin_to_child[aa[n]];
-      xi_per_obs[n]   = xi[ch];
-      zeta_per_obs[n] = zeta[ch];
-    }
-    vector[N] slope_per_obs = time_baseline + delta + zeta_per_obs;
-    vector[N] beta_per_obs  = beta_c[cc[jj]];
-    vector[N] base = xi_per_obs + beta_per_obs .* log_p[jj] + log_H
-                   + slope_per_obs .* log_age - psi[jj];
-    eta = lambda[jj] .* base;
-  }
-  y ~ bernoulli_logit(eta);
+  // Likelihood: parallelize per-observation lpmf via reduce_sum.
+  // grainsize = 1 lets Stan's TBB scheduler auto-tune the slice size.
+  target += reduce_sum(partial_sum_lpmf, y, 1,
+                       aa, jj, admin_to_child, cc,
+                       admin_age, s, a0,
+                       time_baseline, delta, log_H,
+                       log_p, psi, lambda, beta_c,
+                       xi, zeta);
 }
 
 generated quantities {

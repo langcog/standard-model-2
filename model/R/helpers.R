@@ -300,29 +300,110 @@ fit_variant <- function(stan_data, tag,
   fit
 }
 
+# cmdstanr-backed version with reduce_sum threading. Compatible Stan
+# files have a `partial_sum_lpmf` function in their `functions` block
+# called via `reduce_sum`; non-threaded files compile and run fine
+# too (threads_per_chain just goes unused).
+#
+# Output is converted to a `stanfit` via rstan::read_stan_csv(), so
+# downstream code (summarize_fit, posterior::as_draws_df, loo, etc.)
+# works unchanged.
+fit_variant_cmdstanr <- function(stan_data, tag,
+                                  cfg = DEFAULT_FIT_CONFIG,
+                                  model_path = PATHS$stan_model,
+                                  fits_dir = PATHS$fits_dir,
+                                  threads_per_chain = NULL,
+                                  force = FALSE) {
+  if (!requireNamespace("cmdstanr", quietly = TRUE))
+    stop("cmdstanr not installed; install via install.packages(\"cmdstanr\", repos = \"https://stan-dev.r-universe.dev\") and cmdstanr::install_cmdstan().")
+
+  fit_file <- file.path(fits_dir, sprintf("%s.rds", tag))
+  if (!force && file.exists(fit_file)) {
+    message(sprintf("[%s] already fit at %s, loading.", tag, fit_file))
+    return(readRDS(fit_file))
+  }
+
+  if (is.null(threads_per_chain)) {
+    n_cores <- as.integer(Sys.getenv("STAN_THREADS_PER_CHAIN",
+                                      unset = max(1, parallel::detectCores() %/% cfg$chains)))
+    threads_per_chain <- n_cores
+  }
+
+  message(sprintf("[%s] cmdstanr fitting (chains=%d, iter=%d, warmup=%d, threads_per_chain=%d)...",
+                  tag, cfg$chains, cfg$iter, cfg$warmup, threads_per_chain))
+  m <- cmdstanr::cmdstan_model(model_path,
+                                cpp_options = list(stan_threads = TRUE))
+
+  t0 <- Sys.time()
+  csm <- m$sample(
+    data              = stan_data,
+    chains            = cfg$chains,
+    parallel_chains   = cfg$chains,
+    threads_per_chain = threads_per_chain,
+    iter_sampling     = cfg$iter - cfg$warmup,
+    iter_warmup       = cfg$warmup,
+    seed              = cfg$seed,
+    adapt_delta       = cfg$adapt_delta,
+    max_treedepth     = cfg$max_treedepth,
+    refresh           = max(1L, (cfg$iter %/% 10L))
+  )
+  dt <- as.numeric(difftime(Sys.time(), t0, units = "mins"))
+  message(sprintf("[%s] cmdstanr sampling time: %.1f min", tag, dt))
+
+  # Save the CmdStanMCMC object directly. cmdstanr's save_object()
+  # reads all the CSV draws into memory before serializing, so the
+  # resulting .rds is portable across machines and self-contained.
+  # Downstream code uses posterior::as_draws_df(fit), which works on
+  # both stanfit and CmdStanMCMC.
+  csm$save_object(file = fit_file)
+  csm
+}
+
 # ===========================================================================
 # Summaries
 # ===========================================================================
 
+# Backend-agnostic summary. Works on both rstan stanfit and cmdstanr
+# CmdStanMCMC via posterior::summarise_draws(); each row is one
+# parameter, columns are mean / lo95 / median / hi95 / n_eff / Rhat.
 summarize_fit <- function(fit, pars = c("sigma_alpha", "s", "delta",
                                         "pi_alpha", "sigma_xi")) {
-  s <- summary(fit, pars = pars)$summary
+  d <- posterior::as_draws_df(fit)
+  pars_present <- intersect(pars, names(d))
+  if (length(pars_present) == 0)
+    return(tibble(param = character(), mean = double(),
+                  lo95 = double(), median = double(), hi95 = double(),
+                  n_eff = double(), Rhat = double()))
+  s <- posterior::summarise_draws(
+    posterior::subset_draws(d, variable = pars_present),
+    "mean", q025 = ~ stats::quantile(.x, 0.025, names = FALSE),
+    "median",
+    q975 = ~ stats::quantile(.x, 0.975, names = FALSE),
+    "ess_bulk", "rhat"
+  )
   tibble(
-    param = rownames(s),
-    mean = s[, "mean"],
-    lo95 = s[, "2.5%"], median = s[, "50%"], hi95 = s[, "97.5%"],
-    n_eff = s[, "n_eff"], Rhat = s[, "Rhat"]
+    param  = s$variable,
+    mean   = s$mean,
+    lo95   = s$q025,
+    median = s$median,
+    hi95   = s$q975,
+    n_eff  = s$ess_bulk,
+    Rhat   = s$rhat
   )
 }
 
 class_threshold_table <- function(fit, class_levels) {
   C <- length(class_levels)
-  mu  <- summary(fit, pars = paste0("mu_c[",  seq_len(C), "]"))$summary
-  tau <- summary(fit, pars = paste0("tau_c[", seq_len(C), "]"))$summary
+  d <- posterior::as_draws_df(fit)
+  q <- function(x, p) stats::quantile(x, p, names = FALSE)
   tibble(
-    class = class_levels,
-    mu_median = mu[, "50%"], mu_lo = mu[, "2.5%"], mu_hi = mu[, "97.5%"],
-    tau_median = tau[, "50%"], tau_lo = tau[, "2.5%"], tau_hi = tau[, "97.5%"]
+    class       = class_levels,
+    mu_median   = sapply(seq_len(C), function(c) median(d[[sprintf("mu_c[%d]",  c)]])),
+    mu_lo       = sapply(seq_len(C), function(c) q(d[[sprintf("mu_c[%d]",  c)]], 0.025)),
+    mu_hi       = sapply(seq_len(C), function(c) q(d[[sprintf("mu_c[%d]",  c)]], 0.975)),
+    tau_median  = sapply(seq_len(C), function(c) median(d[[sprintf("tau_c[%d]", c)]])),
+    tau_lo      = sapply(seq_len(C), function(c) q(d[[sprintf("tau_c[%d]", c)]], 0.025)),
+    tau_hi      = sapply(seq_len(C), function(c) q(d[[sprintf("tau_c[%d]", c)]], 0.975))
   )
 }
 

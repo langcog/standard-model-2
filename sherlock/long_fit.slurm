@@ -3,9 +3,12 @@
 #SBATCH --output=%x_%j.out
 #SBATCH --error=%x_%j.err
 #SBATCH --time=36:00:00
-#SBATCH --cpus-per-task=4
+#SBATCH --cpus-per-task=16
 #SBATCH --mem=48G
 #SBATCH --partition=normal
+#
+# 16 cpus = 4 chains x 4 threads/chain (reduce_sum within-chain
+# parallelism). Override via STAN_THREADS_PER_CHAIN env var if needed.
 
 # Usage:
 #   sbatch sherlock/long_fit.slurm <variant> [dataset]
@@ -56,6 +59,10 @@ echo
 
 # Override PATHS$fits_dir for this job so outputs go to $SCRATCH
 export STANDARD_MODEL_FITS_DIR="$RESULTS_DIR/fits"
+
+# cmdstanr threading: each chain gets cpus / chains threads.
+export STAN_THREADS_PER_CHAIN="${STAN_THREADS_PER_CHAIN:-$((SLURM_CPUS_PER_TASK / 4))}"
+echo "Threads per chain: $STAN_THREADS_PER_CHAIN"
 
 Rscript model/scripts/fit_longitudinal.R "$VARIANT" "$DATASET"
 
