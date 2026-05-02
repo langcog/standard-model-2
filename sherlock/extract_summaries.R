@@ -52,33 +52,47 @@ extract_one <- function(tag) {
   cat(sprintf("\n== %s ==\n", tag))
   cat(sprintf("Reading %s ...\n", in_path))
   fit <- readRDS(in_path)
-  d   <- as_draws_df(fit)
+  is_cmdstanr <- inherits(fit, "CmdStanMCMC")
+  cat(sprintf("Backend: %s\n", if (is_cmdstanr) "cmdstanr" else "rstan"))
+  d <- posterior::as_draws_df(fit)
 
-  # ---- Summary: scalar posteriors ---- #
   pars_present <- intersect(SCALAR_PARS, names(d))
   cat(sprintf("Scalar pars present (%d): %s\n",
               length(pars_present),
               paste(pars_present, collapse = ", ")))
 
-  summary_tbl <- summary(fit, pars = pars_present)$summary
+  # ---- Summary: scalar posteriors (backend-agnostic) ---- #
+  summary_tbl <- posterior::summarise_draws(
+    posterior::subset_draws(d, variable = pars_present),
+    "mean", "median", "sd",
+    q025 = ~ stats::quantile(.x, 0.025, names = FALSE),
+    q975 = ~ stats::quantile(.x, 0.975, names = FALSE),
+    "ess_bulk", "rhat"
+  )
   saveRDS(summary_tbl,
           file = file.path(OUT_DIR, paste0(tag, ".summary.rds")))
 
   # ---- Draws: scalar parameters only (small) ---- #
-  draws_small <- d[, c("draw__", "chain__", "iteration__",
-                       intersect(pars_present, names(d)))]
+  draws_small <- d[, c(".draw", ".chain", ".iteration", pars_present)]
   saveRDS(draws_small,
           file = file.path(OUT_DIR, paste0(tag, ".draws.rds")))
   cat(sprintf("Wrote summary + draws (%d rows, %d pars).\n",
-              nrow(draws_small), ncol(draws_small) - 3))
+              nrow(draws_small), length(pars_present)))
 
-  # ---- LOO: ELPD + diagnostics + per-obs estimates ---- #
-  if ("log_lik[1]" %in% names(d)) {
+  # ---- LOO ---- #
+  has_log_lik <- "log_lik[1]" %in% names(d)
+  if (has_log_lik) {
     cat("Computing LOO from log_lik ...\n")
-    log_lik_arr <- extract_log_lik(fit, parameter_name = "log_lik",
-                                    merge_chains = FALSE)
-    r_eff <- relative_eff(exp(log_lik_arr))
-    loo_obj <- loo(log_lik_arr, r_eff = r_eff, cores = 4)
+    if (is_cmdstanr) {
+      # cmdstanr's $loo() handles log_lik extraction internally
+      loo_obj <- fit$loo(cores = 4)
+    } else {
+      log_lik_arr <- loo::extract_log_lik(fit,
+                                           parameter_name = "log_lik",
+                                           merge_chains = FALSE)
+      r_eff <- loo::relative_eff(exp(log_lik_arr))
+      loo_obj <- loo::loo(log_lik_arr, r_eff = r_eff, cores = 4)
+    }
     saveRDS(loo_obj,
             file = file.path(OUT_DIR, paste0(tag, ".loo.rds")))
     cat(sprintf("Wrote loo (elpd = %.1f +- %.1f).\n",
@@ -88,9 +102,7 @@ extract_one <- function(tag) {
     cat("No log_lik in this fit; skipping LOO.\n")
   }
 
-  # Free the giant fit object before processing the next one.
-  rm(fit, d, draws_small)
-  gc(verbose = FALSE)
+  rm(fit, d, draws_small); gc(verbose = FALSE)
 }
 
 for (tag in args) {
