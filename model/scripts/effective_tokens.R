@@ -160,29 +160,32 @@ p2 <- ggplot(all_tab, aes(x = age50, y = tokens_at_50, color = log_p)) +
                         name = expression(log~p[j])) +
   geom_hline(yintercept = c(1, 10, 100, 1000, 10000, 100000),
              color = "gray85", linewidth = 0.2) +
+  facet_wrap(~class, nrow = 1) +
   labs(x = "age of 50% production (months)",
        y = "real tokens of word j heard at age50\n(log scale)",
-       title = "(2) Real tokens to 50% production vs age, all words",
-       subtitle = paste0("Each dot = one of J=", sd_$J,
-                          " items.  Frequent words (yellow) acquired ",
-                          "early with many tokens; rare words ",
-                          "(purple) acquired late with few tokens. ",
-                          "Red line = median by age bin.")) +
+       title = "(2) Real tokens to 50% production vs age, faceted by class",
+       subtitle = paste0("Each dot = one item.  Different classes ",
+                          "occupy different age regions; within a class ",
+                          "the slope is set by frequency.  ",
+                          "If classes had different deltas, ",
+                          "the *shape* of the relationship within ",
+                          "each panel would differ.")) +
   theme_minimal(base_size = 11) +
-  theme(plot.title = element_text(face = "bold"))
+  theme(plot.title = element_text(face = "bold"),
+        strip.text = element_text(face = "bold"))
 
-# Annotations: at three example ages, what's the typical tokens-at-acquisition
+# Per-class binned medians for trend overlay
 trend_summary <- all_tab %>%
   mutate(age_bin = round(age50)) %>%
-  group_by(age_bin) %>%
+  group_by(class, age_bin) %>%
   summarise(n = n(), median_tokens = median(tokens_at_50),
             .groups = "drop") %>%
-  filter(n >= 5)
+  filter(n >= 3)
 
 p2_with_trend <- p2 +
   geom_line(data = trend_summary,
             aes(x = age_bin, y = median_tokens),
-            color = "firebrick", linewidth = 0.8, inherit.aes = FALSE)
+            color = "firebrick", linewidth = 0.6, inherit.aes = FALSE)
 
 # ---- Combine ---- #
 out <- p1 / p2_with_trend + plot_layout(heights = c(1, 1.1))
