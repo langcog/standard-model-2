@@ -556,6 +556,41 @@ age-varying input rate. Documented in `model_explainer.tex`
 
 ---
 
+## ⚪ 13. Adopt-and-augment plan across datasets (queued)
+
+Once the M0..M5 nested family on English completes, the plan for
+extending across datasets is:
+
+1. **English longitudinal (M0..M5 + no_freq + LMM)** — primary
+   structural ablation. LOO-CV + posterior shifts identify M_best.
+   *In flight on Sherlock as of 2026-05-02.*
+
+2. **Norwegian longitudinal (M_best only)** — cross-language
+   replication. Confirms whether the structural choice from English
+   transfers to Norwegian, where δ ≈ 11.5 vs English's 9.4 hints at
+   stronger acceleration and Norwegian has more longitudinal
+   density per kid (8 admins vs 3).
+
+3. **Input-uptake (M_best + uptake channel) on BabyView and
+   SEEDLingS.** The `log_irt_io.stan` Stan file gets patched to
+   incorporate whatever components M_best adds beyond the current
+   spec (likely `time_baseline`, `beta_c`, `log_lik`). Each dataset
+   gets one primary fit; per-dataset secondary ablations (β_react
+   free vs pinned in BabyView; class-specific σ_within if signal
+   suggests it) are local follow-ups.
+
+4. **Processing (M_best + proc channel) on Peekbank-Stanford.**
+   `log_irt_long_proc.stan` similarly patched. Estimates γ_rt for
+   the LWL-RT-as-α coupling alongside M_best's structure.
+
+This avoids running M0..M5 across all four data settings, which
+would be ~24 fits with mostly redundant findings (the core RQs are
+properties of the IRT/accumulator structure, not the dataset).
+Dataset-specific structural variation can be tested as targeted
+secondary analyses if results suggest it.
+
+---
+
 ## Backlog (⚪)
 
 ### Data / robustness

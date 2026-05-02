@@ -470,6 +470,40 @@ with LKJ prior on the correlation matrix.
 \end{frame}
 
 % =====================================================================
+\begin{frame}{Comparison to prior accumulator models}
+
+\centering
+\scriptsize
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Model & Per-child & Per-word & Acceleration & Bayesian & Real units \\
+\midrule
+McMurray 2007                 & --                          & $g(\tau)$               & via $g'$                & --              & --     \\
+Mitchell \& McMurray 2009     & --                          & $g(\tau)$ + leverage    & via $g'$                & --              & --     \\
+Hidaka 2013                   & --                          & $(N, \delta, D)$        & via $D$                 & --              & --     \\
+Mollica \& Piantadosi 2017    & --                          & $(k_w, \lambda_w)$      & --                      & $\checkmark$    & partial \\
+Kachergis et al.\ 2021        & $\theta_i$                  & $d_j$, class            & --                      & --              & --     \\
+\textbf{Ours (M5)}            & $\xi_i, \zeta_i, \pia$      & $\psi_j, \lambda_j, \beta_c$ & $\delta$ free        & $\checkmark$    & $\checkmark$ \\
+\bottomrule
+\end{tabular}
+
+\vspace{1.2em}
+\footnotesize
+\textbf{What's new in our nested family.}
+\begin{itemize}\setlength\itemsep{0.15em}
+\item McMurray 2007 / Mitchell \& McMurray 2009: deterministic, no per-child variation.  Their $g'(\tau) > 0$ requirement maps onto our \textbf{M2 vs.\ M1} test (does $\delta > 0$?).
+\item Hidaka 2013: closed-form Gamma / Weibull AoA distributions, population-averaged. Our \textbf{M1, M2, M3} occupy the same family (cumulative, rate-change, both) at the per-(child, word, age) Bernoulli level.
+\item Mollica \& Piantadosi 2017: $(k_w, \lambda_w)$ Gamma waiting time; large-$k$ approximated by our logistic. Their joint $(k, \lambda)$ ridge is our $(s, \delta)$ ridge.
+\item Kachergis et al.\ 2021: standardized logit IRT.  Our model adds external $\sigma_r$ pin (RQ3), structural $\delta$ (RQ1), real token units, and observation-channel architecture (uptake / processing).
+\end{itemize}
+
+\flushleft
+\scriptsize\textit{Full mathematical mapping in the explainer §\,Comparison to prior accumulator models.}
+
+\end{frame}
+
+% =====================================================================
 \begin{frame}{Conclusions}
 
 \begin{itemize}\setlength\itemsep{0.6em}

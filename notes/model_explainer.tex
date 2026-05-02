@@ -728,6 +728,221 @@ a \texttt{prepare\_<dataset>.R} script that reuses an existing Stan
 file with appropriate dataset-level constants; only when a genuinely
 new \emph{observation channel} appears do we add a Stan file.
 
+\section{Comparison to prior accumulator models}
+\label{sec:compare}
+
+Five prior models in this lineage all sit, with one or two
+parameterization changes, inside our nested family
+(§\ref{sec:nested}). We work through each in chronological order,
+showing the mapping in our notation.
+
+\subsection*{McMurray (2007) — pure deterministic accumulator}
+
+Each word \(j\) has a time-to-acquisition threshold \(\tau_j\) drawn
+from a population distribution \(g(\tau)\). At each unit time step
+every word accumulates one point, and word \(j\) is learned at the
+first \(t\) with \(t \ge \tau_j\). The growth curve is the CDF of
+\(g\):
+\[
+L_{\mathrm{McM}}(t) = \int_0^t g(\tau)\,d\tau = G(t),
+\quad
+L''(t) > 0 \iff g'(t) > 0.
+\]
+Acceleration arises only if \(g(\tau)\) puts more mass at
+moderately-hard ages than at easy ones. Frequency enters
+\emph{implicitly} through whatever shapes \(g(\tau)\); McMurray uses
+Gaussian by CLT.
+
+\paragraph{Mapping.} McMurray's deterministic accumulator is the
+zero-noise limit of our \textbf{M1} (unit-rate accumulator with no
+acceleration parameter). His \(\tau_j\) corresponds to our
+log-threshold \(\psi_j\) on the time axis: in M1, the deterministic
+acquisition age for word \(j\) at population mean child is
+\[
+t_j^{\mathrm{M1}} = a_0 \cdot \exp(\psi_j - \log p_j - \log H - \mu_r),
+\]
+which is the unique \(t\) where \(\theta_{\mathrm{pop}}(t) = \beta_j\).
+The distribution of \(\{\psi_j\}\) across words plays the role of
+\(g(\tau)\). Differences from McMurray:
+\begin{enumerate}[leftmargin=1.3em]
+\item \emph{Stochastic observations} — we observe Bernoulli outcomes
+\(y_{ij} \sim \Bern(\sigma(\theta - \beta))\); McMurray observes
+deterministic acquisition status. Our logit link is the smooth
+analogue of his step function.
+\item \emph{Per-child variation} — McMurray has none.
+\item \emph{Frequency in the linear predictor} — explicit \(\log p_j\)
+enters the linear predictor; McMurray bundles it into \(g(\tau)\).
+\end{enumerate}
+
+\subsection*{Mitchell \& McMurray (2009) — accumulator with feedback}
+
+Continuous-time generalization with a \emph{leverage} feedback term
+\(c\): the effective time argument \(a(t)\) advances faster as the
+child's vocabulary \(L(t)\) grows, so
+\[
+a(t) = t + c\,L(t),
+\quad L(t) = G(t + c\,L(t)),
+\quad
+\frac{dL}{dt} = \frac{g(t + cL)}{1 - c\,g(t+cL)}.
+\]
+Their key result: leverage shifts \(L(t)\) earlier (or later, with
+\(c<0\)) but \emph{cannot create acceleration} that isn't already
+present in \(g\). Acceleration still requires \(g'(\tau) > 0\) over
+the relevant range. They also tested two frequency-to-difficulty
+mappings (additive and multiplicative); under Zipf with exponent~1,
+multiplicative gives uniform difficulties, hence linear growth.
+
+\paragraph{Mapping.} The feedback structure
+\(a(t) = t + c\,L(t)\) does not have a clean analogue in our
+parameterization: it is intrinsically nonlinear in \(L\). What we
+have instead is a \emph{population-level} acceleration term
+\((1+\delta)\,\log_{age}\) (M2) and \emph{per-child} acceleration
+deviation \(\zeta_i\) (M3), neither of which involves the child's
+own vocabulary state. Mitchell \& McMurray's main \emph{conclusion}
+— that acceleration must be in the model \emph{somehow} — is
+operationalized in our family as the M2-vs-M1 comparison
+(RQ1). We confirm their conclusion empirically with
+\(\hat\delta \gg 0\) and CrI excluding zero.
+
+\subsection*{Hidaka (2013) — closed-form AoA distributions}
+
+Hidaka derives closed-form age-of-acquisition distributions for three
+nested learning processes:
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Process & Dynamics & AoA distribution \\
+\midrule
+Cumulative & \(N\)-accumulator, constant rate \(\delta\) &
+  \(\Gamma(N, \delta)\) \\
+Rate-change & 1-accumulator, rate \(\delta\,t^D\) &
+  Weibull \\
+Cumulative + rate-change & both & Weibull--Gamma \\
+\bottomrule
+\end{tabular}
+\end{center}
+Closed-class words best fit Weibull (rate-change); content words best
+fit Gamma (cumulative). \(N\) correlates with frequency;
+change-of-rate exponent \(D\) correlates with imageability.
+
+\paragraph{Mapping.} Hidaka's three families correspond to three
+points in our nested family:
+\begin{itemize}[leftmargin=1.3em]
+\item \emph{Cumulative} = our \textbf{M1}. Constant log-age slope; AoA
+  for word \(j\) at population mean child has a one-point degenerate
+  distribution. With per-child variance, AoA across kids is
+  approximately log-normal.
+\item \emph{Rate-change} = our \textbf{M2}. Slope on \(\log_{age}\) is
+  \(1 + \delta\); on the linear time scale, effective tokens grow as
+  \(t^{1+\delta}\). Hidaka's exponent \(D\) corresponds (after
+  reparameterization) to our \(\delta\).
+\item \emph{Cumulative + rate-change} = our \textbf{M3}. Per-child
+  intercept \(\xi_i\) and per-child slope deviation \(\zeta_i\) jointly
+  give a per-child power-law trajectory.
+\end{itemize}
+The functional families differ — Hidaka's AoA is Gamma/Weibull,
+ours is implicitly the convolution of a logistic CDF (item-level)
+with a normal (child-level) — but both live in the same
+``right-skewed positive AoA distribution'' family. Our model gains
+explicit per-child structure (Hidaka fits population-averaged
+\((N, \delta)\)) and embedding in a Bayesian framework with real
+units.
+
+\subsection*{Mollica \& Piantadosi (2017) — Bayesian Gamma waiting time}
+
+Per-word generative model: accumulation begins at start age \(s_w\);
+``effective learning instances'' (ELIs) arrive as a Poisson process
+with rate \(\lambda_w\); word is acquired after \(k_w\) ELIs.
+Acquisition age is therefore
+\[
+\mathrm{AoA}_w \sim s_w + \Gamma(k_w, \lambda_w),
+\qquad
+F_w(a) = \int_0^{a-s_w}
+\frac{t^{k_w-1}\,e^{-t\lambda_w}\,\lambda_w^{k_w}}{\Gamma(k_w)}\,dt.
+\]
+Aggregated data \(x_{aw} \sim \mathrm{Bin}(F_w(a), N_a)\) is fit per-word
+with JAGS across 13 languages. They report \(k \approx 10\),
+\(\lambda \approx 0.5\)/mo, \(s \approx 2\) mo for comprehension.
+
+\paragraph{Mapping.} Mollica's per-word \((k_w, \lambda_w)\) translates
+directly to our \(\psi_j\) and the population-level rate, but with
+two structural differences:
+\begin{enumerate}[leftmargin=1.3em]
+\item \emph{Their model is per-word; ours is per-(word, child)}.
+Mollica has no \(r_i\) or \(\alpha_i\). The total rate
+\(\lambda_w\) bundles input rate, child efficiency, and
+frequency-of-word-\(w\) into one number. We separate
+\(\lambda \approx r_i \cdot \alpha_i \cdot p_j \cdot H\), with
+\(r_i\) externally pinned, enabling RQ3.
+\item \emph{Gamma waiting time vs.\ logistic acquisition curve}. With
+large \(k\), the Gamma cumulative converges to a normal CDF (CLT);
+the logistic \(\sigma(\theta - \beta)\) is its
+\(\sim\!1.7\)-scale-factor approximation. So with \(k \gtrsim 5\)
+our Rasch model is approximately Mollica's Gamma waiting time, and
+\(\psi_j\) maps to \(\log(k_w / \lambda_w)\) (the Gamma mean on the
+log scale).
+\end{enumerate}
+Their joint \((k, \lambda)\) ridge is the same identifiability problem
+as our \((s, \delta)\) ridge: both have one structural quantity
+(the mean / median acquisition time) and a near-orthogonal shape
+parameter that the data weakly constrains. Our resolution
+(externally pinning \(\sigma_r\) and per-class \(\psi\) priors)
+breaks the ridge in a different place than theirs.
+
+\subsection*{Kachergis, Marchman, \& Frank (2021) — IRT framing}
+
+Reframes the family as a 1-PL Rasch IRT model:
+\[
+P(y_{ij} = 1 \mid \theta_i, d_j)
+= \frac{1}{1 + \exp(\theta_i + d_j)}.
+\]
+Fit with \texttt{lme4::glmer} on Wordbank. Item-level covariates:
+expected tokens/month \((p_j \cdot H \cdot a)\), lexical class.
+Person-level covariate: age. Best-fit model \texttt{m3}: lexical
+class \(\times\) tok\_per\_mo + age.
+
+\paragraph{Mapping.} Kachergis 2021 is essentially our M3 / M4 fit,
+but in standardized logit units with three structural simplifications:
+\begin{enumerate}[leftmargin=1.3em]
+\item \emph{No external pin on \(\sigma_r\)}. Their \(\theta_i\)
+absorbs both input rate and efficiency without any way to decompose
+them. RQ3 is unanswerable in their formulation.
+\item \emph{Age as additive person-covariate, not structural
+\(\log_{age}\)}. They write \(\theta_i = \theta_{i,0} + \beta a\); we
+write \(\theta_{it} = \xi_i + (1 + \delta)\,\log\!((t-s)/a_0)\).
+The two are linearizations of each other for moderate age ranges,
+but ours preserves units (a slope of 1 on \(\log_{age}\) is one
+log-token of evidence per log-age unit).
+\item \emph{No acceleration parameter}. Their model can't pose RQ1
+quantitatively, although their finding that adding age to
+\texttt{m\_tokmo} improves fit (i.e., age matters beyond expected
+tokens) is qualitatively the same conclusion.
+\end{enumerate}
+Our nested family completes the standard-model program of Kachergis
+2021 by (a) putting it in real token units rather than standardized
+logit units, (b) adding the structural \(\delta\) for RQ1, (c)
+adding the external \(\sigma_r\) pin for RQ3, and (d) extending to
+input-uptake (BabyView, SEEDLingS) and processing (Peekbank-Stanford)
+datasets via the observation-channel architecture.
+
+\subsection*{Summary table}
+
+\begin{center}
+\small
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+Model & Per-child & Per-word & Frequency & Acceleration & Bayesian & Real units \\
+\midrule
+McMurray 2007            & --      & \(g(\tau)\)         & implicit          & via \(g'\) only & --     & --     \\
+Mitchell \& McMurray 2009 & --      & \(g(\tau)\) + \(c\)  & implicit          & via \(g'\) only & --     & --     \\
+Hidaka 2013              & --      & \((N, \delta, D)\)  & via \(N\)         & via \(D\)       & --     & --     \\
+Mollica \& Piantadosi 2017 & --      & \((k_w, \lambda_w)\) & implicit (in \(\lambda_w\)) & --     & \(\checkmark\) & partial \\
+Kachergis et al.\ 2021   & \(\theta_i\) & \(d_j\), class    & explicit, unit-coef & --      & --     & --     \\
+\textbf{Ours (M5)}       & \(\xi_i, \zeta_i\), \(\pi_\alpha\) & \(\psi_j, \lambda_j\), class & \(\beta_c\) free & \(\delta\) free & \(\checkmark\) & \(\checkmark\) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
 \appendix
 
 \section{Start time \(s\) and the \(s\)/\(\delta\) ridge}
