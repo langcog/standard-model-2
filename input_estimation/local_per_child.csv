@@ -1,0 +1,303 @@
+source,sample_label,language,measure_type,method,subject_id,n_recordings,log_r,tokens_per_hour,citation_path
+Sperry et al. 2019,South Baltimore,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_South Baltimore_1,1,6.7214,830,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,South Baltimore,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_South Baltimore_2,1,6.9976,1094,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,South Baltimore,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_South Baltimore_3,1,7.3185,1508,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,South Baltimore,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_South Baltimore_4,1,6.5876,726,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,South Baltimore,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_South Baltimore_5,1,6.7452,850,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,South Baltimore,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_South Baltimore_6,1,6.8824,975,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,South Baltimore,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_South Baltimore_7,1,7.3951,1628,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,South Baltimore,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_South Baltimore_8,1,7.5175,1840,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,South Baltimore,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_South Baltimore_9,1,7.7719,2373,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Alabama_10,1,7.411,1654,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Alabama_11,1,8.3168,4092,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Alabama_12,1,8.4268,4568,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Alabama_13,1,7.7998,2440,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Alabama_14,1,7.9936,2962,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Alabama_15,1,8.2003,3642,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Alabama_16,1,8.1185,3356,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Alabama_17,1,8.1758,3554,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Alabama_18,1,8.2491,3824,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Alabama_19,1,7.6109,2020,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Alabama_20,1,7.6667,2136,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Alabama_21,1,7.8702,2618,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Alabama_22,1,7.7415,2302,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Alabama_23,1,7.9697,2892,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Alabama_24,1,8.1374,3420,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Alabama_25,1,7.4844,1780,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Alabama_26,1,7.7749,2380,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Alabama_27,1,7.8973,2690,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Alabama_28,1,6.5596,706,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Alabama_29,1,7.2471,1404,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Alabama_30,1,7.5838,1966,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Alabama_31,1,6.9754,1070,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Alabama_32,1,8.145,3446,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Alabama_33,1,8.6001,5432,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Alabama_34,1,6.9256,1018,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Alabama_35,1,6.9393,1032,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Alabama_36,1,6.9489,1042,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Alabama_37,1,8.0057,2998,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Alabama_38,1,8.1239,3374,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Alabama_39,1,8.297,4012,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Alabama_40,1,6.7708,872,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Alabama_41,1,7.2442,1400,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Alabama,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Alabama_42,1,7.6128,2024,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Indiana_43,1,7.2167,1362,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Indiana_44,1,7.5454,1892,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Indiana_45,1,8.3299,4146,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Indiana_46,1,6.9829,1078,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Indiana_47,1,7.1309,1250,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Indiana_48,1,7.4289,1684,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Indiana_49,1,7.3092,1494,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Indiana_50,1,7.4855,1782,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Indiana_51,1,8.2631,3878,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Indiana_52,1,5.9506,384,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Indiana_53,1,6.6227,752,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Indiana_54,1,7.7398,2298,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Indiana_55,1,7.3251,1518,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Indiana_56,1,7.3382,1538,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Indiana_57,1,7.3601,1572,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Indiana_58,1,6.2383,512,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Indiana_59,1,6.8522,946,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Indiana_60,1,7.3421,1544,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Indiana_61,1,6.1738,480,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Indiana_62,1,6.5309,686,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Indiana_63,1,7.0665,1172,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Indiana_64,1,7.6099,2018,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Indiana_65,1,7.6544,2110,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Indiana_66,1,7.8376,2534,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Indiana_67,1,7.9572,2856,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Indiana_68,1,8.0846,3244,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Indiana_69,1,8.439,4624,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Indiana_70,1,5.8916,362,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Indiana_71,1,6.672,790,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Indiana_72,1,7.5186,1842,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Indiana_73,1,6.6796,796,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Indiana_74,1,7.293,1470,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Indiana_75,1,7.8898,2670,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Indiana_76,1,6.3244,558,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Indiana_77,1,7.0783,1186,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Indiana_78,1,8.1594,3496,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Indiana_79,1,6.8957,988,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Indiana_80,1,7.0049,1102,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Indiana_81,1,7.2342,1386,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Indiana_82,1,6.7382,844,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Indiana_83,1,7.0103,1108,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Indiana_84,1,7.5486,1898,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Indiana_85,1,6.1485,468,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Indiana_86,1,6.9017,994,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Indiana,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Indiana_87,1,7.8686,2614,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Daly Park,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Daly Park_88,1,7.6525,2106,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Daly Park,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Daly Park_89,1,7.6554,2112,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Daly Park,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Daly Park_90,1,7.698,2204,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Daly Park,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Daly Park_91,1,7.6998,2208,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Daly Park,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Daly Park_92,1,7.7007,2210,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Daly Park,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Daly Park_93,1,7.7293,2274,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Daly Park,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Daly Park_94,1,6.1696,478,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Daly Park,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Daly Park_95,1,6.3665,582,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Daly Park,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Daly Park_96,1,7.3963,1630,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Daly Park,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Daly Park_97,1,6.9903,1086,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Daly Park,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Daly Park_98,1,6.9903,1086,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Daly Park,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Daly Park_99,1,7.3172,1506,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Daly Park,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Daly Park_100,1,5.8861,360,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Daly Park,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Daly Park_101,1,6.4739,648,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Daly Park,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Daly Park_102,1,6.8855,978,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Daly Park,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Daly Park_103,1,7.0648,1170,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Daly Park,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Daly Park_104,1,7.1309,1250,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Daly Park,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Daly Park_105,1,7.4254,1678,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Daly Park,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Daly Park_106,1,7.6236,2046,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Daly Park,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Daly Park_107,1,7.6971,2202,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Daly Park,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Daly Park_108,1,7.8208,2492,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Longwood,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Longwood_109,1,7.4742,1762,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Longwood,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Longwood_110,1,7.698,2204,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Longwood,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Longwood_111,1,8.2316,3758,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Longwood,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Longwood_112,1,6.9058,998,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Longwood,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Longwood_113,1,7.2528,1412,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Longwood,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Longwood_114,1,7.3614,1574,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Longwood,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Longwood_115,1,8.0728,3206,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Longwood,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Longwood_116,1,8.1047,3310,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Longwood,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Longwood_117,1,8.1345,3410,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Longwood,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Longwood_118,1,6.1527,470,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Longwood,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Longwood_119,1,6.6412,766,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Longwood,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Longwood_120,1,7.3369,1536,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Longwood,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Longwood_121,1,6.4739,648,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Longwood,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Longwood_122,1,6.7546,858,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Longwood,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Longwood_123,1,7.4337,1692,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Longwood,English (US),CDS-mother,manual transcript (visit recording),Sperry et al. 2019_Longwood_124,1,7.5294,1862,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Longwood,English (US),CDS-any-adult,manual transcript (visit recording),Sperry et al. 2019_Longwood_125,1,7.6563,2114,papers/input_estimation/sperry_etal_2019.pdf
+Sperry et al. 2019,Longwood,English (US),all-adult,manual transcript (visit recording),Sperry et al. 2019_Longwood_126,1,8.0084,3006,papers/input_estimation/sperry_etal_2019.pdf
+Hart & Risley 1995,KC Professional,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Professional_127,1,8.1617,3504,NA
+Hart & Risley 1995,KC Professional,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Professional_128,1,7.9533,2845,NA
+Hart & Risley 1995,KC Professional,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Professional_129,1,7.8766,2635,NA
+Hart & Risley 1995,KC Professional,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Professional_130,1,7.8528,2573,NA
+Hart & Risley 1995,KC Professional,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Professional_131,1,7.8244,2501,NA
+Hart & Risley 1995,KC Professional,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Professional_132,1,7.745,2310,NA
+Hart & Risley 1995,KC Professional,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Professional_133,1,7.6939,2195,NA
+Hart & Risley 1995,KC Professional,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Professional_134,1,7.6658,2134,NA
+Hart & Risley 1995,KC Professional,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Professional_135,1,7.5787,1956,NA
+Hart & Risley 1995,KC Professional,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Professional_136,1,7.3099,1495,NA
+Hart & Risley 1995,KC Professional,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Professional_137,1,7.2598,1422,NA
+Hart & Risley 1995,KC Professional,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Professional_138,1,7.2421,1397,NA
+Hart & Risley 1995,KC Professional,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Professional_139,1,6.9266,1019,NA
+Hart & Risley 1995,KC Middle Class,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Middle Class_140,1,8.1937,3618,NA
+Hart & Risley 1995,KC Middle Class,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Middle Class_141,1,7.8902,2671,NA
+Hart & Risley 1995,KC Middle Class,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Middle Class_142,1,7.4248,1677,NA
+Hart & Risley 1995,KC Middle Class,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Middle Class_143,1,7.2917,1468,NA
+Hart & Risley 1995,KC Middle Class,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Middle Class_144,1,6.9324,1025,NA
+Hart & Risley 1995,KC Middle Class,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Middle Class_145,1,6.8352,930,NA
+Hart & Risley 1995,KC Middle Class,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Middle Class_146,1,6.7214,830,NA
+Hart & Risley 1995,KC Middle Class,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Middle Class_147,1,6.719,828,NA
+Hart & Risley 1995,KC Middle Class,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Middle Class_148,1,6.6946,808,NA
+Hart & Risley 1995,KC Middle Class,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Middle Class_149,1,4.9628,143,NA
+Hart & Risley 1995,KC Working Class,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Working Class_150,1,7.7634,2353,NA
+Hart & Risley 1995,KC Working Class,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Working Class_151,1,7.644,2088,NA
+Hart & Risley 1995,KC Working Class,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Working Class_152,1,7.5559,1912,NA
+Hart & Risley 1995,KC Working Class,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Working Class_153,1,7.4366,1697,NA
+Hart & Risley 1995,KC Working Class,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Working Class_154,1,7.1074,1221,NA
+Hart & Risley 1995,KC Working Class,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Working Class_155,1,6.8544,948,NA
+Hart & Risley 1995,KC Working Class,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Working Class_156,1,6.7593,862,NA
+Hart & Risley 1995,KC Working Class,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Working Class_157,1,6.719,828,NA
+Hart & Risley 1995,KC Working Class,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Working Class_158,1,6.7166,826,NA
+Hart & Risley 1995,KC Working Class,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Working Class_159,1,6.6908,805,NA
+Hart & Risley 1995,KC Working Class,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Working Class_160,1,6.2653,526,NA
+Hart & Risley 1995,KC Working Class,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Working Class_161,1,6.0936,443,NA
+Hart & Risley 1995,KC Working Class,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Working Class_162,1,5.591,268,NA
+Hart & Risley 1995,KC Poor,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Poor_163,1,6.8533,947,NA
+Hart & Risley 1995,KC Poor,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Poor_164,1,6.6346,761,NA
+Hart & Risley 1995,KC Poor,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Poor_165,1,6.6227,752,NA
+Hart & Risley 1995,KC Poor,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Poor_166,1,6.4069,606,NA
+Hart & Risley 1995,KC Poor,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Poor_167,1,5.9915,400,NA
+Hart & Risley 1995,KC Poor,"English (US, KS)",CDS-mother,manual transcript (visit recording),Hart & Risley 1995_KC Poor_168,1,5.4424,231,NA
+Soderstrom & Wittebolle 2013,Home,"English (CA, Manitoba)",all-adult,manual transcript (visit recording),Soderstrom & Wittebolle 2013_Home_169,1,6.8505,944.4,NA
+Soderstrom & Wittebolle 2013,Home,"English (CA, Manitoba)",all-adult,manual transcript (visit recording),Soderstrom & Wittebolle 2013_Home_170,1,6.9814,1076.4,NA
+Soderstrom & Wittebolle 2013,Home,"English (CA, Manitoba)",all-adult,manual transcript (visit recording),Soderstrom & Wittebolle 2013_Home_171,1,7.0034,1100.4,NA
+Soderstrom & Wittebolle 2013,Home,"English (CA, Manitoba)",all-adult,manual transcript (visit recording),Soderstrom & Wittebolle 2013_Home_172,1,7.2832,1455.6,NA
+Soderstrom & Wittebolle 2013,Home,"English (CA, Manitoba)",all-adult,manual transcript (visit recording),Soderstrom & Wittebolle 2013_Home_173,1,7.2707,1437.6,NA
+Soderstrom & Wittebolle 2013,Home,"English (CA, Manitoba)",all-adult,manual transcript (visit recording),Soderstrom & Wittebolle 2013_Home_174,1,6.0601,428.4,NA
+Soderstrom & Wittebolle 2013,Daycare,"English (CA, Manitoba)",all-adult,manual transcript (visit recording),Soderstrom & Wittebolle 2013_Daycare_175,1,6.6593,780,NA
+Soderstrom & Wittebolle 2013,Daycare,"English (CA, Manitoba)",all-adult,manual transcript (visit recording),Soderstrom & Wittebolle 2013_Daycare_176,1,6.1225,456,NA
+Soderstrom & Wittebolle 2013,Daycare,"English (CA, Manitoba)",all-adult,manual transcript (visit recording),Soderstrom & Wittebolle 2013_Daycare_177,1,7.5322,1867.2,NA
+Soderstrom & Wittebolle 2013,Daycare,"English (CA, Manitoba)",all-adult,manual transcript (visit recording),Soderstrom & Wittebolle 2013_Daycare_178,1,6.8632,956.4,NA
+Soderstrom & Wittebolle 2013,Daycare,"English (CA, Manitoba)",all-adult,manual transcript (visit recording),Soderstrom & Wittebolle 2013_Daycare_179,1,6.7448,849.6,NA
+Soderstrom & Wittebolle 2013,Daycare,"English (CA, Manitoba)",all-adult,manual transcript (visit recording),Soderstrom & Wittebolle 2013_Daycare_180,1,7.1177,1233.6,NA
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",CDS-mother,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_181,1,6.5902,727.9018,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",all-adult,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_182,1,6.737,843.0556,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",CDS-mother,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_183,1,5.2913,198.6094,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",all-adult,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_184,1,5.5497,257.1641,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",CDS-mother,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_185,1,6.7391,844.8206,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",all-adult,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_186,1,6.7804,880.4092,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",CDS-mother,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_187,1,6.3622,579.5468,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",all-adult,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_188,1,7.3423,1544.2759,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",CDS-mother,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_189,1,6.9469,1039.9169,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",all-adult,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_190,1,7.2616,1424.5483,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",CDS-mother,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_191,1,5.7348,309.4555,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",all-adult,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_192,1,7.3192,1508.9917,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",CDS-mother,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_193,1,7.1318,1251.1042,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",all-adult,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_194,1,7.3789,1601.7832,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",CDS-mother,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_195,1,5.1157,166.6185,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",all-adult,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_196,1,6.29,539.1279,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",CDS-mother,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_197,1,6.6234,752.4743,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",all-adult,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_198,1,7.0996,1211.4598,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",CDS-mother,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_199,1,6.0682,431.892,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",all-adult,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_200,1,6.0813,437.5906,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",CDS-mother,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_201,1,6.4065,605.7949,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",all-adult,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_202,1,6.8099,906.7826,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",CDS-mother,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_203,1,6.8494,943.3332,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",all-adult,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_204,1,7.377,1598.8362,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",CDS-mother,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_205,1,6.4184,613.029,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",all-adult,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_206,1,7.1752,1306.6804,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",CDS-mother,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_207,1,6.5718,714.6301,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",all-adult,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_208,1,6.8623,955.5522,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",CDS-mother,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_209,1,6.8826,975.1632,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",all-adult,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_210,1,7.1797,1312.472,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",CDS-mother,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_211,1,4.2071,67.1597,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",all-adult,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_212,1,5.3069,201.719,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",CDS-mother,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_213,1,6.0799,437.0009,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",all-adult,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_214,1,6.679,795.5362,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",CDS-mother,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_215,1,6.2861,537.0385,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",all-adult,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_216,1,7.5648,1929.0462,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",CDS-mother,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_217,1,7.1049,1217.9196,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",all-adult,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_218,1,7.272,1439.4442,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",CDS-mother,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_219,1,4.3222,75.3509,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",all-adult,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_220,1,6.3314,561.9298,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",CDS-mother,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_221,1,5.6977,298.1928,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",all-adult,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_222,1,6.6033,737.5301,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",CDS-mother,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_223,1,5.6931,296.8198,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",all-adult,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_224,1,6.437,624.5199,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",CDS-mother,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_225,1,7.0248,1124.1572,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",all-adult,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_226,1,7.9625,2871.3088,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",CDS-mother,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_227,1,5.9737,392.9706,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",all-adult,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_228,1,6.7848,884.3119,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",CDS-mother,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_229,1,6.9344,1026.9551,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",all-adult,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_230,1,7.0183,1116.8522,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",CDS-mother,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_231,1,4.6928,109.1631,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",all-adult,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_232,1,6.5593,705.789,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",CDS-mother,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_233,1,4.8677,130.026,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",all-adult,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_234,1,6.3813,590.6778,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",CDS-mother,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_235,1,6.935,1027.6154,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",all-adult,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_236,1,7.3682,1584.7981,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",CDS-mother,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_237,1,6.1034,447.3902,papers/input_estimation/weisleder_fernald_2013.pdf
+Weisleder & Fernald 2013,low-SES Spanish-speaking,"Spanish (US, low-SES)",all-adult,manual transcript (visit recording),Weisleder & Fernald 2013_low-SES Spanish-speaking_238,1,6.9726,1066.9428,papers/input_estimation/weisleder_fernald_2013.pdf
+this paper (BabyView; Long et al. 2025),20 longitudinal English-dominant Stanford subjects,"English (US, CA)",all-adult,"FEM+MAL transcript (Whisper, score>=0.3)",S00220001,251,7.7132,2237.6067,data/raw_data/babyview/README.md
+this paper (BabyView; Long et al. 2025),20 longitudinal English-dominant Stanford subjects,"English (US, CA)",all-adult,"FEM+MAL transcript (Whisper, score>=0.3)",S00230001,33,7.159,1285.6441,data/raw_data/babyview/README.md
+this paper (BabyView; Long et al. 2025),20 longitudinal English-dominant Stanford subjects,"English (US, CA)",all-adult,"FEM+MAL transcript (Whisper, score>=0.3)",S00270002,158,6.9886,1084.2478,data/raw_data/babyview/README.md
+this paper (BabyView; Long et al. 2025),20 longitudinal English-dominant Stanford subjects,"English (US, CA)",all-adult,"FEM+MAL transcript (Whisper, score>=0.3)",S00300001,147,6.0278,414.806,data/raw_data/babyview/README.md
+this paper (BabyView; Long et al. 2025),20 longitudinal English-dominant Stanford subjects,"English (US, CA)",all-adult,"FEM+MAL transcript (Whisper, score>=0.3)",S00320001,707,7.2183,1364.1362,data/raw_data/babyview/README.md
+this paper (BabyView; Long et al. 2025),20 longitudinal English-dominant Stanford subjects,"English (US, CA)",all-adult,"FEM+MAL transcript (Whisper, score>=0.3)",S00320002,263,6.7189,827.917,data/raw_data/babyview/README.md
+this paper (BabyView; Long et al. 2025),20 longitudinal English-dominant Stanford subjects,"English (US, CA)",all-adult,"FEM+MAL transcript (Whisper, score>=0.3)",S00320003,540,7.3559,1565.4023,data/raw_data/babyview/README.md
+this paper (BabyView; Long et al. 2025),20 longitudinal English-dominant Stanford subjects,"English (US, CA)",all-adult,"FEM+MAL transcript (Whisper, score>=0.3)",S00360001,268,6.8569,950.4435,data/raw_data/babyview/README.md
+this paper (BabyView; Long et al. 2025),20 longitudinal English-dominant Stanford subjects,"English (US, CA)",all-adult,"FEM+MAL transcript (Whisper, score>=0.3)",S00370001,179,7.5052,1817.4535,data/raw_data/babyview/README.md
+this paper (BabyView; Long et al. 2025),20 longitudinal English-dominant Stanford subjects,"English (US, CA)",all-adult,"FEM+MAL transcript (Whisper, score>=0.3)",S00380001,493,7.4178,1665.2981,data/raw_data/babyview/README.md
+this paper (BabyView; Long et al. 2025),20 longitudinal English-dominant Stanford subjects,"English (US, CA)",all-adult,"FEM+MAL transcript (Whisper, score>=0.3)",S00400001,635,7.826,2504.9059,data/raw_data/babyview/README.md
+this paper (BabyView; Long et al. 2025),20 longitudinal English-dominant Stanford subjects,"English (US, CA)",all-adult,"FEM+MAL transcript (Whisper, score>=0.3)",S00400002,317,6.2789,533.1919,data/raw_data/babyview/README.md
+this paper (BabyView; Long et al. 2025),20 longitudinal English-dominant Stanford subjects,"English (US, CA)",all-adult,"FEM+MAL transcript (Whisper, score>=0.3)",S00400003,152,7.7285,2272.2093,data/raw_data/babyview/README.md
+this paper (BabyView; Long et al. 2025),20 longitudinal English-dominant Stanford subjects,"English (US, CA)",all-adult,"FEM+MAL transcript (Whisper, score>=0.3)",S00420001,279,7.0092,1106.7675,data/raw_data/babyview/README.md
+this paper (BabyView; Long et al. 2025),20 longitudinal English-dominant Stanford subjects,"English (US, CA)",all-adult,"FEM+MAL transcript (Whisper, score>=0.3)",S00430001,177,7.0938,1204.5156,data/raw_data/babyview/README.md
+this paper (BabyView; Long et al. 2025),20 longitudinal English-dominant Stanford subjects,"English (US, CA)",all-adult,"FEM+MAL transcript (Whisper, score>=0.3)",S00490001,59,7.2524,1411.4262,data/raw_data/babyview/README.md
+this paper (BabyView; Long et al. 2025),20 longitudinal English-dominant Stanford subjects,"English (US, CA)",all-adult,"FEM+MAL transcript (Whisper, score>=0.3)",S00510001,147,7.484,1779.3536,data/raw_data/babyview/README.md
+this paper (BabyView; Long et al. 2025),20 longitudinal English-dominant Stanford subjects,"English (US, CA)",all-adult,"FEM+MAL transcript (Whisper, score>=0.3)",S00510002,490,7.7244,2262.7855,data/raw_data/babyview/README.md
+this paper (BabyView; Long et al. 2025),20 longitudinal English-dominant Stanford subjects,"English (US, CA)",all-adult,"FEM+MAL transcript (Whisper, score>=0.3)",S00720001,111,7.0694,1175.4659,data/raw_data/babyview/README.md
+this paper (BabyView; Long et al. 2025),20 longitudinal English-dominant Stanford subjects,"English (US, CA)",all-adult,"FEM+MAL transcript (Whisper, score>=0.3)",S00820001,282,7.1802,1313.2142,data/raw_data/babyview/README.md
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),01,12,6.9952,1091.3365,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),02,12,7.0029,1099.7722,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),03,12,6.7937,892.1938,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),04,12,7.4406,1703.8432,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),06,12,6.6819,797.8602,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),07,11,7.4868,1784.3655,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),08,12,7.5274,1858.1748,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),09,12,6.6249,753.6226,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),10,12,7.1551,1280.6312,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),11,12,7.537,1876.2086,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),12,12,7.5152,1835.6887,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),13,12,6.9301,1022.5792,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),14,12,6.8905,982.9255,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),15,12,6.8073,904.4331,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),16,12,6.9383,1031.0246,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),17,12,6.9468,1039.791,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),18,12,7.4942,1797.676,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),19,11,7.6508,2102.365,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),20,12,7.0604,1164.9305,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),21,12,7.0941,1204.8676,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),22,11,6.7479,852.2749,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),23,12,6.8055,902.7915,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),25,12,6.3874,594.2896,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),26,12,6.6637,783.4247,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),27,12,7.2717,1438.9467,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),28,12,6.702,814.0051,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),29,12,7.2247,1372.961,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),30,12,7.1624,1289.9925,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),31,12,7.0146,1112.7244,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),32,12,6.8207,916.6417,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),33,12,7.5154,1836.1477,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),34,12,6.155,471.0786,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),35,12,7.1514,1275.8484,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),36,12,7.1466,1269.8025,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),37,12,6.589,727.0656,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),38,12,7.5317,1866.3221,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),39,12,6.9929,1088.8837,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),40,12,6.7667,868.4124,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),41,12,7.0587,1162.913,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),42,12,7.0392,1140.4178,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),43,12,7.2126,1356.3692,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),44,12,6.355,575.3575,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),45,12,6.3388,566.1449,papers/input_estimation/bergelson_etal_2018.pdf
+this paper (SEEDLingS; Bergelson 2018; Egan-Dailey & Bergelson 2025),44 longitudinal Rochester subjects,"English (US, Rochester NY)",all-adult,LENA AWC (automated),46,12,6.9298,1022.3151,papers/input_estimation/bergelson_etal_2018.pdf

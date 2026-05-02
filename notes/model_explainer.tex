@@ -233,9 +233,18 @@ implemented by flooring $a_i - s$ at $0.01$ inside the $\log$).
 The likelihood depends on \(\log r_i\) and \(\log \alpha_i\) only through
 their sum, so we sample a single child-level latent
 \[ \xi_i \coloneqq \log r_i + \log \alpha_i \sim \Norm\!\big(\mu_r,\; \sigma_r^2 + \sigma_\alpha^2\big). \]
-Here \(\mu_r = \log 1198\) and \(\sigma_r^2 = \Var(\log r)_{\text{Sperry/HR/WF}}\)
-are \emph{pinned} from external data (this is the identifiability lever
-for RQ4), while \(\sigma_\alpha\) is free:
+Here \(\mu_r = \mathrm{mean}(\log r)_{\text{Sperry pool}} \approx 7.34\)
+(geometric mean \(\approx 1537\) tokens/hour) and
+\(\sigma_r^2 = \Var(\log r)_{\text{Sperry pool}} \approx 0.534^2\) are
+\emph{pinned} from external data (this is the identifiability lever
+for RQ4). The pool is the \(n=42\) dyads with non-NA
+\(\texttt{adult\_child\_tokens\_hr}\) in
+\texttt{data/raw\_data/sperry/hourly\_tokens\_Sperry\_HartRisley.csv}; in
+practice these are all from Sperry et al.\ (2019), since Hart \& Risley
+(1995) and Weisleder \& Fernald (2013) reported only mother-only and
+all-adult counts, respectively. See \texttt{input\_estimation/} for the
+full validation set and a sensitivity-range justification.
+\(\sigma_\alpha\) is free:
 \begin{equation}
 \sigma_\alpha \sim \HN(0, 1).
 \end{equation}
