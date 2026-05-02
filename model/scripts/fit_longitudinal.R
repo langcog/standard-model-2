@@ -69,10 +69,17 @@ cfg <- modifyList(DEFAULT_FIT_CONFIG, list(
 cat(sprintf("Stan config: chains=%d iter=%d warmup=%d adapt_delta=%.2f\n",
             cfg$chains, cfg$iter, cfg$warmup, cfg$adapt_delta))
 
+# LMM variants use a different Stan file (linear-in-age, no s / delta).
+is_lmm <- grepl("^long_lmm", variant) || identical(sub("^long_", "", variant), "lmm") ||
+          identical(sub("^long_", "", variant), "lmm_slopes")
+stan_file <- file.path(PROJECT_ROOT,
+                       if (is_lmm) "model/stan/log_irt_long_lmm.stan"
+                       else "model/stan/log_irt_long.stan")
+cat(sprintf("Stan model: %s\n", stan_file))
+
 fit <- fit_variant(stan_data, tag = out_tag,
                    cfg = cfg,
-                   model_path = file.path(PROJECT_ROOT,
-                                          "model/stan/log_irt_long.stan"))
+                   model_path = stan_file)
 
 pars <- c("sigma_alpha", "pi_alpha", "sigma_xi", "s", "delta",
           "sigma_zeta", "rho_xi_zeta")

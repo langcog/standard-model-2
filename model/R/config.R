@@ -67,7 +67,12 @@ DEFAULT_PRIORS <- list(
   delta_prior_sd   = 0.5,
   sigma_lambda_prior_sd = 0.001,   # no 2PL by default
   sigma_zeta_prior_sd   = 0.001,   # no slopes by default; opt in for longitudinal
-  beta_c_prior_sd       = 0.001    # pin per-class log-p slope at 1; opt in via `class_beta`
+  beta_c_prior_sd       = 0.001,   # pin per-class log-p slope at 1; opt in via `class_beta`
+  # Linear-in-age population slope -- only used by log_irt_long_lmm.stan.
+  # Center at ~0.5 logit/month (a typical log-linear trajectory crosses
+  # ~14 logits over 24 months); silently ignored by other Stan files.
+  beta_age_prior_mean   = 0.5,
+  beta_age_prior_sd     = 1
 )
 
 ## Defaults for fitting.

@@ -161,6 +161,9 @@ variant_hyperpriors <- function(name) {
                              sigma_zeta_prior_sd = 1),
     no_class          = list(),  # data-side override; see variant_data_overrides
     no_class_slopes   = list(sigma_zeta_prior_sd = 1),
+    # LMM (linear-in-age) variants -- distinct Stan file log_irt_long_lmm.stan
+    lmm               = list(),
+    lmm_slopes        = list(sigma_zeta_prior_sd = 1),
     # Legacy variants for re-loading old fits / explicit comparison
     fix_s         = list(s_prior_mean = 2, s_prior_sd = 0.001),
     both_fixed    = list(delta_prior_mean = 0, delta_prior_sd = 0.001,
