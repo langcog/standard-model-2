@@ -15,11 +15,11 @@
 ## pending verification; if alignment is wrong we just rerun.)
 ##
 ## Inputs:
-##   data/raw_data/seedlings/cdi_ht_raw_temp.csv
+##   data/seedlings/cdi_ht_raw_temp.csv
 ##
 ## Output:
-##   data/raw_data/seedlings/cdi_items_long.csv
-##   data/raw_data/seedlings/cdi_seedlings_short_code_map.csv
+##   data/seedlings/cdi_items_long.csv
+##   data/seedlings/cdi_seedlings_short_code_map.csv
 
 source("model/R/config.R")
 suppressPackageStartupMessages({
@@ -27,7 +27,7 @@ suppressPackageStartupMessages({
   library(wordbankr)
 })
 
-OUT_DIR <- file.path(PROJECT_ROOT, "data/raw_data/seedlings")
+OUT_DIR <- file.path(PROJECT_ROOT, "data/seedlings")
 
 # -------------------------------------------------------------------- #
 # Manual overrides for sense-disambiguated items (WG form).            #

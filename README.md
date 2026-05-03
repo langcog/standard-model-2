@@ -23,7 +23,7 @@ standard_model_2/
 │   ├── experiments.md              ← running log: each fit + backlog
 │   ├── model_summaries.md          ← literature review notes
 │   └── _archive/                   ← superseded standalone findings files
-├── data/raw_data/                  ← raw external inputs (Sperry, BabyView, etc.)
+├── data/                  ← raw external inputs (Sperry, BabyView, etc.)
 └── sherlock/                       ← SLURM scripts for remote fits
 ```
 
@@ -65,7 +65,7 @@ Rscript sherlock/setup_R.R          # works both locally and on Sherlock
 # at model/fits/long_subset_data.rds).
 #
 # The Sperry / Hart-Risley / Weisleder-Fernald per-recording rate CSV
-# lives at data/raw_data/sperry/hourly_tokens_Sperry_HartRisley.csv.
+# lives at data/sperry/hourly_tokens_Sperry_HartRisley.csv.
 
 # Sanity check
 make smoke

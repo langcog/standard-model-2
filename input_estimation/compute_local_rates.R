@@ -35,7 +35,7 @@ dir.create(OUT, showWarnings = FALSE, recursive = TRUE)
 #   - all adult speech in room  (all_tokens_hr; CDS + ODS)
 
 sperry_raw <- read_csv(file.path(ROOT,
-  "data/raw_data/sperry/hourly_tokens_Sperry_HartRisley.csv"),
+  "data/sperry/hourly_tokens_Sperry_HartRisley.csv"),
   show_col_types = FALSE, progress = FALSE)
 
 # Long format so we can summarize by measure_type
@@ -79,7 +79,7 @@ sperry_long <- sperry_raw %>%
 # Adult Word Count, an automated count of all adult words near the
 # child's microphone (CDS + ODS lumped). We follow the same filter as
 # prepare_seedlings.R: month >= 6 & <= 17, !awc_outlier.
-lena <- read_csv(file.path(ROOT, "data/raw_data/seedlings/lena_data.csv"),
+lena <- read_csv(file.path(ROOT, "data/seedlings/lena_data.csv"),
                  show_col_types = FALSE, progress = FALSE)
 
 seedlings_rec <- lena %>%
@@ -121,7 +121,7 @@ babyview_rec <- bv$videos %>%
 # Long et al. 2025 isn't in the input_estimation/ folder (it's the
 # BabyView dataset paper, not really an input-estimation paper). Cite
 # it via the data README. Set a clearer pointer:
-babyview_rec$citation_path <- "data/raw_data/babyview/README.md"
+babyview_rec$citation_path <- "data/babyview/README.md"
 
 # ------------------------------------------------------------
 # 4. Concatenate per-recording table
@@ -223,7 +223,7 @@ pooled <- per_child %>%
     tokens_per_hour_mean = round(exp(mean(log_r)), 4),
     tokens_per_hour_median = round(median(exp(log_r)), 4),
     age_range_mo = NA_character_,
-    citation_path = "data/raw_data/sperry/hourly_tokens_Sperry_HartRisley.csv")
+    citation_path = "data/sperry/hourly_tokens_Sperry_HartRisley.csv")
 
 local_summary <- bind_rows(local_summary, pooled) %>%
   arrange(source, measure_type, sample_label)

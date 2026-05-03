@@ -5,9 +5,9 @@
 ## `model/fits/long_items.rds`; no wordbankr/peekbankr calls at runtime.
 ##
 ## Inputs:
-##   data/raw_data/peekbank/peekbank_stanford_linked.csv  (LWL admins +
+##   data/peekbank/peekbank_stanford_linked.csv  (LWL admins +
 ##     subject linkage; built by link_peekbank_stanford.R)
-##   data/raw_data/peekbank/stanford_cdi_items_long.csv   (item-level CDI
+##   data/peekbank/stanford_cdi_items_long.csv   (item-level CDI
 ##     in canonical Wordbank item names; built by parse_stanford_cdi.R)
 ##   model/fits/long_items.rds                             (CHILDES p_j)
 ##
@@ -22,7 +22,7 @@ suppressPackageStartupMessages({
 args <- commandArgs(trailingOnly = TRUE)
 n_items <- as.integer(if (length(args) >= 1) args[1] else 200)
 
-PB_DIR <- file.path(PROJECT_ROOT, "data/raw_data/peekbank")
+PB_DIR <- file.path(PROJECT_ROOT, "data/peekbank")
 SEED   <- 20260429
 N_DIFF_BINS <- 4
 

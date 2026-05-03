@@ -5,21 +5,21 @@
 ## model/scripts/pull_peekbank_lwl.R for how that file is built.
 ##
 ## Inputs:
-##   data/raw_data/peekbank/peekbank_2022_lwl_summary.csv  (per LWL admin
+##   data/peekbank/peekbank_2022_lwl_summary.csv  (per LWL admin
 ##     with lab_subject_id, age, RT, accuracy)
-##   data/raw_data/peekbank/stanford_cdi_items_long.csv     (TL2/TL3 items)
+##   data/peekbank/stanford_cdi_items_long.csv     (TL2/TL3 items)
 ##
 ## Outputs:
-##   data/raw_data/peekbank/peekbank_stanford_linked.csv     (per LWL
+##   data/peekbank/peekbank_stanford_linked.csv     (per LWL
 ##     admin: processing measures + nearest-age CDI summary)
-##   data/raw_data/peekbank/peekbank_stanford_admin_match.csv (diagnostic)
+##   data/peekbank/peekbank_stanford_admin_match.csv (diagnostic)
 
 source("model/R/config.R")
 suppressPackageStartupMessages({
   library(dplyr); library(tidyr); library(readr)
 })
 
-OUT_DIR <- file.path(PROJECT_ROOT, "data/raw_data/peekbank")
+OUT_DIR <- file.path(PROJECT_ROOT, "data/peekbank")
 
 # ---- 1. LWL admins with lab_subject_id + processing measures ---- #
 lwl <- read_csv(file.path(OUT_DIR, "peekbank_2022_lwl_summary.csv"),

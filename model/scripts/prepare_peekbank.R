@@ -2,7 +2,7 @@
 ## analysis (per-child RT and accuracy trajectories alongside CDI).
 ##
 ## RUN LOCALLY ONLY. Reads pre-built per-admin summaries lifted from
-## the peekbank-development repo (see data/raw_data/peekbank/README.md);
+## the peekbank-development repo (see data/peekbank/README.md);
 ## no peekbankr / wordbankr calls happen here.
 ##
 ## Usage:   Rscript model/scripts/prepare_peekbank.R [min_admins]
@@ -10,8 +10,8 @@
 ##          on top of the CDI-matching requirement)
 ##
 ## Inputs:
-##   data/raw_data/peekbank/1_d_sub.Rds       per-(subj, admin) summary
-##   data/raw_data/peekbank/0_cdi_subjects.Rds CDI-to-admin fuzzy join
+##   data/peekbank/1_d_sub.Rds       per-(subj, admin) summary
+##   data/peekbank/0_cdi_subjects.Rds CDI-to-admin fuzzy join
 ##                                             (already left-joined into
 ##                                             d_sub; kept around for
 ##                                             provenance)
@@ -30,7 +30,7 @@ suppressPackageStartupMessages({
 args <- commandArgs(trailingOnly = TRUE)
 MIN_ADMINS <- as.integer(if (length(args) >= 1) args[1] else 2)
 
-PB_DIR <- file.path(PROJECT_ROOT, "data/raw_data/peekbank")
+PB_DIR <- file.path(PROJECT_ROOT, "data/peekbank")
 
 message(sprintf("Preparing Peekbank bundle (min_admins=%d)", MIN_ADMINS))
 

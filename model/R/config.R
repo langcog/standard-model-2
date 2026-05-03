@@ -20,7 +20,7 @@ PATHS <- list(
   # Per-recording adult-child token rates from Sperry / Hart-Risley /
   # Weisleder-Fernald, used as the external prior on log r_i.
   input_rate = file.path(PROJECT_ROOT,
-                      "data/raw_data/sperry/hourly_tokens_Sperry_HartRisley.csv"),
+                      "data/sperry/hourly_tokens_Sperry_HartRisley.csv"),
 
   # Stan model
   stan_model = file.path(PROJECT_ROOT, "model/stan/log_irt.stan"),

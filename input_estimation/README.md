@@ -76,7 +76,7 @@ derivation in `notes`.
 | value | meaning |
 |---|---|
 | `computed-from-data` | We have per-recording rows in `local_per_recording.csv` |
-| `computed-from-paper-data` | The paper's data is in `data/raw_data/sperry/hourly_tokens_Sperry_HartRisley.csv` (per-dyad) and our summary aggregates it |
+| `computed-from-paper-data` | The paper's data is in `data/sperry/hourly_tokens_Sperry_HartRisley.csv` (per-dyad) and our summary aggregates it |
 | `reported` | The number is taken from the paper's text or table directly; we did not re-derive |
 
 ## Citations and PDFs

@@ -444,8 +444,8 @@ posterior on the 3-D MVN correlations.
 
 **Artifacts:** `model/stan/log_irt_long_proc.stan`,
 `model/fits/long_proc_slopes.rds` (smoke; will be overwritten by
-production fit), `data/raw_data/peekbank/peekbank_2022_lwl_summary.csv`,
-`data/raw_data/peekbank/peekbank_stanford_linked.csv`.
+production fit), `data/peekbank/peekbank_2022_lwl_summary.csv`,
+`data/peekbank/peekbank_stanford_linked.csv`.
 
 ---
 
@@ -700,7 +700,7 @@ story as M3 but with a worse-conditioned interpretation).
   disambiguator suffixes: `chicken1`/`chicken2`, `ifconn`, `withprep`,
   `notquant`, etc.). All entries are used in production. Loose end: a
   ~20-minute eyeball pass over
-  [`data/raw_data/peekbank/cdi_short_code_map_ws.csv`](../data/raw_data/peekbank/cdi_short_code_map_ws.csv)
+  [`data/peekbank/cdi_short_code_map_ws.csv`](../data/peekbank/cdi_short_code_map_ws.csv)
   and `cdi_short_code_map_wg.csv` to confirm the manual_disambig rows
   (especially for body-parts compounds, helping verbs with slashed
   forms, and place-names with `*` annotations) match what the form

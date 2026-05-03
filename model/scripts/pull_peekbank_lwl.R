@@ -12,7 +12,7 @@
 ##
 ## RUN LOCALLY ONLY. Connects to peekbank.stanford.edu.
 ##
-## Output: data/raw_data/peekbank/peekbank_2022_lwl_summary.csv
+## Output: data/peekbank/peekbank_2022_lwl_summary.csv
 ##   Columns: dataset_name, lab_subject_id, peekbank_subject_id,
 ##            peekbank_admin_id, age, sex,
 ##            n_trials, n_trials_rt,
@@ -24,7 +24,7 @@ suppressPackageStartupMessages({
   library(peekbankr); library(dplyr); library(tidyr); library(readr)
 })
 
-OUT_DIR <- file.path(PROJECT_ROOT, "data/raw_data/peekbank")
+OUT_DIR <- file.path(PROJECT_ROOT, "data/peekbank")
 TARGET_DATASETS <- c("adams_marchman_2018", "fmw_2013")
 
 # RT calculator (ported from peekbank-development helper/rt_helper.R)

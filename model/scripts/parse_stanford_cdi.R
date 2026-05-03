@@ -4,18 +4,18 @@
 ## RUN LOCALLY ONLY. Requires wordbankr (Sherlock can't reach it).
 ##
 ## Inputs:
-##   data/raw_data/peekbank/TL3_compiled_WS.csv   (csv; ~22 + 25 mo, WS form)
-##   data/raw_data/peekbank/TL2_WS_compiled.xlsx  (~18 mo, WS form)
-##   data/raw_data/peekbank/TL2_WG_compiled.xlsx  (~16 mo, WG form)
+##   data/peekbank/TL3_compiled_WS.csv   (csv; ~22 + 25 mo, WS form)
+##   data/peekbank/TL2_WS_compiled.xlsx  (~18 mo, WS form)
+##   data/peekbank/TL2_WG_compiled.xlsx  (~16 mo, WG form)
 ##
 ## Outputs:
-##   data/raw_data/peekbank/cdi_short_code_map_ws.csv
-##   data/raw_data/peekbank/cdi_short_code_map_wg.csv
+##   data/peekbank/cdi_short_code_map_ws.csv
+##   data/peekbank/cdi_short_code_map_wg.csv
 ##       Mapping from internal short codes to Wordbank item_definitions.
 ##       Columns: short, item_definition, status. All entries are
 ##       used in production at the moment; LOOSE END is hand review of
 ##       the rows where status != "auto_exact" or "manual_disambig".
-##   data/raw_data/peekbank/stanford_cdi_items_long.csv
+##   data/peekbank/stanford_cdi_items_long.csv
 ##       Long format, one row per (lab_subject_id, study, age, form,
 ##       item, produces). Items are Wordbank item_definitions.
 
@@ -25,7 +25,7 @@ suppressPackageStartupMessages({
   library(stringr); library(wordbankr)
 })
 
-OUT_DIR <- file.path(PROJECT_ROOT, "data/raw_data/peekbank")
+OUT_DIR <- file.path(PROJECT_ROOT, "data/peekbank")
 
 # -------------------------------------------------------------------- #
 # 1.  Manual disambiguator overrides (Marchman-lab CDI conventions).   #
