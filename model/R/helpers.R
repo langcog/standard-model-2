@@ -345,6 +345,16 @@ fit_variant_cmdstanr <- function(stan_data, tag,
 
   message(sprintf("[%s] cmdstanr fitting (chains=%d, iter=%d, warmup=%d, threads_per_chain=%d)...",
                   tag, cfg$chains, cfg$iter, cfg$warmup, threads_per_chain))
+
+  # Stan's TBB build needs TBB_CXX_TYPE set explicitly when the
+  # compiler can't be auto-detected (Sherlock case). cmdstanr will
+  # rebuild the binary whenever the .stan source is newer than the
+  # cached .rds, and the compile env doesn't inherit TBB_CXX_TYPE
+  # unless we set it here. Match what setup_R.R does on install.
+  if (!nzchar(Sys.getenv("TBB_CXX_TYPE"))) {
+    Sys.setenv(TBB_CXX_TYPE = "gcc")
+  }
+
   m <- cmdstanr::cmdstan_model(model_path,
                                 cpp_options = list(stan_threads = TRUE))
 
