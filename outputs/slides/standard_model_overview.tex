@@ -38,6 +38,11 @@
 \newcommand{\siglam}{\sigma_{\lambda}}
 \newcommand{\delt}{\delta}
 
+% Highlight color for newly-added term in each spine build slide.
+\definecolor{newterm}{RGB}{195,30,55}
+\newcommand{\new}[1]{\textcolor{newterm}{\boldsymbol{#1}}}
+\newcommand{\old}[1]{\textcolor{black!45}{#1}}
+
 \title{\bfseries A Bayesian Standard Model of Early Word Learning}
 \subtitle{Joint inference across vocabulary, input, and processing data}
 \author{Michael C.\ Frank}
@@ -379,30 +384,317 @@ $\boldsymbol{\pia}$ & \textbf{0.913 \,[0.901,\,0.926]} \\
 \end{frame}
 
 % =====================================================================
-\begin{frame}{Ablations: what each component buys you}
+\begin{frame}{Nested family: build the model one component at a time}
 
-\begin{columns}[T, onlytextwidth]
-\column{0.62\textwidth}
+We test each component's contribution by building a strictly nested
+spine. Every step \emph{adds one named component}, and every step has
+a fit on disk so we can compare it to its predecessor by LOO ELPD.
+
+\vspace{0.6em}
 \centering
-\includegraphics[width=\linewidth]{english_ablations_scalars.png}
+\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{@{}clp{0.42\linewidth}p{0.30\linewidth}@{}}
+\toprule
+\textbf{stage} & \textbf{adds} & \textbf{interpretation} & \textbf{answers} \\
+\midrule
+M0 & --                       & minimal IRT: per-child $\xi_i$, per-word $\psi_j$, no time, no frequency & identifiability anchor \\
+M1 & $+\;\log\!\frac{t-s}{a_0}$         & per-child accumulation grows with log-age (unit slope) & basic accumulator \\
+M2 & $+\;\log p_j$            & per-token frequency channel (unit coef) & \textbf{RQ2:} does freq matter? \\
+M3 & $+\;\delta$              & population-level age acceleration & \textbf{RQ1:} does growth accelerate? \\
+M4 & $+\;\zeta_i$             & per-child slope deviation around $\delta$ & between-child rate variance \\
+M5 & $+\;\beta_c\!\cdot\!\log p_j$ & class-specific frequency coefficient & class $\times$ freq interaction \\
+M6 & $+\;\lambda_j$           & per-word discrimination (2PL) & item-level sharpness \\
+\bottomrule
+\end{tabular}
 
-\column{0.38\textwidth}
+\vspace{0.6em}
 \footnotesize
-\textbf{Pin $\delta\!=\!0$}: population MVN no longer matches data;
-$\sigz\!\to\!35$ trying to compensate. \textbf{$\delta$ is
-load-bearing.}
+The next 7 slides walk through each stage's linear predictor, with the
+newly-added term highlighted. Implementation: each stage corresponds
+to a single \texttt{variant\_hyperpriors()} entry that toggles the
+relevant prior from "tight near zero" to "free."
 
-\vspace{0.5em}
-\textbf{Drop slopes}: population fit preserved; slopes matter for
-per-child trajectories, not population mean.
+\end{frame}
 
-\vspace{0.5em}
-\textbf{Free $s$}: $s$ wanders, other params little affected.
+% ====== M0 ===========================================================
+\begin{frame}[fragile]{M0: minimal IRT (no time, no frequency)}
 
-\vspace{0.5em}
-\textbf{Add 2PL} ($\siglam\!\approx\!0.31$): item discrimination
-real but population-averaged-out.
-\end{columns}
+\vspace{0.8em}
+\centering
+\Large
+$\eta_{ijt} = \xi_i + \log H - \psi_j$
+
+\vspace{1.6em}
+\normalsize
+\begin{tikzpicture}[every node/.style={inner sep=2pt},
+  ann/.style={font=\scriptsize\itshape, color=blue!40!black, align=center},
+  arrow/.style={->, blue!25!black, semithick, shorten >=2pt, shorten <=2pt}]
+\matrix[matrix of nodes, column sep=4pt, ampersand replacement=\&]{
+  |[name=Mxi]| $\xi_i$ \&
+  |[name=MlogH]| $\log H$ \&
+  |[name=Mpsi]| $\psi_j$ \\
+};
+\node[ann, below=2.0em of Mxi]   {child intercept\\(level only; absorbs\\$\log r_i$ and $\log \alpha_i$)};
+\node[ann, below=2.0em of MlogH] {waking hours\\per month};
+\node[ann, below=2.0em of Mpsi]  {per-word log\\threshold (free\\with class hierarchy)};
+\end{tikzpicture}
+
+\vspace{1.4em}
+\footnotesize
+\textbf{What this is.} The simplest possible item-response model: a
+fixed-in-age "ability" per child, a fixed difficulty per word, no
+mechanism. Vocabulary curves are flat in age; differences across
+children all live in $\xi_i$.
+
+\textbf{Why M0 first.} Establishes the identifiability anchor for
+$\xi_i$ (free per child) and $\psi_j$ (free per word with class prior).
+Subsequent stages add structural channels on top of these.
+
+\end{frame}
+
+% ====== M1 ===========================================================
+\begin{frame}[fragile]{$\boldsymbol{M_1 = M_0\;+\;\text{time}}$}
+
+\vspace{0.8em}
+\centering
+\Large
+$\eta_{ijt} = \old{\xi_i + \log H} + \new{\log\!\tfrac{t-s}{a_0}} - \old{\psi_j}$
+
+\vspace{1.4em}
+\normalsize
+{\color{newterm}\textbf{Time term:}} the child's accumulation grows
+with the log of (age $-$ start time), at a fixed unit slope.
+
+\vspace{1.6em}
+\centering
+\begin{tikzpicture}[every node/.style={inner sep=2pt},
+  ann/.style={font=\scriptsize\itshape, color=newterm, align=center},
+  arrow/.style={->, newterm, semithick, shorten >=2pt, shorten <=2pt}]
+\node[font=\Large, color=newterm] (T) {$\log\tfrac{t-s}{a_0}$};
+\node[ann, below=2.2em of T, text width=10cm]
+  {one log-token of evidence per log-age unit (\emph{no} acceleration);
+   $a_0$ is the per-dataset reference age (median admin); $s$ is the
+   global start time, pinned near 0 in the lean baseline.};
+\end{tikzpicture}
+
+\vspace{1.4em}
+\footnotesize
+\textbf{What's pinned.} $\delta = 0$ (no acceleration), $\beta_c = 0$
+(no frequency channel), $\zeta_i = 0$, $\lambda_j = 1$. Equivalent to
+McMurray's (2007) deterministic accumulator without the frequency
+proxy or any per-child age dynamics beyond a constant log-age slope.
+
+\end{frame}
+
+% ====== M2 ===========================================================
+\begin{frame}[fragile]{$\boldsymbol{M_2 = M_1\;+\;\text{frequency}}$}
+
+\vspace{0.8em}
+\centering
+\Large
+$\eta_{ijt} = \old{\xi_i + \log H} + \new{\log p_j} + \old{\log\!\tfrac{t-s}{a_0}} - \old{\psi_j}$
+
+\vspace{1.4em}
+\normalsize
+{\color{newterm}\textbf{Frequency term:}} per-token corpus frequency
+of word $j$ in CHILDES, with unit coefficient ("one log-token of
+evidence per log-token of corpus probability").
+
+\vspace{1.6em}
+\centering
+\begin{tikzpicture}[every node/.style={inner sep=2pt},
+  ann/.style={font=\scriptsize\itshape, color=newterm, align=center},
+  arrow/.style={->, newterm, semithick, shorten >=2pt, shorten <=2pt}]
+\node[font=\Large, color=newterm] (P) {$\log p_j$};
+\node[ann, below=2.2em of P, text width=10cm]
+  {Coefficient is exactly 1 (the "unit-accumulator" assumption).
+   $M_2$ vs.\ $M_1$ is the on-spine RQ2 test: does the data prefer
+   a freq-aware model over per-word $\psi_j$ alone?};
+\end{tikzpicture}
+
+\vspace{1.4em}
+\footnotesize
+\textbf{What's still pinned.} $\delta = 0$, $\zeta_i = 0$,
+$\beta_c = 1$ (unit), $\lambda_j = 1$.
+
+\end{frame}
+
+% ====== M3 ===========================================================
+\begin{frame}[fragile]{$\boldsymbol{M_3 = M_2\;+\;\delta\text{ (acceleration)}}$}
+
+\vspace{0.8em}
+\centering
+\Large
+$\eta_{ijt} = \old{\xi_i + \log H + \log p_j} + (1{+}\new{\delta})\old{\log\!\tfrac{t-s}{a_0}} - \old{\psi_j}$
+
+\vspace{1.4em}
+\normalsize
+{\color{newterm}\textbf{Acceleration:}} the population log-age slope
+becomes $1 + \delta$ instead of $1$. With $\delta > 0$, evidence
+accumulates super-linearly in log-age $\Leftrightarrow$ token weight
+grows with development.
+
+\vspace{1.6em}
+\centering
+\begin{tikzpicture}[every node/.style={inner sep=2pt},
+  ann/.style={font=\scriptsize\itshape, color=newterm, align=center},
+  arrow/.style={->, newterm, semithick, shorten >=2pt, shorten <=2pt}]
+\node[font=\Large, color=newterm] (D) {$\delta$};
+\node[ann, below=2.2em of D, text width=10cm]
+  {single global acceleration parameter; prior $\mathcal{N}(0, 0.5^2)$.
+   $M_3$ vs.\ $M_2$ is the on-spine RQ1 test: must the slope deviate
+   from 1 to fit observed growth-curve shape?};
+\end{tikzpicture}
+
+\vspace{1.4em}
+\footnotesize
+\textbf{What's still pinned.} $\zeta_i = 0$, $\beta_c = 1$, $\lambda_j = 1$.
+
+\end{frame}
+
+% ====== M4 ===========================================================
+\begin{frame}[fragile]{$\boldsymbol{M_4 = M_3\;+\;\zeta_i\text{ (per-child slopes)}}$}
+
+\vspace{0.8em}
+\centering
+\Large
+$\eta_{ijt} = \old{\xi_i + \log H + \log p_j} + (1{+}\delta{+}\new{\zeta_i})\old{\log\!\tfrac{t-s}{a_0}} - \old{\psi_j}$
+
+\vspace{1.4em}
+\normalsize
+{\color{newterm}\textbf{Per-child slope deviation:}} on top of the
+population acceleration, each child has their own $\zeta_i$ — a
+deviation of the log-age slope around $\delta$.
+
+\vspace{1.6em}
+\centering
+\begin{tikzpicture}[every node/.style={inner sep=2pt},
+  ann/.style={font=\scriptsize\itshape, color=newterm, align=center},
+  arrow/.style={->, newterm, semithick, shorten >=2pt, shorten <=2pt}]
+\node[font=\Large, color=newterm] (Z) {$\zeta_i$};
+\node[ann, below=2.2em of Z, text width=10cm]
+  {jointly drawn with $\xi_i$:
+   $(\xi_i, \zeta_i) \sim \mathrm{MVN}(0, \Sigma)$ with LKJ prior on
+   the correlation. Sum-to-zero centered, so $\delta$ stays separately
+   identified from $\mathrm{mean}(\zeta_i)$.};
+\end{tikzpicture}
+
+\vspace{1.4em}
+\footnotesize
+\textbf{What's still pinned.} $\beta_c = 1$, $\lambda_j = 1$. Adding
+$\zeta_i$ requires \emph{longitudinal} data to identify; the
+cross-sectional version of this fit is unidentified.
+
+\end{frame}
+
+% ====== M5 ===========================================================
+\begin{frame}[fragile]{$\boldsymbol{M_5 = M_4\;+\;\beta_c\text{ (class-specific freq)}}$}
+
+\vspace{0.8em}
+\centering
+\Large
+$\eta_{ijt} = \old{\xi_i + \log H} + \new{\beta_{c(j)}}\old{\log p_j + (1{+}\delta{+}\zeta_i)\log\!\tfrac{t-s}{a_0} - \psi_j}$
+
+\vspace{1.4em}
+\normalsize
+{\color{newterm}\textbf{Class-specific frequency coefficient:}} the
+unit weight on $\log p_j$ becomes a per-class free parameter $\beta_c$,
+one for each lexical class (nouns, predicates, function words, other).
+
+\vspace{1.6em}
+\centering
+\begin{tikzpicture}[every node/.style={inner sep=2pt},
+  ann/.style={font=\scriptsize\itshape, color=newterm, align=center},
+  arrow/.style={->, newterm, semithick, shorten >=2pt, shorten <=2pt}]
+\node[font=\Large, color=newterm] (B) {$\beta_c$};
+\node[ann, below=2.2em of B, text width=10cm]
+  {prior $\mathcal{N}(1, 0.5^2)$ per class; $\beta_c = 1$ recovers $M_4$;
+   $\beta_c < 1$ means the frequency channel contributes less than the
+   unit-accumulator assumption for that class.};
+\end{tikzpicture}
+
+\vspace{1.4em}
+\footnotesize
+\textbf{What's still pinned.} $\lambda_j = 1$.
+
+\end{frame}
+
+% ====== M6 ===========================================================
+\begin{frame}[fragile]{$\boldsymbol{M_6 = M_5\;+\;\lambda_j\text{ (2PL discrimination)}}$}
+
+\vspace{0.8em}
+\centering
+\Large
+$\eta_{ijt} = \new{\lambda_j}\,\old{\big[\,\xi_i + \log H + \beta_{c(j)}\log p_j + (1{+}\delta{+}\zeta_i)\log\!\tfrac{t-s}{a_0} - \psi_j\,\big]}$
+
+\vspace{1.4em}
+\normalsize
+{\color{newterm}\textbf{Per-word discrimination:}} the entire ability
+$-$ difficulty gap is multiplied by a word-specific $\lambda_j$. High
+$\lambda_j$ = sharp transition near $\psi_j$ (concrete nouns); low
+$\lambda_j$ = gradual transition (function words, abstracts).
+
+\vspace{1.6em}
+\centering
+\begin{tikzpicture}[every node/.style={inner sep=2pt},
+  ann/.style={font=\scriptsize\itshape, color=newterm, align=center},
+  arrow/.style={->, newterm, semithick, shorten >=2pt, shorten <=2pt}]
+\node[font=\Large, color=newterm] (L) {$\lambda_j$};
+\node[ann, below=2.2em of L, text width=10cm]
+  {hierarchical: $\log \lambda_j \sim \mathcal{N}(0, \sigma_\lambda^2)$
+   with $\sigma_\lambda \sim \mathrm{HN}(0,1)$. Recovers the standard
+   2PL IRT extension.};
+\end{tikzpicture}
+
+\vspace{1.4em}
+\footnotesize
+\textbf{Full model.} $M_6$ has the complete linear predictor as
+introduced on slide~5; everything to its left is now structurally
+free (or unit-anchored where the data prefer that).
+
+\end{frame}
+
+% ====== LOO results ==================================================
+\begin{frame}{Spine LOO comparison (English, $N=200$ children)}
+
+\vspace{0.4em}
+\textbf{Step-wise ELPD differences} (later $-$ earlier, $\sigma_r=0.534$ pinned):
+
+\vspace{0.4em}
+\centering
+\small
+\renewcommand{\arraystretch}{1.18}
+\begin{tabular}{@{}lrrrl@{}}
+\toprule
+step & $\Delta$ELPD & SE & $z$ & verdict \\
+\midrule
+$M_1\;\text{vs}\;M_0$ & $+8\,033$  & 36   & 222.6 & \textbf{time matters} \\
+$M_2\;\text{vs}\;M_1$ & $\sim\!0$ (pending) & -- & -- & \textbf{RQ2:} on-spine; new fit running \\
+$\boldsymbol{M_3\;\text{vs}\;M_2}$ & $\boldsymbol{+23\,289}$ & $\boldsymbol{178}$ & $\boldsymbol{131.0}$ & \textbf{RQ1: $\delta$ matters, decisively} \\
+$M_4\;\text{vs}\;M_3$ & $+2\,212$  & 69   & 31.9  & per-child slopes matter \\
+$M_5\;\text{vs}\;M_4$ & $+1.5$     & 1.25 & 1.2   & class $\beta_c$ \emph{null} \\
+$M_6\;\text{vs}\;M_5$ & $+1\,079$  & 52   & 20.8  & 2PL marginal but real \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.8em}
+\flushleft
+\footnotesize
+\textbf{Reading the table.}
+\begin{itemize}\setlength\itemsep{0.15em}
+\item RQ1 (acceleration): closed at $z = 131$. The $\delta$ step is the
+  load-bearing structural addition.
+\item RQ2 (frequency): the off-spine M4-level test gave
+  $z = 0.5$ (drop $\log p_j$, no ELPD change). On-spine $M_2\!\!\to\!\!M_1$
+  test pending Sherlock job 23710155.
+\item M5 (class-specific $\beta_c$): null at the LOO level
+  ($z = 1.2$). The per-class posteriors $(0.55, 0.45, 0.36, 0.16)$
+  trade off cleanly with $\psi_j$; no out-of-sample value.
+\item Best by LOO: $M_6$. Recommended adopt-and-augment scaffold:
+  $M_4$ (slopes-level), with the no-frequency variant as M\_best for
+  input-uptake fits.
+\end{itemize}
 
 \end{frame}
 
