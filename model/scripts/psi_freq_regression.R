@@ -15,51 +15,68 @@
 ## difficulty (where psi_j is unknown).
 ##
 ## Usage:
-##   Rscript model/scripts/psi_freq_regression.R [fit_path] [bundle_path]
-## Defaults: fits/long_m1_time_only.rds, fits/long_subset_data.rds
+##   Rscript model/scripts/psi_freq_regression.R [psi_source] [bundle_path]
+## psi_source can be either:
+##   - a fit .rds file (large; reads draws, computes summary inline)
+##   - a pre-extracted .csv (small; columns jj, psi_mean, psi_median,
+##     psi_sd, psi_q025, psi_q975) -- produced by Sherlock-side script
+##
+## Defaults: fits/summaries/long_m1_time_only_psi.csv if it exists,
+##           else fits/long_m1_time_only.rds
 ##
 ## Outputs:
-##   outputs/figs/longitudinal/psi_freq_regression.csv
+##   outputs/figs/longitudinal/psi_freq_regression_{per_word,per_class,r2}.csv
 ##   outputs/figs/longitudinal/psi_freq_regression.png
 
 source("model/R/config.R")
 suppressPackageStartupMessages({
-  library(dplyr); library(ggplot2); library(posterior)
+  library(dplyr); library(ggplot2); library(readr)
 })
 
 args <- commandArgs(trailingOnly = TRUE)
-fit_path    <- if (length(args) >= 1) args[1]
-                else file.path(PATHS$fits_dir, "long_m1_time_only.rds")
+default_csv <- file.path(PATHS$fits_dir, "summaries",
+                          "long_m1_time_only_psi.csv")
+default_rds <- file.path(PATHS$fits_dir, "long_m1_time_only.rds")
+psi_source  <- if (length(args) >= 1) args[1]
+                else if (file.exists(default_csv)) default_csv
+                else default_rds
 bundle_path <- if (length(args) >= 2) args[2]
                 else file.path(PATHS$fits_dir, "long_subset_data.rds")
 
 OUT_FIGS <- file.path(PATHS$figs_dir, "longitudinal")
 dir.create(OUT_FIGS, recursive = TRUE, showWarnings = FALSE)
 
-if (!file.exists(fit_path))
-  stop(sprintf("Fit not found: %s\n  (Sync from Sherlock when the m1_time_only fit lands.)", fit_path))
+if (!file.exists(psi_source))
+  stop(sprintf("Source not found: %s\n  (Sync from Sherlock when the m1_time_only fit lands.)", psi_source))
 if (!file.exists(bundle_path))
   stop(sprintf("Bundle not found: %s", bundle_path))
 
-cat(sprintf("Reading fit: %s\n", fit_path))
-fit    <- readRDS(fit_path)
+# Two paths to a per-word psi summary tibble:
+#   - .csv: precomputed by Sherlock-side extraction (cheap)
+#   - .rds: full fit, compute medians/CrIs inline (expensive but
+#           self-contained, useful for one-off analyses on M-other fits)
+if (grepl("\\.csv$", psi_source)) {
+  cat(sprintf("Reading psi summary CSV: %s\n", psi_source))
+  psi_summary <- read_csv(psi_source, show_col_types = FALSE)
+} else {
+  suppressPackageStartupMessages(library(posterior))
+  cat(sprintf("Reading fit RDS (slow for large files): %s\n", psi_source))
+  fit <- readRDS(psi_source)
+  d <- as_draws_df(fit)
+  psi_cols <- grep("^psi\\[", names(d), value = TRUE)
+  if (length(psi_cols) == 0) stop("No psi[] columns in fit draws.")
+  psi_summary <- tibble(
+    jj      = as.integer(sub("psi\\[(\\d+)\\]", "\\1", psi_cols)),
+    psi_mean   = sapply(psi_cols, function(p) mean(d[[p]])),
+    psi_median = sapply(psi_cols, function(p) median(d[[p]])),
+    psi_sd     = sapply(psi_cols, function(p) sd(d[[p]])),
+    psi_q025   = sapply(psi_cols, function(p) quantile(d[[p]], 0.025, names = FALSE)),
+    psi_q975   = sapply(psi_cols, function(p) quantile(d[[p]], 0.975, names = FALSE))
+  )
+}
+cat(sprintf("Found %d per-word psi parameters.\n", nrow(psi_summary)))
+
 bundle <- readRDS(bundle_path)
-
-d <- as_draws_df(fit)
-
-psi_cols <- grep("^psi\\[", names(d), value = TRUE)
-if (length(psi_cols) == 0) stop("No psi[] columns in fit draws.")
-cat(sprintf("Found %d per-word psi parameters.\n", length(psi_cols)))
-
-# Per-word posterior summary
-psi_summary <- tibble(
-  jj      = as.integer(sub("psi\\[(\\d+)\\]", "\\1", psi_cols)),
-  psi_mean   = sapply(psi_cols, function(p) mean(d[[p]])),
-  psi_median = sapply(psi_cols, function(p) median(d[[p]])),
-  psi_sd     = sapply(psi_cols, function(p) sd(d[[p]])),
-  psi_q025   = sapply(psi_cols, function(p) quantile(d[[p]], 0.025, names = FALSE)),
-  psi_q975   = sapply(psi_cols, function(p) quantile(d[[p]], 0.975, names = FALSE))
-)
 
 # Join with word_info from the bundle to get item, log_p, lexical class
 classes <- bundle$class_levels
