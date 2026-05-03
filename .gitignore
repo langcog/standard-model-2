@@ -57,6 +57,12 @@ model/figs/**/*.png
 model/*.rds
 model/stan/*.rds
 model/stan/*.rds.stan
+# cmdstanr also compiles a binary alongside the .stan source with no
+# extension (e.g. model/stan/log_irt_long for log_irt_long.stan).
+# Ignore those binaries; the !*.stan negation keeps source tracked.
+model/stan/log_irt
+model/stan/log_irt_*
+!model/stan/log_irt*.stan
 
 # Local-only pre-refactor stuff
 model/log_irt.rds
