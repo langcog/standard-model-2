@@ -5,7 +5,7 @@
 ## fit the data equally well, the (1+delta) coefficient is buying
 ## flexibility, not structural content.
 ##
-## Output: model/figs/longitudinal/lmm_vs_loglinear.png
+## Output: outputs/figs/longitudinal/lmm_vs_loglinear.png
 
 source("model/R/config.R")
 source("model/R/helpers.R")

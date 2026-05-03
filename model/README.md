@@ -1,7 +1,7 @@
 # `model/` — log-linear IRT accumulator implementation
 
 Reproducible code for the Bayesian accumulator model described in
-[`notes/model_explainer.pdf`](../notes/model_explainer.pdf).
+[`outputs/model_explainer.pdf`](../outputs/model_explainer.pdf).
 
 ## Layout
 
@@ -37,7 +37,7 @@ idempotent (re-running skips existing fits unless you `make clean-fits`).
 | `make diagnostics` | Fit the 2×2 sweep (baseline, fix_delta, fix_s, both_fixed) + LOO | ~2–3 hrs |
 | `make analyze` | RQ1/2/3/4 plots + tables for baseline | ~30 sec |
 | `make analyze-all` | Same for all four variants | ~1 min |
-| `make explainer` | Recompile `notes/model_explainer.pdf` | ~5 sec |
+| `make explainer` | Recompile `outputs/model_explainer.pdf` | ~5 sec |
 | `make all` | recovery → data → diagnostics → analyze-all | ~3 hrs |
 | `make clean-fits` / `clean-figs` / `clean` | Remove outputs | — |
 
@@ -53,7 +53,7 @@ make data N_CHILDREN=1000 N_ITEMS=400
    real data).
 2. **Prepare the Wordbank subsample:** `make data`.
 3. **Run the diagnostic sweep:** `make diagnostics`.
-4. **Inspect:** `make analyze-all` produces plots + tables in `model/figs/`.
+4. **Inspect:** `make analyze-all` produces plots + tables in `outputs/figs/`.
 
 ## Migrating from the pre-refactor flat layout
 

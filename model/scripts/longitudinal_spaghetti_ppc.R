@@ -142,4 +142,4 @@ ggsave(file.path(PATHS$figs_dir,
                  "long_2pl_slopes_ppc_spaghetti_marginal.png"),
        combined, width = 12, height = 5.5, dpi = 150)
 
-cat("\nSaved model/figs/long_2pl_slopes_ppc_spaghetti_marginal.png\n")
+cat("\nSaved outputs/figs/long_2pl_slopes_ppc_spaghetti_marginal.png\n")

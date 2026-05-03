@@ -3,7 +3,7 @@
 ## Usage:   Rscript model/scripts/04_analyze.R [variant]
 ##          default variant = "baseline". Pass "all" to loop over all.
 ## Reads:   fits/wordbank_{variant}.rds, fits/subset_data.rds
-## Outputs: model/figs/wordbank_{variant}_*.png
+## Outputs: outputs/figs/wordbank_{variant}_*.png
 ##          Prints scalar posteriors, class means, RQ1 correlations.
 
 source("model/R/config.R")
@@ -79,4 +79,4 @@ for (nm in variants) {
     variant_tag = nm)
 }
 
-cat("\nDone. Figures in model/figs/\n")
+cat("\nDone. Figures in outputs/figs/\n")

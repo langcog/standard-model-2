@@ -8,7 +8,7 @@
 ##   theta_it = [ log_r_true_i + log H + log_age ]   ("input part")
 ##            + [ log_alpha_i + (delta + zeta_i) * log_age ]  ("efficiency part")
 ##
-## Output: model/figs/io/io_ability_decomposition.png
+## Output: outputs/figs/io/io_ability_decomposition.png
 
 source("model/R/config.R")
 source("model/R/helpers.R")

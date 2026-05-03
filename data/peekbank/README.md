@@ -51,7 +51,7 @@ Two distinct sets of inputs live here:
   396 WG) resolve via `auto_exact` (fingerprint match) or
   `manual_disambig` (deterministic Marchman-lab conventions). Hand
   review of the manual_disambig rows is logged as a loose end in
-  `notes/experiments.md`.
+  `outputs/experiments.md`.
 - `stanford_cdi_items_long.csv` — long format, one row per
   (lab_subject_id, age, form, item, produces). 183 subjects × 511
   admins × 681 items ≈ 321K rows. Placeholder rows (no parent

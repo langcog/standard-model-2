@@ -13,7 +13,7 @@
 ##      colored by log p_j. Tests Mike's intuition: do words acquired
 ##      early need more real tokens than words acquired later?
 ##
-## Output: model/figs/longitudinal/effective_tokens.png
+## Output: outputs/figs/longitudinal/effective_tokens.png
 
 source("model/R/config.R")
 source("model/R/helpers.R")

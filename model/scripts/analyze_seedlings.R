@@ -3,7 +3,7 @@
 ##  2. Per-recording log_r_obs scatter (with reactivity inflation)
 ##  3. Per-child predicted vs observed vocab trajectory + scalar summaries
 ##
-## Output: model/figs/seedlings_io_*.png
+## Output: outputs/figs/seedlings_io_*.png
 
 source("model/R/config.R")
 source("model/R/helpers.R")
@@ -244,7 +244,7 @@ out <- (p_scalars / p_input / p_traj) +
   plot_layout(heights = c(1, 1.2, 1.2))
 ggsave(file.path(PATHS$figs_dir, "io", "seedlings_io_summary.png"),
        out, width = 9, height = 12, dpi = 150)
-cat("Wrote model/figs/seedlings_io_summary.png\n")
+cat("Wrote outputs/figs/seedlings_io_summary.png\n")
 
 # Save individual plots too for clean inclusion
 ggsave(file.path(PATHS$figs_dir, "io", "seedlings_io_scalars.png"),

@@ -3,11 +3,11 @@
 ## Reads small summary / draws / loo artifacts from
 ## fits/summaries/ (synced from Sherlock).  Produces:
 ##
-##   model/figs/longitudinal/nested_family_scalars.png  forest of headline
+##   outputs/figs/longitudinal/nested_family_scalars.png  forest of headline
 ##                                                       scalars across models
-##   model/figs/longitudinal/nested_family_loo.png      ELPD differences
+##   outputs/figs/longitudinal/nested_family_loo.png      ELPD differences
 ##                                                       (cumulative, M_k - M_0)
-##   model/figs/longitudinal/nested_family_summary.csv  scalar summary
+##   outputs/figs/longitudinal/nested_family_summary.csv  scalar summary
 ##                                                       table for paper
 ##
 ## Robust to missing files: any model without a {summary,draws,loo}.rds

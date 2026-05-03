@@ -164,4 +164,4 @@ p <- ggplot(smooth_df, aes(age)) +
 ggsave(file.path(PATHS$figs_dir, "long_2pl_slopes_ppc_variance_marginal.png"),
        p, width = 7.5, height = 5, dpi = 150)
 
-cat("\nSaved model/figs/long_2pl_slopes_ppc_variance_marginal.png\n")
+cat("\nSaved outputs/figs/long_2pl_slopes_ppc_variance_marginal.png\n")

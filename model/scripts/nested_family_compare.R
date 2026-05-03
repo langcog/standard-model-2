@@ -9,8 +9,8 @@
 ##   M5  long_m5                     + 2PL (lambda_j)
 ##
 ## Outputs:
-##   model/figs/longitudinal/nested_family_scalars.png
-##   model/figs/longitudinal/nested_family_loo.csv
+##   outputs/figs/longitudinal/nested_family_scalars.png
+##   outputs/figs/longitudinal/nested_family_loo.csv
 ##
 ## Targeted comparisons:
 ##   M1 vs M0:  does adding the unit time + freq baseline help?

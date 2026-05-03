@@ -6,7 +6,7 @@
 ##   Rscript model/scripts/analyze_longitudinal.R long_2pl_slopes
 ##   Rscript model/scripts/analyze_longitudinal.R long_2pl_slopes norwegian
 ##
-## Writes figures under model/figs/<variant>[_<dataset>]_*.png
+## Writes figures under outputs/figs/<variant>[_<dataset>]_*.png
 
 source("model/R/config.R")
 source("model/R/helpers.R")
@@ -266,4 +266,4 @@ combined <- p_obs | p_sim
 ggsave(fig_prefix("5_ppc_spaghetti_marginal.png"),
        combined, width = 12, height = 5.5, dpi = 150)
 
-cat(sprintf("\nFigures saved under model/figs/%s_*.png\n", tag))
+cat(sprintf("\nFigures saved under outputs/figs/%s_*.png\n", tag))

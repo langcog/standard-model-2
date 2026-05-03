@@ -29,8 +29,8 @@ PATHS <- list(
   fits_dir = Sys.getenv("STANDARD_MODEL_FITS_DIR",
                         unset = file.path(PROJECT_ROOT, "fits")),
   figs_dir = Sys.getenv("STANDARD_MODEL_FIGS_DIR",
-                        unset = file.path(PROJECT_ROOT, "model/figs")),
-  notes_dir = file.path(PROJECT_ROOT, "notes")
+                        unset = file.path(PROJECT_ROOT, "outputs/figs")),
+  outputs_dir = file.path(PROJECT_ROOT, "outputs")
 )
 
 for (d in c(PATHS$fits_dir, PATHS$figs_dir)) {

@@ -10,8 +10,8 @@
 ##      the correlation; provide robust-subset r as a sanity check.
 ##
 ## Output:
-##   model/figs/longitudinal/ability_s_delta_tradeoff.png
-##   model/figs/longitudinal/ability_xi_zeta_languages.png
+##   outputs/figs/longitudinal/ability_s_delta_tradeoff.png
+##   outputs/figs/longitudinal/ability_xi_zeta_languages.png
 
 source("model/R/config.R")
 source("model/R/helpers.R")

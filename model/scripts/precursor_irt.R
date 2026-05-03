@@ -15,10 +15,10 @@
 ##     or behind do +/-1 SD kids look".
 ##
 ## Outputs:
-##   model/figs/longitudinal/precursor_trajectories.png  spaghetti plot of
+##   outputs/figs/longitudinal/precursor_trajectories.png  spaghetti plot of
 ##                                                       per-child theta_a
 ##                                                       trajectories.
-##   model/figs/longitudinal/precursor_variation.png     sigma_theta vs.
+##   outputs/figs/longitudinal/precursor_variation.png     sigma_theta vs.
 ##                                                       age + months-of-dev
 ##                                                       interpretation.
 

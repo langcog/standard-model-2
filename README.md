@@ -3,8 +3,8 @@
 Bayesian accumulator model of early word learning, linking language
 input, vocabulary outcomes, and individual differences. Successor to
 Kachergis, Marchman, & Frank (2021). See
-[`notes/model_explainer.pdf`](notes/model_explainer.pdf) for the model
-specification and [`notes/experiments.md`](notes/experiments.md) for a
+[`outputs/model_explainer.pdf`](outputs/model_explainer.pdf) for the model
+specification and [`outputs/experiments.md`](outputs/experiments.md) for a
 running log of fits and findings.
 
 ## Layout
@@ -18,7 +18,7 @@ standard_model_2/
 │   ├── scripts/                    ← driver scripts (numbered in workflow order)
 │   ├── fits/                       ← output .rds files (gitignored)
 │   └── figs/                       ← output .png figures (gitignored)
-├── notes/
+├── outputs/
 │   ├── model_explainer.{tex,pdf}   ← durable model specification
 │   ├── experiments.md              ← running log: each fit + backlog
 │   ├── model_summaries.md          ← literature review notes

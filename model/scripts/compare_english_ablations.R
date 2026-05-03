@@ -11,9 +11,9 @@
 ##   fits/long_2pl_slopes.rds        (adds 2PL)
 ##
 ## Output:
-##   model/figs/english_ablations_scalars.png
-##   model/figs/english_ablations_trajectory.png
-##   model/figs/english_ablations_xi_zeta.png
+##   outputs/figs/english_ablations_scalars.png
+##   outputs/figs/english_ablations_trajectory.png
+##   outputs/figs/english_ablations_xi_zeta.png
 
 source("model/R/config.R")
 source("model/R/helpers.R")

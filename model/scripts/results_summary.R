@@ -8,7 +8,7 @@
 ##   - Peekbank-linked proc fit
 ##
 ## Prints wide tables to stdout, saves a long-format CSV to
-##   model/figs/results_summary.csv
+##   outputs/figs/results_summary.csv
 
 source("model/R/config.R")
 source("model/R/helpers.R")

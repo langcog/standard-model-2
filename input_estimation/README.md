@@ -3,7 +3,7 @@
 Validation set and supporting analyses for the **per-child input-rate
 prior** that drives RQ3 / π_α in the standard-model project.
 
-The full model (`notes/model_explainer.pdf`) has a single identifiability
+The full model (`outputs/model_explainer.pdf`) has a single identifiability
 lever for the variance-decomposition question (RQ3): the population SD
 of `log r_i` across children, called **σ_r**. We pin σ_r externally from
 data and check the conclusion under a sensitivity sweep. This directory

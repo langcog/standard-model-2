@@ -32,7 +32,7 @@ as 0.624 [0.50, 0.72] against true 0.61.
 **Key finding:** the collapsed-ξ parameterization (`log_irt.stan`) is
 well-identified and samples cleanly on synthetic data.
 
-**Artifacts:** `fits/recovery.rds`, `model/figs/recovery_*.png`.
+**Artifacts:** `fits/recovery.rds`, `outputs/figs/recovery_*.png`.
 
 ---
 
@@ -106,7 +106,7 @@ Also: new "within-age ability SD" PPC panel shows observed SD rises
 from ~1.0 at 16 mo to ~1.6 at 30 mo, while model predicts a flat ~2.2.
 Confirms σ_α is inflated relative to real within-age dispersion.
 
-**Artifacts:** `fits/wordbank_*.rds`, `model/figs/ppc_*.png`.
+**Artifacts:** `fits/wordbank_*.rds`, `outputs/figs/ppc_*.png`.
 
 ---
 
@@ -204,7 +204,7 @@ approaches σ_α, π_α becomes more sensitive.
 **Artifacts:**
 `fits/sensitivity_sigma_r_2pl.rds`,
 `fits/wordbank_2pl_sigmaR_*.rds` (full-data replication),
-`model/figs/sensitivity_*_2pl.png`.
+`outputs/figs/sensitivity_*_2pl.png`.
 
 ---
 
@@ -286,8 +286,8 @@ distribution (not using any real child's inferred posterior):
   noise misses some of the within-child irregularity in real trajectories,
   but reproduces the population-level shape.
 
-**Artifacts:** `model/figs/long_2pl_slopes_ppc_variance_marginal.png`,
-`model/figs/long_2pl_slopes_ppc_spaghetti_marginal.png`.
+**Artifacts:** `outputs/figs/long_2pl_slopes_ppc_variance_marginal.png`,
+`outputs/figs/long_2pl_slopes_ppc_spaghetti_marginal.png`.
 
 ---
 
@@ -552,7 +552,7 @@ therefore mostly attributable to age-varying *efficiency*, not
 age-varying input rate. Documented in `model_explainer.tex`
 §Assumptions.
 
-**Artifacts:** `model/figs/io/input_rate_vs_age.png`.
+**Artifacts:** `outputs/figs/io/input_rate_vs_age.png`.
 
 ---
 
@@ -681,11 +681,11 @@ story as M3 but with a worse-conditioned interpretation).
 
 **Artifacts.**
 - `fits/summaries/long_{m0,m1,baseline,slopes,class_beta_slopes,m5,no_freq_slopes}.{summary,draws,loo}.rds`
-- `model/figs/longitudinal/nested_family_scalars.png`
-- `model/figs/longitudinal/nested_family_loo.png`
-- `model/figs/longitudinal/nested_family_summary.csv`
-- `model/figs/longitudinal/nested_family_loo_ranking.csv`
-- `model/figs/longitudinal/nested_family_loo_steps.csv`
+- `outputs/figs/longitudinal/nested_family_scalars.png`
+- `outputs/figs/longitudinal/nested_family_loo.png`
+- `outputs/figs/longitudinal/nested_family_summary.csv`
+- `outputs/figs/longitudinal/nested_family_loo_ranking.csv`
+- `outputs/figs/longitudinal/nested_family_loo_steps.csv`
 
 ---
 

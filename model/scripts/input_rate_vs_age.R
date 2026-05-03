@@ -10,7 +10,7 @@
 ## within-subject linear fits. If slopes are clustered around zero, the
 ## age-invariance assumption holds.
 ##
-## Output: model/figs/io/input_rate_vs_age.png
+## Output: outputs/figs/io/input_rate_vs_age.png
 
 source("model/R/config.R")
 source("model/R/datasets.R")

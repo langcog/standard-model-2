@@ -5,7 +5,7 @@
 ## explaining the model in talks / paper figures, and for showing how
 ## removing each ingredient changes predicted patterns.
 ##
-## Outputs (under model/figs/schematic/):
+## Outputs (under outputs/figs/schematic/):
 ##   A_growth_curves.png   - vocab(age) families, 5 model variants
 ##   B_per_word_growth.png - per-word growth curves, full vs 1PL
 ##   C_psi_vs_freq.png     - item difficulty vs frequency, freq-driven vs random

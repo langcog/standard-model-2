@@ -18,7 +18,7 @@
 ##   (2) SD of theta_it across kids vs age (per-child spread).
 ##       Reveals where slopes / pin-delta really differ.
 ##
-## Output: model/figs/longitudinal/english_ablations_ability.png
+## Output: outputs/figs/longitudinal/english_ablations_ability.png
 
 source("model/R/config.R")
 source("model/R/helpers.R")

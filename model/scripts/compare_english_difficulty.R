@@ -10,7 +10,7 @@
 ##   (2) Per-item beta_j scatter vs. lean reference (each variant
 ##       plotted against the lean-ref baseline).
 ##
-## Output: model/figs/longitudinal/english_ablations_difficulty.png
+## Output: outputs/figs/longitudinal/english_ablations_difficulty.png
 
 source("model/R/config.R")
 source("model/R/helpers.R")
