@@ -164,19 +164,33 @@ variant_hyperpriors <- function(name) {
     # LMM (linear-in-age) variants -- distinct Stan file log_irt_long_lmm.stan
     lmm               = list(),
     lmm_slopes        = list(sigma_zeta_prior_sd = 1),
-    # Nested family canonical labels (M0..M5).  M2/M3/M4 already have
-    # established names (baseline / slopes / class_beta_slopes); we
-    # add explicit aliases so the run set is uniformly named.
+    # Nested family canonical labels.  Spine has 7 stages (M0..M6) so
+    # that "+ time" and "+ frequency" are factored as separate steps.
+    # The fit-tag column shows which fit on disk each label maps to
+    # (so M3..M6 reuse existing baseline/slopes/class_beta/2pl fits).
+    #
+    #   label | tag                           | what it adds
+    #   M0    | long_m0                       | minimal IRT (no time, no freq)
+    #   M1    | long_m1_time_only             | + time only (delta=0, freq=0)
+    #   M2    | long_m1                       | + frequency (delta=0)
+    #   M3    | long_baseline                 | + free delta
+    #   M4    | long_slopes                   | + per-child slope zeta_i
+    #   M5    | long_class_beta_slopes        | + class-specific beta_c
+    #   M6    | long_m5                       | + 2PL (lambda_j)
     m0 = list(time_baseline = 0,
               beta_c_prior_mean = 0,
               delta_prior_mean = 0, delta_prior_sd = 0.001),
+    m1_time_only = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
+                        delta_prior_mean = 0, delta_prior_sd = 0.001),
     m1 = list(delta_prior_mean = 0, delta_prior_sd = 0.001),
     m2 = list(),  # = baseline (drops slopes, frees delta)
     m3 = list(sigma_zeta_prior_sd = 1),  # = slopes (lean ref)
     m4 = list(sigma_zeta_prior_sd = 1, beta_c_prior_sd = 0.5),  # + class_beta
     m5 = list(sigma_zeta_prior_sd = 1, beta_c_prior_sd = 0.5,
               sigma_lambda_prior_sd = 1),  # + 2PL
-    # no_freq variant: drops log p_j entirely (beta_c pinned at 0)
+    # no_freq variant: drops log p_j entirely (beta_c pinned at 0).
+    # With delta and slopes free this is the off-spine "M4 without freq"
+    # robustness check; m1_time_only above is the equivalent test on the spine.
     no_freq        = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001),
     no_freq_slopes = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
                           sigma_zeta_prior_sd = 1),

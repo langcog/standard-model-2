@@ -25,14 +25,16 @@ dir.create(OUT_FIGS, recursive = TRUE, showWarnings = FALSE)
 
 FAMILY <- list(
   list(label = "M0", tag = "long_m0",                desc = "no time, no freq"),
-  list(label = "M1", tag = "long_m1",                desc = "unit time + freq, delta pinned"),
-  list(label = "M2", tag = "long_baseline",          desc = "+ free delta"),
-  list(label = "M3", tag = "long_slopes",            desc = "+ per-child slopes"),
-  list(label = "M4", tag = "long_class_beta_slopes", desc = "+ class-specific beta_c"),
-  list(label = "M5", tag = "long_m5",                desc = "+ 2PL (lambda_j)")
+  list(label = "M1", tag = "long_m1_time_only",      desc = "+ time only (no freq)"),
+  list(label = "M2", tag = "long_m1",                desc = "+ frequency"),
+  list(label = "M3", tag = "long_baseline",          desc = "+ free delta"),
+  list(label = "M4", tag = "long_slopes",            desc = "+ per-child slopes"),
+  list(label = "M5", tag = "long_class_beta_slopes", desc = "+ class-specific beta_c"),
+  list(label = "M6", tag = "long_m5",                desc = "+ 2PL (lambda_j)")
 )
 EXTRA <- list(  # off-spine variants for later context
-  list(label = "no_freq", tag = "long_no_freq_slopes", desc = "drop log p_j (M3 baseline)"),
+  list(label = "no_freq_M4", tag = "long_no_freq_slopes",
+       desc = "M4 - log p_j (RQ2 robustness with full structure on top)"),
   list(label = "lmm_NO",  tag = "long_lmm_slopes_norwegian",
        desc = "LMM (Norwegian; off-spine)")
 )
@@ -178,20 +180,21 @@ if (length(loo_objs) >= 2) {
               file.path(OUT_FIGS, "nested_family_loo_steps.csv"),
               row.names = FALSE)
 
-    # Off-spine pairwise tests: each EXTRA variant vs its natural spine
-    # reference (no_freq -> M3, lmm -> M3, etc.).
-    if ("no_freq" %in% names(extra_loo) && "M3" %in% names(loo_objs)) {
-      d <- loo_compare(list(M3 = loo_objs[["M3"]],
-                            no_freq = extra_loo[["no_freq"]]))
+    # Off-spine pairwise tests. The spine itself now has a clean RQ2
+    # test at M2 vs M1 (+ frequency on top of time-only); we keep the
+    # M4-level no_freq comparison as a robustness check that the
+    # frequency-redundancy result is stable under more model structure.
+    if ("no_freq_M4" %in% names(extra_loo) && "M4" %in% names(loo_objs)) {
+      d <- loo_compare(list(M4 = loo_objs[["M4"]],
+                            no_freq = extra_loo[["no_freq_M4"]]))
       ref <- rownames(d)[1]; other <- rownames(d)[2]
-      diff <- if (ref == "M3") -d[other, "elpd_diff"] else d[other, "elpd_diff"]
+      diff <- if (ref == "M4") -d[other, "elpd_diff"] else d[other, "elpd_diff"]
       se <- d[other, "se_diff"]
       cat(sprintf(
-        "\nRQ2 test (no_freq vs M3): ELPD_diff = %.1f +/- %.1f (z=%.1f)\n",
+        "\nRQ2 robustness (no_freq_M4 vs M4): ELPD_diff = %.1f +/- %.1f (z=%.1f)\n",
         diff, se, diff / se))
-      cat("   (no_freq drops log p_j; M3 keeps unit-coef freq.\n")
-      cat("    Negative diff = freq is helping; near zero = freq is redundant\n")
-      cat("    given per-word psi_j.)\n")
+      cat("   (Drops log p_j on top of the slopes-level model.\n")
+      cat("    Companion to the on-spine M2 vs M1 test.)\n")
     }
 
     # Plot
