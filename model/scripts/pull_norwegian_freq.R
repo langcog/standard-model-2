@@ -5,7 +5,7 @@
 ## counts each lowercased token, normalizes by total token count to get
 ## prob per word, then tries to match Wordbank item_definitions.
 ##
-## Writes: model/fits/norwegian_word_freq.rds with columns (item, count,
+## Writes: fits/norwegian_word_freq.rds with columns (item, count,
 ## prob).
 
 suppressPackageStartupMessages({
@@ -32,6 +32,6 @@ freq <- freq %>% mutate(prob = count / total)
 message(sprintf("  %d unique word types, total tokens %d", nrow(freq), total))
 
 saveRDS(freq, file.path(PATHS$fits_dir, "norwegian_word_freq.rds"))
-cat("\nSaved model/fits/norwegian_word_freq.rds\n")
+cat("\nSaved fits/norwegian_word_freq.rds\n")
 cat("Top 10 words:\n")
 print(head(freq, 10))

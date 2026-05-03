@@ -9,7 +9,7 @@
 ##   make analyze-all      Run analyze over all 4 variants.
 ##   make explainer        Recompile notes/model_explainer.pdf from .tex.
 ##   make all              recovery -> data -> diagnostics -> analyze-all.
-##   make clean-fits       Delete model/fits/ (force refit next run).
+##   make clean-fits       Delete fits/ (force refit next run).
 ##   make clean-figs       Delete model/figs/.
 ##   make clean            Both.
 ##
@@ -105,30 +105,30 @@ explainer:
 	            model_explainer.out model_explainer.toc
 
 # One-off migration: move outputs from the pre-refactor flat layout into
-# model/fits + model/figs. Safe to run any number of times (no-op if the
+# fits + model/figs. Safe to run any number of times (no-op if the
 # source files are gone).
 migrate:
-	@mkdir -p model/fits model/figs
+	@mkdir -p fits model/figs
 	@for v in baseline fix_delta fix_s both_fixed; do \
 	  [ -f model/wordbank_fit_$$v.rds ] && \
-	    mv model/wordbank_fit_$$v.rds model/fits/wordbank_$$v.rds && \
+	    mv model/wordbank_fit_$$v.rds fits/wordbank_$$v.rds && \
 	    echo "moved wordbank_fit_$$v.rds -> fits/wordbank_$$v.rds" || true; \
 	done
 	@[ -f model/wordbank_loos.rds ] && \
-	  mv model/wordbank_loos.rds model/fits/loo_compare.rds && \
+	  mv model/wordbank_loos.rds fits/loo_compare.rds && \
 	  echo "moved wordbank_loos.rds -> fits/loo_compare.rds" || true
 	@[ -f model/wordbank_data_subset.rds ] && \
-	  cp model/wordbank_data_subset.rds model/fits/subset_data.rds && \
+	  cp model/wordbank_data_subset.rds fits/subset_data.rds && \
 	  echo "copied wordbank_data_subset.rds -> fits/subset_data.rds" || true
 	@[ -f model/recovery_fit.rds ] && \
-	  mv model/recovery_fit.rds model/fits/recovery.rds && \
+	  mv model/recovery_fit.rds fits/recovery.rds && \
 	  echo "moved recovery_fit.rds -> fits/recovery.rds" || true
 	@for f in model/*.png; do \
 	  [ -f "$$f" ] && mv "$$f" model/figs/ && echo "moved $$f -> figs/" || true; \
 	done
 
 clean-fits:
-	rm -rf model/fits
+	rm -rf fits
 
 clean-figs:
 	rm -rf model/figs

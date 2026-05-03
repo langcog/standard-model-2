@@ -174,4 +174,4 @@ cat(sprintf("Wrote %s\n",
 
 # ---- Save the per-admin theta for downstream ---- #
 saveRDS(theta_a, file.path(PATHS$fits_dir, "precursor_theta_admin.rds"))
-cat("\nSaved per-admin theta to model/fits/precursor_theta_admin.rds\n")
+cat("\nSaved per-admin theta to fits/precursor_theta_admin.rds\n")

@@ -60,4 +60,4 @@ alp_tbl <- sens_tbl[sens_tbl$param == "sigma_alpha",
                     c("sigma_r", "median", "lo95", "hi95")]
 print(alp_tbl, digits = 3)
 
-cat(sprintf("\nSaved: model/fits/sensitivity_sigma_r_%s.rds\n", nm))
+cat(sprintf("\nSaved: fits/sensitivity_sigma_r_%s.rds\n", nm))

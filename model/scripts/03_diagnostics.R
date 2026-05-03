@@ -8,9 +8,9 @@
 ## both_fixed      | fixed at 0   | fixed at 2
 ##
 ## Usage:   Rscript model/scripts/03_diagnostics.R
-## Reads:   model/fits/subset_data.rds (from 02_prepare_data.R)
-## Outputs: model/fits/wordbank_{variant}.rds for each variant,
-##          model/fits/loo_compare.rds
+## Reads:   fits/subset_data.rds (from 02_prepare_data.R)
+## Outputs: fits/wordbank_{variant}.rds for each variant,
+##          fits/loo_compare.rds
 
 source("model/R/config.R")
 source("model/R/helpers.R")
@@ -45,4 +45,4 @@ summary_tbl <- summary_tbl[, c("variant", "param", "median", "lo95", "hi95",
 print(summary_tbl, digits = 3)
 
 saveRDS(summary_tbl, file.path(PATHS$fits_dir, "summary_tbl.rds"))
-cat("\nDone. Saved model/fits/summary_tbl.rds\n")
+cat("\nDone. Saved fits/summary_tbl.rds\n")

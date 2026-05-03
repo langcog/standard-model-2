@@ -32,8 +32,8 @@ echo "Pulling $PATTERN from $SHERLOCK_HOST:$SHERLOCK_FITS_DIR ..."
 # pulled back, not the (broken-on-laptop) symlink itself.
 rsync -avzL --progress \
     "${SHERLOCK_HOST}:${SHERLOCK_FITS_DIR}/${PATTERN}" \
-    model/fits/
+    fits/
 
 echo
-echo "Done. Files in model/fits/:"
-ls -la model/fits/ | tail -20
+echo "Done. Files in fits/:"
+ls -la fits/ | tail -20

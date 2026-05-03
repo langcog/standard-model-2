@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-SRC="$HOME/standard_model_2/model/fits"
+SRC="$HOME/standard_model_2/fits"
 DST="$SCRATCH/standard_model_2/fits"
 mkdir -p "$DST"
 

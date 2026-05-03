@@ -5,8 +5,8 @@
 ##   Rscript model/scripts/prepare_longitudinal_data.R [language] [n_children] [n_items]
 ## Defaults: English, 200 children, stratified subsample of 200 items.
 ##
-## Reads:   model/fits/long_items.rds (from pull_longitudinal.R)
-## Writes:  model/fits/long_subset_data.rds (Stan-ready bundle)
+## Reads:   fits/long_items.rds (from pull_longitudinal.R)
+## Writes:  fits/long_subset_data.rds (Stan-ready bundle)
 ##
 ## Each (child, age, form) combination is its own admin so a child who
 ## took both WG and WS at the same age contributes two admin rows.
@@ -171,4 +171,4 @@ bundle <- list(
 )
 
 saveRDS(bundle, file.path(PATHS$fits_dir, "long_subset_data.rds"))
-cat(sprintf("\nSaved model/fits/long_subset_data.rds\n"))
+cat(sprintf("\nSaved fits/long_subset_data.rds\n"))

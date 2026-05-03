@@ -1,7 +1,7 @@
 ## Cross-model analysis of the M0..M5 nested family on English.
 ##
 ## Reads small summary / draws / loo artifacts from
-## model/fits/summaries/ (synced from Sherlock).  Produces:
+## fits/summaries/ (synced from Sherlock).  Produces:
 ##
 ##   model/figs/longitudinal/nested_family_scalars.png  forest of headline
 ##                                                       scalars across models

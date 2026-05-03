@@ -35,8 +35,8 @@ RESULTS_DIR="$SCRATCH/standard_model_2"
 mkdir -p "$RESULTS_DIR/fits" "$RESULTS_DIR/logs"
 
 # Make repo input bundles visible from $SCRATCH/.../fits (where Stan reads).
-# Symlink any .rds in the repo's model/fits that isn't already in scratch.
-for f in "$HOME/standard_model_2/model/fits"/*.rds; do
+# Symlink any .rds in the repo's fits that isn't already in scratch.
+for f in "$HOME/standard_model_2/fits"/*.rds; do
   [ -e "$f" ] || continue
   base="$(basename "$f")"
   dst="$RESULTS_DIR/fits/$base"

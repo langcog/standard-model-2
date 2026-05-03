@@ -4,7 +4,7 @@
 ##
 ## RUN LOCALLY ONLY. The 875 MB merged_transcripts_parsed.csv is too
 ## big to ship to Sherlock. The prepared bundle
-## `model/fits/babyview_subset_data.rds` is small (~500 KB) and is
+## `fits/babyview_subset_data.rds` is small (~500 KB) and is
 ## committed to the repo, so Sherlock just reads it directly.
 ##
 ## Usage:   Rscript model/scripts/prepare_babyview.R [n_items]
@@ -14,9 +14,9 @@
 ##   data/babyview/video_metadata_processed.csv
 ##   data/babyview/merged_transcripts_parsed.csv
 ##   data/babyview/cdi_data_oct_2025/babyview-english-{ws,wg}_items.csv
-##   model/fits/long_items.rds  (for English CHILDES p_j; reused)
+##   fits/long_items.rds  (for English CHILDES p_j; reused)
 ##
-## Output:  model/fits/babyview_subset_data.rds
+## Output:  fits/babyview_subset_data.rds
 
 source("model/R/config.R")
 source("model/R/helpers.R")
@@ -295,4 +295,4 @@ bundle <- list(
 )
 
 saveRDS(bundle, file.path(PATHS$fits_dir, "babyview_subset_data.rds"))
-cat("\nSaved model/fits/babyview_subset_data.rds\n")
+cat("\nSaved fits/babyview_subset_data.rds\n")

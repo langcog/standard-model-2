@@ -82,6 +82,6 @@ cat(sprintf("  median span: %.1f mo (range %.1f–%.1f)\n",
 
 # Save the filtered longitudinal admin info so downstream scripts can use it
 saveRDS(list(admins_ws = n_long_ws, admins_wg = n_long_wg),
-        file.path("/Users/mcfrank/Projects/standard_model_2/model/fits",
+        file.path("/Users/mcfrank/Projects/standard_model_2/fits",
                   "longitudinal_admins.rds"))
-cat("\nSaved: model/fits/longitudinal_admins.rds\n")
+cat("\nSaved: fits/longitudinal_admins.rds\n")

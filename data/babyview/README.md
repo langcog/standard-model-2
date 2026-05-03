@@ -38,7 +38,7 @@ The BabyView release contains:
   (`log_r_obs`)
 - CDI item-level → admin-level production observations (`y_ij`)
 
-Output: `model/fits/babyview_subset_data.rds` (Stan-ready bundle).
+Output: `fits/babyview_subset_data.rds` (Stan-ready bundle).
 The 835 MB transcript is **not** committed; the prepared bundle is
 ~500 KB and is committed so Sherlock can fit without re-running prep.
 

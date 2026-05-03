@@ -8,7 +8,7 @@
 #SBATCH --partition=normal
 
 # Smoke test for the full Sherlock pipeline: recovery sim on synthetic
-# data. Writes model/fits/recovery.rds to $SCRATCH. Rsync it back and
+# data. Writes fits/recovery.rds to $SCRATCH. Rsync it back and
 # inspect to confirm the full cycle works.
 
 set -euo pipefail

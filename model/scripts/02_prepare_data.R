@@ -2,7 +2,7 @@
 ## the Stan data list for downstream fits.
 ##
 ## Usage:   Rscript model/scripts/02_prepare_data.R [n_children] [n_items]
-## Outputs: model/fits/subset_data.rds (the stan_data + metadata used by
+## Outputs: fits/subset_data.rds (the stan_data + metadata used by
 ##          every Wordbank-subset-based fit)
 ##
 ## Note: all fits that load this file see identical data, making LOO-CV
@@ -33,4 +33,4 @@ message(sprintf("Subsample: %d children, %d items, %d obs (mean produces=%.3f)",
                 bundle$stan_data$N, mean(bundle$stan_data$y)))
 
 saveRDS(bundle, file.path(PATHS$fits_dir, "subset_data.rds"))
-cat("\nSaved to model/fits/subset_data.rds\n")
+cat("\nSaved to fits/subset_data.rds\n")

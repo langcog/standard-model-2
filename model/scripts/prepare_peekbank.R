@@ -16,7 +16,7 @@
 ##                                             d_sub; kept around for
 ##                                             provenance)
 ##
-## Output:  model/fits/peekbank_subset_data.rds
+## Output:  fits/peekbank_subset_data.rds
 ##
 ## Bundle schema differs from the longitudinal IRT bundles: there's no
 ## item-level CDI here, only CDI totals (peekbankr returns rawscores).

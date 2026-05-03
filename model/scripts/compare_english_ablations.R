@@ -4,11 +4,11 @@
 ##  3. Per-child posterior xi/zeta scatter, faceted by variant
 ##
 ## Inputs (5 fits):
-##   model/fits/long_slopes.rds            (lean reference)
-##   model/fits/long_baseline.rds          (drops slopes)
-##   model/fits/long_fix_delta_slopes.rds  (pins delta=0)
-##   model/fits/long_free_s_slopes.rds     (frees s)
-##   model/fits/long_2pl_slopes.rds        (adds 2PL)
+##   fits/long_slopes.rds            (lean reference)
+##   fits/long_baseline.rds          (drops slopes)
+##   fits/long_fix_delta_slopes.rds  (pins delta=0)
+##   fits/long_free_s_slopes.rds     (frees s)
+##   fits/long_2pl_slopes.rds        (adds 2PL)
 ##
 ## Output:
 ##   model/figs/english_ablations_scalars.png

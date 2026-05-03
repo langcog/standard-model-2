@@ -103,7 +103,7 @@ seedlings_rec <- lena %>%
 # ages 8-30 months. Adult tokens = Whisper-transcribed FEM + MAL alpha
 # tokens with confidence >= 0.3, normalized by video duration. Counts
 # all adult speech in the recording (CDS + ODS).
-bv <- readRDS(file.path(ROOT, "model/fits/babyview_subset_data.rds"))
+bv <- readRDS(file.path(ROOT, "fits/babyview_subset_data.rds"))
 
 babyview_rec <- bv$videos %>%
   transmute(

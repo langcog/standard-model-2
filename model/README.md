@@ -58,7 +58,7 @@ make data N_CHILDREN=1000 N_ITEMS=400
 ## Migrating from the pre-refactor flat layout
 
 The first diagnostic run wrote outputs to `model/wordbank_fit_*.rds` (flat
-layout). To move them into `model/fits/` under the new naming convention:
+layout). To move them into `fits/` under the new naming convention:
 
 ```
 make migrate

@@ -1,7 +1,7 @@
 ## Prepare Norwegian longitudinal WS data for Stan fitting.
 ##
 ## Usage:   Rscript model/scripts/prepare_longitudinal_norwegian.R [n_children] [n_items]
-## Writes:  model/fits/long_subset_data_nor.rds
+## Writes:  fits/long_subset_data_nor.rds
 
 source("model/R/config.R")
 source("model/R/helpers.R")
@@ -184,4 +184,4 @@ bundle <- list(
 )
 
 saveRDS(bundle, file.path(PATHS$fits_dir, "long_subset_data_nor.rds"))
-cat("\nSaved model/fits/long_subset_data_nor.rds\n")
+cat("\nSaved fits/long_subset_data_nor.rds\n")

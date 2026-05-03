@@ -116,7 +116,7 @@ along a shared learning curve).
 
 - **σ_r sensitivity sweep (running now)** on the 2PL variant, to check
   how robust π_α is to the externally-pinned input-variance estimate.
-  Results will land in `model/fits/sensitivity_sigma_r_2pl.rds`.
+  Results will land in `fits/sensitivity_sigma_r_2pl.rds`.
 - **Longitudinal accumulator fit** — need item-level longitudinal data,
   which we don't have locally. Admin-level totals + binomial likelihood
   is a middle ground we could pursue if item-level stays out of reach.

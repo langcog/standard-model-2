@@ -4,7 +4,7 @@
 ## maximal item set seen across their admin history.
 ##
 ## Usage:   Rscript model/scripts/pull_longitudinal.R
-## Outputs: model/fits/long_items.rds  (renamed from old long_ws_items.rds)
+## Outputs: fits/long_items.rds  (renamed from old long_ws_items.rds)
 ##          For backwards compatibility a symlink long_ws_items.rds is
 ##          also written, pointing at the new file.
 ##

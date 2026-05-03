@@ -2,16 +2,16 @@
 ## fit (`log_irt_long_proc.stan`).
 ##
 ## RUN LOCALLY ONLY. Reuses Wordbank's English CHILDES p_j table from
-## `model/fits/long_items.rds`; no wordbankr/peekbankr calls at runtime.
+## `fits/long_items.rds`; no wordbankr/peekbankr calls at runtime.
 ##
 ## Inputs:
 ##   data/peekbank/peekbank_stanford_linked.csv  (LWL admins +
 ##     subject linkage; built by link_peekbank_stanford.R)
 ##   data/peekbank/stanford_cdi_items_long.csv   (item-level CDI
 ##     in canonical Wordbank item names; built by parse_stanford_cdi.R)
-##   model/fits/long_items.rds                             (CHILDES p_j)
+##   fits/long_items.rds                             (CHILDES p_j)
 ##
-## Output: model/fits/stanford_linked_subset_data.rds
+## Output: fits/stanford_linked_subset_data.rds
 
 source("model/R/config.R")
 source("model/R/helpers.R")
@@ -165,4 +165,4 @@ bundle <- list(
 )
 
 saveRDS(bundle, file.path(PATHS$fits_dir, "stanford_linked_subset_data.rds"))
-cat("\nSaved model/fits/stanford_linked_subset_data.rds\n")
+cat("\nSaved fits/stanford_linked_subset_data.rds\n")

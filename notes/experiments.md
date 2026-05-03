@@ -32,7 +32,7 @@ as 0.624 [0.50, 0.72] against true 0.61.
 **Key finding:** the collapsed-ξ parameterization (`log_irt.stan`) is
 well-identified and samples cleanly on synthetic data.
 
-**Artifacts:** `model/fits/recovery.rds`, `model/figs/recovery_*.png`.
+**Artifacts:** `fits/recovery.rds`, `model/figs/recovery_*.png`.
 
 ---
 
@@ -106,7 +106,7 @@ Also: new "within-age ability SD" PPC panel shows observed SD rises
 from ~1.0 at 16 mo to ~1.6 at 30 mo, while model predicts a flat ~2.2.
 Confirms σ_α is inflated relative to real within-age dispersion.
 
-**Artifacts:** `model/fits/wordbank_*.rds`, `model/figs/ppc_*.png`.
+**Artifacts:** `fits/wordbank_*.rds`, `model/figs/ppc_*.png`.
 
 ---
 
@@ -130,7 +130,7 @@ strongly positively correlated, not independent as our Stan model
 assumes. Consistent with Peekbank's "faster processors have both
 higher current vocab AND faster vocab growth" finding.
 
-**Artifacts:** `model/fits/longitudinal_slopes.rds`.
+**Artifacts:** `fits/longitudinal_slopes.rds`.
 
 ---
 
@@ -202,8 +202,8 @@ approaches σ_α, π_α becomes more sensitive.
   Seedlings within-vs-between-child input decomposition in the backlog.
 
 **Artifacts:**
-`model/fits/sensitivity_sigma_r_2pl.rds`,
-`model/fits/wordbank_2pl_sigmaR_*.rds` (full-data replication),
+`fits/sensitivity_sigma_r_2pl.rds`,
+`fits/wordbank_2pl_sigmaR_*.rds` (full-data replication),
 `model/figs/sensitivity_*_2pl.png`.
 
 ---
@@ -267,7 +267,7 @@ operationalized inside the accumulator model.
 Chains are directionally reliable but not fully mixed — longer runs
 will tighten intervals but not move medians much.
 
-**Artifacts:** `model/fits/long_2pl_slopes.rds`.
+**Artifacts:** `fits/long_2pl_slopes.rds`.
 
 **Posterior-predictive checks (marginal).** Two PPCs, both sampling
 new hypothetical children from the fitted bivariate-normal population
@@ -380,7 +380,7 @@ input-data path: `cdi_ht_raw_temp.csv` from
 codes; SeedlingsFinalSample filter restricts to the canonical 44
 Egan-Dailey subjects.
 
-**Artifacts:** `model/fits/io_slopes.rds` (BabyView), pending
+**Artifacts:** `fits/io_slopes.rds` (BabyView), pending
 `io_slopes_seedlings.rds`.
 
 ---
@@ -443,7 +443,7 @@ Will give proper Rhat/ESS, tighter intervals, and a properly-mixed
 posterior on the 3-D MVN correlations.
 
 **Artifacts:** `model/stan/log_irt_long_proc.stan`,
-`model/fits/long_proc_slopes.rds` (smoke; will be overwritten by
+`fits/long_proc_slopes.rds` (smoke; will be overwritten by
 production fit), `data/peekbank/peekbank_2022_lwl_summary.csv`,
 `data/peekbank/peekbank_stanford_linked.csv`.
 
@@ -597,7 +597,7 @@ secondary analyses if results suggest it.
 generated quantities. `extract_summaries.R` (job 23696322) pulled
 small artifacts (`<tag>.summary.rds`, `<tag>.draws.rds`,
 `<tag>.loo.rds`) per fit; rsync'd home into
-`model/fits/summaries/`. Ablation analysis in
+`fits/summaries/`. Ablation analysis in
 `model/scripts/nested_family_analysis.R`.
 
 **Variant → tag mapping.**
@@ -680,7 +680,7 @@ shipped as the production scaffold (it tells the same out-of-sample
 story as M3 but with a worse-conditioned interpretation).
 
 **Artifacts.**
-- `model/fits/summaries/long_{m0,m1,baseline,slopes,class_beta_slopes,m5,no_freq_slopes}.{summary,draws,loo}.rds`
+- `fits/summaries/long_{m0,m1,baseline,slopes,class_beta_slopes,m5,no_freq_slopes}.{summary,draws,loo}.rds`
 - `model/figs/longitudinal/nested_family_scalars.png`
 - `model/figs/longitudinal/nested_family_loo.png`
 - `model/figs/longitudinal/nested_family_summary.csv`

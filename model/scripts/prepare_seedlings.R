@@ -1,7 +1,7 @@
 ## Prepare SEEDLingS (Bergelson lab) for the input-observed model.
 ##
 ## RUN LOCALLY ONLY. The prepared bundle
-## `model/fits/seedlings_subset_data.rds` is small (~50 KB) and gets
+## `fits/seedlings_subset_data.rds` is small (~50 KB) and gets
 ## committed to the repo so Sherlock can read it without re-running
 ## any of the prep upstream.
 ##
@@ -20,9 +20,9 @@
 ##                                              folder for the expected schema.
 ##
 ## Reused inputs:
-##   model/fits/long_items.rds  (English CHILDES p_j and lexical_category)
+##   fits/long_items.rds  (English CHILDES p_j and lexical_category)
 ##
-## Output:  model/fits/seedlings_subset_data.rds
+## Output:  fits/seedlings_subset_data.rds
 
 source("model/R/config.R")
 source("model/R/helpers.R")
@@ -224,4 +224,4 @@ bundle <- list(
 )
 
 saveRDS(bundle, file.path(PATHS$fits_dir, "seedlings_subset_data.rds"))
-cat("\nSaved model/fits/seedlings_subset_data.rds\n")
+cat("\nSaved fits/seedlings_subset_data.rds\n")

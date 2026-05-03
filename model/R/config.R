@@ -27,7 +27,7 @@ PATHS <- list(
 
   # Outputs — may be redirected via STANDARD_MODEL_FITS_DIR / _FIGS_DIR
   fits_dir = Sys.getenv("STANDARD_MODEL_FITS_DIR",
-                        unset = file.path(PROJECT_ROOT, "model/fits")),
+                        unset = file.path(PROJECT_ROOT, "fits")),
   figs_dir = Sys.getenv("STANDARD_MODEL_FIGS_DIR",
                         unset = file.path(PROJECT_ROOT, "model/figs")),
   notes_dir = file.path(PROJECT_ROOT, "notes")

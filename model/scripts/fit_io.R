@@ -65,4 +65,4 @@ if (grepl("2pl",    variant)) pars <- c(pars, "sigma_lambda")
 if (grepl("slopes", variant)) pars <- c(pars, "sigma_zeta")
 print(summarize_fit(fit, pars = pars), digits = 3)
 
-cat(sprintf("\nSaved: model/fits/%s.rds\n", out_tag))
+cat(sprintf("\nSaved: fits/%s.rds\n", out_tag))

@@ -122,5 +122,5 @@ for (r in results) {
 }
 
 saveRDS(results,
-        "/Users/mcfrank/Projects/standard_model_2/model/fits/longitudinal_slopes.rds")
-cat("\nSaved: model/fits/longitudinal_slopes.rds\n")
+        "/Users/mcfrank/Projects/standard_model_2/fits/longitudinal_slopes.rds")
+cat("\nSaved: fits/longitudinal_slopes.rds\n")

@@ -51,4 +51,4 @@ pars <- c("sigma_alpha", "pi_alpha", "sigma_xi",
 if (grepl("2pl", variant)) pars <- c(pars, "sigma_lambda")
 print(summarize_fit(fit, pars = pars), digits = 3)
 
-cat(sprintf("\nSaved: model/fits/%s.rds\n", variant))
+cat(sprintf("\nSaved: fits/%s.rds\n", variant))

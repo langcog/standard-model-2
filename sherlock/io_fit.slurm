@@ -26,7 +26,7 @@ RESULTS_DIR="$SCRATCH/standard_model_2"
 mkdir -p "$RESULTS_DIR/fits" "$RESULTS_DIR/logs"
 
 # Symlink repo-side input bundles into scratch fits dir (race-tolerant)
-for f in "$HOME/standard_model_2/model/fits"/*.rds; do
+for f in "$HOME/standard_model_2/fits"/*.rds; do
   [ -e "$f" ] || continue
   base="$(basename "$f")"
   dst="$RESULTS_DIR/fits/$base"

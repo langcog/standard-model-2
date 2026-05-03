@@ -34,8 +34,8 @@ Two reasons:
    Sherlock.
 2. `childesr` requires R ≥ 4.4; Sherlock's R module is 4.2.
 
-The pulled intermediate files (`model/fits/long_ws_items.rds`,
-`model/fits/norwegian_word_freq.rds`) are committed to the repo, so on
+The pulled intermediate files (`fits/long_ws_items.rds`,
+`fits/norwegian_word_freq.rds`) are committed to the repo, so on
 Sherlock you just do:
 
 ```bash
@@ -48,7 +48,7 @@ Rscript model/scripts/prepare_longitudinal_norwegian.R 500 1000
 
 If you need to refresh the intermediate files (e.g., new Wordbank release),
 re-run `pull_longitudinal.R` and `pull_norwegian_freq.R` on your laptop,
-`git add model/fits/long_ws_items.rds model/fits/norwegian_word_freq.rds`,
+`git add fits/long_ws_items.rds fits/norwegian_word_freq.rds`,
 commit, push, and `git pull` on Sherlock.
 
 ## Submitting a fit
@@ -81,7 +81,7 @@ done
 
 ```bash
 # Locally
-rsync -avz <SUNetID>@login.sherlock.stanford.edu:"\$SCRATCH/standard_model_2/fits/" model/fits/
+rsync -avz <SUNetID>@login.sherlock.stanford.edu:"\$SCRATCH/standard_model_2/fits/" fits/
 rsync -avz <SUNetID>@login.sherlock.stanford.edu:"\$SCRATCH/standard_model_2/logs/" sherlock/logs/
 ```
 

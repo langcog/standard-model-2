@@ -2,7 +2,7 @@
 ## verify the posteriors cover truth.
 ##
 ## Usage:   Rscript model/scripts/01_recovery.R
-## Outputs: model/fits/recovery.rds, model/figs/recovery_*.png
+## Outputs: fits/recovery.rds, model/figs/recovery_*.png
 ##          logs scalar recovery table to stdout.
 
 source("model/R/config.R")
@@ -71,4 +71,4 @@ p_psi <- ggplot(psi_df, aes(truth, post_median, colour = class)) +
 ggsave(file.path(PATHS$figs_dir, "recovery_psi.png"),
        p_psi, width = 5.5, height = 5, dpi = 150)
 
-cat("\nDone. Fit: model/fits/recovery.rds. Figures: model/figs/recovery_*.png\n")
+cat("\nDone. Fit: fits/recovery.rds. Figures: model/figs/recovery_*.png\n")

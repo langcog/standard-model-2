@@ -31,27 +31,27 @@ stan_cache/
 # --- Outputs we don't want in the repo
 # Large Stan fits and figs — regenerable, take a lot of space.
 # Intermediate data (subsets) are reproducible from scripts.
-model/fits/**/*.rds
+fits/**/*.rds
 model/figs/**/*.png
 # But keep the directories themselves so scripts don't have to mkdir
-!model/fits/.gitkeep
+!fits/.gitkeep
 !model/figs/.gitkeep
 !model/figs/**/.gitkeep
 # And keep the pulled raw data — these need wordbankr/childesr (R >= 4.4
 # and mysql headers) which Sherlock's R 4.2 can't handle. Commit the
 # intermediate files so Sherlock can skip those packages.
-!model/fits/long_items.rds
-!model/fits/norwegian_word_freq.rds
+!fits/long_items.rds
+!fits/norwegian_word_freq.rds
 # Also keep the prepared Stan bundles — small (~few MB each), and they
 # need raw inputs (e.g., the 875 MB BabyView transcripts) that aren't
 # on Sherlock. Building them once locally and committing avoids that.
-!model/fits/long_subset_data.rds
-!model/fits/long_subset_data_nor.rds
-!model/fits/babyview_subset_data.rds
-!model/fits/subset_data.rds
-!model/fits/peekbank_subset_data.rds
-!model/fits/seedlings_subset_data.rds
-!model/fits/stanford_linked_subset_data.rds
+!fits/long_subset_data.rds
+!fits/long_subset_data_nor.rds
+!fits/babyview_subset_data.rds
+!fits/subset_data.rds
+!fits/peekbank_subset_data.rds
+!fits/seedlings_subset_data.rds
+!fits/stanford_linked_subset_data.rds
 
 # Compiled Stan model objects (auto-generated)
 model/*.rds

@@ -62,7 +62,7 @@ Rscript sherlock/setup_R.R          # works both locally and on Sherlock
 
 # Wordbank longitudinal data is pulled by model/scripts/pull_longitudinal.R
 # (requires childesr / wordbankr; uses preprocessed bundles when available
-# at model/fits/long_subset_data.rds).
+# at fits/long_subset_data.rds).
 #
 # The Sperry / Hart-Risley / Weisleder-Fernald per-recording rate CSV
 # lives at data/sperry/hourly_tokens_Sperry_HartRisley.csv.

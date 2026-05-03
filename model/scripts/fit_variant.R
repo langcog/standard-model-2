@@ -2,8 +2,8 @@
 ##
 ## Usage:   Rscript model/scripts/fit_variant.R <variant_name>
 ## Variants: baseline | fix_delta | fix_s | both_fixed | 2pl | 2pl_fix_delta
-## Reads:   model/fits/subset_data.rds
-## Writes:  model/fits/wordbank_<variant_name>.rds
+## Reads:   fits/subset_data.rds
+## Writes:  fits/wordbank_<variant_name>.rds
 
 source("model/R/config.R")
 source("model/R/helpers.R")
@@ -33,4 +33,4 @@ if (grepl("2pl", nm))     pars <- c(pars, "sigma_lambda")
 if (grepl("slopes", nm))  pars <- c(pars, "sigma_zeta")
 print(summarize_fit(fit, pars = pars), digits = 3)
 
-cat(sprintf("\nSaved: model/fits/wordbank_%s.rds\n", nm))
+cat(sprintf("\nSaved: fits/wordbank_%s.rds\n", nm))
