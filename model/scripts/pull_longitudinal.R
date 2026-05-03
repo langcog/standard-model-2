@@ -65,11 +65,15 @@ long_keys <- admin_counts %>%
 long_child_keys <- long_keys %>% distinct(language, child_id)
 d_long <- d_long %>% inner_join(long_child_keys, by = c("language", "child_id"))
 
-# Attach English CHILDES p_j (only for English rows). Norwegian rows
-# still have prob = NA and get freq attached by prepare_longitudinal_norwegian.R.
-e <- new.env(); load(PATHS$wordbank, envir = e)
-prob_tbl <- e$d_wf %>% distinct(item, prob)
-d_long <- d_long %>% left_join(prob_tbl, by = "item")
+# Word-frequency probabilities are NOT attached here. Both English
+# and Norwegian rows leave with prob = NA; the per-language prepare_*
+# scripts join their own fresh CHILDES frequencies via normalize-and-match
+# (see prepare_longitudinal_data.R / prepare_longitudinal_norwegian.R).
+# Older versions of this script joined English freqs from a legacy
+# preprocessed file from the predecessor standard_model project; that
+# coupling has been removed in favor of pull_english_freq.R + the
+# downstream join.
+d_long <- d_long %>% mutate(prob = NA_real_)
 
 # ---- Reporting ----
 cat("\n=== Per-language summary ===\n")

@@ -27,10 +27,48 @@ message(sprintf("Preparing longitudinal subset: language=%s, children=%d, items=
                 language, n_children, n_items))
 
 long <- readRDS(file.path(PATHS$fits_dir, "long_items.rds"))
+freq <- readRDS(file.path(PATHS$fits_dir, "english_word_freq.rds"))
+
+# Filter to language; drop pre-existing prob column (legacy English
+# preprocessed source or NA) so the fresh CHILDES freqs win the join.
 d <- long %>%
-  filter(language == !!language,
-         !is.na(prob), prob > 0,
-         !is.na(produces))
+  filter(language == !!language, !is.na(produces)) %>%
+  select(-any_of("prob"))
+
+# Wordbank item_definition often has parenthetical qualifiers (e.g.
+# "go (verb)", "no (response)"); strip them for the lowercased join,
+# parallel to prepare_longitudinal_norwegian.R.
+normalize <- function(x) {
+  x %>% tolower() %>%
+    gsub("\\s*\\(.*\\)\\s*", "", .) %>%
+    gsub("\\s+", " ", .) %>% trimws()
+}
+
+d <- d %>% mutate(item_norm = normalize(item))
+freq_lookup <- freq %>%
+  mutate(w_norm = normalize(w)) %>%
+  group_by(w_norm) %>%
+  summarise(count = sum(count), .groups = "drop")
+
+total_freq <- sum(freq_lookup$count)
+freq_lookup <- freq_lookup %>%
+  mutate(prob = count / total_freq)
+
+d <- d %>% left_join(freq_lookup, by = c("item_norm" = "w_norm"))
+
+# Diagnostic: how many items matched?
+matched <- d %>% distinct(item, item_norm, prob)
+cat(sprintf("  items with CHILDES match: %d / %d\n",
+            sum(!is.na(matched$prob)), nrow(matched)))
+
+# For unmatched items, use the minimum freq (small but nonzero) so we
+# keep the item rather than dropping it. Same convention as Norwegian.
+if (sum(is.na(d$prob)) > 0) {
+  min_prob <- min(d$prob, na.rm = TRUE)
+  d <- d %>% mutate(prob = dplyr::coalesce(prob, min_prob))
+}
+
+d <- d %>% filter(prob > 0)
 
 message(sprintf("  input: %d rows, %d children, %d items",
                 nrow(d), length(unique(d$child_id)),
