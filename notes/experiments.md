@@ -591,6 +591,104 @@ secondary analyses if results suggest it.
 
 ---
 
+## 🟢 14. M0..M5 nested-family LOO comparison (English longitudinal)
+
+**Setup.** All six spine variants fit on Sherlock with `log_lik` in
+generated quantities. `extract_summaries.R` (job 23696322) pulled
+small artifacts (`<tag>.summary.rds`, `<tag>.draws.rds`,
+`<tag>.loo.rds`) per fit; rsync'd home into
+`model/fits/summaries/`. Ablation analysis in
+`model/scripts/nested_family_analysis.R`.
+
+**Variant → tag mapping.**
+
+| label | tag | what it adds |
+|---|---|---|
+| M0 | `long_m0` | minimal IRT (no time, no freq) |
+| M1 | `long_m1` | unit time + unit freq, δ pinned |
+| M2 | `long_baseline` | + free δ |
+| M3 | `long_slopes` | + per-child slopes ζ_i |
+| M4 | `long_class_beta_slopes` | + class-specific β_c on log p_j |
+| M5 | `long_m5` | + 2PL discrimination λ_j |
+| no_freq | `long_no_freq_slopes` | M3 with log p_j dropped (RQ2 test) |
+
+**Headline scalar posteriors (English).**
+
+| | σ_α | π_α | δ | σ_ζ | σ_λ | s |
+|---|---:|---:|---:|---:|---:|---:|
+| M0 | 0.88 | 0.73 | pinned | pinned | pinned | 0.51 |
+| M1 | 0.88 | 0.73 | pinned | pinned | pinned | **1.47** |
+| M2 | 1.76 | 0.92 | 9.13 | pinned | pinned | 0.52 |
+| M3 | 1.75 | 0.91 | 9.39 | 3.48 | pinned | 0.52 |
+| M4 | 1.72 | 0.91 | 9.36 | 3.45 | pinned | 0.53 |
+| M5 | 1.62 | 0.90 | 8.52 | 3.00 | 0.35 | 0.54 |
+
+The s = 1.47 in M1 is a misspecification diagnostic, not a bug: with
+both δ and time-baseline fixed, the model has no other knob for
+trajectory shape, so s breaks past its tight prior of (0.5, 0.05) by
+~20 SD to mimic what δ would otherwise do. In every well-specified
+variant (M2–M5) s sits comfortably at ~0.52, exactly where its prior
+puts it.
+
+**Step-wise LOO ELPD differences.**
+
+| step | ΔELPD | SE | z | what it adds |
+|---|---:|---:|---:|---|
+| M1 vs M0 | +8 033 | 36 | 222.6 | unit time + freq |
+| **M2 vs M1** | **+23 289** | **178** | **131.0** | **free δ (RQ1)** |
+| M3 vs M2 | +2 212 | 69 | 31.9 | per-child slope ζ_i |
+| **M4 vs M3** | **+1.5** | **1.25** | **1.2** | **class-specific β_c (RQ2 fail)** |
+| M5 vs M4 | +1 079 | 52 | 20.8 | 2PL λ_j |
+
+Off-spine RQ2 robustness check:
+
+| | ΔELPD | SE | z |
+|---|---:|---:|---:|
+| **no_freq vs M3** | **+0.9** | **1.6** | **0.5** |
+
+Best by LOO: **M5**.
+
+**Findings by RQ.**
+
+- **RQ1 (acceleration). Closed.** Adding free δ is the largest single
+  step in the family by a large margin (z = 131). δ in M2 is 9.13
+  [9.01, 9.26] — decisively above zero. The McMurray–Mitchell argument
+  that the observed growth-curve shape requires acceleration is
+  empirically confirmed at industrial significance.
+- **RQ2 (frequency reconstructs word difficulty). Sharp null.** Both
+  the M4-vs-M3 test (class-specific β_c, z = 1.2) and the no_freq-vs-M3
+  test (drop log p_j entirely, z = 0.5) say frequency contributes
+  nothing structural over and above the per-word ψ_j parameter. The
+  M4 within-fit posterior gives β_c = (0.55, 0.45, 0.36, 0.16) with
+  CrIs comfortably below 1 — but cross-validation says ψ_j and
+  β_c · log p_j trade off so cleanly that any combination preserving
+  their sum predicts equally well out-of-sample. Frequency information
+  is preserved through the per-word ψ_j (the
+  `r(ψ_j, log p_j) = 0.68` finding from §2a), it just has no separate
+  structural channel.
+- **RQ3 (input vs efficiency). Closed.** π_α stabilizes at 0.90–0.92
+  in every well-specified variant (M2–M5). The σ_r = 0.534 prior from
+  the input-estimation work (see §15 / `input_estimation/`) anchors
+  this. M0 and M1's lower π_α ≈ 0.73 are an artifact of the model
+  being misspecified there.
+
+**Implications for adopt-and-augment.** Strict-LOO-best is M5, but the
+gain of M5 over M3 is +1 079 (z = 21), about 20× smaller than the
+M2-vs-M1 step. M3 is the cleanest minimal answer to all three RQs;
+M5 is a sensible final-table robustness check. M4 should not be
+shipped as the production scaffold (it tells the same out-of-sample
+story as M3 but with a worse-conditioned interpretation).
+
+**Artifacts.**
+- `model/fits/summaries/long_{m0,m1,baseline,slopes,class_beta_slopes,m5,no_freq_slopes}.{summary,draws,loo}.rds`
+- `model/figs/longitudinal/nested_family_scalars.png`
+- `model/figs/longitudinal/nested_family_loo.png`
+- `model/figs/longitudinal/nested_family_summary.csv`
+- `model/figs/longitudinal/nested_family_loo_ranking.csv`
+- `model/figs/longitudinal/nested_family_loo_steps.csv`
+
+---
+
 ## Backlog (⚪)
 
 ### Data / robustness
