@@ -139,6 +139,28 @@ if (length(loo_objs) >= 2) {
               length(loo_objs),
               paste(names(loo_objs), collapse = ", ")))
 
+  # loo_compare requires the same N across models. Check and prune.
+  ns <- sapply(loo_objs, function(o) length(o$pointwise[, "elpd_loo"]))
+  cat("Per-model N data points:\n")
+  for (k in names(ns)) cat(sprintf("  %-12s  N = %d\n", k, ns[k]))
+  if (length(unique(ns)) > 1) {
+    majority_n <- as.integer(names(sort(table(ns), decreasing = TRUE)[1]))
+    keep <- names(ns)[ns == majority_n]
+    drop <- setdiff(names(loo_objs), keep)
+    cat(sprintf(
+      "\nN mismatch: dropping %s (need same data points). Comparing %s.\n",
+      paste(drop, collapse = ", "),
+      paste(keep, collapse = ", ")))
+    cat("  Likely cause: fits done on different bundle revisions.\n")
+    cat("  Fix: refit the dropped variants on the current long_subset_data.rds.\n\n")
+    loo_objs <- loo_objs[keep]
+  }
+  if (length(loo_objs) < 2) {
+    cat("Fewer than 2 N-matched LOO objects; skipping comparison.\n")
+    cat("(Loaded:", paste(names(loo_objs), collapse = ", "), ")\n")
+    quit(status = 0)
+  }
+
   # Pairwise comparison (loo_compare picks best as ref, reports
   # ELPD differences relative to it, with SE).
   comp <- loo_compare(loo_objs)
