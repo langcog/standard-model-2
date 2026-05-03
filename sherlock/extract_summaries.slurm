@@ -4,7 +4,7 @@
 #SBATCH --error=%x_%j.err
 #SBATCH --time=06:00:00
 #SBATCH --cpus-per-task=4
-#SBATCH --mem=24G
+#SBATCH --mem=64G
 #SBATCH --partition=normal
 
 # Usage:
