@@ -37,11 +37,18 @@ args <- commandArgs(trailingOnly = TRUE)
 default_csv <- file.path(PATHS$fits_dir, "summaries",
                           "long_m1_time_only_psi.csv")
 default_rds <- file.path(PATHS$fits_dir, "long_m1_time_only.rds")
-psi_source  <- if (length(args) >= 1) args[1]
-                else if (file.exists(default_csv)) default_csv
-                else default_rds
-bundle_path <- if (length(args) >= 2) args[2]
-                else file.path(PATHS$fits_dir, "long_subset_data.rds")
+psi_source <- if (length(args) >= 1) {
+  args[1]
+} else if (file.exists(default_csv)) {
+  default_csv
+} else {
+  default_rds
+}
+bundle_path <- if (length(args) >= 2) {
+  args[2]
+} else {
+  file.path(PATHS$fits_dir, "long_subset_data.rds")
+}
 
 OUT_FIGS <- file.path(PATHS$figs_dir, "longitudinal")
 dir.create(OUT_FIGS, recursive = TRUE, showWarnings = FALSE)
