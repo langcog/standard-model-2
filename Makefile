@@ -99,7 +99,7 @@ analyze-all:
 	$(RSCRIPT) $(R_FLAGS) $(SCRIPTS)/04_analyze.R all
 
 explainer:
-	cd notes && pdflatex -interaction=nonstopmode model_explainer.tex > /dev/null \
+	cd outputs && pdflatex -interaction=nonstopmode model_explainer.tex > /dev/null \
 	    && pdflatex -interaction=nonstopmode model_explainer.tex > /dev/null \
 	    ; rm -f model_explainer.aux model_explainer.log \
 	            model_explainer.out model_explainer.toc

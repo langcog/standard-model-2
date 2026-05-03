@@ -20,6 +20,9 @@ stan_cache/
 *.nav
 *.snm
 *.vrb
+*.fdb_latexmk
+*.fls
+texput.log
 
 # --- OS / editor
 .DS_Store

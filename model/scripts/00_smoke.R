@@ -10,7 +10,6 @@ cat("PATHS:\n")
 for (k in names(PATHS)) cat(sprintf("  %-10s = %s\n", k, PATHS[[k]]))
 
 cat("\nStan model exists:", file.exists(PATHS$stan_model), "\n")
-cat("Wordbank data exists:", file.exists(PATHS$wordbank), "\n")
 cat("Input-rate data exists:", file.exists(PATHS$input_rate), "\n")
 
 prior_r <- load_input_rate_prior()
