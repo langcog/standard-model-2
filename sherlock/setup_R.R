@@ -68,6 +68,37 @@ if (is.null(tryCatch(cmdstan_path(), error = function(e) NULL))) {
 cat("cmdstan path:", cmdstan_path(), "\n")
 cat("cmdstan version:", cmdstan_version(), "\n")
 
+## Ensure make/local has the configuration that our model fits need.
+## install_cmdstan() rewrites this file from scratch, so anything we
+## want preserved across reinstalls has to be re-applied here.
+##
+## Required entries:
+##   STAN_THREADS=true              -- enable reduce_sum threading
+##   TBB_CXX_TYPE=gcc               -- TBB build needs explicit compiler kind
+##   LDLIBS += -lpthread            -- linker needs explicit -lpthread; default
+##   CXXFLAGS += -pthread              cmdstan-2.38 + Sherlock GCC build
+##                                     doesn't add it from STAN_THREADS alone
+##   CXXFLAGS += -Wno-deprecated-declarations  -- silence harmless warnings
+ensure_make_local <- function() {
+  ml <- file.path(cmdstan_path(), "make", "local")
+  needed <- c(
+    "CXXFLAGS += -Wno-deprecated-declarations",
+    "STAN_THREADS=true",
+    "TBB_CXX_TYPE=gcc",
+    "LDLIBS += -lpthread",
+    "CXXFLAGS += -pthread"
+  )
+  existing <- if (file.exists(ml)) readLines(ml) else character(0)
+  to_add <- setdiff(needed, trimws(existing))
+  if (length(to_add) == 0) {
+    cat("make/local already has required entries.\n"); return(invisible())
+  }
+  cat(sprintf("Appending %d entries to make/local: %s\n",
+              length(to_add), paste(to_add, collapse = "; ")))
+  writeLines(c(existing, to_add), ml)
+}
+ensure_make_local()
+
 cat("\nPackages installed. rstan version:\n")
 print(packageVersion("rstan"))
 cat("cmdstanr version:\n")
