@@ -84,7 +84,17 @@ DEFAULT_PRIORS <- list(
   gamma_0_prior_mean    = 0,
   gamma_0_prior_sd      = 0.001,
   gamma_1_prior_mean    = 0,
-  gamma_1_prior_sd      = 0.001
+  gamma_1_prior_sd      = 0.001,
+  # Standardized-test channel -- only used by log_irt_long_io_comp.stan.
+  # gamma_std = slope from log_alpha to z-scored standardized score.
+  # Defaults pinned tight at 0 so a fit without `std_*` variant has no
+  # contribution from this channel. mu_std anchored at 0 (z-scored data);
+  # sigma_std weakly anchored.
+  gamma_std_prior_mean  = 0,
+  gamma_std_prior_sd    = 0.001,
+  mu_std_prior_mean     = 0,
+  mu_std_prior_sd       = 1,
+  sigma_std_prior_sd    = 1
 )
 
 ## Defaults for fitting.

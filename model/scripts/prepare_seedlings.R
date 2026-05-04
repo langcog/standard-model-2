@@ -187,8 +187,38 @@ recordings <- recordings %>% inner_join(subj_to_ii, by = "subject_id") %>%
   rename(child_ii = ii)
 V <- nrow(recordings)
 
-message(sprintf("  bundle: I=%d, A=%d, J=%d, C=%d, N=%d, V=%d",
-                I, A, J, C, nrow(cdi_long), V))
+# ---- Standardized-test channel (optional). Reads later assessment
+# scores (CELF core language is the most reliable composite available).
+# z-scored within sample so gamma_std is interpretable as
+# standardized-score SDs per log_alpha unit. Bundle always emits
+# N_std + arrays; the comp Stan file uses them iff N_std > 0 AND the
+# variant unlocks gamma_std (otherwise the prior pins gamma_std=0). ----
+std_path <- file.path(PROJECT_ROOT, "data/seedlings/all_vocab.csv")
+if (file.exists(std_path)) {
+  std_raw <- readr::read_csv(std_path, show_col_types = FALSE) %>%
+    transmute(subject_id = sprintf("%02d", as.integer(subj)),
+              # `celf_core_lang` is the canonical CELF-Preschool composite
+              # (mean 100, SD 15 in standardization). Z-score within this
+              # SEEDLingS sample.
+              std_raw_score = celf_core_lang) %>%
+    filter(!is.na(std_raw_score)) %>%
+    inner_join(subj_to_ii, by = "subject_id") %>%
+    mutate(std_z = as.numeric(scale(std_raw_score)))
+  N_std         <- nrow(std_raw)
+  std_to_child  <- std_raw$ii
+  std_score     <- std_raw$std_z
+  message(sprintf("  std: %d kids with celf_core_lang (sample mean=%.1f, sd=%.1f)",
+                  N_std, mean(std_raw$std_raw_score),
+                  sd(std_raw$std_raw_score)))
+} else {
+  N_std        <- 0L
+  std_to_child <- integer(0)
+  std_score    <- numeric(0)
+  message("  std: all_vocab.csv not found; N_std = 0")
+}
+
+message(sprintf("  bundle: I=%d, A=%d, J=%d, C=%d, N=%d, V=%d, N_std=%d",
+                I, A, J, C, nrow(cdi_long), V, N_std))
 
 prior_r <- load_input_rate_prior()
 
@@ -213,6 +243,13 @@ stan_data <- c(
     aa_comp = if (has_comp) cdi_long$aa else integer(0),
     jj_comp = if (has_comp) cdi_long$jj else integer(0),
     y_comp  = if (has_comp) cdi_long$comprehends else integer(0),
+
+    # Standardized-test channel (NEW; optional). One score per kid;
+    # log_irt_long_io_comp.stan reads these only if N_std > 0 AND the
+    # variant unlocks gamma_std prior.
+    N_std        = N_std,
+    std_to_child = std_to_child,
+    std_score    = std_score,
 
     # Input-observed side: LENA AWC per recording
     V = V,

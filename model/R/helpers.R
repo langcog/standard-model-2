@@ -205,6 +205,20 @@ variant_hyperpriors <- function(name) {
     comp_no_freq_slopes = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
                                sigma_zeta_prior_sd = 1,
                                gamma_0_prior_sd = 2, gamma_1_prior_sd = 2),
+    # Standardized-test channel variants. Same Stan file; unlocks
+    # gamma_std prior (default tight at 0). The standardized-score
+    # observations sigma-anchor sigma_alpha jointly with the CDI side,
+    # so the per-child latent log_alpha is identified from two readouts
+    # rather than one. Combined `comp_std_*` variants enable both.
+    std_slopes = list(sigma_zeta_prior_sd = 1,
+                      gamma_std_prior_sd = 2),
+    std_no_freq_slopes = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
+                              sigma_zeta_prior_sd = 1,
+                              gamma_std_prior_sd = 2),
+    comp_std_no_freq_slopes = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
+                                   sigma_zeta_prior_sd = 1,
+                                   gamma_0_prior_sd = 2, gamma_1_prior_sd = 2,
+                                   gamma_std_prior_sd = 2),
     # Legacy variants for re-loading old fits / explicit comparison
     fix_s         = list(s_prior_mean = 2, s_prior_sd = 0.001),
     both_fixed    = list(delta_prior_mean = 0, delta_prior_sd = 0.001,

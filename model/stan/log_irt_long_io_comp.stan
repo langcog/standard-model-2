@@ -1,20 +1,29 @@
-// Strict superset of log_irt_io.stan: adds an optional comprehension
-// observation channel.
+// Strict superset of log_irt_io.stan: adds two optional observation
+// channels -- comprehension responses and standardized-test scores.
+// Either or both can be active; pass N_comp = 0 / N_std = 0 to disable.
 //
-// For comp observations on the same (admin, word) grid:
+// COMPREHENSION channel (optional). For comp observations on the same
+// (admin, word) grid:
 //   eta_comp = lambda * base + gamma_0 + gamma_1 * log_age
-// where `base` is the same per-(admin, word) linear predictor that
-// production uses. gamma_0 captures the constant logit-scale shift
-// from production to comprehension; gamma_1 captures how that shift
-// changes with log-age. Equivalent reparameterization on the
-// difficulty side: psi_j_comp = psi_j - gamma_0 - gamma_1 * log_age.
+// gamma_0 = constant logit-scale shift from production to comprehension;
+// gamma_1 = how that shift changes with log-age. Equivalent
+// reparameterization on the difficulty side:
+//   psi_j_comp = psi_j - gamma_0 - gamma_1 * log_age.
 //
-// Modularity contract: when N_comp = 0 the comp block contributes
-// nothing to the likelihood, and with gamma_0_prior_sd / gamma_1_prior_sd
-// pinned tight near 0 the gamma parameters are pinned at their prior
-// mean (0 by default). In that configuration the posterior on every
-// other parameter is identical to log_irt_io.stan. The fit_io.R
-// dispatcher selects this file only for variants matching `comp_*`.
+// STANDARDIZED-TEST channel (optional). One score per child (e.g.,
+// CELF / QUILS / PVT z-score), regressed on log_alpha:
+//   std_score_i ~ N(mu_std + gamma_std * log_alpha_i, sigma_std)
+// gamma_std calibrates the slope from latent efficiency to the external
+// test score. With this channel active sigma_alpha is jointly identified
+// from CDI + standardized-score data, so parent-report noise no longer
+// inflates the estimate.
+//
+// Modularity contract: each channel's likelihood block is gated on
+// N_*  > 0, and the channel-specific gammas have priors pinned tight at
+// 0 by default in DEFAULT_PRIORS. Passing N_comp = 0 / N_std = 0 and
+// keeping the tight priors yields a posterior identical to log_irt_io.stan
+// on every shared parameter. The fit_io.R dispatcher selects this file
+// for any variant matching `(comp|std)`.
 
 data {
   // ---- CDI side (production; identical to log_irt_io.stan) ----
@@ -74,6 +83,18 @@ data {
   real<lower=0> gamma_0_prior_sd;
   real gamma_1_prior_mean;
   real<lower=0> gamma_1_prior_sd;
+
+  // ---- Standardized-test channel (new; pass N_std=0 to disable) ----
+  int<lower=0> N_std;
+  array[N_std] int<lower=1, upper=I> std_to_child;
+  vector[N_std] std_score;             // z-scored within sample
+  // Default tight at 0 unless variant frees them. mu_std anchored at 0
+  // since std_score is z-scored.
+  real gamma_std_prior_mean;
+  real<lower=0> gamma_std_prior_sd;
+  real mu_std_prior_mean;
+  real<lower=0> mu_std_prior_sd;
+  real<lower=0> sigma_std_prior_sd;
 }
 
 parameters {
@@ -109,6 +130,11 @@ parameters {
   // Comp shift
   real gamma_0;
   real gamma_1;
+
+  // Standardized-test channel
+  real gamma_std;
+  real mu_std;
+  real<lower=0> sigma_std;
 }
 
 transformed parameters {
@@ -161,6 +187,17 @@ model {
   // Comp shift priors
   gamma_0 ~ normal(gamma_0_prior_mean, gamma_0_prior_sd);
   gamma_1 ~ normal(gamma_1_prior_mean, gamma_1_prior_sd);
+
+  // Standardized-test priors
+  gamma_std ~ normal(gamma_std_prior_mean, gamma_std_prior_sd);
+  mu_std    ~ normal(mu_std_prior_mean, mu_std_prior_sd);
+  sigma_std ~ normal(0, sigma_std_prior_sd);
+
+  // Standardized-test likelihood (only if N_std > 0)
+  if (N_std > 0) {
+    std_score ~ normal(mu_std + gamma_std * log_alpha[std_to_child],
+                       sigma_std);
+  }
 
   // ---- Production likelihood (same as log_irt_io.stan) ----
   vector[N] eta;

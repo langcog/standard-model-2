@@ -59,7 +59,7 @@ cat(sprintf("Stan config: chains=%d iter=%d warmup=%d adapt_delta=%.2f\n",
 # file would fail to find the gamma parameters, while the comp file
 # with a comp-free bundle (N_comp=0) reduces exactly to the standard
 # fit. Keeping them as two files makes the toggle obvious.
-stan_file <- if (grepl("comp", variant)) {
+stan_file <- if (grepl("comp|std", variant)) {
   "model/stan/log_irt_long_io_comp.stan"
 } else {
   "model/stan/log_irt_io.stan"
