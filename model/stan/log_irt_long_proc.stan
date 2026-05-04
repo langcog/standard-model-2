@@ -51,6 +51,11 @@ data {
   real<lower=0> delta_prior_sd;
   real<lower=0> sigma_lambda_prior_sd;
   real<lower=0> sigma_zeta_prior_sd;
+  // Per-class slope on log p_j. Default behavior (DEFAULT_PRIORS) pins
+  // beta_c at 1 (unit-accumulator). The `no_freq*` variants pin it at 0.
+  // Mirrors log_irt_long.stan / log_irt_io.stan.
+  real<lower=0> beta_c_prior_sd;
+  real beta_c_prior_mean;
 
   // ---- LWL processing side ---- //
   int<lower=0> N_lwl;                          // LWL admins
@@ -87,6 +92,7 @@ parameters {
   // 2PL discrimination
   vector[J] log_lambda_raw;
   real<lower=0> sigma_lambda;
+  vector[C] beta_c;
 
   // LWL channel
   real mu_rt;
@@ -149,6 +155,7 @@ model {
 
   log_lambda_raw ~ std_normal();
   sigma_lambda   ~ normal(0, sigma_lambda_prior_sd);
+  beta_c         ~ normal(beta_c_prior_mean, beta_c_prior_sd);
 
   // LWL priors
   mu_rt      ~ normal(mu_rt_prior_mean, mu_rt_prior_sd);
@@ -170,7 +177,8 @@ model {
       zeta_per_obs[n] = zeta[ch];
     }
     vector[N] slope_per_obs = 1 + delta + zeta_per_obs;
-    vector[N] base = xi_per_obs + log_p[jj] + log_H
+    vector[N] beta_per_obs  = beta_c[cc[jj]];
+    vector[N] base = xi_per_obs + beta_per_obs .* log_p[jj] + log_H
                    + slope_per_obs .* log_age - psi[jj];
     eta = lambda[jj] .* base;
   }
