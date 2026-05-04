@@ -655,11 +655,11 @@ free (or unit-anchored where the data prefer that).
 
 \end{frame}
 
-% ====== LOO results ==================================================
-\begin{frame}{Spine LOO comparison (English, $N=200$ children)}
+% ====== English spine LOO ============================================
+\begin{frame}{Spine LOO comparison: English, $N\!=\!200$ children}
 
 \vspace{0.4em}
-\textbf{Step-wise ELPD differences} (later $-$ earlier, $\sigma_r=0.534$ pinned):
+\textbf{Step-wise ELPD differences} (later $-$ earlier; $\sigma_r=0.534$ pinned):
 
 \vspace{0.4em}
 \centering
@@ -669,32 +669,115 @@ free (or unit-anchored where the data prefer that).
 \toprule
 step & $\Delta$ELPD & SE & $z$ & verdict \\
 \midrule
-$M_1\;\text{vs}\;M_0$ & $+8\,033$  & 36   & 222.6 & \textbf{time matters} \\
-$M_2\;\text{vs}\;M_1$ & $\sim\!0$ (pending) & -- & -- & \textbf{RQ2:} on-spine; new fit running \\
-$\boldsymbol{M_3\;\text{vs}\;M_2}$ & $\boldsymbol{+23\,289}$ & $\boldsymbol{178}$ & $\boldsymbol{131.0}$ & \textbf{RQ1: $\delta$ matters, decisively} \\
-$M_4\;\text{vs}\;M_3$ & $+2\,212$  & 69   & 31.9  & per-child slopes matter \\
-$M_5\;\text{vs}\;M_4$ & $+1.5$     & 1.25 & 1.2   & class $\beta_c$ \emph{null} \\
-$M_6\;\text{vs}\;M_5$ & $+1\,079$  & 52   & 20.8  & 2PL marginal but real \\
+$M_1\;\text{vs}\;M_0$ & $+8\,033$  & 36    & 222.6 & + time: \textbf{matters} \\
+$\boldsymbol{M_2\;\text{vs}\;M_1}$ & $\boldsymbol{+2.2}$ & $\boldsymbol{1.85}$ & $\boldsymbol{1.2}$ &
+  \textbf{+ frequency: \emph{null} (RQ2)} \\
+$\boldsymbol{M_3\;\text{vs}\;M_2}$ & $\boldsymbol{+23\,289}$ & $\boldsymbol{178}$ & $\boldsymbol{131.0}$ &
+  \textbf{+ $\delta$: matters, decisively (RQ1)} \\
+$M_4\;\text{vs}\;M_3$ & $+2\,212$  & 69    & 31.9  & + per-child slopes \\
+$M_5\;\text{vs}\;M_4$ & $+1.5$     & 1.25  & 1.2   & + class $\beta_c$: \emph{null} \\
+$M_6\;\text{vs}\;M_5$ & $+1\,079$  & 52    & 20.8  & + 2PL: marginal but real \\
 \bottomrule
 \end{tabular}
 
 \vspace{0.8em}
 \flushleft
 \footnotesize
-\textbf{Reading the table.}
-\begin{itemize}\setlength\itemsep{0.15em}
-\item RQ1 (acceleration): closed at $z = 131$. The $\delta$ step is the
-  load-bearing structural addition.
-\item RQ2 (frequency): the off-spine M4-level test gave
-  $z = 0.5$ (drop $\log p_j$, no ELPD change). On-spine $M_2\!\!\to\!\!M_1$
-  test pending Sherlock job 23710155.
-\item M5 (class-specific $\beta_c$): null at the LOO level
-  ($z = 1.2$). The per-class posteriors $(0.55, 0.45, 0.36, 0.16)$
-  trade off cleanly with $\psi_j$; no out-of-sample value.
-\item Best by LOO: $M_6$. Recommended adopt-and-augment scaffold:
-  $M_4$ (slopes-level), with the no-frequency variant as M\_best for
-  input-uptake fits.
-\end{itemize}
+\textbf{Three closures.} \textbf{RQ1} (does $\delta$ matter?): closed at $z\!=\!131$ -- the
+load-bearing addition. \textbf{RQ2} (does frequency matter on-spine?): closed at
+$z\!=\!1.2$ -- frequency contributes nothing structural over and above per-word
+$\psi_j$. The M4-level off-spine variant agrees ($z\!=\!0.5$). \textbf{Class
+$\beta_c$}: also null ($z\!=\!1.2$). The per-class posteriors $(0.55, 0.45, 0.36, 0.16)$
+trade cleanly with $\psi_j$ -- real-looking within fit, zero out-of-sample value.
+
+\vspace{0.4em}
+Best by LOO: $M_6$. \textbf{Recommended adopt-and-augment scaffold: $M_4$}
+(the slopes level), and the no-frequency variant for M\_best on input-uptake fits.
+
+\end{frame}
+
+% ====== Norwegian spine LOO ==========================================
+\begin{frame}{Spine LOO comparison: Norwegian, $N\!=\!200$ children}
+
+\vspace{0.4em}
+\textbf{Step-wise ELPD differences} (some steps merged; $M_3$--$M_5$ Norwegian fits
+are pre-LOO rstan and lack \texttt{log\_lik}):
+
+\vspace{0.4em}
+\centering
+\small
+\renewcommand{\arraystretch}{1.18}
+\begin{tabular}{@{}lrrrl@{}}
+\toprule
+step & $\Delta$ELPD & SE & $z$ & verdict \\
+\midrule
+$M_1\;\text{vs}\;M_0$ & $+59\,136$ & 233  & 253.6 & + time alone: \textbf{huge} \\
+$\boldsymbol{M_2\;\text{vs}\;M_1}$ & $\boldsymbol{-46.5}$ & $\boldsymbol{4.5}$ & $\boldsymbol{-10.3}$ &
+  \textbf{+ frequency: \emph{hurts} (!)} \\
+$M_6\;\text{vs}\;M_2$ & $+4\,215$ & 84  & 50.1  & + $\delta$ + slopes + $\beta_c$ + 2PL (lumped) \\
+no\_freq vs $M_6$    & $-1\,423$ & 59 & $-24.3$ & dropping freq from $M_6$: \emph{hurts} \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.6em}
+\flushleft
+\footnotesize
+\textbf{Norwegian-specific finding: degenerate $M_1$/$M_2$.} With $\delta$ pinned
+at 0, the model in Norwegian collapses $\sigma_\alpha$ to $\sim\!0.03$ and pushes
+$s$ past its prior to $\sim\!2.0$. Production variance gets absorbed into $\sigma_r$
+plus a global $s$-shift; $\pi_\alpha\!\to\!0.003$ in $M_1$/$M_2$. Once $\delta$ is
+freed (in $M_3$ onward), $\sigma_\alpha$ recovers to $\sim\!1.57$ and
+$\pi_\alpha\!\to\!0.90$. The $-46.5$ ELPD step at $M_2$ vs $M_1$ is a comparison
+of two near-degenerate fits in this corner -- read it as ``adding unit-coef
+frequency in this regime makes a worse fit slightly worse,'' not as a
+substantive RQ2 finding on its own.
+
+\vspace{0.3em}
+The cleaner Norwegian RQ2 test is no\_freq vs $M_6$: with the full structure on
+top, dropping $\log p_j$ \emph{hurts} fit by $\sim\!1\,400$ ELPD ($z\!=\!-24$).
+
+\end{frame}
+
+% ====== Cross-language reading =======================================
+\begin{frame}{Cross-language reading: RQ1 universal, RQ2 culturally-specific}
+
+\centering
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+RQ test & English & Norwegian \\
+\midrule
+RQ1: $+\delta$ on top of time$+$freq               & $z\!=\!131$ & $z\!=\!50$ (lumped) \\
+RQ2 on-spine ($+\log p_j$ over time-only)          & $z\!=\!1.2$ \emph{null}     & $z\!=\!-10.3$ \emph{neg} \\
+RQ2 robustness (drop $\log p_j$ at top of spine)   & $z\!=\!0.5$ \emph{null}     & $z\!=\!-24.3$ \emph{neg} \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.8em}
+\flushleft
+\footnotesize
+\textbf{Reading.} \textbf{RQ1 (acceleration) is universal} -- both languages need
+$\delta\!\gg\!0$ to fit the data, with $\sigma_\alpha$ and $\pi_\alpha$ both
+reaching plausible values once $\delta$ is freed.
+
+\textbf{RQ2 (frequency) is asymmetric across languages.} In English, frequency is
+structurally redundant: the per-word $\psi_j$ absorbs it. In Norwegian, dropping
+frequency at the top of the spine \emph{hurts} fit by $\sim\!1\,400$ ELPD --
+frequency is doing real work there.
+
+\textbf{Plausible mechanism.} Norwegian Wordbank items match imperfectly to
+CHILDES Norwegian tokens (mixed Bokm\aa l/Nynorsk orthography; many items fall
+back to a min-prob floor). At unit-$\beta_c$ this noisy signal misleads $M_2$
+(hence the $-47$ on-spine ELPD). Once class-specific $\beta_c$ and per-word
+$\lambda_j$ are free in $M_6$, the model can down-weight the noisy channel and
+freq becomes useful again. \textbf{The asymmetry is most likely about freq-data
+quality, not about a deep structural difference between the two languages.}
+
+\vspace{0.4em}
+\textbf{Headline:} cross-linguistic, $\sigma_\alpha$ and $\pi_\alpha\approx 0.91$
+replicate; $\delta$ varies (English $\sim\!9.4$, Norwegian $\sim\!11.4$);
+frequency's structural role is small everywhere and zero in English.
 
 \end{frame}
 
