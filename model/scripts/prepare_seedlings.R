@@ -75,9 +75,19 @@ if (length(missing)) {
   stop(sprintf("cdi_items_long.csv missing columns: %s",
                paste(missing, collapse = ", ")))
 }
+has_comp <- "comprehends" %in% colnames(cdi_long)
 cdi_long <- cdi_long %>%
   filter(form == "WG", !is.na(produces)) %>%
   mutate(produces = as.integer(produces))
+if (has_comp) {
+  cdi_long <- cdi_long %>%
+    filter(!is.na(comprehends)) %>%
+    mutate(comprehends = as.integer(comprehends))
+  message(sprintf("  comp data present: %d/%d obs are comprehends=1",
+                  sum(cdi_long$comprehends), nrow(cdi_long)))
+} else {
+  message("  no comprehends column; comp channel will be empty (N_comp=0)")
+}
 
 message(sprintf("  CDI: %d rows (admins: %d, items: %d)",
                 nrow(cdi_long),
@@ -104,10 +114,15 @@ normalize_item <- function(x) {
     sub("_+$", "", .)
 }
 
-prob_lookup <- long_ws %>%
-  distinct(item, prob) %>% filter(!is.na(prob), prob > 0) %>%
-  mutate(item_norm = normalize_item(item)) %>%
-  group_by(item_norm) %>% summarise(prob = max(prob), .groups = "drop")
+# Frequencies now come from the fresh CHILDES pull (Phase A); long_items
+# leaves prob=NA. Match parses the way prepare_longitudinal_data.R does.
+freq <- readRDS(file.path(PATHS$fits_dir, "english_word_freq.rds"))
+prob_lookup <- freq %>%
+  mutate(item_norm = normalize_item(w)) %>%
+  group_by(item_norm) %>%
+  summarise(count = sum(count), .groups = "drop") %>%
+  mutate(prob = count / sum(count)) %>%
+  select(item_norm, prob)
 
 class_lookup <- long_ws %>%
   distinct(item, lexical_category) %>%
@@ -189,6 +204,15 @@ stan_data <- c(
     log_p = log(word_info$prob),
     log_H = MODEL_CONSTANTS$log_H,
     a0    = round(median(admin_info$age)),  # dataset median admin age
+
+    # Comprehension channel (NEW; optional). The same (aa, jj) indices
+    # apply: each row of the production y has a parallel comprehends
+    # observation. log_irt_long_io_comp.stan reads N_comp / aa_comp /
+    # jj_comp / y_comp; log_irt_io.stan ignores them silently.
+    N_comp = if (has_comp) nrow(cdi_long) else 0L,
+    aa_comp = if (has_comp) cdi_long$aa else integer(0),
+    jj_comp = if (has_comp) cdi_long$jj else integer(0),
+    y_comp  = if (has_comp) cdi_long$comprehends else integer(0),
 
     # Input-observed side: LENA AWC per recording
     V = V,

@@ -4,9 +4,10 @@
 ##
 ## Schema in: wide format. 398 `Talk_<item>` columns whose values are
 ##   "Understands and Says" / "Understands" / NA.
-##   "Understands and Says" -> produces = 1; everything else -> 0.
+##   produces     = 1 iff raw == "Understands and Says"
+##   comprehends  = 1 iff raw in {"Understands", "Understands and Says"}
 ## 31 `Understand_<phrase>` columns and 60 `Gestures_<x>` columns are
-## ignored here -- we only model production.
+## ignored here -- single-word comprehension lives on Talk_<item>.
 ##
 ## subj alignment caveat: the source `subj` column uses bare integer
 ## strings ("1".."44") while the public Egan-Dailey `lena_data.csv`
@@ -214,10 +215,14 @@ d_long <- d_meta %>%
   inner_join(map_df %>% filter(!is.na(item_definition)) %>%
                select(short, item_definition, mapping_status = status),
              by = "short") %>%
-  mutate(produces = as.integer(!is.na(raw) & raw == "Understands and Says"),
+  mutate(produces    = as.integer(!is.na(raw) & raw == "Understands and Says"),
+         comprehends = as.integer(!is.na(raw) &
+                                  raw %in% c("Understands",
+                                              "Understands and Says")),
          form = "WG") %>%
   rename(item = item_definition) %>%
-  select(subject_id, age, form, item, produces, raw, short, mapping_status)
+  select(subject_id, age, form, item, produces, comprehends,
+         raw, short, mapping_status)
 
 cat(sprintf("Long-format rows: %d (%d admins x %d items)\n",
             nrow(d_long),
@@ -247,6 +252,7 @@ print(agg %>% group_by(age) %>%
                 p75 = quantile(n_produces, 0.75),
                 .groups = "drop"))
 
-write_csv(d_long %>% select(subject_id, age, form, item, produces),
+write_csv(d_long %>% select(subject_id, age, form, item,
+                            produces, comprehends),
           file.path(OUT_DIR, "cdi_items_long.csv"))
 cat(sprintf("\nWrote %s\n", file.path(OUT_DIR, "cdi_items_long.csv")))

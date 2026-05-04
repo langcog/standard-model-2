@@ -194,6 +194,17 @@ variant_hyperpriors <- function(name) {
     no_freq        = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001),
     no_freq_slopes = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
                           sigma_zeta_prior_sd = 1),
+    # Comprehension-channel variants. Used only by log_irt_long_io_comp.stan;
+    # fit_io.R selects that Stan file when the variant matches `comp_*`.
+    # The bundle already carries N_comp, aa_comp, jj_comp, y_comp; this
+    # override unlocks the gamma_0 / gamma_1 priors so the comp shift
+    # is freely estimated. Pair with whatever production-side variant
+    # you want (slopes, no_freq_slopes, etc.).
+    comp_slopes = list(sigma_zeta_prior_sd = 1,
+                       gamma_0_prior_sd = 2, gamma_1_prior_sd = 2),
+    comp_no_freq_slopes = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
+                               sigma_zeta_prior_sd = 1,
+                               gamma_0_prior_sd = 2, gamma_1_prior_sd = 2),
     # Legacy variants for re-loading old fits / explicit comparison
     fix_s         = list(s_prior_mean = 2, s_prior_sd = 0.001),
     both_fixed    = list(delta_prior_mean = 0, delta_prior_sd = 0.001,

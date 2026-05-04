@@ -53,10 +53,22 @@ cfg <- modifyList(DEFAULT_FIT_CONFIG, list(
 cat(sprintf("Stan config: chains=%d iter=%d warmup=%d adapt_delta=%.2f\n",
             cfg$chains, cfg$iter, cfg$warmup, cfg$adapt_delta))
 
+# Stan-file dispatch: comp_* variants need the comp-channel Stan file;
+# everything else uses the standard io file. The two are related by
+# the comp file being a strict superset; comp_* fits in the original
+# file would fail to find the gamma parameters, while the comp file
+# with a comp-free bundle (N_comp=0) reduces exactly to the standard
+# fit. Keeping them as two files makes the toggle obvious.
+stan_file <- if (grepl("comp", variant)) {
+  "model/stan/log_irt_long_io_comp.stan"
+} else {
+  "model/stan/log_irt_io.stan"
+}
+cat(sprintf("Stan model: %s\n", stan_file))
+
 fit <- fit_variant(stan_data, tag = out_tag,
                    cfg = cfg,
-                   model_path = file.path(PROJECT_ROOT,
-                                          "model/stan/log_irt_io.stan"))
+                   model_path = file.path(PROJECT_ROOT, stan_file))
 
 pars <- c("mu_r", "sigma_r", "sigma_alpha", "pi_alpha",
           "beta_react", "reactivity_multiplier", "sigma_within",

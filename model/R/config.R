@@ -74,7 +74,17 @@ DEFAULT_PRIORS <- list(
   # Center at ~0.5 logit/month (a typical log-linear trajectory crosses
   # ~14 logits over 24 months); silently ignored by other Stan files.
   beta_age_prior_mean   = 0.5,
-  beta_age_prior_sd     = 1
+  beta_age_prior_sd     = 1,
+  # Comp-vs-prod difficulty shift -- only used by log_irt_long_io_comp.stan.
+  # gamma_0 = constant logit-scale lead of comprehension over production;
+  # gamma_1 = how that lead changes with log-age. Defaults pinned tight
+  # at 0 so a fit that doesn't opt in via the `comp_*` variant family
+  # gets the same posterior as the comp-free model; opt in by setting
+  # gamma_*_prior_sd to a wider value (e.g., 2) in variant_hyperpriors.
+  gamma_0_prior_mean    = 0,
+  gamma_0_prior_sd      = 0.001,
+  gamma_1_prior_mean    = 0,
+  gamma_1_prior_sd      = 0.001
 )
 
 ## Defaults for fitting.
