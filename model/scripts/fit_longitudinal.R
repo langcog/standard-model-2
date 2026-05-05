@@ -52,6 +52,20 @@ stan_data <- modifyList(modifyList(base_data, DEFAULT_PRIORS), overrides)
 # collapses class hierarchy by overriding cc / C).
 stan_data <- variant_data_overrides(stan_data, variant)
 
+# Optional sigma_r override for sensitivity analysis. Set
+# STAN_SIGMA_R_OVERRIDE=<value> to refit at a different externally
+# pinned input-rate variance; tag suffix _sigmaR_<value> is appended.
+sigma_r_override <- Sys.getenv("STAN_SIGMA_R_OVERRIDE", unset = "")
+if (nzchar(sigma_r_override)) {
+  sr <- as.numeric(sigma_r_override)
+  if (!is.finite(sr) || sr <= 0) stop("Invalid STAN_SIGMA_R_OVERRIDE: ", sigma_r_override)
+  cat(sprintf("\nsigma_r override: bundle had %.4f; using %.4f\n",
+              stan_data$sigma_r, sr))
+  stan_data$sigma_r <- sr
+  out_tag <- sprintf("%s_sigmaR_%s", out_tag,
+                     sub("\\.", "p", sprintf("%.2f", sr)))
+}
+
 cat(sprintf("\n===== Fitting %s on %s =====\n", variant, dataset))
 cat("Hyperprior overrides:\n"); str(overrides)
 
