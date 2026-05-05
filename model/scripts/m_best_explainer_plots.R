@@ -75,15 +75,27 @@ cat(sprintf("Fit '%s': δ=%.2f σ_α=%.2f σ_ξ=%.2f σ_ζ=%.2f ρ=%.2f π_α=%.
             FIT_NAME, P$delta_med, P$sa_med, P$sxi_med, P$sz_med,
             P$rho_med, P$pia_med, P$a0))
 
-# Per-item ψ_j (M1 stand-in for vocab calibration)
-psi_csv <- file.path(OUT_DIR, "psi_freq_regression_per_word.csv")
-if (!file.exists(psi_csv) && grepl("norwegian", FIT_NAME)) {
-  warning("Norwegian ψ_j extract not on disk; using English ψ_j as proxy for vocab calibration.")
+# Per-item ψ_j on the M_best scale.
+# Preferred source: long_slopes_psi_to_mbest.csv, derived from the
+# fitted long_slopes posterior by ψ_M_best_j ≈ ψ_long_slopes_j − log p_j
+# (subtracting the log-frequency that long_slopes carried in the linear
+# predictor but M_best (no_freq) absorbs into ψ).
+# Fallback: M1 (time-only) ψ_j, which is on a different absolute scale —
+# loud warning if used.
+psi_mbest_csv <- file.path(OUT_DIR, "long_slopes_psi_to_mbest.csv")
+if (file.exists(psi_mbest_csv)) {
+  psi_df  <- read.csv(psi_mbest_csv, stringsAsFactors = FALSE)
+  psi_j   <- psi_df$psi_M_best_median
+  psi_src <- "M_best-equivalent (long_slopes - log_p)"
+} else {
+  warning("M_best psi not on disk; falling back to M1 psi (different scale).")
+  psi_df  <- read.csv(file.path(OUT_DIR, "psi_freq_regression_per_word.csv"),
+                      stringsAsFactors = FALSE)
+  psi_j   <- psi_df$psi_median
+  psi_src <- "M1 (DIFFERENT SCALE — fallback)"
 }
-psi_df <- read.csv(psi_csv, stringsAsFactors = FALSE)
-psi_j  <- psi_df$psi_median
-class_j <- psi_df$lexical_class
 N_ITEMS <- length(psi_j)
+cat(sprintf("psi_j source: %s (N=%d)\n", psi_src, N_ITEMS))
 
 # ---- Figure A: spaghetti trajectories on ability + vocab axes -------
 ##
@@ -107,19 +119,19 @@ zeta_kid <- effs[2, ]
 age_eff <- pmax(AGE_GRID - P$s_med, 0.01)
 log_age_rel <- log(age_eff / P$a0)
 
-theta_mat <- outer(rep(1, length(AGE_GRID)), xi_kid) +
-             outer(log_age_rel, 1 + P$delta_med + zeta_kid)
-# Subtract mu_r so y-axis is "ability above population log-rate intercept"
-theta_centered <- theta_mat - P$mu_r
+# Full theta (uncentered): theta_full = xi + (1+delta+zeta)*log_age_rel.
+# Centered version (theta - mu_r) for the ability panel.
+theta_full <- outer(rep(1, length(AGE_GRID)), xi_kid) +
+              outer(log_age_rel, 1 + P$delta_med + zeta_kid)
+theta_centered <- theta_full - P$mu_r
 
-# Vocab: for each (age, kid), sum sigmoid(theta - psi_j) across items.
-# Vectorize: at each age, vocab[i] = sum_j sigma(theta_mat[a, i] - psi_j)
+# Vocab: M_best linear predictor (no_freq variant) is
+#   eta_ij = theta_full + log_H - psi_M_best_j
+# Vocab(t) = sum_j sigmoid(eta_ij).
 vocab_mat <- matrix(NA_real_, nrow = length(AGE_GRID), ncol = N_KIDS_SHOW)
 for (a in seq_along(AGE_GRID)) {
-  # theta_mat[a, ] is length N_KIDS_SHOW; we want sum over items of sigmoid
-  # broadcast: outer(theta_mat[a, ], psi_j, FUN = "-") gives N_KIDS x N_ITEMS
-  diff <- outer(theta_mat[a, ], psi_j, FUN = "-")
-  vocab_mat[a, ] <- rowSums(plogis(diff))
+  eta <- outer(theta_full[a, ] + P$log_H, psi_j, FUN = "-")
+  vocab_mat[a, ] <- rowSums(plogis(eta))
 }
 
 # Population mean and percentiles per age
@@ -129,29 +141,47 @@ vocab_med <- pct_band(vocab_mat, 0.5)
 vocab_p25 <- pct_band(vocab_mat, 0.25); vocab_p75 <- pct_band(vocab_mat, 0.75)
 vocab_p05 <- pct_band(vocab_mat, 0.05); vocab_p95 <- pct_band(vocab_mat, 0.95)
 
-# Long-form for ggplot
+# Long-form for ggplot. Add log_age_rel column so we can plot the
+# ability panel against log_age (where M_best's super-linear scaling
+# manifests as straight lines with slope 1+delta+zeta).
 df_kid <- expand.grid(age = AGE_GRID, kid = seq_len(N_KIDS_SHOW)) |>
   mutate(theta = as.vector(theta_centered),
-         vocab = as.vector(vocab_mat))
+         vocab = as.vector(vocab_mat),
+         log_age_rel = rep(log_age_rel, times = N_KIDS_SHOW))
 
 df_pop <- tibble::tibble(age = AGE_GRID,
+                         log_age_rel = log_age_rel,
                          theta_med = theta_med,
                          vocab_med = vocab_med,
                          vocab_p25 = vocab_p25, vocab_p75 = vocab_p75,
                          vocab_p05 = vocab_p05, vocab_p95 = vocab_p95)
 
+# Secondary x-axis ticks: at the ages we care about, what is log_age_rel?
+age_ticks <- c(12, 16, 19, 22, 26, 30)
+age_tick_labels <- as.character(age_ticks)
+log_age_at_tick <- log(pmax(age_ticks - P$s_med, 0.01) / P$a0)
+
 p_theta <- ggplot() +
-  geom_line(data = df_kid, aes(age, theta, group = kid),
+  geom_line(data = df_kid, aes(log_age_rel, theta, group = kid),
             alpha = 0.10, colour = "grey25", linewidth = 0.4) +
-  geom_line(data = df_pop, aes(age, theta_med),
+  geom_line(data = df_pop, aes(log_age_rel, theta_med),
             colour = "firebrick", linewidth = 1.3) +
   geom_hline(yintercept = 0, colour = "grey75", linewidth = 0.3) +
-  labs(x = "Age (months)",
-       y = expression("Ability  " * theta[i*","*t] - mu[r] * "  (logits)"),
+  geom_vline(xintercept = 0, colour = "grey75", linewidth = 0.3,
+             linetype = "dashed") +
+  scale_x_continuous(
+    name = expression("log "*((t-s)/a[0])),
+    breaks = log_age_at_tick,
+    labels = sprintf("%.2f", log_age_at_tick),
+    sec.axis = sec_axis(~ ., name = "Age (months)",
+                        breaks = log_age_at_tick,
+                        labels = age_tick_labels)
+  ) +
+  labs(y = expression("Ability  " * theta[i*","*t] - mu[r] * "  (logits)"),
        title = "Per-child ability trajectories",
-       subtitle = sprintf("120 kids sampled from posterior population MVN; red = population median.\nM_best (%s): delta=%.2f, sigma_xi=%.2f, sigma_zeta=%.2f, rho(xi,zeta)=%.2f.",
-                          FIT_NAME, P$delta_med, P$sxi_med, P$sz_med, P$rho_med)) +
-  coord_cartesian(xlim = c(12, 30), ylim = c(-10, 10)) +
+       subtitle = sprintf("120 kids sampled from posterior population MVN; red = population median.\nOn log_age axis, slope = 1+delta+zeta_i; population mean slope = 1+%.2f = %.2f.",
+                          P$delta_med, 1 + P$delta_med)) +
+  coord_cartesian(ylim = c(-10, 10)) +
   theme_minimal(base_size = 11) +
   theme(plot.subtitle = element_text(size = 9, colour = "grey25"))
 
@@ -166,8 +196,8 @@ p_vocab <- ggplot() +
             colour = "navy", linewidth = 1.3) +
   labs(x = "Age (months)",
        y = sprintf("Predicted productive vocab (out of %d items)", N_ITEMS),
-       title = "Same kids, vocabulary scale",
-       subtitle = sprintf("Vocab = sum_j sigmoid(theta_it - psi_j) across the %d CDI items in the longitudinal sample.\nBlue ribbons: 25/75 and 5/95 percentiles across kids.", N_ITEMS)) +
+       title = "Same kids, vocabulary scale (super-linear in age)",
+       subtitle = sprintf("Vocab = sum_j sigmoid(theta_full + log_H - psi_j) across the %d CDI items.\nBlue ribbons: 25/75 and 5/95 percentiles across kids.", N_ITEMS)) +
   coord_cartesian(xlim = c(12, 30), ylim = c(0, N_ITEMS)) +
   theme_minimal(base_size = 11) +
   theme(plot.subtitle = element_text(size = 9, colour = "grey25"))
@@ -175,7 +205,7 @@ p_vocab <- ggplot() +
 composite <- p_theta + p_vocab + plot_layout(widths = c(1, 1)) +
   plot_annotation(
     title = sprintf("M_best (%s): per-child trajectory fan", FIT_NAME),
-    caption = "Item difficulties psi_j for vocab calibration: posterior medians from the M1 (time-only) fit, used here as a stand-in (M_best psi_j not separately extracted; absolute scale would shift slightly, ranking and spread match)."
+    caption = sprintf("psi_j source for vocab calibration: %s. Left panel x-axis is log((t-s)/a_0) so the M_best slope (1+delta+zeta_i) appears linear; right panel x-axis is age in months for direct vocab interpretation.", psi_src)
   ) & theme(plot.title = element_text(face = "bold"),
             plot.caption = element_text(size = 7.5, colour = "grey45"))
 

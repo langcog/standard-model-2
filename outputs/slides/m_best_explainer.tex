@@ -26,17 +26,18 @@
 \scriptsize
 \textbf{Reading.}
 \begin{itemize}\setlength\itemsep{0.25em}
-\item 120 kids drawn from posterior population MVN $(\xi_i, \zeta_i)$
-  of M\_best (\texttt{long\_no\_freq\_slopes}).
-\item Each kid has \emph{both} a baseline efficiency $\xi_i$ and a
-  growth-rate deviation $\zeta_i$. Kids fan out continuously; they
-  don't converge.
-\item \emph{Left}: ability $\theta_{it}-\mu_r$ on logit scale ---
-  direct model output.
-\item \emph{Right}: same kids, vocab from
-  $\sum_j \sigma(\theta_{it}-\psi_j)$ over 198 CDI items.
-\item Population-mean line: scaling exponent $1+\delta \approx 10.4$
-  on log-age.
+\item 120 kids drawn from posterior population MVN of M\_best
+  (\texttt{long\_no\_freq\_slopes}). Each kid has both a baseline
+  $\xi_i$ and a growth-rate deviation $\zeta_i$; kids fan out
+  continuously.
+\item \emph{Left}: $\theta_{it}-\mu_r$ on logit scale vs. $\log_{age}$ ---
+  trajectories visibly linear, slope $1+\delta+\zeta_i$, mean $\approx 10.4$.
+\item \emph{Right}: same kids on linear age, vocab
+  $\sum_j \sigma(\theta_{it}+\log H - \psi_j)$ over 198 CDI items;
+  median tracks Wordbank ($\sim$150 at 30~mo).
+\item \textbf{Super-linearity} is visible \emph{on the vocab axis};
+  on the logit axis it manifests as a steep slope ($\sim$10) on
+  $\log_{age}$.
 \end{itemize}
 
 \end{columns}
