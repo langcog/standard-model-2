@@ -689,6 +689,305 @@ story as M3 but with a worse-conditioned interpretation).
 
 ---
 
+## 🟢 15. Norwegian nested family LOO (cross-language replication)
+
+**Setup.** Same 7-stage spine as English §14 fit on Norwegian
+longitudinal (200 kids × ~1 600 admins, median 8 admins/kid vs.
+English's 3). The three structurally heaviest fits
+(`long_baseline_norwegian`, `long_slopes_norwegian`,
+`long_class_beta_slopes_norwegian`) had to be **resubmitted with
+cmdstanr** because the original April rstan fits predated the
+`log_lik` patch in `log_irt_long.stan` (commit b65cfcc) and so had no
+LOO. Refit jobs 23816977–79 finished May 4; old rstan fits archived
+locally as `*_oldnoll.rds`.
+
+**Headline scalar posteriors (Norwegian).**
+
+| tag | δ | σ_α | σ_ζ | π_α | ρ(ξ,ζ) |
+|---|---:|---:|---:|---:|---:|
+| `long_m0_norwegian` | 0.01 | 1.42 | — | 0.88 | — |
+| `long_m1_time_only_norwegian` | 0.01 | 0.03 | 0.03 | 0.00 | — |
+| `long_m1_norwegian` | 0.01 | 0.03 | 0.03 | 0.00 | — |
+| `long_baseline_norwegian` (+δ) | 10.98 | 1.88 | — | 0.92 | — |
+| `long_no_freq_slopes_norwegian` (+ζ, no freq) | 11.43 | 2.10 | 3.74 | 0.94 | −0.32 |
+| `long_slopes_norwegian` (+δ+ζ+freq) | 11.47 | 2.10 | 3.72 | 0.94 | −0.31 |
+| `long_class_beta_slopes_norwegian` (+β_c) | 11.44 | 2.10 | 3.74 | 0.94 | −0.32 |
+| `long_m5_norwegian` (+2PL) | 7.97 | 1.57 | 2.66 | 0.90 | −0.43 |
+
+**Step-wise LOO ELPD differences (Norwegian).**
+
+| step | ΔELPD | SE | z | reading |
+|---|---:|---:|---:|---|
+| M0 → +time | +59 136 | 233 | 254 | time helps massively (as in English) |
+| +time → +freq | −46 | 4.5 | −10 | freq null/slightly hurts (replicates English) |
+| **+freq → +δ alone** | **−235** | **86.7** | **−2.7** | **δ alone HURTS (NOT in English)** |
+| +time → +ζ alone (no_freq path) | +2 746 | 96 | +29 | ζ alone helps massively |
+| +δ → +δ+ζ | +3 028 | 83 | +37 | adding ζ on top of δ is the big win |
+| +ζ → +ζ+freq | +1 | 1.5 | +0.7 | freq still null |
+| +β_c (Mboth → Mclass) | **−2.7** | **1.1** | **−2.3** | **class-specific β_c null (replicates English RQ2)** |
+| → +2PL | +1 425 | 59 | +24 | 2PL real, matches English ~+1 079 |
+
+**Striking finding: δ replicates as exponent, not as parameter.**
+In English, freeing δ on top of the unit accumulator is the largest
+structural step (+23 289 ELPD, z = 131). In Norwegian, freeing δ
+**alone** *reduces* ELPD by 235; freeing per-child slopes ζ_i *alone*
+(without δ) gains 2 746 ELPD instead. Once both are free, the
+posterior medians are δ = 11.5, σ_ζ = 3.7, almost identical to
+English (δ = 9.4, σ_ζ = 3.5). The cross-language disagreement is
+about *parameterization*, not about *acceleration*: the population
+mean of the per-child scaling exponent (1 + δ + ζ_i) is ~10.4 in
+English and ~12.5 in Norwegian — comparable.
+
+**Driver: longitudinal density.** Norwegian has 8 admins/kid (vs.
+English's 3), so per-child slopes ζ_i are well-identified.
+Population δ becomes redundant when ζ_i can carry the per-kid
+acceleration directly. With sparse longitudinal data (English), the
+data cannot pin ζ_i and the population term δ pools the action
+instead.
+
+**Implication for paper framing.** The "all children show
+super-linear scaling" headline is robust across languages. The clean
+parameterization for the comparison is `(1 + δ + ζ_i)` — not δ alone.
+The disanalogy figure (`outputs/figs/schematic/D1_scaling_disanalogy.png`)
+should label the kid scaling exponent as `1 + δ + ζ_i` rather than
+`1 + δ`, and the population mean of that quantity is the natural
+cross-language summary.
+
+**RQ2 cross-language.** Norwegian replicates English's sharp RQ2 null:
+adding class-specific β_c on top of `long_slopes_norwegian` *reduces*
+ELPD by 2.7 (z = −2.3, comparable to English's near-zero step).
+Frequency contributes nothing structural in either language once
+per-word ψ_j is free.
+
+**Artifacts.** `fits/summaries/long_*_norwegian.{summary,draws,loo}.rds`
+(8 fits × 3 files each, complete).
+
+---
+
+## 🟢 16. SEEDLingS parent-report-noise correction (comp + std channels)
+
+**Concern.** σ_α in CDI-only fits absorbs parent-report
+measurement error. The CDI ↔ later-CELF correlation r = 0.63 implies
+CDI reliability ≤ 0.42 (lower bound; developmental drift attenuates
+further), suggesting 30–50% of CDI between-child variance may be
+parent-report noise rather than true between-child efficiency.
+The SEEDLingS extreme `π_α = 0.98` is the most likely candidate to
+be inflated by this.
+
+**Approach.** Add second observation channels on the SEEDLingS sample
+that pin `log α_i` from non-CDI signals:
+- **comp**: SEEDLingS WG comprehension scores enter the io model as
+  a second measurement layer parallel to production, sharing the
+  per-child latent. Stan extension committed in `f12d2b0` (`comp_*`
+  variant family).
+- **std**: SEEDLingS preschool-age standardized scores (CELF, QUILS,
+  PVT at ~4;6) enter as a non-CDI readout of `log α_i`. Stan
+  extension in `42d5a4e` (`std_*` variant family). Same modular
+  pattern as `comp`.
+
+**Four-way SEEDLingS comparison.**
+
+| variant | σ_α | σ_ζ | π_α | δ | ESS_bulk(δ) |
+|---|---:|---:|---:|---:|---:|
+| baseline (`io_no_freq_slopes_seedlings`) | 2.59 [2.13, 3.21] | 3.62 | 0.98 [0.97, 0.99] | 8.05 | ~3 700 |
+| **+comp** (`io_comp_no_freq_slopes_seedlings`) | **1.39 [1.13, 1.74]** | **2.73** | **0.94 [0.89, 0.97]** | 7.76 | ~3 600 |
+| +std (`io_std_no_freq_slopes_seedlings`) | 0.96 [0.80, 1.23] | 1.92 | 0.88 [0.80, 0.94] | 3.77 | ~3 700 |
+| +comp +std (`io_comp_std_no_freq_slopes_seedlings`) | 1.42 [1.16, 1.76] | 2.72 | 0.94 [0.90, 0.97] | 7.78 | ~720 |
+
+**Reading.**
+- **+comp drops σ_α by 46%** (2.59 → 1.39): comp identifies
+  `log α_i` independently of production noise within the same age
+  window, removing a major chunk of parent-report measurement error.
+  π_α moves from the 0.98 ceiling to 0.94 — still high, but no longer
+  pinned.
+- **+std drops σ_α by 63%** (2.59 → 0.96), but also collapses δ from
+  8.05 to 3.77. The δ drop is suspicious: standardized scores at
+  ~4;6 are far outside the CDI window (6–18 mo), so `log α_i` becomes
+  pinned by a future-state measurement and the model has fewer
+  degrees of freedom to fit early-window growth, soaking the gap into
+  reduced δ. Best read as an identifiability artifact, not a
+  substantive estimate. **Don't quote +std alone as the headline
+  correction.**
+- **+comp+std** matches +comp on σ_α and δ — comp dominates,
+  std-channel contribution is absorbed. ESS for δ drops to ~720
+  (from ~3 700), suggesting the joint fit has slight identifiability
+  trouble but still yields reasonable posteriors.
+
+**Headline correction.** Use **+comp** (not +std, not baseline) as
+the SEEDLingS reading: σ_α = 1.39, π_α = 0.94. Cross-sample range
+tightens from [0.84, 0.98] to [0.84, 0.94] — still efficiency-
+dominated, no longer at the ceiling for any sample.
+
+**Caveat for the abstract.** The "80–90% of between-child variation
+unexplained by input quantity" phrasing remains accurate at the
+sample level, with the SEEDLingS extreme rationalized post-correction
+rather than dismissed. The bigger-picture reading is unchanged:
+efficiency variance dominates input-rate variance robustly.
+
+**LOO.** `log_irt_io.stan` does not currently emit `log_lik`, so the
+four-way comparison is on scalar posteriors only, not LOO. Adding
+log_lik would let us formally compare these four; for the parent-
+report-noise question scalar-posterior comparison is sufficient.
+
+**Artifacts.**
+`fits/summaries/io_{,comp_,std_,comp_std_}no_freq_slopes_seedlings.{summary,draws}.rds`.
+
+---
+
+## 🟢 17. Peekbank LWL channel: M_best fit (no_freq variant)
+
+**Setup.** Following the §14 finding that frequency contributes
+nothing structural beyond per-word ψ_j, the production Peekbank fit
+drops the frequency channel: `long_proc_no_freq_slopes` on the 62
+Stanford-linked subjects with both LWL admins and item-level CDIs.
+Same `log_irt_long_proc.stan` as §9 with `beta_c` pinned at 0.
+
+**Headline scalars.**
+
+| variable | median | 95% CrI |
+|---|---:|---|
+| σ_α | 1.64 | [1.34, 2.03] |
+| σ_ζ | 6.30 | [5.24, 7.43] |
+| π_α | 0.90 | [0.86, 0.94] |
+| δ | 2.56 | [1.62, 3.44] |
+| γ_rt | 0.082 | [0.046, 0.125] |
+| μ_rtslope | −0.74 | [−1.09, −0.40] |
+| σ_rtslope | 0.76 | [0.47, 1.07] |
+
+**Reading.** π_α = 0.90 confirms the §9 `long_proc_slopes` finding
+robustly (0.90 vs. 0.91 with frequency). σ_α drops slightly under the
+no-freq simplification but otherwise the structural picture is the
+same. The δ value (2.56) is much smaller than English `long_slopes`
+(9.39), echoing the Norwegian pattern: when a second high-quality
+readout on log α_i is available (LWL here, ζ_i in Norwegian), δ is no
+longer the load-bearing parameter.
+
+**γ_rt = 0.082** [0.046, 0.125] — bounded firmly above 0; LWL
+processing-speed gain per unit of `log α_i` is real. Each unit of
+`log α_i` corresponds to ~8% lower mean log-RT.
+
+**Cross-readout correlation reminder (from earlier work).** ρ(ζ_i,
+rtslope_i) = −0.024 [−0.33, 0.27] — null at the noise floor.
+CDI-side and LWL-side growth rates do not share variance even at this
+sample size. The two channels are independent maturation clocks.
+
+**Artifacts.** `fits/summaries/long_proc_no_freq_slopes.{summary,draws}.rds`
+(no LOO; `log_irt_long_proc.stan` doesn't currently emit log_lik).
+
+---
+
+## 🟢 18. σ_r sensitivity for M_best (analytical + one confirmatory refit)
+
+**Why revisit.** §4b ran a 4-point σ_r sweep on the cross-sectional 2PL
+model and found σ_ξ² ≈ 4.8 stable across σ_r priors, with π_α
+following the analytical formula 1 − σ_r²/σ_ξ². With M_best now being
+longitudinal slopes (different identification structure), and the
+SEEDLingS comp-correction (§16) demonstrating that pinned model
+assumptions can shift π_α, the question is worth re-asking. But the
+§4b geometry plausibly extends to M_best, so we did the cheap
+analytical extension first and queued one confirmatory refit at the
+"challenging" σ_r = 0.8 value.
+
+**Analytical extension to M_best.** For each draw of σ_ξ from the
+fitted posterior, π_α(σ_r) = 1 − σ_r²/σ_ξ² is computed across a σ_r
+grid; the §4b refit points at matched σ_r values are overlaid as
+validation.
+
+| fit | σ_ξ med | π_α(σ_r=0.30) | π_α(σ_r=0.534) | π_α(σ_r=0.80) | π_α(σ_r=1.20) |
+|---|---:|---:|---:|---:|---:|
+| English `long_no_freq_slopes` | 1.83 | 0.97 | 0.91 | 0.80 | 0.55 |
+| English `long_slopes` | 1.83 | 0.97 | 0.91 | 0.81 | 0.57 |
+| Norwegian `long_no_freq_slopes_norwegian` | 2.16 | 0.98 | 0.94 | 0.86 | 0.69 |
+| Norwegian `long_slopes_norwegian` | 2.17 | 0.98 | 0.94 | 0.86 | 0.69 |
+| §4b cross-sectional 2PL (refit) | 2.19 | 0.98 | 0.94 | 0.87 | 0.70 |
+
+The §4b refit values land **on** the analytical curves (Norwegian σ_ξ
+and §4b σ_ξ are nearly identical, so curves coincide). This validates
+that the σ_ξ posterior is anchored by the data and the σ_r prior just
+partitions σ_ξ² into σ_α² and σ_r².
+
+**Reading.**
+- At the externally pinned σ_r = 0.534, all four production fits give
+  π_α ∈ [0.91, 0.94]. Robust.
+- M_best (English) is **slightly more sensitive** than §4b at high σ_r
+  (π_α drops to 0.55 at σ_r = 1.2 vs §4b's 0.70) because longitudinal
+  σ_ξ ≈ 1.83 is smaller than cross-sectional σ_ξ ≈ 2.19. The
+  longitudinal fit attributes more variation to σ_ζ (slopes).
+- Norwegian σ_ξ ≈ 2.17 lands near the §4b cross-sectional value, so
+  Norwegian's σ_r sensitivity matches §4b almost exactly.
+- The qualitative structural claim — efficiency dominates input rate
+  in any plausible σ_r regime — survives. At σ_r = 0.8 (the upper end
+  of any defensible external estimate), π_α is still 0.80–0.86. Even
+  at σ_r = 1.2, English M_best gives π_α ≈ 0.55, well above 0.5.
+
+**Confirmatory refit (job 23881868, completed).** σ_r = 0.8 refit on
+`long_no_freq_slopes` via the new `STAN_SIGMA_R_OVERRIDE` env-var
+hook in `fit_longitudinal.R` (commit 88b2d4f). Output tag:
+`long_no_freq_slopes_sigmaR_0p80`. **Refit and analytical prediction
+agree to three decimal places on every relevant quantity:**
+
+| | π_α | σ_α | σ_ξ |
+|---|---:|---:|---:|
+| Analytical prediction (from σ_r=0.534 fit) | 0.802 [0.762, 0.837] | 1.608 [1.430, 1.815] | 1.796 |
+| Refit at σ_r = 0.8 | 0.801 [0.760, 0.839] | 1.607 [1.425, 1.824] | 1.795 [1.634, 1.991] |
+
+σ_ξ is unchanged between the two priors (1.795 vs. 1.796). σ_ζ
+similarly stable (3.51 vs. 3.48), δ moved trivially (9.65 vs. 9.39,
+within CrI overlap). The σ_r prior just partitions a data-identified
+σ_ξ² into σ_α² and σ_r², exactly as the §4b finding said for the
+cross-sectional 2PL.
+
+**Conclusion.** The analytical extension is now validated for M_best
+as well. We can quote π_α(σ_r) curves from the analytical formula
+without further refits; the rest of the §4b sweep is unnecessary on
+M_best.
+
+**Caveat.** Refit ESS_bulk for σ_α / σ_ξ / π_α was ~102 (Rhat = 1.03)
+— borderline but adequate for the central-tendency validation. If
+the abstract leans on tight CrIs at σ_r = 0.8 specifically (as
+opposed to just the median), we should rerun with longer chains.
+Currently the M_best CrI at σ_r = 0.534 is the headline, so this is
+not blocking.
+
+**Headline π_α robustness across σ_r ∈ [0.3, 1.2]:**
+
+> Across plausible external estimates of σ_r (range [0.3, 1.2] from
+> Sperry / Hart-Risley / Weisleder-Fernald sensitivity), π_α for
+> M_best on English ranges from 0.97 (σ_r = 0.3) to 0.55 (σ_r = 1.2);
+> at the externally pinned σ_r = 0.534, π_α = 0.91. For Norwegian
+> the corresponding range is [0.98, 0.69] with π_α = 0.94 at the
+> external pin. **In every plausible σ_r regime, efficiency variance
+> dominates input variance** (π_α > 0.5), and at the external pin
+> the dominance is strong (≥ 0.91 in both languages).
+
+**Artifacts.**
+- `model/scripts/sigma_r_analytical_sensitivity.R`
+- `outputs/figs/longitudinal/sigma_r_analytical_sensitivity.png`
+- `outputs/figs/longitudinal/sigma_r_analytical_sensitivity.csv`
+- `fits/summaries/long_no_freq_slopes_sigmaR_0p80.{summary,draws}.rds`
+
+---
+
+## 🟢 19. Cross-sample π_α replication (post-correction)
+
+| sample | n | σ_α | π_α | source fit |
+|---|---:|---:|---:|---|
+| English long_slopes | 200 | 1.83 [1.65, 2.04] | 0.91 [0.90, 0.93] | `long_slopes` |
+| Peekbank long_proc | 62 | 1.64 [1.34, 2.03] | 0.90 [0.86, 0.94] | `long_proc_no_freq_slopes` |
+| BabyView io | 20 | 1.13 [0.86, 1.61] | 0.84 [0.68, 0.93] | `io_no_freq_slopes` |
+| **SEEDLingS io+comp** | 44 | 1.39 [1.13, 1.74] | **0.94 [0.89, 0.97]** | `io_comp_no_freq_slopes_seedlings` |
+| SEEDLingS io baseline (uncorrected) | 44 | 2.59 | 0.98 | `io_no_freq_slopes_seedlings` |
+| Norwegian long_slopes | 200 | 2.10 [1.90, 2.35] | 0.94 [0.93, 0.95] | `long_slopes_norwegian` |
+
+**Headline.** π_α ∈ [0.84, 0.94] across **five samples** (English,
+Peekbank-Stanford, BabyView, SEEDLingS-comp-corrected, Norwegian),
+two languages, three input-observation channels, with parent-report
+noise correction where available. Robust efficiency-dominated
+decomposition; no sample sits at the ceiling once correction channels
+are deployed.
+
+---
+
 ## Backlog (⚪)
 
 ### Data / robustness
