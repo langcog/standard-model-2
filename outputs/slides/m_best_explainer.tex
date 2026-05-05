@@ -1,0 +1,120 @@
+% M_best explainer: 3 frames to insert into standard_model_overview.tex.
+%
+% Use either:
+%   (a) \input{m_best_explainer.tex} after the lean-baseline-results frame
+%   (b) Copy these three frames directly into the deck.
+%
+% Required figures (already produced by
+% model/scripts/m_best_explainer_plots.R):
+%   - longitudinal/m_best_spaghetti.png
+%   - longitudinal/m_best_variance_decomp.png
+%
+% The graphicspath in the parent deck already includes
+% ../../outputs/figs/longitudinal/, so the \includegraphics calls below
+% will resolve those filenames without paths.
+
+% =====================================================================
+\begin{frame}{M\_best: per-child trajectory fan}
+
+\begin{columns}[T, onlytextwidth]
+
+\column{0.66\textwidth}
+\centering
+\includegraphics[width=\linewidth]{m_best_spaghetti.png}
+
+\column{0.34\textwidth}
+\scriptsize
+\textbf{Reading.}
+\begin{itemize}\setlength\itemsep{0.25em}
+\item 120 kids drawn from posterior population MVN $(\xi_i, \zeta_i)$
+  of M\_best (\texttt{long\_no\_freq\_slopes}).
+\item Each kid has \emph{both} a baseline efficiency $\xi_i$ and a
+  growth-rate deviation $\zeta_i$. Kids fan out continuously; they
+  don't converge.
+\item \emph{Left}: ability $\theta_{it}-\mu_r$ on logit scale ---
+  direct model output.
+\item \emph{Right}: same kids, vocab from
+  $\sum_j \sigma(\theta_{it}-\psi_j)$ over 198 CDI items.
+\item Population-mean line: scaling exponent $1+\delta \approx 10.4$
+  on log-age.
+\end{itemize}
+
+\end{columns}
+
+\end{frame}
+
+% =====================================================================
+\begin{frame}{M\_best: parameter posteriors}
+
+\centering
+\scriptsize
+\renewcommand{\arraystretch}{1.20}
+\begin{tabular}{@{}llp{1.7cm}p{6.7cm}@{}}
+\toprule
+\textbf{Param} & \textbf{Posterior} & \textbf{Units} & \textbf{What it does} \\
+\midrule
+$\mu_r$           & 7.34 \,(pinned)            & log tok/hr      & Geometric mean input rate ($\sim 1\,500$ tok/hr). \\
+$\sigma_r$        & 0.534 \,(pinned)           & log scale       & Between-child input variation \,(Sperry/HR/WF). \\
+$\sigma_\alpha$   & 1.71 \,[1.55, 1.91]        & logits          & Between-child efficiency variation. \\
+$\sigma_\xi$      & 1.80 \,[1.64, 1.98]        & logits          & Total intercept variance: $\sigma_\xi^2 = \sigma_\alpha^2 + \sigma_r^2$. \\
+$\boldsymbol{\pi_\alpha}$ & \textbf{0.91 \,[0.89, 0.93]} & proportion & \textbf{Share of intercept variance from efficiency.} \\
+$\delta$          & 9.35 \,[9.21, 9.51]        & dimensionless   & Population age-acceleration: ability $\propto T^{1+\delta}$. \\
+$\sigma_\zeta$    & 3.47 \,[3.14, 3.84]        & logits/log\_age & Between-child variation in growth rate. \\
+$\rho(\xi,\zeta)$ & $+0.35$ \,$[+0.22, +0.47]$ & correlation     & Higher-baseline kids also have steeper growth. \\
+$s$               & 0.53 \,(pinned $\sim 0$)   & months          & Global accumulation start age. \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.6em}
+
+\scriptsize
+\textbf{Three load-bearing reads.}
+\begin{itemize}\setlength\itemsep{0.15em}
+\item $\pi_\alpha = 0.91$: efficiency dominates input; $\sim$9\% of
+  intercept variance is CDS quantity.
+\item $\delta \approx 9.4$: vocabulary scales as $T^{10}$ on cumulative
+  tokens. McMurray's pure unit accumulator is $\delta = 0$.
+\item $\sigma_\zeta > \sigma_\alpha$: kids vary more in
+  \emph{growth rate} than in \emph{baseline quality}.
+\end{itemize}
+
+\end{frame}
+
+% =====================================================================
+\begin{frame}{M\_best: where between-child variance comes from, by age}
+
+\begin{columns}[T, onlytextwidth]
+
+\column{0.62\textwidth}
+\centering
+\includegraphics[width=\linewidth]{m_best_variance_decomp.png}
+
+\column{0.38\textwidth}
+\scriptsize
+\textbf{Decomposition.}
+\begin{align*}
+\mathrm{Var}_i(\theta_{it})
+\;=\;& \sigma_r^2 + \sigma_\alpha^2 \\
+   & + \sigma_\zeta^2 \log_{age}^2 \\
+   & + 2\rho\,\sigma_\xi\,\sigma_\zeta\,\log_{age}
+\end{align*}
+\vspace{-0.4em}
+$\log_{age} = \log\!\big(\tfrac{t-s}{a_0}\big)$.
+
+\vspace{0.6em}
+
+\textbf{Reads.}
+\begin{itemize}\setlength\itemsep{0.2em}
+\item At $a_0=19$\,mo, $\log_{age}=0$: only input + efficiency
+  contribute. $\pi_\alpha$ exact here.
+\item Off-pivot: growth-rate variance grows quadratically; by 30\,mo
+  it dominates intercept components.
+\item Cross-term sign tracks $\log_{age}$: negative younger, positive
+  older.
+\item $\pi_\alpha$ is an \emph{intercept-share}, not a total-variance
+  share --- exact at $a_0$, qualified elsewhere.
+\end{itemize}
+
+\end{columns}
+
+\end{frame}
