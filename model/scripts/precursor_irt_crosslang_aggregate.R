@@ -94,6 +94,39 @@ ggsave(file.path(OUT_DIR, "precursor_crosslang_panel.png"),
 cat(sprintf("Wrote: %s\n",
             file.path(OUT_DIR, "precursor_crosslang_panel.png")))
 
+# ---- Overlay plot: all languages on one panel ----------------------
+# Better visual when N languages > ~10 (facets get tiny).
+# Light grey lines per language; bold black = cross-language mean by age bin.
+mean_by_age <- plot_df |>
+  group_by(age_int) |>
+  summarise(mean_sd = mean(sd_theta, na.rm = TRUE),
+            n_lang = dplyr::n(),
+            .groups = "drop") |>
+  filter(n_lang >= 3)
+
+p_overlay <- ggplot(plot_df, aes(age_int, sd_theta, group = language)) +
+  geom_line(linewidth = 0.4, colour = "grey55", alpha = 0.55) +
+  geom_line(data = mean_by_age, aes(age_int, mean_sd),
+            inherit.aes = FALSE,
+            colour = "firebrick", linewidth = 1.6) +
+  geom_point(data = mean_by_age, aes(age_int, mean_sd),
+             inherit.aes = FALSE,
+             colour = "firebrick", size = 2.4) +
+  coord_cartesian(ylim = c(0, NA)) +
+  labs(x = "Age (months)",
+       y = expression("Within-age SD of " * theta[admin] * " (logits)"),
+       title = sprintf("Cross-language replication (N = %d languages)",
+                       length(unique(plot_df$language))),
+       subtitle = "Each grey line = one language; red = cross-language mean.\nWithin-age variability in productive vocabulary is a universal pattern, growing with age.") +
+  theme_minimal(base_size = 12) +
+  theme(plot.title = element_text(face = "bold"),
+        plot.subtitle = element_text(size = 10, colour = "grey25"))
+
+ggsave(file.path(OUT_DIR, "precursor_crosslang_overlay.png"),
+       p_overlay, width = 10, height = 6, dpi = 150)
+cat(sprintf("Wrote: %s\n",
+            file.path(OUT_DIR, "precursor_crosslang_overlay.png")))
+
 # Summary scatter
 p_summary <- ggplot(summary_df,
                     aes(pop_slope, months_per_sd_within, label = language)) +
