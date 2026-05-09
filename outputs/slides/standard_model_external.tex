@@ -736,21 +736,21 @@ for fixed-architecture LLMs).
 
 \begin{columns}[T, onlytextwidth]
 \column{0.5\textwidth}
-\centering\textbf{\color{accent} Sources of variability}\\[0.5em]
-\begin{itemize}\setlength\itemsep{0.4em}
-\item Interactional input quality (joint attention, contingent talk)
-\item Genetic / heritable variation
-\item Environmental richness not captured by token quantity
-\item Processing-side individual differences (working memory, attention)
-\end{itemize}
-
-\column{0.5\textwidth}
 \centering\textbf{\color{accent} Sources of acceleration}\\[0.5em]
 \begin{itemize}\setlength\itemsep{0.4em}
 \item Growing processing efficiency with maturation
 \item Learning-to-learn (mutual exclusivity, shape bias, syntactic bootstrapping)
 \item Domain-general changes in attention, memory, perception
 \item Cross-word leverage / vocabulary-mediated bootstrapping
+\end{itemize}
+
+\column{0.5\textwidth}
+\centering\textbf{\color{accent} Sources of variability}\\[0.5em]
+\begin{itemize}\setlength\itemsep{0.4em}
+\item Interactional input quality (joint attention, contingent talk)
+\item Genetic / heritable variation
+\item Environmental richness not captured by token quantity
+\item Processing-side individual differences (working memory, attention)
 \end{itemize}
 
 \end{columns}
@@ -772,9 +772,9 @@ growth rate.}
   measurement --- there is a true zero, and word counts are
   interpretable in word-count units.
 \item Two robust signatures across $\sim$30 languages and 5 modeling
-  samples: \textbf{variability} ($\pi_\alpha \approx 0.91$, growing
-  with age) and \textbf{acceleration} ($1+\delta+\zeta_i \sim 10$,
-  varying widely across kids).
+  samples: \textbf{acceleration} ($\kappa_i \sim 10$, varying widely
+  across kids) and \textbf{variability} ($\pi_\alpha \approx 0.91$,
+  growing with age).
 \item Both signatures violate a pure-accumulator null. Posited
   ``quality'' alternatives \emph{relabel} acceleration rather than
   escape it.

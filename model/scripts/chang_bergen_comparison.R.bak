@@ -169,7 +169,7 @@ p <- ggplot(all_data, aes(slope_natural, fill = label, colour = label)) +
         plot.subtitle = element_text(size = 9, colour = "grey25"))
 
 ggsave(file.path(OUT_DIR, "chang_bergen_slope_comparison.png"), p,
-       width = 9, height = 4.5, dpi = 200)
+       width = 10, height = 5.8, dpi = 150)
 cat(sprintf("\nWrote: %s\n",
             file.path(OUT_DIR, "chang_bergen_slope_comparison.png")))
 

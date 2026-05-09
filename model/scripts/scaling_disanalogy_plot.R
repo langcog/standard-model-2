@@ -362,9 +362,9 @@ make_scaling_disanalogy_plot <- function(
   n_kids_per_draw = 30,
   n_draws_use     = 60,
   age_grid        = seq(12, 30, by = 0.5),
-  width           = 13,
-  height          = 6.5,
-  dpi             = 150
+  width           = 10,
+  height          = 5,
+  dpi             = 200
 ) {
   P <- get_kid_scaling_params(fit_name)
   kid_traj <- simulate_kid_trajectories(P,
