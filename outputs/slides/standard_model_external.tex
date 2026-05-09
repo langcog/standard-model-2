@@ -138,7 +138,7 @@ red is the cross-language mean.
 \small
 \textbf{Pure accumulator.}
 Each child accumulates word-evidence at per-child input rate $r_i$;
-word $j$ is acquired when threshold $\psi_j$ is crossed.
+word $j$ is acquired when difficulty $\delta_j$ is crossed.
 
 \vspace{0.4em}
 \textbf{Scaling exponent $\kappa_i$:} ability scales as (tokens)$^{\kappa_i}$.
@@ -161,7 +161,7 @@ posterior (\emph{is $\kappa$ above 1, and does it vary?}).
 \vspace{0.3em}
 \scriptsize\color{black!55}\textit{Bucket-fill metaphor: each child
 hears tokens at rate $r_i \cdot p_j$; word $j$ is acquired when its
-bucket fills past threshold $\psi_j$ (Kachergis et al.\ 2021).}
+bucket fills past difficulty $\delta_j$ (Kachergis et al.\ 2021).}
 \end{columns}
 
 \end{frame}
@@ -196,44 +196,41 @@ these models cannot produce.
 \end{frame}
 
 % =====================================================================
-\begin{frame}{Linear predictor}{Item-response theory + accumulator dynamics}
+\begin{frame}{The model: a progressive build}{Rasch IRT + accumulator dynamics, in three steps}
 
-\centering
-$P(\text{produces}_{ijt} = 1) = \sigma\!\big( \eta_{ijt} \big)$
+\footnotesize
+Kid $i$, word $j$: \;\; $P(\text{produces}_{ij}) = \sigma(\eta_{ij})$, with
+$\eta_{ij} = \theta_i - \delta_j$ \;\; (ability $-$ difficulty).
 
-\vspace{0.4em}
+\vspace{0.3em}
 
-\Large
-$\eta_{ijt} = \underbrace{\xi_i}_{\text{child}}
-            + \underbrace{\kappa_i}_{\text{scaling exponent}}\!\!\log\!\tfrac{t}{a_0}
-            \;-\; \underbrace{\psi_j}_{\text{word}}$
+\textbf{Step 1 -- Pure accumulator.}\;
+$\theta_i = \log r_i + \log t \;\;\Longleftrightarrow\;\; \exp(\theta_i) = r_i \cdot t$
 
-\vspace{0.8em}
-\normalsize
+\emph{Ability = rate $\times$ time. Variation between kids comes only from $r_i$.}
 
-\begin{columns}[T, onlytextwidth]
-\column{0.5\textwidth}
-\textbf{Child intercept} $\xi_i = \log r_i + \log\alpha_i$.
-\begin{itemize}\setlength\itemsep{0.2em}
-\item $\log r_i$: input rate, externally pinned via Sperry / HR / WF.
-\item $\log\alpha_i$: efficiency multiplier (free).
-\end{itemize}
-\textbf{Scaling exponent} $\kappa_i \sim \mathcal{N}(\kappa_{\text{pop}}, \sigma_\kappa^2)$:
-ability scales as (tokens)$^{\kappa_i}$. McMurray's pure accumulator
-sits at $\kappa_i = 1$ for every child.
+\vspace{0.3em}
 
-\column{0.5\textwidth}
-\textbf{Word threshold} $\psi_j$: log-tokens needed to acquire word
-$j$, hierarchical by lexical class.
+\textbf{Step 2 -- + per-child efficiency $\alpha_i$.}\;
+$\theta_i = \log r_i + \log \alpha_i + \log t \;\;\Longleftrightarrow\;\; \exp(\theta_i) = \alpha_i \cdot r_i \cdot t$
 
-\vspace{0.5em}
-\textbf{Headline derived quantities:}
-\begin{itemize}\setlength\itemsep{0.2em}
-\item $\pi_\alpha = \sigma_\alpha^2 / (\sigma_\alpha^2 + \sigma_r^2)$: efficiency-share of intercept variance.
-\item $\kappa_{\text{pop}}, \sigma_\kappa$: population scaling and between-child variation in scaling.
-\end{itemize}
+\emph{Each child has a multiplicative efficiency over and above input rate.}
 
-\end{columns}
+\vspace{0.3em}
+
+\textbf{Step 3 -- + per-child scaling exponent $\kappa_i$.}\;
+$\theta_i = \log r_i + \log \alpha_i + \kappa_i \log t \;\;\Longleftrightarrow\;\; \exp(\theta_i) = \alpha_i \cdot r_i \cdot t^{\kappa_i}$
+
+\emph{Children also differ in how steeply ability scales with cumulative input.}
+
+\vspace{0.6em}
+
+\textbf{Two diagnostic questions:}\quad
+$\pi_\alpha = \dfrac{\sigma_\alpha^2}{\sigma_\alpha^2 + \sigma_r^2} > 0.5\,$? \;\;
+(efficiency-share of variance)
+\quad
+$\kappa_i > 1\,$? \;\;
+(super-linear scaling)
 
 \end{frame}
 
