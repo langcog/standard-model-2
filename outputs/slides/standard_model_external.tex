@@ -165,70 +165,29 @@ bucket fills past difficulty $\delta_j$ (Kachergis et al.\ 2021).}
 \end{frame}
 
 % =====================================================================
-\begin{frame}{Prior accumulator models: what each predicts}{Mechanisms by which acceleration ($\kappa_{\text{pop}} > 1$) and variability could arise}
+\begin{frame}{Prior accumulator models: structural lineage}{We'll translate each into our notation later, after the model build}
 
 \small
-\begin{description}\setlength\itemsep{0.4em}
+\begin{description}\setlength\itemsep{0.5em}
 \item[McMurray (2007).]
-  Each word $w$ has an acquisition threshold $\tau_w$, drawn from a
-  population distribution $g(\tau)$. Vocabulary at age $t$ is the
-  CDF $G(t)$. \textbf{Acceleration} requires $g'(\tau) > 0$
-  (i.e., the threshold density is rising as $\tau$ increases over
-  the relevant range) --- otherwise growth is sub-linear in age.
-  No per-child variation.
-
+  Pure accumulator. Each word $w$ has acquisition threshold $\tau_w$
+  from population distribution $g(\tau)$. Acceleration requires $g'(\tau) > 0$.
 \item[Mitchell \& McMurray (2009).]
-  Adds a leverage feedback: $a(t) = t + c \cdot L(t)$. They prove
-  this can shift growth earlier or later but \emph{cannot create}
-  acceleration not already present in $g(\tau)$.
-
+  McMurray $+$ leverage feedback $a(t) = t + cL(t)$. \emph{Shifts}
+  growth without creating acceleration.
 \item[Hidaka (2013).]
-  Closed-form AoA distributions for cumulative
-  ($N$-accumulator, AoA $\sim$ Gamma) and rate-change
-  (1-accumulator at rate $\delta \cdot t^{D}$, AoA $\sim$ Weibull)
-  processes. \textbf{$D$ is the rate-change exponent}: ability
-  grows as $t^{D+1}$, so $D > 0$ produces acceleration.
-  Population-averaged; no per-child structure.
-
+  Closed-form AoA distributions: cumulative (Gamma), rate-change
+  (Weibull, exponent $D$ on time), or both.
 \item[Mollica \& Piantadosi (2017).]
   Per-word Gamma waiting time: AoA $\sim \Gamma(k_w, \lambda_w)$.
-  Acceleration is embedded in per-word rate $\lambda_w$ (same
-  population for all kids).
-
 \item[Kachergis et al.\ (2021).]
   1-PL Rasch IRT with per-child $\theta_i$ and linear age covariate.
-  \textbf{First model with per-child intercept variation} ($\theta_i$
-  free), but no per-child acceleration variation.
 \end{description}
 
-\end{frame}
-
-% =====================================================================
-\begin{frame}{Where prior models sit in the parameter space}{None has both per-child efficiency $\sigma_\alpha$ and per-child slope $\sigma_\kappa$ free}
-
-\centering
-\scriptsize
-\renewcommand{\arraystretch}{1.30}
-\begin{tabular}{@{}lp{2.0cm}p{2.0cm}p{4.5cm}@{}}
-\toprule
-\textbf{Model} & \textbf{per-child $\sigma_\alpha$} & \textbf{per-child $\sigma_\kappa$} & \textbf{$\kappa_{\text{pop}} > 1$ via} \\
-\midrule
-McMurray (2007) pure accumulator        & --        & --        & only via $g'(\tau)$ \\
-Mitchell \& McMurray (2009) + leverage  & --        & --        & shifts but cannot create \\
-Hidaka (2013) closed-form AoA           & --        & --        & rate-change exponent $D$ \\
-Mollica \& Piantadosi (2017) Gamma      & --        & --        & embedded in per-word $\lambda_w$ \\
-Kachergis et al.\ (2021) 1-PL Rasch     & $\theta_i$ free   & --   & linear age covariate \\
-\midrule
-\textbf{Best-fitting model (this work)} & \textbf{free}     & \textbf{free}     & \textbf{free} \\
-\bottomrule
-\end{tabular}
-
-\vspace{1.0em}
-\small
-\textbf{Common gap.} No prior accumulator model has both $\sigma_\alpha$
-\emph{and} $\sigma_\kappa$ free. The two signatures we measure ---
-acceleration and variability --- are what these models cannot
-\emph{jointly} produce.
+\vspace{0.5em}
+\small\color{black!55}\textit{Each uses different notation. After we
+introduce our model, we'll re-express each in our coordinates and
+compare structurally.}
 
 \end{frame}
 
@@ -411,6 +370,208 @@ Children also differ in how steeply ability scales with cumulative
 input. \textbf{Diagnostic question:} $\kappa_i > 1\,$? --- i.e., is
 ability super-linear in cumulative tokens, beyond what a unit
 accumulator predicts?
+
+\end{frame}
+
+% =====================================================================
+% PRIOR MODELS IN UNIFIED NOTATION
+% =====================================================================
+\begin{frame}{Prior models in our notation}{Each prior accumulator pins specific parameters; ours frees all four}
+
+\centering
+$\eta_{ij}(t) =
+\underbrace{\log r_i}_{\text{input rate}} +
+\underbrace{\log\alpha_i}_{\text{efficiency}} +
+\underbrace{\kappa_i \log t}_{\text{scaling}} -
+\underbrace{\delta_j}_{\text{word difficulty}}$
+
+\vspace{1.0em}
+
+\small
+For each prior model: which of these four parameters are free, which
+are pinned, and at what values? Walking through five models in the
+next four slides.
+
+\vspace{0.5em}
+
+\textbf{The key distinction we'll see:} the prior literature
+progressively frees parameters --- McMurray pins everything; Hidaka
+frees $\kappa_{\text{pop}}$; Kachergis frees $\sigma_\alpha$. None
+frees $\sigma_\kappa$ (per-child slope variance). That's what's
+structurally new in this work.
+
+\end{frame}
+
+% =====================================================================
+\begin{frame}{McMurray (2007) in our notation}{The pure accumulator: all four parameters pinned at the unit-rate boundary}
+
+\small
+\textbf{Original.} Each word $w$ has threshold $\tau_w \sim g(\tau)$;
+deterministic step at $t \ge \tau_w$. Vocabulary $L(t) = G(t)$ (CDF of $g$).
+Acceleration requires $g'(\tau) > 0$ over the productive window.
+
+\vspace{0.6em}
+\centering
+\textbf{In our notation:}
+\[
+\eta_{ij}(t) \;=\; \log t - \log\tau_j \;=\; \kappa \log t - \delta_j
+\quad\text{with}\quad \kappa \equiv 1,\quad \delta_j = \log\tau_j.
+\]
+
+\vspace{0.4em}
+\renewcommand{\arraystretch}{1.20}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Parameter} & \textbf{Setting in McMurray} \\
+\midrule
+$\log r_i$         & $\equiv 0$ \,(no per-child rate variation) \\
+$\log\alpha_i$     & $\equiv 0$ \,(no efficiency variation) \\
+$\boldsymbol{\kappa_i}$ & $\boldsymbol{\equiv 1}$ \,(unit accumulator) \\
+$\delta_j$         & free, drawn from $g$ \\
+\bottomrule
+\end{tabular}
+
+\end{frame}
+
+% =====================================================================
+\begin{frame}{Hidaka (2013) in our notation}{Rate-change form: $D$ is exactly $\kappa - 1$}
+
+\small
+\textbf{Original.} Three families: cumulative ($N$-accumulator at constant rate,
+AoA $\sim \Gamma$), rate-change (1-accumulator at rate $\delta\cdot t^D$,
+AoA $\sim$ Weibull), and both. \textbf{Rate-change}: ability $\propto t^{D+1}$;
+$D > 0$ produces super-linear scaling.
+
+\vspace{0.6em}
+\centering
+\textbf{In our notation (rate-change form):}
+\[
+\eta_{ij}(t) \;=\; (D+1) \log t - \delta_j
+\quad\text{with}\quad \kappa_i \equiv D+1.
+\]
+
+\vspace{0.4em}
+\renewcommand{\arraystretch}{1.20}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Parameter} & \textbf{Setting in Hidaka rate-change} \\
+\midrule
+$\log r_i$         & $\equiv \log\delta_{\text{const}}$ \,(shared population rate) \\
+$\log\alpha_i$     & $\equiv 0$ \,(no efficiency variation) \\
+$\boldsymbol{\kappa_i}$ & $\boldsymbol{\equiv D+1}$ \,(shared, no per-child variation) \\
+$\delta_j$         & free \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.6em}
+\textbf{Hidaka's $D = \kappa_{\text{pop}} - 1$ in our notation.}
+His $D > 0$ is our $\kappa_{\text{pop}} > 1$.
+
+\end{frame}
+
+% =====================================================================
+\begin{frame}{Mollica \& Piantadosi (2017) in our notation}{Per-word Gamma waiting time, no per-child structure}
+
+\small
+\textbf{Original.} Per-word: $k_w$ effective learning instances arrive as
+Poisson at rate $\lambda_w$; word acquired after $k_w$ events.
+$\mathrm{AoA}_w \sim \Gamma(k_w, \lambda_w)$. For large $k_w$, Gamma CDF
+approximates Gaussian (mean $k_w/\lambda_w$) and then a $\sim$1.7-scale
+logistic.
+
+\vspace{0.6em}
+\centering
+\textbf{In our notation:}
+\[
+\eta_{ij}(t) \;=\; \log t - \delta_j
+\quad\text{with}\quad \kappa_i \equiv 1,\ \delta_j \approx \log(k_j/\lambda_j).
+\]
+
+\vspace{0.4em}
+\renewcommand{\arraystretch}{1.20}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Parameter} & \textbf{Setting in Mollica \& Piantadosi} \\
+\midrule
+$\log r_i$         & $\equiv \log \lambda$ \,(shared population rate) \\
+$\log\alpha_i$     & $\equiv 0$ \,(no per-child variation) \\
+$\boldsymbol{\kappa_i}$ & $\boldsymbol{\equiv 1}$ \,(unit-rate accumulator) \\
+$\delta_j$         & $\approx \log(k_j/\lambda_j)$, free per-word \\
+\bottomrule
+\end{tabular}
+
+\end{frame}
+
+% =====================================================================
+\begin{frame}{Kachergis et al.\ (2021) in our notation}{First prior model to free $\sigma_\alpha$; $\sigma_\kappa$ still pinned}
+
+\small
+\textbf{Original.} 1-PL Rasch IRT with per-child latent ability:
+$\mathrm{logit}\,P(y_{ij}=1) = \theta_i + d_j + \beta_a a_i + \beta_t \log(p_j H a_i)$.
+Per-child $\theta_i$ free; $d_j$ per-word free; shared age slope $\beta_a$
+across all kids.
+
+\vspace{0.6em}
+\centering
+\textbf{In our notation:}
+\[
+\eta_{ij} \;=\; (\log r_i + \log\alpha_i) + \kappa \log a_i - \delta_j
+\quad\text{with}\quad \kappa \equiv \text{shared population slope}.
+\]
+
+\vspace{0.4em}
+\renewcommand{\arraystretch}{1.20}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Parameter} & \textbf{Setting in Kachergis 2021} \\
+\midrule
+$\log r_i$         & free, no per-child variance specified \\
+$\boldsymbol{\log\alpha_i}$ & \textbf{free} \,(their $\theta_i$ absorbs $\log r + \log\alpha$) \\
+$\kappa_i$         & $\equiv$ shared population slope (no per-child variance) \\
+$\delta_j$         & free (their $d_j$) \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.6em}
+\textbf{First prior model to free $\sigma_\alpha$.} But $\sigma_\kappa$
+is still zero --- every kid has the same scaling slope.
+
+\end{frame}
+
+% =====================================================================
+\begin{frame}{Unified comparison: who pins what}{The progression: McMurray $\to$ Hidaka $\to$ Kachergis $\to$ this work}
+
+\centering
+\scriptsize
+\renewcommand{\arraystretch}{1.30}
+\begin{tabular}{@{}lcccl@{}}
+\toprule
+\textbf{Model} & $\boldsymbol{\sigma_\alpha}$ & $\boldsymbol{\kappa_{\text{pop}}}$ & $\boldsymbol{\sigma_\kappa}$ & \textbf{Per-word $\delta_j$?} \\
+\midrule
+McMurray (2007)              & $0$    & $1$     & $0$ & free, $\delta_j = \log\tau_j$ \\
+Mitchell \& McMurray (2009)  & $0$    & $1^{*}$ & $0$ & free, plus leverage $c$ \\
+Hidaka (2013) cumulative     & $0$    & $1$     & $0$ & free, $\delta_j = \log(N_j/\delta)$ \\
+Hidaka (2013) rate-change    & $0$    & $D{+}1$ & $0$ & free \\
+Mollica \& Piantadosi (2017) & $0$    & $1$     & $0$ & free, $\delta_j = \log(k_j/\lambda_j)$ \\
+Kachergis et al.\ (2021)     & free   & free    & $0$ & free \\
+\midrule
+\textbf{Best-fitting model (this work)} & \textbf{free} & \textbf{free} & \textbf{free} & \textbf{free} \\
+\bottomrule
+\end{tabular}
+
+\vspace{1.0em}
+\small
+\textbf{What's structurally new.} Every prior accumulator model has
+$\sigma_\kappa = 0$ (same scaling slope for all kids). Our model frees
+it and finds $\sigma_\kappa \approx 3.5$ in English --- comparable to
+$\sigma_\alpha$, with $P(\kappa_i > 1) > 0.997$ across kids. \emph{This}
+is the load-bearing addition that lets the model fit both the
+acceleration and the variability signature jointly.
+
+\vspace{0.4em}
+\scriptsize\color{black!55}\textit{$^{*}$Mitchell \& McMurray's
+leverage isn't linear in $\log t$; their model lives outside our
+power-law family.}
 
 \end{frame}
 
