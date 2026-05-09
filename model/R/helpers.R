@@ -188,6 +188,27 @@ variant_hyperpriors <- function(name) {
     m4 = list(sigma_zeta_prior_sd = 1, beta_c_prior_sd = 0.5),  # + class_beta
     m5 = list(sigma_zeta_prior_sd = 1, beta_c_prior_sd = 0.5,
               sigma_lambda_prior_sd = 1),  # + 2PL
+    # 4-panel "model spine" variants for the quantile-demo figure.
+    # Each progressively frees one component on top of the pure
+    # accumulator. All are no_freq (beta_c=0) so psi_j absorbs item
+    # difficulty without a separate frequency channel; that's the
+    # cleanest comparison.
+    #
+    #   variant       | sigma_alpha | sigma_zeta | delta  | what it represents
+    #   demo_pure     | pinned ~0   | pinned ~0  | pinned | McMurray pure accumulator
+    #   demo_alpha    | free        | pinned ~0  | pinned | + child efficiency variation (Kachergis-like)
+    #   demo_kappa    | pinned ~0   | free       | free   | + age dynamics (Hidaka-like)
+    #   demo_full     | free        | free       | free   | full M_best (= no_freq + slopes)
+    demo_pure  = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
+                      sigma_alpha_prior_sd = 0.001,
+                      delta_prior_mean = 0, delta_prior_sd = 0.001),
+    demo_alpha = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
+                      delta_prior_mean = 0, delta_prior_sd = 0.001),
+    demo_kappa = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
+                      sigma_alpha_prior_sd = 0.001,
+                      sigma_zeta_prior_sd = 1),
+    demo_full  = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
+                      sigma_zeta_prior_sd = 1),
     # no_freq variant: drops log p_j entirely (beta_c pinned at 0).
     # With delta and slopes free this is the off-spine "M4 without freq"
     # robustness check; m1_time_only above is the equivalent test on the spine.

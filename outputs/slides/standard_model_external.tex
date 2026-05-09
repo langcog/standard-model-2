@@ -131,31 +131,28 @@ red is the cross-language mean.
 \end{frame}
 
 % =====================================================================
-\begin{frame}{The structural null: pure accumulator}{Where prior models sit, and what they all lack}
+\begin{frame}{The structural null: pure accumulator}
 
 \begin{columns}[T, onlytextwidth]
 \column{0.55\textwidth}
+\small
 \textbf{Pure accumulator.}
 Each child accumulates word-evidence at per-child input rate $r_i$;
 word $j$ is acquired when threshold $\psi_j$ is crossed.
 
 \vspace{0.4em}
-\textbf{Per-child scaling exponent} $\boldsymbol{\kappa_i}$:
-ability scales as (cumulative tokens)$^{\kappa_i}$.
+\textbf{Scaling exponent $\kappa_i$:} ability scales as (tokens)$^{\kappa_i}$.
 
-\begin{itemize}\setlength\itemsep{0.2em}
+\begin{itemize}\setlength\itemsep{0.15em}
 \item $\kappa_i = 1$ for every child: pure unit accumulator.
-\item Between-child variance is determined entirely by $\sigma_r$.
-\item No per-child slope variation around the population mean.
+\item Between-child variance comes only from $\sigma_r$ (input rate).
+\item No per-child slope variation.
 \end{itemize}
 
 \vspace{0.4em}
-\textbf{Two estimands diagnose deviation from the null:}
-
-\vspace{0.3em}
-\centering
-$\boldsymbol{\sigma_\alpha}$ \;\;-- \emph{between-child efficiency variation}\\
-$\boldsymbol{\kappa_i}$ posterior \;\;-- \emph{is $\kappa$ above 1, and does it vary?}
+\textbf{Two estimands diagnose deviation:}
+$\boldsymbol{\sigma_\alpha}$ (efficiency variation) and the $\boldsymbol{\kappa_i}$
+posterior (\emph{is $\kappa$ above 1, and does it vary?}).
 
 \column{0.45\textwidth}
 \centering
@@ -170,39 +167,31 @@ bucket fills past threshold $\psi_j$ (Kachergis et al.\ 2021).}
 \end{frame}
 
 % =====================================================================
-\begin{frame}{Where prior accumulator models sit}{None has both per-child efficiency and per-child slope variation}
+\begin{frame}{Where prior accumulator models sit}{None has both $\sigma_\alpha$ and $\sigma_\kappa$ free}
 
 \centering
-\small
-\renewcommand{\arraystretch}{1.20}
-\begin{tabular}{@{}lccc@{}}
+\scriptsize
+\renewcommand{\arraystretch}{1.30}
+\begin{tabular}{@{}lp{2.0cm}p{2.0cm}p{4.5cm}@{}}
 \toprule
-\textbf{Model} & \textbf{per-child} $\boldsymbol{\sigma_\alpha}$ & \textbf{per-child} $\boldsymbol{\sigma_\kappa}$ & \textbf{$\boldsymbol{\kappa_{\text{pop}} > 1}$} \\
+\textbf{Model} & \textbf{per-child $\sigma_\alpha$} & \textbf{per-child $\sigma_\kappa$} & \textbf{$\kappa_{\text{pop}} > 1$ via} \\
 \midrule
-McMurray (2007) -- pure accumulator       & --        & --        & only via $g'(\tau)$ \\
-Mitchell \& McMurray (2009) -- + leverage & --        & --        & shifts but cannot create \\
-Hidaka (2013) -- closed-form AoA          & --        & --        & via rate-change exponent $D$ \\
-Mollica \& Piantadosi (2017) -- Gamma     & --        & --        & embedded in per-word $\lambda_w$ \\
-Kachergis et al.\ (2021) -- 1-PL Rasch    & $\theta_i$ free   & --        & linear age covariate \\
+McMurray (2007) pure accumulator        & --        & --        & only via $g'(\tau)$ \\
+Mitchell \& McMurray (2009) + leverage  & --        & --        & shifts but cannot create \\
+Hidaka (2013) closed-form AoA           & --        & --        & rate-change exponent $D$ \\
+Mollica \& Piantadosi (2017) Gamma      & --        & --        & embedded in per-word $\lambda_w$ \\
+Kachergis et al.\ (2021) 1-PL Rasch     & $\theta_i$ free   & --   & linear age covariate \\
 \midrule
-\textbf{M\_best (this work)}              & \textbf{free}     & \textbf{free}     & \textbf{free} \\
+\textbf{M\_best (this work)}            & \textbf{free}     & \textbf{free}     & \textbf{free} \\
 \bottomrule
 \end{tabular}
 
-\vspace{0.8em}
-
-\begin{columns}[T, onlytextwidth]
-\column{0.55\textwidth}
-\textbf{Common gap.} \emph{No prior accumulator model has both
-$\sigma_\alpha$ \emph{and} $\sigma_\kappa$ free.} Most have neither.
-The two signatures we measure --- variability and acceleration in growth
-rate --- are precisely what these models cannot produce.
-
-\column{0.45\textwidth}
-\textbf{Implication for the next slides.} The 4-panel comparison shows
-each model's predictions for the canonical CDI percentile fan. The
-nested family makes clear what each addition buys.
-\end{columns}
+\vspace{1.0em}
+\small
+\textbf{Common gap.} No prior accumulator model has both $\sigma_\alpha$
+\emph{and} $\sigma_\kappa$ free. Most have neither. The two signatures
+we measure --- variability and acceleration --- are precisely what
+these models cannot produce.
 
 \end{frame}
 

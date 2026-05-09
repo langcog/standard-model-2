@@ -47,6 +47,13 @@ data {
   // random slopes (zeta_i ≈ 0). Use 1.0 to estimate freely, 0.001 to disable.
   // zeta_i adds to delta: effective slope = (1 + delta + zeta_i).
   real<lower=0> sigma_zeta_prior_sd;
+
+  // Per-child intercept variance toggle: sigma_alpha_prior_sd near 0
+  // disables efficiency variation (sigma_alpha ≈ 0, so xi_i ~ N(mu_r, sigma_r^2)
+  // with the only between-child variation coming from input rate).
+  // Use 1.0 to estimate freely, 0.001 to disable.
+  // Defaulted via DEFAULT_PRIORS to 1.0 to preserve back-compat.
+  real<lower=0> sigma_alpha_prior_sd;
 }
 
 parameters {
@@ -83,7 +90,7 @@ transformed parameters {
 
 model {
   xi_raw      ~ std_normal();
-  sigma_alpha ~ normal(0, 1);
+  sigma_alpha ~ normal(0, sigma_alpha_prior_sd);
 
   psi_raw ~ std_normal();
   mu_c    ~ normal(mu_mu_c, sigma_mu_c);

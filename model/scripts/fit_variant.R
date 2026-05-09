@@ -18,7 +18,10 @@ if (!file.exists(data_file))
 bundle <- readRDS(data_file)
 
 overrides <- variant_hyperpriors(nm)
-stan_data <- modifyList(bundle$stan_data, overrides)
+# Re-apply DEFAULT_PRIORS so any newer prior fields (e.g.,
+# sigma_alpha_prior_sd) are present even when the bundle was built
+# before they were introduced.
+stan_data <- modifyList(modifyList(bundle$stan_data, DEFAULT_PRIORS), overrides)
 
 cat(sprintf("\n===== Fitting variant: %s =====\n", nm))
 cat("Hyperprior overrides:\n")
