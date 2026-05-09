@@ -1,0 +1,383 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1.1in]{geometry}
+\usepackage{amsmath, amssymb, amsthm, mathtools}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{parskip}
+\usepackage{xcolor}
+\hypersetup{colorlinks=true, urlcolor=blue, linkcolor=black}
+
+\title{Prior accumulator models in unified notation\\
+\large{Translating McMurray, Mitchell--McMurray, Hidaka, Mollica--Piantadosi,\\
+       and Kachergis into our $(\alpha_i, r_i, \kappa_i, \delta_j)$ coordinates}}
+\author{Standard Model 2 working note}
+\date{\today}
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\mathrm{Var}}
+
+\begin{document}
+\maketitle
+
+\section{Why this exercise}
+
+Each prior accumulator model uses its own notation: McMurray writes a
+threshold density $g(\tau)$, Hidaka uses rate-change exponent $D$,
+Mollica \& Piantadosi use a per-word $(k_w, \lambda_w)$, and so on.
+Translating each model into our common parameterization makes the
+comparison literal rather than structural. It also pins down exactly
+which of our parameters each prior model pins (and at what value),
+versus what they leave free.
+
+The unified parameterization throughout this note is
+\begin{equation}
+\eta_{ij}(t) \;=\;
+\underbrace{\log r_i}_{\text{input rate}}
+\;+\;
+\underbrace{\log\alpha_i}_{\text{efficiency}}
+\;+\;
+\underbrace{\kappa_i\,\log t}_{\text{scaling}}
+\;-\;
+\underbrace{\delta_j}_{\text{word difficulty}},
+\qquad
+P(\text{produces}_{ij}\mid t) = \sigma(\eta_{ij}).
+\label{eq:our-model}
+\end{equation}
+A pure accumulator pins $\alpha_i \equiv 1$ and $\kappa_i \equiv 1$,
+leaving only $r_i$ and $\delta_j$ free. Our model frees both
+$\alpha_i$ and $\kappa_i$ at the per-child level.
+
+Each section below: the original model, in its native notation; the
+translation; what's pinned vs.\ free in our coordinates.
+
+\section{McMurray (2007): pure accumulator}
+
+\paragraph{Original.}
+Each word $w$ has a fixed acquisition threshold $\tau_w$, drawn from
+a population distribution $g(\tau)$. At each unit time step every
+word's accumulator gains one count. Word $w$ is learned at the first
+$t$ such that the count reaches $\tau_w$. Since accumulation is
+unit-rate and deterministic, that's the first $t \ge \tau_w$.
+Aggregate vocabulary is $L(t) = \int_0^t g(\tau)\,d\tau = G(t)$
+(the CDF of $g$).
+
+\paragraph{Translation.}
+A deterministic step $\mathbb{1}[t \ge \tau_w]$ is the zero-noise
+limit of $\sigma\!\big(\lambda(t - \tau_w)\big)$ as $\lambda \to \infty$.
+With our IRT logit link,
+\begin{equation}
+P(\text{produces}_w \mid t)
+\;=\;
+\sigma\!\big(\log t - \log \tau_w\big)
+\;=\;
+\sigma\!\big(\kappa\,\log t - \delta_w\big)
+\quad\text{with}\quad
+\kappa \equiv 1,\;\; \delta_w := \log\tau_w.
+\end{equation}
+The threshold density $g(\tau)$ becomes the prior over the per-word
+$\delta_j$ on a log-time scale.
+
+\paragraph{In our parameterization.}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.10}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Parameter} & \textbf{Setting in McMurray} & \textbf{Free in our model?} \\
+\midrule
+$\log r_i$         & $\equiv 0$ (constant rate, no per-child variation) & free \\
+$\log \alpha_i$    & $\equiv 0$ (no efficiency variation) & free \\
+$\kappa_i$         & $\equiv 1$ (unit-rate accumulator) & free \\
+$\delta_j$         & $= \log \tau_j$, drawn from $g$ & free \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Acceleration in this model.} The aggregate vocabulary curve
+$L(t) = G(t)$ is the CDF of $g$. Whether the population-mean trajectory
+shows visible acceleration depends entirely on the shape of $g$:
+\begin{itemize}\setlength\itemsep{0.2em}
+\item If $g(\tau)$ is uniform on a window, $L(t)$ is linear in $t$
+  over that window.
+\item If $g'(\tau) > 0$ over the relevant range (more words have
+  higher thresholds than lower), $L(t)$ accelerates.
+\item If $g'(\tau) < 0$, $L(t)$ decelerates.
+\end{itemize}
+McMurray's argument: empirical $L(t)$ accelerates, so $g'(\tau) > 0$.
+\textbf{This is a population-level claim, not a per-child claim.}
+McMurray has no $\kappa_i$ heterogeneity ($\sigma_\kappa = 0$); the
+``acceleration'' he refers to is in $g$, which corresponds to
+heterogeneity in our $\delta_j$ across words.
+
+\section{Mitchell \& McMurray (2009): McMurray + leverage}
+
+\paragraph{Original.}
+McMurray (2007) plus a feedback term: as the child accumulates
+vocabulary, each known word ``leverages'' the acquisition of new
+words. The effective time becomes
+\begin{equation}
+a(t) = t + c\,L(t),
+\quad
+L(t) = G(a(t)),
+\quad
+\frac{dL}{dt} = \frac{g(t + cL)}{1 - c\,g(t+cL)},
+\end{equation}
+where $c$ is the leverage strength.
+
+\paragraph{Translation.}
+The leverage $cL(t)$ couples each child's effective time to their own
+vocabulary state. In our linear predictor, this is a non-linear-in-$L$
+modification:
+\begin{equation}
+\eta_{ij}(t) = \log a(t) - \delta_j = \log\!\big(t + c\,L_i(t)\big) - \delta_j.
+\end{equation}
+The argument is no longer linear in $\log t$, and $a(t)$ depends on
+the child's own vocabulary state, which makes per-(child, word) likelihoods
+non-separable in our framework. \textbf{This is the one prior model
+that doesn't embed cleanly in
+equation~\eqref{eq:our-model}.}
+
+\paragraph{Mitchell \& McMurray's result.} They prove the leverage
+\emph{shifts} the growth curve forward or backward in time but
+\emph{cannot create acceleration not already present in $g(\tau)$}.
+In our coordinates: leverage moves the timing of acquisition without
+changing $\kappa_i$ — it can't manufacture super-linear scaling.
+
+\section{Hidaka (2013): closed-form AoA families}
+
+\paragraph{Original.}
+Three nested learning processes, each with closed-form AoA distribution:
+
+\begin{center}
+\renewcommand{\arraystretch}{1.10}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Process} & \textbf{Dynamics} & \textbf{AoA distribution} \\
+\midrule
+Cumulative & $N$-accumulator at constant rate $\delta$ & $\Gamma(N, \delta)$ \\
+Rate-change & 1-accumulator at rate $\delta \cdot t^D$ & Weibull \\
+Cumulative + rate-change & both & Weibull--Gamma \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The rate-change form yields ability $\propto t^{D+1}$, since
+$\int_0^t \delta \tau^D\,d\tau = \frac{\delta}{D+1}\,t^{D+1}$.
+
+\paragraph{Translation: rate-change form.}
+On the logit scale,
+\begin{equation}
+\log(\text{ability at } t) = (D+1)\log t + \mathrm{const},
+\end{equation}
+so equation~\eqref{eq:our-model} reduces to
+\begin{equation}
+\eta_{ij}(t) = (D+1)\log t - \delta_j
+\quad\text{with}\quad \kappa_i \equiv D+1.
+\end{equation}
+\textbf{Hidaka's $D$ is exactly $\kappa - 1$ in our notation.} His
+$D > 0$ is our $\kappa_{\text{pop}} > 1$ (super-linear scaling).
+Crucially, $D$ is shared across all kids — no per-child variation.
+
+\paragraph{Translation: cumulative form.}
+The Gamma waiting-time form $\Gamma(N_w, \delta)$ does not have a
+simple closed-form on the log scale; for large $N_w$ it converges
+to a normal CDF, which approximates a sigmoid. Mapping at the
+mean: $\delta_j \approx \log(N_j/\delta)$, and $\kappa_i \equiv 1$.
+This is essentially McMurray's pure accumulator with a smoothed
+threshold.
+
+\paragraph{In our parameterization (rate-change).}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.10}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Parameter} & \textbf{Setting in Hidaka rate-change} & \textbf{Free in our model?} \\
+\midrule
+$\log r_i$         & $\equiv \log \delta_{\text{const}}$ (population rate) & free \\
+$\log \alpha_i$    & $\equiv 0$ (no efficiency variation) & free \\
+$\kappa_i$         & $\equiv D + 1$ (shared, no per-child variation) & free \\
+$\delta_j$         & per-word, free                                  & free \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Hidaka's posit: $D$ is informative about word properties.
+He reports correlation between $D$ and imageability, taking $D$
+from population-pooled fits. In our coordinates this corresponds
+to per-word $\kappa_w$ (not per-child $\kappa_i$), which we don't
+currently estimate. (It's an interesting direction.)
+
+\section{Mollica \& Piantadosi (2017): per-word Gamma waiting time}
+
+\paragraph{Original.}
+Per-word generative model: word $w$ acquisition begins at start age
+$s_w$, ``effective learning instances'' (ELIs) arrive as Poisson at
+rate $\lambda_w$, and the word is acquired after $k_w$ ELIs. So
+\begin{equation}
+\mathrm{AoA}_w \sim s_w + \Gamma(k_w, \lambda_w),
+\quad
+F_w(a) = \int_0^{a-s_w} \frac{u^{k_w-1}\,e^{-u\lambda_w}\,\lambda_w^{k_w}}{\Gamma(k_w)}\,du.
+\end{equation}
+Mollica \& Piantadosi report $k \approx 10$, $\lambda \approx 0.5$/mo,
+$s \approx 2$~mo for comprehension across 13 languages.
+
+\paragraph{Translation.}
+For large $k_w$, the Gamma CDF converges to a Gaussian CDF (CLT) with
+mean $k_w/\lambda_w$ and standard deviation $\sqrt{k_w}/\lambda_w$.
+The Gaussian CDF approximates the logistic with a $\sim$1.7 scale
+factor. So
+\begin{equation}
+F_w(a) \approx \sigma\!\big(b_w (a - k_w/\lambda_w)\big),
+\quad
+b_w \propto \lambda_w/\sqrt{k_w}.
+\end{equation}
+On the log scale (writing $a = e^{\log t}$, no $s_w$ for simplicity),
+the curve is approximately a sigmoid in $\log t$ with slope
+proportional to $b_w \cdot k_w/\lambda_w = \sqrt{k_w}$.
+
+In our parameterization:
+\begin{equation}
+\eta_{ij}(t) = \log t - \delta_j
+\quad\text{with}\quad
+\delta_j \approx \log(k_j/\lambda_j),\;\;
+\kappa_i \equiv 1.
+\end{equation}
+$\kappa$ doesn't appear directly because the Gamma waiting time has
+a fixed shape; the per-word slope variation comes from $\sqrt{k_w}$
+inside the sigmoid scale, which our model doesn't have a free
+parameter for (we'd need a per-word discrimination $\lambda_j$, the
+2PL extension).
+
+\paragraph{In our parameterization.}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.10}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Parameter} & \textbf{Setting in Mollica \& Piantadosi} & \textbf{Free in our model?} \\
+\midrule
+$\log r_i$         & $\equiv \log \lambda$ (shared rate) & free \\
+$\log \alpha_i$    & $\equiv 0$ (no per-child variation) & free \\
+$\kappa_i$         & $\equiv 1$ (unit-rate accumulator) & free \\
+$\delta_j$         & $= \log(k_j/\lambda_j)$, free       & free \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Kachergis et al.\ (2021): 1-PL Rasch IRT with covariates}
+
+\paragraph{Original.}
+\begin{equation}
+\mathrm{logit}\,P(y_{ij}=1) = \theta_i + d_j + \beta_a\cdot a_i + \beta_t\cdot \log(p_j H a_i),
+\end{equation}
+where $\theta_i$ is per-child latent ability, $d_j$ is per-word
+difficulty, $a_i$ is age, $p_j$ is the word's CHILDES probability,
+$H$ is waking hours per month, and $\beta_a, \beta_t$ are shared
+slopes (no per-child variation).
+
+\paragraph{Translation.}
+Identify $\theta_i = \log r_i + \log\alpha_i$ (their per-child
+intercept), $d_j = -\delta_j$ (their per-word intercept), and the
+linear age covariate $\beta_a a_i$ as a linearization of
+$\kappa\,\log a$:
+\begin{equation}
+\eta_{ij} \;\approx\;
+(\log r_i + \log\alpha_i) + \log p_j + \log H + \kappa\,\log a_i - \delta_j,
+\end{equation}
+with $\kappa \equiv \beta_a/(\partial \log a /\partial a) \cdot a$ a
+constant population slope, no per-child variation.
+
+\paragraph{In our parameterization.}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.10}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Parameter} & \textbf{Setting in Kachergis 2021} & \textbf{Free in our model?} \\
+\midrule
+$\log r_i$         & free (population $\mu_r$, no per-child variance specified) & free, $\sigma_r$ pinned \\
+$\log \alpha_i$    & free (their $\theta_i$ absorbs $\log r + \log \alpha$) & free \\
+$\kappa_i$         & $\equiv$ shared population slope (no per-child variance) & free \\
+$\delta_j$         & free (their $d_j$)                  & free \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Kachergis et al.\ are the first prior model to free $\sigma_\alpha$.}
+But $\sigma_\kappa$ is still zero: every child has the same
+acceleration slope.
+
+\section{Unified table}
+
+In our coordinates, every prior model pins or frees specific parameters.
+The pattern below makes clear what's structural and what's notational
+across the literature.
+
+\begin{center}
+\renewcommand{\arraystretch}{1.20}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+\textbf{Model} &
+$\boldsymbol{\sigma_\alpha}$ &
+$\boldsymbol{\kappa_{\text{pop}}}$ &
+$\boldsymbol{\sigma_\kappa}$ &
+\textbf{Per-word $\delta_j$?} \\
+\midrule
+McMurray (2007)                & $0$        & $1$       & $0$ & free, $\delta_j = \log\tau_j$ \\
+Mitchell \& McMurray (2009)    & $0$        & $1^{*}$   & $0$ & free, plus leverage $c$ \\
+Hidaka (2013) cumulative       & $0$        & $1$       & $0$ & free, $\delta_j = \log(N_j/\delta)$ \\
+Hidaka (2013) rate-change      & $0$        & $D{+}1$   & $0$ & free \\
+Mollica \& Piantadosi (2017)   & $0$        & $1$       & $0$ & free, $\delta_j = \log(k_j/\lambda_j)$ \\
+Kachergis et al.\ (2021)       & free       & free      & $0$ & free \\
+\midrule
+\textbf{Best-fitting model (this work)} &
+\textbf{free} & \textbf{free} & \textbf{free} & \textbf{free} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\footnotesize{$^{*}$Mitchell \& McMurray's leverage is not
+linear-in-$\log t$, so $\kappa$ as defined in our model isn't quite
+the right summary. Their model lives outside our power-law family.}
+
+\section{What's structurally new in our model}
+
+Reading down the table, the prior literature progressively frees
+parameters: McMurray gives all four to a single shared form;
+Hidaka's rate-change frees $\kappa_{\text{pop}}$; Kachergis frees
+$\sigma_\alpha$. Each step adds one degree of freedom.
+
+\textbf{Our model is the first to free $\sigma_\kappa$:} per-child
+variation in the scaling exponent. That's the load-bearing addition
+that enables fitting the variability signature jointly with
+acceleration. The 4-panel comparison (deck slide 13) shows visually
+that this addition is necessary --- variants without
+$\sigma_\kappa$ free can't reproduce both the percentile fan width
+and its growth with age.
+
+\section{Discussion: what this implies for the literature}
+
+\paragraph{Acceleration was always in the field, but as a
+population-level claim.} McMurray's $g'(\tau) > 0$ argument and
+Hidaka's $D > 0$ both posit acceleration at the population level.
+We replicate that claim ($\kappa_{\text{pop}} \approx 10.4 \gg 1$
+in English M\_best). What's new is per-child variance: kids differ
+substantially in their scaling exponent.
+
+\paragraph{Variability was treated as a measurement issue rather
+than a structural feature.} Kachergis's $\theta_i$ first frees the
+intercept, but the slope is shared. Treating between-child variance
+as primarily intercept-level is consistent with much of the field's
+focus on ``per-child ability'' as a single number. The data argue
+for a richer two-axis structure (intercept + slope variance).
+
+\paragraph{The per-child slope variance is a falsifiable claim, not
+a parameter convenience.} If $\sigma_\kappa$ were small, our model
+would collapse onto Kachergis (2021). The empirical posterior gives
+$\sigma_\kappa = 3.47$ \,[3.14, 3.84] in English, well above zero
+and large compared to $\sigma_\alpha = 1.71$. This is the
+quantitative finding that requires explanation.
+
+\end{document}

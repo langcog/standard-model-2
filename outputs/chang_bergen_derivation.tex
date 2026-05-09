@@ -1,0 +1,288 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1.1in]{geometry}
+\usepackage{amsmath, amssymb, amsthm, mathtools}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{parskip}
+\usepackage{xcolor}
+\hypersetup{colorlinks=true, urlcolor=blue, linkcolor=black}
+
+\title{Comparing children to LMs on a single sigmoid-slope axis\\
+\large{A derivation of the Chang \& Bergen bridge}}
+\author{Standard Model 2 working note}
+\date{\today}
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\logit}{\mathrm{logit}}
+
+\begin{document}
+\maketitle
+
+\section{The claim}
+
+Children's per-word acquisition curves and large language models'
+per-word acquisition curves both have a sigmoidal form in
+$\log(\text{experience})$. They live on the same axis. The
+\emph{slope} of that sigmoid is the natural object to compare
+across the two populations.
+
+This note derives the slope from each side, lines them up in matched
+units, and reports the headline numbers we use in the deck.
+
+\section{Children's side: per-child sigmoid slope is $\kappa_i$}
+
+\subsection{Linear predictor}
+
+In our model (slides 9--12), for child $i$, word $j$, age $t$:
+\begin{equation}
+\eta_{ij}(t) = \log r_i + \log\alpha_i + \kappa_i\,\log t - \delta_j,
+\qquad
+P(\text{produces}_{ij} \mid t) = \sigma(\eta_{ij}(t)),
+\label{eq:our-model}
+\end{equation}
+where $\sigma(x) = 1/(1+e^{-x})$ is the standard logistic.
+Per-child parameters: input rate $r_i$, efficiency $\alpha_i$,
+scaling exponent $\kappa_i$. Per-word: difficulty $\delta_j$.
+
+\subsection{Per-child slope}
+
+Differentiate $\eta_{ij}$ with respect to $\log t$, holding
+$(i, j)$ fixed:
+\begin{equation}
+\frac{\partial \eta_{ij}}{\partial \log t} = \kappa_i.
+\label{eq:per-child-slope}
+\end{equation}
+Therefore $\logit P(\text{produces}_{ij}\mid t)$ is a
+\emph{linear} function of $\log t$ with slope exactly $\kappa_i$.
+The per-child sigmoid slope on $\log t$ is $\kappa_i$ --- by
+construction.
+
+\subsection{Population-marginalized slope}
+
+If instead we ask, ``what slope does a researcher fit to
+\emph{cross-sectional} Wordbank data for word $w$, marginalizing
+over the population of kids?'', the answer attenuates $\kappa_{\text{pop}}$.
+
+For fixed word $w$ and time $t$, define
+\begin{equation*}
+X_i = \log r_i + \log\alpha_i + \kappa_i \log t,
+\end{equation*}
+so $P(\text{produces}_{iw}\mid t) = \sigma(X_i - \delta_w)$.
+With $(\log r_i, \log\alpha_i, \kappa_i)$ joint normal and (for
+simplicity) treating cross-correlations as zero,
+\begin{align}
+\E[X_i] &= \mu_r + \kappa_{\text{pop}}\,\log t, \\
+\Var[X_i] &= \sigma_r^2 + \sigma_\alpha^2 + \sigma_\kappa^2\,\log^2 t
+        \;=\; \sigma_\xi^2 + \sigma_\kappa^2\,\log^2 t \;=:\; \sigma_X^2(t).
+\end{align}
+
+The cross-sectional acquisition probability is
+\begin{equation*}
+P_{\text{pop}}(t, w) = \E_i\!\left[\sigma(X_i - \delta_w)\right].
+\end{equation*}
+Using the standard logistic--Gaussian convolution approximation with
+$a^2 = \pi^2/8 \approx 1.234$ (Daunizeau, 2017),
+\begin{equation}
+P_{\text{pop}}(t, w) \;\approx\;
+\sigma\!\left(
+  \frac{\mu_r + \kappa_{\text{pop}} \log t - \delta_w}
+       {\sqrt{1 + a^2\,\sigma_X^2(t)}}
+\right).
+\label{eq:pop-marginal}
+\end{equation}
+
+Differentiating with respect to $\log t$ at the midpoint
+$\log t_{50\%}$ where the numerator vanishes:
+\begin{equation}
+\boxed{
+\left.\frac{\partial \logit P_{\text{pop}}}{\partial \log t}\right|_{t_{50\%}}
+\;=\;
+\frac{\kappa_{\text{pop}}}{\sqrt{1 + a^2\,\sigma_X^2(t_{50\%})}}.
+}
+\label{eq:pop-slope}
+\end{equation}
+
+For our M\_best on English: $\kappa_{\text{pop}} = 10.4$, $\sigma_\xi^2 = 1.80^2 \approx 3.24$, $\sigma_\kappa^2 = 3.47^2 \approx 12.0$. Plugging in:
+\begin{itemize}\setlength\itemsep{0.2em}
+\item At $t_{50\%}=a_0$ ($\log t = 0$): $\sigma_X^2 = 3.24$, slope $\approx 10.4/\sqrt{1+1.234\cdot 3.24} = 10.4/2.24 \approx 4.6$.
+\item At $\log t = 0.4$ (about 28~mo if $a_0=19$): $\sigma_X^2 \approx 3.24 + 0.16\cdot 12 = 5.16$, slope $\approx 10.4/\sqrt{7.37} \approx 3.83$.
+\end{itemize}
+
+So a researcher fitting a single sigmoid to Wordbank cross-sectional
+production data per word would observe \emph{population-marginalized}
+slopes of about $4$~logits per natural-log-time unit. The per-child
+slope is much higher ($\kappa_i \sim 10.4 \pm 3.5$); the cross-sectional
+fit averages over kids and the slope shrinks.
+
+\subsection{Which slope is the right LLM comparand?}
+
+Both kid-side slopes have meaningful comparands on the LM side. Chang
+\& Bergen fit \emph{per-LM, per-word} sigmoids: there's no
+``population of kids'' equivalent because each LM is a fixed
+deterministic learner. The LM analog of $\kappa_i$ is therefore the
+fitted slope $1/\text{scale}_w$ for one (LM, word) pair --- same
+``instance'' (a single deterministic learner on a single word).
+That's the comparison we make in the deck. The
+population-marginalized slope is what one would compare to a
+cross-LM-architecture pooled fit.
+
+\section{LM side: Chang \& Bergen sigmoid fit}
+
+\subsection{Their parameterization}
+
+For each (LM, word) pair, Chang \& Bergen (2022) fit per-word mean
+surprisal $S_w$ during training as a function of $x = \log_{10}(\text{steps})$,
+using the four-parameter logistic
+\begin{equation}
+S_w(x) = \mathrm{ParamLower}_w + \frac{\mathrm{ParamUpper}_w - \mathrm{ParamLower}_w}
+                                       {1 + \exp((x - \mathrm{ParamXmid}_w)/\mathrm{ParamScale}_w)}.
+\label{eq:cb-fit}
+\end{equation}
+$\mathrm{ParamUpper}_w$ is the asymptote at $x \to -\infty$ (high
+surprisal at training start), $\mathrm{ParamLower}_w$ is the asymptote
+at $x \to +\infty$ (low surprisal after learning).
+$\mathrm{ParamXmid}_w$ is the $x$ at the curve's midpoint, and
+$\mathrm{ParamScale}_w$ is the scale parameter.
+
+\subsection{Translating to ``proportion learned''}
+
+Define proportion-learned as the fractional surprisal reduction:
+\begin{equation}
+P_{w}^{\mathrm{LM}}(x)
+\;:=\;
+\frac{\mathrm{ParamUpper}_w - S_w(x)}
+     {\mathrm{ParamUpper}_w - \mathrm{ParamLower}_w}
+\;=\;
+1 \;-\; \frac{1}{1+\exp((x - \mathrm{ParamXmid}_w)/\mathrm{ParamScale}_w)}
+\;=\;
+\sigma\!\!\left(\frac{x - \mathrm{ParamXmid}_w}{\mathrm{ParamScale}_w}\right).
+\end{equation}
+So $P_w^{\mathrm{LM}}$ is a sigmoid in $x = \log_{10}(\text{steps})$
+with slope on $\logit$:
+\begin{equation}
+\frac{\partial \logit P_w^{\mathrm{LM}}}{\partial x} \;=\; \frac{1}{\mathrm{ParamScale}_w}.
+\end{equation}
+
+\subsection{Unit conversion from $\log_{10}$ to natural log}
+
+Let $y = \ln(\text{steps})$. Since $x = y/\ln 10$,
+\begin{equation}
+\boxed{
+\frac{\partial \logit P_w^{\mathrm{LM}}}{\partial y}
+\;=\;
+\frac{1}{\mathrm{ParamScale}_w}\cdot\frac{1}{\ln 10}
+\;\approx\;
+\frac{0.434}{\mathrm{ParamScale}_w}.
+}
+\label{eq:lm-slope}
+\end{equation}
+Per-word, per-LM sigmoid slope on \emph{natural-log} training experience.
+
+\section{Direct comparison}
+
+Equations~\eqref{eq:per-child-slope} and \eqref{eq:lm-slope} are
+on identical units: ``logit per natural-log unit of experience.''
+Reading from our M\_best fits and Chang \& Bergen's processed sigmoid
+fits:
+
+\begin{center}
+\renewcommand{\arraystretch}{1.20}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+& \textbf{median slope} & \textbf{IQR} \\
+\midrule
+Children, per-child $\kappa_i$ (English M\_best) & $10.3$ & $[8.0,\,12.6]$ \\
+Children, per-child $\kappa_i$ (Norwegian M\_best) & $12.5$ & $[10.0,\,14.9]$ \\
+LMs, BERT per-word                                & $0.76$ & $[0.42,\,1.32]$ \\
+LMs, BiLSTM per-word                              & $0.87$ & $[0.53,\,1.52]$ \\
+LMs, GPT-2 per-word                               & $0.81$ & $[0.45,\,1.54]$ \\
+LMs, LSTM per-word                                & $0.96$ & $[0.44,\,1.90]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Headline.} Children are 10--15$\times$ steeper on the same
+sigmoid-slope axis. LMs cluster at $\kappa \approx 1$, the unit
+accumulator boundary; children sit in a wide distribution around
+$\kappa \approx 10$.
+
+\section{Caveats}
+
+\begin{enumerate}[leftmargin=1.4em]
+\item \textbf{Per-instance vs.\ per-instance, but different ``instance.''}
+Kids' slopes vary across \emph{children}; LM slopes vary across
+\emph{words} (within an LM, each word gets its own $1/\text{scale}_w$).
+A single LM is a deterministic learner, so there's no
+population-of-LM-instances analog of $\sigma_\kappa$ within architecture
+--- variation is across the word set, not across replicates.
+
+\item \textbf{Different experience units.} The $\log t$ axis on the kid
+side is log-months-of-life. The $x$ axis on the LM side is
+log-training-steps; for batch size 128 and average sentence length
+$\sim$25, that's roughly log-(training-tokens/3200). On the log axis,
+absolute alignment doesn't matter for slope; relative changes in
+experience do.
+
+\item \textbf{Cross-sectional Wordbank fit would give a smaller slope.}
+A researcher who fit a sigmoid to Wordbank's per-word
+production-vs-age data (one curve per word, marginalizing over kids)
+would observe $\sim$4 on the same axis, not 10. That's the
+population-marginalized slope from
+equation~\eqref{eq:pop-slope}. The 10$\times$ headline is the
+\emph{per-child} slope.
+
+\item \textbf{LM training distribution is not CDS.} Chang \& Bergen
+trained on BookCorpus + WikiText, which is adult written text, not
+child-directed speech. Per-word acquisition slopes there reflect
+distributional statistics of that corpus, not what kids hear. See
+the next section.
+\end{enumerate}
+
+\section{Forward direction: CHILDES-trained GPT (Feng et al.\ 2026)}
+
+Chang \& Bergen's comparison is a strong start but conflates two
+factors: (1) the structural difference in scaling between humans and
+LMs, and (2) the input distribution mismatch (adult-written-text vs.\
+CDS). Feng et al.~(2026) train GPT-style models on CHILDES, which
+matches the input distribution kids actually receive.
+
+If their models retain training-step-by-step surprisal (or can be
+rerun with that logging), we can:
+\begin{enumerate}[leftmargin=1.4em]
+\item Fit Chang \& Bergen-style sigmoids to CHILDES-trained GPT
+surprisal trajectories on \emph{exactly the CDI vocabulary}.
+\item Re-extract per-word slopes $1/\mathrm{scale}_w$ on natural-log
+experience.
+\item Replot Figure~18 of the deck (children-vs-LMs sigmoid-slope
+distributions) with these matched-input slopes.
+\end{enumerate}
+
+The structural-difference hypothesis predicts the gap will largely
+remain: kids will still be 10$\times$ steeper than LMs even when LM
+training is CDS-matched. If the gap shrinks substantially, the
+input-distribution explanation is doing more work than we currently
+attribute to it.
+
+\begin{thebibliography}{9}
+
+\bibitem{chang2022}
+Chang, T.\ A., \& Bergen, B.\ K.~(2022).
+Word Acquisition in Neural Language Models.
+\emph{Transactions of the Association for Computational Linguistics}, 10, 1--16.
+
+\bibitem{daunizeau2017}
+Daunizeau, J.~(2017).
+Semi-analytical approximations to statistical moments of
+sigmoid and softmax mappings of normal variables.
+\emph{arXiv:1703.00091}.
+
+\bibitem{feng2026}
+Feng, S., et al.~(2026).
+Child-directed-speech-trained language models. (Pending --- to be
+filled in once we read the paper.)
+
+\end{thebibliography}
+
+\end{document}
