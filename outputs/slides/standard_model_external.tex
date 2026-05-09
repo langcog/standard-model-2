@@ -518,7 +518,23 @@ process.
 \end{frame}
 
 % =====================================================================
-\begin{frame}{Coda: how does this compare to LLM scaling laws?}
+\begin{frame}{Direct comparison: per-instance scaling slopes}{Same task (CDI word acquisition), same axis (logit per log-experience)}
+
+\centering
+\includegraphics[width=0.85\linewidth]{chang_bergen_slope_comparison.png}
+
+\vspace{0.2em}
+\small
+\textbf{Reading.} Per-word sigmoid slope on $\log(\text{experience})$,
+extracted from Chang \& Bergen (2022) for 4 LMs $\times$ $\sim$600 CDI
+words, vs.\ our per-child $\kappa_i$ from M\_best on English and
+Norwegian. \textbf{LMs cluster near the unit-accumulator boundary
+($\kappa = 1$); children are $\sim$10$\times$ steeper.}
+
+\end{frame}
+
+% =====================================================================
+\begin{frame}{Coda: scaling regimes are categorically different}
 
 \centering
 \includegraphics[width=0.94\linewidth]{D1_scaling_disanalogy.png}
