@@ -96,3 +96,4 @@ secrets/
 # users can regenerate it via preprocess_word_freq.R.
 # (Uncomment if you want to keep it out of the repo entirely.)
 # standard_model/scripts/data/engWS_preprocessed.Rdata
+.claude/
