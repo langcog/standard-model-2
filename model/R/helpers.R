@@ -215,6 +215,13 @@ variant_hyperpriors <- function(name) {
     no_freq        = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001),
     no_freq_slopes = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
                           sigma_zeta_prior_sd = 1),
+    # M_best (no_freq + slopes) with global start time s freed.
+    # Used to investigate whether onset-time effects (per-child or
+    # population) help with the 4-panel demo "compressed at top, wide
+    # at bottom" pattern at very young ages.
+    free_s_no_freq_slopes = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
+                                 sigma_zeta_prior_sd = 1,
+                                 s_prior_mean = 4.5, s_prior_sd = 2),
     # Comprehension-channel variants. Used only by log_irt_long_io_comp.stan;
     # fit_io.R selects that Stan file when the variant matches `comp_*`.
     # The bundle already carries N_comp, aa_comp, jj_comp, y_comp; this
