@@ -235,28 +235,32 @@ emp_df <- bundle$df |>
   group_by(child_id, age) |>
   summarise(vocab = sum(produces, na.rm = TRUE), .groups = "drop")
 
-# Run quantile regression
+# Run quantile regression on empirical (gcrq for smoothness).
 emp_q   <- fit_gcrq(emp_df)
-sim_qs  <- lapply(VARIANTS, function(v) {
-  fit_gcrq(sim_df |> filter(variant == v))
-})
-names(sim_qs) <- VARIANTS
-
-# Predicted percentile curves
 age_grid <- seq(AGE_RANGE[1], AGE_RANGE[2], by = 0.25)
 emp_pred <- pred_gcrq(emp_q, age_grid) |> mutate(variant = "Empirical")
-sim_preds <- bind_rows(lapply(VARIANTS, function(v) {
-  p <- pred_gcrq(sim_qs[[v]], age_grid)
-  if (!is.null(p)) p$variant <- v
-  p
-}))
+
+# For simulated, just compute per-age-bin quantiles directly (more robust
+# than gcrq when the simulated distribution is narrow, e.g. demo_pure).
+sim_preds <- sim_df |>
+  group_by(variant, age) |>
+  summarise(
+    `0.1`  = quantile(vocab, 0.10, na.rm = TRUE),
+    `0.25` = quantile(vocab, 0.25, na.rm = TRUE),
+    `0.5`  = quantile(vocab, 0.50, na.rm = TRUE),
+    `0.75` = quantile(vocab, 0.75, na.rm = TRUE),
+    `0.9`  = quantile(vocab, 0.90, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  pivot_longer(cols = -c(variant, age), names_to = "tau",
+               values_to = "vocab")
 
 # ---- 5. Plot ------------------------------------------------------
 variant_labels <- c(
-  demo_pure  = "Pure accumulator",
-  demo_alpha = "+ efficiency variation",
-  demo_kappa = "+ scaling variation",
-  demo_full  = "+ both (M_best)"
+  demo_pure  = "1. Pure accumulator",
+  demo_alpha = "2. + efficiency variation (alpha)",
+  demo_kappa = "3. + scaling variation (kappa)",
+  demo_full  = "4. + both (best-fitting model)"
 )
 sim_preds$variant <- factor(sim_preds$variant,
                             levels = VARIANTS,
@@ -285,9 +289,10 @@ emp_lines_panel <- bind_rows(lapply(1:4, function(p) {
 })) |> left_join(variant_panels, by = "panel_n") |>
   rename(variant_x = variant.x, variant = variant.y)
 
+N_ITEMS_BUNDLE <- bundle$stan_data$J  # axis ceiling
 p_main <- ggplot(panel_data, aes(age, vocab)) +
   # Empirical points (light)
-  geom_jitter(width = 0.3, alpha = 0.18, size = 0.6, colour = "grey30") +
+  geom_jitter(width = 0.3, alpha = 0.20, size = 0.5, colour = "grey30") +
   # Empirical quantile lines (faint dashed)
   geom_line(data = emp_lines_panel,
             aes(age, vocab, group = tau),
@@ -302,12 +307,15 @@ p_main <- ggplot(panel_data, aes(age, vocab)) +
     values = c("0.1" = "#1f78b4", "0.25" = "#a6cee3",
                "0.5" = "#33a02c", "0.75" = "#fdbf6f",
                "0.9" = "#e31a1c"),
-    name = "Predicted percentile"
+    name = "Percentile"
   ) +
-  coord_cartesian(ylim = c(0, max(emp_df$vocab) * 1.05)) +
-  labs(x = "Age (months)", y = "Productive vocabulary (count)",
-       title = "How well does each model account for the empirical fan?",
-       subtitle = "Black points: Wordbank English WS empirical data. Dashed grey: empirical 10/25/50/75/90 percentile curves (gcrq). Coloured: same percentiles from posterior-simulated kids under each variant.") +
+  scale_x_continuous(breaks = c(16, 20, 24, 28),
+                     limits = c(AGE_RANGE[1], AGE_RANGE[2])) +
+  coord_cartesian(ylim = c(0, N_ITEMS_BUNDLE)) +
+  labs(x = "Age (months)", y = sprintf("Productive vocabulary (of %d items)",
+                                        N_ITEMS_BUNDLE),
+       title = "Each addition matters: predicted vs. empirical percentile fans",
+       subtitle = "Empirical (Wordbank): grey points + dashed lines.  Predicted (each variant): coloured lines.") +
   theme_minimal(base_size = 11) +
   theme(strip.text = element_text(face = "bold"),
         plot.title = element_text(face = "bold"),
@@ -315,5 +323,5 @@ p_main <- ggplot(panel_data, aes(age, vocab)) +
         legend.position = "bottom")
 
 out_png <- file.path(OUT_DIR, "quantile_demo.png")
-ggsave(out_png, p_main, width = 12, height = 8, dpi = 150)
+ggsave(out_png, p_main, width = 9, height = 6, dpi = 200)
 cat(sprintf("\nWrote: %s\n", out_png))

@@ -104,26 +104,47 @@ mean_by_age <- plot_df |>
             .groups = "drop") |>
   filter(n_lang >= 3)
 
-p_overlay <- ggplot(plot_df, aes(age_int, sd_theta, group = language)) +
-  geom_line(linewidth = 0.4, colour = "grey55", alpha = 0.55) +
-  geom_line(data = mean_by_age, aes(age_int, mean_sd),
-            inherit.aes = FALSE,
-            colour = "firebrick", linewidth = 1.6) +
-  geom_point(data = mean_by_age, aes(age_int, mean_sd),
-             inherit.aes = FALSE,
-             colour = "firebrick", size = 2.4) +
-  coord_cartesian(ylim = c(0, NA)) +
+# Wordbank-style aesthetics: color by language, smooth per-language lines
+# via loess, black bold trend across all languages. Restrict 15-30 mo.
+plot_df_15_30 <- plot_df |> filter(age_int >= 15, age_int <= 30)
+
+# Cross-language mean (smoothed across age bins) — black bold
+mean_by_age_smooth <- plot_df_15_30 |>
+  group_by(age_int) |>
+  summarise(mean_sd = mean(sd_theta, na.rm = TRUE),
+            n_lang = dplyr::n(),
+            .groups = "drop") |>
+  filter(n_lang >= 3)
+
+p_overlay <- ggplot(plot_df_15_30,
+                    aes(age_int, sd_theta, colour = language, group = language)) +
+  geom_smooth(method = "loess", se = FALSE, span = 0.9,
+              linewidth = 0.55, alpha = 0.85) +
+  geom_smooth(data = mean_by_age_smooth,
+              aes(age_int, mean_sd, group = 1),
+              inherit.aes = FALSE,
+              method = "loess", se = FALSE, span = 0.9,
+              colour = "black", linewidth = 1.6) +
+  scale_colour_viridis_d(option = "turbo", end = 0.92,
+                         guide = guide_legend(ncol = 4, byrow = TRUE,
+                                              keywidth = 0.6,
+                                              override.aes = list(linewidth = 1.0))) +
+  coord_cartesian(xlim = c(15, 30), ylim = c(0, NA)) +
+  scale_x_continuous(breaks = seq(15, 30, 3)) +
   labs(x = "Age (months)",
        y = expression("Within-age SD of " * theta[admin] * " (logits)"),
+       colour = NULL,
        title = sprintf("Cross-language replication (N = %d languages)",
-                       length(unique(plot_df$language))),
-       subtitle = "Each grey line = one language; red = cross-language mean.\nWithin-age variability in productive vocabulary is a universal pattern, growing with age.") +
+                       length(unique(plot_df_15_30$language))),
+       subtitle = "Coloured: per-language loess smooth. Black: cross-language mean.") +
   theme_minimal(base_size = 12) +
   theme(plot.title = element_text(face = "bold"),
-        plot.subtitle = element_text(size = 10, colour = "grey25"))
+        plot.subtitle = element_text(size = 10, colour = "grey25"),
+        legend.position = "bottom",
+        legend.text = element_text(size = 7))
 
 ggsave(file.path(OUT_DIR, "precursor_crosslang_overlay.png"),
-       p_overlay, width = 10, height = 6, dpi = 150)
+       p_overlay, width = 9, height = 6, dpi = 200)
 cat(sprintf("Wrote: %s\n",
             file.path(OUT_DIR, "precursor_crosslang_overlay.png")))
 

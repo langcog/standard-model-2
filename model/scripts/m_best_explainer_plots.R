@@ -162,29 +162,18 @@ age_tick_labels <- as.character(age_ticks)
 log_age_at_tick <- log(pmax(age_ticks - P$s_med, 0.01) / P$a0)
 
 p_theta <- ggplot() +
-  geom_line(data = df_kid, aes(log_age_rel, theta, group = kid),
+  geom_line(data = df_kid, aes(age, theta, group = kid),
             alpha = 0.10, colour = "grey25", linewidth = 0.4) +
-  geom_line(data = df_pop, aes(log_age_rel, theta_med),
+  geom_line(data = df_pop, aes(age, theta_med),
             colour = "firebrick", linewidth = 1.3) +
   geom_hline(yintercept = 0, colour = "grey75", linewidth = 0.3) +
-  geom_vline(xintercept = 0, colour = "grey75", linewidth = 0.3,
-             linetype = "dashed") +
-  scale_x_continuous(
-    name = expression("log "*((t-s)/a[0])),
-    breaks = log_age_at_tick,
-    labels = sprintf("%.2f", log_age_at_tick),
-    sec.axis = sec_axis(~ ., name = "Age (months)",
-                        breaks = log_age_at_tick,
-                        labels = age_tick_labels)
-  ) +
+  scale_x_continuous(name = "Age (months)",
+                     breaks = c(12, 15, 18, 21, 24, 27, 30)) +
   labs(y = expression("Ability  " * theta[i*","*t] - mu[r] * "  (logits)"),
-       title = "Per-child ability trajectories",
-       subtitle = sprintf("120 kids sampled from posterior population MVN; red = population median.\nOn log_age axis, slope = kappa_i; population mean kappa = %.2f [%.2f, %.2f]; sigma_kappa = %.2f.",
-                          1 + P$delta_med,
-                          1 + quantile(P$delta, 0.025),
-                          1 + quantile(P$delta, 0.975),
-                          P$sz_med)) +
-  coord_cartesian(ylim = c(-10, 10)) +
+       title = "Per-child ability trajectories (linear age axis)",
+       subtitle = sprintf("120 kids sampled from posterior. Per-child slope on log-tokens is kappa_i; population mean kappa = %.2f.\nThe super-linear (concave-up) shape on linear age is the signature of kappa > 1.",
+                          1 + P$delta_med)) +
+  coord_cartesian(xlim = c(12, 30), ylim = c(-10, 10)) +
   theme_minimal(base_size = 11) +
   theme(plot.subtitle = element_text(size = 9, colour = "grey25"))
 
@@ -200,20 +189,21 @@ p_vocab <- ggplot() +
   labs(x = "Age (months)",
        y = sprintf("Predicted productive vocab (out of %d items)", N_ITEMS),
        title = "Same kids, vocabulary scale (super-linear in age)",
-       subtitle = sprintf("Vocab = sum_j sigmoid(theta_full + log_H - psi_j) across the %d CDI items.\nBlue ribbons: 25/75 and 5/95 percentiles across kids.", N_ITEMS)) +
+       subtitle = "The shape on linear age is concave-up: vocabulary grows as t^kappa.") +
   coord_cartesian(xlim = c(12, 30), ylim = c(0, N_ITEMS)) +
+  scale_x_continuous(breaks = c(12, 15, 18, 21, 24, 27, 30)) +
   theme_minimal(base_size = 11) +
   theme(plot.subtitle = element_text(size = 9, colour = "grey25"))
 
 composite <- p_theta + p_vocab + plot_layout(widths = c(1, 1)) +
   plot_annotation(
-    title = sprintf("M_best (%s): per-child trajectory fan", FIT_NAME),
-    caption = sprintf("psi_j source for vocab calibration: %s. Left panel x-axis is log((t-s)/a_0) so the M_best slope (1+delta+zeta_i) appears linear; right panel x-axis is age in months for direct vocab interpretation.", psi_src)
+    title = "Per-child trajectories (best-fitting model)",
+    caption = "Left: ability theta on logit scale; concave-down on linear age because logit grows as kappa_i * log(t).  Right: predicted vocabulary on linear age; concave-up reflects super-linear scaling vocab ~ t^kappa_i."
   ) & theme(plot.title = element_text(face = "bold"),
-            plot.caption = element_text(size = 7.5, colour = "grey45"))
+            plot.caption = element_text(size = 8, colour = "grey45"))
 
 out_png <- file.path(OUT_DIR, "m_best_spaghetti.png")
-ggsave(out_png, composite, width = 12, height = 5.5, dpi = 150)
+ggsave(out_png, composite, width = 10, height = 5, dpi = 200)
 cat("Wrote:", out_png, "\n")
 
 # ---- Figure B: between-child variance composition by age ------------
