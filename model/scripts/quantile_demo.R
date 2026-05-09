@@ -182,8 +182,17 @@ simulate_for_variant <- function(fit, variant_name, N_SIM = 2000) {
       log_age <- log(max(a - s_d, 0.01) / bundle$stan_data$a0)
       kappa <- 1 + delta_d + zeta  # per-kid scaling exponent
       theta <- xi + kappa * log_age
-      # Predicted vocab count: sum_j sigmoid(theta + log_H - psi_j)
-      eta_partial <- outer(theta + bundle$stan_data$log_H, psi_med, "-")
+      # Predicted vocab count: sum_j sigmoid(theta + log_p_j + log_H - psi_j)
+      # NB: log_irt.stan adds log_p[j] to base with unit coefficient even
+      # under no_freq variants (the Stan file doesn't have a beta_c
+      # multiplier on log_p — that's only in log_irt_long.stan). So when
+      # log_p[j] = -8 (placeholder constant in our bundle), every base
+      # carries a -8 offset that the fitted psi_j absorbs. The simulation
+      # MUST include log_p too or it over-shifts predictions toward ceiling.
+      log_p_vec <- bundle$stan_data$log_p
+      base_kid_age <- theta + bundle$stan_data$log_H
+      eta_partial <- outer(base_kid_age, psi_med, "-")
+      eta_partial <- sweep(eta_partial, 2, log_p_vec, "+")  # add log_p_j per item
       vocab <- rowSums(plogis(eta_partial))
       rows[[length(rows) + 1]] <- data.frame(
         variant = variant_name, draw = d_idx, age = a, vocab = vocab
