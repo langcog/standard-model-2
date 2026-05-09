@@ -271,7 +271,7 @@ p_decomp <- ggplot(decomp, aes(factor(age), value, fill = component)) +
         plot.subtitle = element_text(size = 9, colour = "grey25"))
 
 out_png2 <- file.path(OUT_DIR, "m_best_variance_decomp.png")
-ggsave(out_png2, p_decomp, width = 10, height = 5.5, dpi = 150)
+ggsave(out_png2, p_decomp, width = 8, height = 4.5, dpi = 200)
 cat("Wrote:", out_png2, "\n")
 
 # ---- Save tabular data for the LaTeX coefficient table -------------

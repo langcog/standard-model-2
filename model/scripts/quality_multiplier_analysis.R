@@ -166,7 +166,7 @@ composite <- p_logq + p_ratio + plot_layout(widths = c(1, 1)) +
             plot.caption = element_text(size = 8, colour = "grey45"))
 
 out_png <- file.path(OUT_DIR, "quality_multiplier_implied.png")
-ggsave(out_png, composite, width = 12, height = 5.8, dpi = 150)
+ggsave(out_png, composite, width = 9, height = 4.5, dpi = 200)
 cat(sprintf("\nWrote: %s\n", out_png))
 
 cat("\nDone.\n")

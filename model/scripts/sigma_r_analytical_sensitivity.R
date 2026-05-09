@@ -187,5 +187,5 @@ p <- ggplot(plot_df, aes(sigma_r, pi_alpha_med, colour = label, fill = label)) +
         plot.subtitle = element_text(size = 9, colour = "grey25"))
 
 out_png <- file.path(OUT_DIR, "sigma_r_analytical_sensitivity.png")
-ggsave(out_png, p, width = 9.5, height = 5.5, dpi = 150)
+ggsave(out_png, p, width = 8, height = 4.5, dpi = 200)
 cat("\nWrote:", out_png, "\n")
