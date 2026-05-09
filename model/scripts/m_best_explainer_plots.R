@@ -170,9 +170,7 @@ p_theta <- ggplot() +
   scale_x_continuous(name = "Age (months)",
                      breaks = c(12, 15, 18, 21, 24, 27, 30)) +
   labs(y = expression("Ability  " * theta[i*","*t] - mu[r] * "  (logits)"),
-       title = "Per-child ability trajectories (linear age axis)",
-       subtitle = sprintf("120 kids sampled from posterior. Per-child slope on log-tokens is kappa_i; population mean kappa = %.2f.\nThe super-linear (concave-up) shape on linear age is the signature of kappa > 1.",
-                          1 + P$delta_med)) +
+       title = "Ability (logit scale)") +
   coord_cartesian(xlim = c(12, 30), ylim = c(-10, 10)) +
   theme_minimal(base_size = 11) +
   theme(plot.subtitle = element_text(size = 9, colour = "grey25"))
@@ -187,23 +185,17 @@ p_vocab <- ggplot() +
   geom_line(data = df_pop, aes(age, vocab_med),
             colour = "navy", linewidth = 1.3) +
   labs(x = "Age (months)",
-       y = sprintf("Predicted productive vocab (out of %d items)", N_ITEMS),
-       title = "Same kids, vocabulary scale (super-linear in age)",
-       subtitle = "The shape on linear age is concave-up: vocabulary grows as t^kappa.") +
+       y = sprintf("Predicted productive vocab (of %d items)", N_ITEMS),
+       title = "Vocabulary count (linear scale)") +
   coord_cartesian(xlim = c(12, 30), ylim = c(0, N_ITEMS)) +
   scale_x_continuous(breaks = c(12, 15, 18, 21, 24, 27, 30)) +
   theme_minimal(base_size = 11) +
   theme(plot.subtitle = element_text(size = 9, colour = "grey25"))
 
-composite <- p_theta + p_vocab + plot_layout(widths = c(1, 1)) +
-  plot_annotation(
-    title = "Per-child trajectories (best-fitting model)",
-    caption = "Left: ability theta on logit scale; concave-down on linear age because logit grows as kappa_i * log(t).  Right: predicted vocabulary on linear age; concave-up reflects super-linear scaling vocab ~ t^kappa_i."
-  ) & theme(plot.title = element_text(face = "bold"),
-            plot.caption = element_text(size = 8, colour = "grey45"))
+composite <- p_theta + p_vocab + plot_layout(widths = c(1, 1))
 
 out_png <- file.path(OUT_DIR, "m_best_spaghetti.png")
-ggsave(out_png, composite, width = 10, height = 5, dpi = 200)
+ggsave(out_png, composite, width = 9, height = 4.5, dpi = 200)
 cat("Wrote:", out_png, "\n")
 
 # ---- Figure B: between-child variance composition by age ------------

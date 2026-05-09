@@ -323,5 +323,5 @@ p_main <- ggplot(panel_data, aes(age, vocab)) +
         legend.position = "bottom")
 
 out_png <- file.path(OUT_DIR, "quantile_demo.png")
-ggsave(out_png, p_main, width = 9, height = 6, dpi = 200)
+ggsave(out_png, p_main, width = 9, height = 5.0, dpi = 200)
 cat(sprintf("\nWrote: %s\n", out_png))

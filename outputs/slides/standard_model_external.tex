@@ -21,6 +21,8 @@
 \usepackage{graphicx}
 \usepackage{tabularx}
 \usepackage{array}
+\usepackage{tikz}
+\usetikzlibrary{matrix, positioning, arrows.meta}
 
 % Compact tables, gentle row spacing
 \renewcommand{\arraystretch}{1.10}
@@ -40,7 +42,7 @@
 \definecolor{accent}{RGB}{195,30,55}
 \definecolor{cool}{RGB}{31,120,180}
 
-\title{\bfseries Variability and acceleration in the\\growth of children's early vocabulary}
+\title{\bfseries Acceleration and variability in the\\growth of children's early vocabulary}
 \subtitle{}
 \author{Michael C.\ Frank}
 \institute{\small Stanford University}
@@ -83,36 +85,31 @@ longitudinal sample. Each grey line = one child.}
 \end{frame}
 
 % =====================================================================
-\begin{frame}{Two signatures of vocabulary growth}{What any theory of word learning has to predict}
+\begin{frame}{Acceleration: vocabulary grows super-linearly with age}
 
-\begin{columns}[T, onlytextwidth]
-
-\column{0.5\textwidth}
 \centering
-\textbf{\large\color{accent} Variability}\\[0.4em]
-\small
-Children fan out, not converge. \\[0.4em]
-Within-age SD of ability \emph{grows} with age. \\[0.6em]
-
-\vspace{0.2em}
-\includegraphics[width=0.95\linewidth]{precursor_variation.png}
-
-\column{0.5\textwidth}
-\centering
-\textbf{\large\color{accent} Acceleration}\\[0.4em]
-\small
-Vocabulary grows super-linearly in tokens. \\[0.4em]
-Population scaling exponent $\kappa_{\text{pop}} \gg 1$. \\[0.6em]
-
-\vspace{0.2em}
-\includegraphics[width=0.95\linewidth]{m_best_spaghetti.png}
-
-\end{columns}
+\includegraphics[width=0.78\linewidth]{precursor_acceleration.png}
 
 \vspace{0.4em}
+\small
+\textbf{Each line is a percentile (10/25/50/75/90) of vocabulary across kids.}
+The concave-up shape across the productive window (16--30 mo) is the
+visual signature of super-linear growth: doubling age does \emph{more}
+than double vocabulary.
+
+\end{frame}
+
+% =====================================================================
+\begin{frame}{Variability: between-child spread grows with age}
+
 \centering
-\small\color{black!55}\textit{Both signatures show up in nearly every
-language Wordbank covers (next slide).}
+\includegraphics[width=0.78\linewidth]{precursor_variability.png}
+
+\vspace{0.4em}
+\small
+\textbf{Children fan out, not converge.} Within-age SD of latent ability
+$\theta$ (1-PL Rasch IRT) climbs from $\sim$1.7 logits at 16 mo to
+$\sim$2.3 logits at 30 mo --- the spread grows even as kids age.
 
 \end{frame}
 
@@ -167,7 +164,46 @@ bucket fills past difficulty $\delta_j$ (Kachergis et al.\ 2021).}
 \end{frame}
 
 % =====================================================================
-\begin{frame}{Where prior accumulator models sit}{None has both $\sigma_\alpha$ and $\sigma_\kappa$ free}
+\begin{frame}{Prior accumulator models: what each predicts}{Mechanisms by which acceleration ($\kappa_{\text{pop}} > 1$) and variability could arise}
+
+\small
+\begin{description}\setlength\itemsep{0.4em}
+\item[McMurray (2007).]
+  Each word $w$ has an acquisition threshold $\tau_w$, drawn from a
+  population distribution $g(\tau)$. Vocabulary at age $t$ is the
+  CDF $G(t)$. \textbf{Acceleration} requires $g'(\tau) > 0$
+  (i.e., the threshold density is rising as $\tau$ increases over
+  the relevant range) --- otherwise growth is sub-linear in age.
+  No per-child variation.
+
+\item[Mitchell \& McMurray (2009).]
+  Adds a leverage feedback: $a(t) = t + c \cdot L(t)$. They prove
+  this can shift growth earlier or later but \emph{cannot create}
+  acceleration not already present in $g(\tau)$.
+
+\item[Hidaka (2013).]
+  Closed-form AoA distributions for cumulative
+  ($N$-accumulator, AoA $\sim$ Gamma) and rate-change
+  (1-accumulator at rate $\delta \cdot t^{D}$, AoA $\sim$ Weibull)
+  processes. \textbf{$D$ is the rate-change exponent}: ability
+  grows as $t^{D+1}$, so $D > 0$ produces acceleration.
+  Population-averaged; no per-child structure.
+
+\item[Mollica \& Piantadosi (2017).]
+  Per-word Gamma waiting time: AoA $\sim \Gamma(k_w, \lambda_w)$.
+  Acceleration is embedded in per-word rate $\lambda_w$ (same
+  population for all kids).
+
+\item[Kachergis et al.\ (2021).]
+  1-PL Rasch IRT with per-child $\theta_i$ and linear age covariate.
+  \textbf{First model with per-child intercept variation} ($\theta_i$
+  free), but no per-child acceleration variation.
+\end{description}
+
+\end{frame}
+
+% =====================================================================
+\begin{frame}{Where prior models sit in the parameter space}{None has both per-child efficiency $\sigma_\alpha$ and per-child slope $\sigma_\kappa$ free}
 
 \centering
 \scriptsize
@@ -182,55 +218,198 @@ Hidaka (2013) closed-form AoA           & --        & --        & rate-change ex
 Mollica \& Piantadosi (2017) Gamma      & --        & --        & embedded in per-word $\lambda_w$ \\
 Kachergis et al.\ (2021) 1-PL Rasch     & $\theta_i$ free   & --   & linear age covariate \\
 \midrule
-\textbf{M\_best (this work)}            & \textbf{free}     & \textbf{free}     & \textbf{free} \\
+\textbf{Best-fitting model (this work)} & \textbf{free}     & \textbf{free}     & \textbf{free} \\
 \bottomrule
 \end{tabular}
 
 \vspace{1.0em}
 \small
 \textbf{Common gap.} No prior accumulator model has both $\sigma_\alpha$
-\emph{and} $\sigma_\kappa$ free. Most have neither. The two signatures
-we measure --- variability and acceleration --- are precisely what
-these models cannot produce.
+\emph{and} $\sigma_\kappa$ free. The two signatures we measure ---
+acceleration and variability --- are what these models cannot
+\emph{jointly} produce.
 
 \end{frame}
 
 % =====================================================================
-\begin{frame}{The model: a progressive build}{Rasch IRT + accumulator dynamics, in three steps}
+\begin{frame}{The model: Rasch IRT + accumulator dynamics}
 
-\footnotesize
-Kid $i$, word $j$: \;\; $P(\text{produces}_{ij}) = \sigma(\eta_{ij})$, with
-$\eta_{ij} = \theta_i - \delta_j$ \;\; (ability $-$ difficulty).
+\centering
+$P(\text{produces}_{ij}) = \sigma(\eta_{ij})$
+\quad with \quad
+\Large $\eta_{ij} = \theta_i - \delta_j$
+\normalsize
 
-\vspace{0.3em}
+\vspace{1.5em}
 
-\textbf{Step 1 -- Pure accumulator.}\;
-$\theta_i = \log r_i + \log t \;\;\Longleftrightarrow\;\; \exp(\theta_i) = r_i \cdot t$
+\begin{tikzpicture}[
+  every node/.style={inner sep=2pt},
+  ann/.style={font=\small\itshape, color=blue!40!black,
+              align=center, text width=3.5cm},
+  arrow/.style={->, blue!30!black, semithick, shorten >=2pt, shorten <=2pt}]
+\matrix[matrix of nodes, column sep=60pt, nodes={font=\Large},
+        ampersand replacement=\&]{
+  |[name=eta]| $\eta_{ij}$ \&
+  $=$ \&
+  |[name=theta]| $\theta_i$ \&
+  $-$ \&
+  |[name=delta]| $\delta_j$ \\
+};
+\node[ann, below=3em of theta] (atheta)
+  {\textbf{kid ability}\\(grows with experience)};
+\draw[arrow] (atheta) -- (theta);
+\node[ann, below=3em of delta] (adelta)
+  {\textbf{word difficulty}\\(per-word, free)};
+\draw[arrow] (adelta) -- (delta);
+\end{tikzpicture}
 
-\emph{Ability = rate $\times$ time. Variation between kids comes only from $r_i$.}
+\vspace{1.5em}
+\small
+This is a standard Rasch IRT model. The substantive content is in
+how $\theta_i$ depends on accumulated experience. We build that up
+in three steps.
 
-\vspace{0.3em}
+\end{frame}
 
-\textbf{Step 2 -- + per-child efficiency $\alpha_i$.}\;
-$\theta_i = \log r_i + \log \alpha_i + \log t \;\;\Longleftrightarrow\;\; \exp(\theta_i) = \alpha_i \cdot r_i \cdot t$
+% =====================================================================
+\begin{frame}{Step 1: pure accumulator}
 
-\emph{Each child has a multiplicative efficiency over and above input rate.}
+\centering
+\Large
+$\theta_i = \log r_i + \log t$
+\quad $\Longleftrightarrow$ \quad
+$\exp(\theta_i) = r_i \cdot t$
+\normalsize
 
-\vspace{0.3em}
+\vspace{1.5em}
 
-\textbf{Step 3 -- + per-child scaling exponent $\kappa_i$.}\;
-$\theta_i = \log r_i + \log \alpha_i + \kappa_i \log t \;\;\Longleftrightarrow\;\; \exp(\theta_i) = \alpha_i \cdot r_i \cdot t^{\kappa_i}$
+\begin{tikzpicture}[
+  every node/.style={inner sep=2pt},
+  ann/.style={font=\small\itshape, color=blue!40!black,
+              align=center, text width=3.5cm},
+  arrow/.style={->, blue!30!black, semithick, shorten >=2pt, shorten <=2pt}]
+\matrix[matrix of nodes, column sep=20pt, nodes={font=\Large},
+        ampersand replacement=\&]{
+  |[name=t1]| $\theta_i$ \&
+  $=$ \&
+  |[name=logr]| $\log r_i$ \&
+  $+$ \&
+  |[name=logt]| $\log t$ \\
+};
+\node[ann, below=3em of logr] (alogr)
+  {per-child input rate\\(words per month)};
+\draw[arrow] (alogr) -- (logr);
+\node[ann, below=3em of logt] (alogt)
+  {time = age\\(months since onset)};
+\draw[arrow] (alogt) -- (logt);
+\end{tikzpicture}
 
-\emph{Children also differ in how steeply ability scales with cumulative input.}
+\vspace{1.5em}
+\small
+\textbf{Ability = rate $\times$ time.} The only thing that changes
+across development is more accumulated input. The only source of
+variation between children is variation in the input rate $r_i$.
 
-\vspace{0.6em}
+\end{frame}
 
-\textbf{Two diagnostic questions:}\quad
-$\pi_\alpha = \dfrac{\sigma_\alpha^2}{\sigma_\alpha^2 + \sigma_r^2} > 0.5\,$? \;\;
-(efficiency-share of variance)
-\quad
-$\kappa_i > 1\,$? \;\;
-(super-linear scaling)
+% =====================================================================
+\begin{frame}{Step 2: + per-child efficiency $\alpha_i$}
+
+\centering
+\Large
+$\theta_i = \log r_i + \log \alpha_i + \log t$
+\quad $\Longleftrightarrow$ \quad
+$\exp(\theta_i) = \alpha_i \cdot r_i \cdot t$
+\normalsize
+
+\vspace{1.5em}
+
+\begin{tikzpicture}[
+  every node/.style={inner sep=2pt},
+  ann/.style={font=\small\itshape, color=blue!40!black,
+              align=center, text width=2.5cm},
+  newann/.style={font=\small\itshape\bfseries, color=accent,
+                 align=center, text width=2.5cm},
+  arrow/.style={->, blue!30!black, semithick, shorten >=2pt, shorten <=2pt},
+  newarrow/.style={->, accent, semithick, shorten >=2pt, shorten <=2pt}]
+\matrix[matrix of nodes, column sep=18pt, nodes={font=\Large},
+        ampersand replacement=\&]{
+  |[name=t1]| $\theta_i$ \&
+  $=$ \&
+  |[name=logr]| $\log r_i$ \&
+  $+$ \&
+  |[name=logalpha]| $\log\alpha_i$ \&
+  $+$ \&
+  |[name=logt]| $\log t$ \\
+};
+\node[ann, below=3em of logr] (alogr) {input rate};
+\draw[arrow] (alogr) -- (logr);
+\node[newann, below=3em of logalpha] (alogalpha)
+  {per-child efficiency\\(NEW)};
+\draw[newarrow] (alogalpha) -- (logalpha);
+\node[ann, below=3em of logt] (alogt) {time};
+\draw[arrow] (alogt) -- (logt);
+\end{tikzpicture}
+
+\vspace{1.0em}
+\small
+Each child has a multiplicative efficiency $\alpha_i$ over and above
+their input rate. \textbf{Diagnostic question:}
+$\pi_\alpha = \dfrac{\sigma_\alpha^2}{\sigma_\alpha^2 + \sigma_r^2} > 0.5\,$? ---
+i.e., is most between-child variation attributable to
+efficiency rather than input quantity?
+
+\end{frame}
+
+% =====================================================================
+\begin{frame}{Step 3: + per-child scaling exponent $\kappa_i$}
+
+\centering
+\Large
+$\theta_i = \log r_i + \log \alpha_i + \kappa_i \log t$
+\quad $\Longleftrightarrow$ \quad
+$\exp(\theta_i) = \alpha_i \cdot r_i \cdot t^{\kappa_i}$
+\normalsize
+
+\vspace{1.5em}
+
+\begin{tikzpicture}[
+  every node/.style={inner sep=2pt},
+  ann/.style={font=\small\itshape, color=blue!40!black,
+              align=center, text width=2.0cm},
+  newann/.style={font=\small\itshape\bfseries, color=accent,
+                 align=center, text width=2.4cm},
+  arrow/.style={->, blue!30!black, semithick, shorten >=2pt, shorten <=2pt},
+  newarrow/.style={->, accent, semithick, shorten >=2pt, shorten <=2pt}]
+\matrix[matrix of nodes, column sep=15pt, nodes={font=\Large},
+        ampersand replacement=\&]{
+  |[name=t1]| $\theta_i$ \&
+  $=$ \&
+  |[name=logr]| $\log r_i$ \&
+  $+$ \&
+  |[name=logalpha]| $\log\alpha_i$ \&
+  $+$ \&
+  |[name=kappa]| $\kappa_i$ \&
+  $\cdot$ \&
+  |[name=logt]| $\log t$ \\
+};
+\node[ann, below=3em of logr] (alogr) {input rate};
+\draw[arrow] (alogr) -- (logr);
+\node[ann, below=3em of logalpha] (alogalpha) {efficiency};
+\draw[arrow] (alogalpha) -- (logalpha);
+\node[newann, below=3em of kappa] (akappa)
+  {per-child scaling exponent (NEW)};
+\draw[newarrow] (akappa) -- (kappa);
+\node[ann, below=3em of logt] (alogt) {time};
+\draw[arrow] (alogt) -- (logt);
+\end{tikzpicture}
+
+\vspace{1.0em}
+\small
+Children also differ in how steeply ability scales with cumulative
+input. \textbf{Diagnostic question:} $\kappa_i > 1\,$? --- i.e., is
+ability super-linear in cumulative tokens, beyond what a unit
+accumulator predicts?
 
 \end{frame}
 
@@ -248,20 +427,22 @@ Pure accumulator misses the fan. + efficiency only gets the wrong shape. + scali
 \end{frame}
 
 % =====================================================================
-\begin{frame}{M\_best fit: per-child trajectory fan}{120 kids drawn from posterior of \texttt{long\_no\_freq\_slopes}}
+\begin{frame}{Best-fitting model: per-child trajectories}{Acceleration and variability both visible}
 
 \centering
-\includegraphics[width=0.96\linewidth]{m_best_spaghetti.png}
+\includegraphics[width=0.92\linewidth]{m_best_spaghetti.png}
 
 \vspace{0.4em}
 \small
-\textbf{Left:} ability $\theta_{it}-\mu_r$ vs.\ $\log_{age}$, slope = $\kappa_i$, mean $\approx 10.4$.\quad
-\textbf{Right:} same kids, vocabulary on linear age. Median tracks Wordbank empirical.
+120 kids sampled from the posterior of the best-fitting model (acceleration + variability).
+\textbf{Left:} latent ability $\theta$ (logit scale).
+\textbf{Right:} predicted vocabulary count.
+The concave-up shape on the right is the super-linear signature; the fan width is the variability.
 
 \end{frame}
 
 % =====================================================================
-\begin{frame}{M\_best parameters}{Variability and acceleration both bounded firmly above zero}
+\begin{frame}{Best-fitting model: parameter posteriors}{Acceleration and variability both bounded firmly above zero}
 
 \centering
 \small
@@ -527,7 +708,7 @@ process.
 \small
 \textbf{Reading.} Per-word sigmoid slope on $\log(\text{experience})$,
 extracted from Chang \& Bergen (2022) for 4 LMs $\times$ $\sim$600 CDI
-words, vs.\ our per-child $\kappa_i$ from M\_best on English and
+words, vs.\ our per-child $\kappa_i$ from the best-fitting model on English and
 Norwegian. \textbf{LMs cluster near the unit-accumulator boundary
 ($\kappa = 1$); children are $\sim$10$\times$ steeper.}
 
