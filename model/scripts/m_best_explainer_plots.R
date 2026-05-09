@@ -179,8 +179,11 @@ p_theta <- ggplot() +
   ) +
   labs(y = expression("Ability  " * theta[i*","*t] - mu[r] * "  (logits)"),
        title = "Per-child ability trajectories",
-       subtitle = sprintf("120 kids sampled from posterior population MVN; red = population median.\nOn log_age axis, slope = 1+delta+zeta_i; population mean slope = 1+%.2f = %.2f.",
-                          P$delta_med, 1 + P$delta_med)) +
+       subtitle = sprintf("120 kids sampled from posterior population MVN; red = population median.\nOn log_age axis, slope = kappa_i; population mean kappa = %.2f [%.2f, %.2f]; sigma_kappa = %.2f.",
+                          1 + P$delta_med,
+                          1 + quantile(P$delta, 0.025),
+                          1 + quantile(P$delta, 0.975),
+                          P$sz_med)) +
   coord_cartesian(ylim = c(-10, 10)) +
   theme_minimal(base_size = 11) +
   theme(plot.subtitle = element_text(size = 9, colour = "grey25"))
@@ -239,8 +242,8 @@ decomp <- lapply(age_panel, function(t) {
   tibble::tibble(
     age = t, log_age = log_age,
     component = c("Input (sigma_r^2)", "Efficiency (sigma_alpha^2)",
-                  "Slope (sigma_zeta^2 * log_age^2)",
-                  "Cross (2 rho * sigma_xi * sigma_zeta * log_age)"),
+                  "Slope (sigma_kappa^2 * log_age^2)",
+                  "Cross (2 rho * sigma_xi * sigma_kappa * log_age)"),
     value = c(v_input, v_eff, v_slope, v_cross),
     total = total
   )
@@ -249,8 +252,8 @@ decomp <- lapply(age_panel, function(t) {
 decomp$component <- factor(decomp$component,
                            levels = c("Input (sigma_r^2)",
                                       "Efficiency (sigma_alpha^2)",
-                                      "Slope (sigma_zeta^2 * log_age^2)",
-                                      "Cross (2 rho * sigma_xi * sigma_zeta * log_age)"))
+                                      "Slope (sigma_kappa^2 * log_age^2)",
+                                      "Cross (2 rho * sigma_xi * sigma_kappa * log_age)"))
 
 # For stacked bar, separate ± values: positives stack up, negatives stack down
 decomp$sign <- ifelse(decomp$value >= 0, "pos", "neg")
@@ -270,16 +273,16 @@ p_decomp <- ggplot(decomp, aes(factor(age), value, fill = component)) +
             inherit.aes = FALSE,
             vjust = -0.6, size = 3.2, fontface = "bold", colour = "grey25") +
   scale_fill_manual(values = c(
-    "Input (sigma_r^2)"                              = "#a6cee3",
-    "Efficiency (sigma_alpha^2)"                     = "#1f78b4",
-    "Slope (sigma_zeta^2 * log_age^2)"               = "#fb9a99",
-    "Cross (2 rho * sigma_xi * sigma_zeta * log_age)" = "#fdbf6f"
+    "Input (sigma_r^2)"                                = "#a6cee3",
+    "Efficiency (sigma_alpha^2)"                       = "#1f78b4",
+    "Slope (sigma_kappa^2 * log_age^2)"                = "#fb9a99",
+    "Cross (2 rho * sigma_xi * sigma_kappa * log_age)" = "#fdbf6f"
   )) +
   labs(x = "Age (months)",
        y = expression("Variance contribution to  " * Var[i]( theta[it] )),
        fill = NULL,
        title = "Between-child variance composition by age (M_best)",
-       subtitle = sprintf("sigma_r=%.2f (input), sigma_alpha=%.2f (efficiency), sigma_zeta=%.2f (growth-rate spread), rho(xi,zeta)=%.2f.\nAt a_0=%.0f mo, log_age=0 -> slope and cross terms vanish; pi_alpha = sigma_alpha^2 / (sigma_alpha^2 + sigma_r^2) = %.2f exact.",
+       subtitle = sprintf("sigma_r=%.2f (input), sigma_alpha=%.2f (efficiency), sigma_kappa=%.2f (slope spread), rho(xi,kappa)=%.2f.\nAt a_0=%.0f mo, log_age=0 -> slope and cross terms vanish; pi_alpha = sigma_alpha^2 / (sigma_alpha^2 + sigma_r^2) = %.2f exact.",
                           sr, sa, sz, rho, P$a0, P$pia_med)) +
   theme_minimal(base_size = 11) +
   theme(legend.position = "bottom",

@@ -102,7 +102,7 @@ Within-age SD of ability \emph{grows} with age. \\[0.6em]
 \textbf{\large\color{accent} Acceleration}\\[0.4em]
 \small
 Vocabulary grows super-linearly in tokens. \\[0.4em]
-Population scaling exponent $1+\delta \gg 1$. \\[0.6em]
+Population scaling exponent $\kappa_{\text{pop}} \gg 1$. \\[0.6em]
 
 \vspace{0.2em}
 \includegraphics[width=0.95\linewidth]{m_best_spaghetti.png}
@@ -131,30 +131,31 @@ red is the cross-language mean.
 \end{frame}
 
 % =====================================================================
-\begin{frame}{The estimand: a pure accumulator as the structural null}
+\begin{frame}{The structural null: pure accumulator}{Where prior models sit, and what they all lack}
 
 \begin{columns}[T, onlytextwidth]
 \column{0.55\textwidth}
-\textbf{Pure accumulator (McMurray 2007).}
-Each child accumulates word-evidence at a per-child input rate $r_i$.
-Word $j$ is learned when threshold $\psi_j$ is crossed.
+\textbf{Pure accumulator.}
+Each child accumulates word-evidence at per-child input rate $r_i$;
+word $j$ is acquired when threshold $\psi_j$ is crossed.
 
-\vspace{0.5em}
-\textbf{Predictions.}
-\begin{itemize}\setlength\itemsep{0.3em}
-\item Ability $\propto \log(\text{tokens})$, slope = 1.
-\item Between-child variance proportional to $\sigma_r^2$.
-\item No per-child acceleration deviation from population.
+\vspace{0.4em}
+\textbf{Per-child scaling exponent} $\boldsymbol{\kappa_i}$:
+ability scales as (cumulative tokens)$^{\kappa_i}$.
+
+\begin{itemize}\setlength\itemsep{0.2em}
+\item $\kappa_i = 1$ for every child: pure unit accumulator.
+\item Between-child variance is determined entirely by $\sigma_r$.
+\item No per-child slope variation around the population mean.
 \end{itemize}
 
-\vspace{0.5em}
-\textbf{We measure deviations from this null.}
-Two estimands carry the structural argument:
+\vspace{0.4em}
+\textbf{Two estimands diagnose deviation from the null:}
 
 \vspace{0.3em}
 \centering
-$\boldsymbol{\delta}$ \;\;-- \emph{population age-acceleration}\\
-$\boldsymbol{\sigma_\zeta}$ \;\;-- \emph{between-child growth-rate variance}
+$\boldsymbol{\sigma_\alpha}$ \;\;-- \emph{between-child efficiency variation}\\
+$\boldsymbol{\kappa_i}$ posterior \;\;-- \emph{is $\kappa$ above 1, and does it vary?}
 
 \column{0.45\textwidth}
 \centering
@@ -163,7 +164,44 @@ $\boldsymbol{\sigma_\zeta}$ \;\;-- \emph{between-child growth-rate variance}
 \vspace{0.3em}
 \scriptsize\color{black!55}\textit{Bucket-fill metaphor: each child
 hears tokens at rate $r_i \cdot p_j$; word $j$ is acquired when its
-bucket fills past threshold $\psi_j$. Originally Kachergis et al.\ 2021.}
+bucket fills past threshold $\psi_j$ (Kachergis et al.\ 2021).}
+\end{columns}
+
+\end{frame}
+
+% =====================================================================
+\begin{frame}{Where prior accumulator models sit}{None has both per-child efficiency and per-child slope variation}
+
+\centering
+\small
+\renewcommand{\arraystretch}{1.20}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Model} & \textbf{per-child} $\boldsymbol{\sigma_\alpha}$ & \textbf{per-child} $\boldsymbol{\sigma_\kappa}$ & \textbf{$\boldsymbol{\kappa_{\text{pop}} > 1}$} \\
+\midrule
+McMurray (2007) -- pure accumulator       & --        & --        & only via $g'(\tau)$ \\
+Mitchell \& McMurray (2009) -- + leverage & --        & --        & shifts but cannot create \\
+Hidaka (2013) -- closed-form AoA          & --        & --        & via rate-change exponent $D$ \\
+Mollica \& Piantadosi (2017) -- Gamma     & --        & --        & embedded in per-word $\lambda_w$ \\
+Kachergis et al.\ (2021) -- 1-PL Rasch    & $\theta_i$ free   & --        & linear age covariate \\
+\midrule
+\textbf{M\_best (this work)}              & \textbf{free}     & \textbf{free}     & \textbf{free} \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.8em}
+
+\begin{columns}[T, onlytextwidth]
+\column{0.55\textwidth}
+\textbf{Common gap.} \emph{No prior accumulator model has both
+$\sigma_\alpha$ \emph{and} $\sigma_\kappa$ free.} Most have neither.
+The two signatures we measure --- variability and acceleration in growth
+rate --- are precisely what these models cannot produce.
+
+\column{0.45\textwidth}
+\textbf{Implication for the next slides.} The 4-panel comparison shows
+each model's predictions for the canonical CDI percentile fan. The
+nested family makes clear what each addition buys.
 \end{columns}
 
 \end{frame}
@@ -178,8 +216,7 @@ $P(\text{produces}_{ijt} = 1) = \sigma\!\big( \eta_{ijt} \big)$
 
 \Large
 $\eta_{ijt} = \underbrace{\xi_i}_{\text{child}}
-            + \underbrace{(1+\delta+\zeta_i)}_{\text{age dynamics}}
-              \log\!\tfrac{t-s}{a_0}
+            + \underbrace{\kappa_i}_{\text{scaling exponent}}\!\!\log\!\tfrac{t}{a_0}
             \;-\; \underbrace{\psi_j}_{\text{word}}$
 
 \vspace{0.8em}
@@ -192,8 +229,9 @@ $\eta_{ijt} = \underbrace{\xi_i}_{\text{child}}
 \item $\log r_i$: input rate, externally pinned via Sperry / HR / WF.
 \item $\log\alpha_i$: efficiency multiplier (free).
 \end{itemize}
-\textbf{Acceleration} $1+\delta+\zeta_i$: scaling exponent on
-log-tokens. Population mean $\delta$, per-child deviation $\zeta_i$.
+\textbf{Scaling exponent} $\kappa_i \sim \mathcal{N}(\kappa_{\text{pop}}, \sigma_\kappa^2)$:
+ability scales as (tokens)$^{\kappa_i}$. McMurray's pure accumulator
+sits at $\kappa_i = 1$ for every child.
 
 \column{0.5\textwidth}
 \textbf{Word threshold} $\psi_j$: log-tokens needed to acquire word
@@ -203,7 +241,7 @@ $j$, hierarchical by lexical class.
 \textbf{Headline derived quantities:}
 \begin{itemize}\setlength\itemsep{0.2em}
 \item $\pi_\alpha = \sigma_\alpha^2 / (\sigma_\alpha^2 + \sigma_r^2)$: efficiency-share of intercept variance.
-\item $\sigma_\zeta$: between-child growth-rate variance.
+\item $\kappa_{\text{pop}}, \sigma_\kappa$: population scaling and between-child variation in scaling.
 \end{itemize}
 
 \end{columns}
@@ -218,7 +256,7 @@ $j$, hierarchical by lexical class.
 
 \vspace{0.4em}
 \small
-\textbf{Left:} ability $\theta_{it}-\mu_r$ vs.\ $\log_{age}$, slope = $1+\delta+\zeta_i$, mean $\approx 10.4$.\quad
+\textbf{Left:} ability $\theta_{it}-\mu_r$ vs.\ $\log_{age}$, slope = $\kappa_i$, mean $\approx 10.4$.\quad
 \textbf{Right:} same kids, vocabulary on linear age. Median tracks Wordbank empirical.
 
 \end{frame}
@@ -235,9 +273,9 @@ $j$, hierarchical by lexical class.
 \midrule
 $\sigma_\alpha$   & 1.71 \,[1.55, 1.91]   & Between-child efficiency variation. \\
 $\boldsymbol{\pi_\alpha}$ & \textbf{0.91 \,[0.89, 0.93]} & \textbf{Share of intercept variance from efficiency, not input.} \\
-$\boldsymbol{\delta}$ & \textbf{9.35 \,[9.21, 9.51]} & \textbf{Population age-acceleration: ability scales as $T^{1+\delta}$.} \\
-$\boldsymbol{\sigma_\zeta}$ & \textbf{3.47 \,[3.14, 3.84]} & \textbf{Between-child variation in growth rate.} \\
-$\rho(\xi,\zeta)$ & $+0.35$ \,$[+0.22, +0.47]$ & Higher-baseline kids have steeper growth. \\
+$\boldsymbol{\kappa_{\text{pop}}}$ & \textbf{10.35 \,[10.21, 10.51]} & \textbf{Population scaling exponent: ability scales as (tokens)$^{\kappa}$.} \\
+$\boldsymbol{\sigma_\kappa}$ & \textbf{3.47 \,[3.14, 3.84]} & \textbf{Between-child variation in scaling exponent.} \\
+$\rho(\xi,\kappa)$ & $+0.35$ \,$[+0.22, +0.47]$ & Higher-baseline kids have steeper growth. \\
 \bottomrule
 \end{tabular}
 
@@ -252,12 +290,12 @@ $\pi_\alpha = 0.91$: efficiency variance dominates input variance.
 \column{0.32\textwidth}
 \centering\textbf{\color{accent}Acceleration}\\[0.2em]
 \small
-$\delta = 9.4$: scaling is wildly super-linear, far from McMurray's $\delta=0$.
+$\kappa_{\text{pop}} \approx 10.4 \gg 1$: scaling is wildly super-linear, far from the unit accumulator.
 
 \column{0.36\textwidth}
-\centering\textbf{\color{accent}Growth-rate variance}\\[0.2em]
+\centering\textbf{\color{accent}Variation in scaling}\\[0.2em]
 \small
-$\sigma_\zeta > \sigma_\alpha$: kids vary more in growth rate than in baseline.
+$\sigma_\kappa > \sigma_\alpha$: kids vary more in scaling exponent than in baseline.
 
 \end{columns}
 
@@ -272,7 +310,7 @@ $\sigma_\zeta > \sigma_\alpha$: kids vary more in growth rate than in baseline.
 \vspace{0.4em}
 \small
 \textbf{At the pivot age (19 mo):} only input + efficiency contribute $\Rightarrow \pi_\alpha = \sigma_\alpha^2/(\sigma_\alpha^2 + \sigma_r^2)$ exact.\quad
-\textbf{Off-pivot:} growth-rate variance $\sigma_\zeta^2 \cdot \log_{age}^2$ dominates by 30 mo.
+\textbf{Off-pivot:} scaling variance $\sigma_\kappa^2 \cdot \log_{age}^2$ dominates by 30 mo.
 
 \end{frame}
 
@@ -312,10 +350,10 @@ Peekbank-Stanford (LWL processing)      &  62 & 1.64 \,[1.34, 2.03]     & 0.90 \
 \renewcommand{\arraystretch}{1.20}
 \begin{tabular}{@{}lcccc@{}}
 \toprule
-\textbf{Sample} & \textbf{admins/kid} & $\boldsymbol{\delta}$ & $\boldsymbol{\sigma_\zeta}$ & \textbf{mean of $1+\delta+\zeta_i$} \\
+\textbf{Sample} & \textbf{admins/kid} & $\boldsymbol{\kappa_{\text{pop}}}$ & $\boldsymbol{\sigma_\kappa}$ & \textbf{kid range ($\kappa_{\text{pop}} \pm 2\sigma_\kappa$)} \\
 \midrule
-English  & median 3 & 9.4 & 3.5 & $\sim$10.4 \\
-Norwegian & median 8 & 11.5 & 3.7 & $\sim$12.5 \\
+English   & median 3 & 10.4 \,[10.2, 10.5] & 3.5 \,[3.1, 3.8] & $\sim$3 to 17 \\
+Norwegian & median 8 & 12.4 \,[12.3, 12.6] & 3.7 \,[3.4, 4.2] & $\sim$5 to 20 \\
 \bottomrule
 \end{tabular}
 
@@ -323,17 +361,20 @@ Norwegian & median 8 & 11.5 & 3.7 & $\sim$12.5 \\
 
 \begin{columns}[T, onlytextwidth]
 \column{0.55\textwidth}
-\textbf{Population scaling exponent $\sim10\!-\!12$ in both languages.}
+\textbf{Population scaling exponent $\kappa_{\text{pop}} \sim 10\!-\!12$
+in both languages.} Implied $P(\kappa_i > 1) > 0.997$ in both.
 
 \vspace{0.5em}
-What differs across languages is the \emph{decomposition}. With dense
-longitudinal data (Norwegian: 8 admins/kid), per-child slopes
-$\zeta_i$ are well-identified, and population $\delta$ alone --- without
-$\zeta_i$ --- actually \emph{hurts} the fit ($-235$ ELPD).
+\textbf{Internal decomposition into $\delta$ vs.\ $\zeta_i$ is
+identifiability-dependent on longitudinal density.} In Norwegian
+(8 admins/kid) per-child slopes are well-identified, and the
+population term $\delta$ alone --- without per-child deviations ---
+\emph{hurts} fit by 235 ELPD. In English (3 admins/kid), $\delta$
+pools what Norwegian's data lets fall into $\zeta_i$.
 
 \vspace{0.5em}
-With sparse data (English: 3 admins/kid), $\zeta_i$ is hard to pin
-down, and $\delta$ pools the action.
+\textbf{The aggregate $\kappa_i$ is what matters} --- $\kappa_{\text{pop}}$
+and $\sigma_\kappa$ are similar across languages.
 
 \column{0.45\textwidth}
 \textbf{Reading.} The acceleration signature is universal. The
@@ -342,7 +383,7 @@ data density.
 
 \vspace{0.5em}
 \textit{Concretely: in any sufficiently dense longitudinal sample,
-between-child variation in $1+\delta+\zeta_i$ spans roughly $5\!-\!15$.}
+between-child $\kappa_i$ spans roughly $5\!-\!15$.}
 
 \end{columns}
 
@@ -393,7 +434,7 @@ any defensible external $\sigma_r$.
 \vspace{0.6em}
 \textbf{Structural answer.} Per-child age-varying quality
 $q_i(t) = (t/a_0)^{\gamma_i}$ on input is observationally equivalent to
-$\gamma_i = \delta + \zeta_i$.
+$\gamma_i = \kappa_i - 1$.
 
 \vspace{0.6em}
 \textbf{Implication.} Quality cannot escape acceleration --- it
@@ -458,7 +499,7 @@ $\log\alpha_i$ via $\gamma_{rt}$.}
   is real, and bounded above zero.
 \item $\pi_\alpha = 0.90$ \,$[0.86, 0.94]$ --- replicates within the
   Peekbank subset.
-\item $\rho(\zeta_i, \mathrm{rtslope}_i) = -0.02$ \,$[-0.33, +0.27]$
+\item $\rho(\kappa_i, \mathrm{rtslope}_i) = -0.02$ \,$[-0.33, +0.27]$
   --- CDI-side and LWL-side growth rates do \emph{not} share variance.
 \end{itemize}
 
@@ -488,7 +529,7 @@ process.
 \textbf{Two structural differences.}
 Children show a \emph{steeper} scaling exponent on cumulative tokens
 ($\sim10$ vs.\ Chinchilla's $\sim 0.28$) \emph{and} substantial
-between-instance variance in scaling rate ($\sigma_\zeta = 3.5$ vs.\ ~0
+between-instance variance in scaling rate ($\sigma_\kappa = 3.5$ vs.\ ~0
 for fixed-architecture LLMs).
 
 \end{frame}
