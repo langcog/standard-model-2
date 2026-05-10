@@ -31,11 +31,12 @@ suppressPackageStartupMessages({
 OUT_DIR <- file.path(PATHS$figs_dir, "longitudinal")
 dir.create(OUT_DIR, recursive = TRUE, showWarnings = FALSE)
 
-CACHE_BUNDLE <- file.path(PATHS$fits_dir, "demo_subset_data.rds")
-AGE_RANGE    <- c(16, 30)
-N_KIDS       <- 600
-N_ITEMS      <- 200
-TAUS         <- c(0.10, 0.25, 0.50, 0.75, 0.90)
+CACHE_BUNDLE   <- file.path(PATHS$fits_dir, "demo_subset_data.rds")
+CACHE_FULL_EMP <- file.path(PATHS$fits_dir, "demo_full_empirical.rds")
+AGE_RANGE      <- c(16, 30)
+N_KIDS         <- 600
+N_ITEMS        <- 200
+TAUS           <- c(0.10, 0.25, 0.50, 0.75, 0.90)
 
 # ---- 1. Build a clean cross-sectional bundle ----------------------
 build_bundle <- function() {
@@ -121,6 +122,97 @@ bundle <- build_bundle()
 cat(sprintf("Bundle: I=%d, J=%d, N=%d obs\n",
             bundle$stan_data$I, bundle$stan_data$J, bundle$stan_data$N))
 
+# ---- 1b. Build a *large-sample* empirical reference (plotting only) -
+##
+## The fitted bundle (600 kids x 200 items) is small; quantile estimation
+## at p=0.10 / p=0.90 from ~40 admins per age bin is very noisy, which
+## shows up as wiggly empirical reference lines. For the empirical
+## quantile lines (which are NOT used for fitting) we use a much larger
+## empirical sample, restricted to the SAME 200 items the model knows
+## about, so the predicted-vs-empirical comparison stays on a
+## like-for-like 200-item vocabulary scale.
+##
+## Source preference:
+##   1. CACHE_FULL_EMP if present  -- cached result of a prior pull.
+##   2. wordbankr live pull        -- cross-sectional + longitudinal,
+##                                    ALL English WS admins.
+##   3. fits/long_items.rds        -- fallback to the cached longitudinal
+##                                    pull (~3700 admins) if wordbankr
+##                                    is unreachable.
+##
+## To force a fresh wordbankr pull, delete CACHE_FULL_EMP. To skip the
+## wordbankr attempt entirely (useful if the server is known down), set
+## SKIP_WORDBANKR <- TRUE.
+SKIP_WORDBANKR <- FALSE
+
+build_full_empirical <- function(item_definitions) {
+  if (file.exists(CACHE_FULL_EMP)) {
+    cat("Loading cached empirical:", CACHE_FULL_EMP, "\n")
+    return(readRDS(CACHE_FULL_EMP))
+  }
+
+  # Try wordbankr first (full WS = cross-sectional + longitudinal).
+  emp <- NULL
+  if (!SKIP_WORDBANKR) {
+    cat("Pulling Wordbank English (American) WS via wordbankr...\n")
+    options(timeout = max(600, getOption("timeout", 60)))
+    raw <- tryCatch(
+      get_instrument_data(language = "English (American)", form = "WS",
+                          administration_info = TRUE, item_info = TRUE),
+      error = function(e) {
+        message(sprintf("wordbankr pull failed: %s", conditionMessage(e)))
+        NULL
+      }
+    )
+    if (!is.null(raw)) {
+      emp <- raw |>
+        filter(item_kind == "word",
+               item_definition %in% item_definitions,
+               age >= AGE_RANGE[1], age <= AGE_RANGE[2],
+               !is.na(produces)) |>
+        group_by(child_id, age) |>
+        summarise(vocab = sum(produces, na.rm = TRUE),
+                  n_items = n(), .groups = "drop")
+      cat(sprintf("Full empirical (wordbankr): %d admins\n", nrow(emp)))
+    }
+  }
+
+  # Fallback: cached longitudinal pull on disk.
+  if (is.null(emp)) {
+    long_items_path <- file.path(PATHS$fits_dir, "long_items.rds")
+    if (!file.exists(long_items_path)) {
+      stop("wordbankr unreachable and ", long_items_path,
+           " missing. No empirical source available.")
+    }
+    cat("Falling back to cached longitudinal pull:", long_items_path, "\n")
+    d_long <- readRDS(long_items_path)
+    emp <- d_long |>
+      filter(language == "English (American)", form == "WS",
+             item %in% item_definitions,
+             age >= AGE_RANGE[1], age <= AGE_RANGE[2],
+             !is.na(produces)) |>
+      group_by(child_id, age) |>
+      summarise(vocab = sum(produces, na.rm = TRUE),
+                n_items = n(), .groups = "drop")
+    cat(sprintf("Longitudinal empirical: %d admins (longitudinal subset only;\n",
+                nrow(emp)))
+    cat("  refresh once Wordbank is back by deleting CACHE_FULL_EMP and re-running)\n")
+  }
+
+  cat(sprintf("Empirical reference: %d admins, ages %d-%d, median %d items per kid\n",
+              nrow(emp), min(emp$age), max(emp$age), median(emp$n_items)))
+  saveRDS(emp, CACHE_FULL_EMP)
+  emp
+}
+
+emp_df_full <- build_full_empirical(bundle$item_idx$item_definition)
+cat(sprintf("Empirical reference: N=%d admins (vs. bundle's %d for fitting)\n",
+            nrow(emp_df_full), nrow(bundle$admin_idx)))
+emp_df_full |>
+  mutate(age_int = round(age)) |>
+  count(age_int) |>
+  print()
+
 # ---- 2. Fit each variant ------------------------------------------
 VARIANTS <- c("demo_pure", "demo_alpha", "demo_kappa", "demo_full")
 
@@ -154,8 +246,11 @@ suppressPackageStartupMessages(library(posterior))
 
 simulate_for_variant <- function(fit, variant_name, N_SIM = 2000) {
   d <- as_draws_df(fit)
-  # Pull a few representative draws (post-warmup, every k-th)
-  draw_idx <- seq(1, nrow(d), length.out = 30) |> as.integer()
+  # Pull representative draws (post-warmup, evenly spaced). 100 draws
+  # smooths out per-draw parameter noise in the predicted quantile
+  # lines; with N_SIM=2000 kids per age this gives ~6900 sim points
+  # per (variant, age) for stable quantile estimation.
+  draw_idx <- seq(1, nrow(d), length.out = 100) |> as.integer()
   AGE_GRID <- seq(AGE_RANGE[1], AGE_RANGE[2], by = 0.5)
 
   # Per-item psi: posterior median across draws.
@@ -230,10 +325,10 @@ pred_gcrq <- function(model, age_grid) {
   pivot_longer(out, cols = -age, names_to = "tau", values_to = "vocab")
 }
 
-# Empirical: aggregate child total vocab across the bundle
-emp_df <- bundle$df |>
-  group_by(child_id, age) |>
-  summarise(vocab = sum(produces, na.rm = TRUE), .groups = "drop")
+# Empirical reference: total vocab on the bundle's 200 items, but
+# computed across ALL Wordbank admins (not just the 600 used for
+# fitting). This is what stabilizes the dashed quantile lines.
+emp_df <- emp_df_full
 
 # Run quantile regression on empirical (gcrq for smoothness).
 emp_q   <- fit_gcrq(emp_df)
@@ -269,11 +364,24 @@ emp_pred$variant <- factor("Empirical")
 
 # Build 4-panel: each panel shows empirical points + empirical quantile
 # lines (faint) + variant's predicted quantile lines (bold).
-panel_data <- emp_df |>
+# Stratified-by-age sample so the scatter isn't columnar at the most
+# heavily-sampled ages (the longitudinal pull happens to concentrate
+# admins at 16 and 28 mo). gcrq above uses ALL admins.
+set.seed(2026)
+N_PER_AGE_SCATTER <- 100
+emp_scatter <- emp_df |>
+  mutate(age_int = round(age)) |>
+  group_by(age_int) |>
+  group_modify(~ slice_sample(.x, n = min(nrow(.x), N_PER_AGE_SCATTER))) |>
+  ungroup() |>
+  select(-age_int)
+cat(sprintf("Scatter: %d points (stratified ~%d per age bin)\n",
+            nrow(emp_scatter), N_PER_AGE_SCATTER))
+panel_data <- emp_scatter |>
   mutate(panel_n = 1) |>
-  bind_rows(emp_df |> mutate(panel_n = 2)) |>
-  bind_rows(emp_df |> mutate(panel_n = 3)) |>
-  bind_rows(emp_df |> mutate(panel_n = 4))
+  bind_rows(emp_scatter |> mutate(panel_n = 2)) |>
+  bind_rows(emp_scatter |> mutate(panel_n = 3)) |>
+  bind_rows(emp_scatter |> mutate(panel_n = 4))
 
 variant_panels <- data.frame(
   panel_n = 1:4,
@@ -309,9 +417,9 @@ p_main <- ggplot(panel_data, aes(age, vocab)) +
                "0.9" = "#e31a1c"),
     name = "Percentile"
   ) +
-  scale_x_continuous(breaks = c(16, 20, 24, 28),
-                     limits = c(AGE_RANGE[1], AGE_RANGE[2])) +
-  coord_cartesian(ylim = c(0, N_ITEMS_BUNDLE)) +
+  scale_x_continuous(breaks = c(16, 20, 24, 28)) +
+  coord_cartesian(xlim = c(AGE_RANGE[1] - 0.4, AGE_RANGE[2] + 0.4),
+                  ylim = c(0, N_ITEMS_BUNDLE)) +
   labs(x = "Age (months)", y = sprintf("Productive vocabulary (of %d items)",
                                         N_ITEMS_BUNDLE),
        title = "Each addition matters: predicted vs. empirical percentile fans",
