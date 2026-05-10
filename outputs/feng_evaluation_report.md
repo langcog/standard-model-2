@@ -22,7 +22,7 @@ Children's per-child sigmoid slope on log-experience is $\kappa_i \sim 10$ (Engl
 
 ## Single-token coverage
 
-*(To be filled in.)* Of the 611 C&B CDI words, ___ are single tokens in the GPT2_CHILDES tokenizer (vs. C&B's BookCorpus-trained GPT-2 where all 611 were single tokens by construction of their filter).
+All **611/611** of the C&B CDI words are single tokens (with leading space) in the GPT2_CHILDES BPE tokenizer (Feng et al. 2024) — better-than-expected coverage. In the CHILDES validation set, 609 of these 611 have ≥1 occurrence; 578 have ≥50 occurrences; 439 hit the 200-occurrence cap. The two missing words are anatomy terms (`buttocks`, `vagina`); two more (`ankle`, `downtown`) have <10 occurrences. Per-word eval uses 50 occurrences/word (random subsample with fixed seed), giving 578 words full statistical mass.
 
 ## Per-word sigmoid fits
 
