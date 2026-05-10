@@ -7,6 +7,7 @@
 #SBATCH --gpus=1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=32G
+#SBATCH --constraint=GPU_MEM:24GB|GPU_MEM:32GB|GPU_MEM:40GB|GPU_MEM:48GB|GPU_MEM:80GB
 #
 # Smoke test: run a tiny ~2-3 minute training on a small CHILDES subset to
 # verify the full pipeline (HF Trainer + WordSurprisalCallback + per-word CSV
@@ -18,7 +19,7 @@ FENG_ROOT="${FENG_ROOT:-/scratch/users/mcfrank/feng_eval}"
 SCRIPTS_DIR="$FENG_ROOT/scripts"
 
 # Modules + venv
-source /etc/profile.d/modules.sh
+source /share/software/user/open/lmod/lmod/init/bash
 ml reset >/dev/null 2>&1 || true
 ml load python/3.12.1
 ml load cuda/12.6.1 cudnn/9.4.0

@@ -48,7 +48,16 @@ class WordSurprisalCallback(TrainerCallback):
     """
 
     def __init__(self, contexts_jsonl, out_csv, n_points=80,
-                 eval_batch_size=64, max_ctx=1024, also_log_step_0=True):
+                 eval_batch_size=64, max_ctx=128, also_log_step_0=True,
+                 max_per_word=None):
+        """
+        max_ctx : Truncate each context to the last `max_ctx` tokens before
+            (and including) the target. 128 captures the immediate
+            preceding-discourse context that dominates next-token prediction;
+            larger windows add cost without much information for CHILDES.
+        max_per_word : If set, randomly subsample this many contexts per word
+            (deterministic seed). Useful for cheaper eval at training time.
+        """
         self.contexts_jsonl = contexts_jsonl
         self.out_csv = out_csv
         self.n_points = n_points
@@ -66,9 +75,14 @@ class WordSurprisalCallback(TrainerCallback):
                 ctx = r["ctx"]
                 if len(ctx) > self.max_ctx:
                     ctx = ctx[-self.max_ctx:]
-                # target was at last position of original ctx; after truncation
-                # it's still at last position.
                 self.by_word[r["word"]].append((ctx, len(ctx) - 1))
+
+        if max_per_word is not None:
+            import random
+            rng = random.Random(2026)
+            for w, lst in self.by_word.items():
+                if len(lst) > max_per_word:
+                    self.by_word[w] = rng.sample(lst, max_per_word)
 
         self.words = sorted(self.by_word.keys())
         self.n_contexts = sum(len(v) for v in self.by_word.values())
@@ -110,32 +124,59 @@ class WordSurprisalCallback(TrainerCallback):
         sums = defaultdict(float)
         counts = defaultdict(int)
 
+        # Sort contexts by length for tighter padding (length-bucketed batches).
+        flat_sorted = sorted(self._flat, key=lambda t: len(t[1]))
+        # Pre-build tensor batches once (each forward, we rebuild input ids on
+        # device, but tensor gather of target NLLs is vectorized per batch).
+        import numpy as np
+
         bs = self.eval_batch_size
-        for start in range(0, len(self._flat), bs):
-            batch = self._flat[start:start + bs]
+        for start in range(0, len(flat_sorted), bs):
+            batch = flat_sorted[start:start + bs]
+            B = len(batch)
             max_len = max(len(c) for _, c, _ in batch)
-            ids = torch.full((len(batch), max_len),
-                             fill_value=0, dtype=torch.long, device=device)
-            attn = torch.zeros((len(batch), max_len), dtype=torch.long, device=device)
-            for i, (_, ctx, _) in enumerate(batch):
+            ids = torch.zeros((B, max_len), dtype=torch.long, device=device)
+            attn = torch.zeros((B, max_len), dtype=torch.long, device=device)
+            tgt_pos = torch.empty(B, dtype=torch.long, device=device)
+            tgt_id = torch.empty(B, dtype=torch.long, device=device)
+            word_idx = []
+            valid_mask = torch.zeros(B, dtype=torch.bool, device=device)
+
+            for i, (wi, ctx, pos) in enumerate(batch):
                 L = len(ctx)
-                ids[i, :L] = torch.tensor(ctx, device=device)
+                ids[i, :L] = torch.tensor(ctx, device=device, dtype=torch.long)
                 attn[i, :L] = 1
+                word_idx.append(wi)
+                if pos >= 1:
+                    tgt_pos[i] = pos - 1
+                    tgt_id[i] = ctx[pos]
+                    valid_mask[i] = True
+                else:
+                    tgt_pos[i] = 0
+                    tgt_id[i] = 0
 
             out = model(input_ids=ids, attention_mask=attn, use_cache=False)
             logits = out.logits  # [B, T, V]
-            log_probs = torch.log_softmax(logits.float(), dim=-1)
+            # Gather log-prob of target token at target position, per row
+            # log_softmax along V then gather. Using gather avoids materializing
+            # the whole log_probs tensor (we only need one slot per row).
+            row_idx = torch.arange(B, device=device)
+            picked_logits = logits[row_idx, tgt_pos, :]                 # [B, V]
+            picked_log_probs = torch.log_softmax(picked_logits.float(), dim=-1)
+            picked_nll = -picked_log_probs.gather(
+                1, tgt_id.unsqueeze(1)
+            ).squeeze(1)                                                  # [B]
+            picked_nll = picked_nll.masked_fill(~valid_mask, 0.0)
 
-            for i, (wi, ctx, pos) in enumerate(batch):
-                # nll of token at position `pos` given tokens [0, pos-1].
-                # Logits at index pos-1 predict the token at index pos.
-                # Skip pos == 0 (no left context).
-                if pos < 1:
+            # Pull to CPU once per batch
+            nlls_cpu = picked_nll.detach().cpu().numpy()
+            valid_cpu = valid_mask.detach().cpu().numpy()
+
+            for i in range(B):
+                if not valid_cpu[i]:
                     continue
-                tgt = ctx[pos]
-                lp = log_probs[i, pos - 1, tgt].item()
-                w = self.words[wi]
-                sums[w] += -lp
+                w = self.words[word_idx[i]]
+                sums[w] += float(nlls_cpu[i])
                 counts[w] += 1
 
         # Append rows

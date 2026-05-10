@@ -2,11 +2,12 @@
 #SBATCH --job-name=feng_gpt2
 #SBATCH --output=%x_seed%a_%j.out
 #SBATCH --error=%x_seed%a_%j.err
-#SBATCH --time=12:00:00
+#SBATCH --time=24:00:00
 #SBATCH --partition=gpu
 #SBATCH --gpus=1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
+#SBATCH --constraint=GPU_MEM:24GB|GPU_MEM:32GB|GPU_MEM:40GB|GPU_MEM:48GB|GPU_MEM:80GB
 #
 # Train one seed of GPT-2 small on CHILDES, logging per-CDI-word surprisal at
 # ~80 log-spaced training steps. Seed is set per array task.
@@ -31,7 +32,7 @@ mkdir -p "$RUN_DIR" "$FENG_OUT"
 cd "$FENG_ROOT/TinyDialogues"
 
 # Modules + venv
-source /etc/profile.d/modules.sh
+source /share/software/user/open/lmod/lmod/init/bash
 ml reset >/dev/null 2>&1 || true
 ml load python/3.12.1
 ml load cuda/12.6.1 cudnn/9.4.0
@@ -61,6 +62,9 @@ python "$SM2_DIR/model/scripts/feng_eval/train_gpt2_childes.py" \
     --learning_rate 1e-4 \
     --seed "$SEED" \
     --n_log_points 80 \
+    --eval_callback_batch_size 128 \
+    --eval_max_ctx 128 \
+    --eval_max_per_word 50 \
     --no_save
 
 echo "end: $(date)"

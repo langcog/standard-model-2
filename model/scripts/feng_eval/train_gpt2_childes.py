@@ -64,6 +64,10 @@ def main():
     ap.add_argument("--seq_len", type=int, default=1024)
     ap.add_argument("--logging_steps", type=int, default=50)
     ap.add_argument("--eval_callback_batch_size", type=int, default=64)
+    ap.add_argument("--eval_max_ctx", type=int, default=128,
+                    help="Truncate each CDI context to last N tokens for eval (cheap).")
+    ap.add_argument("--eval_max_per_word", type=int, default=50,
+                    help="Subsample CDI contexts to N per word for callback eval.")
     ap.add_argument("--no_save", action="store_true",
                     help="Skip saving any model checkpoints (we don't need them)")
     args = ap.parse_args()
@@ -154,7 +158,7 @@ def main():
         seed=args.seed,
         data_seed=args.seed,
         logging_steps=args.logging_steps,
-        evaluation_strategy="epoch",
+        eval_strategy="epoch",
         save_strategy=save_strategy,
         save_total_limit=args.save_total_limit,
         # match Feng et al.: no shuffling within epoch
@@ -179,7 +183,8 @@ def main():
         out_csv=args.surprisal_csv,
         n_points=args.n_log_points,
         eval_batch_size=args.eval_callback_batch_size,
-        max_ctx=block_size,
+        max_ctx=args.eval_max_ctx,
+        max_per_word=args.eval_max_per_word,
     )
 
     trainer = NoShuffleTrainer(
