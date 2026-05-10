@@ -17,7 +17,7 @@ Children's per-child sigmoid slope on log-experience is $\kappa_i \sim 10$ (Engl
 - **Training data**: `CHILDES_train_ordered.txt` from `styfeng/TinyDialogues` — the same English-subset CHILDES file used in Feng et al. 2026, ~24.5M tokens, ordered (no in-epoch shuffling, mirroring Feng).
 - **Training**: 20 epochs, AdamW, LR 1e-4 linear schedule (no warmup), per-device batch 8, sequence length 1024. Matches §B of Feng et al. 2026.
 - **Seeds**: {42, 0, 123}, 3 replicates.
-- **GPU**: Single GPU per seed (Sherlock `gpu` partition). Seeds 42 and 123 landed on NVIDIA L40S 48GB (bf16); seed 0 on V100 32GB (fp16, ~2× slower).
+- **GPU**: Single GPU per seed (Sherlock `gpu` partition). Seeds 42 and 123 landed on NVIDIA L40S 48GB (bf16); seed 0 on V100 32GB (fp16). The V100 turned out to be ~3× slower per training step than L40S on this workload, so seed 0 may not complete in the 24-hour SLURM wall (linear projection: ~30 hrs). Seeds 42 and 123 are expected to finish in ~15-18 hrs.
 - **Surprisal logging**: at 73 log-spaced training steps (80 requested, deduped after integer rounding), compute mean NLL of each CDI word over 50 random occurrences in CHILDES validation set, scored as $-\log p(w \mid \text{left context})$ under a causal LM forward pass. Context truncated to last 128 tokens of left context (full context up to 1024 would be ~10× more compute with negligible effect on the surprisal — most predictive information is in the immediate preceding sentence).
 
 ## Single-token coverage
