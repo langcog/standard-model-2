@@ -1039,6 +1039,52 @@ in practice}, and the reported \(s\) posterior in any
 accumulation.'' We pin \(s \approx 0\) in M1--M5 and treat
 \texttt{free\_s} as a robustness check, not a first-class estimate.
 
+\paragraph{The ridge depends on what else is free.}
+Empirically, where the posterior settles on the \((s, \delta)\) ridge
+depends on which other parameters are active in the linear predictor.
+With the frequency channel free (\texttt{long\_free\_s\_slopes}), the
+English longitudinal fit gives \(s \approx 3.05\,[2.14, 3.87]\) with
+\(\delta \approx 8.15\) — a sensible interior solution. With the
+frequency channel pinned at zero (the M\_best variant
+\texttt{free\_s\_no\_freq\_slopes}), the same data prefers
+\(s = 15.0\) (at the upper boundary of the prior support) with
+\(\delta = 1.54\) and \(\sigma_\zeta = 1.22\). The free-s posterior
+is concentrated at the boundary (ESS for \(s\) of 3110); chains agreed
+on this mode rather than failing to mix.
+
+Both modes fit the observed Wordbank trajectories for ages 16--30 mo
+about equally well (the swing in \(\eta\) across the data range is
+similar). They differ in (a) the predicted trajectory for ages
+\(< 15\) mo (the \(s = 15\) mode is structurally unable to predict
+those ages), and (b) the partition of between-child variance between
+\(\sigma_\xi\) and \(\sigma_\zeta\). Removing the frequency channel
+(which we did because it was LOO-null in the M\_best comparison)
+removed a constraint that had been silently breaking the ridge in
+favor of the smaller-\(s\) end. Without that constraint, the ridge
+tilts toward larger \(s\) and smaller \(\delta\).
+
+\paragraph{Implications.}
+Three things follow:
+\begin{enumerate}[leftmargin=1.3em]
+\item \(\kappa_{\text{pop}} = 1 + \delta\) is conditional on the
+  \(s\)-pinning. The headline \(\kappa_{\text{pop}} \approx 10.4\)
+  for English M\_best assumes \(s \approx 0\); a \(s \gg 0\)
+  parameterization gives a much smaller \(\kappa_{\text{pop}}\).
+\item The structural conclusion (\(\kappa_{\text{pop}} > 1\), i.e.,
+  super-linear scaling) is robust across both modes: the boundary
+  fit gives \(\kappa_{\text{pop}} = 2.54 > 1\) too. So the
+  \emph{direction} of the acceleration finding is parameterization-
+  invariant, but the magnitude is not.
+\item The free-s mode does not address the panel-4 floor effect
+  (the predicted between-child fan being too wide at young ages and
+  too compressed at old ages relative to empirical). At \(s = 15\)
+  the model predicts \emph{wider} fan at age 16 and a similar fan at
+  age 30, which is the wrong direction. The floor effect is therefore
+  not a missing-\(s\) problem; per-child onset variation
+  (\(s_i\) random rather than global \(s\)) would be the natural next
+  extension.
+\end{enumerate}
+
 \paragraph{Reference age \(a_0\) is dataset-specific.}
 \(a_0\) is the pivot at which \(\log_{age} = 0\) and so
 \(\theta_{it} = \xi_i\) (per-child intercept). Setting a single

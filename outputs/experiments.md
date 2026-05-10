@@ -988,6 +988,89 @@ are deployed.
 
 ---
 
+## 🟢 20. s-identifiability check on M_best (free_s_no_freq_slopes)
+
+**Motivation.** §2b and the explainer §"s near-non-identifiability"
+documented an (s, δ) ridge: log_age and time-from-onset are
+near-collinear over the 16–30 mo CDI:WS range, so the marginal
+likelihood is nearly flat along a ridge in (s, δ). M_best
+(`long_no_freq_slopes`) pins s ≈ 0 and reads κ_pop = 1 + δ off the
+posterior. Two open questions: (a) does the same data prefer an
+interior s when s is freed? (b) is the qualitative
+"super-linear scaling" finding (κ_pop > 1) parameterization-invariant,
+or does it depend on the s-pinning?
+
+**Setup.** Variant `free_s_no_freq_slopes` (added to
+[`model/R/helpers.R`](../model/R/helpers.R)): same as M_best
+(`long_no_freq_slopes`) except `s_prior_mean = 4.5, s_prior_sd = 2`
+on the truncated-normal prior s ∈ [0, 15]. Frequency channel pinned
+at zero (`beta_c_prior_sd = 0.001`), per-child slopes free
+(`sigma_zeta_prior_sd = 1`). 4 chains × 1500 iter on Sherlock
+(job 23900133, completed).
+
+**Headline result.**
+
+| | M_best (s ≈ 0) | free_s_no_freq_slopes |
+|---|---:|---:|
+| s | 0 (pinned) | **14.999 [14.997, 15.000]** (boundary) |
+| δ | 9.39 [8.79, 10.04] | **1.54 [1.49, 1.58]** |
+| σ_α | 1.83 [1.65, 2.04] | 2.08 [1.88, 2.30] |
+| σ_ζ | 3.51 [3.10, 3.95] | 1.22 [1.11, 1.35] |
+| κ_pop = 1 + δ | 10.4 | 2.54 |
+| ESS_bulk (s) | — | 3110 |
+| Rhat (s, δ) | — | 1.001, 1.000 |
+
+**Interpretation.**
+
+1. **The posterior settles at the upper prior boundary.** s = 14.999
+   with sd = 0.0008 — the free-s mode is *concentrated* at the
+   boundary, not failing to mix (Rhat = 1.00, ESS = 3110). Chains agree
+   on the s = 15 corner.
+2. **Removing the frequency channel weakens the ridge constraint.**
+   With frequency channel free (`long_free_s_slopes`, run earlier on
+   the same English data), the posterior gives s ≈ 3.05 [2.14, 3.87]
+   with δ ≈ 8.15 — a sensible interior solution. The frequency channel,
+   even when LOO-null at the model-comparison level, was silently
+   anchoring the ridge to the small-s end. With it pinned, the ridge
+   tilts to the large-s, small-δ corner.
+3. **Direction of acceleration is parameterization-invariant; magnitude
+   is not.** Both modes give κ_pop > 1 (10.4 vs. 2.54), so the
+   structural claim ("super-linear scaling") is robust. But the
+   headline number κ_pop ≈ 10 is conditional on the s-pinning.
+4. **Both modes fit the 16–30 mo data about equally well.** The swing
+   in η across the empirical age range is similar; they differ
+   primarily in (a) extrapolation to ages < 15 mo (the s = 15 mode is
+   structurally unable to predict ages below s) and (b) the σ_ξ²
+   partition between σ_α² and σ_ζ² (free-s pushes more variance into
+   σ_α, less into σ_ζ).
+5. **Free-s does not address the panel-4 floor effect.** Inspection
+   of the predicted fan at ages 16 and 30 under s = 15 shows a *wider*
+   fan at age 16 and a similar fan at age 30 — the wrong direction.
+   The floor effect is not a missing-s problem; per-child onset
+   variation (s_i random rather than global s) would be the natural
+   next extension if we wanted to address it directly.
+
+**Conclusions.**
+
+- Stick with M_best (s ≈ 0) as the headline parameterization. κ_pop ≈
+  10.4 is reported with the explicit caveat that the magnitude depends
+  on s-pinning (now documented in the explainer §"s
+  near-non-identifiability").
+- The κ_pop > 1 finding is robust to s-pinning; the magnitude is not.
+  This goes in the slide deck as a footnote/sensitivity remark, not a
+  retraction.
+- A per-child s_i extension is the natural next step to address the
+  panel-4 floor effect — explicitly *not* what free-s does.
+
+**Artifacts.**
+- [`model/R/helpers.R`](../model/R/helpers.R) (`free_s_no_freq_slopes`
+  variant added)
+- `fits/summaries/free_s_no_freq_slopes.{summary,draws}.rds`
+- Explainer §"s near-non-identifiability" updated with "The ridge
+  depends on what else is free." paragraph and implications.
+
+---
+
 ## Backlog (⚪)
 
 ### Data / robustness
