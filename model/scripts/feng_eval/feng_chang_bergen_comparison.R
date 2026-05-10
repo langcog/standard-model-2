@@ -84,27 +84,50 @@ cat("\n=== Feng CHILDES models ===\n")
 print(as.data.frame(lm_summary(feng_data, "feng")), digits = 3)
 
 # ---- Load our kid kappa distribution -----------------------------
-draws_eng <- readRDS(file.path(PATHS$fits_dir, "summaries",
-                                "long_no_freq_slopes.draws.rds"))
-draws_nor <- readRDS(file.path(PATHS$fits_dir, "summaries",
-                                "long_no_freq_slopes_norwegian.draws.rds"))
+# Prefer the posterior draws; fall back to the published kappa_pop/sigma_zeta
+# summary from outputs/chang_bergen_derivation.tex when draws aren't present.
+
+draws_eng_path <- file.path(PATHS$fits_dir, "summaries",
+                             "long_no_freq_slopes.draws.rds")
+draws_nor_path <- file.path(PATHS$fits_dir, "summaries",
+                             "long_no_freq_slopes_norwegian.draws.rds")
 
 as_num <- function(x) as.numeric(unlist(x))
-sample_kappa_dist <- function(draws, label, N_kids = 5000) {
+
+sample_kappa_from_draws <- function(draws, label, N_kids = 5000) {
   delta <- as_num(draws$delta)
   sigma_zeta <- as_num(draws$sigma_zeta)
   set.seed(2026)
   draw_idx <- sample.int(length(delta), size = 50)
-  out <- lapply(draw_idx, function(d) {
+  lapply(draw_idx, function(d) {
     n <- ceiling(N_kids / length(draw_idx))
     kappa_draw <- 1 + delta[d] + rnorm(n, mean = 0, sd = sigma_zeta[d])
     data.frame(model = label, slope_natural = kappa_draw)
   }) |> bind_rows()
-  out
 }
 
-kid_eng <- sample_kappa_dist(draws_eng, "Kids (English, M_best)")
-kid_nor <- sample_kappa_dist(draws_nor, "Kids (Norwegian, M_best)")
+sample_kappa_from_summary <- function(kappa_pop, sigma_zeta, label, N_kids = 5000) {
+  set.seed(2026)
+  data.frame(model = label,
+             slope_natural = kappa_pop + rnorm(N_kids, 0, sigma_zeta))
+}
+
+if (file.exists(draws_eng_path)) {
+  kid_eng <- sample_kappa_from_draws(readRDS(draws_eng_path),
+                                      "Kids (English, M_best)")
+} else {
+  message("NOTE: ", draws_eng_path, " not found; using published M_best summary",
+          " (kappa_pop=10.3, sigma_zeta=3.47) instead of posterior draws.")
+  kid_eng <- sample_kappa_from_summary(10.3, 3.47, "Kids (English, M_best)")
+}
+if (file.exists(draws_nor_path)) {
+  kid_nor <- sample_kappa_from_draws(readRDS(draws_nor_path),
+                                      "Kids (Norwegian, M_best)")
+} else {
+  message("NOTE: ", draws_nor_path, " not found; using published M_best summary",
+          " (kappa_pop=12.5, sigma_zeta=3.50) instead of posterior draws.")
+  kid_nor <- sample_kappa_from_summary(12.5, 3.50, "Kids (Norwegian, M_best)")
+}
 
 # ---- Common plotting helper --------------------------------------
 pretty_lm <- function(d) {
