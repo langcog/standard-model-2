@@ -17,8 +17,8 @@ Children's per-child sigmoid slope on log-experience is $\kappa_i \sim 10$ (Engl
 - **Training data**: `CHILDES_train_ordered.txt` from `styfeng/TinyDialogues` — the same English-subset CHILDES file used in Feng et al. 2026, ~24.5M tokens, ordered (no in-epoch shuffling, mirroring Feng).
 - **Training**: 20 epochs, AdamW, LR 1e-4 linear schedule (no warmup), per-device batch 8, sequence length 1024. Matches §B of Feng et al. 2026.
 - **Seeds**: {42, 0, 123}, 3 replicates.
-- **GPU**: Single GPU (Sherlock `gpu` partition, H100/A100), bf16.
-- **Surprisal logging**: at ~80 log-spaced training steps, compute mean NLL of each CDI word over up to 200 occurrences in CHILDES validation set, scored as $-\log p(w \mid \text{left context})$ under a causal LM forward pass.
+- **GPU**: Single GPU per seed (Sherlock `gpu` partition). Seeds 42 and 123 landed on NVIDIA L40S 48GB (bf16); seed 0 on V100 32GB (fp16, ~2× slower).
+- **Surprisal logging**: at 73 log-spaced training steps (80 requested, deduped after integer rounding), compute mean NLL of each CDI word over 50 random occurrences in CHILDES validation set, scored as $-\log p(w \mid \text{left context})$ under a causal LM forward pass. Context truncated to last 128 tokens of left context (full context up to 1024 would be ~10× more compute with negligible effect on the surprisal — most predictive information is in the immediate preceding sentence).
 
 ## Single-token coverage
 
@@ -70,10 +70,12 @@ Snapshot plot: `outputs/figs/longitudinal/feng_partial_slope_comparison.png` (pa
 
 ## Caveats
 
-- **Compute scale.** GPT-2-CHILDES is trained on ~24.5M tokens × 20 epochs ≈ 0.5B tokens. Chang & Bergen's BookCorpus-trained GPT-2 saw ~75M tokens × many epochs in a larger compute budget. We are varying input distribution *and* compute simultaneously here; the cleanest control would be a CHILDES-trained model run to a matched compute budget (deferred — see open questions).
-- **Tokenizer coverage.** A CHILDES-trained BPE tokenizer may segment some CDI items differently than C&B's GPT-2 tokenizer; we report single-token coverage in the table above.
+- **Partial-fit bias.** During training, per-word ParamScale estimates are systematically biased *upward* (slope biased *downward*) because the lower asymptote keeps falling as the model continues to learn. Final-checkpoint fits are the meaningful comparand. Between snapshots at 33 evals and 58 evals, 56% of common words had |Δslope| > 1.0 — confirming this is a real bias, not noise. The headline number above will only decrease further as the L40S seeds reach their full 73 evals.
+- **Compute scale.** GPT-2-CHILDES is trained on ~24.5M tokens × 20 epochs ≈ 0.5B tokens. Chang & Bergen's BookCorpus-trained GPT-2 saw ~75M tokens × many epochs in a similar-ish compute budget; the rough match of medians at the partial snapshot suggests slope is not very compute-sensitive once the model has begun to converge.
+- **Tokenizer coverage.** A CHILDES-trained BPE tokenizer might segment some CDI items differently than C&B's GPT-2 tokenizer. In our case all 611 C&B CDI words are single tokens (see Single-token coverage section), so this concern doesn't apply here.
 - **Seed-as-replicate.** We treat 3 seeds as the LM-side analog of between-instance variability. This is a closer analog than C&B's single-seed setup but still likely underestimates true variance.
-- **CHILDES validation set as eval distribution.** CDI-word occurrences are drawn from the CHILDES validation set, not from a held-out wordbank-style probe set.
+- **CHILDES validation set as eval distribution.** CDI-word occurrences are drawn from the CHILDES validation set, not from a held-out wordbank-style probe set. This may favor words that are common in CHILDES specifically.
+- **Per-word vs. per-instance.** The kid-side $\kappa_i$ is per-child (so different kids learning the same word have different slopes). The LM-side slope is per-word (so different words for the same model have different slopes). Both index "between-instance" variation but they're different kinds of instances. See `outputs/chang_bergen_derivation.tex` Section 4.
 
 ## Open questions
 
