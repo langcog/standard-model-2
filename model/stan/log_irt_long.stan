@@ -96,6 +96,7 @@ data {
   real<lower=0> delta_prior_sd;
   real<lower=0> sigma_lambda_prior_sd;
   real<lower=0> sigma_zeta_prior_sd;
+  real<lower=0> sigma_alpha_prior_sd;   // tight => sigma_alpha pinned at 0 (pure-accumulator demo variants)
   real<lower=0> sigma_s_prior_sd;       // per-child onset s_i; tight => off
   real<lower=0> beta_c_prior_sd;        // tight => beta_c pinned at beta_c_prior_mean
   real beta_c_prior_mean;               // 1 = unit accumulator; 0 = no_freq
@@ -177,7 +178,7 @@ model {
   sigma_child[1] ~ normal(0, 1);
   sigma_child[2] ~ normal(0, sigma_zeta_prior_sd);
   L_child       ~ lkj_corr_cholesky(2);  // mild prior toward 0 corr
-  sigma_alpha   ~ normal(0, 1);
+  sigma_alpha   ~ normal(0, sigma_alpha_prior_sd);
 
   psi_raw ~ std_normal();
   mu_c    ~ normal(mu_mu_c, sigma_mu_c);
