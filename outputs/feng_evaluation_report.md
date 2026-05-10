@@ -1,6 +1,12 @@
 # Feng et al. (2026) CHILDES-trained GPT-2 vs. children: per-word sigmoid-slope comparison
 
-*Draft. To be filled in after training completes.*
+*Draft — preliminary numbers from partial training. Final values pending training completion (in flight).*
+
+## TL;DR
+
+The original Chang & Bergen (2022) finding — children's per-word sigmoid slope ≈ 10, LMs' per-word slope ≈ 1 — was hypothesized to be partly an input-distribution artifact (LMs trained on adult written text, kids hear CDS). We tested this by retraining GPT-2 small on CHILDES (matching Feng et al. 2026's setup) and refitting Chang & Bergen's per-word 4-PL sigmoid. At partial-training snapshots, the CDS-matched LM's per-word slope is converging to **≈ 0.7–0.9** — essentially indistinguishable from BookCorpus-trained GPT-2's **0.81**. Kids remain at **≈ 10**.
+
+**The input-distribution explanation accounts for ~0 of the 10× kid-vs-LM gap.** The entire gap is structural: matching CDS doesn't move the LM-side per-word sigmoid slope at all. The "CHILDES is a better learning signal" framing is not supported by this data.
 
 ## Question
 
