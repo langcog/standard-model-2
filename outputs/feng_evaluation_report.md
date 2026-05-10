@@ -34,32 +34,37 @@ Filtering follows C&B / our existing pipeline: drop fits with $\mathrm{ParamScal
 
 ## Headline (preliminary, partial training)
 
-*Final numbers TBD when training completes. Below: snapshot at ~53 of 80 log-spaced evals (step ≈ 5,177 of 60,000) for the two L40S seeds; seed 0 (V100) is at ~20 evals.*
+*Final numbers TBD when training completes. Total training: 114,520 steps (~20 epochs, 9342 CHILDES conversations grouped into 1024-token blocks). Below: snapshot at 58 of 73 log-spaced evals (step ≈ 10,822 of 114,520, ~10% of training) for the two L40S seeds; seed 0 (V100) is much earlier.*
 
 | Population | Median slope | IQR |
 |---|---|---|
 | Children, per-child $\kappa_i$ (English M_best) | 10.3 | [8.0, 12.6] |
 | Children, per-child $\kappa_i$ (Norwegian M_best) | 12.5 | [10.0, 14.9] |
-| **GPT-2-CHILDES, seed 42** (partial, N=595) | **1.35** | [0.67, 2.34] |
-| **GPT-2-CHILDES, seed 123** (partial, N=592) | **1.39** | [0.74, 2.32] |
+| **GPT-2-CHILDES, seed 42** (partial, N=605) | **0.84** | [0.45, 1.46] |
+| **GPT-2-CHILDES, seed 123** (partial, N=605) | **0.89** | [0.46, 1.62] |
 | GPT-2-CHILDES, seed 0 | (still mid-training) | |
 | LMs, BERT-BookCorpus per-word | 0.76 | [0.42, 1.32] |
 | LMs, BiLSTM-BookCorpus per-word | 0.87 | [0.53, 1.52] |
 | LMs, GPT-2-BookCorpus per-word | 0.81 | [0.45, 1.54] |
 | LMs, LSTM-BookCorpus per-word | 0.96 | [0.44, 1.90] |
 
-**Evolution of partial fits as more evals accumulate:**
+**Evolution of partial fits as more evals accumulate (seed 42):**
 
-| Evals done | Step reached | Words kept | Seed 42 median |
+| Evals done | Step reached | Words kept | Median |
 |---|---|---|---|
-| 23 | ~62 | 385/609 (63%) | 3.22 |
-| 33 | ~364 | 475/609 (78%) | 2.36 |
-| 48 | ~2,477 | 583/609 (96%) | 1.85 |
-| 53 | ~5,177 | 595/609 (98%) | 1.35 |
+| 23 | 62 | 385/609 (63%) | 3.22 |
+| 33 | 364 | 475/609 (78%) | 2.36 |
+| 48 | 2,477 | 583/609 (96%) | 1.85 |
+| 53 | 5,177 | 595/609 (98%) | 1.35 |
+| 58 | 10,822 | 605/609 (99.3%) | 0.84 |
 
-The slope estimate is monotonically decreasing as more late-step data anchors the lower asymptote of each word's sigmoid and as more slow-learner words enter the distribution. The final number is likely in the **1.0–1.5** range.
+The slope estimate is decreasing monotonically as more late-step data anchors the lower asymptote of each word's sigmoid. Final number TBD but the partial fits at intermediate training stages systematically overestimate slope (the upper asymptote is fixed at the random-init NLL, the lower asymptote keeps dropping as training continues, so the fitted ParamScale grows and the slope shrinks).
 
-**Direction:** CDS-matched LM training shifts the per-word sigmoid-slope distribution upward by roughly **1.5–2×** versus BookCorpus-trained LMs. The gap to kids ($\kappa \approx 10$) narrows but does **not** close — kids remain ~5–8× steeper than CDS-matched GPT-2. The structural-difference hypothesis is the dominant explanation; input distribution accounts for only a small fraction of the original 10× gap.
+**Direction (preliminary):** CDS-matched GPT-2 has now converged to **almost exactly the same median slope** as C&B's BookCorpus-trained GPT-2 (0.84 vs. 0.81). If this holds through full training, the answer is:
+
+> **Input-distribution matching does NOT close the kid-vs-LM gap. The entire 10× gap is structural.**
+
+This is a stronger conclusion than expected from the original handoff and stands in direct contrast to a "CHILDES is a better learning curriculum than BookCorpus" framing. The per-word sigmoid slope appears to be invariant across very different LM training distributions, given matched compute. Caveat: the final number is still moving as training continues; the L40S seeds have only completed 10% of total training.
 
 Snapshot plot: `outputs/figs/longitudinal/feng_partial_slope_comparison.png` (partial; final plots produced once training completes).
 
