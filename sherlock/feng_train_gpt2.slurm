@@ -21,7 +21,7 @@
 set -euo pipefail
 
 FENG_ROOT="${FENG_ROOT:-/scratch/users/mcfrank/feng_eval}"
-SM2_DIR="${SM2_DIR:-$HOME/standard_model_2}"
+SCRIPTS_DIR="${SCRIPTS_DIR:-$FENG_ROOT/scripts}"
 FENG_OUT="${FENG_OUT:-$FENG_ROOT/runs}"
 
 SEED="${SLURM_ARRAY_TASK_ID:-42}"
@@ -49,7 +49,7 @@ echo "node: $(hostname)"
 echo "GPU: $(nvidia-smi -L 2>/dev/null || echo none)"
 echo "start: $(date)"
 
-python "$SM2_DIR/model/scripts/feng_eval/train_gpt2_childes.py" \
+python "$SCRIPTS_DIR/train_gpt2_childes.py" \
     --train_file "$FENG_ROOT/TinyDialogues/data/CHILDES/CHILDES_train_ordered.txt" \
     --val_file "$FENG_ROOT/TinyDialogues/data/CHILDES/CHILDES_val_ordered.txt" \
     --tokenizer_dir "$FENG_ROOT/TinyDialogues/tokenizers/GPT2_CHILDES" \
