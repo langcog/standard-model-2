@@ -32,21 +32,25 @@ to each per-word mean-NLL trajectory across log-spaced training steps, with $x =
 
 Filtering follows C&B / our existing pipeline: drop fits with $\mathrm{ParamScale} \notin (0.01, 10)$ or surprisal range $\leq 1$ nat.
 
-## Headline
+## Headline (preliminary, partial training)
 
-*(To be filled in once training completes.)*
+*Final numbers TBD when training completes. Below: snapshot at ~33 of 80 log-spaced evals (step ≈ 364 of 60000) for the two L40S seeds; seed 0 (V100) is much earlier.*
 
 | Population | Median slope | IQR |
 |---|---|---|
 | Children, per-child $\kappa_i$ (English M_best) | 10.3 | [8.0, 12.6] |
 | Children, per-child $\kappa_i$ (Norwegian M_best) | 12.5 | [10.0, 14.9] |
-| **GPT-2-CHILDES, seed 42** (this work) | ___ | ___ |
-| **GPT-2-CHILDES, seed 0** (this work) | ___ | ___ |
-| **GPT-2-CHILDES, seed 123** (this work) | ___ | ___ |
+| **GPT-2-CHILDES, seed 42** (partial, N=475) | **2.36** | [1.43, 3.75] |
+| **GPT-2-CHILDES, seed 123** (partial, N=499) | **2.34** | [1.41, 3.75] |
+| GPT-2-CHILDES, seed 0 | (still on early evals) | |
 | LMs, BERT-BookCorpus per-word | 0.76 | [0.42, 1.32] |
 | LMs, BiLSTM-BookCorpus per-word | 0.87 | [0.53, 1.52] |
 | LMs, GPT-2-BookCorpus per-word | 0.81 | [0.45, 1.54] |
 | LMs, LSTM-BookCorpus per-word | 0.96 | [0.44, 1.90] |
+
+**Direction (preliminary):** CDS-matched LM training shifts the per-word sigmoid-slope distribution upward by roughly **2–4×** versus BookCorpus-trained LMs. The gap to kids ($\kappa \approx 10$) narrows but does **not** close — kids remain ~4–5× steeper than CDS-matched GPT-2. The structural-difference hypothesis is winning.
+
+Snapshot plot: `outputs/figs/longitudinal/feng_partial_slope_comparison.png` (partial; final plots produced once training completes).
 
 ## Caveats
 
