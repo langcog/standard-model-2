@@ -112,6 +112,7 @@ if (is_lmm) {
   pars <- c(pars, "s", "delta")
 }
 if (grepl("2pl", variant)) pars <- c(pars, "sigma_lambda")
+if (grepl("_si", variant)) pars <- c(pars, "sigma_s")
 print(summarize_fit(fit, pars = pars), digits = 3)
 
 cat(sprintf("\nSaved: fits/%s.rds\n", out_tag))

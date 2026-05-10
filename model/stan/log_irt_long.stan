@@ -8,10 +8,16 @@
 //   longitudinal LMM shows corr(xi, zeta) ~ 0.7.
 // - 2PL discrimination lambda_j per word, hierarchical.
 // - Global start time s, age rate-change exponent delta.
+// - Optional per-child onset offset s_i (>= 0) drawn from a half-normal
+//   N_+(0, sigma_s); enabled by sigma_s_prior_sd > 0, pinned off otherwise.
+//   Effective onset for child i is (s + s_i[i]); when sigma_s_prior_sd is
+//   tiny (default 0.001), s_i collapses to ~0 and the model reduces to
+//   the standard global-s formulation.
 //
 // Linear predictor:
 //   eta = lambda_j * [xi_i + beta_c[cc[j]] * log p_j + log H
-//                     + (1 + delta + zeta_i) * log((age_a - s)/a0) - psi_j]
+//                     + (1 + delta + zeta_i) * log((age_a - s - s_i)/a0)
+//                     - psi_j]
 //
 // beta_c is a per-class log-p slope that is pinned at 1 by default
 // (tight prior beta_c_prior_sd ~ 0.001 in DEFAULT_PRIORS). The
@@ -40,14 +46,14 @@ functions {
                         vector log_p,
                         vector psi, vector lambda,
                         vector beta_c,
-                        vector xi, vector zeta) {
+                        vector xi, vector zeta, vector s_i) {
     int n_slice = end - start + 1;
     vector[n_slice] eta_slice;
     for (i in 1:n_slice) {
       int n = start + i - 1;
-      real ae = fmax(admin_age[aa[n]] - s, 0.01);
-      real log_age_n = log(ae / a0);
       int ch = admin_to_child[aa[n]];
+      real ae = fmax(admin_age[aa[n]] - s - s_i[ch], 0.01);
+      real log_age_n = log(ae / a0);
       real slope_n = time_baseline + delta + zeta[ch];
       real beta_n  = beta_c[cc[jj[n]]];
       real base = xi[ch] + beta_n * log_p[jj[n]] + log_H
@@ -90,6 +96,7 @@ data {
   real<lower=0> delta_prior_sd;
   real<lower=0> sigma_lambda_prior_sd;
   real<lower=0> sigma_zeta_prior_sd;
+  real<lower=0> sigma_s_prior_sd;       // per-child onset s_i; tight => off
   real<lower=0> beta_c_prior_sd;        // tight => beta_c pinned at beta_c_prior_mean
   real beta_c_prior_mean;               // 1 = unit accumulator; 0 = no_freq
   real time_baseline;                   // 1 = unit-rate accumulator; 0 = no time term (M0)
@@ -114,6 +121,12 @@ parameters {
   real<lower=0> sigma_lambda;
 
   vector[C] beta_c;                     // per-class log-p slope (pinned 1 by default)
+
+  // Per-child onset offset, drawn from N_+(0, sigma_s). Lower-bounded
+  // at 0 so kid effective onsets s + s_i[ch] >= s (no negative onsets).
+  // When sigma_s_prior_sd is tight (~0.001), s_i collapses to ~0.
+  vector<lower=0>[I] s_i;
+  real<lower=0> sigma_s;
 }
 
 transformed parameters {
@@ -178,6 +191,12 @@ model {
 
   beta_c ~ normal(beta_c_prior_mean, beta_c_prior_sd);
 
+  // Per-child onset offset (half-normal via <lower=0> on s_i).
+  // sigma_s_prior_sd ~ 0.001 effectively pins s_i at 0 (legacy global-s
+  // behavior); ~3 frees per-child onset variation.
+  s_i     ~ normal(0, sigma_s);
+  sigma_s ~ normal(0, sigma_s_prior_sd);
+
   // Likelihood: parallelize per-observation lpmf via reduce_sum.
   // grainsize = 1 lets Stan's TBB scheduler auto-tune the slice size.
   target += reduce_sum(partial_sum_lpmf, y, 1,
@@ -185,7 +204,7 @@ model {
                        admin_age, s, a0,
                        time_baseline, delta, log_H,
                        log_p, psi, lambda, beta_c,
-                       xi, zeta);
+                       xi, zeta, s_i);
 }
 
 generated quantities {
@@ -196,9 +215,11 @@ generated quantities {
   // Recomputes the linear predictor; doesn't slow the sampling phase.
   vector[N] log_lik;
   {
-    vector[N] ae;
-    for (n in 1:N) ae[n] = fmax(admin_age[aa[n]] - s, 0.01);
-    vector[N] log_age = log(ae / a0);
+    vector[N] log_age;
+    for (n in 1:N) {
+      int ch_n = admin_to_child[aa[n]];
+      log_age[n] = log(fmax(admin_age[aa[n]] - s - s_i[ch_n], 0.01) / a0);
+    }
     for (n in 1:N) {
       int ch = admin_to_child[aa[n]];
       real slope_n = time_baseline + delta + zeta[ch];

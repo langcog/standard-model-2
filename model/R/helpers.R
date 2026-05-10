@@ -222,6 +222,24 @@ variant_hyperpriors <- function(name) {
     free_s_no_freq_slopes = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
                                  sigma_zeta_prior_sd = 1,
                                  s_prior_mean = 4.5, s_prior_sd = 2),
+    # Per-child onset variants. Population s pinned tight near 0 (via
+    # DEFAULT_PRIORS s_prior_mean=0.5, s_prior_sd=0.05); per-child onset
+    # offset s_i ~ Normal_+(0, sigma_s) with sigma_s ~ HN(0, 3) lets
+    # individual kids start late by up to ~9 mo. Two variants:
+    #   no_freq_si_only -- sigma_zeta pinned at 0 (no kappa variation),
+    #                      sigma_s free; tests whether per-child onset
+    #                      ALONE can match the panel-4 fan asymmetry.
+    #   no_freq_slopes_si -- sigma_zeta free AND sigma_s free; full
+    #                      M_best plus per-child onset.
+    # The two together let us see whether sigma_s competes with
+    # sigma_zeta (the identifiability worry) or adds genuinely new
+    # variance (closing the q10-at-floor gap at age 16).
+    no_freq_si_only = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
+                           sigma_zeta_prior_sd = 0.001,
+                           sigma_s_prior_sd = 3),
+    no_freq_slopes_si = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
+                             sigma_zeta_prior_sd = 1,
+                             sigma_s_prior_sd = 3),
     # Comprehension-channel variants. Used only by log_irt_long_io_comp.stan;
     # fit_io.R selects that Stan file when the variant matches `comp_*`.
     # The bundle already carries N_comp, aa_comp, jj_comp, y_comp; this
