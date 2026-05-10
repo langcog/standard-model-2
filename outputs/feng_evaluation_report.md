@@ -70,7 +70,10 @@ Snapshot plot: `outputs/figs/longitudinal/feng_partial_slope_comparison.png` (pa
 
 ## Caveats
 
-- **Partial-fit bias.** During training, per-word ParamScale estimates are systematically biased *upward* (slope biased *downward*) because the lower asymptote keeps falling as the model continues to learn. Final-checkpoint fits are the meaningful comparand. Between snapshots at 33 evals and 58 evals, 56% of common words had |Δslope| > 1.0 — confirming this is a real bias, not noise. The headline number above will only decrease further as the L40S seeds reach their full 73 evals.
+- **Partial-fit bias.** During training, per-word ParamScale estimates are unstable. Diagnostic per-word plots at 61 evals (`outputs/figs/longitudinal/feng_per_word_trajectories.png`) show two opposing biases:
+  - *Shallowest-slope words* (e.g., `soft`, `cute`, `stay`): trajectories are still descending nearly linearly on log-step axis; the 4-PL fit reduces to a straight line because the lower asymptote hasn't been reached. As more training comes in these will become more sigmoidal and slopes will *increase*.
+  - *Steepest-slope words* (e.g., `clap`, `yogurt`, `raisin`): trajectories look like step functions, fit with very small ParamScale → spuriously high slope. These are rare words (30-50 occurrences) where late-step noise dominates.
+  Between 33 and 58 evals, 56% of common words shifted |Δslope| > 1.0. The median sits near 0.7-0.9 across recent snapshots and should be relatively stable as the two biases partly cancel, but final-training fits remain the meaningful comparand.
 - **Compute scale.** GPT-2-CHILDES is trained on ~24.5M tokens × 20 epochs ≈ 0.5B tokens. Chang & Bergen's BookCorpus-trained GPT-2 saw ~75M tokens × many epochs in a similar-ish compute budget; the rough match of medians at the partial snapshot suggests slope is not very compute-sensitive once the model has begun to converge.
 - **Tokenizer coverage.** A CHILDES-trained BPE tokenizer might segment some CDI items differently than C&B's GPT-2 tokenizer. In our case all 611 C&B CDI words are single tokens (see Single-token coverage section), so this concern doesn't apply here.
 - **Seed-as-replicate.** We treat 3 seeds as the LM-side analog of between-instance variability. This is a closer analog than C&B's single-seed setup but still likely underestimates true variance.
