@@ -1,6 +1,6 @@
 # Feng et al. (2026) CHILDES-trained GPT-2 vs. children: per-word sigmoid-slope comparison
 
-*Final numbers from completed L40S training (seeds 42, 123). Seed 0 still finishing on L40S restart after V100 abandonment; current partial estimate matches the others.*
+*Final numbers from all three completed L40S seeds.*
 
 ## TL;DR
 
@@ -23,7 +23,7 @@ Children's per-child sigmoid slope on log-experience is $\kappa_i \sim 10$ (Engl
 - **Training data**: `CHILDES_train_ordered.txt` from `styfeng/TinyDialogues` — the same English-subset CHILDES file used in Feng et al. 2026, ~24.5M tokens, ordered (no in-epoch shuffling, mirroring Feng).
 - **Training**: 20 epochs, AdamW, LR 1e-4 linear schedule (no warmup), per-device batch 8, sequence length 1024. Matches §B of Feng et al. 2026.
 - **Seeds**: {42, 0, 123}, 3 replicates.
-- **GPU**: Single L40S 48GB per seed (Sherlock `gpu` partition, constrained to `GPU_GEN:AMP|GPU_GEN:LOV|GPU_GEN:HPR`). Seed 0 was originally placed on a V100 32GB, which was ~3× slower per training step than L40S; cancelled at 11% of training and resubmitted on L40S with the tighter constraint. Final wall-time per seed: 7h 21m (seed 42), 8h 12m (seed 123), seed 0 still running on L40S restart.
+- **GPU**: Single L40S 48GB per seed (Sherlock `gpu` partition, constrained to `GPU_GEN:AMP|GPU_GEN:LOV|GPU_GEN:HPR`). Seed 0 was originally placed on a V100 32GB, which was ~3× slower per training step than L40S; cancelled at 11% of training and resubmitted on L40S with the tighter constraint. Final wall-time per seed: 7h 21m (seed 42), 8h 12m (seed 123), 7h 57m (seed 0 after restart).
 - **Surprisal logging**: at 73 log-spaced training steps (80 requested, deduped after integer rounding), compute mean NLL of each CDI word over 50 random occurrences in CHILDES validation set, scored as $-\log p(w \mid \text{left context})$ under a causal LM forward pass. Context truncated to last 128 tokens of left context (full context up to 1024 would be ~10× more compute with negligible effect on the surprisal — most predictive information is in the immediate preceding sentence).
 
 ## Single-token coverage
@@ -48,15 +48,13 @@ Total training: 114,520 steps (20 epochs, 45,807 1024-token blocks of CHILDES). 
 | Children, per-child $\kappa_i$ (Norwegian M_best) | 5000 | **12.5** | [10.0, 14.9] |
 | GPT-2-CHILDES, seed 42 (✅ completed) | 609 | **0.74** | [0.43, 1.11] |
 | GPT-2-CHILDES, seed 123 (✅ completed) | 609 | **0.74** | [0.45, 1.16] |
-| GPT-2-CHILDES, seed 0 (still mid-training, ~64 evals) | 608 | 0.67 | [0.40, 1.13] |
+| GPT-2-CHILDES, seed 0 (✅ completed) | 609 | **0.72** | [0.45, 1.14] |
 | LMs, BERT-BookCorpus per-word | 609 | 0.76 | [0.42, 1.32] |
 | LMs, BiLSTM-BookCorpus per-word | 604 | 0.87 | [0.53, 1.52] |
 | LMs, GPT-2-BookCorpus per-word | 604 | 0.81 | [0.45, 1.54] |
 | LMs, LSTM-BookCorpus per-word | 593 | 0.96 | [0.44, 1.90] |
 
-**The CDS-matched GPT-2 (0.74) sits inside the same tight cluster as the 4 BookCorpus-trained LMs (0.76–0.96), all far below kids (10.3).**
-
-The two completed seeds (42, 123) give identical medians 0.74 — strong reproducibility. Seed 0's partial estimate (0.67) is also in the same cluster.
+**All three CDS-matched seeds give nearly identical medians (0.72, 0.74, 0.74) — strong seed-to-seed reproducibility. The CDS-matched GPT-2 sits inside the same tight cluster as the 4 BookCorpus-trained LMs (0.76–0.96), all far below kids (10.3).**
 
 **Headline plot:** [outputs/figs/longitudinal/feng_chang_bergen_slope_comparison.png](outputs/figs/longitudinal/feng_chang_bergen_slope_comparison.png) (Feng-CHILDES blue, C&B-BookCorpus green densities overlap almost exactly at the mode; children red is at a completely separate location ~10×).
 
