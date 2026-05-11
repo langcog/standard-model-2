@@ -7,7 +7,10 @@
 #SBATCH --gpus=1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
-#SBATCH --constraint=GPU_MEM:24GB|GPU_MEM:32GB|GPU_MEM:40GB|GPU_MEM:48GB|GPU_MEM:80GB
+#SBATCH --constraint=GPU_GEN:AMP|GPU_GEN:LOV|GPU_GEN:HPR
+# Ampere (RTX 3090, A100) / Lovelace (L40S) / Hopper (H100). Excludes Volta
+# (V100) and older — V100 was ~3x slower per step on this workload and could
+# not finish in the 24h wall.
 #
 # Train one seed of GPT-2 small on CHILDES, logging per-CDI-word surprisal at
 # ~80 log-spaced training steps. Seed is set per array task.

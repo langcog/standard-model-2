@@ -99,7 +99,14 @@ class WordSurprisalCallback(TrainerCallback):
 
     def _init_csv(self):
         os.makedirs(os.path.dirname(self.out_csv) or ".", exist_ok=True)
-        if not os.path.exists(self.out_csv):
+        # If the file exists but is missing the header row (e.g., resumed from
+        # an interrupted run that left a non-empty file), prepend the header.
+        needs_header = True
+        if os.path.exists(self.out_csv) and os.path.getsize(self.out_csv) > 0:
+            with open(self.out_csv) as f:
+                first = f.readline().rstrip("\n")
+            needs_header = (first != "step,epoch,word,n_occurrences,mean_nll,sum_nll")
+        if needs_header:
             with open(self.out_csv, "w", newline="") as f:
                 w = csv.writer(f)
                 w.writerow(["step", "epoch", "word", "n_occurrences",

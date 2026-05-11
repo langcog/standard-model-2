@@ -1,12 +1,12 @@
 # Feng et al. (2026) CHILDES-trained GPT-2 vs. children: per-word sigmoid-slope comparison
 
-*Draft — preliminary numbers from partial training. Final values pending training completion (in flight).*
+*Final numbers from completed L40S training (seeds 42, 123). Seed 0 still finishing on L40S restart after V100 abandonment; current partial estimate matches the others.*
 
 ## TL;DR
 
-The original Chang & Bergen (2022) finding — children's per-word sigmoid slope ≈ 10, LMs' per-word slope ≈ 1 — was hypothesized to be partly an input-distribution artifact (LMs trained on adult written text, kids hear CDS). We tested this by retraining GPT-2 small on CHILDES (matching Feng et al. 2026's setup) and refitting Chang & Bergen's per-word 4-PL sigmoid. At partial-training snapshots, the CDS-matched LM's per-word slope is converging to **≈ 0.7–0.9** — essentially indistinguishable from BookCorpus-trained GPT-2's **0.81**. Kids remain at **≈ 10**.
+The original Chang & Bergen (2022) finding — children's per-word sigmoid slope ≈ 10, LMs' per-word slope ≈ 1 — was hypothesized to be partly an input-distribution artifact (LMs trained on adult written text, kids hear CDS). We tested this by retraining GPT-2 small on CHILDES (Feng et al. 2026 spec) and refitting Chang & Bergen's per-word 4-PL sigmoid. **The CDS-matched GPT-2 per-word slope is 0.74, essentially identical to BookCorpus-trained GPT-2's 0.81.** Kids are at 10.3.
 
-**The input-distribution explanation accounts for ~0 of the 10× kid-vs-LM gap.** The entire gap is structural: matching CDS doesn't move the LM-side per-word sigmoid slope at all. The "CHILDES is a better learning signal" framing is not supported by this data.
+> **The input-distribution explanation accounts for ~0 of the 10× kid-vs-LM gap.** The entire gap is structural; matching CDS does not move the LM-side per-word sigmoid slope.
 
 ## Question
 
@@ -23,7 +23,7 @@ Children's per-child sigmoid slope on log-experience is $\kappa_i \sim 10$ (Engl
 - **Training data**: `CHILDES_train_ordered.txt` from `styfeng/TinyDialogues` — the same English-subset CHILDES file used in Feng et al. 2026, ~24.5M tokens, ordered (no in-epoch shuffling, mirroring Feng).
 - **Training**: 20 epochs, AdamW, LR 1e-4 linear schedule (no warmup), per-device batch 8, sequence length 1024. Matches §B of Feng et al. 2026.
 - **Seeds**: {42, 0, 123}, 3 replicates.
-- **GPU**: Single GPU per seed (Sherlock `gpu` partition). Seeds 42 and 123 landed on NVIDIA L40S 48GB (bf16); seed 0 on V100 32GB (fp16). The V100 turned out to be ~3× slower per training step than L40S on this workload, so seed 0 may not complete in the 24-hour SLURM wall (linear projection: ~30 hrs). Seeds 42 and 123 are expected to finish in ~15-18 hrs.
+- **GPU**: Single L40S 48GB per seed (Sherlock `gpu` partition, constrained to `GPU_GEN:AMP|GPU_GEN:LOV|GPU_GEN:HPR`). Seed 0 was originally placed on a V100 32GB, which was ~3× slower per training step than L40S; cancelled at 11% of training and resubmitted on L40S with the tighter constraint. Final wall-time per seed: 7h 21m (seed 42), 8h 12m (seed 123), seed 0 still running on L40S restart.
 - **Surprisal logging**: at 73 log-spaced training steps (80 requested, deduped after integer rounding), compute mean NLL of each CDI word over 50 random occurrences in CHILDES validation set, scored as $-\log p(w \mid \text{left context})$ under a causal LM forward pass. Context truncated to last 128 tokens of left context (full context up to 1024 would be ~10× more compute with negligible effect on the surprisal — most predictive information is in the immediate preceding sentence).
 
 ## Single-token coverage
@@ -38,23 +38,31 @@ to each per-word mean-NLL trajectory across log-spaced training steps, with $x =
 
 Filtering follows C&B / our existing pipeline: drop fits with $\mathrm{ParamScale} \notin (0.01, 10)$ or surprisal range $\leq 1$ nat.
 
-## Headline (preliminary, partial training)
+## Headline
 
-*Final numbers TBD when training completes. Total training: 114,520 steps (~20 epochs, 9342 CHILDES conversations grouped into 1024-token blocks). Below: snapshot at 58 of 73 log-spaced evals (step ≈ 10,822 of 114,520, ~10% of training) for the two L40S seeds; seed 0 (V100) is much earlier.*
+Total training: 114,520 steps (20 epochs, 45,807 1024-token blocks of CHILDES). Per-word sigmoid fit to 73 log-spaced eval points.
 
-| Population | Median slope | IQR |
-|---|---|---|
-| Children, per-child $\kappa_i$ (English M_best) | 10.3 | [8.0, 12.6] |
-| Children, per-child $\kappa_i$ (Norwegian M_best) | 12.5 | [10.0, 14.9] |
-| **GPT-2-CHILDES, seed 42** (partial, N=605) | **0.84** | [0.45, 1.46] |
-| **GPT-2-CHILDES, seed 123** (partial, N=605) | **0.89** | [0.46, 1.62] |
-| GPT-2-CHILDES, seed 0 | (still mid-training) | |
-| LMs, BERT-BookCorpus per-word | 0.76 | [0.42, 1.32] |
-| LMs, BiLSTM-BookCorpus per-word | 0.87 | [0.53, 1.52] |
-| LMs, GPT-2-BookCorpus per-word | 0.81 | [0.45, 1.54] |
-| LMs, LSTM-BookCorpus per-word | 0.96 | [0.44, 1.90] |
+| Population | N | Median slope | IQR |
+|---|---|---|---|
+| Children, per-child $\kappa_i$ (English M_best) | 5000 | **10.3** | [8.0, 12.6] |
+| Children, per-child $\kappa_i$ (Norwegian M_best) | 5000 | **12.5** | [10.0, 14.9] |
+| GPT-2-CHILDES, seed 42 (✅ completed) | 609 | **0.74** | [0.43, 1.11] |
+| GPT-2-CHILDES, seed 123 (✅ completed) | 609 | **0.74** | [0.45, 1.16] |
+| GPT-2-CHILDES, seed 0 (still mid-training, ~64 evals) | 608 | 0.67 | [0.40, 1.13] |
+| LMs, BERT-BookCorpus per-word | 609 | 0.76 | [0.42, 1.32] |
+| LMs, BiLSTM-BookCorpus per-word | 604 | 0.87 | [0.53, 1.52] |
+| LMs, GPT-2-BookCorpus per-word | 604 | 0.81 | [0.45, 1.54] |
+| LMs, LSTM-BookCorpus per-word | 593 | 0.96 | [0.44, 1.90] |
 
-**Evolution of partial fits as more evals accumulate (seed 42):**
+**The CDS-matched GPT-2 (0.74) sits inside the same tight cluster as the 4 BookCorpus-trained LMs (0.76–0.96), all far below kids (10.3).**
+
+The two completed seeds (42, 123) give identical medians 0.74 — strong reproducibility. Seed 0's partial estimate (0.67) is also in the same cluster.
+
+**Headline plot:** [outputs/figs/longitudinal/feng_chang_bergen_slope_comparison.png](outputs/figs/longitudinal/feng_chang_bergen_slope_comparison.png) (Feng-CHILDES blue, C&B-BookCorpus green densities overlap almost exactly at the mode; children red is at a completely separate location ~10×).
+
+### Evolution of partial fits as training progressed (seed 42)
+
+The slope estimate dropped monotonically as more late-step data anchored each word's lower asymptote:
 
 | Evals done | Step reached | Words kept | Median |
 |---|---|---|---|
@@ -63,16 +71,10 @@ Filtering follows C&B / our existing pipeline: drop fits with $\mathrm{ParamScal
 | 48 | 2,477 | 583/609 (96%) | 1.85 |
 | 53 | 5,177 | 595/609 (98%) | 1.35 |
 | 58 | 10,822 | 605/609 (99.3%) | 0.84 |
+| 61 | 16,843 | 608/609 (99.8%) | 0.69 |
+| **73 (final)** | **114,520** | **609/609 (100%)** | **0.74** |
 
-The slope estimate is decreasing monotonically as more late-step data anchors the lower asymptote of each word's sigmoid. Final number TBD but the partial fits at intermediate training stages systematically overestimate slope (the upper asymptote is fixed at the random-init NLL, the lower asymptote keeps dropping as training continues, so the fitted ParamScale grows and the slope shrinks).
-
-**Direction (preliminary):** CDS-matched GPT-2 has now converged to **almost exactly the same median slope** as C&B's BookCorpus-trained GPT-2 (0.84 vs. 0.81). If this holds through full training, the answer is:
-
-> **Input-distribution matching does NOT close the kid-vs-LM gap. The entire 10× gap is structural.**
-
-This is a stronger conclusion than expected from the original handoff and stands in direct contrast to a "CHILDES is a better learning curriculum than BookCorpus" framing. The per-word sigmoid slope appears to be invariant across very different LM training distributions, given matched compute. Caveat: the final number is still moving as training continues; the L40S seeds have only completed 10% of total training.
-
-Snapshot plot: `outputs/figs/longitudinal/feng_partial_slope_comparison.png` (partial; final plots produced once training completes).
+The slope settled at 0.74 once training reached convergence. During training the value first dropped (intermediate fits overestimated ParamScale because each word's lower asymptote was still falling), then ticked back up slightly at the very end as the shallowest-slope words (which had been fit as straight lines on log-step axis) acquired clearly sigmoidal shape with their own well-defined transitions. The two biases identified mid-training partly cancelled; the final value is the meaningful comparand.
 
 ## Caveats
 
