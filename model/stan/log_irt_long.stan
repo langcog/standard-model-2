@@ -123,15 +123,17 @@ parameters {
 
   vector[C] beta_c;                     // per-class log-p slope (pinned 1 by default)
 
-  // Per-child onset offset, drawn from N_+(0, sigma_s). Non-centered:
-  //   s_i = sigma_s * s_i_raw   with   s_i_raw >= 0, raw ~ N(0,1)
-  // so s_i is half-normal(0, sigma_s). The non-centered form decouples
-  // sigma_s from s_i_raw in the posterior, improving HMC geometry --
-  // critical when sigma_s and sigma_zeta are partially identifiable.
-  // When sigma_s_prior_sd is tight (~0.001) sigma_s collapses to ~0
-  // and s_i ~ 0 regardless of s_i_raw. The transformed-parameter
-  // computation is in the main `transformed parameters` block below.
-  vector<lower=0>[I] s_i_raw;
+  // Per-child onset offset, drawn from N_+(0, sigma_s). Lower-bounded
+  // at 0 so kid effective onsets s + s_i[ch] >= s (no negative onsets).
+  // CENTERED parameterization: we briefly tried non-centered
+  // (s_i = sigma_s * s_i_raw) but that exposed/created a bimodal
+  // posterior where one mode had sigma_s ~ 36 with sigma_alpha ~ 0.9
+  // -- the multiplicative factorization lets the model trade kid-onset
+  // variation for kid-efficiency variation in geometrically distant
+  // configurations. Centered ties each s_i directly to the data, which
+  // empirically gives single-mode posteriors. When sigma_s_prior_sd is
+  // tight (~0.001), sigma_s collapses to ~0 and s_i ~ 0.
+  vector<lower=0>[I] s_i;
   real<lower=0> sigma_s;
 }
 
@@ -170,10 +172,6 @@ transformed parameters {
   }
   vector[J] log_lambda = sigma_lambda * log_lambda_raw;
   vector[J] lambda = exp(log_lambda);
-
-  // Non-centered per-child onset offset. With <lower=0> on s_i_raw,
-  // and s_i_raw ~ N(0, 1), s_i = sigma_s * s_i_raw is half-normal(0, sigma_s).
-  vector[I] s_i = sigma_s * s_i_raw;
 }
 
 model {
@@ -201,13 +199,12 @@ model {
 
   beta_c ~ normal(beta_c_prior_mean, beta_c_prior_sd);
 
-  // Per-child onset offset, non-centered: s_i_raw ~ half-normal(0, 1)
-  // via <lower=0>; sigma_s lifts it to half-normal(0, sigma_s).
-  // sigma_s_prior_sd ~ 0.001 effectively pins sigma_s at 0; sd = 2 or 3
-  // frees per-child onset variation. The non-centering is critical
-  // when sigma_s is partially identifiable (e.g., the slopes_si
-  // variant where it trades off with sigma_zeta).
-  s_i_raw ~ std_normal();
+  // Per-child onset offset (half-normal via <lower=0> on s_i).
+  // sigma_s_prior_sd ~ 0.001 effectively pins s_i at 0 (legacy global-s
+  // behavior); sd = 2 frees per-child onset variation. Centered
+  // parameterization (data directly informs each s_i) -- non-centered
+  // was tried and produced multimodal posteriors; centered is single-mode.
+  s_i     ~ normal(0, sigma_s);
   sigma_s ~ normal(0, sigma_s_prior_sd);
 
   // Likelihood: parallelize per-observation lpmf via reduce_sum.
