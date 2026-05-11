@@ -35,7 +35,7 @@ dir.create(OUT_DIR, recursive = TRUE, showWarnings = FALSE)
 # plots, joint posterior contours, and PPC sampling locally).
 SCALAR_PARS <- c(
   "sigma_alpha", "sigma_xi", "sigma_zeta", "rho_xi_zeta",
-  "pi_alpha", "delta", "s", "beta_age",
+  "pi_alpha", "delta", "s", "sigma_s", "beta_age",
   "sigma_lambda",
   "beta_c[1]", "beta_c[2]", "beta_c[3]", "beta_c[4]",
   "mu_r", "sigma_r", "beta_react", "sigma_within",
