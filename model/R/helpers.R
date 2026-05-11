@@ -234,12 +234,16 @@ variant_hyperpriors <- function(name) {
     # The two together let us see whether sigma_s competes with
     # sigma_zeta (the identifiability worry) or adds genuinely new
     # variance (closing the q10-at-floor gap at age 16).
+    # sigma_s_prior_sd = 2 (was 3 in the first round): the first si_only
+    # fit pushed sigma_s to 6.5 (~ 2.2 prior SDs above mean), which over-
+    # predicted the q90 fan at older ages. HN(0, 2) keeps individual
+    # onsets in a more empirically plausible range (~0 to 6 mo).
     no_freq_si_only = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
                            sigma_zeta_prior_sd = 0.001,
-                           sigma_s_prior_sd = 3),
+                           sigma_s_prior_sd = 2),
     no_freq_slopes_si = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
                              sigma_zeta_prior_sd = 1,
-                             sigma_s_prior_sd = 3),
+                             sigma_s_prior_sd = 2),
     # Comprehension-channel variants. Used only by log_irt_long_io_comp.stan;
     # fit_io.R selects that Stan file when the variant matches `comp_*`.
     # The bundle already carries N_comp, aa_comp, jj_comp, y_comp; this
