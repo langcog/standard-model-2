@@ -60,13 +60,21 @@ VARIANTS <- list(
                    tag   = "long_demo_alpha"),
   kappa     = list(label = "3. + scaling variation (ζ → κ)",
                    tag   = "long_demo_kappa"),
-  m_best    = list(label = "4. α + ζ (M_best)",
-                   tag   = "long_no_freq_slopes"),
-  si_only   = list(label = "5. α + per-child onset (s_i, no ζ)",
+  si_only   = list(label = "4. α + per-child onset s_i",
                    tag   = "long_no_freq_si_only"),
-  slopes_si = list(label = "6. α + ζ + s_i (poor mixing)",
+  m_best    = list(label = "5. α + ζ (M_best)",
+                   tag   = "long_no_freq_slopes"),
+  slopes_si = list(label = "6. α + ζ + s_i (full)",
                    tag   = "long_no_freq_slopes_si")
 )
+# Drop variants whose summary files are missing (e.g. while a refit is
+# still running). Lets us produce a 5-panel preview before slopes_si lands.
+VARIANTS <- VARIANTS[sapply(VARIANTS, function(v) {
+  ok <- file.exists(file.path(SUMMARIES, paste0(v$tag, ".draws.rds")))
+  if (!ok) message(sprintf("Skipping variant %s (no draws.rds): %s",
+                           v$tag, v$label))
+  ok
+})]
 
 ## ---- 3. Empirical reference (full Wordbank restricted to bundle items) -
 build_full_empirical <- function(item_definitions) {

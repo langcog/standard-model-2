@@ -244,6 +244,14 @@ variant_hyperpriors <- function(name) {
     no_freq_slopes_si = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
                              sigma_zeta_prior_sd = 1,
                              sigma_s_prior_sd = 2),
+    # Same priors as no_freq_slopes_si, but uses log_irt_long_si_corr.stan
+    # via the _si_corr dispatch in fit_longitudinal.R: trivariate
+    # Cholesky on (xi, zeta, s_i_lat) with LKJ(2) prior on the 3x3
+    # correlation matrix, plus Tobit clipping s_i = fmax(s_i_lat, 0).
+    # Tests whether kid-level (xi, zeta, s_i) co-vary.
+    no_freq_slopes_si_corr = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
+                                  sigma_zeta_prior_sd = 1,
+                                  sigma_s_prior_sd = 2),
     # Comprehension-channel variants. Used only by log_irt_long_io_comp.stan;
     # fit_io.R selects that Stan file when the variant matches `comp_*`.
     # The bundle already carries N_comp, aa_comp, jj_comp, y_comp; this

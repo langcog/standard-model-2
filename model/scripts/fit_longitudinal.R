@@ -86,8 +86,11 @@ cat(sprintf("Stan config: chains=%d iter=%d warmup=%d adapt_delta=%.2f\n",
 # LMM variants use a different Stan file (linear-in-age, no s / delta).
 is_lmm <- grepl("^long_lmm", variant) || identical(sub("^long_", "", variant), "lmm") ||
           identical(sub("^long_", "", variant), "lmm_slopes")
+# si_corr variants use the trivariate-LKJ (xi, zeta, s_i) Stan file.
+is_si_corr <- grepl("_si_corr$", variant)
 stan_file <- file.path(PROJECT_ROOT,
                        if (is_lmm) "model/stan/log_irt_long_lmm.stan"
+                       else if (is_si_corr) "model/stan/log_irt_long_si_corr.stan"
                        else "model/stan/log_irt_long.stan")
 cat(sprintf("Stan model: %s\n", stan_file))
 

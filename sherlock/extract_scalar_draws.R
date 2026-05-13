@@ -15,6 +15,7 @@ dir.create(OUT_DIR, recursive = TRUE, showWarnings = FALSE)
 
 SCALAR_PARS <- c(
   "sigma_alpha", "sigma_xi", "sigma_zeta", "rho_xi_zeta",
+  "rho_xi_s", "rho_zeta_s",
   "pi_alpha", "delta", "s", "sigma_s", "sigma_lambda",
   "mu_r", "sigma_r"
 )
