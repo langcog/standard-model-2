@@ -88,9 +88,13 @@ is_lmm <- grepl("^long_lmm", variant) || identical(sub("^long_", "", variant), "
           identical(sub("^long_", "", variant), "lmm_slopes")
 # si_corr variants use the trivariate-LKJ (xi, zeta, s_i) Stan file.
 is_si_corr <- grepl("_si_corr$", variant)
+# si_reparam variants use the (sigma_total, p_zeta) reparameterized
+# Stan file to break the (sigma_zeta, sigma_s) mixing ridge.
+is_si_reparam <- grepl("_si_reparam$", variant)
 stan_file <- file.path(PROJECT_ROOT,
                        if (is_lmm) "model/stan/log_irt_long_lmm.stan"
                        else if (is_si_corr) "model/stan/log_irt_long_si_corr.stan"
+                       else if (is_si_reparam) "model/stan/log_irt_long_si_reparam.stan"
                        else "model/stan/log_irt_long.stan")
 cat(sprintf("Stan model: %s\n", stan_file))
 
