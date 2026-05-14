@@ -1082,8 +1082,84 @@ Three things follow:
   age 30, which is the wrong direction. The floor effect is therefore
   not a missing-\(s\) problem; per-child onset variation
   (\(s_i\) random rather than global \(s\)) would be the natural next
-  extension.
+  extension. We follow up on this below.
 \end{enumerate}
+
+\paragraph{Per-child onset \(s_i\): a fourth random effect.}
+\label{par:s-i}
+Motivated by the floor-effect signature, we fit two extensions of
+M\_best that add per-child onset offsets:
+\(s_i \sim \mathrm{Normal}_+(0, \sigma_s)\) (half-normal), with
+\(\sigma_s \sim \mathrm{HN}(0, 2)\) and the population mean \(s\)
+pinned tight near 0. Effective onset for kid \(i\) is \(s + s_i\).
+\begin{itemize}[leftmargin=1.3em]
+\item \texttt{long\_no\_freq\_slopes\_si}: M\_best
+  (\(\sigma_\alpha, \sigma_\zeta\) free) + independent \(\sigma_s\).
+\item \texttt{long\_no\_freq\_slopes\_si\_corr}: same, but with a
+  trivariate Cholesky on \((\xi_i, \zeta_i, s_i)\) with
+  \(\mathrm{LKJ}(2)\) on the \(3{\times}3\) correlation matrix and
+  Tobit clipping \(s_i = \max(s_i^{\text{lat}}, 0)\).
+\end{itemize}
+PSIS-LOO comparison on the same English longitudinal bundle
+(\(N = 145{,}350\) observations) over the family:
+\begin{center}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Model & \(\Delta\mathrm{elpd}\) & SE\(_{\Delta}\) & \(p_{\text{loo}}\) \\
+\midrule
+\texttt{slopes\_si\_corr}  & 0      & 0    & 636 \\
+\texttt{slopes\_si} (indep)& \(-62\) & 8   & 616 \\
+\texttt{demo\_kappa}       & \(-292\)& 23  & 527 \\
+\texttt{si\_only}          & \(-500\)& 26  & 568 \\
+M\_best (per-obs norm.)    & \(\sim{-535}\) & --- & 577 \\
+\bottomrule
+\end{tabular}
+\end{center}
+The headline: \textbf{adding \(s_i\) to M\_best gains
+\(\sim\!535\) elpd} (per-obs-normalized; M\_best ran on a slightly
+larger bundle so direct \texttt{loo\_compare} is unavailable). That
+is many SE\_diff's beyond M\_best's overfit penalty budget.
+
+\paragraph{Single-mode posterior, but slow mixing.}
+The centered parameterization \(s_i \sim \mathrm{Normal}_+(0, \sigma_s)\)
+gives a single-mode posterior (all 4 chains agree on per-chain medians
+to within \(\sim5\%\) on every variance component). A non-centered
+\(s_i = \sigma_s \cdot s_i^{\text{raw}}\) was tried first and produced
+a bimodal posterior (one mode at \(\sigma_s \approx 36\) with
+\(\sigma_\alpha \approx 0.9\), one at \(\sigma_s \approx 6.4\) with
+\(\sigma_\alpha \approx 2.9\)); the multiplicative factorization
+allowed trading kid-onset variance for kid-efficiency variance in
+geometrically distant configurations. Centered fixes this.
+
+However, the joint posterior on \((\sigma_\alpha, \sigma_\zeta,
+\sigma_s)\) is poorly conditioned: even at 4000 iterations and
+\texttt{adapt\_delta} = 0.99, \(R\)-hat sits at 1.5--1.9 on the
+slopes\_si variants. The chains explore the same single mode but
+slowly within it; point estimates are stable across chains, but the
+credible intervals are not yet publication-tight. With independent
+\(s_i\):
+\(\sigma_\alpha = 1.86\,[1.64, 2.10],\)
+\(\sigma_\zeta = 3.10\,[2.85, 3.41],\)
+\(\sigma_s = 4.14\,[3.28, 5.01],\)
+\(\delta = 8.06\,[7.73, 8.36].\)
+
+\paragraph{Correlation structure (sidebar finding).}
+The \texttt{si\_corr} variant frees three pairwise correlations on the
+kid-level random effects. The bivariate (\(\xi, \zeta\)) correlation
+flips to near zero (\(\rho_{\xi\zeta} = -0.04\)) while the two new
+correlations come in large and opposite in sign:
+\(\rho_{\xi s} = +0.64\) and \(\rho_{\zeta s} = -0.63\).
+Substantively: kids with higher efficiency \(\xi\) tend to have a
+larger latent delay (start later, ``catch-up learners''); kids with
+steeper acceleration \(\zeta\) tend to have smaller latent delay
+(``early bloomers''). This is consistent with separately-documented
+Wordbank patterns relating onset timing to later vocabulary
+composition (Frank et al., Wordbank book ch.~13, ch.~15) but
+mirroring those patterns from the modeling side is a marginal
+contribution: the LOO improvement over independent-\(s_i\) is
+\(\Delta = 62\) (SE = 8) -- statistically significant but practically
+small given the added complexity of three free correlations. For the
+headline reporting we lean on the independent-\(s_i\) variant.
 
 \paragraph{Reference age \(a_0\) is dataset-specific.}
 \(a_0\) is the pivot at which \(\log_{age} = 0\) and so

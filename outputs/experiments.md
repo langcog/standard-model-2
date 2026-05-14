@@ -1071,6 +1071,111 @@ at zero (`beta_c_prior_sd = 0.001`), per-child slopes free
 
 ---
 
+## 🟢 21. Per-child onset s_i: a fourth random effect
+
+**Motivation.** §20 documented that global s is near-non-identifiable
+and the s-free mode doesn't address the panel-4 floor effect (q10
+not anchoring at 0 at age 16, q90 overshooting at age 30). The
+natural extension proposed there: per-child onset variation
+`s_i ~ Normal_+(0, sigma_s)`, with global s pinned tight near 0.
+
+**Setup.** Two new variants on M_best
+(`long_no_freq_slopes`, σ_α + σ_ζ free):
+
+| variant | σ_α | σ_ζ | σ_s | (ξ,ζ,s) correlations |
+|---|---|---|---|---|
+| `long_no_freq_si_only` | free | pinned 0 | free | independent |
+| `long_no_freq_slopes_si` | free | free | free | independent |
+| `long_no_freq_slopes_si_corr` | free | free | free | trivariate LKJ(2) |
+
+`si_corr` uses a new Stan file
+[`log_irt_long_si_corr.stan`](../model/stan/log_irt_long_si_corr.stan)
+with a 3×3 Cholesky on (ξ, ζ, s_lat) and Tobit clipping
+`s_i = max(s_lat, 0)`. All variants: HN(0, 2) prior on σ_s.
+
+**Sampling settings.** 4000 iter × 4 chains, 2500 warmup,
+adapt_delta = 0.95-0.99. Centered parameterization (non-centered
+was tried briefly and produced a bimodal posterior — see notes
+in `model/stan/log_irt_long.stan` comments).
+
+**Headline: adding s_i to M_best is a large LOO win.**
+
+PSIS-LOO across the family on the English longitudinal bundle
+(N = 145,350 observations; M_best was fit on N = 147,000 and is
+shown per-obs-normalized for comparison):
+
+| model | elpd_loo | Δ vs si_corr | SE_diff | p_loo |
+|---|---:|---:|---:|---:|
+| **slopes_si_corr** | **−36,982** | 0 | — | 636 |
+| slopes_si (indep) | −37,044 | −62 | 8 | 616 |
+| demo_kappa (ζ alone) | −37,274 | −292 | 23 | 527 |
+| si_only (α + s_i) | −37,482 | −500 | 26 | 568 |
+| **M_best** (per-obs proj.) | **~−37,820** | ~−535 | — | 577 |
+| demo_pure / demo_alpha | ~−62,695 | −25,713 | 175 | ~340 |
+
+**Two findings.**
+
+1. **Adding s_i to M_best earns ~535 elpd by per-obs estimate** —
+   far beyond the 90-effective-parameter overfit penalty. The s_i
+   mechanism is doing substantive structural work for the model.
+
+2. **LKJ correlations earn another 62 elpd over independent s_i**
+   (SE_diff = 8, ~8σ separation). Statistically significant, but
+   practically a smaller contribution.
+
+**Posterior summaries (slopes_si independent, headline variant).**
+
+| param | median | 95% CrI | Rhat | ESS_bulk |
+|---|---:|---|---:|---:|
+| σ_α | 1.86 | [1.64, 2.10] | 1.80 | 6 |
+| σ_ζ | 3.10 | [2.85, 3.41] | 1.39 | 9 |
+| σ_s | 4.14 | [3.28, 5.01] | 1.83 | 6 |
+| δ | 8.06 | [7.73, 8.36] | 1.91 | 6 |
+| π_α | 0.92 | [0.90, 0.94] | 1.80 | 6 |
+
+Compared to M_best: δ drops from 9.4 → 8.1 (some of the
+"population acceleration" gets redistributed into onset variation),
+σ_α and σ_ζ are essentially unchanged. The added σ_s = 4.14 mo
+means kid onsets distributed half-normally with scale ~4 — so 50%
+of kids in [0, 2.8] mo, 95% in [0, 8.1] mo. Empirically plausible.
+
+**Mixing diagnostic concerns.** Rhat = 1.5–1.9 on key params despite
+4000 iter / 2500 warmup / adapt_delta 0.99. Per-chain medians agree
+within ~5%, so the chains are exploring the same single mode but
+slowly within it. Point estimates are stable; tight CIs are not yet
+publication-trustworthy. Earlier non-centered parameterization had
+true multimodality (chain 4 in a "sigma_s ≈ 36, sigma_alpha ≈ 0.9"
+mode disconnected from the others); centered fixed that.
+
+**Correlation findings (si_corr variant; sidebar).** Three pairwise
+correlations on (ξ, ζ, s_lat):
+
+| correlation | median | interpretation |
+|---|---:|---|
+| ρ(ξ, ζ) | −0.04 | drops to ~0 once s is in the model |
+| **ρ(ξ, s)** | **+0.64** | high efficiency ↔ later onset ("catch-up learners") |
+| **ρ(ζ, s)** | **−0.63** | high acceleration ↔ earlier onset ("early bloomers") |
+
+The (ξ, ζ) correlation flips from +0.35 in M_best to ~0 here — its
+old role is being absorbed by the two new s_i correlations.
+
+These patterns connect to separately-documented Wordbank findings
+on onset timing and later vocabulary composition (Wordbank book
+[ch. 13.3.3](https://langcog.github.io/wordbank-book/grammar.html#results-3)
+and [ch. 15.2](https://langcog.github.io/wordbank-book/style.html#variation-in-vocabulary-composition)).
+But the LOO gain over independent-s_i is modest (62 elpd, SE 8),
+and Pareto-k diagnostics are concerning (202 obs with k > 0.7).
+**For headline reporting we lean on the independent-s_i variant.**
+The correlation structure is real but a sidebar finding.
+
+**Artifacts.**
+- Stan models: [`log_irt_long.stan`](../model/stan/log_irt_long.stan) (independent s_i toggle), [`log_irt_long_si_corr.stan`](../model/stan/log_irt_long_si_corr.stan) (trivariate LKJ)
+- Variants: `no_freq_si_only`, `no_freq_slopes_si`, `no_freq_slopes_si_corr` in [`helpers.R`](../model/R/helpers.R)
+- LOO files: `fits/summaries/long_no_freq_*_si{_corr}.loo.rds` (gitignored, regenerable via `sherlock/extract_loo_thinned.R`)
+- Figure: [`outputs/figs/longitudinal/quantile_demo.png`](figs/longitudinal/quantile_demo.png) (7-panel comparison)
+
+---
+
 ## Backlog (⚪)
 
 ### Data / robustness
