@@ -54,18 +54,20 @@ stopifnot(length(bundle_items) == sd_b$J)
 
 ## ---- 2. Variant registry -----------------------------------------
 VARIANTS <- list(
-  pure      = list(label = "1. Pure accumulator (no α, no ζ, no s_i)",
-                   tag   = "long_demo_pure"),
-  alpha     = list(label = "2. + efficiency variation (α)",
-                   tag   = "long_demo_alpha"),
-  kappa     = list(label = "3. + scaling variation (ζ → κ)",
-                   tag   = "long_demo_kappa"),
-  si_only   = list(label = "4. α + per-child onset s_i",
-                   tag   = "long_no_freq_si_only"),
-  m_best    = list(label = "5. α + ζ (M_best)",
-                   tag   = "long_no_freq_slopes"),
-  slopes_si = list(label = "6. α + ζ + s_i (full)",
-                   tag   = "long_no_freq_slopes_si")
+  pure       = list(label = "1. Pure accumulator (no α, no ζ, no s_i)",
+                    tag   = "long_demo_pure"),
+  alpha      = list(label = "2. + efficiency variation (α)",
+                    tag   = "long_demo_alpha"),
+  kappa      = list(label = "3. + scaling variation (ζ → κ)",
+                    tag   = "long_demo_kappa"),
+  si_only    = list(label = "4. α + per-child onset s_i",
+                    tag   = "long_no_freq_si_only"),
+  m_best     = list(label = "5. α + ζ (M_best)",
+                    tag   = "long_no_freq_slopes"),
+  slopes_si  = list(label = "6. α + ζ + s_i (independent)",
+                    tag   = "long_no_freq_slopes_si"),
+  slopes_si_corr = list(label = "7. α + ζ + s_i (correlated)",
+                        tag   = "long_no_freq_slopes_si_corr")
 )
 # Drop variants whose summary files are missing (e.g. while a refit is
 # still running). Lets us produce a 5-panel preview before slopes_si lands.
@@ -184,6 +186,17 @@ simulate_variant <- function(tag, label) {
   mu_r     <- sd_b$mu_r
   sigma_r  <- sd_b$sigma_r
 
+  # si_corr variants carry rho_xi_s and rho_zeta_s in their draws
+  # (from log_irt_long_si_corr.stan's generated quantities). When
+  # present, sample (xi, zeta, s_lat) jointly from MVN(0, Sigma) per
+  # draw with the LKJ-recovered correlation matrix, then apply Tobit
+  # clipping s_i = fmax(s_lat, 0). For other variants, fall back to
+  # the independent-sampling path.
+  is_si_corr <- all(c("rho_xi_s", "rho_zeta_s") %in% names(draws))
+  if (is_si_corr) {
+    cat(sprintf("[%s] si_corr variant: sampling correlated (xi, zeta, s_lat) per draw\n", tag))
+  }
+
   rows <- vector("list", length(draw_idx) * length(AGE_GRID))
   idx <- 0
   for (k in draw_idx) {
@@ -194,18 +207,47 @@ simulate_variant <- function(tag, label) {
     s_d  <- as.numeric(draws$s[k])
     sigma_xi <- sqrt(sa^2 + sigma_r^2)
 
+    if (is_si_corr) {
+      # Build 3x3 correlation matrix from this draw's three rho's, then
+      # Cholesky-decompose. Symmetric, diag = 1.
+      r_xz <- as.numeric(draws$rho_xi_zeta[k])
+      r_xs <- as.numeric(draws$rho_xi_s[k])
+      r_zs <- as.numeric(draws$rho_zeta_s[k])
+      Sigma_corr <- matrix(c(1,    r_xz, r_xs,
+                             r_xz, 1,    r_zs,
+                             r_xs, r_zs, 1), nrow = 3, byrow = TRUE)
+      # Safety: nudge to PSD if near-singular due to draw noise
+      L_corr <- tryCatch(chol(Sigma_corr),
+                         error = function(e) {
+                           Sigma_corr <- Sigma_corr + diag(1e-6, 3)
+                           chol(Sigma_corr)
+                         })
+      L_corr <- t(L_corr)  # lower triangular
+      scales <- c(sigma_xi, sz, ss)
+    }
+
     for (a in AGE_GRID) {
       idx <- idx + 1
       set.seed(SEED + k * 1000 + as.integer(a * 10))
-      xi   <- rnorm(N_KIDS_PER_AGE, mu_r, sigma_xi)
-      zeta <- rnorm(N_KIDS_PER_AGE, 0, sz)
-      # half-normal: abs of N(0, sigma_s)
-      s_i  <- abs(rnorm(N_KIDS_PER_AGE, 0, ss))
+      if (is_si_corr) {
+        # Sample standardized 3-vectors per kid, scale by L_corr and sigmas.
+        Z <- matrix(rnorm(N_KIDS_PER_AGE * 3), nrow = 3)
+        effs <- t(L_corr %*% Z) %*% diag(scales)  # N x 3
+        xi    <- mu_r + effs[, 1]
+        zeta  <- effs[, 2]
+        s_lat <- effs[, 3]
+        s_i   <- pmax(s_lat, 0)  # Tobit clip
+      } else {
+        xi   <- rnorm(N_KIDS_PER_AGE, mu_r, sigma_xi)
+        zeta <- rnorm(N_KIDS_PER_AGE, 0, sz)
+        # half-normal: abs of N(0, sigma_s)
+        s_i  <- abs(rnorm(N_KIDS_PER_AGE, 0, ss))
+      }
       kappa <- 1 + delta_d + zeta
       log_age <- log(pmax(a - s_d - s_i, 0.01) / a0)
       theta   <- xi + kappa * log_age   # per-kid latent at this age
-      # All six variants are no_freq (beta_c pinned at 0), so log_p
-      # drops from eta. Fitted psi absorbs any frequency-related shift.
+      # All variants are no_freq (beta_c pinned at 0), so log_p drops
+      # from eta. Fitted psi absorbs any frequency-related shift.
       # eta_ij = theta_i + log_H - psi_j
       base_kid <- theta + log_H
       eta <- outer(base_kid, psi, "-")
@@ -295,7 +337,7 @@ p_main <- ggplot(panel_scatter, aes(age, vocab)) +
   geom_line(data = sim_preds,
             aes(age, vocab, group = tau, colour = tau),
             linewidth = 1.0) +
-  facet_wrap(~ panel, ncol = 3) +
+  facet_wrap(~ panel, ncol = 4) +
   scale_colour_manual(
     values = c("0.1" = "#1f78b4", "0.25" = "#a6cee3",
                "0.5" = "#33a02c", "0.75" = "#fdbf6f",
