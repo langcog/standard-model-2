@@ -91,10 +91,15 @@ is_si_corr <- grepl("_si_corr$", variant)
 # si_reparam variants use the (sigma_total, p_zeta) reparameterized
 # Stan file to break the (sigma_zeta, sigma_s) mixing ridge.
 is_si_reparam <- grepl("_si_reparam$", variant)
+# si_signed variants use signed-normal s_i (sum-to-zero centered) +
+# the (sigma_total, p_zeta) reparam. Fixes both (sigma_zeta, sigma_s)
+# AND (sigma_s, delta) mixing ridges.
+is_si_signed <- grepl("_si_signed$", variant)
 stan_file <- file.path(PROJECT_ROOT,
                        if (is_lmm) "model/stan/log_irt_long_lmm.stan"
                        else if (is_si_corr) "model/stan/log_irt_long_si_corr.stan"
                        else if (is_si_reparam) "model/stan/log_irt_long_si_reparam.stan"
+                       else if (is_si_signed) "model/stan/log_irt_long_si_signed.stan"
                        else "model/stan/log_irt_long.stan")
 cat(sprintf("Stan model: %s\n", stan_file))
 

@@ -265,6 +265,20 @@ variant_hyperpriors <- function(name) {
     no_freq_slopes_si_reparam = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
                                      sigma_zeta_prior_sd = 1,
                                      sigma_s_prior_sd = 2),
+    # Signed-normal s_i variant: combines the (sigma_total, p_zeta)
+    # reparam with signed s_i (sum-to-zero centered). Two-pronged fix:
+    # the reparam handles the (sigma_zeta, sigma_s) ridge; the signed
+    # s_i handles the (sigma_s, delta) population-mean compensation
+    # ridge that remained in the half-normal variant. With signed s_i,
+    # E[s_i] = 0 by construction regardless of sigma_s, so delta no
+    # longer trades off with sigma_s. Interpretation: s_i is a
+    # developmental offset (deviation from population reference), not a
+    # literal delay -- kids with s_i < 0 are "ahead" of the population
+    # reference at any given calendar age. Routes via _si_signed
+    # dispatch in fit_longitudinal.R.
+    no_freq_slopes_si_signed = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
+                                    sigma_zeta_prior_sd = 1,
+                                    sigma_s_prior_sd = 2),
     # Comprehension-channel variants. Used only by log_irt_long_io_comp.stan;
     # fit_io.R selects that Stan file when the variant matches `comp_*`.
     # The bundle already carries N_comp, aa_comp, jj_comp, y_comp; this
