@@ -64,10 +64,8 @@ VARIANTS <- list(
                     tag   = "long_no_freq_si_only"),
   m_best     = list(label = "5. α + ζ (M_best)",
                     tag   = "long_no_freq_slopes"),
-  slopes_si  = list(label = "6. α + ζ + s_i (independent)",
-                    tag   = "long_no_freq_slopes_si"),
-  slopes_si_corr = list(label = "7. α + ζ + s_i (correlated)",
-                        tag   = "long_no_freq_slopes_si_corr")
+  slopes_si_signed = list(label = "6. α + ζ + s_i (signed; full)",
+                          tag   = "long_no_freq_slopes_si_signed")
 )
 # Drop variants whose summary files are missing (e.g. while a refit is
 # still running). Lets us produce a 5-panel preview before slopes_si lands.
@@ -196,6 +194,12 @@ simulate_variant <- function(tag, label) {
   if (is_si_corr) {
     cat(sprintf("[%s] si_corr variant: sampling correlated (xi, zeta, s_lat) per draw\n", tag))
   }
+  # signed-s_i variant: detected by tag suffix _si_signed. Uses signed
+  # normal s_i (deviations around 0) instead of half-normal (delays >= 0).
+  is_si_signed <- grepl("_si_signed$", tag)
+  if (is_si_signed) {
+    cat(sprintf("[%s] si_signed variant: sampling signed s_i ~ N(0, sigma_s)\n", tag))
+  }
 
   rows <- vector("list", length(draw_idx) * length(AGE_GRID))
   idx <- 0
@@ -240,8 +244,13 @@ simulate_variant <- function(tag, label) {
       } else {
         xi   <- rnorm(N_KIDS_PER_AGE, mu_r, sigma_xi)
         zeta <- rnorm(N_KIDS_PER_AGE, 0, sz)
-        # half-normal: abs of N(0, sigma_s)
-        s_i  <- abs(rnorm(N_KIDS_PER_AGE, 0, ss))
+        if (is_si_signed) {
+          # Signed normal: deviations around 0 (can be negative or positive)
+          s_i <- rnorm(N_KIDS_PER_AGE, 0, ss)
+        } else {
+          # half-normal: abs of N(0, sigma_s)
+          s_i  <- abs(rnorm(N_KIDS_PER_AGE, 0, ss))
+        }
       }
       kappa <- 1 + delta_d + zeta
       log_age <- log(pmax(a - s_d - s_i, 0.01) / a0)
@@ -337,7 +346,7 @@ p_main <- ggplot(panel_scatter, aes(age, vocab)) +
   geom_line(data = sim_preds,
             aes(age, vocab, group = tau, colour = tau),
             linewidth = 1.0) +
-  facet_wrap(~ panel, ncol = 4) +
+  facet_wrap(~ panel, ncol = 3) +
   scale_colour_manual(
     values = c("0.1" = "#1f78b4", "0.25" = "#a6cee3",
                "0.5" = "#33a02c", "0.75" = "#fdbf6f",

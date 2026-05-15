@@ -1120,46 +1120,86 @@ The headline: \textbf{adding \(s_i\) to M\_best gains
 larger bundle so direct \texttt{loo\_compare} is unavailable). That
 is many SE\_diff's beyond M\_best's overfit penalty budget.
 
-\paragraph{Single-mode posterior, but slow mixing.}
-The centered parameterization \(s_i \sim \mathrm{Normal}_+(0, \sigma_s)\)
-gives a single-mode posterior (all 4 chains agree on per-chain medians
-to within \(\sim5\%\) on every variance component). A non-centered
-\(s_i = \sigma_s \cdot s_i^{\text{raw}}\) was tried first and produced
-a bimodal posterior (one mode at \(\sigma_s \approx 36\) with
-\(\sigma_\alpha \approx 0.9\), one at \(\sigma_s \approx 6.4\) with
-\(\sigma_\alpha \approx 2.9\)); the multiplicative factorization
-allowed trading kid-onset variance for kid-efficiency variance in
-geometrically distant configurations. Centered fixes this.
+\paragraph{Fixing the mixing problem.}
+The initial half-normal parameterization
+\(s_i \sim \mathrm{Normal}_+(0, \sigma_s)\) (positive-only delays)
+gave single-mode posteriors but very slow mixing: \(R\)-hat 1.5--1.9
+on \((\sigma_\alpha, \sigma_\zeta, \sigma_s, \delta)\) at 4000 iter /
+2500 warmup. Two overlapping sampling ridges were diagnosed and
+fixed:
 
-However, the joint posterior on \((\sigma_\alpha, \sigma_\zeta,
-\sigma_s)\) is poorly conditioned: even at 4000 iterations and
-\texttt{adapt\_delta} = 0.99, \(R\)-hat sits at 1.5--1.9 on the
-slopes\_si variants. The chains explore the same single mode but
-slowly within it; point estimates are stable across chains, but the
-credible intervals are not yet publication-tight. With independent
-\(s_i\):
-\(\sigma_\alpha = 1.86\,[1.64, 2.10],\)
-\(\sigma_\zeta = 3.10\,[2.85, 3.41],\)
-\(\sigma_s = 4.14\,[3.28, 5.01],\)
-\(\delta = 8.06\,[7.73, 8.36].\)
+\textbf{Ridge 1: (\(\sigma_\zeta, \sigma_s\)) variance partition.}
+The two between-kid variance channels traded off across chains
+(\texttt{long\_irt\_long\_si\_reparam.stan}). Fix: reparameterize to
+axis-aligned coordinates
+\(\sigma_{\text{total}}^2 = \sigma_\zeta^2 + \sigma_s^2\) (well
+identified) and \(p_\zeta = \sigma_\zeta^2 / \sigma_{\text{total}}^2\)
+(the loose direction), back-transform in \texttt{transformed
+parameters} to recover \(\sigma_\zeta, \sigma_s\) with original
+interpretation. This brought \(R\)-hat on \(\sigma_\alpha, \sigma_\zeta\)
+down to \(\le 1.07\), but \(\sigma_s\) and \(\delta\) stayed at
+\(R\)-hat 1.21--1.28.
 
-\paragraph{Correlation structure (sidebar finding).}
-The \texttt{si\_corr} variant frees three pairwise correlations on the
-kid-level random effects. The bivariate (\(\xi, \zeta\)) correlation
-flips to near zero (\(\rho_{\xi\zeta} = -0.04\)) while the two new
-correlations come in large and opposite in sign:
-\(\rho_{\xi s} = +0.64\) and \(\rho_{\zeta s} = -0.63\).
-Substantively: kids with higher efficiency \(\xi\) tend to have a
-larger latent delay (start later, ``catch-up learners''); kids with
-steeper acceleration \(\zeta\) tend to have smaller latent delay
-(``early bloomers''). This is consistent with separately-documented
-Wordbank patterns relating onset timing to later vocabulary
-composition (Frank et al., Wordbank book ch.~13, ch.~15) but
-mirroring those patterns from the modeling side is a marginal
-contribution: the LOO improvement over independent-\(s_i\) is
-\(\Delta = 62\) (SE = 8) -- statistically significant but practically
-small given the added complexity of three free correlations. For the
-headline reporting we lean on the independent-\(s_i\) variant.
+\textbf{Ridge 2: (\(\sigma_s, \delta\)) population-mean compensation.}
+Half-normal \(s_i\) has nonzero population mean
+\(\mathbb{E}[s_i \mid \sigma_s] = \sigma_s\sqrt{2/\pi} \approx 0.8\sigma_s\)
+that grows with \(\sigma_s\). Bigger \(\sigma_s\) shifts the average
+effective onset later, requiring \(\delta\) to grow to compensate.
+Fix: switch to \emph{signed} normal \(s_i\) with sum-to-zero centering
+(\texttt{log\_irt\_long\_si\_signed.stan}):
+\(s_i^{\text{raw}} \sim \mathrm{Normal}(0, \sigma_s)\) followed by
+\(s_i = s_i^{\text{raw}} - \overline{s_i^{\text{raw}}}\). Now
+\(\overline{s_i} = 0\) exactly, regardless of \(\sigma_s\), so
+\(\delta\) doesn't need to compensate. The ridge breaks.
+
+Both fixes together: \(R\)-hat 1.00--1.02 on every parameter,
+ESS\(_{\text{bulk}}\) 295--11{,}511, chain wall-clock 2:03--2:30
+(synchronous; previously 5:13--16:46, 3\(\times\) asymmetric).
+
+\paragraph{Interpretation shift: \(s_i\) as developmental offset.}
+With signed \(s_i\), a kid with \(s_i < 0\) is ``ahead'' of the
+population reference: their effective log-age at calendar age \(t\)
+is larger. Analogous to how \(\xi_i\) and \(\zeta_i\) are deviations
+from population means rather than one-sided modifications.
+Empirically age-of-first-word varies symmetrically around a population
+mean, so signed normal matches the data structure better than
+half-normal. The (nonlinear) log transform still makes ``late'' kids
+(\(s_i > 0\)) get a bigger downward pull on log\_age than ``early''
+kids get an upward pull, so \(s_i\) remains useful for anchoring the
+\(q_{10}\) floor at young ages.
+
+\paragraph{Posterior shift: half-normal was inflating \(\sigma_s\).}
+With cleanly-mixed signed \(s_i\):
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & half-normal (poorly mixed) & signed (well mixed) \\
+\midrule
+\(\sigma_\alpha\) & \(1.86\,[1.64, 2.10]\) & \(1.56\,[1.33, 1.79]\) \\
+\(\sigma_\zeta\)  & \(3.10\,[2.85, 3.41]\) & \(3.51\,[3.14, 3.92]\) \\
+\(\sigma_s\)      & \(4.14\,[3.28, 5.01]\) & \(\mathbf{1.40\,[0.88, 1.88]}\) \\
+\(\delta\)        & \(8.06\,[7.73, 8.36]\) & \(\mathbf{9.62\,[9.47, 9.79]}\) \\
+\(\pi_\alpha\)    & \(0.92\,[0.90, 0.94]\) & \(0.894\,[0.862, 0.919]\) \\
+\(\kappa_{\text{pop}} = 1+\delta\) & \(9.06\) & \(\mathbf{10.62}\) \\
+\bottomrule
+\end{tabular}
+\end{center}
+The half-normal model was forcing all kids into a one-sided
+distribution and over-estimating \(\sigma_s\) (kid onset spread of
+\(\sim 4\) mo) to make the spread fit. Once kids can be signed, the
+true between-kid onset SD is much more modest (\(\sim 1.4\) mo). And
+\(\delta\) snaps back near M\_best (\(\kappa_{\text{pop}} \approx
+10.6\) vs M\_best's \(10.4\)), with \(\sigma_\alpha, \sigma_\zeta\)
+also near M\_best values. So the picture is: \textbf{M\_best plus a
+small per-kid onset channel}, not the dramatic rearrangement the
+half-normal had suggested.
+
+PSIS-LOO on the signed variant gives clean diagnostics (0 obs with
+\(\hat k > 0.7\), vs 3 in half-normal and 202 in si\_corr), with
+elpd \(= -37{,}123\) (SE 203). That ranks 3rd in the slopes\_si family
+but is the only mixed-cleanly high-elpd variant -- the gain over
+M\_best per-obs projection (\(\sim\!697\) elpd) is the substantive
+bottom line.
 
 \paragraph{Reference age \(a_0\) is dataset-specific.}
 \(a_0\) is the pivot at which \(\log_{age} = 0\) and so

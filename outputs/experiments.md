@@ -1176,6 +1176,110 @@ The correlation structure is real but a sidebar finding.
 
 ---
 
+## 🟢 22. Fixing s_i mixing: reparam + signed-normal
+
+**Motivation.** §21's slopes_si family had Rhat 1.5–1.9 on key
+parameters (σ_α, σ_ζ, σ_s, δ) despite single-mode posteriors. Two
+overlapping ridges were diagnosed via per-chain median comparison:
+
+1. **(σ_ζ, σ_s) variance-partition ridge**: the two between-kid
+   variance channels traded off — when σ_s grew, σ_ζ shrank.
+2. **(σ_s, δ) population-mean compensation ridge**: with half-normal
+   s_i, E[s_i | σ_s] = σ_s × √(2/π) ≈ 0.8σ_s depends on σ_s. When σ_s
+   grew, the average effective onset shifted later, requiring δ to
+   compensate.
+
+**Two fixes, applied sequentially.**
+
+**Fix 1: (σ_total, p_zeta) reparameterization** [`log_irt_long_si_reparam.stan`]
+- Sample axis-aligned coordinates: σ_total = sqrt(σ_ζ² + σ_s²) (well
+  identified) and p_zeta = σ_ζ²/σ_total² ∈ (0, 1) (the loose direction).
+- Back-transform: σ_ζ = σ_total × √p_zeta; σ_s = σ_total × √(1−p_zeta).
+  Same interpretation as before; only sampling axes differ.
+- Variant: `no_freq_slopes_si_reparam` (job 24959733; 9h52m runtime).
+
+**Fix 2: signed-normal s_i with sum-to-zero centering**
+[`log_irt_long_si_signed.stan`]
+- Switch from `vector<lower=0>[I] s_i; s_i ~ normal(0, σ_s)` (half-normal)
+  to `vector[I] s_i_raw; s_i = s_i_raw - mean(s_i_raw); s_i_raw ~ normal(0, σ_s)`
+  (signed, sum-to-zero). Now E[s_i] = 0 by construction, regardless of σ_s.
+- Interpretation shifts from "literal delay" to "developmental offset
+  around population mean" (kids with s_i < 0 are "ahead" — their
+  effective log-age at calendar age t is larger).
+- Matches Mike's intuition that the half-normal felt artificial: empirical
+  age-of-first-word varies symmetrically around a population mean.
+- Variant: `no_freq_slopes_si_signed` (job 25093875; 2h53m runtime).
+
+**Mixing fully solved.**
+
+| param | direct (v2) | reparam only | signed + reparam |
+|---|---|---|---|
+| σ_α Rhat / ESS | 1.80 / 6 | 1.07 / 62 | **1.00 / 889** ✓ |
+| σ_ζ Rhat / ESS | 1.39 / 9 | 1.04 / 59 | **1.00 / 3250** ✓ |
+| σ_s Rhat / ESS | 1.83 / 6 | 1.21 / 16 | **1.02 / 295** ✓ |
+| δ Rhat / ESS | 1.91 / 6 | 1.28 / 12 | **1.00 / 6590** ✓ |
+| π_α Rhat / ESS | 1.80 / 6 | 1.07 / 62 | **1.00 / 889** ✓ |
+
+Chain wall-clock times also collapsed from 9–17h spread (direct) → ~10h
+synchronous (reparam) → **2:03–2:30 synchronous (signed + reparam)**.
+
+**Posterior shifts compared to half-normal.**
+
+| param | direct (v2) | reparam only | signed + reparam |
+|---|---|---|---|
+| σ_α | 1.86 | 1.98 | **1.56 [1.33, 1.79]** |
+| σ_ζ | 3.10 | 3.30 | **3.51 [3.14, 3.92]** |
+| σ_s | 4.14 | 4.62 | **1.40 [0.88, 1.88]** |
+| δ | 8.06 | 7.93 | **9.62 [9.47, 9.79]** |
+| π_α | 0.92 | 0.93 | **0.894 [0.862, 0.919]** |
+| ρ(ξ,ζ) | +0.35 | +0.29 | **+0.43 [+0.25, +0.59]** |
+| κ_pop = 1+δ | 9.06 | 8.93 | **10.62** |
+
+The half-normal model was inflating σ_s because all kids were forced
+into a single one-sided distribution; once kids can be signed,
+true per-kid onset spread is only ~1.4 mo SD. δ snaps back to near
+M_best (κ_pop ≈ 10.6 vs M_best's 10.4). σ_α and σ_ζ near M_best values.
+
+**LOO comparison.**
+
+| model | elpd_loo | bad pareto-k | p_loo | Rhat |
+|---|---:|---:|---:|---:|
+| slopes_si_corr (LKJ+Tobit) | −36,982 | 202 ⚠ | 636 | 2.5 |
+| slopes_si (half-normal) | −37,044 | 3 | 616 | 1.91 |
+| **slopes_si_signed** | **−37,123** | **0** ✓ | 577 | **1.02** ✓ |
+| demo_kappa (ζ alone) | −37,274 | 0 | 527 | 1.00 |
+| si_only (α + s_i) | −37,482 | 2 | 568 | 1.01 |
+| M_best (per-obs proj.) | ~−37,820 | — | 577 | 1.04 |
+
+Signed-s_i ranks third on raw elpd but is the **only mixed-cleanly
+high-elpd variant**. Half-normal beats it by 79 elpd but has Rhat 1.91 —
+those point estimates were not trustworthy. The 697-elpd gain over
+M_best per-obs projection is the real bottom line: **adding signed s_i
+to M_best is a substantial and well-mixed improvement.**
+
+**Substantive interpretation.**
+
+The signed s_i posterior says per-kid developmental onsets vary by
+~1.4 mo SD around population mean. That's modest — about ±2.8 mo for
+2 SD. Combined with the (nonlinear) log transform: a kid 2 mo "late"
+at calendar age 16 gets log((16-0-2)/19) = -0.169 (vs population
+log(16/19) = -0.172), so the log-age effect is small at the
+population edges but compounds in the tails.
+
+Most importantly: the signed model **restores the canonical M_best
+picture** (κ_pop ≈ 10.6, σ_α ≈ 1.6, σ_ζ ≈ 3.5, π_α ≈ 0.89) with
+s_i as a small extra channel. The half-normal had pushed κ_pop down
+to 9.1 — that was an artifact of bad parameterization, not a real
+finding.
+
+**Artifacts.**
+- [`model/stan/log_irt_long_si_reparam.stan`](../model/stan/log_irt_long_si_reparam.stan): (σ_total, p_zeta) reparam only
+- [`model/stan/log_irt_long_si_signed.stan`](../model/stan/log_irt_long_si_signed.stan): reparam + signed s_i (headline variant)
+- Variants `no_freq_slopes_si_reparam`, `no_freq_slopes_si_signed` in [`helpers.R`](../model/R/helpers.R)
+- Figure: [`outputs/figs/longitudinal/quantile_demo.png`](figs/longitudinal/quantile_demo.png) (6-panel; panel 6 is signed s_i)
+
+---
+
 ## Backlog (⚪)
 
 ### Data / robustness
