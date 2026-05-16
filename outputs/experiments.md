@@ -457,7 +457,7 @@ that 4 of 5 ablations live on the **ability** side of the 2PL
 factorization
 $\eta_{ijt} = \lambda_j (\theta_{it} - \beta_j)$, with
 $\theta_{it} = \xi_i + (1{+}\delta{+}\zeta_i)\log\!((t-s)/a_0)$ and
-$\beta_j = \psi_j - \log p_j - \log H$. Only the 2PL variant touches
+$\beta_j = \delta_j - \log p_j - \log H$. Only the 2PL variant touches
 the item-side, and even then through $\lambda_j$ (multiplier on the
 gap), not through the structure of $\beta_j$ itself. The diagnostic
 $\beta_j$ density across the 5 existing variants showed near-perfect
@@ -469,7 +469,7 @@ changes, not a probe of difficulty structure.
 
 | variant | change | what it tests |
 |---|---|---|
-| `no_class_slopes` | data override: cc<-1, C<-1 (single global $\psi \sim N(\mu, \tau)$) | does lexical-class hierarchy add anything beyond per-word $\psi_j$ + frequency? |
+| `no_class_slopes` | data override: cc<-1, C<-1 (single global $\psi \sim N(\mu, \tau)$) | does lexical-class hierarchy add anything beyond per-word $\delta_j$ + frequency? |
 | `class_beta_slopes` | $\beta_c \sim N(1, 0.5)$ free per-class slope on $\log p_j$ | does frequency enter with class-specific weight (e.g., weaker for function words)? |
 
 **Implementation.** `class_beta` adds a new parameter `beta_c` to
