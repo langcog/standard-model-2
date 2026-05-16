@@ -8,7 +8,7 @@
 //      that remained after the (sigma_zeta, sigma_s) reparam alone.
 //
 //   2. (sigma_total, p_zeta) reparameterization (inherited from
-//      log_irt_long_si_reparam.stan) -- decouples the sigma_zeta and
+//      now-removed log_irt_long_si_reparam.stan) -- decouples the sigma_zeta and
 //      sigma_s sampling axes.
 //
 // Interpretation shift: s_i is now a developmental offset, not a literal

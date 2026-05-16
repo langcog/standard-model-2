@@ -204,6 +204,13 @@ variant_hyperpriors <- function(name) {
                       delta_prior_mean = 0, delta_prior_sd = 0.001),
     demo_alpha = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
                       delta_prior_mean = 0, delta_prior_sd = 0.001),
+    # demo_kappa_pop: + population scaling kappa_pop free (was implicit in
+    # demo_kappa, but demo_kappa also turns on sigma_zeta). This variant
+    # frees kappa_pop alone, with sigma_zeta still pinned -- gives the
+    # "all kids share the same kappa > 1" panel between demo_alpha and
+    # slopes in the 5-panel additive build.
+    demo_kappa_pop = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
+                          sigma_zeta_prior_sd = 0.001),
     demo_kappa = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
                       sigma_alpha_prior_sd = 0.001,
                       sigma_zeta_prior_sd = 1),
@@ -252,19 +259,6 @@ variant_hyperpriors <- function(name) {
     no_freq_slopes_si_corr = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
                                   sigma_zeta_prior_sd = 1,
                                   sigma_s_prior_sd = 2),
-    # Reparameterized version of slopes_si to break the (sigma_zeta,
-    # sigma_s) sampling ridge that gave Rhat 1.5-1.9 in the direct
-    # parameterization. Uses log_irt_long_si_reparam.stan via the
-    # _si_reparam dispatch. Samples (sigma_total, p_zeta) instead of
-    # (sigma_zeta, sigma_s) directly; back-transforms in transformed
-    # parameters so sigma_zeta and sigma_s have identical interpretation.
-    # The hyperprior fields below are ignored by the reparam Stan file
-    # (which uses its own HN(0, 5) + Beta(2, 2) on the reparam'd
-    # coordinates) but kept for compatibility with the standard bundle
-    # data dictionary.
-    no_freq_slopes_si_reparam = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
-                                     sigma_zeta_prior_sd = 1,
-                                     sigma_s_prior_sd = 2),
     # Signed-normal s_i variant: combines the (sigma_total, p_zeta)
     # reparam with signed s_i (sum-to-zero centered). Two-pronged fix:
     # the reparam handles the (sigma_zeta, sigma_s) ridge; the signed
