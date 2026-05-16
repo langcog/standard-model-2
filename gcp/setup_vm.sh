@@ -63,15 +63,25 @@ cat("R packages installed.\n")
 # Install to /opt so all users can find it. ~10 min for the cmdstan
 # build the first time.
 mkdir -p /opt/cmdstan
-chmod 755 /opt/cmdstan
+chmod 777 /opt/cmdstan
 Rscript -e '
 options(cmdstanr_cmdstan_install_path = "/opt/cmdstan")
 cmdstanr::install_cmdstan(dir = "/opt/cmdstan", cores = parallel::detectCores())
 '
 
-# Make cmdstanr know where to find the install
-echo 'CMDSTAN=/opt/cmdstan/cmdstan-2.36.0' >> /etc/environment
-echo 'export CMDSTAN=/opt/cmdstan/cmdstan-2.36.0' >> /etc/profile.d/cmdstan.sh
+# Find the actual installed version (cmdstanr installs the latest by
+# default; version moves over time) and set env vars accordingly.
+CMDSTAN_PATH=$(ls -d /opt/cmdstan/cmdstan-*/ 2>/dev/null | head -1 | sed 's:/$::')
+echo "Detected cmdstan at: $CMDSTAN_PATH"
+
+# Chown so non-root users can compile Stan models (compile writes
+# intermediate object files into the cmdstan tree).
+chmod -R 777 /opt/cmdstan
+
+echo "CMDSTAN=$CMDSTAN_PATH" >> /etc/environment
+cat > /etc/profile.d/cmdstan.sh <<EOF
+export CMDSTAN="$CMDSTAN_PATH"
+EOF
 
 echo "[$(date)] === SM2 GCP VM setup DONE ==="
 touch /var/run/sm2_setup_complete

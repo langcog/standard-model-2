@@ -21,6 +21,9 @@ INIT_FROM="${3:-}"
 
 cd "$HOME/standard_model_2"
 
+# Tell config.R where the project root is (defaults to mcfrank's Mac path).
+export STANDARD_MODEL_ROOT="$PWD"
+
 export STAN_ITER="${STAN_ITER:-4000}"
 export STAN_WARMUP="${STAN_WARMUP:-2500}"
 export STAN_ADAPT_DELTA="${STAN_ADAPT_DELTA:-0.95}"
