@@ -43,6 +43,30 @@ claim (κ_pop > 1, super-linear) is invariant.
 4. `long_no_freq_slopes` — + σ_ζ free (was "M_best")
 5. `long_no_freq_slopes_si_signed` — + σ_s free; signed-`s_i` — HEADLINE
 
+## 0. Compute strategy: GCP, not Sherlock
+
+Sherlock fairshare is depleted (EffectvUsage = 0.95, FairShare = 0.20).
+Pivoted to GCP `hs-babyview` project (`mcfrank@stanford.edu` account)
+for the family refits.
+
+**Active VM:** `sm2-fit-01` in us-central1-a, machine `n2d-standard-32`
+(32 vCPUs AMD EPYC, 128 GB RAM), 100 GB pd-balanced boot disk, ~$1.46/hr.
+
+**Setup script** `gcp/setup_vm.sh` runs as VM startup metadata:
+installs R + cmdstanr + cmdstan from binary repos (Posit PPM for R
+binaries, source-build for cmdstan). ~30-40 min on a fresh VM.
+
+**Fit drivers** in `gcp/`:
+- `gcp/run_fit.sh <variant> <dataset> [init_from_tag]` — single fit.
+  Sets STAN env vars, runs `fit_longitudinal.R`, then extract scripts.
+  Writes summaries to `fits/summaries/`.
+- `gcp/run_family.sh [english|norwegian]` — runs all 5 variants
+  sequentially with smart init (each warm-starts from previous).
+
+**Expected cost:** ~$140-200 for the full English + Norwegian sweep
+(10 fits × ~14h × $1.46/hr ≈ $200 sequential, lower with smart init
+warmup savings).
+
 ## 1. Optimizations under test
 
 **Threading benchmark** (job 25132788 on Sherlock, currently PENDING):
