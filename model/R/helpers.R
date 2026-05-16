@@ -143,7 +143,16 @@ variant_hyperpriors <- function(name) {
   # prefixes first so they match before their substrings.
   base <- sub("^(long_proc_|long_|io_)", "", name)
 
+  # === ACTIVE / HEADLINE VARIANTS ===
+  # The five "5-panel build" variants for the main figure are:
+  #   demo_pure, demo_alpha, demo_kappa_pop, no_freq_slopes,
+  #   no_freq_slopes_si_signed
+  # The headline (full model) is no_freq_slopes_si_signed.
+  # All other variants below are legacy / robustness / ablation; some are
+  # retained for cross-referencing fits on disk and for the §14 nested
+  # family analysis (m0..m5).
   switch(base,
+    # --- Legacy: spine ablations (no s_i; primarily used in §14 LOO) ---
     baseline      = list(),
     slopes        = list(sigma_zeta_prior_sd = 1),
     `2pl`         = list(sigma_lambda_prior_sd = 1),
@@ -155,7 +164,7 @@ variant_hyperpriors <- function(name) {
     fix_delta     = list(delta_prior_mean = 0, delta_prior_sd = 0.001),
     fix_delta_slopes = list(delta_prior_mean = 0, delta_prior_sd = 0.001,
                             sigma_zeta_prior_sd = 1),
-    # Difficulty-side ablations
+    # --- Legacy: difficulty-side ablations ---
     class_beta        = list(beta_c_prior_sd = 0.5),
     class_beta_slopes = list(beta_c_prior_sd = 0.5,
                              sigma_zeta_prior_sd = 1),
@@ -188,17 +197,21 @@ variant_hyperpriors <- function(name) {
     m4 = list(sigma_zeta_prior_sd = 1, beta_c_prior_sd = 0.5),  # + class_beta
     m5 = list(sigma_zeta_prior_sd = 1, beta_c_prior_sd = 0.5,
               sigma_lambda_prior_sd = 1),  # + 2PL
-    # 4-panel "model spine" variants for the quantile-demo figure.
-    # Each progressively frees one component on top of the pure
-    # accumulator. All are no_freq (beta_c=0) so psi_j absorbs item
-    # difficulty without a separate frequency channel; that's the
-    # cleanest comparison.
+    # === ACTIVE: 5-panel "model spine" variants for the quantile-demo
+    # figure. Each progressively frees one parameter on top of the pure
+    # accumulator. All are no_freq (beta_c pinned at 0) so delta_j
+    # absorbs item difficulty without a separate frequency channel.
     #
-    #   variant       | sigma_alpha | sigma_zeta | delta  | what it represents
-    #   demo_pure     | pinned ~0   | pinned ~0  | pinned | McMurray pure accumulator
-    #   demo_alpha    | free        | pinned ~0  | pinned | + child efficiency variation (Kachergis-like)
-    #   demo_kappa    | pinned ~0   | free       | free   | + age dynamics (Hidaka-like)
-    #   demo_full     | free        | free       | free   | full M_best (= no_freq + slopes)
+    #   variant         | sigma_alpha | sigma_zeta | delta  | what it represents
+    #   demo_pure       | pinned ~0   | pinned ~0  | pinned | McMurray pure accumulator
+    #   demo_alpha      | free        | pinned ~0  | pinned | + per-kid efficiency (Kachergis 2021)
+    #   demo_kappa_pop  | free        | pinned ~0  | free   | + population acceleration (Hidaka rate-change)
+    #   no_freq_slopes  | free        | free       | free   | + per-kid acceleration (was M_best)
+    #   no_freq_slopes_si_signed | + sigma_s free  |        | + per-kid trajectory phase (this work)
+    #
+    # Legacy demo_kappa (sigma_alpha pinned, sigma_zeta + delta free) is
+    # kept for backward compatibility but superseded by demo_kappa_pop
+    # in the 5-panel build.
     demo_pure  = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
                       sigma_alpha_prior_sd = 0.001,
                       delta_prior_mean = 0, delta_prior_sd = 0.001),
