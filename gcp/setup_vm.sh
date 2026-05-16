@@ -83,5 +83,22 @@ cat > /etc/profile.d/cmdstan.sh <<EOF
 export CMDSTAN="$CMDSTAN_PATH"
 EOF
 
+# Find and chown cmdstan to the default user so compiles work without sudo.
+CMDSTAN_PATH=$(ls -d /opt/cmdstan/cmdstan-*/ 2>/dev/null | head -1 | sed 's:/$::')
+chmod -R 777 /opt/cmdstan
+# Set thread support in cmdstan make/local. Do NOT add -march=native or
+# -DNDEBUG -- they trigger "double free or corruption (out)" on Stan 2.38
+# with AMD EPYC and -O3 (default). Stan's default flags are fine.
+cat > "$CMDSTAN_PATH/make/local" <<EOF
+STAN_THREADS=true
+EOF
+
+# IMPORTANT thread-count note for users: when launching fits, set
+# STAN_THREADS_PER_CHAIN to the number of PHYSICAL cores divided by
+# number of chains. GCP n2d-* machines have 1 physical core per 2 vCPUs
+# (SMT). Using all vCPUs as threads causes FPU contention and slows
+# Stan ~3x. e.g. n2d-standard-32 = 16 physical cores -> 4 chains x 4
+# threads/chain = 16 (full saturation, no SMT pressure).
+
 echo "[$(date)] === SM2 GCP VM setup DONE ==="
 touch /var/run/sm2_setup_complete
