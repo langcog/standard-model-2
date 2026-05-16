@@ -58,11 +58,17 @@ MODEL_CONSTANTS <- list(
 DEFAULT_PRIORS <- list(
   mu_mu_c          = 8,
   sigma_mu_c       = 3,
-  # s effectively pinned near 0; we don't quite use 0 to avoid putting
-  # the prior mode exactly on the parameter's lower boundary (Stan's
-  # bounded transform blows up there).
-  s_prior_mean     = 0.5,
-  s_prior_sd       = 0.05,
+  # s pinned at 6 months: developmentally plausible reference age for
+  # word-learning onset (kid effective onsets s + s_i around 6 mo, ±~1.4
+  # mo SD with signed s_i, so most kids in [3.5, 8.5] mo range -- positive
+  # and interpretable). Previously pinned near 0 (s_prior_mean=0.5) as a
+  # coordinate convention to avoid the (s, delta) ridge; that led to
+  # signed s_i giving negative effective onsets, which Mike noted as
+  # interpretively weird. The (s, delta) ridge means changing s shifts
+  # delta proportionally, so this re-pinning changes kappa_pop = 1 + delta
+  # downward from the s=0.5 reporting. Standard convention now.
+  s_prior_mean     = 6,
+  s_prior_sd       = 0.5,
   delta_prior_mean = 0,
   delta_prior_sd   = 0.5,
   sigma_lambda_prior_sd = 0.001,   # no 2PL by default
