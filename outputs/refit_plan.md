@@ -37,9 +37,9 @@ claim (κ_pop > 1, super-linear) is invariant.
 - `log_irt.stan`, `log_irt_io.stan` — cross-sectional base.
 
 **Active variants (5-panel build):**
-1. `long_demo_pure` — pure accumulator (σ_α=σ_ζ=σ_s=0, δ=0)
-2. `long_demo_alpha` — + σ_α free (δ still 0)
-3. `long_demo_kappa_pop` — + δ free (σ_ζ still 0) — NEW VARIANT
+1. `long_demo_pure` — pure accumulator (σ_α=σ_ζ=σ_s=0, κ_pop=1)
+2. `long_demo_alpha` — + σ_α free (κ_pop still 1)
+3. `long_demo_kappa_pop` — + κ_pop free (σ_ζ still 0) — NEW VARIANT
 4. `long_no_freq_slopes` — + σ_ζ free (was "M_best")
 5. `long_no_freq_slopes_si_signed` — + σ_s free; signed-`s_i` — HEADLINE
 
@@ -52,12 +52,12 @@ claim (κ_pop > 1, super-linear) is invariant.
 - Target: ≥1.7× speedup, ideally 2×.
 
 **Decision tree from benchmark result:**
-- Speedup ≥2.5×: use 8 threads/chain for family refit. I=800 × J=650
+- Speedup ≥2.5×: use 8 threads/chain for family refit. I=800 × J=680
   projects to ~12-14h. Within slurm 18h window. ✓
-- Speedup 1.7–2.5×: use 8 threads/chain. I=600 × J=650 projects to
+- Speedup 1.7–2.5×: use 8 threads/chain. I=600 × J=680 projects to
   ~12h. ✓
 - Speedup <1.7×: fall back to 4 threads/chain, smaller bundle (I=400,
-  J=650).
+  J=680).
 
 **Other speedups available (deferred unless we need them):**
 - Higher adapt_delta only when needed for divergent transitions
@@ -78,14 +78,16 @@ claim (κ_pop > 1, super-linear) is invariant.
 ### Step 1: Build scaled bundle
 
 ```bash
-Rscript model/scripts/prepare_longitudinal_data.R "English (American)" 800 650
+Rscript model/scripts/prepare_longitudinal_data.R "English (American)" 800 680
 ```
 
 Writes `fits/long_subset_data.rds` (overwrites current I=200, J=198).
 Stratified-by-median-admin-age sampling for kids (4 bins);
 stratified-by-(lexical_class × log_p_quartile) sampling for items.
 
-Expected bundle dimensions: I=800, A≈3000 admins, J=~650, N≈1.8M obs.
+Expected bundle dimensions: I=800, A≈3000 admins, J=~680 (full WS item
+set), N≈1.8M obs. (Items without CHILDES frequency match get a
+min-prob fallback in the prep script, so all 680 are retained.)
 
 ### Step 2: Submit 5 fits on Sherlock
 
@@ -210,7 +212,7 @@ abstracts.
 
 - **Benchmark queue wait**: 32-cpu request is held back by fairshare;
   may need to wait several hours before benchmark runs.
-- **18h slurm window**: I=800 × J=650 projects to 12-14h at 8
+- **18h slurm window**: I=800 × J=680 projects to 12-14h at 8
   threads/chain, but per-iteration cost depends on chain mixing.
   signed_si is well-mixed in current bundle; should still be well-mixed
   at larger scale, but not guaranteed.
