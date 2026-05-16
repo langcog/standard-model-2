@@ -17,7 +17,7 @@
 // Linear predictor:
 //   eta = lambda_j * [xi_i + beta_c[cc[j]] * log p_j + log H
 //                     + (1 + delta + zeta_i) * log((age_a - s - s_i)/a0)
-//                     - psi_j]
+//                     - delta_j]
 //
 // beta_c is a per-class log-p slope that is pinned at 1 by default
 // (tight prior beta_c_prior_sd ~ 0.001 in DEFAULT_PRIORS). The
@@ -44,7 +44,7 @@ functions {
                         real log_H,
                         // per-item / per-child
                         vector log_p,
-                        vector psi, vector lambda,
+                        vector delta_j, vector lambda,
                         vector beta_c,
                         vector xi, vector zeta, vector s_i) {
     int n_slice = end - start + 1;
@@ -57,7 +57,7 @@ functions {
       real slope_n = time_baseline + delta + zeta[ch];
       real beta_n  = beta_c[cc[jj[n]]];
       real base = xi[ch] + beta_n * log_p[jj[n]] + log_H
-                + slope_n * log_age_n - psi[jj[n]];
+                + slope_n * log_age_n - delta_j[jj[n]];
       eta_slice[i] = lambda[jj[n]] * base;
     }
     return bernoulli_logit_lpmf(y_slice | eta_slice);
@@ -111,7 +111,7 @@ parameters {
 
   real<lower=0> sigma_alpha;
 
-  vector[J] psi_raw;
+  vector[J] delta_j_raw;
   vector[C] mu_c;
   vector<lower=0>[C] tau_c;
 
@@ -166,9 +166,9 @@ transformed parameters {
   vector[I] zeta = child_effs[, 2] - mean(child_effs[, 2]);
   real<lower=0> sigma_zeta = sigma_child[2];
 
-  vector[J] psi;
+  vector[J] delta_j;
   for (j in 1:J) {
-    psi[j] = mu_c[cc[j]] + tau_c[cc[j]] * psi_raw[j];
+    delta_j[j] = mu_c[cc[j]] + tau_c[cc[j]] * delta_j_raw[j];
   }
   vector[J] log_lambda = sigma_lambda * log_lambda_raw;
   vector[J] lambda = exp(log_lambda);
@@ -187,7 +187,7 @@ model {
   L_child       ~ lkj_corr_cholesky(2);  // mild prior toward 0 corr
   sigma_alpha   ~ normal(0, sigma_alpha_prior_sd);
 
-  psi_raw ~ std_normal();
+  delta_j_raw ~ std_normal();
   mu_c    ~ normal(mu_mu_c, sigma_mu_c);
   tau_c   ~ normal(0, 1);
 
@@ -213,7 +213,7 @@ model {
                        aa, jj, admin_to_child, cc,
                        admin_age, s, a0,
                        time_baseline, delta, log_H,
-                       log_p, psi, lambda, beta_c,
+                       log_p, delta_j, lambda, beta_c,
                        xi, zeta, s_i);
 }
 
@@ -234,7 +234,7 @@ generated quantities {
       int ch = admin_to_child[aa[n]];
       real slope_n = time_baseline + delta + zeta[ch];
       real base_n = xi[ch] + beta_c[cc[jj[n]]] * log_p[jj[n]] + log_H
-                  + slope_n * log_age[n] - psi[jj[n]];
+                  + slope_n * log_age[n] - delta_j[jj[n]];
       real eta_n = lambda[jj[n]] * base_n;
       log_lik[n] = bernoulli_logit_lpmf(y[n] | eta_n);
     }

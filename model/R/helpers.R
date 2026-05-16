@@ -10,7 +10,7 @@
 ##   fit_variant()
 ##   summarize_fit()
 ##   variant_hyperpriors()
-##   plot_psi_vs_logp(), plot_class_means(), plot_posterior_density()
+##   plot_delta_j_vs_logp(), plot_class_means(), plot_posterior_density()
 
 suppressPackageStartupMessages({
   library(rstan)
@@ -122,7 +122,7 @@ build_stan_data <- function(df, prior_r,
 }
 
 # Variants opt in to model components ABOVE the lean baseline defined
-# in DEFAULT_PRIORS (Rasch + frequency + per-class psi + free delta,
+# in DEFAULT_PRIORS (Rasch + frequency + per-class delta_j + free delta,
 # with s pinned at 0 and no per-child slopes).
 #
 # Naming convention: variants are named for what they ADD.
@@ -323,7 +323,7 @@ variant_hyperpriors <- function(name) {
 
 # Some variants need to mutate stan_data structure, not just priors.
 # Currently `no_class` is the only such variant: it collapses the
-# class-hierarchical prior on psi_j into a single global N(mu, tau)
+# class-hierarchical prior on delta_j into a single global N(mu, tau)
 # by overriding cc and C in stan_data. Equivalent to "C = 1 class".
 variant_data_overrides <- function(stan_data, variant) {
   base <- sub("^(long_proc_|long_|io_)", "", variant)
@@ -356,7 +356,7 @@ simulate_data <- function(I = 250, J = 150, C = 3,
   cc <- sort(rep(seq_len(C), length.out = J))
   cc <- sample(cc)
   log_p <- runif(J, log_p_range[1], log_p_range[2])
-  psi   <- rnorm(J, mu_c_true[cc], tau_c_true[cc])
+  delta_j   <- rnorm(J, mu_c_true[cc], tau_c_true[cc])
 
   log_r     <- rnorm(I, mu_r, sigma_r)
   log_alpha <- rnorm(I, 0, sigma_alpha_true)
@@ -367,7 +367,7 @@ simulate_data <- function(I = 250, J = 150, C = 3,
   ae <- pmax(ages[idx$ii] - s_true, 0.01)
   eta <- log_r[idx$ii] + log_alpha[idx$ii] +
          log_p[idx$jj] + log_H +
-         (1 + delta_true) * log(ae / a0) - psi[idx$jj]
+         (1 + delta_true) * log(ae / a0) - delta_j[idx$jj]
   y <- rbinom(length(eta), 1, plogis(eta))
 
   list(
@@ -375,7 +375,7 @@ simulate_data <- function(I = 250, J = 150, C = 3,
                      age = ages[idx$ii],
                      log_p = log_p[idx$jj], y = y),
     true = list(log_r = log_r, log_alpha = log_alpha, ages = ages,
-                psi = psi, cc = cc, log_p = log_p,
+                delta_j = delta_j, cc = cc, log_p = log_p,
                 sigma_alpha = sigma_alpha_true,
                 mu_c = mu_c_true, tau_c = tau_c_true,
                 s = s_true, delta = delta_true,
@@ -548,13 +548,13 @@ class_threshold_table <- function(fit, class_levels) {
   )
 }
 
-extract_psi_df <- function(fit, word_info, class_levels) {
+extract_delta_j_df <- function(fit, word_info, class_levels) {
   draws <- as_draws_df(fit)
-  psi_cols <- grep("^psi\\[", names(draws), value = TRUE)
+  delta_j_cols <- grep("^delta_j\\[", names(draws), value = TRUE)
   word_info %>%
-    mutate(psi_median = sapply(psi_cols, function(p) median(draws[[p]])),
-           psi_lo = sapply(psi_cols, function(p) quantile(draws[[p]], .025)),
-           psi_hi = sapply(psi_cols, function(p) quantile(draws[[p]], .975)),
+    mutate(delta_j_median = sapply(delta_j_cols, function(p) median(draws[[p]])),
+           delta_j_lo = sapply(delta_j_cols, function(p) quantile(draws[[p]], .025)),
+           delta_j_hi = sapply(delta_j_cols, function(p) quantile(draws[[p]], .975)),
            class = class_levels[cc],
            log_p = log(prob))
 }
@@ -563,17 +563,17 @@ extract_psi_df <- function(fit, word_info, class_levels) {
 # Plots
 # ===========================================================================
 
-plot_psi_vs_logp <- function(psi_df, save_path = NULL, tag = "") {
-  r <- cor(psi_df$psi_median, psi_df$log_p)
-  p <- ggplot(psi_df, aes(log_p, psi_median, colour = class)) +
-    geom_errorbar(aes(ymin = psi_lo, ymax = psi_hi), width = 0, alpha = 0.3) +
+plot_delta_j_vs_logp <- function(delta_j_df, save_path = NULL, tag = "") {
+  r <- cor(delta_j_df$delta_j_median, delta_j_df$log_p)
+  p <- ggplot(delta_j_df, aes(log_p, delta_j_median, colour = class)) +
+    geom_errorbar(aes(ymin = delta_j_lo, ymax = delta_j_hi), width = 0, alpha = 0.3) +
     geom_point(size = 1.6, alpha = 0.8) +
     geom_smooth(method = "lm", se = FALSE, colour = "grey40",
                 aes(group = 1), linewidth = 0.5, linetype = "dashed") +
-    labs(title = sprintf("RQ1: psi vs log p%s",
+    labs(title = sprintf("RQ1: delta_j vs log p%s",
                          if (nzchar(tag)) sprintf(" (%s)", tag) else ""),
          subtitle = sprintf("r = %.2f, R^2 = %.2f", r, r^2),
-         x = "log p_j", y = "Posterior median psi_j") +
+         x = "log p_j", y = "Posterior median delta_j") +
     theme_minimal(base_size = 12)
   if (!is.null(save_path)) ggsave(save_path, p, width = 7, height = 5, dpi = 150)
   invisible(p)

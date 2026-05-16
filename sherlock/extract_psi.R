@@ -1,10 +1,10 @@
-## Extract per-word psi posterior summary from a longitudinal fit.
+## Extract per-word delta_j posterior summary from a longitudinal fit.
 ##
-## For each psi[j] in the fit's draws, computes mean/median/SD/95% CrI
+## For each delta_j[j] in the fit's draws, computes mean/median/SD/95% CrI
 ## across MCMC draws, writes a small CSV (~30 KB at J=200). Used by
-## the Phase C psi_j ~ log p_j + class regression. Lives separately
+## the Phase C delta_j ~ log p_j + class regression. Lives separately
 ## from extract_summaries.R because we don't always want this for
-## every fit (psi is large; only m1_time_only / m1 / baseline want it).
+## every fit (delta_j is large; only m1_time_only / m1 / baseline want it).
 ##
 ## Usage on Sherlock:
 ##   Rscript sherlock/extract_psi.R <tag>
@@ -32,19 +32,19 @@ cat(sprintf("Reading %s ...\n", in_path))
 fit <- readRDS(in_path)
 d <- as_draws_df(fit)
 
-psi_cols <- grep("^psi\\[", names(d), value = TRUE)
-if (length(psi_cols) == 0) stop("No psi[] columns in fit draws.")
-cat(sprintf("Found %d psi columns.\n", length(psi_cols)))
+delta_j_cols <- grep("^delta_j\\[", names(d), value = TRUE)
+if (length(delta_j_cols) == 0) stop("No delta_j[] columns in fit draws.")
+cat(sprintf("Found %d delta_j columns.\n", length(delta_j_cols)))
 
-psi_summary <- tibble(
-  jj         = as.integer(sub("psi\\[(\\d+)\\]", "\\1", psi_cols)),
-  psi_mean   = sapply(psi_cols, function(p) mean(d[[p]])),
-  psi_median = sapply(psi_cols, function(p) median(d[[p]])),
-  psi_sd     = sapply(psi_cols, function(p) sd(d[[p]])),
-  psi_q025   = sapply(psi_cols, function(p) quantile(d[[p]], 0.025, names = FALSE)),
-  psi_q975   = sapply(psi_cols, function(p) quantile(d[[p]], 0.975, names = FALSE))
+delta_j_summary <- tibble(
+  jj         = as.integer(sub("delta_j\\[(\\d+)\\]", "\\1", delta_j_cols)),
+  delta_j_mean   = sapply(delta_j_cols, function(p) mean(d[[p]])),
+  delta_j_median = sapply(delta_j_cols, function(p) median(d[[p]])),
+  delta_j_sd     = sapply(delta_j_cols, function(p) sd(d[[p]])),
+  delta_j_q025   = sapply(delta_j_cols, function(p) quantile(d[[p]], 0.025, names = FALSE)),
+  delta_j_q975   = sapply(delta_j_cols, function(p) quantile(d[[p]], 0.975, names = FALSE))
 ) %>% arrange(jj)
 
 out_path <- file.path(OUT_DIR, paste0(tag, "_psi.csv"))
-write.csv(psi_summary, out_path, row.names = FALSE)
-cat(sprintf("Wrote %s (%d rows)\n", out_path, nrow(psi_summary)))
+write.csv(delta_j_summary, out_path, row.names = FALSE)
+cat(sprintf("Wrote %s (%d rows)\n", out_path, nrow(delta_j_summary)))

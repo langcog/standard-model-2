@@ -55,7 +55,7 @@ parameters {
 
   real<lower=0> sigma_alpha;
 
-  vector[J] psi_raw;
+  vector[J] delta_j_raw;
   vector[C] mu_c;
   vector<lower=0>[C] tau_c;
 
@@ -83,8 +83,8 @@ transformed parameters {
   vector[I] zeta = child_effs[, 2] - mean(child_effs[, 2]);
   real<lower=0> sigma_zeta = sigma_child[2];
 
-  vector[J] psi;
-  for (j in 1:J) psi[j] = mu_c[cc[j]] + tau_c[cc[j]] * psi_raw[j];
+  vector[J] delta_j;
+  for (j in 1:J) delta_j[j] = mu_c[cc[j]] + tau_c[cc[j]] * delta_j_raw[j];
 
   vector[J] log_lambda = sigma_lambda * log_lambda_raw;
   vector[J] lambda = exp(log_lambda);
@@ -97,7 +97,7 @@ model {
   L_child       ~ lkj_corr_cholesky(2);
   sigma_alpha   ~ normal(0, 1);
 
-  psi_raw ~ std_normal();
+  delta_j_raw ~ std_normal();
   mu_c    ~ normal(mu_mu_c, sigma_mu_c);
   tau_c   ~ normal(0, 1);
 
@@ -122,7 +122,7 @@ model {
     vector[N] slope_per_obs = beta_age + zeta_per_obs;
     vector[N] beta_per_obs  = beta_c[cc[jj]];
     vector[N] base = xi_per_obs + beta_per_obs .* log_p[jj] + log_H
-                   + slope_per_obs .* dt - psi[jj];
+                   + slope_per_obs .* dt - delta_j[jj];
     eta = lambda[jj] .* base;
   }
   y ~ bernoulli_logit(eta);

@@ -1,4 +1,4 @@
-## Extract per-item psi medians from an rstan stanfit. Same output
+## Extract per-item delta_j medians from an rstan stanfit. Same output
 ## format as extract_psi_slim.R but works on stanfit (S4 class with
 ## different API than CmdStanMCMC).
 ##
@@ -24,13 +24,13 @@ extract_one <- function(tag) {
 
   # rstan summary() lazy-computes per-variable means/medians; doesn't
   # materialize the full draws matrix.
-  s <- summary(fit, pars = "psi",
+  s <- summary(fit, pars = "delta_j",
                probs = c(0.025, 0.5, 0.975))$summary
-  if (is.null(s) || nrow(s) == 0) stop("No psi in this fit.")
+  if (is.null(s) || nrow(s) == 0) stop("No delta_j in this fit.")
   out <- data.frame(
-    jj         = as.integer(sub("psi\\[(\\d+)\\]", "\\1", rownames(s))),
-    psi_mean   = s[, "mean"],
-    psi_median = s[, "50%"]
+    jj         = as.integer(sub("delta_j\\[(\\d+)\\]", "\\1", rownames(s))),
+    delta_j_mean   = s[, "mean"],
+    delta_j_median = s[, "50%"]
   )
   out <- out[order(out$jj), ]
   out_path <- file.path(OUT_DIR, paste0(tag, "_psi.csv"))

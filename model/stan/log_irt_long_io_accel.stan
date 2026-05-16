@@ -91,7 +91,7 @@ parameters {
   vector[I] eps_zeta_raw;             // residual zeta (after coupling to log_r)
 
   // Word-level
-  vector[J] psi_raw;
+  vector[J] delta_j_raw;
   vector[C] mu_c;
   vector<lower=0>[C] tau_c;
   vector[J] log_lambda_raw;
@@ -132,8 +132,8 @@ transformed parameters {
 
   vector[I] xi = log_r_true + log_alpha;
 
-  vector[J] psi;
-  for (j in 1:J) psi[j] = mu_c[cc[j]] + tau_c[cc[j]] * psi_raw[j];
+  vector[J] delta_j;
+  for (j in 1:J) delta_j[j] = mu_c[cc[j]] + tau_c[cc[j]] * delta_j_raw[j];
 
   vector[J] log_lambda = sigma_lambda * log_lambda_raw;
   vector[J] lambda = exp(log_lambda);
@@ -153,7 +153,7 @@ model {
   eps_zeta_raw       ~ std_normal();
 
   // Word-level
-  psi_raw ~ std_normal();
+  delta_j_raw ~ std_normal();
   mu_c    ~ normal(mu_mu_c, sigma_mu_c);
   tau_c   ~ normal(0, 1);
   log_lambda_raw ~ std_normal();
@@ -192,7 +192,7 @@ model {
     vector[N] slope_per_obs = time_baseline + delta + zeta_per_obs;
     vector[N] beta_per_obs  = beta_c[cc[jj]];
     vector[N] base = xi_per_obs + beta_per_obs .* log_p[jj] + log_H
-                   + slope_per_obs .* log_age - psi[jj];
+                   + slope_per_obs .* log_age - delta_j[jj];
     eta = lambda[jj] .* base;
   }
   y ~ bernoulli_logit(eta);
@@ -222,7 +222,7 @@ generated quantities {
       int ch = admin_to_child[aa[n]];
       real slope_n = time_baseline + delta + zeta[ch];
       real base_n = xi[ch] + beta_c[cc[jj[n]]] * log_p[jj[n]] + log_H
-                  + slope_n * log_age[n] - psi[jj[n]];
+                  + slope_n * log_age[n] - delta_j[jj[n]];
       real eta_n = lambda[jj[n]] * base_n;
       log_lik[n] = bernoulli_logit_lpmf(y[n] | eta_n);
     }

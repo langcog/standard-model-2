@@ -8,7 +8,7 @@
 // gamma_0 = constant logit-scale shift from production to comprehension;
 // gamma_1 = how that shift changes with log-age. Equivalent
 // reparameterization on the difficulty side:
-//   psi_j_comp = psi_j - gamma_0 - gamma_1 * log_age.
+//   delta_j_comp = delta_j - gamma_0 - gamma_1 * log_age.
 //
 // STANDARDIZED-TEST channel (optional). One score per child (e.g.,
 // CELF / QUILS / PVT z-score), regressed on log_alpha:
@@ -112,7 +112,7 @@ parameters {
   real<lower=0> sigma_zeta;
 
   // Word-level
-  vector[J] psi_raw;
+  vector[J] delta_j_raw;
   vector[C] mu_c;
   vector<lower=0>[C] tau_c;
   vector[J] log_lambda_raw;
@@ -151,8 +151,8 @@ transformed parameters {
 
   vector[I] xi = log_r_true + log_alpha;
 
-  vector[J] psi;
-  for (j in 1:J) psi[j] = mu_c[cc[j]] + tau_c[cc[j]] * psi_raw[j];
+  vector[J] delta_j;
+  for (j in 1:J) delta_j[j] = mu_c[cc[j]] + tau_c[cc[j]] * delta_j_raw[j];
 
   vector[J] log_lambda = sigma_lambda * log_lambda_raw;
   vector[J] lambda = exp(log_lambda);
@@ -169,7 +169,7 @@ model {
   zeta_raw   ~ std_normal();
   sigma_zeta ~ normal(0, sigma_zeta_prior_sd);
 
-  psi_raw ~ std_normal();
+  delta_j_raw ~ std_normal();
   mu_c    ~ normal(mu_mu_c, sigma_mu_c);
   tau_c   ~ normal(0, 1);
   log_lambda_raw ~ std_normal();
@@ -215,7 +215,7 @@ model {
     vector[N] slope_per_obs = 1 + delta + zeta_per_obs;
     vector[N] beta_per_obs  = beta_c[cc[jj]];
     vector[N] base = xi_per_obs + beta_per_obs .* log_p[jj] + log_H
-                   + slope_per_obs .* log_age - psi[jj];
+                   + slope_per_obs .* log_age - delta_j[jj];
     eta = lambda[jj] .* base;
   }
   y ~ bernoulli_logit(eta);
@@ -238,7 +238,7 @@ model {
       vector[N_comp] beta_per_obs_c  = beta_c[cc[jj_comp]];
       vector[N_comp] base_c = xi_per_obs_c + beta_per_obs_c .* log_p[jj_comp]
                             + log_H + slope_per_obs_c .* log_age_c
-                            - psi[jj_comp];
+                            - delta_j[jj_comp];
       // Comp shift sits OUTSIDE the lambda multiplier so that gamma_0,
       // gamma_1 are interpretable as a logit-scale shift independent
       // of word discrimination. With lambda == 1 (Rasch / 1PL) this

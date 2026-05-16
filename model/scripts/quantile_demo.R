@@ -14,7 +14,7 @@
 ##
 ## All fits live on Sherlock; locally we have:
 ##   - fits/summaries/<tag>.draws.rds   (scalar parameter draws, ~2000)
-##   - fits/summaries/<tag>_psi.csv     (per-item psi median)
+##   - fits/summaries/<tag>_psi.csv     (per-item delta_j median; legacy filename)
 ##
 ## Empirical reference: Wordbank English (American) WS, restricted to
 ## the bundle's 198 items, computed across all admins via wordbankr or
@@ -142,36 +142,50 @@ J_ITEMS <- sd_b$J  # for y-axis ceiling
 ##   zeta_i ~ N(0, sigma_zeta)
 ##   s_i    ~ Normal_+(0, sigma_s)  (zero if sigma_s not free)
 ##   kappa_i = 1 + delta + zeta_i
-##   eta_ij = xi_i + log_p_j + log_H + kappa_i * log((t - s - s_i)/a0) - psi_j
+##   eta_ij = xi_i + log_p_j + log_H + kappa_i * log((t - s - s_i)/a0) - delta_j
 ##
-## Items: bundle's J items with empirical log_p_j and posterior median psi_j.
+## Items: bundle's J items with empirical log_p_j and posterior median delta_j.
+## CSV file naming: legacy `_psi.csv` (internal artifact name; the Stan
+## variable was renamed psi -> delta_j but the file extension remains
+## historical). The CSV's data column is now `delta_j_median`; fall back
+## to `psi_median` for legacy CSVs written before the rename.
 load_variant <- function(tag) {
   draws_path <- file.path(SUMMARIES, paste0(tag, ".draws.rds"))
-  psi_path   <- file.path(SUMMARIES, paste0(tag, "_psi.csv"))
+  delta_j_path <- file.path(SUMMARIES, paste0(tag, "_psi.csv"))
 
   draws <- readRDS(draws_path)
   if ("draws_df" %in% class(draws)) draws <- as.data.frame(draws)
 
-  # M_best (long_no_freq_slopes) doesn't have sigma_s -- fill with 0.
+  # Older M_best fit doesn't have sigma_s -- fill with 0 for sim consistency.
   if (!"sigma_s" %in% names(draws)) draws$sigma_s <- 0
 
-  # M_best psi: read from a proxy if its own _psi.csv doesn't exist
-  if (!file.exists(psi_path)) {
+  # delta_j table: use the variant's own _psi.csv when present, else
+  # fall back to slopes_si as a proxy (e.g. long_no_freq_slopes was fit
+  # on a slightly different bundle and doesn't have its own psi extract).
+  if (!file.exists(delta_j_path)) {
     proxy <- file.path(SUMMARIES, "long_no_freq_slopes_si_psi.csv")
-    cat(sprintf("[%s] psi not found; using slopes_si as proxy\n", tag))
-    psi <- read_csv(proxy, show_col_types = FALSE)
+    cat(sprintf("[%s] delta_j not found; using slopes_si as proxy\n", tag))
+    delta_j_df <- read_csv(proxy, show_col_types = FALSE)
   } else {
-    psi <- read_csv(psi_path, show_col_types = FALSE)
+    delta_j_df <- read_csv(delta_j_path, show_col_types = FALSE)
   }
-
-  list(draws = draws, psi = psi$psi_median)
+  # Column name handling: new extracts write delta_j_median; legacy
+  # extracts wrote psi_median. Accept either.
+  median_col <- if ("delta_j_median" %in% names(delta_j_df)) {
+    "delta_j_median"
+  } else if ("psi_median" %in% names(delta_j_df)) {
+    "psi_median"
+  } else {
+    stop("Neither delta_j_median nor psi_median column found in ", delta_j_path)
+  }
+  list(draws = draws, delta_j = delta_j_df[[median_col]])
 }
 
 simulate_variant <- function(tag, label) {
   cat(sprintf("\n=== Simulating %s ===\n", label))
   v <- load_variant(tag)
-  draws <- v$draws
-  psi   <- v$psi
+  draws   <- v$draws
+  delta_j <- v$delta_j
 
   # Sub-sample posterior draws
   set.seed(SEED)
@@ -256,10 +270,10 @@ simulate_variant <- function(tag, label) {
       log_age <- log(pmax(a - s_d - s_i, 0.01) / a0)
       theta   <- xi + kappa * log_age   # per-kid latent at this age
       # All variants are no_freq (beta_c pinned at 0), so log_p drops
-      # from eta. Fitted psi absorbs any frequency-related shift.
-      # eta_ij = theta_i + log_H - psi_j
+      # from eta. Fitted delta_j absorbs any frequency-related shift.
+      # eta_ij = theta_i + log_H - delta_j
       base_kid <- theta + log_H
-      eta <- outer(base_kid, psi, "-")
+      eta <- outer(base_kid, delta_j, "-")
       vocab <- rowSums(plogis(eta))
       rows[[idx]] <- data.frame(variant = tag, age = a, vocab = vocab)
     }

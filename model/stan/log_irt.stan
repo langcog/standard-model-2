@@ -2,10 +2,10 @@
 //
 // - Child-level latent collapsed into xi_i = log r_i + log alpha_i
 //   with xi_i ~ N(mu_r, sigma_r^2 + sigma_alpha^2); sigma_r pinned externally.
-// - Word threshold psi_j hierarchical by lexical class.
+// - Word threshold delta_j hierarchical by lexical class.
 // - Global start time s, age rate-change exponent delta.
 // - 2PL discrimination lambda_j per word (toggled via data flag):
-//     eta_ij = lambda_j * [xi_i + log p_j + log H + (1+delta) log((a-s)/a0) - psi_j]
+//     eta_ij = lambda_j * [xi_i + log p_j + log H + (1+delta) log((a-s)/a0) - delta_j]
 //   In Rasch mode (use_2pl=0), sigma_lambda_prior_sd is passed as ~0 so
 //   lambda_j is pinned at 1 (log_lambda = 0). In 2PL mode, sigma_lambda
 //   is freely estimated.
@@ -60,7 +60,7 @@ parameters {
   vector[I] xi_raw;
   real<lower=0> sigma_alpha;
 
-  vector[J] psi_raw;
+  vector[J] delta_j_raw;
   vector[C] mu_c;
   vector<lower=0>[C] tau_c;
 
@@ -79,9 +79,9 @@ parameters {
 transformed parameters {
   real<lower=0> sigma_xi = sqrt(square(sigma_r) + square(sigma_alpha));
   vector[I] xi = mu_r + sigma_xi * xi_raw;
-  vector[J] psi;
+  vector[J] delta_j;
   for (j in 1:J) {
-    psi[j] = mu_c[cc[j]] + tau_c[cc[j]] * psi_raw[j];
+    delta_j[j] = mu_c[cc[j]] + tau_c[cc[j]] * delta_j_raw[j];
   }
   vector[J] log_lambda = sigma_lambda * log_lambda_raw;
   vector[J] lambda = exp(log_lambda);
@@ -92,7 +92,7 @@ model {
   xi_raw      ~ std_normal();
   sigma_alpha ~ normal(0, sigma_alpha_prior_sd);
 
-  psi_raw ~ std_normal();
+  delta_j_raw ~ std_normal();
   mu_c    ~ normal(mu_mu_c, sigma_mu_c);
   tau_c   ~ normal(0, 1);
 
@@ -113,7 +113,7 @@ model {
     // effective slope per child = (1 + delta + zeta_i)
     vector[N] slope_per_obs = 1 + delta + zeta[ii];
     vector[N] base = xi[ii] + log_p[jj] + log_H
-                   + slope_per_obs .* log_age - psi[jj];
+                   + slope_per_obs .* log_age - delta_j[jj];
     eta = lambda[jj] .* base;
   }
   y ~ bernoulli_logit(eta);
