@@ -7,7 +7,7 @@
 ## every fit (delta_j is large; only m1_time_only / m1 / baseline want it).
 ##
 ## Usage on Sherlock:
-##   Rscript sherlock/extract_psi.R <tag>
+##   Rscript sherlock/extract_delta_j.R <tag>
 ##
 ## Output:
 ##   $SCRATCH/standard_model_2/summaries/<tag>_psi.csv
@@ -18,7 +18,7 @@ suppressPackageStartupMessages({
 })
 
 args <- commandArgs(trailingOnly = TRUE)
-if (length(args) < 1) stop("Usage: extract_psi.R <tag>")
+if (length(args) < 1) stop("Usage: extract_delta_j.R <tag>")
 tag <- args[1]
 
 FITS_DIR <- file.path(Sys.getenv("SCRATCH"), "standard_model_2/fits")

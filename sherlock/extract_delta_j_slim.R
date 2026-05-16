@@ -2,10 +2,10 @@
 ## memory bounded under 16 GB. The naive approach of pulling all delta_j
 ## draws as a matrix instantiates ~12 GB which OOMs.
 ##
-## Usage: Rscript sherlock/extract_psi_slim.R <tag1> [<tag2> ...]
+## Usage: Rscript sherlock/extract_delta_j_slim.R <tag1> [<tag2> ...]
 
 args <- commandArgs(trailingOnly = TRUE)
-if (length(args) == 0) stop("Usage: extract_psi_slim.R <tag1> [<tag2> ...]")
+if (length(args) == 0) stop("Usage: extract_delta_j_slim.R <tag1> [<tag2> ...]")
 
 suppressPackageStartupMessages({ library(cmdstanr) })
 

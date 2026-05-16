@@ -439,11 +439,156 @@ fit_variant <- function(stan_data, tag,
 # Output is converted to a `stanfit` via rstan::read_stan_csv(), so
 # downstream code (summarize_fit, posterior::as_draws_df, loo, etc.)
 # works unchanged.
+# Build a list of per-chain init values from a previous fit's
+# summary.rds (the small one written by sherlock/extract_summary_table_only.R).
+#
+# Stan can only init RAW (parameters-block) variables, not derived
+# (transformed-parameters or generated-quantities) ones. So this
+# function filters to known-safe raw param names. The set varies by
+# Stan file; common-safe defaults are sigma_alpha, delta, s,
+# sigma_lambda. For the signed-s_i variant (log_irt_long_si_signed.stan)
+# we additionally compute the reparameterized raw params (sigma_total,
+# p_zeta) from sigma_zeta and sigma_s in the source summary.
+#
+# Note: things NOT in raw-params and intentionally excluded:
+#   - sigma_xi (derived from sigma_alpha + sigma_r)
+#   - sigma_zeta (derived from sigma_child[2] or from sigma_total*sqrt(p_zeta))
+#   - sigma_s in the signed variant (derived from sigma_total*sqrt(1-p_zeta))
+#   - rho_xi_zeta, rho_xi_s, rho_zeta_s (derived from L_child Cholesky)
+#   - pi_alpha (generated quantity from sigma_alpha)
+#
+# Args:
+#   source_tag        - tag of a prior fit (without .summary.rds extension).
+#   n_chains          - number of chains to build inits for.
+#   jitter_frac       - per-param jitter scale, fraction of source posterior SD.
+#   target_variant    - optional variant name to choose appropriate raw params.
+#                       Currently supports "signed" (adds sigma_total + p_zeta)
+#                       or "default" (sigma_alpha, delta, s, sigma_lambda,
+#                       sigma_s if present). Default auto-detects from tag.
+build_init_from_summary <- function(source_tag,
+                                    n_chains = 4,
+                                    jitter_frac = 0.05,
+                                    target_variant = "auto",
+                                    summaries_dir = NULL) {
+  if (is.null(summaries_dir)) {
+    candidates <- c(
+      file.path(PATHS$fits_dir, "summaries", paste0(source_tag, ".summary.rds")),
+      file.path("fits", "summaries", paste0(source_tag, ".summary.rds"))
+    )
+    summary_path <- candidates[file.exists(candidates)][1]
+  } else {
+    summary_path <- file.path(summaries_dir, paste0(source_tag, ".summary.rds"))
+    candidates <- summary_path
+  }
+  if (is.na(summary_path) || !file.exists(summary_path)) {
+    stop(sprintf("No summary file found for source_tag '%s' (checked: %s)",
+                 source_tag, paste(candidates, collapse = ", ")))
+  }
+  summ <- readRDS(summary_path)
+
+  # Auto-detect target variant from source_tag name.
+  if (target_variant == "auto") {
+    target_variant <- if (grepl("_si_signed$", source_tag)) "signed" else "default"
+  }
+
+  # Raw params Stan can accept inits for, by variant type.
+  # In log_irt_long.stan, sigma_zeta is DERIVED from sigma_child[2] (a
+  # vector raw param) -- so for the default variant we init sigma_child
+  # instead, with element [2] = source sigma_zeta. In signed variant
+  # the Cholesky structure is different so we use sigma_total/p_zeta.
+  raw_params <- switch(target_variant,
+    signed  = c("sigma_alpha", "delta", "s", "sigma_lambda"),
+    default = c("sigma_alpha", "delta", "s", "sigma_lambda", "sigma_s"),
+    stop("Unknown target_variant: ", target_variant)
+  )
+
+  # Cap SD floor to avoid zero-jitter on tight posteriors.
+  med_lookup <- setNames(summ$median, summ$variable)
+  sd_lookup  <- setNames(summ$sd, summ$variable)
+
+  # For signed variant: reconstruct sigma_total and p_zeta from
+  # sigma_zeta and sigma_s in the source. Both quantities must exist
+  # in the summary.
+  signed_extras <- NULL
+  if (target_variant == "signed") {
+    if (all(c("sigma_zeta", "sigma_s") %in% summ$variable)) {
+      sz <- as.numeric(med_lookup["sigma_zeta"])
+      ss <- as.numeric(med_lookup["sigma_s"])
+      sigma_total_med <- sqrt(sz^2 + ss^2)
+      p_zeta_med      <- sz^2 / sigma_total_med^2
+      # Derive SDs via first-order Taylor (rough, just for jitter scale)
+      sz_sd <- max(as.numeric(sd_lookup["sigma_zeta"]), 1e-3)
+      ss_sd <- max(as.numeric(sd_lookup["sigma_s"]),    1e-3)
+      sigma_total_sd <- sqrt((sz * sz_sd)^2 + (ss * ss_sd)^2) / sigma_total_med
+      p_zeta_sd      <- 2 * sz * sz_sd / sigma_total_med^2  # rough
+      signed_extras <- list(
+        sigma_total = list(med = sigma_total_med, sd = max(sigma_total_sd, 1e-3)),
+        p_zeta      = list(med = p_zeta_med,      sd = max(p_zeta_sd, 1e-3))
+      )
+      message(sprintf("  signed-variant init: derived sigma_total=%.3f, p_zeta=%.3f",
+                      sigma_total_med, p_zeta_med))
+    } else {
+      message("  signed-variant requested but source summary lacks sigma_zeta/sigma_s; ",
+              "skipping reparam-raw inits")
+    }
+  }
+
+  # Filter raw_params to those actually present in source.
+  vars <- intersect(raw_params, summ$variable)
+
+  # Known >=0 params to clip after jitter (avoid Stan boundary errors).
+  positive_params <- c("sigma_alpha", "sigma_zeta", "sigma_s",
+                       "sigma_total", "sigma_lambda", "p_zeta", "s",
+                       "tau_c")
+  upper_one_params <- c("p_zeta")
+  s_upper <- 14.99  # leave headroom from the upper=15 bound
+
+  set.seed(20260515)
+  inits <- vector("list", n_chains)
+  for (ch in seq_len(n_chains)) {
+    chain_init <- list()
+    for (p in vars) {
+      v <- as.numeric(med_lookup[p]) +
+           rnorm(1, 0, jitter_frac * max(as.numeric(sd_lookup[p]), 1e-3))
+      if (p %in% positive_params) v <- max(v, 1e-4)
+      if (p %in% upper_one_params) v <- min(v, 0.999)
+      if (p == "s") v <- min(v, s_upper)
+      chain_init[[p]] <- v
+    }
+    # Inject signed-variant reparam params if applicable
+    if (!is.null(signed_extras)) {
+      for (p in names(signed_extras)) {
+        v <- signed_extras[[p]]$med +
+             rnorm(1, 0, jitter_frac * signed_extras[[p]]$sd)
+        if (p %in% positive_params) v <- max(v, 1e-4)
+        if (p %in% upper_one_params) v <- min(v, 0.999)
+        chain_init[[p]] <- v
+      }
+    }
+    # For default variant: log_irt_long.stan declares sigma_child as a
+    # 2-vector raw param. sigma_zeta is derived as sigma_child[2].
+    # If the source has sigma_zeta, build a sigma_child init.
+    if (target_variant == "default" && "sigma_zeta" %in% summ$variable) {
+      sz <- as.numeric(med_lookup["sigma_zeta"])
+      sz_sd <- max(as.numeric(sd_lookup["sigma_zeta"]), 1e-3)
+      sz_init <- max(sz + rnorm(1, 0, jitter_frac * sz_sd), 1e-4)
+      # sigma_child[1] gets internally replaced by sigma_xi; init at 1
+      # for the prior, harmless.
+      chain_init$sigma_child <- c(1.0, sz_init)
+    }
+    inits[[ch]] <- chain_init
+  }
+  message(sprintf("Built init from %s: %d raw params, %d chains, jitter=%.2f*SD",
+                  source_tag, length(inits[[1]]), n_chains, jitter_frac))
+  inits
+}
+
 fit_variant_cmdstanr <- function(stan_data, tag,
                                   cfg = DEFAULT_FIT_CONFIG,
                                   model_path = PATHS$stan_model,
                                   fits_dir = PATHS$fits_dir,
                                   threads_per_chain = NULL,
+                                  init = NULL,
                                   force = FALSE) {
   if (!requireNamespace("cmdstanr", quietly = TRUE))
     stop("cmdstanr not installed; install via install.packages(\"cmdstanr\", repos = \"https://stan-dev.r-universe.dev\") and cmdstanr::install_cmdstan().")
@@ -476,7 +621,7 @@ fit_variant_cmdstanr <- function(stan_data, tag,
                                 cpp_options = list(stan_threads = TRUE))
 
   t0 <- Sys.time()
-  csm <- m$sample(
+  sample_args <- list(
     data              = stan_data,
     chains            = cfg$chains,
     parallel_chains   = cfg$chains,
@@ -488,6 +633,12 @@ fit_variant_cmdstanr <- function(stan_data, tag,
     max_treedepth     = cfg$max_treedepth,
     refresh           = max(1L, (cfg$iter %/% 10L))
   )
+  # Optional init values: if supplied (typically a list of length
+  # n_chains, each a named list of parameter starting values), pass to
+  # cmdstanr. Missing params are drawn from the prior, which is the
+  # standard cmdstanr fallback.
+  if (!is.null(init)) sample_args$init <- init
+  csm <- do.call(m$sample, sample_args)
   dt <- as.numeric(difftime(Sys.time(), t0, units = "mins"))
   message(sprintf("[%s] cmdstanr sampling time: %.1f min", tag, dt))
 

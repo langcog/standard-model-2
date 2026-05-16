@@ -1,11 +1,11 @@
 ## Extract per-item delta_j medians from an rstan stanfit. Same output
-## format as extract_psi_slim.R but works on stanfit (S4 class with
+## format as extract_delta_j_slim.R but works on stanfit (S4 class with
 ## different API than CmdStanMCMC).
 ##
-## Usage: Rscript sherlock/extract_psi_rstan.R <tag1> [<tag2> ...]
+## Usage: Rscript sherlock/extract_delta_j_rstan.R <tag1> [<tag2> ...]
 
 args <- commandArgs(trailingOnly = TRUE)
-if (length(args) == 0) stop("Usage: extract_psi_rstan.R <tag1> [<tag2> ...]")
+if (length(args) == 0) stop("Usage: extract_delta_j_rstan.R <tag1> [<tag2> ...]")
 
 suppressPackageStartupMessages({ library(rstan) })
 

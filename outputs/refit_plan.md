@@ -113,7 +113,7 @@ srun --time=01:30:00 --mem=48G --cpus-per-task=1 --ntasks=1 \
   bash -c "ml R && export STANDARD_MODEL_FITS_DIR=\$SCRATCH/standard_model_2/fits && \
     Rscript sherlock/extract_summary_table_only.R <tag> && \
     Rscript sherlock/extract_scalar_draws.R <tag> && \
-    Rscript sherlock/extract_psi_slim.R <tag> && \
+    Rscript sherlock/extract_delta_j_slim.R <tag> && \
     Rscript sherlock/extract_loo_thinned.R <tag>"
 ```
 

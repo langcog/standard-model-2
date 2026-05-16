@@ -44,7 +44,7 @@ for (nm in variants) {
   ctbl <- class_threshold_table(fit, bundle$class_levels)
   print(ctbl, n = Inf)
 
-  psi_df <- extract_psi_df(fit, bundle$word_info, bundle$class_levels)
+  psi_df <- extract_delta_j_df(fit, bundle$word_info, bundle$class_levels)
   r_glb <- cor(psi_df$psi_median, psi_df$log_p)
   cat(sprintf("\n-- RQ1 --\n  r(psi, log_p) = %.3f   R^2 = %.3f\n",
               r_glb, r_glb^2))

@@ -109,9 +109,37 @@ fit_fun <- switch(backend,
                   stop(sprintf("Unknown STAN_BACKEND: %s", backend)))
 cat(sprintf("Backend: %s\n", backend))
 
-fit <- fit_fun(stan_data, tag = out_tag,
-               cfg = cfg,
-               model_path = stan_file)
+# Optional warm-start: STAN_INIT_FROM=<source_tag> uses posterior
+# medians from that source fit's summary.rds as chain initialization
+# (with small Gaussian jitter per chain). Skips cold-start exploration,
+# typically halving warmup requirements. Source must have been
+# previously fit and extracted to fits/summaries/<source_tag>.summary.rds.
+init_from <- Sys.getenv("STAN_INIT_FROM", unset = "")
+init_list <- NULL
+if (nzchar(init_from) && backend == "cmdstanr") {
+  cat(sprintf("\nWarm-start init from: %s\n", init_from))
+  init_list <- tryCatch(
+    build_init_from_summary(init_from, n_chains = cfg$chains),
+    error = function(e) {
+      message(sprintf("init build failed (%s); using default cmdstanr init",
+                      conditionMessage(e)))
+      NULL
+    }
+  )
+}
+
+if (backend == "cmdstanr") {
+  fit <- fit_fun(stan_data, tag = out_tag,
+                 cfg = cfg,
+                 model_path = stan_file,
+                 init = init_list)
+} else {
+  # rstan backend doesn't support init in fit_variant; warm-start
+  # is cmdstanr-only.
+  fit <- fit_fun(stan_data, tag = out_tag,
+                 cfg = cfg,
+                 model_path = stan_file)
+}
 
 pars <- c("sigma_alpha", "pi_alpha", "sigma_xi",
           "sigma_zeta", "rho_xi_zeta")

@@ -1,5 +1,5 @@
 ## Scalars-only extraction. Skips psi and log_lik to fit in <16 GB.
-## Use sherlock/extract_psi.R separately for psi medians (needs more
+## Use sherlock/extract_delta_j.R separately for psi medians (needs more
 ## memory because loading psi as draws_matrix instantiates ~12 GB).
 ##
 ## Usage: Rscript sherlock/extract_scalars_only.R <tag1> [<tag2> ...]
