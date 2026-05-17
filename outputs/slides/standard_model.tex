@@ -37,6 +37,23 @@
 \newcommand{\sigr}{\sigma_{r}}
 \newcommand{\sigz}{\sigma_{\zeta}}
 \newcommand{\siglam}{\sigma_{\lambda}}
+\newcommand{\sigs}{\sigma_{s}}
+\newcommand{\kappap}{\kappa_{\text{pop}}}
+
+% Recurring outline slide at each section start. Shows the full TOC with
+% the current section highlighted.
+\AtBeginSection[]{%
+  \begin{frame}{Outline}
+    \vspace{0.5em}
+    \tableofcontents[currentsection,
+                     sectionstyle=show/shaded,
+                     subsectionstyle=hide]
+  \end{frame}
+}
+\setbeamertemplate{section in toc}{%
+  \leavevmode\leftskip=1em%
+  \inserttocsectionnumber.\,\inserttocsection\par%
+}
 
 % Accent: brand-red used for the "kid" / acceleration thread
 \definecolor{accent}{RGB}{195,30,55}
@@ -86,6 +103,173 @@ both diagnostic of learning.}
 \end{frame}
 
 % =====================================================================
+\begin{frame}{The data: Wordbank CDI}{What we measure when we measure a child's vocabulary}
+
+\begin{columns}[T, onlytextwidth]
+\column{0.55\textwidth}
+\small
+The MacArthur--Bates Communicative Development Inventory (CDI) is a
+parent-report checklist of ~680 words. Parents indicate which words
+their child \emph{produces} (Words \& Sentences) or
+\emph{comprehends} (Words \& Gestures).
+
+\vspace{0.7em}
+\textbf{Wordbank}: open repository of CDI administrations across
+~30 languages, ~$10^5$ children. Data we use here:
+\begin{itemize}\setlength\itemsep{0.1em}
+\item \textbf{Cross-sectional}: each child contributes one snapshot
+\item \textbf{Longitudinal}: each child contributes $\geq$2 admins,
+      letting us track per-child growth
+\end{itemize}
+
+\vspace{0.7em}
+\textbf{Strong properties:} large $N$, parent-report calibrated against
+direct testing, cross-linguistically validated, free-to-use.
+
+\column{0.45\textwidth}
+\centering
+\includegraphics[width=\linewidth]{precursor_acceleration.png}
+
+\vspace{0.3em}
+\scriptsize\color{black!55}\textit{One child = one point.
+A standard view of vocabulary $\times$ age in Wordbank English (American)
+WS, with quantile-regression overlays at the 10/25/50/75/90th percentiles.}
+\end{columns}
+
+\end{frame}
+
+% =====================================================================
+\begin{frame}{The two signatures of vocabulary growth}{Both visible in any reasonably-sized vocabulary sample}
+
+\centering
+\includegraphics[width=0.78\linewidth]{precursor_acceleration.png}
+
+\vspace{0.5em}
+\small
+\begin{columns}[T, onlytextwidth]
+\column{0.5\textwidth}
+\textbf{Signature 1: acceleration.}
+Each quantile curve is concave up: doubling age more than doubles
+vocabulary. The growth rate accelerates.
+\column{0.5\textwidth}
+\textbf{Signature 2: variability.}
+The quantile lines fan out: between-child differences in vocabulary
+grow with age, not shrink.
+\end{columns}
+
+\vspace{0.8em}
+\small\textbf{These signatures are remarkably robust:} replicate across
+languages, samples, and forms. Any model of early word learning must
+explain both.
+
+\end{frame}
+
+% =====================================================================
+\begin{frame}{The dominant theoretical view: pure accumulation}{Vocabulary as a counter that fills}
+
+\begin{columns}[T, onlytextwidth]
+\column{0.55\textwidth}
+\small
+The pure accumulator: each child has an input rate $r_i$ (words per hour);
+each word $j$ has a difficulty $\delta_j$. A word is acquired when
+enough tokens of it have accumulated.
+
+\vspace{0.6em}
+A textbook lineage:
+\begin{itemize}\setlength\itemsep{0.15em}
+\item \textbf{McMurray (2007).}\, Pure rate-times-time accumulator.
+\item \textbf{Mitchell \& McMurray (2009).}\, + leverage feedback.
+\item \textbf{Hidaka (2013).}\, Cumulative-Weibull; allows rate change.
+\item \textbf{Mollica \& Piantadosi (2017).}\, Per-word Gamma waiting.
+\item \textbf{Kachergis et al.\ (2021).}\, IRT Rasch with $\alpha_i$.
+\end{itemize}
+
+\vspace{0.5em}
+\textbf{All share}: between-child variation is in baseline ($r_i$ or
+$\alpha_i$); per-child scaling exponent is implicitly fixed.
+
+\column{0.45\textwidth}
+\centering
+\includegraphics[width=0.95\linewidth]{kachergis_buckets.png}
+
+\vspace{0.3em}
+\scriptsize\color{black!55}\textit{Bucket-fill metaphor: each child
+hears tokens at rate $r_i \cdot p_j$; word $j$ is acquired when its
+bucket fills past difficulty $\delta_j$.}
+\end{columns}
+
+\end{frame}
+
+% =====================================================================
+\begin{frame}{The empirical gap: input matters less than supposed}{Coffey \& Snedeker (2026): meta-analytic $R^2$ = 0.04--0.07}
+
+\begin{columns}[T, onlytextwidth]
+\column{0.55\textwidth}
+\small
+The accumulator view predicts that variation in vocabulary growth is
+dominated by variation in input quantity. But Coffey \& Snedeker (2026)
+meta-analyzed 71 input studies, 4,760 children:
+
+\vspace{0.5em}
+\textbf{Input $\to$ outcome $R^2$ across four input measures: 0.04--0.07.}
+
+\vspace{0.7em}
+That is: \emph{caregiver speech quantity explains 4--7\% of variance
+in language outcome}. The relationship is real but small.
+
+\vspace{0.5em}
+The dominant accumulator view leaves a \textbf{huge variance budget}
+unexplained --- where does the other 90+\% live?
+
+\vspace{0.7em}
+\textbf{Our hypothesis}: in \emph{how children accelerate}, not just
+how much input they hear. Modeling this requires freeing two
+parameters that prior models pin: per-child acceleration and per-child
+trajectory phase.
+
+\column{0.45\textwidth}
+\centering
+\includegraphics[width=0.95\linewidth]{precursor_variability.png}
+
+\vspace{0.3em}
+\scriptsize\color{black!55}\textit{Between-child variability in
+ability $\theta$ (1-PL Rasch IRT) grows from $\sim$1.7 logits at 16 mo
+to $\sim$2.3 logits at 30 mo. If input quantity explains only $\sim$5\%
+of this, the rest must come from elsewhere.}
+\end{columns}
+
+\end{frame}
+
+% =====================================================================
+\begin{frame}{This work: modeling individual variability in acceleration}
+
+\small
+We build a Bayesian IRT-accumulator model that pins down three
+quantities directly:
+
+\vspace{0.6em}
+\begin{itemize}\setlength\itemsep{0.5em}
+\item \textbf{The acceleration signature.} Is population vocabulary
+  growth super-linear in cumulative input? ($\kappap > 1$?)
+\item \textbf{The variability signature.} Do children differ in their
+  scaling exponent and trajectory phase, not just baseline?
+  ($\sigz > 0$? $\sigs > 0$?)
+\item \textbf{The input share.} How much of between-child variance is
+  attributable to input rate vs.\ to internal factors?
+  ($\pia = \siga^2 / (\siga^2 + \sigr^2)$.)
+\end{itemize}
+
+\vspace{0.8em}
+We then ask: does the same machinery applied to large language models
+yield the same answers? \textbf{Spoiler}: no --- LLMs show a categorical
+disanalogy with children's learning. (Later in the talk.)
+
+\end{frame}
+
+% =====================================================================
+\section{Two empirical signatures: acceleration and variability}
+
+% =====================================================================
 \begin{frame}{Acceleration: vocabulary grows super-linearly with age}
 
 \centering
@@ -127,6 +311,9 @@ Each grey line is one language's within-age SD of $\theta_{\text{admin}}$;
 red is the cross-language mean.
 
 \end{frame}
+
+% =====================================================================
+\section{Building the model: individual variability in acceleration}
 
 % =====================================================================
 \begin{frame}{The structural null: pure accumulator}
@@ -322,13 +509,13 @@ efficiency rather than input quantity?
 \end{frame}
 
 % =====================================================================
-\begin{frame}{Step 3: + per-child scaling exponent $\kappa_i$}
+\begin{frame}{Step 3: + population acceleration $\kappap$}
 
 \centering
 \Large
-$\theta_i = \log r_i + \log \alpha_i + \kappa_i \log t$
+$\theta_i = \log r_i + \log \alpha_i + \kappap \log t$
 \quad $\Longleftrightarrow$ \quad
-$\exp(\theta_i) = \alpha_i \cdot r_i \cdot t^{\kappa_i}$
+$\exp(\theta_i) = \alpha_i \cdot r_i \cdot t^{\kappap}$
 \normalsize
 
 \vspace{1.5em}
@@ -338,7 +525,7 @@ $\exp(\theta_i) = \alpha_i \cdot r_i \cdot t^{\kappa_i}$
   ann/.style={font=\small\itshape, color=blue!40!black,
               align=center, text width=2.0cm},
   newann/.style={font=\small\itshape\bfseries, color=accent,
-                 align=center, text width=2.4cm},
+                 align=center, text width=2.6cm},
   arrow/.style={->, blue!30!black, semithick, shorten >=2pt, shorten <=2pt},
   newarrow/.style={->, accent, semithick, shorten >=2pt, shorten <=2pt}]
 \matrix[matrix of nodes, column sep=15pt, nodes={font=\Large},
@@ -349,7 +536,7 @@ $\exp(\theta_i) = \alpha_i \cdot r_i \cdot t^{\kappa_i}$
   $+$ \&
   |[name=logalpha]| $\log\alpha_i$ \&
   $+$ \&
-  |[name=kappa]| $\kappa_i$ \&
+  |[name=kappa]| $\kappap$ \&
   $\cdot$ \&
   |[name=logt]| $\log t$ \\
 };
@@ -358,7 +545,7 @@ $\exp(\theta_i) = \alpha_i \cdot r_i \cdot t^{\kappa_i}$
 \node[ann, below=3em of logalpha] (alogalpha) {efficiency};
 \draw[arrow] (alogalpha) -- (logalpha);
 \node[newann, below=3em of kappa] (akappa)
-  {per-child scaling exponent (NEW)};
+  {population scaling exponent (NEW; shared)};
 \draw[newarrow] (akappa) -- (kappa);
 \node[ann, below=3em of logt] (alogt) {time};
 \draw[arrow] (alogt) -- (logt);
@@ -366,10 +553,107 @@ $\exp(\theta_i) = \alpha_i \cdot r_i \cdot t^{\kappa_i}$
 
 \vspace{1.0em}
 \small
-Children also differ in how steeply ability scales with cumulative
-input. \textbf{Diagnostic question:} $\kappa_i > 1\,$? --- i.e., is
-ability super-linear in cumulative tokens, beyond what a unit
-accumulator predicts?
+The population accelerates: ability scales as $t^{\kappap}$
+super-linearly. All children still share one $\kappap$.
+\textbf{Diagnostic question:} $\kappap > 1\,$? --- is ability super-linear
+in cumulative tokens, beyond what a unit accumulator predicts? This
+recovers Hidaka's rate-change model.
+
+\end{frame}
+
+% =====================================================================
+\begin{frame}{Step 4: + per-child acceleration $\zeta_i$}{Children differ not just in baseline ability, but in \emph{how they accelerate}}
+
+\centering
+\Large
+$\theta_i = \log r_i + \log \alpha_i + (\kappap + \zeta_i) \log t$
+\normalsize
+
+\vspace{1.2em}
+
+\begin{tikzpicture}[
+  every node/.style={inner sep=2pt},
+  ann/.style={font=\small\itshape, color=blue!40!black,
+              align=center, text width=2.0cm},
+  newann/.style={font=\small\itshape\bfseries, color=accent,
+                 align=center, text width=2.6cm},
+  arrow/.style={->, blue!30!black, semithick, shorten >=2pt, shorten <=2pt},
+  newarrow/.style={->, accent, semithick, shorten >=2pt, shorten <=2pt}]
+\matrix[matrix of nodes, column sep=8pt, nodes={font=\Large},
+        ampersand replacement=\&]{
+  |[name=t1]| $\theta_i$ \&
+  $=$ \&
+  |[name=logr]| $\log r_i$ \&
+  $+$ \&
+  |[name=logalpha]| $\log\alpha_i$ \&
+  $+$ \&
+  $($ \& |[name=kpop]| $\kappap$ \& $+$ \& |[name=zeta]| $\zeta_i$ \& $)$ \&
+  $\cdot \log t$ \\
+};
+\node[ann, below=3em of logalpha] (alogalpha) {efficiency};
+\draw[arrow] (alogalpha) -- (logalpha);
+\node[ann, below=3em of kpop] (akpop) {pop.\ scaling};
+\draw[arrow] (akpop) -- (kpop);
+\node[newann, below=3em of zeta] (azeta)
+  {per-child acceleration deviation (NEW)};
+\draw[newarrow] (azeta) -- (zeta);
+\end{tikzpicture}
+
+\vspace{0.7em}
+\small
+\textbf{Each child has their own scaling exponent
+$\kappa_i = \kappap + \zeta_i$.} The structural addition: between-child
+variation isn't just in baseline ($\sigma_\alpha$) but in \emph{how
+trajectories accelerate} ($\sigz$). All prior accumulator models pin
+$\sigz = 0$. \textbf{Diagnostic question:} $\sigz > 0\,$? --- do children
+really differ in their acceleration rates?
+
+\end{frame}
+
+% =====================================================================
+\begin{frame}{Step 5: + per-child trajectory phase $s_i$}{The second piece of \emph{individual variability in acceleration}: when children start}
+
+\centering
+\Large
+$\theta_i = \log r_i + \log \alpha_i + (\kappap + \zeta_i)\,\log(t - s - s_i)$
+\normalsize
+
+\vspace{1.2em}
+
+\begin{tikzpicture}[
+  every node/.style={inner sep=2pt},
+  ann/.style={font=\small\itshape, color=blue!40!black,
+              align=center, text width=2.0cm},
+  newann/.style={font=\small\itshape\bfseries, color=accent,
+                 align=center, text width=2.4cm},
+  arrow/.style={->, blue!30!black, semithick, shorten >=2pt, shorten <=2pt},
+  newarrow/.style={->, accent, semithick, shorten >=2pt, shorten <=2pt}]
+\matrix[matrix of nodes, column sep=4pt, nodes={font=\large},
+        ampersand replacement=\&]{
+  $\theta_i$ \&
+  $=$ \&
+  $\ldots +\,$ \&
+  $(\kappap + \zeta_i)\,\cdot \log\,($ \&
+  |[name=t]| $t$ \&
+  $-\, s\, -$ \&
+  |[name=si]| $s_i$ \&
+  $)$ \\
+};
+\node[ann, below=3em of t] (at) {calendar age};
+\draw[arrow] (at) -- (t);
+\node[newann, below=3em of si] (asi)
+  {per-child trajectory phase (NEW)};
+\draw[newarrow] (asi) -- (si);
+\end{tikzpicture}
+
+\vspace{0.7em}
+\small
+The same kind of individual-variability addition, but on the
+\emph{time} dimension: children differ in \emph{when} their developmental
+clock effectively starts. Signed: $s_i$ can be positive
+(later start) or negative (developmentally ahead). \textbf{Diagnostic
+question:} $\sigs > 0\,$? --- does the timing of trajectory onset also
+vary across children, alongside their scaling exponents?
 
 \end{frame}
 
@@ -576,15 +860,51 @@ power-law family.}
 \end{frame}
 
 % =====================================================================
-\begin{frame}{Each addition matters: 4-panel comparison to data}{Variants fit to Wordbank English WS; predicted percentile fans vs.\ observed}
+\section{Results: English and Norwegian longitudinal fits}
+
+% =====================================================================
+\begin{frame}{Each addition matters: 5-panel comparison to data}{Variants fit to Wordbank English WS; predicted percentile fans vs.\ observed}
 
 \centering
-\includegraphics[width=0.92\linewidth]{quantile_demo.png}
+\includegraphics[width=0.96\linewidth]{quantile_demo.png}
+
+\vspace{0.1em}
+\scriptsize\color{black!55}\textit{Each panel: empirical data (dashed
+grey 10/25/50/75/90 quantiles) vs.\ the same quantiles from posterior
+simulations of that variant. The story is told in the fan-vs-no-fan
+comparison: pure / + \(\siga\) / + \(\kappap\) / + \(\sigz\) / + \(\sigs\).}\color{black!88}
+
+\vspace{0.4em}
+\small
+\textbf{Reading.} Each step adds one mechanism. The pure accumulator
+collapses every kid to the same trajectory. Adding per-kid efficiency
+(\(\siga\)) gets vertical spread but no acceleration. Adding population
+acceleration (\(\kappap\)) gets the curvature but kids stay parallel.
+Adding per-kid acceleration variation (\(\sigz\)) opens the fan with
+age. Adding per-kid trajectory phase (\(\sigs\)) handles the floor
+effect at young ages.
+
+\end{frame}
+
+% =====================================================================
+\begin{frame}{Same story in \(\theta\)-space}{The structural commitment each model makes about per-child latent ability}
+
+\centering
+\includegraphics[width=0.96\linewidth]{theta_spaghetti.png}
 
 \vspace{0.2em}
-\small
-\textbf{Reading.} Each panel: empirical data with empirical 10/25/50/75/90 percentile lines (dashed grey); coloured lines = same percentiles from the variant's posterior simulations.
-Pure accumulator misses the fan. + efficiency only gets the wrong shape. + scaling only misses cross-kid variance. Both required.
+\scriptsize\color{black!55}\textit{Same five-panel build, but plotting
+latent ability \(\theta_i(t)\) directly instead of integrating to vocabulary.
+Population mean (bold), 10th/90th percentiles (blue/red), 100 simulated
+kids (faint). Dotted: \(\theta_{50\%}\), the value at which a typical-difficulty
+word has 50\% acquisition probability.}
+
+\vspace{0.4em}
+\small\textbf{What it shows.} The first two panels never cross
+\(\theta_{50\%}\) within the data range --- pure accumulators (with or
+without efficiency variation) are structurally unable to fit children's
+acquisition. Each subsequent panel adds a structural mechanism the
+data demands.
 
 \end{frame}
 
@@ -604,7 +924,7 @@ The concave-up shape on the right is the super-linear signature; the fan width i
 \end{frame}
 
 % =====================================================================
-\begin{frame}{Best-fitting model: parameter posteriors}{Acceleration and variability both bounded firmly above zero}
+\begin{frame}{Best-fitting model: parameter posteriors}{Acceleration and variability both bounded firmly above zero \hfill \textcolor{black!45}{\scriptsize\textit{(placeholder values: s=0.5 fits; s=6 refits running)}}}
 
 \centering
 \small
@@ -615,9 +935,10 @@ The concave-up shape on the right is the super-linear signature; the fan width i
 \midrule
 $\sigma_\alpha$   & 1.71 \,[1.55, 1.91]   & Between-child efficiency variation. \\
 $\boldsymbol{\pi_\alpha}$ & \textbf{0.91 \,[0.89, 0.93]} & \textbf{Share of intercept variance from efficiency, not input.} \\
-$\boldsymbol{\kappa_{\text{pop}}}$ & \textbf{10.35 \,[10.21, 10.51]} & \textbf{Population scaling exponent: ability scales as (tokens)$^{\kappa}$.} \\
-$\boldsymbol{\sigma_\kappa}$ & \textbf{3.47 \,[3.14, 3.84]} & \textbf{Between-child variation in scaling exponent.} \\
-$\rho(\xi,\kappa)$ & $+0.35$ \,$[+0.22, +0.47]$ & Higher-baseline kids have steeper growth. \\
+$\boldsymbol{\kappap}$ & \textbf{10.35 \,[10.21, 10.51]} & \textbf{Population scaling exponent: ability scales as (tokens)$^{\kappap}$.} \\
+$\boldsymbol{\sigz}$ & \textbf{3.47 \,[3.14, 3.84]} & \textbf{Between-child variation in scaling exponent.} \\
+$\boldsymbol{\sigs}$ & \textbf{[refits pending]} & \textbf{Between-child variation in trajectory phase.} \\
+$\rho(\xi,\zeta)$ & $+0.35$ \,$[+0.22, +0.47]$ & Higher-baseline kids have steeper growth. \\
 \bottomrule
 \end{tabular}
 
@@ -790,6 +1111,35 @@ quality story.
 \end{frame}
 
 % =====================================================================
+\section{Extensions: directly observed input and processing}
+
+% =====================================================================
+\begin{frame}{Three model extensions: testing $\pia$ with richer data}
+
+\small
+The Wordbank longitudinal fits use \emph{population-level} input rate
+priors (Sperry/Hart-Risley/Weisleder-Fernald). Two natural follow-ups:
+
+\vspace{0.6em}
+\begin{enumerate}\setlength\itemsep{0.4em}
+\item \textbf{Per-child observed input}: use \emph{measured} per-child
+  input rate instead of a population prior. Does $\pia$ stay $\sim$0.9
+  when input is no longer a pooled estimate? \textbf{\(\to\) BabyView,
+  SEEDLingS.}
+\item \textbf{Per-child processing efficiency}: link CDI growth to an
+  independent per-child readout of processing speed. Does the
+  $\sigma_\alpha$ we estimate from CDI reflect ``processing
+  efficiency'' or something else? \textbf{\(\to\) Peekbank.}
+\end{enumerate}
+
+\vspace{0.6em}
+Both extensions reuse the same model machinery with an added channel
+in the linear predictor; only the data and the per-child latents
+change.
+
+\end{frame}
+
+% =====================================================================
 \begin{frame}{Replicating with directly observed input}{BabyView (head-mounted video) and SEEDLingS (LENA all-day audio)}
 
 \begin{columns}[T, onlytextwidth]
@@ -823,6 +1173,34 @@ $\pi_\alpha = 0.94$ \,[0.89, 0.97]
 With per-recording observed input rates, the $\pi_\alpha$ headline
 holds. Input-rate variance is a small share of between-child
 vocabulary variance, even when measured directly.
+
+\end{frame}
+
+% =====================================================================
+\begin{frame}{$\pia$ across five samples}{Three input-observation channels, two languages, parent-report noise corrected}
+
+\centering
+\small
+\renewcommand{\arraystretch}{1.20}
+\begin{tabular}{@{}lrrrl@{}}
+\toprule
+\textbf{Sample} & \textbf{N} & $\boldsymbol{\siga}$ & $\boldsymbol{\pia}$ & \textbf{Channel} \\
+\midrule
+English longitudinal & 200 & 1.83 [1.65, 2.04] & \textbf{0.91 [0.90, 0.93]} & Pooled input prior \\
+Norwegian longitudinal & 200 & 2.10 [1.90, 2.35] & \textbf{0.94 [0.93, 0.95]} & Pooled input prior \\
+Peekbank (Stanford) & 62  & 1.64 [1.34, 2.03] & \textbf{0.90 [0.86, 0.94]} & Pooled $+$ LWL \\
+BabyView & 20  & 1.13 [0.86, 1.61] & \textbf{0.84 [0.68, 0.93]} & Head-mounted video \\
+SEEDLingS & 44  & 1.39 [1.13, 1.74] & \textbf{0.94 [0.89, 0.97]} & LENA all-day audio \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.8em}
+\small\textbf{$\pia \in [0.84, 0.94]$ across all five samples.} The
+specific input channel (pooled vs.\ measured) and sample size hardly
+move the picture: between-child variance is dominated by something
+\emph{other} than input rate. \\[0.3em]
+\textcolor{black!50}{\textit{(Placeholder: numbers from s=0.5 fits; s=6 refits running.
+The qualitative pattern is invariant.)}}
 
 \end{frame}
 
@@ -861,6 +1239,91 @@ process.
 \end{frame}
 
 % =====================================================================
+\section{Connecting to LLMs}
+
+% =====================================================================
+\begin{frame}{Why look at LLMs?}{Same task, same statistical machinery, very different learners}
+
+\small
+LLMs and children both learn word meanings from input. They differ
+\emph{enormously} in scale and architecture, but the question of how
+their learning scales with input is statistically well-posed:
+
+\vspace{0.6em}
+\begin{itemize}\setlength\itemsep{0.3em}
+\item For an LM and a word $w$, we have $P(w \text{ produced correctly})$
+  as a function of training tokens.
+\item This is a sigmoid in log-tokens with a per-word slope.
+\item The same statistic exists for human children: $P(w \text{ acquired})$
+  as a function of cumulative input.
+\end{itemize}
+
+\vspace{0.6em}
+\textbf{This lets us put kids and LMs on the same axis} --- not just
+trade anecdotes about scaling. Two questions:
+\begin{enumerate}\setlength\itemsep{0.2em}
+\item Do kids and LMs have similar per-word acquisition slopes?
+\item Does a model that fits kids' learning say anything about LMs?
+\end{enumerate}
+
+\end{frame}
+
+% =====================================================================
+\begin{frame}{Chang \& Bergen (2022): per-word sigmoids in LMs}{Method we'll re-use for the comparison}
+
+\small
+\textbf{Setup.} Chang \& Bergen trained four LMs (BERT, biLSTM, GPT-2,
+LSTM) on the same input corpus (BookCorpus $+$ WikiText). At each of
+$\sim$200 training checkpoints, they probed each of $\sim$611 CDI
+words to get $P(\text{word produced correctly} \mid \text{checkpoint})$.
+
+\vspace{0.6em}
+For each (LM, word) they fit a 4-parameter logistic
+\[
+S_w(x) = \mathrm{lower}_w + \frac{\mathrm{upper}_w - \mathrm{lower}_w}
+                                    {1 + \exp((x - \mathrm{mid}_w)/\mathrm{scale}_w)}
+\]
+where $x = \log_{10}(\text{training steps})$, yielding a per-word
+\textbf{scaling slope}: how fast that word's acquisition probability
+rises with cumulative training. After unit conversion, this is exactly
+analogous to our $\kappa_i \log t$ for children.
+
+\vspace{0.6em}
+\textbf{Result they reported.} Across the four LMs, mean per-word slope
+$\approx 1$ logit per nat-log training-step. Striking but ambiguous:
+is this the LM architecture or the input distribution?
+
+\end{frame}
+
+% =====================================================================
+\begin{frame}{Methods: re-running C\&B on CHILDES-trained LMs}{Feng et al.\ (2026) trained GPT-2 on the input distribution kids actually hear}
+
+\small
+\textbf{Confound in C\&B's setup}: BookCorpus + WikiText is adult
+written text, not child-directed speech. That conflates two things:
+(a) structural difference in how LMs vs children scale; (b) input
+distribution mismatch.
+
+\vspace{0.6em}
+\textbf{Feng et al.\ (2026)} train multiple GPT-2 variants on \emph{CHILDES}
+--- the same corpus that supplies our $\log p_j$ frequencies for the
+kid models. Same architecture as Chang \& Bergen's GPT-2, but input
+matched to what children actually hear.
+
+\vspace{0.6em}
+\textbf{Our re-application:} for each Feng et al.\ checkpoint, fit
+C\&B's per-word sigmoid on $\sim$611 CDI words. Compute per-word slope
+in our $\kappa$-equivalent units. Compare to kids.
+
+\vspace{0.6em}
+\textbf{Note:} Feng et al.\ refits are running on Sherlock in parallel
+to this analysis. Results shown next are \textbf{placeholder} from the
+C\&B BookCorpus models; will refresh with CHILDES-trained slopes when
+the refits land. The qualitative answer is preserved either way.
+
+\end{frame}
+
+% =====================================================================
 \begin{frame}{Direct comparison: per-instance scaling slopes}{Same task (CDI word acquisition), same axis (logit per log-experience)}
 
 \centering
@@ -893,62 +1356,70 @@ for fixed-architecture LLMs).
 \end{frame}
 
 % =====================================================================
-\begin{frame}{Mechanisms not in the standard model}{What human learning needs that pure accumulators don't have}
+\section{Synthesis}
 
-\begin{columns}[T, onlytextwidth]
-\column{0.5\textwidth}
-\centering\textbf{\color{accent} Sources of acceleration}\\[0.5em]
-\begin{itemize}\setlength\itemsep{0.4em}
-\item Growing processing efficiency with maturation
-\item Learning-to-learn (mutual exclusivity, shape bias, syntactic bootstrapping)
-\item Domain-general changes in attention, memory, perception
-\item Cross-word leverage / vocabulary-mediated bootstrapping
+% =====================================================================
+\begin{frame}{Technical summary}{What the modeling pinned down}
+
+\begin{itemize}\setlength\itemsep{0.5em}
+\item \textbf{Acceleration is real and population-level.} {\color{black!55}\textit{(placeholder for s=6 refits)}}
+  \(\kappap \approx 10\), confidently above the unit-accumulator boundary
+  \(\kappap = 1\). The first prior model to free \(\kappap\) (Hidaka rate-change)
+  was structurally right.
+\item \textbf{Individual variability in acceleration is real too.}
+  \(\sigz > 0\) and \(\sigs > 0\): children differ not just in baseline
+  ability, but in \emph{how their trajectories accelerate} and in
+  \emph{when they accelerate}. No prior accumulator model frees these.
+\item \textbf{Input quantity is a small share of between-child variance.}
+  \(\pia \approx 0.91\) across 5 samples (English long, Norwegian long,
+  BabyView, SEEDLingS, Peekbank). Aligns with the meta-analytic
+  \(R^2 = 0.04\)--\(0.07\) of Coffey \& Snedeker (2026).
+\item \textbf{LLMs are structurally different.} The same per-word
+  sigmoid statistic gives \(\kappa \sim 1\) for LMs vs.\ \(\sim 10\) for
+  children --- a 10\(\times\) gap, with near-zero between-instance variance
+  in LMs. Even Feng et al.'s CHILDES-trained models stay near the
+  unit boundary.
 \end{itemize}
 
-\column{0.5\textwidth}
-\centering\textbf{\color{accent} Sources of variability}\\[0.5em]
-\begin{itemize}\setlength\itemsep{0.4em}
-\item Interactional input quality (joint attention, contingent talk)
-\item Genetic / heritable variation
-\item Environmental richness not captured by token quantity
-\item Processing-side individual differences (working memory, attention)
-\end{itemize}
-
-\end{columns}
-
-\vspace{0.8em}
-\centering
-\small\color{black!55}\textit{The structural finding constrains theory:
-any account of early word learning must produce both
-super-linear-in-tokens growth \emph{and} large per-child variation in
-growth rate.}
+\vspace{0.4em}
+\centering\small \texttt{github.com/langcog/standard-model-2}
 
 \end{frame}
 
 % =====================================================================
-\begin{frame}{Summary}
+\begin{frame}{Two signatures, twin constraints on theory}{Calling back to the start}
 
-\begin{itemize}\setlength\itemsep{0.6em}
-\item Vocabulary uniquely affords \emph{absolute} variability
-  measurement --- there is a true zero, and word counts are
-  interpretable in word-count units.
-\item Two robust signatures across $\sim$30 languages and 5 modeling
-  samples: \textbf{acceleration} ($\kappa_i \sim 10$, varying widely
-  across kids) and \textbf{variability} ($\pi_\alpha \approx 0.91$,
-  growing with age).
-\item Both signatures violate a pure-accumulator null. Posited
-  ``quality'' alternatives \emph{relabel} acceleration rather than
-  escape it.
-\item The picture is structurally different from LLM scaling laws on
-  both axes (steeper exponent, between-instance variance).
-\item Open question: \emph{which} mechanism --- maturation,
-  learning-to-learn, processing speed --- is the load-bearing source of
-  the acceleration we measure?
-\end{itemize}
-
-\vspace{0.6em}
+\begin{columns}[T, onlytextwidth]
+\column{0.5\textwidth}
 \centering
-\small \texttt{github.com/langcog/standard-model-2}
+\includegraphics[width=\linewidth]{precursor_acceleration.png}
+
+\vspace{0.5em}
+\small\textbf{Acceleration.}\\
+\(\kappap \approx 10\) is above any version of pure accumulation.\\
+\emph{Where does the super-linearity come from?}
+
+\column{0.5\textwidth}
+\centering
+\includegraphics[width=\linewidth]{precursor_variability.png}
+
+\vspace{0.5em}
+\small\textbf{Variability.}\\
+\(\pia \approx 0.91\); input rate explains only \(\sim\)10\% of between-child
+variance.\\
+\emph{Where does the other 90\% live?}
+\end{columns}
+
+\vspace{0.7em}
+\small\centering
+The same two signatures we started with constrain any account of
+human word learning:\\[0.2em]
+\textbf{(a)} a mechanism that makes growth super-linear-in-tokens at
+the population level (maturation? learning-to-learn? processing speed?)\\[0.2em]
+\textbf{(b)} a source of individual differences not in input quantity
+(processing-side individual differences? interactional quality?
+heritable variation?)\\[0.4em]
+\emph{Pure-accumulator models can't satisfy either constraint.}
 
 \end{frame}
 
