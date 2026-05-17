@@ -6,6 +6,14 @@
 # This is set as the `startup-script` metadata when the VM is created.
 # Output goes to /var/log/syslog (and /var/log/cloud-init-output.log
 # on systems where that's enabled).
+#
+# DISK REQUIREMENTS: provision at least 250 GB boot disk for fits
+# with N >= 1M observations. Stan writes log_lik for every (chain, iter,
+# obs) tuple to /tmp CSV (~17 MB per iter at N=2M, ~17 GB per chain
+# for 1000 sampling iters, ~68 GB per fit total). The 100 GB default
+# is NOT enough -- a previously-good fit's read_cmdstan_csv silently
+# failed because /tmp filled, losing 11h of compute. Use:
+#   gcloud compute instances create ... --boot-disk-size=250GB
 
 set -euo pipefail
 
