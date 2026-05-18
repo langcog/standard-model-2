@@ -27,6 +27,7 @@ export STANDARD_MODEL_ROOT="$PWD"
 export STAN_ITER="${STAN_ITER:-4000}"
 export STAN_WARMUP="${STAN_WARMUP:-2500}"
 export STAN_ADAPT_DELTA="${STAN_ADAPT_DELTA:-0.95}"
+export STAN_MAX_TREEDEPTH="${STAN_MAX_TREEDEPTH:-10}"
 export STAN_THREADS_PER_CHAIN="${STAN_THREADS_PER_CHAIN:-8}"
 [ -n "$INIT_FROM" ] && export STAN_INIT_FROM="$INIT_FROM"
 
@@ -36,11 +37,18 @@ export STAN_THREADS_PER_CHAIN="${STAN_THREADS_PER_CHAIN:-8}"
 # resolves to a location inside our repo.
 export STANDARD_MODEL_FITS_DIR="$PWD/fits"
 export SCRATCH="$PWD/_local"
-mkdir -p "$SCRATCH/standard_model_2/summaries"
 mkdir -p fits/summaries
-# Symlink so extracts written to $SCRATCH/... also appear in fits/summaries/
-[ -L "$SCRATCH/standard_model_2/summaries" ] || \
-  ln -sfn "$PWD/fits/summaries" "$SCRATCH/standard_model_2/summaries"
+mkdir -p "$SCRATCH/standard_model_2"
+# Symlink so extracts written to $SCRATCH/standard_model_2/summaries
+# land in fits/summaries/. Previous version raced mkdir -p in front of
+# the symlink check, leaving a real directory that swallowed output.
+SUMM_LINK="$SCRATCH/standard_model_2/summaries"
+if [ -e "$SUMM_LINK" ] && [ ! -L "$SUMM_LINK" ]; then
+  echo "Migrating pre-existing $SUMM_LINK directory into fits/summaries/ ..."
+  mv -n "$SUMM_LINK"/* fits/summaries/ 2>/dev/null || true
+  rmdir "$SUMM_LINK" 2>/dev/null || rm -rf "$SUMM_LINK"
+fi
+ln -sfn "$PWD/fits/summaries" "$SUMM_LINK"
 
 TAG="${VARIANT}"
 [ "$DATASET" != "english" ] && TAG="${VARIANT}_${DATASET}"

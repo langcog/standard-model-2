@@ -75,13 +75,14 @@ cat("Hyperprior overrides:\n"); str(overrides)
 # ~500 sampling iter x 4 chains = 2000 effective samples, plenty for
 # posterior summaries. Bump to 1500/750 for publication-grade runs.
 cfg <- modifyList(DEFAULT_FIT_CONFIG, list(
-  chains      = as.integer(Sys.getenv("STAN_CHAINS",      unset = "4")),
-  iter        = as.integer(Sys.getenv("STAN_ITER",        unset = "1000")),
-  warmup      = as.integer(Sys.getenv("STAN_WARMUP",      unset = "500")),
-  adapt_delta = as.numeric(Sys.getenv("STAN_ADAPT_DELTA", unset = "0.95"))
+  chains        = as.integer(Sys.getenv("STAN_CHAINS",        unset = "4")),
+  iter          = as.integer(Sys.getenv("STAN_ITER",          unset = "1000")),
+  warmup        = as.integer(Sys.getenv("STAN_WARMUP",        unset = "500")),
+  adapt_delta   = as.numeric(Sys.getenv("STAN_ADAPT_DELTA",   unset = "0.95")),
+  max_treedepth = as.integer(Sys.getenv("STAN_MAX_TREEDEPTH", unset = "10"))
 ))
-cat(sprintf("Stan config: chains=%d iter=%d warmup=%d adapt_delta=%.2f\n",
-            cfg$chains, cfg$iter, cfg$warmup, cfg$adapt_delta))
+cat(sprintf("Stan config: chains=%d iter=%d warmup=%d adapt_delta=%.2f max_treedepth=%d\n",
+            cfg$chains, cfg$iter, cfg$warmup, cfg$adapt_delta, cfg$max_treedepth))
 
 # LMM variants use a different Stan file (linear-in-age, no s / delta).
 is_lmm <- grepl("^long_lmm", variant) || identical(sub("^long_", "", variant), "lmm") ||

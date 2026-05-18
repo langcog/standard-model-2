@@ -219,6 +219,32 @@ s=6 fits in the same comparison.
   `outputs/slides/standard_model_external.tex`.
 - **Update slide 17** (unified model comparison) with the new κ_pop.
 
+### 4a. Input estimation + σ_r sensitivity at s=6 (NEW, 2026-05-17)
+
+The current input-estimation + σ_r sensitivity slides (deck slides 19–21)
+and the `quality_multiplier_implied` appendix all derive from the s=0.5
+cross-sectional 2PL fits in `outputs/experiments.md §4` and §18. With
+s=6 now the canonical pin, these need to be re-derived to be internally
+consistent with the rest of the headline.
+
+What to redo once a stable s=6 `long_no_freq_slopes_si_signed` fit lands:
+1. Re-run the σ_r analytical sensitivity (the formula
+   $\pi_\alpha(\sigma_r) = 1 - \sigma_r^2 / \sigma_\xi^2$ uses
+   the data-identified $\sigma_\xi$, which depends on the fit). The
+   plotting script is `model/scripts/sigma_r_analytical_sensitivity.R`.
+2. Refit **at minimum** the σ_r = 0.30, 0.534, 0.80, 1.20 grid for the
+   headline variant at s=6 — the confirmatory points on the analytical
+   curve. (4 fits × 11h ≈ 44h on one VM.)
+3. Recompute the `quality_multiplier_implied` figure using the new
+   `κ_i` posterior. Script: `model/scripts/quality_multiplier_demo.R`.
+4. Update both **slide 20 (sensitivity)** and **the appendix
+   quantity-vs-quality slide** with refreshed numbers; update the
+   manuscript's input-estimation section the same way.
+
+Plan-doc reminder: the input-estimation analysis is **not yet in the
+manuscript**. Once refreshed at s=6, add it as a section (probably
+just before or just after the existing variance-decomposition section).
+
 ## 5. Headline numbers as of 2026-05-15 (will be replaced)
 
 | Variant | σ_α | σ_ζ | σ_s | δ | κ_pop | π_α | Rhat | N |
