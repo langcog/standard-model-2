@@ -1,0 +1,69 @@
+% Beamer setup --------------------------------------------------------
+\usetheme{default}
+\setbeamertemplate{navigation symbols}{}
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{normal text}{fg=black!88}
+\setbeamercolor{frametitle}{fg=black}
+\setbeamerfont{frametitle}{size=\Large, series=\bfseries}
+\setbeamertemplate{frametitle}{%
+  \vspace{0.7em}\hspace{0.5em}\insertframetitle\par%
+  \vspace{0.2em}\hspace{0.6em}{\small\color{black!55}\insertframesubtitle}\par}
+\setbeamertemplate{footline}{%
+  \hfill\scriptsize\color{black!35}\insertframenumber\;/\;\inserttotalframenumber\hspace{1em}\vspace{0.5em}}
+\setbeamertemplate{itemize item}{\textbullet}
+\setbeamertemplate{itemize subitem}{\textendash}
+
+% Packages -----------------------------------------------------------
+\usepackage{booktabs}
+\usepackage{amsmath, amssymb}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{tikz}
+\usetikzlibrary{matrix, positioning, arrows.meta}
+
+% Compact tables, gentle row spacing
+\renewcommand{\arraystretch}{1.10}
+
+% Tighten paragraph spacing. Quarto/Pandoc emits blank lines between
+% every Markdown block, which LaTeX turns into \parskip vertical space.
+% Default \parskip in Beamer is ~6pt, which on a content-heavy slide
+% with 4-5 paragraphs adds ~30pt of slack that pushes the last paragraph
+% past the frame boundary. Setting to a smaller (but not zero) value
+% recovers most of that without making the slide feel cramped.
+\setlength{\parskip}{2pt plus 1pt minus 1pt}
+\setlength{\partopsep}{0pt}
+\setlength{\topsep}{2pt plus 1pt minus 1pt}
+
+% Where ggsave outputs live (relative to this file's compile dir).
+% This .qmd lives at outputs/slides/, so figures resolve as in the .tex.
+\graphicspath{{./}{../figs/}{../figs/longitudinal/}{../figs/io/}{../figs/proc/}{../figs/schematic/}}
+
+% Convenience commands -----------------------------------------------
+\newcommand{\pia}{\pi_{\alpha}}
+\newcommand{\sigxi}{\sigma_{\xi}}
+\newcommand{\siga}{\sigma_{\alpha}}
+\newcommand{\sigr}{\sigma_{r}}
+\newcommand{\sigz}{\sigma_{\zeta}}
+\newcommand{\siglam}{\sigma_{\lambda}}
+\newcommand{\sigs}{\sigma_{s}}
+\newcommand{\kappap}{\kappa_{\text{pop}}}
+
+% Recurring outline slide at each section start.
+\AtBeginSection[]{%
+  \begin{frame}{Outline}
+    \vspace{0.5em}
+    \tableofcontents[currentsection,
+                     sectionstyle=show/shaded,
+                     subsectionstyle=hide]
+  \end{frame}
+}
+\setbeamertemplate{section in toc}{%
+  \leavevmode\leftskip=1em%
+  \inserttocsectionnumber.\,\inserttocsection\par%
+}
+
+% Accent colors ------------------------------------------------------
+\definecolor{accent}{RGB}{195,30,55}
+\definecolor{cool}{RGB}{31,120,180}
