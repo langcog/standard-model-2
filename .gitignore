@@ -96,7 +96,11 @@ secrets/
 # users can regenerate it via preprocess_word_freq.R.
 # (Uncomment if you want to keep it out of the repo entirely.)
 # standard_model/scripts/data/engWS_preprocessed.Rdata
-.claude/
+# Exclude transient .claude contents, but keep project-specific skills
+.claude/settings.local.json
+.claude/.DS_Store
+.claude/worktrees/
+.claude/sessions/
 .positai
 
 # Feng eval partial-training snapshots (overwritten frequently; only final committed)
