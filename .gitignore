@@ -98,3 +98,6 @@ secrets/
 # standard_model/scripts/data/engWS_preprocessed.Rdata
 .claude/
 .positai
+
+# Feng eval partial-training snapshots (overwritten frequently; only final committed)
+outputs/feng_eval/seed*_partial.csv
