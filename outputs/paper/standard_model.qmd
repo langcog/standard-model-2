@@ -1,0 +1,136 @@
+---
+author:
+  - name: Michael C. Frank
+    affiliations: 
+      - name: Department of Psychology, Stanford University
+
+title: Variability and acceleration in the growth of children’s early vocabulary
+title-short: Variability and acceleration
+keywords: American Chemical Society, LaTeX
+abstract: |
+  This is the abstract.
+bibliography: bibliography.bib
+format:
+  acs-pdf:
+    journal:
+      id: jacsat  
+      type: article  #article, note, communication, review, letter, or perspectivee
+      layout: traditional #traditional or twocolumn, twocolumn currently broken for longtables
+      hide-email: true # if enabled, hides email addresses (and fax/phone)
+      abbreviations: IR,NMR,UV
+  acs-html: default
+---
+
+<!-- quarto add quarto-journals/acs -->
+
+Children’s early vocabulary grows very rapidly during early childhood, with large variation between children. The nature of this growth has theoretical, practical, and methodological importance.
+
+From a theoretical perspective, growth mechanisms shed light on children’s fundamental learning mechanisms and how they change across childhood. From a practical perspective, variation in growth is an important precursor — and predictor — of academic achievement. From a methodological perspective, vocabulary also affords a unique psychometric opportunity to study human variation because, unlike nearly all important human psychological metrics, there is a true zero point - a time before which children know no words. Thus, absolute levels of variability can be calculated. 
+
+One dominant viewpoint is that this growth can be characterized as a process of accumulation (McMurray 2007; Mitchell & McMurray, 2009; Hidaka, 2013; Mollica & Piantadosi, 2017; Kachergis et al., 2021). This pure accumulator view connects with a viewpoint in which the quantity of language that children hear has a strong causal role in the speed of their learning (Fernald papers; Bergeleson 1001). It also connects with the idea that large language models – whose learning scales in predictable, accumulator-like ways (Kaplan, Chinchilla, scaling laws) – might be good models for children’s learning. 
+
+But important parts of this proposal have not been fleshed out. For example, how much variation is due to input quantity vs. other sources? Meta-analysis of this relationship suggests it’s there but not that big (Coffey & Snedeker 2026). Could be quality as well, of course.
+
+Furthermore, how does the accumulation process relate to the rapid growth of vocabulary? On some models, accumulation by itself can produce an exponential “vocabulary explosion” while the child’s own learning abilities remain constant. On other accounts, however, the child’s own abilities change over development. These changes could be due to the accumulation of language allowing bootstrapping (e.g., via mutual excusivity or the shape bias), they could be through faster processing (Fernald rich get richer), or they could be via general maturation (e.g., better memory, faster processing). Or all of these. 
+
+We address these questions by creating Bayesian data analysis models that connect proposals about the nature of the accumulation process with large-scale data about the longitudinal growth of children’s vocabulary over time. Our key innovations are 1) that we model population variability between children, not just the central tendency and 2) that we directly connect quantitative estimates of language exposure to the rate of vocabulary growth.
+
+Critically, we make use of new data resources, first connecting between vocabulary growth and data-driven estimates of the general range of language input quantity available to children (study 1), then to estimates of specific children’s language input from BabyView and SEEDLings datasets (study 2), and finally to estimates of children’s processing speed from Peekbank (study 3). 
+
+Overall, our analysis supports a view in which children’s vocabulary growth is not a pure process of accumulation but rather one that accelerates rapidly over time. Further, although variation in input rate accounts for significant variation in learning speed, it is limited to approximately 10% of total variation across datasets. 
+
+Finally, we explore an application of the same framework to large language models. Making use of GPT-2 models trained on human developmental data, we show that – in contrast to children – these models do appear to function as pure accumulators. This analysis exposes a critical disanalogy between LLMs and human learners and suggests a potential route for understanding the vast “data gap” between children and large language models (Frank, 2023). 
+
+# Data
+
+We start with the MB-CDI
+
+Across XYZ different language samples (N=XYZ), variability between children is extremely high, and increases with development. 
+
+Here we ask whether these two signatures of vocabulary growth - variation and acceleration - are consistent with pure accumulator models, which are prevalent in the word learning literature and which characterize the scaling dynamics of large language models.
+
+We use psychometric models to characterize how human vocabulary growth scales with data. 
+Using Bayesian data analysis, we investigate longitudinal growth in vocabulary across two languages (English, N=XYZ and Norwegian, N=XYZ). 
+
+# Model 
+
+We start with a simple accumulator model that merges ideas from item response theory and learning theory (McMurray, Kachergis): 
+
+Kid i learning word has probability logit($\eta_ij$)
+
+$$\eta_ij = \theta_i - \delta_j$$
+
+This is an IRT model – specifically a Rasch model – where $\theta$ is ability and $\delta$ is word difficulty. But we augment this by specifying that $\theta$ is not a single parameter for a child but instead a function of accumulation over time. In the simplest form: 
+
+$$\theta_i  = log(r_i) + log(t),$$
+
+\noindent where t is months and r is word tokens per month
+
+And 
+
+$$\delta_j = \psi_j$$
+
+When exponentiated, this gives us a simple rate X time computation. In other words, ability increases over time. This form instantiates the basic hypothesis that the only thing that changes over time is more input, and the only source of variation between children is variation in rate.
+
+We augment this model in two ways. First, we add variation related to accumulation rate:
+
+$$\theta_i  = log(\alpha_i) + log(r_i) + log(t)$$
+
+
+In this formulation, 
+
+Second, we add a temporal acceleration component (an exponent):
+
+$$\theta_i  = log(\alpha_i) + log(r_i) + \kappa_i * log(t)$$
+
+When exponentiated, this turns into $$\alpha_i * r_i  * t \exp{\kappa_i}$$.
+
+This final model instantiates the idea that children vary in their base level of variation ($\alpha$) and their acceleration rate ($\kappa$). 
+
+As we will show, such a model fits a range of data vastly better than models without these terms. 
+
+As discussed above, one important question is how much of variance is due to variance in rate. We explore this by asking about the parameter $\pi$,
+
+$$\pi = \frac{\sigma_\alpha^2}{\sigma_\alpha^2 + \sigma_r^2}$$
+
+If $\pi$ > .5, then the majority of variation between individuals is not due to pure accumulation rate. 
+
+A second question is about the nature of acceleration. If $\kappa$ > 1, then acceleration is steeper than pure accumulator dynamics would predict. 
+
+
+## Model comparison
+
+
+
+Under a range of plausible assumptions about variation in input, all children show supra-linear scaling of growth, even accounting for accumulation dynamics.
+
+In addition, 80-90% of between-child variation remains unexplained by input quantity. 
+These conclusions are supported by analysis of longitudinal input data from BabyView (N=20) and SEEDLings (N=44) datasets, which contain child-specific estimates of input, and Peekbank (N=XYZ), which contains child-specific estimates of processing speed. 
+
+
+Thus, modeling human learning requires positing other sources of variability and acceleration. Sources of variability could include from variation in interactional input quality, genetic variation between children, environmental richness not captured by input, etc. Sources of acceleration could include increases in processing efficiency, learning-to-learn including mutual exclusivity, shape bias, syntactic bootstrapping, as well as domain general changes in perception, processing speed, memory, attention or other aspects of cognition. The key to understanding children’s data efficiency may thus lie in better understanding when and how children’s learning accelerates with maturation and experience. 
+
+We end by providing a quantitative comparison between within-child human learning and LLM scaling laws, showing that children’s early language learning is strikingly different from LLM scaling: it shows both steeper scaling and greater variance in growth rate. 
+
+
+
+# Discussion
+
+Coffey 2026 variance decomposition
+
+Blingualism 
+
+International adoption
+
+https://bergelsonlab.fas.harvard.edu/sites/g/files/omnuum3941/files/2025-01/meylan_bergelson_2021_ARL.pdf	
+
+:::{.acknowledgement}
+Claude Code was used for literature review, code generation, visualization, and simulation infrastructure. All writing is original to the author. 
+:::
+
+<!-- :::{.suppinfo} -->
+
+
+<!-- ::: -->
+
+<!-- ## References -->

@@ -1,13 +1,13 @@
 % Beamer setup --------------------------------------------------------
+% Standard title-only frame template (no subtitle line). This is the
+% default Beamer look modulo font tweaks; we no longer override the
+% frametitle template, so subtitles set via \framesubtitle are ignored.
 \usetheme{default}
 \setbeamertemplate{navigation symbols}{}
 \setbeamercolor{background canvas}{bg=white}
 \setbeamercolor{normal text}{fg=black!88}
 \setbeamercolor{frametitle}{fg=black}
 \setbeamerfont{frametitle}{size=\Large, series=\bfseries}
-\setbeamertemplate{frametitle}{%
-  \vspace{0.7em}\hspace{0.5em}\insertframetitle\par%
-  \vspace{0.2em}\hspace{0.6em}{\small\color{black!55}\insertframesubtitle}\par}
 \setbeamertemplate{footline}{%
   \hfill\scriptsize\color{black!35}\insertframenumber\;/\;\inserttotalframenumber\hspace{1em}\vspace{0.5em}}
 \setbeamertemplate{itemize item}{\textbullet}

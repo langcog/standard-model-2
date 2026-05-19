@@ -118,15 +118,15 @@
 
 
 % Beamer setup --------------------------------------------------------
+% Standard title-only frame template (no subtitle line). This is the
+% default Beamer look modulo font tweaks; we no longer override the
+% frametitle template, so subtitles set via \framesubtitle are ignored.
 \usetheme{default}
 \setbeamertemplate{navigation symbols}{}
 \setbeamercolor{background canvas}{bg=white}
 \setbeamercolor{normal text}{fg=black!88}
 \setbeamercolor{frametitle}{fg=black}
 \setbeamerfont{frametitle}{size=\Large, series=\bfseries}
-\setbeamertemplate{frametitle}{%
-  \vspace{0.7em}\hspace{0.5em}\insertframetitle\par%
-  \vspace{0.2em}\hspace{0.6em}{\small\color{black!55}\insertframesubtitle}\par}
 \setbeamertemplate{footline}{%
   \hfill\scriptsize\color{black!35}\insertframenumber\;/\;\inserttotalframenumber\hspace{1em}\vspace{0.5em}}
 \setbeamertemplate{itemize item}{\textbullet}
@@ -501,8 +501,6 @@ bucket fills past difficulty $\delta_j$ (Kachergis et al.\ 2021).}
 
 \begin{frame}{Prior accumulator models: structural lineage}
 \phantomsection\label{prior-accumulator-models-structural-lineage}
-\framesubtitle{We'll translate each into our notation later, after the model build}
-
 \small
 
 \begin{description}\setlength\itemsep{0.5em}
@@ -707,8 +705,6 @@ model.
 
 \begin{frame}{Step 4: + per-child acceleration \(\zeta_i\)}
 \phantomsection\label{step-4-per-child-acceleration-zeta_i}
-\framesubtitle{Children differ not just in baseline ability, but in \emph{how they accelerate}}
-
 \centering
 \Large
 
@@ -758,8 +754,6 @@ how fast their vocabulary accelerates?
 
 \begin{frame}{Step 5: + per-child trajectory phase \(s_i\)}
 \phantomsection\label{step-5-per-child-trajectory-phase-s_i}
-\framesubtitle{The second piece of \emph{individual variability in acceleration}: when children start}
-
 \centering
 \Large
 
@@ -807,8 +801,6 @@ accelerate?
 
 \begin{frame}{What every prior model pins; what we free}
 \phantomsection\label{what-every-prior-model-pins-what-we-free}
-\framesubtitle{Re-expressing each prior model in our common notation, $\eta_{ij}(t) = \log r_i + \log\alpha_i + \kappa_i\log(t-s-s_i) - \delta_j$}
-
 \centering
 \scriptsize
 \renewcommand{\arraystretch}{1.30}
@@ -851,8 +843,6 @@ vary?}\label{input-quantity-how-much-does-it-really-vary}
 
 \begin{frame}{Where does \(\sigma_r\) come from? The input-rate prior}
 \phantomsection\label{where-does-sigma_r-come-from-the-input-rate-prior}
-\framesubtitle{Why we need an external pin: the variance partition is not data-identified}
-
 \begin{columns}[T]
 \begin{column}{0.55\linewidth}
 \small
@@ -900,8 +890,6 @@ sensitivity sweep so the headline doesn't hinge on the central pin.
 
 \begin{frame}{Empirical estimates of input-rate variation}
 \phantomsection\label{empirical-estimates-of-input-rate-variation}
-\framesubtitle{From observational studies of adult speech to young children}
-
 \centering
 \scriptsize
 \renewcommand{\arraystretch}{1.25}
@@ -938,8 +926,6 @@ Fernald 2013, Bergelson 2018/2019/2023, Bunce et al.~2024, Casillas
 
 \begin{frame}{Sensitivity: \(\pi_\alpha\) across plausible \(\sigma_r\)}
 \phantomsection\label{sensitivity-pi_alpha-across-plausible-sigma_r}
-\framesubtitle{Stress-testing the input-rate pin}
-
 \begin{columns}[T]
 \begin{column}{0.58\linewidth}
 \centering
@@ -976,8 +962,6 @@ answer survives even the cross-cultural upper bound.
 \begin{frame}{Caveat: this is about input \emph{quantity}, not
 \emph{quality}}
 \phantomsection\label{caveat-this-is-about-input-quantity-not-quality}
-\framesubtitle{What the $\sigma_r$ analysis does and doesn't address}
-
 \footnotesize
 
 \textbf{What we've modeled.} Variation in input \emph{quantity} --- how
@@ -1022,8 +1006,6 @@ fits}\label{results-english-and-norwegian-longitudinal-fits}
 
 \begin{frame}[fragile]{Data and compute for the longitudinal fits}
 \phantomsection\label{data-and-compute-for-the-longitudinal-fits}
-\framesubtitle{How the next results were produced}
-
 \small
 
 \textbf{Data.}
@@ -1067,8 +1049,6 @@ Posteriors with \(\hat R < 1.05\) on all parameters of interest.
 
 \begin{frame}{Each addition matters: 5-panel comparison to data}
 \phantomsection\label{each-addition-matters-5-panel-comparison-to-data}
-\framesubtitle{Variants fit to Wordbank English WS; predicted percentile fans vs.\ observed}
-
 \centerline{\includegraphics[width=0.70\linewidth]{quantile_demo.png}}
 
 \begin{footnotesize}
@@ -1078,8 +1058,6 @@ Posteriors with \(\hat R < 1.05\) on all parameters of interest.
 
 \begin{frame}{Same story in \(\theta\)-space}
 \phantomsection\label{same-story-in-theta-space}
-\framesubtitle{The structural commitment each model makes about per-child latent ability}
-
 \centering
 
 \includegraphics[width=0.96\linewidth]{theta_spaghetti.png}
@@ -1104,8 +1082,6 @@ data demands.
 
 \begin{frame}{Best-fitting model: parameter posteriors}
 \phantomsection\label{best-fitting-model-parameter-posteriors}
-\framesubtitle{Acceleration and variability both bounded firmly above zero \hfill \textcolor{black!45}{\scriptsize\textit{(s=0.5 placeholders)}}}
-
 \centering
 \small
 \renewcommand{\arraystretch}{1.20}
@@ -1147,8 +1123,6 @@ exponent than in baseline.
 
 \begin{frame}{Cross-language acceleration}
 \phantomsection\label{cross-language-acceleration}
-\framesubtitle{Where it lives, not whether it does}
-
 \centering
 \small
 \renewcommand{\arraystretch}{1.20}
@@ -1224,8 +1198,6 @@ the linear predictor; only the data and the per-child latents change.
 
 \begin{frame}{Replicating with directly observed input}
 \phantomsection\label{replicating-with-directly-observed-input}
-\framesubtitle{BabyView (head-mounted video) and SEEDLingS (LENA all-day audio)}
-
 \begin{columns}[T]
 \begin{column}{0.5\linewidth}
 \centering
@@ -1269,8 +1241,6 @@ measured directly.
 
 \begin{frame}{Adding a processing-speed readout: Peekbank LWL}
 \phantomsection\label{adding-a-processing-speed-readout-peekbank-lwl}
-\framesubtitle{$N = 62$ subjects with both CDI and looking-while-listening}
-
 \begin{columns}[T]
 \begin{column}{0.55\linewidth}
 \textbf{Joint model adds a per-child LWL log-RT readout coupled to
@@ -1311,8 +1281,6 @@ process.
 
 \begin{frame}{\(\pia\) across five samples}
 \phantomsection\label{pia-across-five-samples}
-\framesubtitle{Three input-observation channels, two languages, parent-report noise corrected}
-
 \centering
 \small
 \renewcommand{\arraystretch}{1.20}
@@ -1343,8 +1311,6 @@ The qualitative pattern is invariant.)}}
 
 \begin{frame}{Why look at LLMs?}
 \phantomsection\label{why-look-at-llms}
-\framesubtitle{Same task, same statistical machinery, very different learners}
-
 \small
 
 LLMs and children both learn word meanings from input. They differ
@@ -1381,8 +1347,6 @@ trade anecdotes about scaling. Two questions:
 
 \begin{frame}{Chang \& Bergen (2022): per-word sigmoids in LMs}
 \phantomsection\label{chang-bergen-2022-per-word-sigmoids-in-lms}
-\framesubtitle{Method we'll re-use for the comparison}
-
 \small
 
 \textbf{Setup.} Chang \& Bergen trained four LMs (BERT, biLSTM, GPT-2,
@@ -1410,8 +1374,6 @@ is this the LM architecture or the input distribution?
 
 \begin{frame}{Methods: re-running C\&B on CHILDES-trained LMs}
 \phantomsection\label{methods-re-running-cb-on-childes-trained-lms}
-\framesubtitle{Feng et al.\ (2026) trained GPT-2 on the input distribution kids actually hear}
-
 \small
 
 \textbf{Confound in C\&B's setup}: BookCorpus + WikiText is adult
@@ -1443,8 +1405,6 @@ slide --- not the BookCorpus original.
 \begin{frame}{The per-word view: are kids and LMs learning at the same
 rate?}
 \phantomsection\label{the-per-word-view-are-kids-and-lms-learning-at-the-same-rate}
-\framesubtitle{Per-instance sigmoid slope on the same x-axis (log experience)}
-
 \centering
 
 \includegraphics[width=0.72\linewidth]{chang_bergen_slope_comparison.png}
@@ -1461,8 +1421,6 @@ cluster near \(\kappa \approx 1\); children average \(\sim\)
 
 \begin{frame}{The aggregate view: scaling laws}
 \phantomsection\label{the-aggregate-view-scaling-laws}
-\framesubtitle{Children sit far above LM scaling-law slopes on cumulative tokens}
-
 \centering
 
 \includegraphics[width=0.8\linewidth]{D1_scaling_disanalogy.png}
@@ -1481,8 +1439,6 @@ steeper --- a different scaling regime, not a quantitative degree.
 
 \begin{frame}[fragile]{Technical summary}
 \phantomsection\label{technical-summary}
-\framesubtitle{What the modeling pinned down}
-
 \footnotesize
 
 \begin{itemize}
@@ -1516,11 +1472,9 @@ steeper --- a different scaling regime, not a quantitative degree.
 
 \begin{frame}{Two signatures, twin constraints on theory}
 \phantomsection\label{two-signatures-twin-constraints-on-theory}
-\framesubtitle{Calling back to the start}
-
 \begin{columns}[T]
 \begin{column}{0.5\linewidth}
-\centerline{\includegraphics[width=0.70\linewidth]{precursor_acceleration.png}}
+\centerline{\includegraphics[width=0.62\linewidth]{precursor_acceleration.png}}
 
 \begin{footnotesize}
 \textbf{Acceleration.} $\kappap \approx 10$ --- above any pure accumulator. \emph{Where does the super-linearity come from?}
@@ -1528,7 +1482,7 @@ steeper --- a different scaling regime, not a quantitative degree.
 \end{column}
 
 \begin{column}{0.5\linewidth}
-\centerline{\includegraphics[width=0.70\linewidth]{precursor_variability.png}}
+\centerline{\includegraphics[width=0.62\linewidth]{precursor_variability.png}}
 
 \begin{footnotesize}
 \textbf{Variability.} $\pia \approx 0.91$: input explains $\sim$ 10\% of between-child variance. \emph{Where does the other 90\% live?}
@@ -1545,8 +1499,6 @@ Twin constraints on any theory: \textbf{(a)} population-level super-linear growt
 
 \begin{frame}{Appendix: per-child trajectories from the best fit}
 \phantomsection\label{appendix-per-child-trajectories-from-the-best-fit}
-\framesubtitle{Acceleration and variability both visible at the level of individual kids}
-
 \centering
 
 \includegraphics[width=0.85\linewidth]{m_best_spaghetti.png}
@@ -1563,8 +1515,6 @@ variability.
 \begin{frame}{Appendix: \(\sigma_r\) sensitivity from earlier
 cross-sectional fits}
 \phantomsection\label{appendix-sigma_r-sensitivity-from-earlier-cross-sectional-fits}
-\framesubtitle{Confirms the variance-partition story doesn't hinge on the central pin}
-
 \begin{columns}[T]
 \begin{column}{0.55\linewidth}
 \centering
@@ -1596,8 +1546,6 @@ kid, \(\sim 10^6 \times\). Implausible as a substantive quality story.
 
 \begin{frame}{Appendix: McMurray (2007) in our notation}
 \phantomsection\label{appendix-mcmurray-2007-in-our-notation}
-\framesubtitle{Pure accumulator: all four parameters pinned at the unit-rate boundary}
-
 \small
 
 \textbf{Original.} Each word \(w\) has threshold
@@ -1629,8 +1577,6 @@ $\delta_j$         & free, drawn from $g$ \\
 
 \begin{frame}{Appendix: Hidaka (2013) in our notation}
 \phantomsection\label{appendix-hidaka-2013-in-our-notation}
-\framesubtitle{Rate-change form: $D$ is exactly $\kappa - 1$}
-
 \small
 
 \textbf{Original.} Three families: cumulative (\(N\)-accumulator at
@@ -1668,8 +1614,6 @@ our \(\kappap > 1\).
 
 \begin{frame}{Appendix: Mollica \& Piantadosi (2017) in our notation}
 \phantomsection\label{appendix-mollica-piantadosi-2017-in-our-notation}
-\framesubtitle{Per-word Gamma waiting time, no per-child structure}
-
 \small
 
 \textbf{Original.} Per-word: \(k_w\) effective learning instances arrive
@@ -1702,8 +1646,6 @@ $\delta_j$         & $\approx \log(k_j/\lambda_j)$, free per-word \\
 
 \begin{frame}{Appendix: Kachergis et al.~(2021) in our notation}
 \phantomsection\label{appendix-kachergis-et-al.-2021-in-our-notation}
-\framesubtitle{First prior model to free $\sigma_\alpha$; $\sigma_\kappa$ still pinned}
-
 \small
 
 \textbf{Original.} 1-PL Rasch IRT with per-child latent ability:

@@ -44,8 +44,6 @@ psychological metric has: a true zero.
 
 ## The data
 
-<!-- \framesubtitle{What we measure when we measure a child's vocabulary} -->
-
 ::: columns
 ::: {.column width="55%"}
 \small
@@ -78,8 +76,6 @@ Vocabulary $\times$ age in English (American) WS.}
 
 ## Two signatures of vocabulary growth
 
-<!-- \framesubtitle{Both visible in any reasonably-sized vocabulary sample} -->
-
 ::: columns
 ::: {.column width="50%"}
 \footnotesize\textbf{Signature 1: acceleration.} Each quantile curve is concave up: doubling age more than doubles vocabulary. The growth rate accelerates.
@@ -93,8 +89,6 @@ Vocabulary $\times$ age in English (American) WS.}
 \begin{footnotesize}\textbf{These signatures are remarkably robust:} replicate across languages, samples, and forms. Any model of early word learning must explain both.\end{footnotesize}
 
 ## The dominant theoretical view: pure accumulation
-
-<!-- \framesubtitle{Vocabulary as a counter that fills} -->
 
 ::: columns
 ::: {.column width="55%"}
@@ -129,8 +123,6 @@ $r_i \cdot p_j$; word $j$ is acquired when its bucket fills past $\delta_j$.}
 :::
 
 ## A puzzle: input matters less than supposed
-
-<!-- \framesubtitle{Coffey \& Snedeker (2026): meta-analytic $R^2$ = 0.04--0.07} -->
 
 ::: columns
 ::: {.column width="55%"}
@@ -197,8 +189,6 @@ disanalogy with children's learning. (Later in the talk.
 
 ## The accumulator hypothesis
 
-<!-- \framesubtitle{What every prior model assumes} -->
-
 ::: columns
 ::: {.column width="55%"}
 \small
@@ -234,8 +224,6 @@ bucket fills past difficulty $\delta_j$ (Kachergis et al.\ 2021).}
 :::
 
 ## Prior accumulator models: structural lineage
-
-\framesubtitle{We'll translate each into our notation later, after the model build}
 
 \small
 
@@ -431,8 +419,6 @@ than a unit accumulator predicts? This is Hidaka's rate-change model.
 
 ## Step 4: + per-child acceleration $\zeta_i$
 
-\framesubtitle{Children differ not just in baseline ability, but in \emph{how they accelerate}}
-
 \centering
 \Large
 $\theta_i = \log r_i + \log \alpha_i + (\kappap + \zeta_i) \log t$
@@ -478,8 +464,6 @@ children really differ in how fast their vocabulary accelerates?
 
 ## Step 5: + per-child trajectory phase $s_i$
 
-\framesubtitle{The second piece of \emph{individual variability in acceleration}: when children start}
-
 \centering
 \Large
 $\theta_i = \log r_i + \log \alpha_i + (\kappap + \zeta_i)\,\log(t - s - s_i)$
@@ -523,8 +507,6 @@ onset really vary across children, alongside how fast they accelerate?
 
 ## What every prior model pins; what we free
 
-\framesubtitle{Re-expressing each prior model in our common notation, $\eta_{ij}(t) = \log r_i + \log\alpha_i + \kappa_i\log(t-s-s_i) - \delta_j$}
-
 \centering
 \scriptsize
 \renewcommand{\arraystretch}{1.30}
@@ -562,8 +544,6 @@ individually.}
 # Input quantity: how much does it really vary?
 
 ## Where does $\sigma_r$ come from? The input-rate prior
-
-\framesubtitle{Why we need an external pin: the variance partition is not data-identified}
 
 ::: columns
 ::: {.column width="55%"}
@@ -605,8 +585,6 @@ sensitivity sweep so the headline doesn't hinge on the central pin.
 
 ## Empirical estimates of input-rate variation
 
-\framesubtitle{From observational studies of adult speech to young children}
-
 \centering
 \scriptsize
 \renewcommand{\arraystretch}{1.25}
@@ -638,8 +616,6 @@ Bergelson 2018/2019/2023, Bunce et al.\ 2024, Casillas 2020/2021, Coffey et al.\
 
 ## Sensitivity: $\pi_\alpha$ across plausible $\sigma_r$
 
-\framesubtitle{Stress-testing the input-rate pin}
-
 ::: columns
 ::: {.column width="58%"}
 \centering
@@ -669,8 +645,6 @@ answer survives even the cross-cultural upper bound.
 :::
 
 ## Caveat: this is about input *quantity*, not *quality*
-
-\framesubtitle{What the $\sigma_r$ analysis does and doesn't address}
 
 \footnotesize
 
@@ -710,8 +684,6 @@ and age-varying to substitute.
 
 ## Data and compute for the longitudinal fits
 
-\framesubtitle{How the next results were produced}
-
 \small
 
 **Data.**
@@ -747,8 +719,6 @@ Posteriors with $\hat R < 1.05$ on all parameters of interest.
 
 ## Each addition matters: 5-panel comparison to data
 
-\framesubtitle{Variants fit to Wordbank English WS; predicted percentile fans vs.\ observed}
-
 \centerline{\includegraphics[width=0.70\linewidth]{quantile_demo.png}}
 
 \begin{footnotesize}
@@ -756,8 +726,6 @@ Posteriors with $\hat R < 1.05$ on all parameters of interest.
 \end{footnotesize}
 
 ## Same story in $\theta$-space
-
-\framesubtitle{The structural commitment each model makes about per-child latent ability}
 
 \centering
 \includegraphics[width=0.96\linewidth]{theta_spaghetti.png}
@@ -779,8 +747,6 @@ data demands.
 \end{small}
 
 ## Best-fitting model: parameter posteriors
-
-\framesubtitle{Acceleration and variability both bounded firmly above zero \hfill \textcolor{black!45}{\scriptsize\textit{(s=0.5 placeholders)}}}
 
 \centering
 \small
@@ -819,8 +785,6 @@ $\sigma_\kappa > \sigma_\alpha$: kids vary more in scaling exponent than in base
 :::
 
 ## Cross-language acceleration
-
-\framesubtitle{Where it lives, not whether it does}
 
 \centering
 \small
@@ -888,8 +852,6 @@ change.
 
 ## Replicating with directly observed input
 
-\framesubtitle{BabyView (head-mounted video) and SEEDLingS (LENA all-day audio)}
-
 ::: columns
 ::: {.column width="50%"}
 \centering
@@ -923,8 +885,6 @@ input-rate variance is a small share of between-child variance even when measure
 
 ## Adding a processing-speed readout: Peekbank LWL
 
-\framesubtitle{$N = 62$ subjects with both CDI and looking-while-listening}
-
 ::: columns
 ::: {.column width="55%"}
 **Joint model adds a per-child LWL log-RT readout coupled to
@@ -956,8 +916,6 @@ axis"); the two readouts each pick up a different developmental process.
 
 ## $\pia$ across five samples
 
-\framesubtitle{Three input-observation channels, two languages, parent-report noise corrected}
-
 \centering
 \small
 \renewcommand{\arraystretch}{1.20}
@@ -988,8 +946,6 @@ The qualitative pattern is invariant.)}}
 
 ## Why look at LLMs?
 
-\framesubtitle{Same task, same statistical machinery, very different learners}
-
 \small
 
 LLMs and children both learn word meanings from input. They differ
@@ -1013,8 +969,6 @@ anecdotes about scaling. Two questions:
 2. Does a model that fits kids' learning say anything about LMs?
 
 ## Chang & Bergen (2022): per-word sigmoids in LMs
-
-\framesubtitle{Method we'll re-use for the comparison}
 
 \small
 
@@ -1042,8 +996,6 @@ $\approx 1$ logit per nat-log training-step. Striking but ambiguous:
 is this the LM architecture or the input distribution?
 
 ## Methods: re-running C&B on CHILDES-trained LMs
-
-\framesubtitle{Feng et al.\ (2026) trained GPT-2 on the input distribution kids actually hear}
 
 \small
 
@@ -1074,8 +1026,6 @@ slide --- not the BookCorpus original.
 
 ## The per-word view: are kids and LMs learning at the same rate?
 
-\framesubtitle{Per-instance sigmoid slope on the same x-axis (log experience)}
-
 \centering
 \includegraphics[width=0.72\linewidth]{chang_bergen_slope_comparison.png}
 
@@ -1088,8 +1038,6 @@ near $\kappa \approx 1$; children average $\sim$ 10$\times$ steeper,
 with much more between-instance variance.**
 
 ## The aggregate view: scaling laws
-
-\framesubtitle{Children sit far above LM scaling-law slopes on cumulative tokens}
 
 \centering
 \includegraphics[width=0.8\linewidth]{D1_scaling_disanalogy.png}
@@ -1106,8 +1054,6 @@ $\kappa_{\text{pop}} \approx 10$ is two orders of magnitude steeper
 # Synthesis
 
 ## Technical summary
-
-\framesubtitle{What the modeling pinned down}
 
 \footnotesize
 
@@ -1131,18 +1077,16 @@ $\kappa_{\text{pop}} \approx 10$ is two orders of magnitude steeper
 
 ## Two signatures, twin constraints on theory
 
-\framesubtitle{Calling back to the start}
-
 ::: columns
 ::: {.column width="50%"}
-\centerline{\includegraphics[width=0.70\linewidth]{precursor_acceleration.png}}
+\centerline{\includegraphics[width=0.62\linewidth]{precursor_acceleration.png}}
 
 \begin{footnotesize}
 \textbf{Acceleration.} $\kappap \approx 10$ --- above any pure accumulator. \emph{Where does the super-linearity come from?}
 \end{footnotesize}
 :::
 ::: {.column width="50%"}
-\centerline{\includegraphics[width=0.70\linewidth]{precursor_variability.png}}
+\centerline{\includegraphics[width=0.62\linewidth]{precursor_variability.png}}
 
 \begin{footnotesize}
 \textbf{Variability.} $\pia \approx 0.91$: input explains $\sim$ 10\% of between-child variance. \emph{Where does the other 90\% live?}
@@ -1159,8 +1103,6 @@ Twin constraints on any theory: \textbf{(a)} population-level super-linear growt
 
 ## Appendix: per-child trajectories from the best fit
 
-\framesubtitle{Acceleration and variability both visible at the level of individual kids}
-
 \centering
 \includegraphics[width=0.85\linewidth]{m_best_spaghetti.png}
 
@@ -1171,8 +1113,6 @@ Twin constraints on any theory: \textbf{(a)} population-level super-linear growt
 Concave-up shape = super-linear signature; fan width = between-child variability.
 
 ## Appendix: $\sigma_r$ sensitivity from earlier cross-sectional fits
-
-\framesubtitle{Confirms the variance-partition story doesn't hinge on the central pin}
 
 ::: columns
 ::: {.column width="55%"}
@@ -1201,8 +1141,6 @@ kid, $\sim 10^6 \times$. Implausible as a substantive quality story.
 
 ## Appendix: McMurray (2007) in our notation
 
-\framesubtitle{Pure accumulator: all four parameters pinned at the unit-rate boundary}
-
 \small
 **Original.** Each word $w$ has threshold $\tau_w \sim g(\tau)$;
 deterministic step at $t \ge \tau_w$. Vocabulary $L(t) = G(t)$ (CDF of $g$).
@@ -1230,8 +1168,6 @@ $\delta_j$         & free, drawn from $g$ \\
 \end{tabular}
 
 ## Appendix: Hidaka (2013) in our notation
-
-\framesubtitle{Rate-change form: $D$ is exactly $\kappa - 1$}
 
 \small
 **Original.** Three families: cumulative ($N$-accumulator at constant
@@ -1265,8 +1201,6 @@ $\delta_j$         & free \\
 
 ## Appendix: Mollica & Piantadosi (2017) in our notation
 
-\framesubtitle{Per-word Gamma waiting time, no per-child structure}
-
 \small
 **Original.** Per-word: $k_w$ effective learning instances arrive as
 Poisson at rate $\lambda_w$; word acquired after $k_w$ events.
@@ -1296,8 +1230,6 @@ $\delta_j$         & $\approx \log(k_j/\lambda_j)$, free per-word \\
 \end{tabular}
 
 ## Appendix: Kachergis et al. (2021) in our notation
-
-\framesubtitle{First prior model to free $\sigma_\alpha$; $\sigma_\kappa$ still pinned}
 
 \small
 **Original.** 1-PL Rasch IRT with per-child latent ability:
