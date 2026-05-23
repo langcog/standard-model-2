@@ -1,0 +1,44 @@
+\documentclass[border=4pt]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{matrix, positioning, arrows.meta}
+\usepackage{xcolor}
+\usepackage{amsmath, amssymb}
+\definecolor{accent}{RGB}{195,30,55}
+\definecolor{cool}{RGB}{31,120,180}
+\newcommand{\pia}{\pi_{\alpha}}
+\newcommand{\sigxi}{\sigma_{\xi}}
+\newcommand{\siga}{\sigma_{\alpha}}
+\newcommand{\sigr}{\sigma_{r}}
+\newcommand{\sigz}{\sigma_{\zeta}}
+\newcommand{\siglam}{\sigma_{\lambda}}
+\newcommand{\sigs}{\sigma_{s}}
+\newcommand{\kappap}{\kappa_{\text{pop}}}
+\begin{document}
+\begin{tikzpicture}[
+  every node/.style={inner sep=2pt},
+  ann/.style={font=\small\itshape, color=blue!40!black,
+              align=center, text width=2.0cm},
+  newann/.style={font=\small\itshape\bfseries, color=accent,
+                 align=center, text width=2.6cm},
+  arrow/.style={->, blue!30!black, semithick, shorten >=2pt, shorten <=2pt},
+  newarrow/.style={->, accent, semithick, shorten >=2pt, shorten <=2pt}]
+\matrix[matrix of nodes, column sep=8pt, nodes={font=\Large},
+        ampersand replacement=\&]{
+  |[name=t1]| $\theta_i$ \&
+  $=$ \&
+  |[name=logr]| $\log r_i$ \&
+  $+$ \&
+  |[name=logalpha]| $\log\alpha_i$ \&
+  $+$ \&
+  $($ \& |[name=kpop]| $\kappap$ \& $+$ \& |[name=zeta]| $\zeta_i$ \& $)$ \&
+  $\cdot \log t$ \\
+};
+\node[ann, below=3em of logalpha] (alogalpha) {efficiency};
+\draw[arrow] (alogalpha) -- (logalpha);
+\node[ann, below=3em of kpop] (akpop) {pop.\ scaling};
+\draw[arrow] (akpop) -- (kpop);
+\node[newann, below=3em of zeta] (azeta)
+  {per-child acceleration deviation (NEW)};
+\draw[newarrow] (azeta) -- (zeta);
+\end{tikzpicture}
+\end{document}

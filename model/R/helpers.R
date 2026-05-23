@@ -233,8 +233,18 @@ variant_hyperpriors <- function(name) {
     # With delta and slopes free this is the off-spine "M4 without freq"
     # robustness check; m1_time_only above is the equivalent test on the spine.
     no_freq        = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001),
+    # M_best (no_freq + slopes): the headline model after we excised
+    # s and s_i (2026-05-22). Rationale: at I=500 the (s, delta) ridge
+    # and the fmax(age - s - s_i, 0.01) floor created multi-modal
+    # posteriors that did not appear at I=50. The May 3 fit with
+    # s_prior_mean=0.5 converged cleanly; we go one step further and
+    # pin s at 0 (s_prior_sd=0.001) so it's effectively a constant.
+    # s_i remains pinned off via the default sigma_s_prior_sd=0.001.
+    # Linear predictor reduces to:
+    #   eta = xi + log H + (1 + delta + zeta) * log(age/a0) - delta_j
     no_freq_slopes = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
-                          sigma_zeta_prior_sd = 1),
+                          sigma_zeta_prior_sd = 1,
+                          s_prior_mean = 0, s_prior_sd = 0.001),
     # M_best (no_freq + slopes) with global start time s freed.
     # Used to investigate whether onset-time effects (per-child or
     # population) help with the 4-panel demo "compressed at top, wide
@@ -311,6 +321,19 @@ variant_hyperpriors <- function(name) {
                                    sigma_zeta_prior_sd = 1,
                                    gamma_0_prior_sd = 2, gamma_1_prior_sd = 2,
                                    gamma_std_prior_sd = 2),
+    # comp + si_signed: same as comp_no_freq_slopes plus the per-child
+    # trajectory phase s_i (signed-normal, sum-to-zero). Used by the
+    # log_irt_long_io_comp_si_signed.stan dispatch in fit_io.R for the
+    # SEEDLingS s=6 refit.
+    comp_no_freq_slopes_si_signed = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
+                                         sigma_zeta_prior_sd = 1,
+                                         gamma_0_prior_sd = 2, gamma_1_prior_sd = 2,
+                                         sigma_s_prior_sd = 2),
+    comp_std_no_freq_slopes_si_signed = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
+                                             sigma_zeta_prior_sd = 1,
+                                             gamma_0_prior_sd = 2, gamma_1_prior_sd = 2,
+                                             gamma_std_prior_sd = 2,
+                                             sigma_s_prior_sd = 2),
     # Legacy variants for re-loading old fits / explicit comparison
     fix_s         = list(s_prior_mean = 2, s_prior_sd = 0.001),
     both_fixed    = list(delta_prior_mean = 0, delta_prior_sd = 0.001,
@@ -620,6 +643,15 @@ fit_variant_cmdstanr <- function(stan_data, tag,
   m <- cmdstanr::cmdstan_model(model_path,
                                 cpp_options = list(stan_threads = TRUE))
 
+  # Persistent CSV output directory. By default cmdstanr writes CSVs
+  # to a per-session tempdir that gets auto-cleaned when R exits, so if
+  # save_object() crashes (e.g., disk-full during fread of the log_lik
+  # column) the draws are lost. Pointing output_dir at a real directory
+  # under fits/ means the CSVs survive any post-sampling failure and
+  # scalar params can be recovered via cmdstanr::as_cmdstan_fit().
+  csv_dir <- file.path(fits_dir, sprintf("csvs_%s", tag))
+  dir.create(csv_dir, recursive = TRUE, showWarnings = FALSE)
+
   t0 <- Sys.time()
   sample_args <- list(
     data              = stan_data,
@@ -631,7 +663,8 @@ fit_variant_cmdstanr <- function(stan_data, tag,
     seed              = cfg$seed,
     adapt_delta       = cfg$adapt_delta,
     max_treedepth     = cfg$max_treedepth,
-    refresh           = max(1L, (cfg$iter %/% 10L))
+    refresh           = max(1L, (cfg$iter %/% 10L)),
+    output_dir        = csv_dir
   )
   # Optional init values: if supplied (typically a list of length
   # n_chains, each a named list of parameter starting values), pass to
@@ -647,7 +680,16 @@ fit_variant_cmdstanr <- function(stan_data, tag,
   # resulting .rds is portable across machines and self-contained.
   # Downstream code uses posterior::as_draws_df(fit), which works on
   # both stanfit and CmdStanMCMC.
-  csm$save_object(file = fit_file)
+  # Wrapped in try() so a save_object failure (typically OOM/disk-full
+  # during the internal read_cmdstan_csv) doesn't kill the script
+  # before we've at least preserved the CSVs in csv_dir.
+  saved <- try(csm$save_object(file = fit_file), silent = FALSE)
+  if (inherits(saved, "try-error")) {
+    message(sprintf("[%s] save_object FAILED -- CSVs preserved at %s",
+                    tag, csv_dir))
+    message("Recover via: cmdstanr::as_cmdstan_fit(list.files('",
+            csv_dir, "', pattern = 'csv$', full.names = TRUE))")
+  }
   csm
 }
 

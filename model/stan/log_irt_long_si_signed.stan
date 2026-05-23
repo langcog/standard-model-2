@@ -45,24 +45,24 @@
 // axis-aligned coordinate system, and what the data identifies is what
 // the marginal posterior reflects.
 //
-// Linear predictor (identical to log_irt_long.stan with independent s_i):
-//   eta = lambda_j * [xi_i + beta_c[cc[j]] * log p_j + log H
-//                     + (1 + delta + zeta_i) * log((age_a - s - s_i)/a0)
-//                     - delta_j]
+// Linear predictor (after 2026-05-21 cleanup that removed 2PL lambda_j
+// and per-class frequency slope beta_c, both of which were pinned off
+// in every active variant):
+//   eta = xi_i + log H + (1 + delta + zeta_i) * log((age_a - s - s_i[i])/a0)
+//                      - delta_j
 // (xi, zeta) drawn from a bivariate Normal via 2x2 Cholesky with LKJ(2)
-// prior on the correlation; s_i drawn independently from Normal_+(0, sigma_s).
+// prior on the correlation; s_i drawn from Normal(0, sigma_s),
+// sum-to-zero centered in transformed parameters.
 
 functions {
   real partial_sum_lpmf(array[] int y_slice,
                         int start, int end,
                         array[] int aa, array[] int jj,
-                        array[] int admin_to_child, array[] int cc,
+                        array[] int admin_to_child,
                         vector admin_age, real s, real a0,
                         real time_baseline, real delta,
                         real log_H,
-                        vector log_p,
-                        vector delta_j, vector lambda,
-                        vector beta_c,
+                        vector delta_j,
                         vector xi, vector zeta, vector s_i) {
     int n_slice = end - start + 1;
     vector[n_slice] eta_slice;
@@ -72,10 +72,7 @@ functions {
       real ae = fmax(admin_age[aa[n]] - s - s_i[ch], 0.01);
       real log_age_n = log(ae / a0);
       real slope_n = time_baseline + delta + zeta[ch];
-      real beta_n  = beta_c[cc[jj[n]]];
-      real base = xi[ch] + beta_n * log_p[jj[n]] + log_H
-                + slope_n * log_age_n - delta_j[jj[n]];
-      eta_slice[i] = lambda[jj[n]] * base;
+      eta_slice[i] = xi[ch] + log_H + slope_n * log_age_n - delta_j[jj[n]];
     }
     return bernoulli_logit_lpmf(y_slice | eta_slice);
   }
@@ -86,16 +83,16 @@ data {
   int<lower=1> A;
   int<lower=1> I;
   int<lower=1> J;
-  int<lower=1> C;
+  int<lower=1> C;                       // unused after 2026-05-21 cleanup; kept for bundle compat
 
   array[N] int<lower=1, upper=A> aa;
   array[N] int<lower=1, upper=J> jj;
   array[A] int<lower=1, upper=I> admin_to_child;
-  array[J] int<lower=1, upper=C> cc;
+  array[J] int<lower=1, upper=C> cc;    // unused
   array[N] int<lower=0, upper=1> y;
 
   vector[A] admin_age;
-  vector[J] log_p;
+  vector[J] log_p;                      // unused after cleanup
 
   real log_H;
   real<lower=0> a0;
@@ -132,16 +129,19 @@ parameters {
   real<lower=0> sigma_alpha;
 
   vector[J] delta_j_raw;
-  vector[C] mu_c;
-  vector<lower=0>[C] tau_c;
+  // Flat (non-class-stratified) hyperprior on delta_j. See log_irt_long.stan
+  // for the rationale (2026-05-21). cc[] and C are now unused (kept in
+  // the data block only for bundle compatibility).
+  real mu_delta;
+  real<lower=0> tau_delta;
 
   real<lower=0, upper=15> s;
   real delta;
 
-  vector[J] log_lambda_raw;
-  real<lower=0> sigma_lambda;
-
-  vector[C] beta_c;
+  // 2PL discrimination (log_lambda, sigma_lambda) and per-class log-p
+  // frequency slope (beta_c) removed 2026-05-21. Both were pinned off
+  // in every active variant; removing them simplifies the linear
+  // predictor to:  eta = xi + log_H + (1 + delta + zeta) * log_age - delta_j .
 
   // Per-child onset (SIGNED normal; sum-to-zero centered in TP).
   // s_i_raw can be negative or positive; the centered s_i in transformed
@@ -179,12 +179,10 @@ transformed parameters {
   vector[I] zeta = child_effs[, 2] - mean(child_effs[, 2]);
   vector[I] s_i  = s_i_raw - mean(s_i_raw);
 
-  vector[J] delta_j;
-  for (j in 1:J) {
-    delta_j[j] = mu_c[cc[j]] + tau_c[cc[j]] * delta_j_raw[j];
-  }
-  vector[J] log_lambda = sigma_lambda * log_lambda_raw;
-  vector[J] lambda = exp(log_lambda);
+  // Flat (non-class-stratified) delta_j hierarchy.
+  // (Sum-to-zero centering was tried and reverted; see log_irt_long.stan
+  // comment block for the diagnostic.)
+  vector[J] delta_j = mu_delta + tau_delta * delta_j_raw;
 }
 
 model {
@@ -198,26 +196,21 @@ model {
   sigma_alpha       ~ normal(0, sigma_alpha_prior_sd);
 
   delta_j_raw ~ std_normal();
-  mu_c    ~ normal(mu_mu_c, sigma_mu_c);
-  tau_c   ~ normal(0, 1);
+  mu_delta  ~ normal(mu_mu_c, sigma_mu_c);   // reuse the old hyperprior numerics
+  tau_delta ~ normal(0, 1);
 
   s     ~ normal(s_prior_mean, s_prior_sd);
   delta ~ normal(delta_prior_mean, delta_prior_sd);
-
-  log_lambda_raw ~ std_normal();
-  sigma_lambda   ~ normal(0, sigma_lambda_prior_sd);
-
-  beta_c ~ normal(beta_c_prior_mean, beta_c_prior_sd);
 
   // Per-child onset (signed normal). Sampling on s_i_raw; the
   // sum-to-zero centering happens in transformed parameters.
   s_i_raw ~ normal(0, sigma_s);
 
   target += reduce_sum(partial_sum_lpmf, y, 1,
-                       aa, jj, admin_to_child, cc,
+                       aa, jj, admin_to_child,
                        admin_age, s, a0,
                        time_baseline, delta, log_H,
-                       log_p, delta_j, lambda, beta_c,
+                       delta_j,
                        xi, zeta, s_i);
 }
 
@@ -236,9 +229,7 @@ generated quantities {
     for (n in 1:N) {
       int ch = admin_to_child[aa[n]];
       real slope_n = time_baseline + delta + zeta[ch];
-      real base_n = xi[ch] + beta_c[cc[jj[n]]] * log_p[jj[n]] + log_H
-                  + slope_n * log_age[n] - delta_j[jj[n]];
-      real eta_n = lambda[jj[n]] * base_n;
+      real eta_n = xi[ch] + log_H + slope_n * log_age[n] - delta_j[jj[n]];
       log_lik[n] = bernoulli_logit_lpmf(y[n] | eta_n);
     }
   }

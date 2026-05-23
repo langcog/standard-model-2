@@ -37,15 +37,13 @@ functions {
                         int start, int end,
                         // observation indices
                         array[] int aa, array[] int jj,
-                        array[] int admin_to_child, array[] int cc,
+                        array[] int admin_to_child,
                         // global / scalar
                         vector admin_age, real s, real a0,
                         real time_baseline, real delta,
                         real log_H,
                         // per-item / per-child
-                        vector log_p,
-                        vector delta_j, vector lambda,
-                        vector beta_c,
+                        vector delta_j,
                         vector xi, vector zeta, vector s_i) {
     int n_slice = end - start + 1;
     vector[n_slice] eta_slice;
@@ -55,10 +53,7 @@ functions {
       real ae = fmax(admin_age[aa[n]] - s - s_i[ch], 0.01);
       real log_age_n = log(ae / a0);
       real slope_n = time_baseline + delta + zeta[ch];
-      real beta_n  = beta_c[cc[jj[n]]];
-      real base = xi[ch] + beta_n * log_p[jj[n]] + log_H
-                + slope_n * log_age_n - delta_j[jj[n]];
-      eta_slice[i] = lambda[jj[n]] * base;
+      eta_slice[i] = xi[ch] + log_H + slope_n * log_age_n - delta_j[jj[n]];
     }
     return bernoulli_logit_lpmf(y_slice | eta_slice);
   }
@@ -69,16 +64,19 @@ data {
   int<lower=1> A;                       // admins
   int<lower=1> I;                       // children
   int<lower=1> J;                       // words
-  int<lower=1> C;                       // lexical classes
+  int<lower=1> C;                       // lexical classes (unused in this Stan file
+                                        // after the 2026-05-21 cleanup; kept so
+                                        // bundles built for earlier versions
+                                        // remain accepted)
 
   array[N] int<lower=1, upper=A> aa;    // admin index per obs
   array[N] int<lower=1, upper=J> jj;    // word index per obs
   array[A] int<lower=1, upper=I> admin_to_child;
-  array[J] int<lower=1, upper=C> cc;
+  array[J] int<lower=1, upper=C> cc;    // unused (see above)
   array[N] int<lower=0, upper=1> y;
 
   vector[A] admin_age;                  // age per admin (months)
-  vector[J] log_p;
+  vector[J] log_p;                      // unused after cleanup; kept for bundle compat
 
   real log_H;
   real<lower=0> a0;
@@ -94,12 +92,12 @@ data {
   real<lower=0> s_prior_sd;
   real delta_prior_mean;
   real<lower=0> delta_prior_sd;
-  real<lower=0> sigma_lambda_prior_sd;
+  real<lower=0> sigma_lambda_prior_sd;  // unused; kept for bundle compat
   real<lower=0> sigma_zeta_prior_sd;
   real<lower=0> sigma_alpha_prior_sd;   // tight => sigma_alpha pinned at 0 (pure-accumulator demo variants)
   real<lower=0> sigma_s_prior_sd;       // per-child onset s_i; tight => off
-  real<lower=0> beta_c_prior_sd;        // tight => beta_c pinned at beta_c_prior_mean
-  real beta_c_prior_mean;               // 1 = unit accumulator; 0 = no_freq
+  real<lower=0> beta_c_prior_sd;        // unused; kept for bundle compat
+  real beta_c_prior_mean;               // unused; kept for bundle compat
   real time_baseline;                   // 1 = unit-rate accumulator; 0 = no time term (M0)
 }
 
@@ -112,16 +110,24 @@ parameters {
   real<lower=0> sigma_alpha;
 
   vector[J] delta_j_raw;
-  vector[C] mu_c;
-  vector<lower=0>[C] tau_c;
+  // FLAT (not class-stratified) hyperprior on delta_j. Replaces the
+  // earlier vector[C] mu_c + vector<lower=0>[C] tau_c hierarchy on
+  // 2026-05-21 along with the s-prior tightening: we don't use the
+  // per-class delta_j shrinkage anywhere downstream (the headline
+  // params sigma_alpha, kappa_pop, sigma_zeta, sigma_s don't depend
+  // on which class shrinkage delta_j gets), and a single global hyperprior
+  // is fewer parameters and simpler to explain. cc[] and C remain in
+  // the data block since beta_c uses them.
+  real mu_delta;
+  real<lower=0> tau_delta;
 
   real<lower=0, upper=15> s;
   real delta;
 
-  vector[J] log_lambda_raw;
-  real<lower=0> sigma_lambda;
-
-  vector[C] beta_c;                     // per-class log-p slope (pinned 1 by default)
+  // 2PL discrimination (log_lambda, sigma_lambda) and per-class log-p
+  // frequency slope (beta_c) removed 2026-05-21. Both were pinned off
+  // in every active variant; removing them simplifies the linear
+  // predictor to:  eta = xi + log_H + (1 + delta + zeta) * log_age - delta_j .
 
   // Per-child onset offset, drawn from N_+(0, sigma_s). Lower-bounded
   // at 0 so kid effective onsets s + s_i[ch] >= s (no negative onsets).
@@ -166,12 +172,15 @@ transformed parameters {
   vector[I] zeta = child_effs[, 2] - mean(child_effs[, 2]);
   real<lower=0> sigma_zeta = sigma_child[2];
 
-  vector[J] delta_j;
-  for (j in 1:J) {
-    delta_j[j] = mu_c[cc[j]] + tau_c[cc[j]] * delta_j_raw[j];
-  }
-  vector[J] log_lambda = sigma_lambda * log_lambda_raw;
-  vector[J] lambda = exp(log_lambda);
+  // Flat (non-class-stratified) delta_j hierarchy.
+  // (We briefly tried sum-to-zero centering here on 2026-05-21 to
+  // match the kid-level random effects; the 50-kid pilot showed worse
+  // chain agreement on rho_xi_zeta and sigma_alpha, so the centering
+  // was reverted. The mean(delta_j_unc) subtraction introduces a
+  // J-wide coupling between every delta_j_raw[k] that NUTS finds harder
+  // to traverse than the small mu_delta-vs-globals soft correlation
+  // it was meant to fix.)
+  vector[J] delta_j = mu_delta + tau_delta * delta_j_raw;
 }
 
 model {
@@ -188,16 +197,11 @@ model {
   sigma_alpha   ~ normal(0, sigma_alpha_prior_sd);
 
   delta_j_raw ~ std_normal();
-  mu_c    ~ normal(mu_mu_c, sigma_mu_c);
-  tau_c   ~ normal(0, 1);
+  mu_delta  ~ normal(mu_mu_c, sigma_mu_c);   // reuse the old hyperprior numerics
+  tau_delta ~ normal(0, 1);
 
   s     ~ normal(s_prior_mean, s_prior_sd);
   delta ~ normal(delta_prior_mean, delta_prior_sd);
-
-  log_lambda_raw ~ std_normal();
-  sigma_lambda   ~ normal(0, sigma_lambda_prior_sd);
-
-  beta_c ~ normal(beta_c_prior_mean, beta_c_prior_sd);
 
   // Per-child onset offset (half-normal via <lower=0> on s_i).
   // sigma_s_prior_sd ~ 0.001 effectively pins s_i at 0 (legacy global-s
@@ -210,10 +214,10 @@ model {
   // Likelihood: parallelize per-observation lpmf via reduce_sum.
   // grainsize = 1 lets Stan's TBB scheduler auto-tune the slice size.
   target += reduce_sum(partial_sum_lpmf, y, 1,
-                       aa, jj, admin_to_child, cc,
+                       aa, jj, admin_to_child,
                        admin_age, s, a0,
                        time_baseline, delta, log_H,
-                       log_p, delta_j, lambda, beta_c,
+                       delta_j,
                        xi, zeta, s_i);
 }
 
@@ -233,9 +237,7 @@ generated quantities {
     for (n in 1:N) {
       int ch = admin_to_child[aa[n]];
       real slope_n = time_baseline + delta + zeta[ch];
-      real base_n = xi[ch] + beta_c[cc[jj[n]]] * log_p[jj[n]] + log_H
-                  + slope_n * log_age[n] - delta_j[jj[n]];
-      real eta_n = lambda[jj[n]] * base_n;
+      real eta_n = xi[ch] + log_H + slope_n * log_age[n] - delta_j[jj[n]];
       log_lik[n] = bernoulli_logit_lpmf(y[n] | eta_n);
     }
   }

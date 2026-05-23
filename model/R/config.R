@@ -58,17 +58,18 @@ MODEL_CONSTANTS <- list(
 DEFAULT_PRIORS <- list(
   mu_mu_c          = 8,
   sigma_mu_c       = 3,
-  # s pinned at 6 months: developmentally plausible reference age for
-  # word-learning onset (kid effective onsets s + s_i around 6 mo, ±~1.4
-  # mo SD with signed s_i, so most kids in [3.5, 8.5] mo range -- positive
-  # and interpretable). Previously pinned near 0 (s_prior_mean=0.5) as a
-  # coordinate convention to avoid the (s, delta) ridge; that led to
-  # signed s_i giving negative effective onsets, which Mike noted as
-  # interpretively weird. The (s, delta) ridge means changing s shifts
-  # delta proportionally, so this re-pinning changes kappa_pop = 1 + delta
-  # downward from the s=0.5 reporting. Standard convention now.
-  s_prior_mean     = 6,
-  s_prior_sd       = 0.5,
+  # s pinned at 0 (2026-05-22): excised from the headline model. The
+  # s=6 pivot (for signed-s_i interpretability) created the (s, delta)
+  # ridge geometry that made I=500 fits multimodal, and the signed-s_i
+  # extension that motivated s=6 was itself abandoned. With s_i also
+  # excised (sigma_s_prior_sd=0.001 below), there's no inferential
+  # reason for s to be free -- it just enables the floor-clamping
+  # pathology in fmax(t-s, 0.01) without adding identifiable signal.
+  # Pinning at 0 with sd=0.001 makes Stan effectively treat s as a
+  # constant. Variants that need a free s (e.g. `free_s_no_freq_slopes`
+  # robustness check) explicitly override this default.
+  s_prior_mean     = 0,
+  s_prior_sd       = 0.001,
   delta_prior_mean = 0,
   delta_prior_sd   = 0.5,
   sigma_lambda_prior_sd = 0.001,   # no 2PL by default

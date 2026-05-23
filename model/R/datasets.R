@@ -21,6 +21,16 @@ DATASETS <- list(
     prepare_script = "model/scripts/prepare_longitudinal_data.R",
     description    = "English (American) CDI:WS longitudinal subset"
   ),
+  english_pilot50 = list(
+    bundle         = "long_subset_data_50.rds",
+    prepare_script = "N/A (built inline)",
+    description    = "50-child English pilot bundle for prior/model validation"
+  ),
+  english_I200 = list(
+    bundle         = "long_subset_data_I200.rds",
+    prepare_script = "model/scripts/prepare_longitudinal_data.R \"English (American)\" 200 200",
+    description    = "English I=200 J=198 bundle (May-10-era scale) for the 4-panel architecture demo"
+  ),
   norwegian = list(
     bundle         = "long_subset_data_nor.rds",
     prepare_script = "model/scripts/prepare_longitudinal_norwegian.R",

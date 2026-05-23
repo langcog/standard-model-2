@@ -1,5 +1,5 @@
 ---
-title: "Acceleration and variability in the growth of children's early vocabulary"
+title: "Acceleration and variability in vocabulary growth for young children and language models"
 author: "Michael C. Frank"
 institute: "Stanford University"
 date: "2026-06-01"
@@ -16,10 +16,8 @@ format:
 
 ## Vocabulary growth
 
-::: columns
-::: {.column width="55%"}
-**Theoretical:** Growth mechanisms are diagnostic of how children's
-learning works --- and how it changes with development.
+
+**Theoretical:** Vocabulary is a key nexus of language, social cognition, and conceptual development. 
 
 \vspace{1em}
 
@@ -29,27 +27,23 @@ academic outcomes.
 \vspace{1em}
 
 **Methodological:** Vocabulary count has a property nearly no other
-psychological metric has: a true zero. 
-:::
-::: {.column width="45%"}
-\centering
-\includegraphics[width=\linewidth]{precursor_acceleration.png}
+psychological metric has: a true zero, so we can explore the psychometrics of learning.
 
-<!-- \vspace{0.3em} -->
-<!-- \scriptsize\color{black!55}\textit{Wordbank English (American) vocabulary -->
-<!-- vs.\ age, with quantile fan: rapid growth, large between-child spread, -->
-<!-- both diagnostic of learning.} -->
-:::
-:::
+\vspace{1em}
 
-## The data
+**Comparative:** We can explore how LLMs relate to children using dense data about child outcomes.
+
+## Wordbank Data
 
 ::: columns
 ::: {.column width="55%"}
 \small
-MacArthur--Bates Communicative Development Inventory (CDI) is a
-parent-report checklist of $\sim$ 680 words. Parents check which words
-their child *produces* or *comprehends*.
+MacArthur--Bates Communicative Development Inventory (CDI):
+parent-report checklist of $\sim$ 680 words. 
+
+\vspace{0.7em}
+
+We focus on production (less noisy). 
 
 \vspace{0.7em}
 
@@ -64,7 +58,7 @@ languages, $\sim\!10^5$ children. We use both:
 
 Large $N$, parent-report calibrated to direct testing, cross-linguistically validated.
 :::
-::: {.column width="45%"}
+::: {.column width="45%"} 
 \centering
 \includegraphics[width=\linewidth]{precursor_acceleration.png}
 
@@ -78,17 +72,24 @@ Vocabulary $\times$ age in English (American) WS.}
 
 ::: columns
 ::: {.column width="50%"}
-\footnotesize\textbf{Signature 1: acceleration.} Each quantile curve is concave up: doubling age more than doubles vocabulary. The growth rate accelerates.
-\footnotesize\textbf{Signature 2: variability.} The quantile lines fan out: between-child differences in vocabulary grow with age, not shrink.
+\textbf{Signature 1: acceleration.} Each quantile curve is concave up: doubling age more than doubles vocabulary. The growth rate accelerates.
+
+\vspace{0.5em}
+
+\textbf{Signature 2: variability.} The quantile lines fan out: between-child differences in vocabulary grow with age, not shrink.
+
+\vspace{0.5em}
+
+\textbf{These signatures are remarkably robust:} replicate across languages, samples, and forms. Any model of early word learning must explain both.
+
 :::
 ::: {.column width="50%"}
-\centerline{\includegraphics[width=0.44\linewidth]{precursor_acceleration.png}}
+\centerline{\includegraphics[width=\linewidth]{precursor_acceleration.png}}
 :::
 :::
 
-\begin{footnotesize}\textbf{These signatures are remarkably robust:} replicate across languages, samples, and forms. Any model of early word learning must explain both.\end{footnotesize}
 
-## The dominant theoretical view: pure accumulation
+## Is growth pure accumulation?
 
 ::: columns
 ::: {.column width="55%"}
@@ -99,7 +100,11 @@ A word is acquired when enough tokens accumulate.
 
 \vspace{0.4em}
 
-**Textbook lineage:**
+Derived from cross-situational word learning and other associative/statistical learning ideas.
+
+\vspace{0.4em}
+
+**In the literature:**
 
 - McMurray (2007) --- pure rate $\times$ time
 - Mitchell & McMurray (2009) --- + leverage feedback
@@ -109,8 +114,12 @@ A word is acquired when enough tokens accumulate.
 
 \vspace{0.4em}
 
-**All share:** between-child variation lives only in baseline ($r_i$
-or $\alpha_i$); per-child scaling exponent fixed.
+**Acceleration:** Some models have changes in efficiency to create acceleration, others do not. 
+
+\vspace{0.4em}
+
+**Variation:** Between-child variation only in baseline ($r_i$ or $\alpha_i$). No variation in efficiency. 
+
 :::
 ::: {.column width="45%"}
 \centering
@@ -120,6 +129,30 @@ or $\alpha_i$); per-child scaling exponent fixed.
 \scriptsize\color{black!55}\textit{Each child hears tokens at rate
 $r_i \cdot p_j$; word $j$ is acquired when its bucket fills past $\delta_j$.}
 :::
+:::
+
+## Item response theory (IRT)
+
+::: columns 
+::: {.column width="55%"}
+IRT describes a family of models of binary data (like CDI data).
+
+\vspace{0.7em}
+
+We use the Rasch model, a logistic model where each item has a single difficulty parameter $\delta$, and each person has a single ability parameter $\theta$. 
+
+\vspace{0.7em}
+
+Probability of success on an item is then just:
+$$
+P(w_{i,j} = 1 | \theta_i, \delta_j) = \frac{\exp(\theta_i - \delta_j)}{1 + exp(\theta_i - \delta_j)}
+$$
+:::
+
+:::
+\includegraphics[width=0.95\linewidth]{irt.pdf}
+:::
+
 :::
 
 ## A puzzle: input matters less than supposed
@@ -995,47 +1028,60 @@ analogous to our $\kappa_i \log t$ for children.
 $\approx 1$ logit per nat-log training-step. Striking but ambiguous:
 is this the LM architecture or the input distribution?
 
-## Methods: re-running C&B on CHILDES-trained LMs
+## Could the gap be an input-distribution artifact?
 
 \small
 
-**Confound in C&B's setup**: BookCorpus + WikiText is adult written
-text, not child-directed speech. That conflates two things: (a)
-structural difference in how LMs vs children scale; (b) input
-distribution mismatch.
+**Confound in C&B's setup.** Their LMs trained on BookCorpus + WikiText
+(adult written text), not on the speech kids actually hear. So the
+slope gap conflates two things: (a) a structural difference in how LMs
+and kids scale, and (b) an input-distribution mismatch.
 
 \vspace{0.6em}
 
-**Feng et al.\ (2026)** train multiple GPT-2 variants on *CHILDES* ---
-the same corpus that supplies our $\log p_j$ frequencies for the kid
-models. Same architecture as Chang & Bergen's GPT-2, but input matched
-to what children actually hear.
+**Test:** retrain GPT-2 small on CHILDES (the corpus kids actually
+hear, per Feng et al.\ 2026), keep everything else fixed, refit C&B's
+per-word sigmoid. If the gap is input-driven, CHILDES-trained slopes
+should rise toward children.
 
 \vspace{0.6em}
 
-**Our re-application:** for each Feng et al.\ checkpoint, fit C&B's
-per-word sigmoid on $\sim$ 611 CDI words. Compute per-word slope in our
-$\kappa$-equivalent units. Compare to kids.
+**Setup:**
 
-\vspace{0.6em}
+- GPT-2 small (124M params, 12L $\times$ 768d $\times$ 12h)
+- CHILDES train split, $\sim$ 24.5M tokens, 20 epochs (Feng et al.\ §B spec)
+- 3 random seeds (\{0, 42, 123\}) as a between-instance variance probe
+- 73 log-spaced eval checkpoints; per-word mean NLL over 50 occurrences
+  in the CHILDES validation set
+- C&B 4-parameter logistic fit per (LM, word); per-word slope = $0.434 / \mathrm{ParamScale}_w$
+- 609 / 611 C&B CDI words are single tokens in the GPT2-CHILDES BPE
 
-**Status:** we refit C&B's per-word sigmoids on the Feng et al.\
-CHILDES-trained GPT-2 checkpoints (Sherlock GPU jobs). The
-CHILDES-trained slopes are what appear in the comparison on the next
-slide --- not the BookCorpus original.
+\vspace{0.5em}
 
-## The per-word view: are kids and LMs learning at the same rate?
+\begin{footnotesize}
+Single L40S 48GB per seed (Stanford Sherlock \texttt{gpu} partition), $\sim$ 8h wall-clock each.
+\end{footnotesize}
+
+## The per-word view: CDS training does not move the LM slope
+
+\centerline{\includegraphics[width=0.54\linewidth]{feng_chang_bergen_slope_comparison.png}}
 
 \centering
-\includegraphics[width=0.72\linewidth]{chang_bergen_slope_comparison.png}
+\scriptsize
+\begin{tabular}{@{}lrcc@{}}
+\toprule
+\textbf{Population} & \textbf{N} & \textbf{Median} & \textbf{IQR} \\
+\midrule
+Children (English best-fit)              & 5000     & \textbf{10.3}        & [8.0, 12.6]   \\
+GPT-2-CHILDES (3 seeds)                  & 609 ea  & \textbf{0.72--0.74}  & [0.43, 1.16]  \\
+GPT-2-BookCorpus (C\&B)                  & 604      & 0.81                  & [0.45, 1.54]  \\
+BERT, biLSTM, LSTM-BookCorpus            & 593--609 & 0.76--0.96            & ---            \\
+\bottomrule
+\end{tabular}
 
-\vspace{0.1em}
+\raggedright
 \footnotesize
-**Reading.** Per-word sigmoid slope on $\log(\text{experience})$: LMs
-(BERT, biLSTM, GPT-2, LSTM, from Chang & Bergen 2022 + our
-CHILDES-trained refits) vs.\ our per-child $\kappa_i$. **LMs cluster
-near $\kappa \approx 1$; children average $\sim$ 10$\times$ steeper,
-with much more between-instance variance.**
+\textbf{CHILDES-trained GPT-2 (0.72--0.74)} sits inside the BookCorpus cluster (0.76--0.96), all $\sim\!14\times$ below kids (10.3). \emph{The input-distribution explanation accounts for $\sim$ 0 of the kid-vs-LM gap; the gap is structural.}
 
 ## The aggregate view: scaling laws
 
