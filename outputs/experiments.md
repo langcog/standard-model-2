@@ -1278,6 +1278,317 @@ finding.
 - Variants `no_freq_slopes_si_reparam`, `no_freq_slopes_si_signed` in [`helpers.R`](../model/R/helpers.R)
 - Figure: [`outputs/figs/longitudinal/quantile_demo.png`](figs/longitudinal/quantile_demo.png) (6-panel; panel 6 is signed s_i)
 
+> **Update (2026-05-23).** Sections 23–28 below back out the §22 conclusion.
+> After scaling to I=500, signed s_i developed multi-mode posteriors that the
+> I=50 pilot had concealed. We excised both `s` and `s_i` from the headline
+> model. M_best is now `α + ζ + δ` only.
+
+---
+
+## 🟢 23. Excising `s` and `s_i` from the headline model (2026-05-22)
+
+**TL;DR.** After §22, we tried to scale up the signed-s_i model to I=500. It
+broke (multimodal posterior, three chains in different modes). We diagnosed
+the failure as a non-smooth boundary in `fmax(t - s - s_i, 0.01)` plus an
+unanchored `(s, δ)` ridge, neither of which the smaller pilots had exposed.
+Backed out both `s` and `s_i` from the headline model: M_best is now
+`α + ζ + δ` only, with `s` pinned tight at 0 (`s_prior_mean=0,
+s_prior_sd=0.001` in `DEFAULT_PRIORS`) and `sigma_s_prior_sd=0.001` keeping
+`s_i ≈ 0`.
+
+**Why this took so long to surface.** Three separate things lined up at I=500
+that didn't at I=50:
+
+1. **(s, δ) ridge re-emerged.** During the s_i campaign we had pivoted
+   `s_prior_mean` from 0.5 (historical) to 6 for signed-s_i interpretability
+   ("kids with s_i < 0 are ahead of population, kids with s_i > 0 are
+   behind"). With `s = 6`, `fmax(t − s − s_i, 0.01)` clamps the youngest
+   ~25% of admins (those with age < 6 + s_i). Clamped admins no longer
+   inform `s` from the likelihood side, weakening the data's pull. The
+   (s, δ) ridge — flat by construction in the model — then has nothing
+   anchoring it.
+
+2. **Multimodality only appears at I=500.** Pilot fits at I=50 landed all
+   chains in one mode by luck (Bayesian shrinkage was strong enough to
+   smooth out the geometry). At I=500 we found **three modes**: σ_s ≈ 55
+   (chain 1, all variance in s_i), σ_s ≈ 5 (chains 2+4, the pilot mode),
+   σ_s ≈ 2.8 with ρ_xi_zeta = 0.999 (chain 3, LKJ boundary).
+
+3. **The `fmax` floor is the structural problem.** Even with `s = 0.5`
+   (historical), adding signed-`s_i ≥ 0` with σ_s ≈ 5 made kids with large
+   positive s_i ride the floor individually. The May-16 si_reparam fit at
+   `s = 0.5` already showed Rhat 1.28 on δ, ess 12 — the symptom was real
+   even before the `s = 6` mistake.
+
+**The fix.** Pin `s` tight at 0 globally, pin `s_i` off (`sigma_s_prior_sd =
+0.001`). The (s, δ) ridge disappears by construction; the floor never
+activates because `t − 0` is always positive for admins ≥ 12 mo.
+
+**Affected files.**
+
+- [`model/R/config.R`](../model/R/config.R) — `s_prior_mean = 0,
+  s_prior_sd = 0.001` in `DEFAULT_PRIORS`.
+- [`model/R/helpers.R`](../model/R/helpers.R) — `no_freq_slopes` variant
+  comment updated to reflect the new architecture.
+
+**Open thread.** The si_signed family fits in §21–22 are now archival.
+Their elpd_loo numbers don't carry over to the new regime: the (s, δ)
+freedom they had isn't in M_best anymore, so a direct comparison would
+mix model classes.
+
+---
+
+## 🟢 24. EN M_best refit at I=500 (the multimodality discovery)
+
+**Data.** EN longitudinal Wordbank WS, stratified to I=500 kids, J=671
+items, A=1829 admins, N=1.1M obs.
+
+**First attempt (broken).** `long_no_freq_slopes_si_signed` at I=500 with
+the inherited `s_prior_mean=6, s_prior_sd=0.05` priors and σ_s free. All
+four chains finished, but:
+
+- 100% of transitions hit `max_treedepth=10`.
+- σ_α Rhat = 2.94, ess = 5.
+- σ_s posterior was multimodal: mean 16.9, 95% CI [2.70, 58.2]; per-chain
+  medians 54.7 / 5.0 / 2.8 / 5.0.
+
+This was the failure that motivated §23.
+
+**Second attempt (M_best, headline).** `long_no_freq_slopes` with the
+s-excised regime, cold start, 4 chains × iter=2000 warmup=1000 ×
+threads=16, adapt_delta=0.95, max_treedepth=10.
+
+| param | mean | 95% CI | ess_bulk | Rhat |
+|---|---:|---:|---:|---:|
+| σ_α | 1.81 | [1.69, 1.94] | 109 | 1.02 |
+| σ_xi | 1.89 | [1.78, 2.01] | 109 | 1.02 |
+| σ_ζ | 3.81 | [3.58, 4.07] | 218 | 1.01 |
+| ρ(ξ,ζ) | **−0.09** | [−0.18, −0.01] | 154 | 1.03 |
+| π_α | 0.920 | [0.910, 0.930] | 109 | 1.02 |
+| δ | **10.31** | [10.25, 10.37] | 3948 | 1.000 |
+| s | 0.0008 | [0.00002, 0.0023] | 3458 | 1.000 |
+
+All chains finished in lockstep (~106 min each, 3% spread) — strong
+single-mode evidence. Compare to the prior (broken) si_signed run where
+chain 1 finished in 98 min and chains 2-4 took 9+ hr (the "racer vs
+laggard" pattern that indicated multimodality).
+
+**δ shifted up vs the s=0.5 historical era** (was 9.36 → now 10.31), as
+expected: with `s` pinned at 0 instead of 0.5, the youngest admins'
+log-age term is slightly larger in magnitude, and δ has to push harder
+to fit the same data. The 10% bump in δ matches the analytical prediction.
+
+**ρ(ξ, ζ) flipped sign** (was +0.35 historical → now −0.09). The bivariate
+prior structure changed slightly when `s_i` was excised and `s` was
+re-anchored; the new fit reports kid intercept and slope as essentially
+uncorrelated.
+
+**Disk-full crash during save_object.** First time the fit landed,
+cmdstanr's `read_cmdstan_csv` (called internally by `save_object`) tried
+to materialize the 35 GB `log_lik` array, fread spilled to /tmp which
+filled, and the R session died before the .rds could be written. **No
+output saved.** Lessons (added to skill files):
+
+- cmdstanr's default per-session tempdir gets auto-cleaned on R exit, so
+  if `save_object` crashes, the raw draws are also gone.
+- Patched [`fit_variant_cmdstanr`](../model/R/helpers.R) to set
+  `output_dir = fits/csvs_<tag>/` (persistent) and wrap `save_object` in
+  `try()`. Now if it crashes, raw CSVs survive and
+  [`sherlock/recover_from_csvs.R`](../sherlock/recover_from_csvs.R) can
+  extract scalars + delta_j without the full materialize.
+- Freed ~80 GB of disk on the VM (EN CSVs + bad-prior fits) before
+  relaunch.
+
+**Tag:** `long_no_freq_slopes` (this overwrites the May-3-era same-named
+fit; the I=200 architecture-demo refit goes to
+`long_no_freq_slopes_english_I200`).
+
+---
+
+## 🟢 25. NO M_best at I=500 (cold + warm-start)
+
+**Bundle upgrade.** Earlier NO bundle was I=200 J=197 N=310K, sized for
+pilots. Wordbank Norwegian has 1676 kids with ≥2 admins available
+(median 6 admins/kid — more than EN's 3.7). Regenerated bundle at
+I=500 J=674: **A=3222, N=2.06M** — ~1.85× more observations than EN at
+the same I. See
+[`fits/long_subset_data_nor.rds`](../fits/long_subset_data_nor.rds).
+
+**Cold-start fit.** Same config as EN (iter=2000, warmup=1000, threads=16,
+adapt_delta=0.95). All chains finished in lockstep (8305-8754 sec, 5%
+spread). But σ_α / σ_xi / π_α showed Rhat = 1.23 and ess = 12 — much
+worse than EN's Rhat 1.02 / ess 109. δ and σ_ζ were fine (Rhat 1.005).
+
+**Warm-start refit.** Used STAN_INIT_FROM with posterior medians from the
+cold-start as initial values (jittered per chain). Same iter/warmup;
+no change to treedepth or adapt_delta. Result:
+
+| param | mean | 95% CI | ess | Rhat |
+|---|---:|---:|---:|---:|
+| σ_α | 2.05 | [1.93, 2.18] | 29 | **1.11** |
+| σ_ζ | 4.79 | [4.49, 5.13] | 102 | 1.03 |
+| ρ(ξ,ζ) | −0.13 | [−0.21, −0.04] | 89 | 1.03 |
+| π_α | **0.936** | [0.929, 0.944] | 29 | 1.11 |
+| δ | **11.47** | [11.40, 11.53] | 1380 | 1.005 |
+
+σ_α / π_α cluster has Rhat 1.11 (improved from 1.23 cold-start) but still
+above the 1.05 threshold. **Headline numbers stable** (π_α = 0.94 is the
+key replication finding); only the posterior width on σ_α / π_α is
+imprecise. Open question: more iterations might resolve it, or it's a
+slow-mixing ridge particular to NO's denser longitudinal data.
+
+**Same disk-full incident pattern.** First save_object attempt crashed.
+Recovered scalars and delta_j from persistent CSVs via
+`recover_from_csvs.R`. Second attempt with disk freed (deleted bad-prior
+.rds + old si_signed remnants) succeeded.
+
+**Tag:** `long_no_freq_slopes_norwegian`.
+
+---
+
+## 🟢 26. IO + Peekbank refits with the cleaned priors
+
+**Motivation.** The earlier IO/proc fits (May 3–4 era) had been done with
+`s_prior_mean=0.5, s_prior_sd=0.05` (the historical pin near zero —
+*not* corrupted by the s=6 disaster). They were substantively correct
+but used the pre-cleanup Stan code (β_c, λ_j still in the linear
+predictor, even if pinned off). For consistency with the new headline
+regime, refit all six.
+
+**Variant list.**
+
+1. `io_no_freq_slopes` — BabyView (I=20 head-mounted video data)
+2. `io_no_freq_slopes_seedlings` — SEEDLingS LENA (I=44)
+3. `io_comp_no_freq_slopes_seedlings` — + comprehension channel
+4. `io_std_no_freq_slopes_seedlings` — + standardized test channel
+5. `io_comp_std_no_freq_slopes_seedlings` — + both
+6. `long_proc_no_freq_slopes` — Stanford-linked Peekbank LWL (I=62)
+
+**Queued via [`gcp/queue_io_proc.sh`](../gcp/queue_io_proc.sh)** after the
+EN fit landed. Each fit ~30-60 min (small bundles).
+
+**Results — all clean:**
+
+| variant | δ | σ_α | π_α | max Rhat | min ess |
+|---|---:|---:|---:|---:|---:|
+| io_no_freq_slopes (BabyView) | 6.42 [5.98, 6.87] | 1.13 [0.82, 1.56] | 0.83 [0.66, 0.93] | 1.007 | 844 |
+| io_no_freq_slopes_seedlings | 8.19 [7.82, 8.57] | 1.39 [1.12, 1.74] | 0.94 [0.89, 0.97] | 1.003 | 710 |
+| io_comp_no_freq_slopes_seedlings | 8.01 | 1.39 | 0.938 | 1.012 | 397 |
+| io_std_no_freq_slopes_seedlings | 3.97 | 1.39 | 0.885 | 1.008 | 661 |
+| io_comp_std_no_freq_slopes_seedlings | 8.01 | 1.39 | 0.939 | 1.005 | 510 |
+| long_proc_no_freq_slopes (Peekbank) | 2.51 | 1.67 | 0.904 | 1.002 | 1506 |
+
+**π_α landing 0.83–0.94 across all six datasets** (different N, different
+input channels, different ages). The "efficiency dominates kid-level
+intercept variance" finding is robust.
+
+**Peekbank-specific extras.** Extracted γ_rt, μ_rt, μ_rtslope, σ_rtslope,
+σ_lwl, and the three pairwise correlations (ρ_alpha_zeta,
+ρ_alpha_rtslope, ρ_zeta_rtslope) into
+`long_proc_no_freq_slopes.draws_full.rds`. Headline:
+- γ_rt = **0.084** [0.044, 0.125] — strictly positive, confirming the
+  level-coupling between log_α and log_rt-intercept.
+- ρ(ζ, rtslope) = **+0.05** [−0.26, +0.34] — vocab acceleration and RT
+  maturation are uncoupled.
+- **Reframing**: "one clock for the level, separate clocks for the
+  maturation rates." Replaces the earlier "two clocks, not one" framing
+  which conflated levels and slopes.
+
+---
+
+## 🟢 27. Cross-sectional empirical via `bundle$df` + GAMLSS BEINF
+
+**Two methodology bugs found and fixed** when building the new quantile
+plots.
+
+**Bug A: long_items.rds has no admin_id.** Multiple admins for the same
+kid at the same age appeared as repeated rows (no way to tell them apart).
+`group_by(child_id, age) %>% summarise(vocab = sum(produces))` then
+*summed produces across admins*. Some kids had `n_items` = 2007 = 3 × 669
+items — three separate admins collapsed. Vocab counts inflated beyond J.
+
+**Fix.** Use the bundle's `$df` slot instead. It carries `admin_key`
+which uniquely identifies an admin. Helper
+[`build_xsec_empirical`](../model/R/empirical_xsec_helper.R) groups by
+`(child_id, age, admin_key)` and then randomly samples one admin per
+child for the cross-sectional reduction. Bonus discovery: ~3% of bundle
+df rows are exact duplicates (same admin_key, same item, same produces);
+`distinct(admin_key, item, .keep_all=TRUE)` handles that.
+
+**Bug B: `quantregGrowth::gcrq()` silently breaks in a wrapper.** The
+package's `ps(age, lambda = X)` term reaches back into the calling
+environment to resolve `lambda`. When called from inside a function, this
+produced "attempt to set an attribute on NULL" deep in gcrq internals
+that `tryCatch` swallowed (returning NULL silently). Spent ~30 min
+chasing this. Switched the empirical quantile smoother to **GAMLSS**
+with `BEINF` family (beta inflated at 0 and 1), `pbm(age, lambda=10000)`
+for the mean and `pb(age)` for the variance, per the MB-CDI manual
+demo recipe (Mike's `wordbank/demo-vocab/gamlss_demo.R`).
+
+`pbm`/`pb` are well-behaved in wrapper functions; `centiles.pred()`
+needs the data exposed via a global symbol (workaround in the helper).
+With this in place, the empirical quantile fans on the side-by-side
+plots are smooth and stable.
+
+---
+
+## 🟢 28. Plot suite for the slide deck (2026-05-23)
+
+The slide deck now uses the following figures and tables. Each is
+generated by a single script reading from `fits/summaries/` and (where
+needed) the bundle. Provenance map in [`outputs/PROVENANCE.md`](PROVENANCE.md).
+
+**Vocab-space quantile fans (model vs empirical).**
+- [`m_best_quantile_I500.png`](figs/longitudinal/m_best_quantile_I500.png)
+  — EN single panel (`quantile_demo_mbest_I500.R`)
+- [`m_best_quantile_NO.png`](figs/longitudinal/m_best_quantile_NO.png) —
+  NO single panel (`quantile_demo_mbest_NO.R`)
+- [`m_best_quantile_EN_NO.png`](figs/longitudinal/m_best_quantile_EN_NO.png)
+  — EN + NO side-by-side, bundle-internal x-sec
+  (`quantile_demo_mbest_EN_NO.R`)
+- [`m_best_quantile_EN_NO_wordbank.png`](figs/longitudinal/m_best_quantile_EN_NO_wordbank.png)
+  — EN + NO side-by-side, wordbank-wide x-sec (slide 20 in the deck;
+  `quantile_demo_mbest_EN_NO_wordbank.R`)
+- [`m_best_quantile_io_proc.png`](figs/longitudinal/m_best_quantile_io_proc.png)
+  — BabyView | SEEDLingS | Peekbank 3-panel
+  (`quantile_demo_io_proc.R`). LOESS empirical median in lieu of full
+  fan because N is too small (20/44/62) for stable per-quantile estimates.
+
+**Architecture build-up (4-panel comparisons).**
+- [`quantile_demo_4panel_I200.png`](figs/longitudinal/quantile_demo_4panel_I200.png)
+  — `pure → +α → +κ → M_best`, vocab-space, English I=200
+  (`quantile_demo_4panel_I200.R`). Slide 18.
+- [`theta_spaghetti_4panel_I200.png`](figs/longitudinal/theta_spaghetti_4panel_I200.png)
+  — same build but in latent-θ space
+  (`theta_spaghetti_4panel_I200.R`). Slide 19.
+
+**Input/processing channel plots (IO + Peekbank).**
+- [`m_best_input_quartile_io.png`](figs/longitudinal/m_best_input_quartile_io.png)
+  — BabyView + SEEDLingS; kids binned by their measured log_r quartile;
+  model-predicted trajectory per quartile (`quantile_demo_io_input.R`).
+  Slide 29.
+- [`m_best_rt_quartile_proc.png`](figs/longitudinal/m_best_rt_quartile_proc.png)
+  — Stanford Peekbank; kids binned by their age-adjusted RT intercept
+  quartile (`quantile_demo_proc_rt.R`). Slide 31.
+
+**Exposure-to-learn (per-word view).**
+- [`exposure_to_learn_EN.png`](figs/longitudinal/exposure_to_learn_EN.png)
+  — for each word, predicted age of 50% production and cumulative
+  exposures-of-that-word at that age, coloured by lexical class with
+  per-class lm fits (`exposure_to_learn.R`). Slide 21.
+
+**Parameter table.**
+- [`outputs/param_table.csv`](param_table.csv) + `.md`, plus the .xlsx
+  Mike maintains for the slide (`param_table.R`). Slides 22, 32.
+
+**Supporting infrastructure.**
+- [`model/R/empirical_xsec_helper.R`](../model/R/empirical_xsec_helper.R)
+  — shared `build_xsec_empirical` + `fit_xsec_quantile_fan` used by all
+  the model-vs-data plots.
+- [`sherlock/recover_from_csvs.R`](../sherlock/recover_from_csvs.R) —
+  scalar + delta_j recovery from persistent cmdstanr CSV output when
+  `save_object` crashes.
+
 ---
 
 ## Backlog (⚪)
