@@ -1,0 +1,43 @@
+language,total_kids,long_kids,admins,forms,age_min,age_max
+English (American),11140,1874,14826,WG(5123) WGShort(547) WS(9093) WSShort(63),8,30
+Norwegian,7358,1676,12029,WG(2804) WS(9225),8,36
+English (British),22589,309,23129,Oxford CDI(1210) TEDS Threes(10790) TEDS Twos(11129),12,47
+Finnish,236,236,554,WGProd(70) WGProdShort(246) WS(70) WSShort(168),9,24
+French (Quebecois),2301,179,2514,WG(1119) WS(1395),8,30
+Japanese,846,178,1098,WG(483) WS(615),8,36
+Spanish (Mexican),2283,119,2470,WG(788) WS(1682),8,30
+French (French),1489,111,1605,WG(372) WS(1233),8,30
+Dutch,1941,106,2063,FormOne(392) FormThree(97) FormTwoA(332) FormTwoB(374) Swingley(268) WG(297) WS(303),8,36
+British Sign Language,31,31,161,WG(161),8,36
+American Sign Language,139,28,171,CDITwo(110) FormA(6) FormBOne(19) FormBTwo(19) FormC(17),8,36
+English (Irish),48,28,99,WS(99),17,36
+Irish,48,28,99,WS(99),17,36
+Korean,2422,17,2439,WG(618) WGComp(191) WS(1630),8,36
+Hebrew,559,5,565,WG(61) WS(504),11,36
+Slovak,1712,3,1715,WG(653) WS(1062),8,36
+Catalan,1436,1,1437,WG(578) WS(859),8,30
+Arabic (Saudi),439,0,439,WG(63) WS(195) WSOther(181),8,16
+Cantonese,1208,0,1208,WS(1208),16,30
+Croatian,627,0,627,WG(250) WS(377),8,30
+Czech,493,0,493,WS(493),16,30
+Danish,6112,0,6112,WG(2398) WS(3714),8,36
+Estonian,1235,0,1235,WS(1235),16,30
+English (Australian),1497,0,1497,WS(1497),12,30
+German,1181,0,1181,WS(1181),18,30
+Greek (Cypriot),176,0,176,WS(176),18,30
+Hungarian,372,0,372,WS(372),16,30
+Italian,1400,0,1400,WG(648) WS(752),7,36
+Kigiriama,207,0,207,WG(119) WS(88),8,30
+Kiswahili,103,0,103,WG(41) WS(62),8,30
+Latvian,683,0,683,WG(183) WS(500),8,36
+Mandarin (Beijing),1938,0,1938,IC(230) TC(652) WS(1056),12,30
+Mandarin (Taiwanese),2654,0,2654,WG(757) WS(1897),8,36
+Persian,163,0,163,WG(113) WS(50),8,30
+Portuguese (European),4326,0,4326,WG(1314) WS(3012),8,30
+Russian,1805,0,1805,WG(768) WS(1037),8,36
+Spanish (Argentinian),783,0,783,WS(783),16,33
+Spanish (Chilean),50,0,50,WG(50),8,15
+Spanish (European),1005,0,1005,WG(412) WS(593),8,30
+Spanish (Peruvian),192,0,192,WG(87) WS(105),8,30
+Swedish,1367,0,1367,WG(467) WS(900),8,28
+Turkish,3537,0,3537,WG(1115) WS(2422),8,36
