@@ -32,6 +32,7 @@ FORM_KEEP <- c("WG", "WGProd", "WGProdShort", "WGShort",
                 "WS", "WSShort")
 
 slug <- gsub("[^A-Za-z0-9]+", "_", tolower(LANG))
+slug <- gsub("^_+|_+$", "", slug)   # strip leading/trailing underscores
 out_dir <- file.path(PATHS$fits_dir, "glmer_ladder")
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 out_rds <- file.path(out_dir, sprintf("data_%s.rds", slug))
