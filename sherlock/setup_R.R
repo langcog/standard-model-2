@@ -31,7 +31,9 @@ cat("Library paths:\n"); print(.libPaths())
 #     fails to compile on Sherlock without libarrow.
 cran_pkgs <- c(
   "rstan", "posterior", "loo", "dplyr", "tidyr", "ggplot2", "tibble",
-  "patchwork", "MASS", "remotes", "purrr"
+  "patchwork", "MASS", "remotes", "purrr",
+  # for glmer_ladder pipeline:
+  "lme4", "readr"
 )
 
 installed <- rownames(installed.packages())
