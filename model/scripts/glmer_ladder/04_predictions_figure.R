@@ -37,7 +37,8 @@ QUANTILES  <- c(0.1, 0.25, 0.5, 0.75, 0.9)
 ## Given a fitted glmer, simulate N_SIM_KIDS "fake kids" from the
 ## model's kid-RE distribution. For each (sim, age), compute predicted
 ## vocab = sum_j inv_logit(eta_ij). Return long data with quantiles.
-predict_curves <- function(fit, model_id, ages, n_sim = 200, a0 = NA_real_) {
+predict_curves <- function(fit, model_id, ages, n_sim = 200, a0 = NA_real_,
+                            keep_items = NULL) {
   fe <- fixef(fit)
   vc <- VarCorr(fit)
 
@@ -53,9 +54,14 @@ predict_curves <- function(fit, model_id, ages, n_sim = 200, a0 = NA_real_) {
   # coefficient at 1, so effective slope = 1.
   if (model_id == "A") age_coef <- 1
 
-  # Item BLUPs
+  # Item BLUPs — optionally subset to a given set of items so that we
+  # sum predicted vocab only over items present on a specific form
+  # (matches the form the empirical scatter shows).
   re_item   <- ranef(fit)$item
-  item_blups <- if (!is.null(re_item)) re_item[, 1] else 0
+  if (!is.null(re_item) && !is.null(keep_items)) {
+    re_item <- re_item[rownames(re_item) %in% keep_items, , drop = FALSE]
+  }
+  item_blups <- if (!is.null(re_item) && nrow(re_item) > 0) re_item[, 1] else 0
 
   # Child RE structure. Bootstrap from the actual BLUPs (the shrunken
   # empirical-Bayes per-kid estimates) rather than sampling from
@@ -98,25 +104,48 @@ predict_curves <- function(fit, model_id, ages, n_sim = 200, a0 = NA_real_) {
   out
 }
 
-## ---- Build empirical scatter -----------------------------------------
-## For each language, load the bundle's df and compute per-(kid, age,
-## form) vocab counts.
-##
-## Note on de-duplication: a few kids in wordbank have multiple admin_id
-## records at the same (kid, age, form) — they get pulled as duplicate
-## rows in get_instrument_data. We dedupe by (child_id, age, form, item)
-## first so a kid's vocab is bounded by n_items. (The model fits don't
-## dedupe — flagged for v2 cleanup.)
+## ---- Pick a single "main" form per language --------------------------
+## When languages have multiple forms (WG/WS, plus Short variants), each
+## admin's empirical vocab is capped by the items on whichever form the
+## kid took (e.g., Finnish WSShort has only 100 items). To compare
+## predictions to data on the same scale, restrict the figure to one
+## form per language. Choose the form with the most items (most
+## informative; usually WS or the long WS variant).
+main_form_for <- function(lang_slug) {
+  d <- readRDS(file.path(LADDER_DIR, sprintf("data_%s.rds", lang_slug)))
+  d$df |>
+    distinct(form, item) |>
+    count(form, name = "n_items") |>
+    slice_max(n_items, n = 1, with_ties = FALSE) |>
+    pull(form)
+}
+
+## items on the main form for each language (used to subset prediction
+## sum and to know the ceiling). MAIN_FORM is initialized after LANGS
+## is defined below.
+main_form_items <- function(lang_slug) {
+  d <- readRDS(file.path(LADDER_DIR, sprintf("data_%s.rds", lang_slug)))
+  d$df |>
+    filter(form == MAIN_FORM[[lang_slug]]) |>
+    distinct(item) |>
+    pull(item)
+}
+
+## ---- Build empirical scatter (main form only) ------------------------
 empirical_for <- function(lang_slug) {
   path <- file.path(LADDER_DIR, sprintf("data_%s.rds", lang_slug))
   if (!file.exists(path)) return(NULL)
   d <- readRDS(path)
+  main_form <- MAIN_FORM[[lang_slug]]
+  n_main_items <- length(main_form_items(lang_slug))
   d$df |>
-    distinct(child_id, age, form, item, .keep_all = TRUE) |>
-    group_by(child_id, age, form) |>
+    filter(form == main_form) |>
+    distinct(child_id, age, item, .keep_all = TRUE) |>
+    group_by(child_id, age) |>
     summarise(vocab = sum(produces, na.rm = TRUE), .groups = "drop") |>
     mutate(language = d$language, lang_slug = lang_slug,
-            n_items   = d$n_items)
+            form      = main_form,
+            n_items   = n_main_items)
 }
 
 ## ---- Loop over (lang, model) cells -----------------------------------
@@ -135,6 +164,9 @@ LANG_LABELS <- c(
   french_french    = "French (French)"
 )
 MODELS <- c("A", "B_lin", "B_log", "C_lin", "C_log", "D_lin", "D_log")
+
+MAIN_FORM <- setNames(sapply(LANGS, main_form_for), LANGS)
+cat("\nMain form per language:\n"); print(MAIN_FORM)
 
 cat("Building empirical scatters...\n")
 emp <- bind_rows(lapply(LANGS, empirical_for))
@@ -176,7 +208,9 @@ for (lang in LANGS) {
                                   na.rm = TRUE)
     ar  <- age_ranges[age_ranges$lang_slug == lang, ]
     ages_lang <- seq(ar$age_min, ar$age_max, by = 1)
-    pr <- predict_curves(fit, mid, ages_lang, n_sim = N_SIM_KIDS, a0 = a0)
+    items_main <- main_form_items(lang)
+    pr <- predict_curves(fit, mid, ages_lang, n_sim = N_SIM_KIDS, a0 = a0,
+                          keep_items = items_main)
     pr$lang_slug <- lang
     pr$model     <- mid
     all_preds[[paste(lang, mid, sep = "/")]] <- pr
@@ -207,26 +241,6 @@ cat(sprintf("\nWrote %s\n", OUT_CSV))
 
 ## ---- Plot ------------------------------------------------------------
 qtiles <- qtiles |>
-  mutate(language = factor(LANG_LABELS[lang_slug], levels = LANG_LABELS[LANGS]),
-          model    = factor(model, levels = MODELS))
-emp_lab <- emp |>
-  mutate(language = factor(LANG_LABELS[lang_slug], levels = LANG_LABELS[LANGS]))
-
-# AIC labels per cell, relative to within-lang best
-aic_labs <- summ |>
-  group_by(language, lang_slug) |>
-  mutate(AIC_best = min(AIC), dAIC = AIC - AIC_best) |>
-  ungroup() |>
-  mutate(language  = factor(language, levels = LANG_LABELS[LANGS]),
-          model     = factor(model, levels = MODELS),
-          label     = ifelse(dAIC == 0, "best",
-                              sprintf("Δ%+.0fk", dAIC / 1000)))
-
-# With Spanish-MX excluded, no remaining cells have pathological
-# σ_slope. bad_fits is empty; we drop the annotation layers entirely.
-
-## quantile lines: factor with wordbank palette
-qtiles <- qtiles |>
   mutate(qprob_f = factor(qprob, levels = c(0.1, 0.25, 0.5, 0.75, 0.9),
                            labels = c("0.1", "0.25", "0.5", "0.75", "0.9")))
 WORDBANK_PALETTE <- c("0.1"  = "#1f78b4",   # dark blue
@@ -235,42 +249,86 @@ WORDBANK_PALETTE <- c("0.1"  = "#1f78b4",   # dark blue
                        "0.75" = "#fdbf6f",   # gold
                        "0.9"  = "#e31a1c")   # red
 
-p <- ggplot() +
-  # empirical data
-  geom_point(data = emp_lab,
-              aes(x = age, y = vocab),
-              colour = "grey25", alpha = 0.3, size = 0.4) +
-  # quantile lines for models with kid RE (5 lines per panel)
-  geom_line(data = qtiles |> filter(model %in% c("C_lin", "C_log",
-                                                  "D_lin", "D_log")),
-             aes(x = age, y = vocab,
-                 colour = qprob_f, group = qprob_f,
-                 linewidth = ifelse(as.character(qprob_f) == "0.5", 0.9, 0.55))) +
-  # A and B collapse to a single curve — show only the median in green
-  # so we don't stack 5 identical lines and end up showing only the
-  # last-drawn one.
-  geom_line(data = qtiles |> filter(!model %in% c("C_lin", "C_log",
-                                                   "D_lin", "D_log"),
-                                     qprob_f == "0.5"),
-             aes(x = age, y = vocab, colour = qprob_f),
-             linewidth = 0.95) +
-  facet_grid(language ~ model, scales = "free_y", space = "fixed") +
-  geom_text(data = aic_labs,
-             aes(x = -Inf, y = Inf, label = label),
-             hjust = -0.15, vjust = 1.5, size = 2.6, colour = "grey25") +
-  scale_colour_manual(values = WORDBANK_PALETTE, name = "Percentile") +
-  scale_linewidth_identity() +
-  labs(x = "Age (months)",
-       y = "Productive vocabulary",
-       title = "glmer ladder: predictions vs empirical vocab(age) — 6 languages × 7 models",
-       subtitle = sprintf("Lines = 10/25/50/75/90 quantiles across %d simulated kids drawn from each model's child-RE distribution. Dots = data. Corner label = ΔAIC vs best within language.",
-                          N_SIM_KIDS)) +
-  theme_minimal(base_size = 10) +
-  theme(plot.title    = element_text(face = "bold"),
-        plot.subtitle = element_text(size = 8, colour = "grey25"),
-        strip.text    = element_text(size = 8, face = "bold"),
-        legend.position = "top",
-        panel.spacing = unit(0.4, "lines"))
+## Build the plot for a given language subset. Used twice: once for all
+## 6 languages (supplementary) and once for the 4 well-powered languages
+## (main text).
+build_ladder_plot <- function(langs_subset, out_png, title_n_langs,
+                                width = 18, height = 16) {
+  qt <- qtiles |>
+    filter(lang_slug %in% langs_subset) |>
+    mutate(language = factor(LANG_LABELS[lang_slug],
+                              levels = LANG_LABELS[langs_subset]),
+            model    = factor(model, levels = MODELS))
+  el <- emp |>
+    filter(lang_slug %in% langs_subset) |>
+    mutate(language = factor(LANG_LABELS[lang_slug],
+                              levels = LANG_LABELS[langs_subset]))
+  al <- summ |>
+    filter(lang_slug %in% langs_subset) |>
+    group_by(language, lang_slug) |>
+    mutate(AIC_best = min(AIC), dAIC = AIC - AIC_best) |>
+    ungroup() |>
+    mutate(language = factor(language,
+                              levels = LANG_LABELS[langs_subset]),
+            model    = factor(model, levels = MODELS),
+            label    = ifelse(dAIC == 0, "best",
+                              sprintf("Δ%+.0fk", dAIC / 1000)))
 
-ggsave(OUT_PNG, p, width = 18, height = 16, dpi = 180)
-cat(sprintf("\nWrote %s\n", OUT_PNG))
+  p <- ggplot() +
+    geom_line(data = el,
+               aes(x = age, y = vocab, group = child_id),
+               colour = "grey25", alpha = 0.15, linewidth = 0.25) +
+    geom_point(data = el,
+                aes(x = age, y = vocab),
+                colour = "grey25", alpha = 0.2, size = 0.25) +
+    geom_line(data = qt |> filter(model %in% c("C_lin", "C_log",
+                                                 "D_lin", "D_log")),
+               aes(x = age, y = vocab,
+                   colour = qprob_f, group = qprob_f,
+                   linewidth = ifelse(as.character(qprob_f) == "0.5",
+                                       0.9, 0.55))) +
+    geom_line(data = qt |> filter(!model %in% c("C_lin", "C_log",
+                                                  "D_lin", "D_log"),
+                                    qprob_f == "0.5"),
+               aes(x = age, y = vocab, colour = qprob_f),
+               linewidth = 0.95) +
+    facet_grid(language ~ model, scales = "free_y", space = "fixed") +
+    geom_text(data = al,
+               aes(x = -Inf, y = Inf, label = label),
+               hjust = -0.15, vjust = 1.5, size = 2.6, colour = "grey25") +
+    scale_colour_manual(values = WORDBANK_PALETTE, name = "Percentile") +
+    scale_linewidth_identity() +
+    labs(x = "Age (months)",
+         y = "Productive vocabulary",
+         title = sprintf("glmer ladder: predictions vs empirical vocab(age) — %d languages × 7 models",
+                          title_n_langs),
+         subtitle = sprintf("Lines = 10/25/50/75/90 quantiles across %d simulated kids (BLUP bootstrap from each model's child-RE distribution). Grey lines = per-kid longitudinal trajectories. Empirical and predictions both restricted to the largest form per language. Corner label = ΔAIC vs best within language.",
+                            N_SIM_KIDS)) +
+    theme_minimal(base_size = 10) +
+    theme(plot.title    = element_text(face = "bold"),
+          plot.subtitle = element_text(size = 8, colour = "grey25"),
+          strip.text    = element_text(size = 8, face = "bold"),
+          legend.position = "top",
+          panel.spacing = unit(0.4, "lines"))
+
+  ggsave(out_png, p, width = width, height = height, dpi = 180)
+  cat(sprintf("Wrote %s\n", out_png))
+}
+
+## Main-text version: 4 well-powered languages
+LANGS_MAIN <- c("english_american", "norwegian",
+                "french_quebecois", "japanese")
+build_ladder_plot(
+  LANGS_MAIN,
+  file.path(PATHS$figs_dir, "longitudinal", "glmer_ladder_main.png"),
+  title_n_langs = length(LANGS_MAIN),
+  width = 18, height = 11
+)
+
+## Supplementary version: all 6 languages
+build_ladder_plot(
+  LANGS,
+  OUT_PNG,
+  title_n_langs = length(LANGS),
+  width = 18, height = 16
+)
