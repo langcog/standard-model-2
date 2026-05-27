@@ -1,0 +1,6 @@
+quantity,glmer_estimate,stan_mean,stan_95ci,notes
+Fixed log_age slope,11.292,11.308,"[11.25, 11.37]",Should match 1 + delta = kappa_pop
+sd(Intercept | child),1.907,1.891,"[1.78, 2.01]",Should match sigma_xi = sqrt(sigma_r^2 + sigma_alpha^2)
+sd(log_age | child),3.877,3.811,"[3.58, 4.07]",Should match sigma_zeta
+"cor((Int, log_age) | child)",-0.099,-0.094,"[-0.18, -0.01]",Should match rho_xi_zeta
+sd(Intercept | word),1.911,(not reported),—,Stan reports tau_delta as a hyperprior; not in scalar summary

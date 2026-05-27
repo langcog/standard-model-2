@@ -109,3 +109,5 @@ outputs/feng_eval/seed*_partial.csv
 
 # --- Office lock files
 ~$*
+.claude/scheduled_tasks.lock
+sherlock/glmer_ladder_manifest.csv
