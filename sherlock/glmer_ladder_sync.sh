@@ -25,6 +25,11 @@ mkdir -p fits/glmer_ladder
 # always pull the small per-fit summary CSVs + per-kid BLUP CSVs
 # (the ranef_*.csv files are what you need for demographic regressions
 # on alpha_i / zeta_i across all 7 languages).
+#
+# Note: sync_from_remote.sh expands wildcards server-side and rsync's
+# default flattens them into the local destination root. So pulled
+# files land in fits/ regardless of their remote subdirectory. We
+# move them into fits/glmer_ladder/ after the pull.
 bash sherlock/sync_from_remote.sh 'glmer_ladder/summary_*.csv'
 bash sherlock/sync_from_remote.sh 'glmer_ladder/ranef_*.csv'
 
@@ -33,6 +38,11 @@ if [ "$WITH_FITS" = "1" ]; then
   echo "Pulling fit RDS files (this may take a while) ..."
   bash sherlock/sync_from_remote.sh 'glmer_ladder/fit_*.rds'
 fi
+
+# Re-home the pulled files into fits/glmer_ladder/.
+mv fits/summary_*.csv  fits/glmer_ladder/ 2>/dev/null || true
+mv fits/ranef_*.csv    fits/glmer_ladder/ 2>/dev/null || true
+mv fits/fit_*.rds      fits/glmer_ladder/ 2>/dev/null || true
 
 echo
 echo "After sync, run:"
