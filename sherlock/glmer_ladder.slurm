@@ -3,11 +3,15 @@
 #SBATCH --output=logs/ladder_%A_%a.out
 #SBATCH --error=logs/ladder_%A_%a.err
 #SBATCH --time=12:00:00
-#SBATCH --cpus-per-task=1
+#SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
 #SBATCH --partition=normal
-# 12 hr is over-budgeted for small languages (A/B/C fit in <1 hr) but
-# D_log on English (American) at I=1874 kids, ~7M obs may take 3-5 hr.
+# 8 CPUs per task: glmer itself is single-threaded, but RcppEigen / BLAS
+# inside the IRLS Cholesky updates auto-parallelizes via OpenMP. Observed
+# ~4.5x speedup on NO D_log without SLURM requesting more cores; this
+# bumps the request to match and adds a few more for the bigger Cholesky
+# updates on D_log at I=1840 (English). Smaller languages won't use all
+# 8 cores but the partition has capacity.
 #
 # Model-ladder array. One task per (language, model_id) cell. The
 # manifest below is read in by SLURM_ARRAY_TASK_ID (1-indexed line).
@@ -62,6 +66,15 @@ echo "Start:     $(date)"
 echo
 
 ml R
+
+# Tell BLAS / Eigen how many threads to use. Cap at our SLURM allocation
+# so we don't oversubscribe (oversubscription on Sherlock can get a job
+# throttled). Setting both OPENBLAS and OMP env vars covers both common
+# backends.
+export OPENBLAS_NUM_THREADS="$SLURM_CPUS_PER_TASK"
+export OMP_NUM_THREADS="$SLURM_CPUS_PER_TASK"
+export MKL_NUM_THREADS="$SLURM_CPUS_PER_TASK"
+echo "Threads: $SLURM_CPUS_PER_TASK"
 
 Rscript model/scripts/glmer_ladder/02_fit_one.R "$LANG_SLUG" "$MODEL_ID"
 
