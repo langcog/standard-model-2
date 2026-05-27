@@ -44,6 +44,7 @@ LADDER_DIR <- file.path(PATHS$fits_dir, "glmer_ladder")
 DATA_RDS   <- file.path(LADDER_DIR, sprintf("data_%s.rds", LANG_SLUG))
 OUT_RDS    <- file.path(LADDER_DIR, sprintf("fit_%s_%s.rds", LANG_SLUG, MODEL_ID))
 OUT_CSV    <- file.path(LADDER_DIR, sprintf("summary_%s_%s.csv", LANG_SLUG, MODEL_ID))
+OUT_RANEF  <- file.path(LADDER_DIR, sprintf("ranef_%s_%s.csv", LANG_SLUG, MODEL_ID))
 
 if (!file.exists(DATA_RDS)) stop(sprintf("missing data: %s", DATA_RDS))
 data <- readRDS(DATA_RDS)
@@ -129,3 +130,23 @@ write_csv(summary_row, OUT_CSV)
 cat(sprintf("Wrote %s\n", OUT_CSV))
 cat("\nSummary:\n")
 print(summary_row)
+
+## ---- Per-kid BLUPs (slim CSV; portable across machines) ----------
+## Extract ranef(fit)$child for downstream demographic regressions
+## without needing to pull back the full fit RDS. Only meaningful when
+## there's a child random effect (C and D models).
+re_child <- tryCatch(ranef(fit)$child, error = function(e) NULL)
+if (!is.null(re_child)) {
+  ranef_df <- tibble(
+    child_id = rownames(re_child),
+    intercept_blup = re_child[, 1],
+    slope_blup     = if (ncol(re_child) >= 2) re_child[, 2] else NA_real_,
+    language       = data$language,
+    lang_slug      = LANG_SLUG,
+    model          = MODEL_ID
+  )
+  write_csv(ranef_df, OUT_RANEF)
+  cat(sprintf("Wrote %s (%d kids)\n", OUT_RANEF, nrow(ranef_df)))
+} else {
+  cat("No child random effects in this model — no ranef CSV written.\n")
+}

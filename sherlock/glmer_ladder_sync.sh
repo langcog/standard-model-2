@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
-## Pull ladder fit summaries (and optionally fit RDS) back from Sherlock.
-## Wraps sync_from_remote.sh with the ladder/ pattern.
+## Pull glmer_ladder fit outputs back from Sherlock.
+## Wraps sync_from_remote.sh with the glmer_ladder/ pattern.
 ##
 ## Usage:
-##   bash sherlock/glmer_ladder_sync.sh             # just summaries (small)
-##   bash sherlock/glmer_ladder_sync.sh --with-fits # also pull fit RDS (large)
+##   bash sherlock/glmer_ladder_sync.sh               # summaries only (small)
+##   bash sherlock/glmer_ladder_sync.sh --with-fits   # also pull fit RDS (big; needed for ranef analysis)
+##
+## Fit RDS files are essential if you want to extract per-child random
+## effects later (xi_i and zeta_i BLUPs for demographic regressions).
+## They are also large — ~tens of MB to a couple of GB total across 49
+## cells, depending on language size — so we keep them as an opt-in flag.
 
 set -euo pipefail
 
@@ -17,13 +22,18 @@ fi
 
 mkdir -p fits/glmer_ladder
 
-# always pull the small summary CSVs
-bash sherlock/sync_from_remote.sh 'ladder/summary_*.csv'
+# always pull the small per-fit summary CSVs + per-kid BLUP CSVs
+# (the ranef_*.csv files are what you need for demographic regressions
+# on alpha_i / zeta_i across all 7 languages).
+bash sherlock/sync_from_remote.sh 'glmer_ladder/summary_*.csv'
+bash sherlock/sync_from_remote.sh 'glmer_ladder/ranef_*.csv'
 
 if [ "$WITH_FITS" = "1" ]; then
-  bash sherlock/sync_from_remote.sh 'ladder/fit_*.rds'
+  echo
+  echo "Pulling fit RDS files (this may take a while) ..."
+  bash sherlock/sync_from_remote.sh 'glmer_ladder/fit_*.rds'
 fi
 
 echo
 echo "After sync, run:"
-echo "  Rscript model/scripts/aggregate_ladder.R"
+echo "  Rscript model/scripts/glmer_ladder/03_aggregate.R"
