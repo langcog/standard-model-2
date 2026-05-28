@@ -100,13 +100,26 @@ class_lookup <- long_ws |>
   group_by(item_norm) |> slice(1) |> ungroup() |>
   select(item_norm, lexical_category)
 
+## Keep ALL items. Frequency (log_p) and class (cc) are vestigial in the
+## anchored no_freq model — log_p enters only as beta_c*log_p with
+## beta_c pinned at 0, and delta_j is anchored (not class-derived). So
+## items that fail the CHILDES freq/class normalization (multi-word like
+## "teddy bear", sense-split like "chicken (animal)") get placeholder
+## covariates rather than being dropped. They still receive their EN
+## delta_j anchor, which joins on the exact item string.
 cdi <- cdi |>
   mutate(item_norm = normalize_item(item)) |>
   left_join(prob_lookup, by = "item_norm") |>
-  left_join(class_lookup, by = "item_norm") |>
-  filter(!is.na(prob), !is.na(lexical_category))
-cat(sprintf("  after CHILDES match: %d obs, %d items (ALL items kept)\n",
-            nrow(cdi), n_distinct(cdi$item)))
+  left_join(class_lookup, by = "item_norm")
+n_no_prob  <- sum(is.na(cdi$prob[!duplicated(cdi$item)]))
+n_no_class <- sum(is.na(cdi$lexical_category[!duplicated(cdi$item)]))
+med_prob <- median(cdi$prob, na.rm = TRUE)
+cdi <- cdi |>
+  mutate(prob = ifelse(is.na(prob), med_prob, prob),
+         lexical_category = ifelse(is.na(lexical_category), "other",
+                                    lexical_category))
+cat(sprintf("  CHILDES match: %d obs, %d items kept (%d placeholder freq, %d placeholder class)\n",
+            nrow(cdi), n_distinct(cdi$item), n_no_prob, n_no_class))
 
 ## ---- 5. delta_j anchor from the big EN longitudinal fit -----------
 ## EN long fit delta_j (posterior median) keyed by item_definition.

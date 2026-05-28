@@ -50,6 +50,16 @@ DATASETS <- list(
     bundle         = "stanford_linked_subset_data.rds",
     prepare_script = "model/scripts/prepare_stanford_linked.R",
     description    = "Stanford TotLot 3 (Adams 2018) item-level CDI joined with Peekbank LWL processing"
+  ),
+  am2018 = list(
+    bundle         = "io_am2018_subset_data.rds",
+    prepare_script = "model/scripts/prepare_io_dataset.R am2018",
+    description    = "AM2018 (TL3): WG+WS CDI (13-27mo) + LENA AWC @16,18mo; delta_j anchored"
+  ),
+  fmw2013 = list(
+    bundle         = "io_fmw2013_subset_data.rds",
+    prepare_script = "model/scripts/prepare_io_dataset.R fmw2013",
+    description    = "FMW2013 (TLO): WG+WS CDI (18-30mo) + LENA AWC @18mo; delta_j anchored"
   )
 )
 

@@ -44,8 +44,11 @@ cat(sprintf("Dataset: %s (%s)  I=%d, A=%d, J=%d, V=%d, N=%d\n",
             base_data$N))
 
 # Defer to shared variant_hyperpriors() registry (the "io_" prefix is
-# stripped inside, so io_slopes -> slopes etc.)
-overrides <- variant_hyperpriors(variant)
+# stripped inside, so io_slopes -> slopes etc.). The optional "_anchored"
+# suffix only switches the Stan file (delta_j anchoring); strip it for
+# the hyperprior lookup so io_no_freq_slopes_anchored reuses the
+# io_no_freq_slopes priors.
+overrides <- variant_hyperpriors(sub("_anchored$", "", variant))
 # Re-apply DEFAULT_PRIORS at fit time so stale priors baked into older
 # bundles (e.g., the s-prior boundary bug) are overridden by config.R.
 stan_data <- modifyList(modifyList(base_data, DEFAULT_PRIORS), overrides)
@@ -67,7 +70,12 @@ cat(sprintf("Stan config: chains=%d iter=%d warmup=%d adapt_delta=%.2f max_treed
 # base comp/std/io files when the variant matches.
 is_si_signed <- grepl("_si_signed$", variant)
 has_comp_or_std <- grepl("comp|std", variant)
-stan_file <- if (is_si_signed && has_comp_or_std) {
+is_anchored  <- grepl("anchored", variant)
+stan_file <- if (is_anchored) {
+  # delta_j anchored to the EN longitudinal fit (input-uptake revisited).
+  # Requires a bundle with delta_j_prior_mean/_sd (io_am2018, io_fmw2013).
+  "model/stan/log_irt_io_anchored.stan"
+} else if (is_si_signed && has_comp_or_std) {
   "model/stan/log_irt_long_io_comp_si_signed.stan"
 } else if (is_si_signed) {
   "model/stan/log_irt_long_io_accel_si_signed.stan"
