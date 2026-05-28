@@ -12,7 +12,7 @@ for (lang in LANGS) {
   cat("\n###########################################\n")
   cat(sprintf("### Extracting: %s\n", lang))
   cat("###########################################\n")
-  cmd <- sprintf("Rscript model/scripts/glmer_ladder/01_extract_one.R \"%s\"", lang)
+  cmd <- sprintf("Rscript glmer_ladder/01_extract_one.R \"%s\"", lang)
   status <- system(cmd)
   if (status != 0) {
     warning(sprintf("FAILED for %s (exit %d)", lang, status))

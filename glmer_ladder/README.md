@@ -6,6 +6,21 @@ longitudinal CDI datasets as we have. Pure-frequentist `glmer` (nAGQ=0); no
 Bayesian machinery and no σ_r decomposition (those belong to the input-share
 section of the talk, not this section).
 
+## Where things live
+
+This directory (`glmer_ladder/`, project root) holds all the R code. Other
+artifacts are namespaced under the conventional project subdirs:
+
+| Path | Contents |
+|---|---|
+| `glmer_ladder/*.R` | the pipeline (this dir) |
+| `fits/glmer_ladder/` | per-language data bundles + per-fit RDS/CSV outputs |
+| `outputs/glmer_ladder/` | `sim_cache.rds`, quantile + AIC CSV tables |
+| `outputs/figs/glmer_ladder/` | `main.png`, `mega.png`, `supp_log.png`, `deltaAIC.png` |
+| `sherlock/glmer_ladder*` | SLURM array + submit/sync helpers |
+
+Only dependency on the rest of the repo is `model/R/config.R` (for `PATHS`).
+
 ## The model ladder
 
 Cumulative nested sequence, 7 models per language:
@@ -53,9 +68,9 @@ Total compute: 7 langs × 7 models = **49 fits**.
 01_extract_one.R        # pull one language's tidy data → fits/glmer_ladder/data_<slug>.rds
 01_extract_all.R        # loops 01 over all 7 languages
 02_fit_one.R            # fit ONE model on ONE language → summary csv + fit rds
-03_aggregate.R          # combine summaries → ΔAIC table + figure
+03_aggregate.R          # combine summaries → ΔAIC table + deltaAIC.png
 04a_simulate.R          # BLUP-bootstrap predictions (slow) → sim_cache.rds
-04b_plot.R              # read cache, build mega-figures (fast; iterate here)
+04b_plot.R              # read cache → main.png / mega.png / supp_log.png (fast; iterate here)
 ```
 
 The 04 step is split so you can iterate on plot aesthetics without
@@ -69,7 +84,7 @@ each requesting 1 core × 64 GB × 12 hr.
 
 ```
 # On laptop, locally:
-Rscript model/scripts/glmer_ladder/01_extract_all.R       # ~5 min
+Rscript glmer_ladder/01_extract_all.R       # ~5 min
 rsync -avz fits/glmer_ladder/data_*.rds sherlock:standard_model_2/fits/glmer_ladder/
 
 # On Sherlock:
@@ -78,7 +93,7 @@ sbatch --array=1-49 sherlock/glmer_ladder.slurm
 
 # After fits complete, locally:
 bash sherlock/glmer_ladder_sync.sh                        # pulls summaries
-Rscript model/scripts/glmer_ladder/03_aggregate.R         # builds figure
+Rscript glmer_ladder/03_aggregate.R         # builds figure
 ```
 
 ## Two pre-flight tests (Mike's spec)

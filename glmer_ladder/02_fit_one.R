@@ -4,7 +4,7 @@
 ## inputs, writes a single summary CSV + a fit RDS.
 ##
 ## Usage:
-##   Rscript model/scripts/glmer_ladder/02_fit_one.R <lang_slug> <model_id>
+##   Rscript glmer_ladder/02_fit_one.R <lang_slug> <model_id>
 ##
 ## lang_slug: matches the file fits/glmer_ladder/data_<lang_slug>.rds
 ##            (e.g. "english_american_", "norwegian", "japanese")

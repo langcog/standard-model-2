@@ -204,4 +204,4 @@ saveRDS(list(
   MAIN_FORM   = MAIN_FORM
 ), OUT_CACHE)
 cat(sprintf("Wrote %s\n", OUT_CACHE))
-cat("\nNow run: Rscript model/scripts/glmer_ladder/04b_plot.R\n")
+cat("\nNow run: Rscript glmer_ladder/04b_plot.R\n")

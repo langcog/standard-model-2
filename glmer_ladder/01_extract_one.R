@@ -8,9 +8,9 @@
 ## form's checklists.
 ##
 ## Usage:
-##   Rscript model/scripts/glmer_ladder/01_extract_one.R "English (American)"
-##   Rscript model/scripts/glmer_ladder/01_extract_one.R Norwegian
-##   Rscript model/scripts/glmer_ladder/01_extract_one.R Japanese
+##   Rscript glmer_ladder/01_extract_one.R "English (American)"
+##   Rscript glmer_ladder/01_extract_one.R Norwegian
+##   Rscript glmer_ladder/01_extract_one.R Japanese
 ##
 ## Output: fits/glmer_ladder/data_<lang_slug>.rds
 ##   contains: df (kid, age, item, produces), child_meta, item_meta,

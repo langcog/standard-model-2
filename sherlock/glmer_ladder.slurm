@@ -76,7 +76,7 @@ export OMP_NUM_THREADS="$SLURM_CPUS_PER_TASK"
 export MKL_NUM_THREADS="$SLURM_CPUS_PER_TASK"
 echo "Threads: $SLURM_CPUS_PER_TASK"
 
-Rscript model/scripts/glmer_ladder/02_fit_one.R "$LANG_SLUG" "$MODEL_ID"
+Rscript glmer_ladder/02_fit_one.R "$LANG_SLUG" "$MODEL_ID"
 
 echo
 echo "End: $(date)"

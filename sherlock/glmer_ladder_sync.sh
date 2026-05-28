@@ -46,4 +46,4 @@ mv fits/fit_*.rds      fits/glmer_ladder/ 2>/dev/null || true
 
 echo
 echo "After sync, run:"
-echo "  Rscript model/scripts/glmer_ladder/03_aggregate.R"
+echo "  Rscript glmer_ladder/03_aggregate.R"

@@ -4,8 +4,8 @@
 ## Iterate on aesthetics here without re-running the simulation.
 ##
 ## Input:   outputs/glmer_ladder/sim_cache.rds
-## Outputs: outputs/figs/longitudinal/glmer_ladder_main.png  (4 langs)
-##          outputs/figs/longitudinal/glmer_ladder_mega.png  (6 langs)
+## Outputs: outputs/figs/glmer_ladder/main.png  (4 langs)
+##          outputs/figs/glmer_ladder/mega.png  (6 langs)
 
 source("model/R/config.R")
 suppressPackageStartupMessages({
@@ -13,7 +13,7 @@ suppressPackageStartupMessages({
 })
 
 CACHE   <- file.path(PATHS$outputs_dir, "glmer_ladder", "sim_cache.rds")
-FIG_DIR <- file.path(PATHS$figs_dir, "longitudinal")
+FIG_DIR <- file.path(PATHS$figs_dir, "glmer_ladder")
 dir.create(FIG_DIR, recursive = TRUE, showWarnings = FALSE)
 
 if (!file.exists(CACHE)) {
@@ -126,7 +126,7 @@ LANGS_MAIN  <- c("english_american", "norwegian",
 MODELS_LOG  <- c("A", "B_log", "C_log", "D_log")
 build_ladder_plot(
   LANGS_MAIN,
-  file.path(FIG_DIR, "glmer_ladder_main.png"),
+  file.path(FIG_DIR, "main.png"),
   title = "Model ladder: vocabulary growth across four longitudinal CDI samples",
   models_subset = MODELS_LOG,
   relabel_models = TRUE,
@@ -136,7 +136,7 @@ build_ladder_plot(
 ## Supplementary version 1: all 6 languages, LOG-only ladder
 build_ladder_plot(
   LANGS,
-  file.path(FIG_DIR, "glmer_ladder_supp_log.png"),
+  file.path(FIG_DIR, "supp_log.png"),
   title = "Model ladder (log-age only): six longitudinal CDI samples",
   models_subset = MODELS_LOG,
   relabel_models = TRUE,
@@ -147,7 +147,7 @@ build_ladder_plot(
 ## linear-vs-log comparison that motivates using log throughout.
 build_ladder_plot(
   LANGS,
-  file.path(FIG_DIR, "glmer_ladder_mega.png"),
+  file.path(FIG_DIR, "mega.png"),
   title = "Full model grid: linear vs log age × 6 languages",
   width = 18, height = 16
 )

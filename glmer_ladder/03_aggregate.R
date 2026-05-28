@@ -6,7 +6,7 @@
 ## Outputs:
 ##   outputs/glmer_ladder/ladder_summary.csv              -- combined long table
 ##   outputs/glmer_ladder/ladder_deltas.csv               -- ΔAIC vs worst per language
-##   figures/longitudinal/glmer_ladder_deltaAIC.png-- panel figure
+##   outputs/figs/glmer_ladder/deltaAIC.png-- panel figure
 
 source("model/R/config.R")
 suppressPackageStartupMessages({
@@ -15,7 +15,7 @@ suppressPackageStartupMessages({
 
 OUT_SUMM <- file.path(PATHS$outputs_dir, "glmer_ladder/ladder_summary.csv")
 OUT_DELT <- file.path(PATHS$outputs_dir, "glmer_ladder/ladder_deltas.csv")
-OUT_PNG  <- file.path(PATHS$figs_dir, "longitudinal", "glmer_ladder_deltaAIC.png")
+OUT_PNG  <- file.path(PATHS$figs_dir, "glmer_ladder", "deltaAIC.png")
 dir.create(dirname(OUT_PNG), recursive = TRUE, showWarnings = FALSE)
 
 ladder_dir <- file.path(PATHS$fits_dir, "glmer_ladder")
