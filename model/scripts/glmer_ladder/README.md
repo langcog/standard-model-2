@@ -53,8 +53,14 @@ Total compute: 7 langs × 7 models = **49 fits**.
 01_extract_one.R        # pull one language's tidy data → fits/glmer_ladder/data_<slug>.rds
 01_extract_all.R        # loops 01 over all 7 languages
 02_fit_one.R            # fit ONE model on ONE language → summary csv + fit rds
-03_aggregate.R          # combine summaries → table + ΔAIC figure
+03_aggregate.R          # combine summaries → ΔAIC table + figure
+04a_simulate.R          # BLUP-bootstrap predictions (slow) → sim_cache.rds
+04b_plot.R              # read cache, build mega-figures (fast; iterate here)
 ```
+
+The 04 step is split so you can iterate on plot aesthetics without
+re-running the 500-kid bootstrap across all 42 fits. Run 04a once after
+fits land; then re-run 04b as many times as you like.
 
 ## Compute on Sherlock
 
