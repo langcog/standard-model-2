@@ -1591,6 +1591,102 @@ needed) the bundle. Provenance map in [`outputs/PROVENANCE.md`](PROVENANCE.md).
 
 ---
 
+## 🟢 29. glmer model-ladder across longitudinal CDI samples (2026-05-27)
+
+Self-contained frequentist companion to the Bayesian M_best work, in
+its own project-root directory [`glmer_ladder/`](../glmer_ladder/) (see
+its [README](../glmer_ladder/README.md)). The point: make the §1
+("what is the best model for vocabulary growth?") claims with plain
+AIC/BIC on `glmer`, on as much longitudinal data as Wordbank has, with
+*no* Bayesian machinery and *no* σ_r decomposition (those belong to the
+input-share section). This was motivated by §0 of the Kachergis
+re-read: M_best is exactly
+`glmer(produces ~ 1 + log_age + (1 + log_age | child) + (1 | word),
+family = binomial)` + the external σ_r pin (verified earlier: every
+glmer point estimate inside the Stan 95% CrI; implied π_α = 0.922 vs
+Stan 0.920).
+
+**The ladder (7 nested models per language).** `log_age = log(t/a0)`,
+`age_c = t − a0`, `a0` = median admin age. IRT reading:
+`logit P = θ_i(t) − δ_j`, δ_j = −(word RE).
+
+| Model | glmer formula | θ_i(t) |
+|---|---|---|
+| A     | `~ offset(log_age) + (1\|item)` | β₀ + log(t/a₀) (κ≡1) |
+| B_log | `~ 1 + log_age + (1\|item)` | β₀ + κ·log(t/a₀) |
+| B_lin | `~ 1 + age_c + (1\|item)` | β₀ + β₁·(t−a₀) |
+| C_log | `+ (1\|child)` | + ξ_i (random intercept) |
+| C_lin | `+ (1\|child)` | + ξ_i |
+| D_log | `(1 + log_age\|child)` | β₀ + ξ_i + (κ+ζ_i)·log(t/a₀) = M_best |
+| D_lin | `(1 + age_c\|child)` | β₀ + ξ_i + (β₁+ζ_i)·(t−a₀) |
+
+Four design choices, one clean ΔAIC each: A→B (free κ vs unit
+accumulator), B_lin↔B_log (exponential vs power-law growth), B→C
+(per-kid intercept), C→D (per-kid slope = "is σ_ζ > 0 needed?").
+
+**Data.** Wordbank survey ([`00_survey_languages.R`](../glmer_ladder/00_survey_languages.R)
+→ [`outputs/glmer_ladder/00_language_survey.csv`](glmer_ladder/00_language_survey.csv))
+kept languages with ≥100 kids with ≥2 admins (any form). WG + WS
+combined at the item level, production only. 7 languages qualified:
+English (American) 1840 kids, Norwegian 1676, Finnish 236, French
+(Quebecois) 179, Japanese 178, Spanish (Mexican) 119, French (French)
+111. Spanish-MX later dropped from figures (WS-only, narrow 17–30 mo
+window → degenerate D fits, σ_slope blew to 43).
+
+**Compute.** 49 cells (7 langs × 7 models) as a Sherlock SLURM array
+([`sherlock/glmer_ladder.slurm`](../sherlock/glmer_ladder.slurm), 8
+cpus × 64 GB × 12 hr). All `nAGQ=0`. D_log on the big languages is the
+bottleneck: EN D_log 10.2 hr (1840 kids, 3.3M obs), NO D_log 6.8 hr
+(1676 kids, 4.4M obs); A/B/C cells finish in seconds-to-minutes. glmer
+is single-threaded for the IRLS but RcppEigen/BLAS auto-threads the
+Cholesky updates (~4.5 cores even at `--cpus-per-task=1`); explicit
+8-core pinning did not buy a real speedup, and re-fits are byte-identical
+(deterministic). Per-fit RDS + per-kid BLUP CSV (`ranef_*.csv`) saved
+for downstream demographic analysis.
+
+**Findings (consistent across all comparable languages).**
+- A → B_log: free κ beats the unit accumulator by a huge AIC margin
+  (NO: ~940k). κ̂ lands 8.6–12.7 across languages (all ≫ 1).
+- B_lin vs B_log: **log wins everywhere** (EN ΔAIC = 585 at matched df,
+  N=1.1M). But the two are visually near-identical over the CDI age
+  window — log(t) and t are near-affine across a ~2:1 age ratio, so the
+  difference is fine-tail-structure, not gross shape. Honest framing:
+  you need ~10⁶ observations to distinguish exponential from power-law
+  growth over 12–30 months. Prior work using either parameterization
+  wasn't making a detectable fit error, just an interpretive one
+  (constant-rate accumulation vs efficiency gain).
+- B → C: per-kid intercept is the single biggest rung (NO: ~2.2M AIC).
+- C → D: per-kid slope adds another large chunk (NO: ~115k). σ_ζ > 0
+  is real and needed in every language.
+
+**Pipeline.** `00_survey` → `01_extract_{one,all}` →
+`02_fit_one` (Sherlock array) → `03_aggregate` (ΔAIC table + figure) →
+`04a_simulate` (BLUP-bootstrap predictions, slow, → `sim_cache.rds`) →
+`04b_plot` (cache → figures, ~7 s; iterate here). The 04 split keeps
+the 500-kid × 42-fit bootstrap out of the plot-iteration loop.
+
+**Prediction figures** ([`outputs/figs/glmer_ladder/`](figs/glmer_ladder/)).
+Per (lang, model): bootstrap 500 kids from the fit's *BLUP* distribution
+(not MVN(0,Σ̂) — the unshrunken parametric draws produce extreme
+intercept/slope combos absent from the data and blow up the upper
+quantiles at thin-data ages), compute each kid's `Σ_j inv_logit(η_ij)`
+over the main form's items, take 10/25/50/75/90 quantiles. Empirical
+shown as per-kid spaghetti, both restricted to the largest form per
+language (so the vocab ceiling matches; e.g. Finnish WS=111 not the
+201-item WG+WS union).
+- `main.png` — 4 well-powered langs (EN, NO, FR-CA, JA) × the log-only
+  conceptual ladder (A→B→C→D). Main text.
+- `supp_log.png` — 6 langs × log ladder.
+- `mega.png` — full 6 langs × 7 models (lin + log).
+- `deltaAIC.png` — bar/lollipop ΔAIC summary (`03_aggregate.R`).
+
+Visual signatures: A under-fits; B's median hugs the population mean
+(item REs + κ do most of the shape work); C gives parallel quantile
+fans (baseline variance); D's fans **open with age** — the σ_ζ
+signature.
+
+---
+
 ## Backlog (⚪)
 
 ### Data / robustness
