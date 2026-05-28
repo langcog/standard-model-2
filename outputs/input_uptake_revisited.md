@@ -205,6 +205,65 @@ quartile pulls away at older ages — a direct visual of γ.
 - **Does the reduced-form ζ-vs-log_r correlation survive** using the
   raw observed rate? If not, the model-based γ is unlikely to be real.
 
+## Data inventory (audited 2026-05-28)
+
+What we actually have on disk, per dataset × channel:
+
+| Dataset | CDI (forms, ages, source) | Input (LENA) | LWL (Peekbank) | IO-ready? |
+|---|---|---|---|---|
+| **BabyView** | WG+WS, 9–32 mo, 20 kids (`babyview_subset_data.rds`) | head-cam AWC ✓ | — | **yes** |
+| **SEEDLingS** | WG only, 6–18 mo, 44 kids (`seedlings/cdi_items_long.csv`) | `lena_data.csv` 560 rec / 44 kids ✓ | — | **yes** (WG-only is age-appropriate) |
+| **AM2018 (TL3 / totlot3)** | **WS only**, 14–32 mo, 65 kids (`stanford_cdi_items_long.csv`) — **WG NOT in our files** | `TL3TLO_LENA.csv` TL3: 66 kids, AWC @ 16+18 mo ✓ | `adams_marchman_2018` 711 | **partial** — missing WG |
+| **FMW2013 (TLO)** | **MISSING entirely** (no TLO/FMW rows in `stanford_cdi_items_long.csv`) | `TL3TLO_LENA.csv` TLO: 51 kids, AWC @ **18 mo only** | `fmw_2013` 178 | **blocked** — no CDI |
+| **TotLot2 (TL2 / totlot2)** | WG (15–19, 97 kids) + WS, 409 admins ✓ | **not in `TL3TLO_LENA.csv`** | `fernald_totlot`? `fernald_marchman_2012`? | input unclear |
+
+The parsed `stanford_cdi_items_long.csv` contains only `study ∈ {totlot2,
+totlot3}` — **414 WS admins (181 kids) + 97 WG admins (97 kids), all
+totlot2/3**. There is no FMW2013/TLO CDI in it, and no totlot3 (AM2018)
+WG.
+
+### Gaps that block / limit the IO analysis
+
+1. **AM2018 (TL3) WG CDI is missing.** Only `TL3_compiled_WS.csv` exists;
+   the WG-equivalent (TL3 ~16–18 mo) was never compiled into the long
+   file. Without it, AM2018 stays in the WS-only narrow window we're
+   trying to escape. *Need: the TL3 WG compiled export from the
+   Marchman lab.*
+2. **FMW2013 (TLO) CDI is missing entirely.** We have its LENA input (51
+   kids @ 18 mo) and its LWL (`fmw_2013`, 178), but no item-level CDI in
+   our files, so we can't fit it at all. *Need: TLO/FMW2013 CDI item
+   data.*
+3. **TotLot2 (TL2) has WG+WS CDI but no LENA in our files.** It could be
+   a usable third IO cohort if its input exists somewhere; the
+   `TL3TLO_LENA.csv` only covers TL3 + TLO. *Question: is TL2 one of
+   AM2018/FMW2013 under a different label, or a separate cohort? Does it
+   have LENA?*
+4. **TLO LENA is single-timepoint (18 mo only); TL3 is 16+18 mo.** Fine
+   for the IO model (input rate is treated age-invariant), but worth
+   noting.
+
+### Crosswalk still to confirm (needs lab knowledge)
+
+| TotLot label | LENA `Study` | Peekbank LWL `dataset_name` | public name |
+|---|---|---|---|
+| totlot3 / TL3 | TL3 | `adams_marchman_2018` (711) | **AM2018** ✓ confirmed |
+| ? | TLO | `fmw_2013` (178) | **FMW2013** ✓ confirmed |
+| totlot2 / TL2 | (none) | `fernald_totlot` (229)? `fernald_marchman_2012` (679)? | ? |
+
+The lab subject IDs (`11xxx`, `20xxx`) are the join key; `data/peekbank/README.md`
+says TL2/TL3 IDs line up with `peekbankr::get_subjects()` for
+`adams_marchman_2018` and `fmw_2013`.
+
+### Bottom line
+
+- **BabyView + SEEDLingS**: ready now (β_react removal aside).
+- **AM2018**: usable but WS-only until the TL3 WG export is found.
+- **FMW2013**: blocked until CDI item data is sourced.
+
+So "all four datasets" is currently **two-and-a-half**. Resolving gaps
+1–2 (sourcing TL3-WG and TLO-CDI from the Marchman lab) is the
+precondition for the full IO analysis.
+
 ## Concrete order of operations
 
 1. Crosswalk Peekbank LWL names → studies; document in `data/README`.
