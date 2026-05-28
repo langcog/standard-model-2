@@ -153,11 +153,15 @@ message(sprintf("  subjects with video AND >=%d admins: %d", MIN_ADMINS,
 cdi_long <- cdi_long %>% filter(subject_id %in% keep_subjs)
 videos   <- videos %>% filter(subject_num %in% keep_subjs)
 
-# ---- 4. Attach CHILDES p_j to items ----
-# Re-use the Wordbank long_items processed English prob table.
+# ---- 4. Attach CHILDES p_j + lexical class to items ----
+# prob comes from the fresh CHILDES pull (english_word_freq.rds); class
+# from the Wordbank long_items table. long_items.rds leaves prob = NA
+# post-refactor, so we must NOT source prob from it (that was the old
+# bug that zeroed out all items). Items are kept regardless of match:
+# prob/class are vestigial in the anchored no_freq model (beta_c=0,
+# delta_j anchored), so unmatched items get placeholders.
 long_ws <- readRDS(file.path(PATHS$fits_dir, "long_items.rds")) %>%
   filter(language == "English (American)")
-prob_tbl <- long_ws %>% distinct(item, prob) %>% filter(!is.na(prob), prob > 0)
 
 # BabyView item names use underscore-separated lowercase ('peanut_butter');
 # Wordbank items use mixed punctuation. Build a normalization fn.
@@ -169,30 +173,34 @@ normalize_item <- function(x) {
     gsub("[^a-z0-9_]", "", .) %>%
     sub("_+$", "", .)
 }
-prob_tbl <- prob_tbl %>% mutate(item_norm = normalize_item(item))
-cdi_long <- cdi_long %>% mutate(item_norm = normalize_item(item))
-
-# Use the most-frequent prob per normalized name
-prob_lookup <- prob_tbl %>% group_by(item_norm) %>%
-  summarise(prob = max(prob), .groups = "drop")
-
-cdi_long <- cdi_long %>% left_join(prob_lookup, by = "item_norm")
-matched <- cdi_long %>% distinct(item, prob) %>% summarise(
-  total = n(), with_prob = sum(!is.na(prob)))
-message(sprintf("  CDI items with CHILDES match: %d / %d",
-                matched$with_prob, matched$total))
-
-# Drop items without prob; lexical_class isn't in the CDI item CSVs, so
-# we'll need to fetch it from the Wordbank long_ws_items table.
+freq <- readRDS(file.path(PATHS$fits_dir, "english_word_freq.rds"))
+prob_lookup <- freq %>%
+  mutate(item_norm = normalize_item(w)) %>%
+  group_by(item_norm) %>%
+  summarise(count = sum(count), .groups = "drop") %>%
+  mutate(prob = count / sum(count)) %>%
+  select(item_norm, prob)
 class_lookup <- long_ws %>% distinct(item, lexical_category) %>%
   mutate(item_norm = normalize_item(item)) %>%
   group_by(item_norm) %>% slice(1) %>% ungroup() %>%
   select(item_norm, lexical_category)
-cdi_long <- cdi_long %>% left_join(class_lookup, by = "item_norm") %>%
-  filter(!is.na(prob), !is.na(lexical_category))
 
-message(sprintf("  after filtering to items with prob + class: %d obs, %d items",
-                nrow(cdi_long), n_distinct(cdi_long$item)))
+cdi_long <- cdi_long %>%
+  mutate(item_norm = normalize_item(item)) %>%
+  left_join(prob_lookup, by = "item_norm") %>%
+  left_join(class_lookup, by = "item_norm")
+# Require a Wordbank lexical class: this keeps only vocabulary-checklist
+# words and drops BabyView's non-vocab CDI sections (gestures,
+# morphology / over-regularizations, irregular pasts), which have no
+# delta_j and aren't part of the production-vocab IRT model. prob is
+# vestigial (beta_c=0) so placeholder-fill the rare unmatched ones.
+n_pre <- n_distinct(cdi_long$item)
+cdi_long <- cdi_long %>% filter(!is.na(lexical_category))
+med_prob <- median(cdi_long$prob, na.rm = TRUE)
+cdi_long <- cdi_long %>% mutate(prob = ifelse(is.na(prob), med_prob, prob))
+message(sprintf("  CHILDES match: %d obs, %d vocab items kept (%d non-vocab dropped)",
+                nrow(cdi_long), n_distinct(cdi_long$item),
+                n_pre - n_distinct(cdi_long$item)))
 
 # ---- 5. Stratified item subsample (class x difficulty quartile) ----
 set.seed(SEED)
@@ -274,9 +282,12 @@ stan_data <- c(
     mu_r_prior_sd   = 1,
     sigma_r_prior_sd = 1,
 
-    # Reactivity prior: videos ~1.4x real life, 95% CI ~[0, +0.8]
-    beta_react_prior_mean = 0.4,
-    beta_react_prior_sd   = 0.4,
+    # Reactivity REMOVED (pinned at 0) for the input-uptake revisit:
+    # worst case is a constant scale offset for BabyView vs the other
+    # datasets, which doesn't affect the cross-kid input/efficiency/slope
+    # structure. Was mean=0.4, sd=0.4 (videos ~1.4x real life).
+    beta_react_prior_mean = 0,
+    beta_react_prior_sd   = 0.001,
 
     # Within-child noise (per-video deviation around child's true rate)
     sigma_within_prior_sd = 1
