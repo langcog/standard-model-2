@@ -32,21 +32,37 @@ data + models below are cleaned up.**
 
 ## Part 1 — Data audit & fixes (must happen first)
 
-### 1.1 The datasets (correct names + internal aliases)
+### 1.1 The datasets (CONFIRMED crosswalk, 2026-05-28)
 
-| Public name | Internal | CDI | Input (LENA-style) | LWL / processing |
-|---|---|---|---|---|
-| **BabyView** | — | WG+WS, 9–32 mo | head-cam AWC | — |
-| **SEEDLingS** | — | WG (6–18 mo) | LENA daylong | — |
-| **Adams-Marchman 2018** | **TL3** | WG+WS @ 16,18,22,24,27,30 | LENA @ 16,18 | Peekbank LWL, several timepoints |
-| **Fernald-Marchman-Weisleder 2013** | **TLO** | CDI @ 18,24 | LENA | Peekbank LWL (should exist) |
+Five datasets. Going forward, refer to the three Fernald/Marchman-lab
+cohorts by their reduced paper titles: **AM2018, FMW2013, FM2012**.
+Retire "Stanford" / "Peekbank" as dataset names (Peekbank is the *LWL
+data source*, not a study).
 
-The Peekbank `d_admin` currently mixes four LWL dataset names —
-`adams_marchman_2018`, `fernald_marchman_2012`, `fernald_totlot`,
-`fmw_2013`. **Action: map each Peekbank LWL dataset to the correct
-CDI/LENA study and document the crosswalk explicitly.** Retire the
-ambiguous labels "Stanford" / "Peekbank" as dataset names — they're a
-*data source* (Peekbank = the LWL repository), not a study.
+| Name | Internal | Lab IDs | CDI | Input (LENA) | LWL (Peekbank) | Roles |
+|---|---|---|---|---|---|---|
+| **BabyView** | — | — | WG+WS, 9–32 mo, 20 kids | head-cam AWC | — | IO |
+| **SEEDLingS** | — | — | WG, 6–18 mo, 44 kids | LENA daylong | — | IO |
+| **AM2018** | TL3 / totlot3 | 11xxx | WG (13–18) + WS (20–32) | LENA @ 16,18 mo (66) | `adams_marchman_2018` (711) | **IO + processing** |
+| **FMW2013** | TLO | 20xxx | WG@18 + WS@24 + WS@30 | LENA @ 18 mo (51) | `fmw_2013` (178) | IO |
+| **FM2012** | TL2 / totlot2 | — | WG+WS, 409 admins | **none** | `fernald_marchman_2012` (679) | **processing only** |
+
+- **4 IO datasets** (CDI + measured input): BabyView, SEEDLingS,
+  AM2018, FMW2013 → the γ analysis.
+- **2 processing datasets** (CDI + LWL): AM2018, FM2012 → the separate
+  processing study. FM2012 has no LENA, so it's processing-only.
+- AM2018 is the only dataset with all three channels.
+
+CDI source files (Marchman lab, `data/peekbank/`): `TL3_compiled_WS.csv`
++ `TL3_compiled_WG.xlsx` (AM2018); `TLO_18m_WG.xlsx` + `TLO_24_WS.xlsx` +
+`TLO_30m_WS.xlsx` (FMW2013); `totlot2/TL2_W{G,S}_compiled.xlsx` (FM2012).
+
+**Parsing notes for the new files:** the TLO files carry the CDI age in
+the *filename* (no age column in the sheet) and include some
+`study == "misc"` rows to filter out (keep `tlo`). TL3 WG has a real
+`age_cdi` column (13–18). The existing `parse_stanford_cdi.R` →
+`stanford_cdi_items_long.csv` pipeline must be extended to ingest these
+(it currently only emits totlot2 + totlot3, WG only for totlot2).
 
 ### 1.2 The big fix: use WG + WS everywhere
 
@@ -254,15 +270,20 @@ The lab subject IDs (`11xxx`, `20xxx`) are the join key; `data/peekbank/README.m
 says TL2/TL3 IDs line up with `peekbankr::get_subjects()` for
 `adams_marchman_2018` and `fmw_2013`.
 
-### Bottom line
+### Bottom line — UPDATED 2026-05-28 (gaps resolved)
 
-- **BabyView + SEEDLingS**: ready now (β_react removal aside).
-- **AM2018**: usable but WS-only until the TL3 WG export is found.
-- **FMW2013**: blocked until CDI item data is sourced.
+Mike added the missing CDI files. All four IO datasets now have the CDI
+they need:
+- **BabyView + SEEDLingS**: ready (β_react removal aside).
+- **AM2018**: now WG+WS (TL3_compiled_WG.xlsx added) → full age range.
+- **FMW2013**: now WG@18 + WS@24,30 (TLO_*.xlsx added).
+- **FM2012**: WG+WS present but no LENA → reserved for the *processing*
+  study, not IO.
 
-So "all four datasets" is currently **two-and-a-half**. Resolving gaps
-1–2 (sourcing TL3-WG and TLO-CDI from the Marchman lab) is the
-precondition for the full IO analysis.
+Remaining precondition is engineering, not sourcing: extend
+`parse_stanford_cdi.R` to ingest the new TL3-WG / TLO files (age from
+filename, drop `misc` rows) into `stanford_cdi_items_long.csv`, then
+build IO bundles with WG+WS for AM2018 and FMW2013.
 
 ## Concrete order of operations
 
