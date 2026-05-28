@@ -1,20 +1,26 @@
-## Parse Stanford CDI files (totlot2 / totlot3) into long item-level
-## format and emit a reviewable short-code-to-Wordbank-item mapping.
+## Parse Stanford CDI files (totlot2 / totlot3 / tlo) into long
+## item-level format and emit a reviewable short-code-to-Wordbank-item
+## mapping. Combines WG + WS for every cohort so the longitudinal age
+## window isn't artificially truncated.
 ##
 ## RUN LOCALLY ONLY. Requires wordbankr (Sherlock can't reach it).
 ##
-## Inputs:
-##   data/peekbank/TL3_compiled_WS.csv   (csv; ~22 + 25 mo, WS form)
-##   data/peekbank/TL2_WS_compiled.xlsx  (~18 mo, WS form)
-##   data/peekbank/TL2_WG_compiled.xlsx  (~16 mo, WG form)
+## Study → public dataset crosswalk:
+##   totlot3 = TL3 = AM2018   (IDs 11xxx; WG 13-18 + WS 20-27)
+##   tlo     = TLO = FMW2013   (IDs 20xxx; WG@18 + WS@24,30)
+##   totlot2 = TL2 = FM2012    (WG 15-19 + WS 14-32; processing-only, no LENA)
+##
+## Inputs (data/peekbank/):
+##   TL3_compiled_WS.csv, TL3_compiled_WG.xlsx          (AM2018)
+##   TLO_18m_WG.xlsx, TLO_24_WS.xlsx, TLO_30m_WS.xlsx   (FMW2013; age in filename,
+##                                                       'misc' rows dropped)
+##   totlot2/TL2_WG_compiled.xlsx, totlot2/TL2_WS_compiled.xlsx  (FM2012)
 ##
 ## Outputs:
-##   data/peekbank/cdi_short_code_map_ws.csv
-##   data/peekbank/cdi_short_code_map_wg.csv
+##   data/peekbank/cdi_short_code_map_{ws,wg}.csv
 ##       Mapping from internal short codes to Wordbank item_definitions.
-##       Columns: short, item_definition, status. All entries are
-##       used in production at the moment; LOOSE END is hand review of
-##       the rows where status != "auto_exact" or "manual_disambig".
+##       Columns: short, item_definition, status. LOOSE END is hand
+##       review of rows where status != "auto_exact"/"manual_disambig".
 ##   data/peekbank/stanford_cdi_items_long.csv
 ##       Long format, one row per (lab_subject_id, study, age, form,
 ##       item, produces). Items are Wordbank item_definitions.
@@ -257,7 +263,8 @@ vocab_columns <- function(nm, form) {
 # -------------------------------------------------------------------- #
 # 4.  Read each source file, harmonize meta columns, pivot to long.    #
 # -------------------------------------------------------------------- #
-read_one <- function(path, form_label) {
+read_one <- function(path, form_label, age_override = NA_real_,
+                      drop_studies = "misc") {
   if (grepl("\\.xlsx$", path)) {
     d <- read_excel(path, sheet = 1, .name_repair = "minimal")
   } else {
@@ -265,12 +272,22 @@ read_one <- function(path, form_label) {
   }
   # Make column names unique (TL2 has duplicate `id`, `feet`, `combine`)
   names(d) <- make.unique(names(d), sep = ".")
-  # Standardize the age column name
+  # Locate the subject-id column robustly: the column named exactly "id"
+  # (TL3_WS/TL2 have it first; TLO files have it at position 4). Fall back
+  # to the first column if no exact match.
+  id_hits <- which(tolower(names(d)) == "id")
+  id_col  <- if (length(id_hits)) names(d)[id_hits[1]] else names(d)[1]
+  # Standardize the age column name; TLO files have none → use override.
   age_col <- intersect(c("age_mos", "age_cdi", "agecdi", "age"), names(d))[1]
-  if (is.na(age_col)) stop(sprintf("No age col in %s", path))
+  if (is.na(age_col)) {
+    if (is.na(age_override))
+      stop(sprintf("No age col in %s and no age_override given", path))
+    d[[".age_override"]] <- age_override
+    age_col <- ".age_override"
+  }
   # Keep core meta + vocab section
   vocab_idx <- vocab_columns(names(d), form_label)
-  meta_cols <- c("id" = names(d)[1],   # first id column
+  meta_cols <- c("id" = id_col,
                  "study" = "study",
                  "form"  = "form",
                  "age"   = age_col,
@@ -280,6 +297,15 @@ read_one <- function(path, form_label) {
                                                       collapse = ",")))
   d_meta  <- d[, meta_cols, drop = FALSE]
   names(d_meta) <- names(meta_cols)
+  d_meta$id <- as.character(d_meta$id)   # ids are numeric in some files, char in others
+  # Drop rows from other studies pooled into the same sheet (TLO files
+  # carry some study == "misc" rows).
+  if (length(drop_studies)) {
+    keep_study <- !(tolower(trimws(as.character(d_meta$study))) %in%
+                    tolower(drop_studies))
+    d        <- d[keep_study, , drop = FALSE]
+    d_meta   <- d_meta[keep_study, , drop = FALSE]
+  }
   d_vocab <- d[, vocab_idx, drop = FALSE]
   # Coerce every vocab column to character so pivot_longer doesn't choke
   # on mixed dbl/chr (TL2 WG has both "1" strings and numeric 1s).
@@ -306,19 +332,22 @@ read_one <- function(path, form_label) {
   d_long
 }
 
-cat("Reading TL3 (WS), TL2 WS, TL2 WG...\n")
-tl3_ws <- read_one(file.path(OUT_DIR, "TL3_compiled_WS.csv"),     "WS")
-tl2_ws <- read_one(file.path(OUT_DIR, "TL2_WS_compiled.xlsx"),    "WS")
-tl2_wg <- read_one(file.path(OUT_DIR, "TL2_WG_compiled.xlsx"),    "WG")
-cat(sprintf("  TL3 WS: %d rows (subjects: %d, admins: %d)\n",
-            nrow(tl3_ws), n_distinct(tl3_ws$id),
-            n_distinct(paste(tl3_ws$id, tl3_ws$age))))
-cat(sprintf("  TL2 WS: %d rows (subjects: %d, admins: %d)\n",
-            nrow(tl2_ws), n_distinct(tl2_ws$id),
-            n_distinct(paste(tl2_ws$id, tl2_ws$age))))
-cat(sprintf("  TL2 WG: %d rows (subjects: %d, admins: %d)\n",
-            nrow(tl2_wg), n_distinct(tl2_wg$id),
-            n_distinct(paste(tl2_wg$id, tl2_wg$age))))
+cat("Reading all Stanford CDI source files...\n")
+report <- function(tag, d) cat(sprintf("  %-12s %5d rows (subjects: %d, admins: %d, ages: %s)\n",
+            tag, nrow(d), n_distinct(d$id),
+            n_distinct(paste(d$id, d$age)),
+            paste(range(suppressWarnings(as.integer(d$age)), na.rm = TRUE),
+                  collapse = "-")))
+# FM2012 (TL2 / totlot2): WG + WS
+tl2_wg <- read_one(file.path(OUT_DIR, "totlot2/TL2_WG_compiled.xlsx"), "WG"); report("TL2 WG", tl2_wg)
+tl2_ws <- read_one(file.path(OUT_DIR, "totlot2/TL2_WS_compiled.xlsx"), "WS"); report("TL2 WS", tl2_ws)
+# AM2018 (TL3 / totlot3): WS (existing csv) + WG (newly added)
+tl3_ws <- read_one(file.path(OUT_DIR, "TL3_compiled_WS.csv"),  "WS"); report("TL3 WS", tl3_ws)
+tl3_wg <- read_one(file.path(OUT_DIR, "TL3_compiled_WG.xlsx"), "WG"); report("TL3 WG", tl3_wg)
+# FMW2013 (TLO): WG@18, WS@24, WS@30 — age comes from the filename
+tlo_wg18 <- read_one(file.path(OUT_DIR, "TLO_18m_WG.xlsx"), "WG", age_override = 18); report("TLO WG18", tlo_wg18)
+tlo_ws24 <- read_one(file.path(OUT_DIR, "TLO_24_WS.xlsx"),  "WS", age_override = 24); report("TLO WS24", tlo_ws24)
+tlo_ws30 <- read_one(file.path(OUT_DIR, "TLO_30m_WS.xlsx"), "WS", age_override = 30); report("TLO WS30", tlo_ws30)
 
 # -------------------------------------------------------------------- #
 # 5.  Build mappings (one per form), apply, and emit outputs.          #
@@ -328,8 +357,8 @@ wb_ws <- get_item_data(language = "English (American)", form = "WS") %>%
 wb_wg <- get_item_data(language = "English (American)", form = "WG") %>%
   filter(item_kind == "word") %>% select(item_id, item_definition, category)
 
-ws_short <- unique(c(tl3_ws$short, tl2_ws$short))
-wg_short <- unique(tl2_wg$short)
+ws_short <- unique(c(tl3_ws$short, tl2_ws$short, tlo_ws24$short, tlo_ws30$short))
+wg_short <- unique(c(tl2_wg$short, tl3_wg$short, tlo_wg18$short))
 
 map_ws <- build_mapping(ws_short, wb_ws)
 map_wg <- build_mapping(wg_short, wb_wg)
@@ -350,14 +379,14 @@ apply_map <- function(d_long, map_df) {
                by = "short")
 }
 
-tl3_ws_m <- apply_map(tl3_ws, map_ws)
-tl2_ws_m <- apply_map(tl2_ws, map_ws)
-tl2_wg_m <- apply_map(tl2_wg, map_wg)
-
 cdi_long <- bind_rows(
-  tl3_ws_m %>% mutate(form = "WS", source_file = "TL3_compiled_WS.csv"),
-  tl2_ws_m %>% mutate(form = "WS", source_file = "TL2_WS_compiled.xlsx"),
-  tl2_wg_m %>% mutate(form = "WG", source_file = "TL2_WG_compiled.xlsx")
+  apply_map(tl2_wg,   map_wg) %>% mutate(form = "WG", source_file = "TL2_WG_compiled.xlsx"),
+  apply_map(tl2_ws,   map_ws) %>% mutate(form = "WS", source_file = "TL2_WS_compiled.xlsx"),
+  apply_map(tl3_ws,   map_ws) %>% mutate(form = "WS", source_file = "TL3_compiled_WS.csv"),
+  apply_map(tl3_wg,   map_wg) %>% mutate(form = "WG", source_file = "TL3_compiled_WG.xlsx"),
+  apply_map(tlo_wg18, map_wg) %>% mutate(form = "WG", source_file = "TLO_18m_WG.xlsx"),
+  apply_map(tlo_ws24, map_ws) %>% mutate(form = "WS", source_file = "TLO_24_WS.xlsx"),
+  apply_map(tlo_ws30, map_ws) %>% mutate(form = "WS", source_file = "TLO_30m_WS.xlsx")
 ) %>%
   rename(lab_subject_id = id, item = item_definition) %>%
   mutate(age = suppressWarnings(as.integer(age))) %>%
