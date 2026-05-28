@@ -56,6 +56,8 @@ outputs/figs/**/*.png
 !fits/peekbank_subset_data.rds
 !fits/seedlings_subset_data.rds
 !fits/stanford_linked_subset_data.rds
+!fits/io_am2018_subset_data.rds
+!fits/io_fmw2013_subset_data.rds
 
 # Compiled Stan model objects (auto-generated)
 model/*.rds
