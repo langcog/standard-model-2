@@ -38,14 +38,27 @@ qtiles <- qtiles |>
   mutate(qprob_f = factor(qprob, levels = c(0.1, 0.25, 0.5, 0.75, 0.9),
                            labels = c("0.1", "0.25", "0.5", "0.75", "0.9")))
 
-## ---- Build the plot for a given language subset ----------------------
-build_ladder_plot <- function(langs_subset, out_png, title_n_langs,
+## Friendly column labels for the conceptual-ladder (log-only) figure.
+MODEL_LABELS <- c(
+  A     = "A: unit accumulator (κ=1)",
+  B_lin = "B: + acceleration κ (linear age)",
+  B_log = "B: + acceleration κ",
+  C_lin = "C: + child intercept (linear age)",
+  C_log = "C: + child intercept",
+  D_lin = "D: + child slope (linear age)",
+  D_log = "D: + child slope"
+)
+
+## ---- Build the plot for a given language × model subset --------------
+build_ladder_plot <- function(langs_subset, out_png, title,
+                                models_subset = MODELS,
+                                relabel_models = FALSE,
                                 width = 18, height = 16) {
   qt <- qtiles |>
-    filter(lang_slug %in% langs_subset) |>
+    filter(lang_slug %in% langs_subset, model %in% models_subset) |>
     mutate(language = factor(LANG_LABELS[lang_slug],
                               levels = LANG_LABELS[langs_subset]),
-            model    = factor(model, levels = MODELS))
+            model    = factor(model, levels = models_subset))
   el <- emp |>
     filter(lang_slug %in% langs_subset) |>
     mutate(language = factor(LANG_LABELS[lang_slug],
@@ -53,11 +66,12 @@ build_ladder_plot <- function(langs_subset, out_png, title_n_langs,
   al <- summ |>
     filter(lang_slug %in% langs_subset) |>
     group_by(language, lang_slug) |>
-    mutate(AIC_best = min(AIC), dAIC = AIC - AIC_best) |>
+    mutate(AIC_best = min(AIC), dAIC = AIC - AIC_best) |>   # ΔAIC vs best of ALL 7 models
     ungroup() |>
+    filter(model %in% models_subset) |>
     mutate(language = factor(language,
                               levels = LANG_LABELS[langs_subset]),
-            model    = factor(model, levels = MODELS),
+            model    = factor(model, levels = models_subset),
             label    = ifelse(dAIC == 0, "best",
                               sprintf("Δ%+.0fk", dAIC / 1000)))
 
@@ -79,7 +93,9 @@ build_ladder_plot <- function(langs_subset, out_png, title_n_langs,
                                     qprob_f == "0.5"),
                aes(x = age, y = vocab, colour = qprob_f),
                linewidth = 0.95) +
-    facet_grid(language ~ model, scales = "free_y", space = "fixed") +
+    facet_grid(language ~ model, scales = "free_y", space = "fixed",
+                labeller = if (relabel_models)
+                  labeller(model = MODEL_LABELS) else "label_value") +
     geom_text(data = al,
                aes(x = -Inf, y = Inf, label = label),
                hjust = -0.15, vjust = 1.5, size = 2.6, colour = "grey25") +
@@ -87,9 +103,8 @@ build_ladder_plot <- function(langs_subset, out_png, title_n_langs,
     scale_linewidth_identity() +
     labs(x = "Age (months)",
          y = "Productive vocabulary",
-         title = sprintf("glmer ladder: predictions vs empirical vocab(age) — %d languages × 7 models",
-                          title_n_langs),
-         subtitle = sprintf("Lines = 10/25/50/75/90 quantiles across %d simulated kids (BLUP bootstrap from each model's child-RE distribution). Grey lines = per-kid longitudinal trajectories. Empirical and predictions both restricted to the largest form per language. Corner label = ΔAIC vs best within language.",
+         title = title,
+         subtitle = sprintf("Lines = 10/25/50/75/90 quantiles across %d simulated kids (BLUP bootstrap from each model's child-RE distribution). Grey lines = per-kid longitudinal trajectories. Empirical and predictions both restricted to the largest form per language. Corner label = ΔAIC vs best of all 7 models in that language.",
                             N_SIM_KIDS)) +
     theme_minimal(base_size = 10) +
     theme(plot.title    = element_text(face = "bold"),
@@ -102,20 +117,37 @@ build_ladder_plot <- function(langs_subset, out_png, title_n_langs,
   cat(sprintf("Wrote %s\n", out_png))
 }
 
-## Main-text version: 4 well-powered languages
-LANGS_MAIN <- c("english_american", "norwegian",
-                "french_quebecois", "japanese")
+## Main-text version: 4 well-powered languages, LOG-only ladder
+## (A → B → C → D). Linear vs log is a fine-structure AIC difference
+## that's visually imperceptible over the CDI age window, so we keep
+## the linear columns for the supplement only.
+LANGS_MAIN  <- c("english_american", "norwegian",
+                 "french_quebecois", "japanese")
+MODELS_LOG  <- c("A", "B_log", "C_log", "D_log")
 build_ladder_plot(
   LANGS_MAIN,
   file.path(FIG_DIR, "glmer_ladder_main.png"),
-  title_n_langs = length(LANGS_MAIN),
-  width = 18, height = 11
+  title = "Model ladder: vocabulary growth across four longitudinal CDI samples",
+  models_subset = MODELS_LOG,
+  relabel_models = TRUE,
+  width = 13, height = 11
 )
 
-## Supplementary version: all 6 languages
+## Supplementary version 1: all 6 languages, LOG-only ladder
+build_ladder_plot(
+  LANGS,
+  file.path(FIG_DIR, "glmer_ladder_supp_log.png"),
+  title = "Model ladder (log-age only): six longitudinal CDI samples",
+  models_subset = MODELS_LOG,
+  relabel_models = TRUE,
+  width = 13, height = 16
+)
+
+## Supplementary version 2: full 7-model grid (lin + log) — shows the
+## linear-vs-log comparison that motivates using log throughout.
 build_ladder_plot(
   LANGS,
   file.path(FIG_DIR, "glmer_ladder_mega.png"),
-  title_n_langs = length(LANGS),
+  title = "Full model grid: linear vs log age × 6 languages",
   width = 18, height = 16
 )
