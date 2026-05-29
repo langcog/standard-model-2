@@ -14,14 +14,14 @@
 ## Cols = BabyView | SEEDLingS | AM2018. Per-kid spaghetti, coloured by
 ## form, with the per-form item count annotated.
 ##
-## Output: outputs/figs/longitudinal/io_diagnostic_spaghetti.png
+## Output: outputs/figs/io/io_diagnostic_spaghetti.png
 
 source("model/R/config.R")
 suppressPackageStartupMessages({
   library(dplyr); library(tidyr); library(ggplot2); library(patchwork)
 })
 
-OUT_PNG <- file.path(PATHS$figs_dir, "longitudinal", "io_diagnostic_spaghetti.png")
+OUT_PNG <- file.path(PATHS$figs_dir, "io", "io_diagnostic_spaghetti.png")
 
 DATASETS <- list(
   BabyView  = "babyview_subset_data.rds",
