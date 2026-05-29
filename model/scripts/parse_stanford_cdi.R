@@ -318,15 +318,20 @@ read_one <- function(path, form_label, age_override = NA_real_,
   d_meta  <- d_meta [keep, , drop = FALSE]
   d_vocab <- d_vocab[keep, , drop = FALSE]
 
-  # Pivot to long: produces = 1 if cell is "1" (or "produces"); else 0
+  # Pivot to long, then code PRODUCTION. Critical form difference:
+  #   WS: cells are 1 = produces, NA = not. produces = (raw == "1").
+  #   WG: cells are 1 = understands, 2 = understands AND says (produces),
+  #       NA = neither. So production on WG is raw == "2" ONLY; coding
+  #       "1" as produces (the old bug) counted comprehension as
+  #       production and inflated WG vocab ~4x.
+  prod_codes <- if (form_label == "WG") c("2") else
+                 c("1", "produces", "yes", "y", "x")
   d_long <- bind_cols(d_meta, d_vocab) %>%
     pivot_longer(-c(id, study, form, age, sex),
                  names_to = "short", values_to = "raw") %>%
-    mutate(produces = case_when(
-      is.na(raw)                    ~ 0L,
-      tolower(trimws(as.character(raw))) %in% c("1", "produces", "yes", "y", "x") ~ 1L,
-      TRUE                          ~ 0L
-    )) %>%
+    mutate(produces = if_else(
+      !is.na(raw) &
+        tolower(trimws(as.character(raw))) %in% prod_codes, 1L, 0L)) %>%
     select(-raw)
   attr(d_long, "form_label") <- form_label
   d_long
