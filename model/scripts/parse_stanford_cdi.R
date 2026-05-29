@@ -264,7 +264,7 @@ vocab_columns <- function(nm, form) {
 # 4.  Read each source file, harmonize meta columns, pivot to long.    #
 # -------------------------------------------------------------------- #
 read_one <- function(path, form_label, age_override = NA_real_,
-                      drop_studies = "misc") {
+                      drop_studies = NULL, force_study = NULL) {
   if (grepl("\\.xlsx$", path)) {
     d <- read_excel(path, sheet = 1, .name_repair = "minimal")
   } else {
@@ -298,9 +298,14 @@ read_one <- function(path, form_label, age_override = NA_real_,
   d_meta  <- d[, meta_cols, drop = FALSE]
   names(d_meta) <- names(meta_cols)
   d_meta$id <- as.character(d_meta$id)   # ids are numeric in some files, char in others
-  # Drop rows from other studies pooled into the same sheet (TLO files
-  # carry some study == "misc" rows).
-  if (length(drop_studies)) {
+  # force_study: the TLO sheets label rows "tlo" OR "misc", but ALL of
+  # them are FMW2013 children (every "misc" subject id is in the 20xxx
+  # FMW2013 range and appears in the tlo set at other ages — verified).
+  # So we relabel the whole sheet to the study (not drop "misc", which
+  # was a bug that discarded 30/34 of the 30-month admins).
+  if (!is.null(force_study)) {
+    d_meta$study <- force_study
+  } else if (length(drop_studies)) {
     keep_study <- !(tolower(trimws(as.character(d_meta$study))) %in%
                     tolower(drop_studies))
     d        <- d[keep_study, , drop = FALSE]
@@ -349,10 +354,13 @@ tl2_ws <- read_one(file.path(OUT_DIR, "totlot2/TL2_WS_compiled.xlsx"), "WS"); re
 # AM2018 (TL3 / totlot3): WS (existing csv) + WG (newly added)
 tl3_ws <- read_one(file.path(OUT_DIR, "TL3_compiled_WS.csv"),  "WS"); report("TL3 WS", tl3_ws)
 tl3_wg <- read_one(file.path(OUT_DIR, "TL3_compiled_WG.xlsx"), "WG"); report("TL3 WG", tl3_wg)
-# FMW2013 (TLO): WG@18, WS@24, WS@30 — age comes from the filename
-tlo_wg18 <- read_one(file.path(OUT_DIR, "TLO_18m_WG.xlsx"), "WG", age_override = 18); report("TLO WG18", tlo_wg18)
-tlo_ws24 <- read_one(file.path(OUT_DIR, "TLO_24_WS.xlsx"),  "WS", age_override = 24); report("TLO WS24", tlo_ws24)
-tlo_ws30 <- read_one(file.path(OUT_DIR, "TLO_30m_WS.xlsx"), "WS", age_override = 30); report("TLO WS30", tlo_ws30)
+# FMW2013 (TLO): WG@18, WS@24, WS@30 — age comes from the filename.
+# force_study="tlo": every row in these sheets is an FMW2013 child
+# (the "misc" label is a within-study annotation, not a different
+# study), so keep them all.
+tlo_wg18 <- read_one(file.path(OUT_DIR, "TLO_18m_WG.xlsx"), "WG", age_override = 18, force_study = "tlo"); report("TLO WG18", tlo_wg18)
+tlo_ws24 <- read_one(file.path(OUT_DIR, "TLO_24_WS.xlsx"),  "WS", age_override = 24, force_study = "tlo"); report("TLO WS24", tlo_ws24)
+tlo_ws30 <- read_one(file.path(OUT_DIR, "TLO_30m_WS.xlsx"), "WS", age_override = 30, force_study = "tlo"); report("TLO WS30", tlo_ws30)
 
 # -------------------------------------------------------------------- #
 # 5.  Build mappings (one per form), apply, and emit outputs.          #
