@@ -78,9 +78,11 @@ print(dat |> group_by(dataset, input_bin) |>
 BIN_COL <- c(low = "#2c7bb6", mid = "#fdae61", high = "#d7191c")
 
 p <- ggplot(dat, aes(age, prop, colour = input_bin, fill = input_bin)) +
-  geom_point(alpha = 0.30, size = 0.9) +
   geom_smooth(method = "loess", se = TRUE, span = 1.0, linewidth = 1.0,
-              alpha = 0.15) +
+              alpha = 0.12) +
+  geom_point(alpha = 0.45, size = 1.0) +   # points on top so the sparse
+                                            # older-age dots aren't buried
+                                            # under the loess ribbons
   facet_wrap(~ dataset, nrow = 1, scales = "free_x") +
   scale_colour_manual(values = BIN_COL, name = "Observed input") +
   scale_fill_manual(values = BIN_COL, name = "Observed input") +

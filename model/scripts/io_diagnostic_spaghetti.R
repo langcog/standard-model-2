@@ -26,7 +26,8 @@ OUT_PNG <- file.path(PATHS$figs_dir, "io", "io_diagnostic_spaghetti.png")
 DATASETS <- list(
   BabyView  = "babyview_subset_data.rds",
   SEEDLingS = "seedlings_subset_data.rds",
-  AM2018    = "io_am2018_subset_data.rds"
+  AM2018    = "io_am2018_subset_data.rds",
+  FMW2013   = "io_fmw2013_subset_data.rds"
 )
 
 emp_for <- function(label, path) {
@@ -72,5 +73,5 @@ p_count <- mk("vocab", "Vocabulary count (raw)") +
 p_prop <- mk("prop", "Proportion of form's items produced")
 
 p <- p_count / p_prop
-ggsave(OUT_PNG, p, width = 13, height = 8, dpi = 200)
+ggsave(OUT_PNG, p, width = 16, height = 8, dpi = 200)
 cat(sprintf("Wrote %s\n", OUT_PNG))
