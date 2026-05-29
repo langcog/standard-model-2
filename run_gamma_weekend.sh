@@ -12,6 +12,10 @@ set -uo pipefail
 cd "$(dirname "$0")"
 mkdir -p logs
 
+# launchd runs with a minimal PATH; Rscript lives in /usr/local/bin and
+# caffeinate in /usr/bin. Make sure both resolve when launched via launchd.
+export PATH="/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin:${PATH:-}"
+
 export STAN_CHAINS=4
 export STAN_THREADS_PER_CHAIN=2
 export STAN_WARMUP=500
