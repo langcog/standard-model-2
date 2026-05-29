@@ -30,7 +30,10 @@ n_items <- as.integer(if (length(args) >= 1) args[1] else 200)
 # ---- Constants ----
 ENG_PCT_THRESHOLD <- 80    # videos: keep if percent_english >= this
 SCORE_THRESHOLD   <- 0.3   # transcripts: drop tokens below this confidence
-MIN_ADMINS        <- 2     # subjects: keep only longitudinal
+# MIN_ADMINS: 2 for the standalone longitudinal fit; pass 1 (arg 2) for
+# the pooled hierarchical model, where single-admin kids still anchor
+# the input/intercept decomposition (their slope shrinks to the mean).
+MIN_ADMINS        <- as.integer(if (length(args) >= 2) args[2] else 2)
 N_DIFF_BINS       <- 4
 SEED              <- 20260428
 
