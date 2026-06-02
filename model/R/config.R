@@ -70,6 +70,20 @@ DEFAULT_PRIORS <- list(
   # robustness check) explicitly override this default.
   s_prior_mean     = 0,
   s_prior_sd       = 0.001,
+  # delta_prior is set for the CROSS-SECTIONAL reference (M0 / unit
+  # accumulator), pulling delta toward 0 with SD 0.5. For longitudinal
+  # or pooled fits with random slopes (no_freq_slopes and descendants),
+  # this prior shrinks delta toward zero unless the data overwhelms it
+  # (e.g. EN Wordbank longitudinal at I=500, N=1.1M does overwhelm).
+  # On smaller samples (e.g. pooled IO with I=183, N=404k) the prior
+  # WINS: delta posterior settles around 5 instead of the data-supported
+  # ~9-10, with zeta_i posteriors absorbing a +3 to +6 mean shift per
+  # study to keep per-kid trajectories honest. The reported kappa_pop
+  # = 1 + delta is then a misleading summary that pretends zeta is
+  # mean-zero. See model/scripts/fit_io_pooled_widedelta.R and
+  # outputs/experiments.md §30 for the diagnostic chain and fix.
+  # For NEW slope-fit work on samples smaller than full EN longitudinal,
+  # override delta_prior_sd to a weakly-informative value (5-10).
   delta_prior_mean = 0,
   delta_prior_sd   = 0.5,
   sigma_lambda_prior_sd = 0.001,   # no 2PL by default

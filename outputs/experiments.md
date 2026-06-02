@@ -1687,6 +1687,97 @@ signature.
 
 ---
 
+## 🟢 30. Pooled IO κ-deflation diagnostic — the delta prior was the culprit (2026-06-02)
+
+The pooled hierarchical IO model
+([`log_irt_io_pooled.stan`](../model/stan/log_irt_io_pooled.stan), fit
+via [`fit_io_pooled.R`](../model/scripts/fit_io_pooled.R)) had been
+reporting `kappa_pop = 6.42` and wildly heterogeneous `kappa_study`:
+**3.4** (BabyView), 6.6 (SEEDLingS), 8.2 (AM2018), 7.5 (FMW2013). That
+implied either a real cross-study population difference (especially
+BabyView) or a model artifact. Per-study spaghetti looked healthy with
+BabyView reaching ~600 items / proportion 0.75+ by 25–30 mo, suggesting
+the data wasn't the problem. A systematic diagnostic chain identified
+the cause as a **misspecified default prior on `delta`**.
+
+### The chain
+
+1. **glmer C_log per IO dataset** ([`glmer_io_datasets.R`](../model/scripts/glmer_io_datasets.R)):
+   κ ∈ [9.6, 11.7] across all four studies — homogeneous, matching
+   longitudinal Wordbank's κ ≈ 11.3.
+2. **glmer D_log per IO dataset** ([`glmer_io_datasets_Dlog.R`](../model/scripts/glmer_io_datasets_Dlog.R)) —
+   the proper apples-to-apples comparison with random slopes — κ ∈
+   [10.1, 10.85], same answer.
+3. **Hypotheses ruled out**:
+   - λ_j is pinned at 1 in no_freq_slopes (σ_λ = 0.001), so the
+     multiplicative λ-slope decomposition isn't absorbing slope.
+   - δ_j anchor relaxation
+     ([`fit_io_pooled_unanchored.R`](../model/scripts/fit_io_pooled_unanchored.R)):
+     refit with anchor SD = 5 for all items gave identical kappa_pop
+     and kappa_study. Anchor wasn't deflating slope.
+   - Input-channel age confound
+     ([`plot_io_input_by_age.R`](../model/scripts/plot_io_input_by_age.R)):
+     within-study age × log_r_obs correlations were all near zero
+     (BabyView +0.08, SEEDLingS −0.08, AM2018 +0.06, FMW2013 NA).
+     Input channel isn't pulling age-related variance into ξ.
+4. **The smoking gun**: extracting per-kid Stan slope posterior
+   medians (slope_i = 1 + δ + study_δ + ζ_i) and averaging across
+   kids gave **9.3, 10.0, 10.6, 10.6** per study — matching glmer.
+   The model was *correctly fitting* per-kid trajectories; only the
+   `kappa_study` summary was misleading.
+5. **The mechanism**: `zeta_i` posteriors were averaging **+2.5 to
+   +5.9 per study** (systematically positive), violating their prior
+   `N(0, σ_ζ)`. The model was compensating for a shrunken `delta`.
+6. **The cause**: `DEFAULT_PRIORS$delta_prior = N(0, 0.5)`. This
+   prior was set for the cross-sectional reference fit. At full EN
+   Wordbank longitudinal (I=500, N=1.1M obs), the data overwhelms
+   it (`delta = 10.3`). At pooled IO (I=183, N=404k), the data is
+   strong but not strong enough — the prior wins on delta, and zeta
+   absorbs the shift.
+
+### The fix
+
+[`fit_io_pooled_widedelta.R`](../model/scripts/fit_io_pooled_widedelta.R)
+overrides to `delta_prior = N(0, 10)` (essentially uninformative over
+the plausible κ range). Saved as `fits/io_pooled_widedelta.rds`. The
+result:
+
+| param           | anchored (old) | wide-delta (corrected) |
+|-----------------|----------------|------------------------|
+| delta           | 5.40           | **9.63**               |
+| kappa_pop       | 6.42           | **10.62**              |
+| kappa_study[BV] | 3.40           | **10.46**              |
+| kappa_study[SS] | 6.59           | **10.50**              |
+| kappa_study[AM] | 8.15           | **10.79**              |
+| kappa_study[FMW]| 7.48           | **10.74**              |
+| sigma_zeta      | 5.22           | **4.00**               |
+| sigma_alpha     | 2.16           | 2.14                   |
+| sigma_r         | 0.36           | 0.36                   |
+| pi_alpha        | 0.972          | 0.972                  |
+| Rhat            | 1.01–1.07      | 1.00–1.01              |
+
+All four IO studies are now homogeneous at κ ≈ 10.5–10.8 (matching
+longitudinal). σ_zeta shrunk because zeta no longer needs to carry
+the +3 to +6 mean shift. The **intercept partition (`π_α`, `σ_r`,
+`σ_α`) is unchanged** — that was correctly identified all along, so
+the input-uptake variance partition story stands as previously
+characterized.
+
+Gamma variants were similarly refit with widened delta as
+[`fit_io_pooled_gamma_widedelta.R`](../model/scripts/fit_io_pooled_gamma_widedelta.R)
+→ `fits/io_pooled_gamma_widedelta_{add,mult}.rds`.
+
+### Reproducibility note
+
+The original `io_pooled.rds` / `io_pooled_gamma_{add,mult}.rds` are
+preserved as the as-built reference. Going forward, the
+`*_widedelta.rds` files are the production baseline for any analysis
+or figure that depends on `delta` / `kappa_pop` / `kappa_study`. The
+DEFAULT_PRIORS comment in `model/R/config.R` flags the gotcha for
+future users.
+
+---
+
 ## Backlog (⚪)
 
 ### Data / robustness
