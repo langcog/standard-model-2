@@ -19,9 +19,9 @@ suppressPackageStartupMessages({
 b <- readRDS(file.path(PATHS$fits_dir, "io_pooled_subset_data.rds"))
 sd <- b$stan_data
 fits <- list(
-  baseline = readRDS(file.path(PATHS$fits_dir, "io_pooled.rds")),
-  add      = readRDS(file.path(PATHS$fits_dir, "io_pooled_gamma_add.rds")),
-  mult     = readRDS(file.path(PATHS$fits_dir, "io_pooled_gamma_mult.rds"))
+  baseline = readRDS(file.path(PATHS$fits_dir, "io_pooled_widedelta.rds")),
+  add      = readRDS(file.path(PATHS$fits_dir, "io_pooled_gamma_widedelta_add.rds"))
+  # mult excluded: wide-delta mult fit failed to converge (see experiments.md §30).
 )
 
 # ---- fixed subsample (same idx for all models) -------------------------

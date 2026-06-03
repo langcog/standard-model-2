@@ -22,9 +22,9 @@ suppressPackageStartupMessages({
 })
 
 fits <- list(
-  baseline = readRDS(file.path(PATHS$fits_dir, "io_pooled.rds")),
-  add      = readRDS(file.path(PATHS$fits_dir, "io_pooled_gamma_add.rds")),
-  mult     = readRDS(file.path(PATHS$fits_dir, "io_pooled_gamma_mult.rds"))
+  baseline = readRDS(file.path(PATHS$fits_dir, "io_pooled_widedelta.rds")),
+  add      = readRDS(file.path(PATHS$fits_dir, "io_pooled_gamma_widedelta_add.rds"))
+  # mult excluded: wide-delta mult fit failed to mix (see experiments.md §30).
 )
 
 A0   <- 15                       # pivot age used in the IO bundle
@@ -88,10 +88,10 @@ comp_cols <- c("Input intercept","Input slope","Efficiency intercept",
 df_long <- df |>
   pivot_longer(all_of(comp_cols), names_to = "component", values_to = "var") |>
   mutate(component = factor(component, levels = comp_cols),
-         model     = factor(model, levels = c("baseline","add","mult"),
-                            labels = c("baseline (no γ)", "γ additive", "γ multiplicative")))
-df$model <- factor(df$model, levels = c("baseline","add","mult"),
-                   labels = c("baseline (no γ)", "γ additive", "γ multiplicative"))
+         model     = factor(model, levels = c("baseline","add"),
+                            labels = c("baseline (no γ)", "γ additive")))
+df$model <- factor(df$model, levels = c("baseline","add"),
+                   labels = c("baseline (no γ)", "γ additive"))
 
 # Palette: 2 input shades + 2 efficiency shades + cross
 fill_pal <- c(

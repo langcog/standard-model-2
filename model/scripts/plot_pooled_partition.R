@@ -17,9 +17,10 @@ suppressPackageStartupMessages({
 
 cat("Loading fits ...\n")
 fits <- list(
-  baseline = readRDS(file.path(PATHS$fits_dir, "io_pooled.rds")),
-  add      = readRDS(file.path(PATHS$fits_dir, "io_pooled_gamma_add.rds")),
-  mult     = readRDS(file.path(PATHS$fits_dir, "io_pooled_gamma_mult.rds"))
+  baseline = readRDS(file.path(PATHS$fits_dir, "io_pooled_widedelta.rds")),
+  add      = readRDS(file.path(PATHS$fits_dir, "io_pooled_gamma_widedelta_add.rds"))
+  # mult excluded: wide-delta multiplicative fit had identifiability
+  # collapse (Rhat 1.13, ess 20-70). See experiments.md §30.
 )
 
 # ---- pull draws --------------------------------------------------------
@@ -39,8 +40,7 @@ get_draws <- function(fit, gamma = FALSE) {
 }
 dr <- list(
   baseline = get_draws(fits$baseline, gamma = FALSE),
-  add      = get_draws(fits$add,      gamma = TRUE),
-  mult     = get_draws(fits$mult,     gamma = TRUE)
+  add      = get_draws(fits$add,      gamma = TRUE)
 )
 
 # ---- per-draw variance partition --------------------------------------
@@ -85,7 +85,7 @@ partition_rows[["intercept"]] <- data.frame(
   V_ef_md = median(V_ef_int),
   total_md = median(V_in_int + V_ef_int)
 )
-for (m in c("baseline","add","mult")) {
+for (m in c("baseline","add")) {
   sp <- slope_part(dr[[m]], m)
   share <- sp$V_input / (sp$V_input + sp$V_eff)
   partition_rows[[paste0("slope_", m)]] <- data.frame(
@@ -110,7 +110,7 @@ bars <- parts |>
          eff_pct   = 100 - input_pct)
 bars$label <- factor(bars$label, levels = c(
   "intercept (shared)",
-  "slope (baseline)", "slope (add)", "slope (mult)"))
+  "slope (baseline)", "slope (add)"))
 
 # Stacked-bar dataframe
 bars_long <- bars |>
@@ -145,10 +145,7 @@ coef_df <- bind_rows(
   data.frame(param = "σ_α",          model = "shared", draws = dr$baseline$sigma_alpha),
   data.frame(param = "σ_ζ",          model = "baseline", draws = dr$baseline$sigma_zeta),
   data.frame(param = "σ_ζ",          model = "add",      draws = dr$add$sigma_zeta),
-  data.frame(param = "σ_ζ",          model = "mult",     draws = dr$mult$sigma_zeta),
-  data.frame(param = "γ (additive)", model = "add",      draws = dr$add$gamma),
-  data.frame(param = "γ·κ (mult, effective)", model = "mult",
-             draws = dr$mult$gamma * dr$mult$A)
+  data.frame(param = "γ (additive)", model = "add",      draws = dr$add$gamma)
 )
 coef_summary <- coef_df |>
   group_by(param, model) |>
@@ -157,15 +154,15 @@ coef_summary <- coef_df |>
   mutate(label = ifelse(model == "shared", param, paste0(param, " [", model, "]")),
          label = factor(label, levels = rev(c(
            "σ_r", "σ_α",
-           "σ_ζ [baseline]", "σ_ζ [add]", "σ_ζ [mult]",
-           "γ (additive) [add]", "γ·κ (mult, effective) [mult]"))))
+           "σ_ζ [baseline]", "σ_ζ [add]",
+           "γ (additive) [add]"))))
 
 panelB <- ggplot(coef_summary, aes(md, label)) +
   geom_pointrange(aes(xmin = lo, xmax = hi), size = 0.4) +
   geom_vline(xintercept = 0, linetype = "dotted", color = "grey60") +
   labs(x = "posterior median (90% CI)", y = NULL,
        title = "Underlying parameter posteriors",
-       subtitle = "γ·κ rescales the multiplicative coef to slope-units (comparable to additive γ)") +
+       subtitle = "Mult excluded — its wide-delta fit was unidentified (γ·A ridge)") +
   theme_minimal(base_size = 11)
 
 out_path <- file.path("figs", "io", "pooled_partition.png")

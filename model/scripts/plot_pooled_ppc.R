@@ -16,9 +16,12 @@ cat("Loading bundle + fits ...\n")
 b <- readRDS(file.path(PATHS$fits_dir, "io_pooled_subset_data.rds"))
 sd <- b$stan_data
 fits <- list(
-  baseline = readRDS(file.path(PATHS$fits_dir, "io_pooled.rds")),
-  add      = readRDS(file.path(PATHS$fits_dir, "io_pooled_gamma_add.rds")),
-  mult     = readRDS(file.path(PATHS$fits_dir, "io_pooled_gamma_mult.rds"))
+  baseline = readRDS(file.path(PATHS$fits_dir, "io_pooled_widedelta.rds")),
+  add      = readRDS(file.path(PATHS$fits_dir, "io_pooled_gamma_widedelta_add.rds"))
+  # mult excluded: wide-delta multiplicative fit had identifiability
+  # collapse (Rhat up to 1.13, ess down to 20-70 for many params); the
+  # tight delta prior was implicitly regularizing the gamma*A ridge.
+  # See experiments.md §30.
 )
 
 # ---- extract median posterior params -----------------------------------
@@ -93,8 +96,7 @@ obs <- b$df |>
 
 # ---- plot --------------------------------------------------------------
 model_labels <- c(baseline = "baseline (no γ)",
-                  add      = "γ additive",
-                  mult     = "γ multiplicative")
+                  add      = "γ additive")
 preds$model <- factor(preds$model, levels = names(model_labels), labels = model_labels)
 study_pal <- c(BabyView = "#E69F00", SEEDLingS = "#56B4E9",
                AM2018   = "#009E73", FMW2013   = "#D55E00")

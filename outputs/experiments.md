@@ -1767,6 +1767,42 @@ Gamma variants were similarly refit with widened delta as
 [`fit_io_pooled_gamma_widedelta.R`](../model/scripts/fit_io_pooled_gamma_widedelta.R)
 → `fits/io_pooled_gamma_widedelta_{add,mult}.rds`.
 
+### A secondary finding: the multiplicative parameterization is fragile
+
+The wide-delta refit produced a sharp, scientifically interesting
+asymmetry between the two γ parameterizations:
+
+|                          | γ-add (wide-delta) | γ-mult (wide-delta) |
+|--------------------------|---------------------|----------------------|
+| `gamma` Rhat / ess_bulk  | 1.01 / 424          | **1.05 / 68.6**      |
+| `delta` Rhat / ess_bulk  | 1.01 / 609          | **1.12 / 515**       |
+| `pi_alpha` Rhat          | 1.00                | **1.13**             |
+| `sigma_r` ess_bulk       | 1734                | **50**               |
+| `sigma_alpha` ess_bulk   | 910                 | **30**               |
+| `sigma_zeta` ess_bulk    | 1405                | **31**               |
+| `study_input_mean[2,4]`  | clean               | **ess 21–22, Rhat 1.12** |
+
+The multiplicative form is `slope_i = (1 + δ + study_δ + ζ_i)·(1 + γ·log_r_dev_i)`,
+so the joint effect of input on slope flows through `γ·A` (where
+`A ≈ 1 + δ ≈ κ_pop`). γ and A are jointly identified ONLY via their
+PRODUCT — there's a ridge in the posterior along `γ·A = constant`. The
+**tight default delta prior was implicitly pinning A** (around 6.4),
+which collapsed the ridge to a point and made γ_mult cleanly
+identifiable. With wide delta letting A roam 9–11, the ridge stretches
+and HMC can't traverse it cleanly.
+
+The additive form `slope_i = (1 + δ + study_δ) + γ·log_r_dev_i + ζ_i`
+has no such ridge — γ_add is identified directly as the slope-shift-
+per-input. Its posterior is healthy under either prior choice.
+
+**Methodological takeaway:** the additive parameterization is the
+robust canonical γ form. The multiplicative form is interesting
+conceptually (efficiency × input synergy / "Matthew on top of Matthew")
+but is not statistically tractable without an informative prior on the
+scale parameter. For analyses that depend on γ, use additive; treat
+multiplicative as a sensitivity check only when paired with a
+regularized prior on `delta`.
+
 ### Reproducibility note
 
 The original `io_pooled.rds` / `io_pooled_gamma_{add,mult}.rds` are
