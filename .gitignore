@@ -114,3 +114,6 @@ outputs/feng_eval/seed*_partial.csv
 ~$*
 .claude/scheduled_tasks.lock
 sherlock/glmer_ladder_manifest.csv
+
+# Quarto auto-generated render artifacts
+outputs/paper/standard_model_files/
