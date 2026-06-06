@@ -10,16 +10,12 @@ keywords: Early word learning; Bayesian data analysis; Large language models
 abstract: |
   Children’s early word learning is alternatively portrayed as either a process of gradual accumulation or as an inferential process that results in rapid mapping. How can these two views be rectified? Here we present a statistical model that describes both the acceleration of children's vocabulary growth and its remarkable variability across children. This model shows how changes in children's learning efficiency mean that younger children accumulate knowledge slowly while older children make rapid inferences. Further, the model can be used to estimate how much variation between children is due to differences in home language environment, a key policy-relevant question. Estimates from four longitudinal datasets converge with a recent meta-analysis in suggesting XYZ% of total variance. Finally, we show that, in contrast to children, large language models are not well-described by this model: they show standard accumulator dynamics and very limited variability across a number of dimensions. These results suggest ...
 
-bibliography: bibliography.bib
+bibliography: standard_model.bib
 format:
-  acs-pdf:
-    journal:
-      id: jacsat  
-      type: article  #article, note, communication, review, letter, or perspectivee
-      layout: traditional #traditional or twocolumn, twocolumn currently broken for longtables
-      hide-email: true # if enabled, hides email addresses (and fax/phone)
-      abbreviations: IR,NMR,UV
-  acs-html: default
+  pnas-pdf:
+    keep-tex: true
+    template-options:
+      type: pnasresearcharticle  # also: pnasmathematics, pnasinvited
 ---
 
 Children’s early language learning is often portrayed as a process of accumulation and gradual learning, with statistical learning, mutual exclusivity and input viewpoints highlighting the accumulation nature. In contrast, studies of processing and word mapping highlight the increases in efficiency that happen over the same  period. How can these two views be rectified? One clue comes from examining the two key signatures of early vocabulary growth: variability and acceleration. What is the shape of this acceleration? And what is the source of variability, from children’s input or otherwise?? We present a quantitative model that unify these views while explaining both the variability and acceleration of children’s early language growth. The resulting model provides a good quantitative explanation for longitude vocabulary growth across large population of children. It also shows that by their increasing efficiency, and their ability of children, learning fundamentally different ways than large language, models, which show classic accumulator dynamics.
