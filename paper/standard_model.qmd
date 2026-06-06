@@ -18,17 +18,26 @@ format:
       type: pnasresearcharticle  # also: pnasmathematics, pnasinvited
 ---
 
-```{r}
-#| include: false
+```{r setup, include=FALSE}
+suppressPackageStartupMessages({
+  library(here); library(dplyr); library(tidyr); library(readr)
+  library(ggplot2); library(patchwork); library(latex2exp)
+  library(knitr); library(scales); library(stringr); library(forcats)
+  library(broom); library(png); library(grid); library(gridExtra)
+})
+source(here("paper", "_helpers.R"))
+
+# load cached data — produced by `Rscript paper/build_cache.R`
+CACHE <- here("paper", "cache")
+table1     <- readRDS(file.path(CACHE, "table1_datasets.rds"))
+ladder     <- readRDS(file.path(CACHE, "fig2_glmer_ladder.rds"))
+demo_blups <- readRDS(file.path(CACHE, "blups_demographics.rds"))
+io_summary <- readRDS(file.path(CACHE, "fig5_io_summary.rds"))
+
 knitr::opts_chunk$set(
-  echo    = FALSE,
-  message = FALSE,
-  warning = FALSE,
-  fig.align = "center",
-  out.width = "100%",
-  dpi     = 300
+  echo = FALSE, message = FALSE, warning = FALSE,
+  fig.align = "center", out.width = "100%", dpi = 300
 )
-source(here::here("outputs", "paper", "_helpers.R"))
 ```
 
 Children’s early language learning is often portrayed as a process of accumulation and gradual learning, with statistical learning, mutual exclusivity and input viewpoints highlighting the accumulation nature. In contrast, studies of processing and word mapping highlight the increases in efficiency that happen over the same  period. How can these two views be rectified? One clue comes from examining the two key signatures of early vocabulary growth: variability and acceleration. What is the shape of this acceleration? And what is the source of variability, from children’s input or otherwise?? We present a quantitative model that unify these views while explaining both the variability and acceleration of children’s early language growth. The resulting model provides a good quantitative explanation for longitude vocabulary growth across large population of children. It also shows that by their increasing efficiency, and their ability of children, learning fundamentally different ways than large language, models, which show classic accumulator dynamics.
@@ -105,30 +114,132 @@ The efficiency change was the best fitting model across all four datasets (as we
 
 Power-law growth models (in which growth in ability is a function of the logarithm of age) showed statistically better fits than exponential growth models (in which growth in ability is a linear function of age). Though these models were better from a statistical perspective ($\delta$AIC XYZ -- XYZ), differences were small within the age range we examined (see Supplemental Table XYZ and Figure XYZ for all model fits). 
 
-```{r}
+```{r fig-glmer-ladder, fig.width=11, fig.height=7}
 #| label: fig-glmer-ladder
 #| fig-cap: ""
-#| fig-width: 9
-#| fig-height: 7
-make_fig2_glmer_ladder()
+# Replicate the glmer-ladder main panel (cf. glmer_ladder/04b_plot.R):
+# empirical kid trajectories (thin lines + points) + per-kid quantile
+# predictions from each model (A, B_log, C_log, D_log) across the four
+# main-text languages.
+qtiles <- ladder$qtiles |>
+  filter(model %in% c("A", "B_log", "C_log", "D_log"),
+         qprob %in% c(0.1, 0.5, 0.9))
+emp <- ladder$emp |>
+  mutate(child_lang = paste(lang_slug, child_id, sep = "::"))
+
+model_lab <- c("A" = "(A) accumulator",
+               "B_log" = "(B) + pop. acceleration",
+               "C_log" = "(C) + per-kid efficiency",
+               "D_log" = "(D) + per-kid acceleration")
+qtiles$model_label <- factor(model_lab[qtiles$model], levels = model_lab)
+
+lang_lab  <- ladder$lang_labels
+emp$lang_label    <- factor(lang_lab[emp$lang_slug],    levels = lang_lab)
+qtiles$lang_label <- factor(lang_lab[qtiles$lang_slug], levels = lang_lab)
+# replicate per-model for facetting
+emp_facet <- bind_rows(lapply(names(model_lab), function(m)
+  emp |> mutate(model_label = factor(model_lab[m], levels = model_lab))))
+
+ggplot() +
+  geom_line(data = emp_facet,
+            aes(age, vocab, group = child_lang),
+            color = "grey55", alpha = 0.18, linewidth = 0.2) +
+  geom_point(data = emp_facet,
+             aes(age, vocab),
+             color = "grey35", alpha = 0.18, size = 0.35) +
+  geom_line(data = qtiles,
+            aes(age, vocab, group = qprob,
+                linewidth = factor(qprob), color = factor(qprob))) +
+  facet_grid(lang_label ~ model_label, scales = "free_y", switch = "y") +
+  scale_color_manual(values = c("0.1" = "#1f77b4", "0.5" = "#d62728",
+                                "0.9" = "#1f77b4"),
+                     labels = c("10th", "median", "90th"),
+                     name = "model quantile") +
+  scale_linewidth_manual(values = c("0.1" = 0.55, "0.5" = 0.9, "0.9" = 0.55),
+                         labels = c("10th", "median", "90th"),
+                         name = "model quantile") +
+  labs(x = "age (months)", y = "vocabulary (items produced)") +
+  theme_minimal(base_size = 9) +
+  theme(strip.text = element_text(size = 8, face = "bold"),
+        strip.placement = "outside",
+        panel.grid.minor = element_blank(),
+        legend.position = "bottom")
 ```
 
-```{r}
+```{r tbl-datasets}
 #| label: tbl-datasets
 #| tbl-cap: ""
-knitr::kable(
-  make_table1_datasets(),
-  col.names = c("Panel", "Dataset", "Citation", "N children",
-                "Admins/kid (median, range)", "Age range", "Input/recordings"),
-  align = "lllrlll"
-)
+# Wordbank rows are pulled from outputs/glmer_ladder/00_language_survey.csv;
+# IO rows are hardcoded from each bundle's actual extracts. Citation column
+# is a [@CITE] placeholder for the author to fill in.
+table1 |>
+  mutate(n_kids = format(n_kids, big.mark = ","),
+         admins_per_kid = sprintf("%.1f", admins_per_kid)) |>
+  knitr::kable(
+    col.names = c("Panel", "Dataset", "Citation",
+                  "N children", "Admins / kid (mean)",
+                  "Age range", "Input / recordings"),
+    align = "lllrlll"
+  )
 ```
 
-```{r}
+```{r fig-demographics, fig.width=11, fig.height=5.5}
 #| label: fig-demographics
 #| fig-cap: ""
-#| out-width: 100%
-knitr::include_graphics(fig3_png_path())
+# Per-kid BLUPs (xi = intercept, zeta = log-age slope) from the four D_log
+# fits joined with Wordbank demographics. For each (language, outcome) we
+# regress the z-scored random effect on sex + birth order + caregiver ed.
+# Coefficients are in SDs of the outcome and directly comparable across
+# panels and languages.
+fit_one <- function(d, outcome) {
+  d <- d |>
+    mutate(y = as.numeric(scale(.data[[outcome]]))) |>
+    filter(!is.na(y), !is.na(sex), !is.na(birth_order_2),
+           !is.na(caregiver_ed_3))
+  if (nrow(d) < 30) return(NULL)
+  m <- lm(y ~ sex + birth_order_2 + caregiver_ed_3, data = d)
+  broom::tidy(m, conf.int = TRUE) |>
+    mutate(outcome = outcome, n = nrow(d))
+}
+combos <- expand.grid(
+  lang_slug = unique(demo_blups$lang_slug),
+  outcome   = c("xi", "zeta"),
+  stringsAsFactors = FALSE
+)
+coefs <- bind_rows(lapply(seq_len(nrow(combos)), function(i) {
+  d <- filter(demo_blups, lang_slug == combos$lang_slug[i])
+  res <- fit_one(d, combos$outcome[i])
+  if (is.null(res)) NULL else mutate(res, lang_slug = combos$lang_slug[i])
+})) |>
+  filter(term != "(Intercept)") |>
+  mutate(
+    term_label = recode(term,
+      "sexMale"                  = "Male\n(vs Female)",
+      "birth_order_2Later"       = "Later\n(vs First)",
+      "caregiver_ed_3College"    = "College\n(vs ≤SomeCol.)",
+      "caregiver_ed_3Graduate+"  = "Graduate+\n(vs ≤SomeCol.)"),
+    predictor = factor(case_when(
+      grepl("sex",          term) ~ "Sex",
+      grepl("birth_order",  term) ~ "Birth order",
+      grepl("caregiver_ed", term) ~ "Caregiver education")),
+    outcome = factor(outcome, levels = c("xi", "zeta"),
+                     labels = c("Efficiency (ξ)",
+                                "Change in efficiency (ζ)")),
+    lang_label = factor(LANG_LABELS[lang_slug],
+                        levels = LANG_LABELS[ladder$langs]))
+
+ggplot(coefs, aes(term_label, estimate, color = lang_label)) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "grey50") +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high),
+                  position = position_dodge(width = 0.6), size = 0.35) +
+  facet_grid(outcome ~ predictor, scales = "free_x", switch = "x") +
+  scale_color_manual(values = LANG_PAL[ladder$langs], name = "language") +
+  labs(x = NULL, y = "regression coefficient (z-scored outcome)") +
+  theme_minimal(base_size = 9) +
+  theme(legend.position = "bottom",
+        strip.placement = "outside",
+        strip.text = element_text(face = "bold", size = 8.5),
+        axis.text.x = element_text(size = 7.5))
 ```
 
 The best-fitting modified accumulator model included large developmental changes in efficiency across all languages ($\beta = XYZ - XYZ$). This finding suggests that we can robustly reject pure accumulation models of early word learning. Instead, children get vastly more efficient over development. 
@@ -137,13 +248,11 @@ The best-fitting modified accumulator model included large developmental changes
 
 This change in efficiency could come from a variety of sources, including general maturation of memory and attention, specific changes in word recognition or processing [@fernald1998;@frank2026], the increasing sophistication of inferential strategies for word learning [@smith2002;@markman1988;etc], or other sources. 
 
-```{r}
+```{r fig-efficiency, out.width="100%"}
 #| label: fig-efficiency
 #| fig-cap: ""
-#| out-width: 100%
 knitr::include_graphics(
-  here::here("outputs", "figs", "longitudinal", "exposure_to_learn_EN.png")
-)
+  here("outputs", "figs", "longitudinal", "exposure_to_learn_EN.png"))
 ```
 
 As an illustration of this change in efficiency, Figure 2 shows a model-derived estimate of the average number of times a child would need to hear a word before producing it (See SI: Changes in Word Efficiency), using frequency estimates from the CHILDES Corpus [@mcwhinney2020;@sanchez2019]. Across different word classes (e.g., nouns, verbs, closed class words), efficiency increases exponentially, such that early-learned words such as "ball" may be heard tens of thousands of times before they are produced, while later learned words such as "vitamin" might only be heard tens of times before being produced. 
@@ -163,12 +272,64 @@ If $\pi$ > .5, then the majority of variation between individuals is not due to 
 In addition, 80-90% of between-child variation remains unexplained by input quantity. 
 These conclusions are supported by analysis of longitudinal input data from BabyView (N=20) and SEEDLings (N=44) datasets, which contain child-specific estimates of input, and Peekbank (N=XYZ), which contains child-specific estimates of processing speed.
 
-```{r}
+```{r fig-io-partition, fig.width=11, fig.height=4.5}
 #| label: fig-io-partition
 #| fig-cap: ""
-#| fig-width: 11
-#| fig-height: 4.5
-make_fig5_io_panel()
+# Two-panel: (A) observed vocabulary trajectories per IO study; (B) age-
+# dependent variance decomposition under the additive gamma model. Panel
+# B uses sigma_r, sigma_alpha, sigma_zeta, gamma at posterior median (see
+# experiments.md §30 for the diagnostic / wide-delta refit).
+obs <- io_summary$obs |>
+  mutate(study = factor(study, levels = names(STUDY_PAL)))
+p_obs <- ggplot(obs, aes(age, prop, color = study)) +
+  geom_point(alpha = 0.35, size = 0.6) +
+  geom_smooth(se = FALSE, method = "loess", span = 0.7, linewidth = 0.7,
+              formula = y ~ x) +
+  scale_color_manual(values = STUDY_PAL, name = "study") +
+  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.25)) +
+  labs(x = "age (months)", y = "vocabulary proportion produced",
+       title = "(A) IO datasets: observed growth") +
+  theme_minimal(base_size = 10) +
+  theme(legend.position = "bottom",
+        plot.title = element_text(face = "bold", size = 10))
+
+# Variance partition (additive form, mean of slope channel)
+p   <- io_summary$params
+a0  <- 15; ages <- seq(8, 30, length.out = 60); L <- log(ages / a0)
+sr2 <- p$sigma_r^2; sa2 <- p$sigma_alpha^2
+sz2 <- p$sigma_zeta_add^2; g <- p$gamma_add
+parts <- tibble(age = rep(ages, 4),
+                L   = rep(L,    4),
+                component = factor(rep(c("Input: intercept",
+                                         "Input: slope (γ)",
+                                         "Efficiency: intercept",
+                                         "Efficiency: slope"),
+                                       each = length(ages)),
+                  levels = c("Efficiency: slope", "Input: slope (γ)",
+                             "Efficiency: intercept", "Input: intercept"))) |>
+  mutate(var = case_when(
+    component == "Input: intercept"      ~ sr2,
+    component == "Input: slope (γ)"      ~ pmax(L^2 * g^2 * sr2 + 2 * L * g * sr2, 0),
+    component == "Efficiency: intercept" ~ sa2,
+    component == "Efficiency: slope"     ~ L^2 * sz2
+  ))
+
+p_partition <- ggplot(parts, aes(age, var, fill = component)) +
+  geom_area(alpha = 0.95) +
+  scale_fill_manual(values = c(
+    "Input: intercept"      = "#B4D7E8",
+    "Input: slope (γ)"      = "#1F77B4",
+    "Efficiency: intercept" = "#003D7A",
+    "Efficiency: slope"     = "#E8A0A8"), name = NULL) +
+  labs(x = "age (months)",
+       y = expression(Var[i](theta[it])),
+       title = "(B) Variance partition (γ-additive, wide-delta)") +
+  theme_minimal(base_size = 10) +
+  theme(legend.position = "bottom",
+        plot.title = element_text(face = "bold", size = 10),
+        legend.text = element_text(size = 8))
+
+p_obs + p_partition + plot_layout(widths = c(1, 1))
 ```
 
 
@@ -176,22 +337,23 @@ Thus, modeling human learning requires positing other sources of variability and
 
 We end by providing a quantitative comparison between within-child human learning and LLM scaling laws, showing that children’s early language learning is strikingly different from LLM scaling: it shows both steeper scaling and greater variance in growth rate.
 
-```{r}
+```{r fig-llm-acceleration, fig.width=11, fig.height=4.5}
 #| label: fig-llm-acceleration
 #| fig-cap: ""
-#| fig-width: 11
-#| fig-height: 4.5
-panels <- fig6_panels()
-# Two-panel composite assembled via patchwork from existing PNGs.
-# Author iterates on the final figure choice.
-library(png); library(grid)
+# Best-guess two-panel composite (will iterate). Each panel is an
+# existing PNG composed via grid; replace with chunked plots once we
+# decide which LLM-vs-children comparison to feature.
+panel_paths <- list(
+  A = here("outputs", "figs", "longitudinal",
+           "chang_bergen_slope_comparison.png"),
+  B = here("outputs", "figs", "schematic", "D1_scaling_disanalogy.png"))
 p_to_grob <- function(path) {
   if (!file.exists(path)) return(grid::nullGrob())
-  rasterGrob(readPNG(path), interpolate = TRUE)
+  grid::rasterGrob(png::readPNG(path), interpolate = TRUE)
 }
 gridExtra::grid.arrange(
-  p_to_grob(panels$A),
-  p_to_grob(panels$B),
+  p_to_grob(panel_paths$A),
+  p_to_grob(panel_paths$B),
   ncol = 2
 )
 ```
