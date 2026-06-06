@@ -1,0 +1,503 @@
+% Options for packages loaded elsewhere
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+%
+\documentclass[
+]{pnas-new}
+\usepackage{xcolor}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+% Make \paragraph and \subparagraph free-standing
+\makeatletter
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}{
+    \@ifstar
+      \xxxParagraphStar
+      \xxxParagraphNoStar
+  }
+  \newcommand{\xxxParagraphStar}[1]{\oldparagraph*{#1}\mbox{}}
+  \newcommand{\xxxParagraphNoStar}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}{
+    \@ifstar
+      \xxxSubParagraphStar
+      \xxxSubParagraphNoStar
+  }
+  \newcommand{\xxxSubParagraphStar}[1]{\oldsubparagraph*{#1}\mbox{}}
+  \newcommand{\xxxSubParagraphNoStar}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+\makeatother
+
+
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+
+
+
+
+
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+
+
+ 
+
+
+\makeatletter
+\let\oldlt\longtable
+\let\endoldlt\endlongtable
+
+\def\longtable{\@ifnextchar[\longtable@i \longtable@ii}
+\def\longtable@i[#1]{%
+  % Temporarily fool longtable into thinking we're in onecolumn mode
+  \@twocolumnfalse
+  \oldlt[#1]%
+}
+\def\longtable@ii{%
+  % Temporarily fool longtable into thinking we're in onecolumn mode  
+  \@twocolumnfalse
+  \oldlt
+}
+\def\endlongtable{%
+  \endoldlt
+  % Restore twocolumn flag
+  \@twocolumntrue
+}
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\AtBeginDocument{%
+\ifdefined\contentsname
+  \renewcommand*\contentsname{Table of contents}
+\else
+  \newcommand\contentsname{Table of contents}
+\fi
+\ifdefined\listfigurename
+  \renewcommand*\listfigurename{List of Figures}
+\else
+  \newcommand\listfigurename{List of Figures}
+\fi
+\ifdefined\listtablename
+  \renewcommand*\listtablename{List of Tables}
+\else
+  \newcommand\listtablename{List of Tables}
+\fi
+\ifdefined\figurename
+  \renewcommand*\figurename{Figure}
+\else
+  \newcommand\figurename{Figure}
+\fi
+\ifdefined\tablename
+  \renewcommand*\tablename{Table}
+\else
+  \newcommand\tablename{Table}
+\fi
+}
+\@ifpackageloaded{float}{}{\usepackage{float}}
+\floatstyle{ruled}
+\@ifundefined{c@chapter}{\newfloat{codelisting}{h}{lop}}{\newfloat{codelisting}{h}{lop}[chapter]}
+\floatname{codelisting}{Listing}
+\newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
+\makeatother
+\makeatletter
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
+\makeatother
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={Variability and acceleration in the growth of children's early vocabulary},
+  pdfauthor={Michael C. Frank},
+  pdfkeywords={Early word learning; Bayesian data analysis; Large
+language models},
+  colorlinks=true,
+  linkcolor={blue},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={Blue},
+  pdfcreator={LaTeX via pandoc}}
+
+
+\templatetype{pnasresearcharticle}
+
+\title{Variability and acceleration in the growth of children's early
+vocabulary}
+
+\newcommand{\equalcont}{1}
+
+\newcommand{\correspond}{1}
+
+\author[aff-1%
+%
+%
+]{Michael C. Frank}
+
+\affil[aff-1]{Department of Psychology, Stanford University}
+
+
+
+
+
+
+
+\keywords{Early word learning; Bayesian data analysis; Large language
+models}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Children's early word learning is alternatively portrayed as either a
+process of gradual accumulation or as an inferential process that
+results in rapid mapping. How can these two views be rectified? Here we
+present a statistical model that describes both the acceleration of
+children's vocabulary growth and its remarkable variability across
+children. This model shows how changes in children's learning efficiency
+mean that younger children accumulate knowledge slowly while older
+children make rapid inferences. Further, the model can be used to
+estimate how much variation between children is due to differences in
+home language environment, a key policy-relevant question. Estimates
+from four longitudinal datasets converge with a recent meta-analysis in
+suggesting XYZ\% of total variance. Finally, we show that, in contrast
+to children, large language models are not well-described by this model:
+they show standard accumulator dynamics and very limited variability
+across a number of dimensions. These results suggest \ldots{}
+\end{abstract}
+
+\dates{This manuscript was compiled on \today}
+\doi{\url{www.pnas.org/cgi/doi/10.1073/pnas.XXXXXXXXXX}}
+
+\thispagestyle{firststyle}
+\ifthenelse{\boolean{shortarticle}}{\ifthenelse{\boolean{singlecolumn}}{\abscontentformatted}{\abscontent}}{}
+
+Children's early language learning is often portrayed as a process of
+accumulation and gradual learning, with statistical learning, mutual
+exclusivity and input viewpoints highlighting the accumulation nature.
+In contrast, studies of processing and word mapping highlight the
+increases in efficiency that happen over the same period. How can these
+two views be rectified? One clue comes from examining the two key
+signatures of early vocabulary growth: variability and acceleration.
+What is the shape of this acceleration? And what is the source of
+variability, from children's input or otherwise?? We present a
+quantitative model that unify these views while explaining both the
+variability and acceleration of children's early language growth. The
+resulting model provides a good quantitative explanation for longitude
+vocabulary growth across large population of children. It also shows
+that by their increasing efficiency, and their ability of children,
+learning fundamentally different ways than large language, models, which
+show classic accumulator dynamics.
+
+Children's early vocabulary grows very rapidly during early childhood,
+with large variation between children. The nature of this growth has
+theoretical, practical, and methodological importance.
+
+From a theoretical perspective, growth mechanisms shed light on
+children's fundamental learning mechanisms and how they change across
+childhood. From a practical perspective, variation in growth is an
+important precursor --- and predictor --- of academic achievement. From
+a methodological perspective, vocabulary also affords a unique
+psychometric opportunity to study human variation because, unlike nearly
+all important human psychological metrics, there is a true zero point -
+a time before which children know no words. Thus, absolute levels of
+variability can be calculated.
+
+One dominant viewpoint is that this growth can be characterized as a
+process of accumulation (McMurray 2007; Mitchell \& McMurray, 2009;
+Hidaka, 2013; Mollica \& Piantadosi, 2017; Kachergis et al., 2021). This
+pure accumulator view connects with a viewpoint in which the quantity of
+language that children hear has a strong causal role in the speed of
+their learning (Fernald papers; Bergeleson 1001). It also connects with
+the idea that large language models -- whose learning scales in
+predictable, accumulator-like ways (Kaplan, Chinchilla, scaling laws) --
+might be good models for children's learning.
+
+But important parts of this proposal have not been fleshed out. For
+example, how much variation is due to input quantity vs.~other sources?
+Meta-analysis of this relationship suggests it's there but not that big
+(Coffey \& Snedeker 2026). Could be quality as well, of course.
+
+Furthermore, how does the accumulation process relate to the rapid
+growth of vocabulary? On some models, accumulation by itself can produce
+an exponential ``vocabulary explosion'' while the child's own learning
+abilities remain constant. On other accounts, however, the child's own
+abilities change over development. These changes could be due to the
+accumulation of language allowing bootstrapping (e.g., via mutual
+excusivity or the shape bias), they could be through faster processing
+(Fernald rich get richer), or they could be via general maturation
+(e.g., better memory, faster processing). Or all of these.
+
+We address these questions by creating Bayesian data analysis models
+that connect proposals about the nature of the accumulation process with
+large-scale data about the longitudinal growth of children's vocabulary
+over time. Our key innovations are 1) that we model population
+variability between children, not just the central tendency and 2) that
+we directly connect quantitative estimates of language exposure to the
+rate of vocabulary growth.
+
+Critically, we make use of new data resources, first connecting between
+vocabulary growth and data-driven estimates of the general range of
+language input quantity available to children (study 1), then to
+estimates of specific children's language input from BabyView and
+SEEDLings datasets (study 2), and finally to estimates of children's
+processing speed from Peekbank (study 3).
+
+Overall, our analysis supports a view in which children's vocabulary
+growth is not a pure process of accumulation but rather one that
+accelerates rapidly over time. Further, although variation in input rate
+accounts for significant variation in learning speed, it is limited to
+approximately 10\% of total variation across datasets.
+
+Finally, we explore an application of the same framework to large
+language models. Making use of GPT-2 models trained on human
+developmental data, we show that -- in contrast to children -- these
+models do appear to function as pure accumulators. This analysis exposes
+a critical disanalogy between LLMs and human learners and suggests a
+potential route for understanding the vast ``data gap'' between children
+and large language models (Frank, 2023).
+
+Here we ask whether these two signatures of vocabulary growth -
+variation and acceleration - are consistent with pure accumulator
+models, which are prevalent in the word learning literature and which
+characterize the scaling dynamics of large language models.
+
+\section{Model}\label{model}
+
+We start with a simple accumulator model that merges ideas from item
+response theory and learning theory (McMurray, Kachergis). We begin with
+the Rasch model.
+
+Child \(i\) produces word \(j\) has probability (\(\eta_ij\))
+
+\[P(w_{i,j}=1 \mid \theta_i, \delta_j) =\frac{\exp(\theta_i - \delta_j)}{1 + \exp(\theta_i - \delta_j)}\]
+This is an IRT model -- specifically a Rasch model -- where \(\theta_i\)
+is child \(i\)'s ability and \(\delta_j\) is word \(j\)'s difficulty.
+Following (\textbf{kachergis2021?}), we consider a simple accumulator
+model (``pure accumulator''), specifying that \(\theta_i\) is not a
+single parameter for a child but instead a function of accumulation over
+time. In the simplest form:
+
+\[\theta_i  = log(r_i) + log(t)\]
+
+\noindent where \(r_i\) is the child's rate of language innput (in
+tokens per month) and \(t\) is the child's age in months. In the
+exponential, this formulation produces a simple rate X time computation.
+In other words, ability increases over time. This form instantiates the
+basic hypothesis that the only thing that changes over time is more
+input, and the only source of variation between children is variation in
+rate.
+
+This model does not have any way to capture variation across children.
+Thus, we augment this model by adding this model in two ways. First, we
+add variation related to accumulation rate:
+
+\[\theta_i  = log(\alpha_i) + log(r_i) + log(t)\]
+
+In this formulation,
+
+Second, we add a temporal acceleration component (an exponent):
+
+\[\theta_i  = log(\alpha_i) + log(r_i) + \kappa_i * log(t)\]
+
+When exponentiated, this turns into
+\[\alpha_i * r_i  * t \exp{\kappa_i}\].
+
+This final model instantiates the idea that children vary in their base
+level of variation (\(\alpha\)) and their acceleration rate
+(\(\kappa\)).
+
+As we will show, such a model fits a range of data vastly better than
+models without these terms.
+
+\subsection{Model comparison}\label{model-comparison}
+
+We used the standard reduction of the Rasch model to a mixed effects
+regression model (\textbf{jss\_paper?}) to fit the set of models
+described above.
+
+We fit these models to data on children's language production. Our
+primary data source is the MacArthur-Bates Communicative Development
+Inventories {[}MB-CDI;
+(\textbf{fenson1994?});(\textbf{marchman2021?}){]}, a popular parent
+report instrument in which parents are asked to indicate which words
+their child produces and understand. Here we focus exclusively on
+production, which is used with older children and which tends to be a
+more reliable measure {[}(\textbf{frank2021?});others{]}. We make use of
+data from Wordbank (\textbf{frank2017?}), an open repository of data
+from the MB-CDI. Since our efficiency variation model is not
+identifiable in cross-sectional data, we focus on those datasets that
+include substantial amounts of longitudinal data, which come from
+American English (N=XYZ), Norwegian (N=XYZ), Quebec French (N=XYZ), and
+Japanese (N=XYZ).
+
+The efficiency change was the best fitting model across all four
+datasets (as well as two smaller ones; see SI), with AIC differences of
+XYZ--XYZ. Figure 1 shows the four primary model variants: pure
+accumulator models and models that include population-level efficiency
+change predict no variation (A, B). Allowing both efficiency (intercept)
+and efficiency change (slope) to vary across individuals results in
+substantially better fit.
+
+Power-law growth models (in which growth in ability is a function of the
+logarithm of age) showed statistically better fits than exponential
+growth models (in which growth in ability is a linear function of age).
+Though these models were better from a statistical perspective
+(\(\delta\)AIC XYZ -- XYZ), differences were small within the age range
+we examined (see Supplemental Table XYZ and Figure XYZ for all model
+fits).
+
+\pandocbounded{\includegraphics[keepaspectratio]{../figs/longitudinal/glmer_ladder_main.png}}
+The best-fitting modified accumulator model included large developmental
+changes in efficiency across all languages (\(\beta = XYZ - XYZ\)). This
+finding suggests that we can robustly reject pure accumulation models of
+early word learning. Instead, children get vastly more efficient over
+development.
+
+This change in efficiency could come from a variety of sources,
+including general maturation of memory and attention, specific changes
+in word recognition or processing (\textbf{fernald1998?};
+\textbf{frank2026?}), the increasing sophistication of inferential
+strategies for word learning
+{[}(\textbf{smith2002?});(\textbf{markman1988?});etc{]}, or other
+sources.
+
+\begin{figure}[H]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{../figs/longitudinal/exposure_to_learn_EN.png}}
+
+}
+
+\caption{Figure 2.}
+
+\end{figure}%
+
+As an illustration of this change in efficiency, Figure 2 shows a
+model-derived estimate of the average number of times a child would need
+to hear a word before producing it (See SI: Changes in Word Efficiency),
+using frequency estimates from the CHILDES Corpus
+(\textbf{mcwhinney2020?}; \textbf{sanchez2019?}). Across different word
+classes (e.g., nouns, verbs, closed class words), efficiency increases
+exponentially, such that early-learned words such as ``ball'' may be
+heard tens of thousands of times before they are produced, while later
+learned words such as ``vitamin'' might only be heard tens of times
+before being produced.
+
+\subsection{Estimating input}\label{estimating-input}
+
+Under a range of plausible assumptions about variation in input, all
+children show supra-linear scaling of growth, even accounting for
+accumulation dynamics.
+
+As discussed above, one important question is how much of variance is
+due to variance in rate. We explore this by asking about the parameter
+\(\pi\),
+
+\[\pi = \frac{\sigma_\alpha^2}{\sigma_\alpha^2 + \sigma_r^2}\]
+
+If \(\pi\) \textgreater{} .5, then the majority of variation between
+individuals is not due to pure accumulation rate.
+
+In addition, 80-90\% of between-child variation remains unexplained by
+input quantity. These conclusions are supported by analysis of
+longitudinal input data from BabyView (N=20) and SEEDLings (N=44)
+datasets, which contain child-specific estimates of input, and Peekbank
+(N=XYZ), which contains child-specific estimates of processing speed.
+
+Thus, modeling human learning requires positing other sources of
+variability and acceleration. Sources of variability could include from
+variation in interactional input quality, genetic variation between
+children, environmental richness not captured by input, etc. Sources of
+acceleration could include increases in processing efficiency,
+learning-to-learn including mutual exclusivity, shape bias, syntactic
+bootstrapping, as well as domain general changes in perception,
+processing speed, memory, attention or other aspects of cognition. The
+key to understanding children's data efficiency may thus lie in better
+understanding when and how children's learning accelerates with
+maturation and experience.
+
+We end by providing a quantitative comparison between within-child human
+learning and LLM scaling laws, showing that children's early language
+learning is strikingly different from LLM scaling: it shows both steeper
+scaling and greater variance in growth rate.
+
+\section{Discussion}\label{discussion}
+
+Coffey 2026 variance decomposition
+
+Blingualism
+
+International adoption
+
+https://bergelsonlab.fas.harvard.edu/sites/g/files/omnuum3941/files/2025-01/meylan\_bergelson\_2021\_ARL.pdf
+
+Claude Code was used for literature review, code generation,
+visualization, and simulation infrastructure. All writing is original to
+the author.
+
+
+
+
+\end{document}
