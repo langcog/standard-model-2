@@ -183,21 +183,24 @@ table1 |>
   )
 ```
 
-```{r fig-demographics, fig.width=11, fig.height=5.5}
+```{r fig-demographics, fig.width=9, fig.height=5.5}
 #| label: fig-demographics
 #| fig-cap: ""
-# Per-kid BLUPs (xi = intercept, zeta = log-age slope) from the four D_log
-# fits joined with Wordbank demographics. For each (language, outcome) we
-# regress the z-scored random effect on sex + birth order + caregiver ed.
-# Coefficients are in SDs of the outcome and directly comparable across
-# panels and languages.
+# Per-kid BLUPs (xi = intercept, zeta = log-age slope) from each language's
+# D_log fit, joined with Wordbank demographics. For each (language, outcome)
+# we regress the z-scored random effect on sex + caregiver education
+# (birth order dropped: see PR thread — Japanese has 0 birth-order
+# coverage and French Quebecois has 34/178). Coefficients are in SDs of
+# the outcome, directly comparable across languages.
+#
+# We add a meta-analytic summary across the four languages per (term,
+# outcome) using random-effects inverse-variance weighting (REML).
 fit_one <- function(d, outcome) {
   d <- d |>
     mutate(y = as.numeric(scale(.data[[outcome]]))) |>
-    filter(!is.na(y), !is.na(sex), !is.na(birth_order_2),
-           !is.na(caregiver_ed_3))
+    filter(!is.na(y), !is.na(sex), !is.na(caregiver_ed_3))
   if (nrow(d) < 30) return(NULL)
-  m <- lm(y ~ sex + birth_order_2 + caregiver_ed_3, data = d)
+  m <- lm(y ~ sex + caregiver_ed_3, data = d)
   broom::tidy(m, conf.int = TRUE) |>
     mutate(outcome = outcome, n = nrow(d))
 }
@@ -211,35 +214,63 @@ coefs <- bind_rows(lapply(seq_len(nrow(combos)), function(i) {
   res <- fit_one(d, combos$outcome[i])
   if (is.null(res)) NULL else mutate(res, lang_slug = combos$lang_slug[i])
 })) |>
-  filter(term != "(Intercept)") |>
+  filter(term != "(Intercept)")
+
+# Random-effects meta-analysis per (outcome, term) across languages
+meta_summary <- coefs |>
+  group_by(outcome, term) |>
+  group_modify(~ {
+    res <- tryCatch(
+      metafor::rma(yi = .x$estimate, sei = .x$std.error,
+                   method = "REML", control = list(stepadj = 0.5)),
+      error = function(e) NULL)
+    if (is.null(res)) return(tibble())
+    tibble(estimate = as.numeric(res$beta),
+           conf.low = res$ci.lb, conf.high = res$ci.ub,
+           k = res$k)
+  }) |>
+  ungroup() |>
+  mutate(lang_slug = "_meta_")
+
+coefs_all <- bind_rows(coefs, meta_summary) |>
   mutate(
     term_label = recode(term,
-      "sexMale"                  = "Male\n(vs Female)",
-      "birth_order_2Later"       = "Later\n(vs First)",
-      "caregiver_ed_3College"    = "College\n(vs ≤SomeCol.)",
-      "caregiver_ed_3Graduate+"  = "Graduate+\n(vs ≤SomeCol.)"),
-    predictor = factor(case_when(
-      grepl("sex",          term) ~ "Sex",
-      grepl("birth_order",  term) ~ "Birth order",
-      grepl("caregiver_ed", term) ~ "Caregiver education")),
+      "sexMale"                 = "Male\n(vs Female)",
+      "caregiver_ed_3College"   = "College\n(vs ≤Some Col.)",
+      "caregiver_ed_3Graduate+" = "Graduate+\n(vs ≤Some Col.)") |>
+      factor(levels = rev(c("Male\n(vs Female)",
+                            "College\n(vs ≤Some Col.)",
+                            "Graduate+\n(vs ≤Some Col.)"))),
     outcome = factor(outcome, levels = c("xi", "zeta"),
-                     labels = c("Efficiency (ξ)",
-                                "Change in efficiency (ζ)")),
-    lang_label = factor(LANG_LABELS[lang_slug],
-                        levels = LANG_LABELS[ladder$langs]))
+                     labels = c("Efficiency~(xi)",
+                                "'Change in efficiency'~(zeta)")),
+    lang_label = factor(c(LANG_LABELS, "_meta_" = "Meta-analytic")[lang_slug],
+                        levels = c(LANG_LABELS[ladder$langs],
+                                   "Meta-analytic")))
+plot_pal <- c(setNames(unname(LANG_PAL[ladder$langs]),
+                       unname(LANG_LABELS[ladder$langs])),
+              "Meta-analytic" = "black")
 
-ggplot(coefs, aes(term_label, estimate, color = lang_label)) +
-  geom_hline(yintercept = 0, linetype = "dashed", color = "grey50") +
-  geom_pointrange(aes(ymin = conf.low, ymax = conf.high),
-                  position = position_dodge(width = 0.6), size = 0.35) +
-  facet_grid(outcome ~ predictor, scales = "free_x", switch = "x") +
-  scale_color_manual(values = LANG_PAL[ladder$langs], name = "language") +
-  labs(x = NULL, y = "regression coefficient (z-scored outcome)") +
-  theme_minimal(base_size = 9) +
+coefs_all <- coefs_all |>
+  mutate(is_meta = lang_label == "Meta-analytic")
+ggplot(coefs_all,
+       aes(estimate, term_label, color = lang_label,
+           group = lang_label, size = is_meta)) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "grey55") +
+  geom_pointrange(aes(xmin = conf.low, xmax = conf.high),
+                  position = position_dodge(width = 0.70),
+                  fatten = 3) +
+  facet_wrap(~ outcome, ncol = 2, scales = "free_x",
+             labeller = label_parsed) +
+  scale_color_manual(values = plot_pal, name = NULL, drop = FALSE) +
+  scale_size_manual(values = c(`FALSE` = 0.35, `TRUE` = 0.65),
+                    guide = "none") +
+  guides(color = guide_legend(nrow = 1)) +
+  labs(x = "regression coefficient (z-scored outcome)", y = NULL) +
+  theme_minimal(base_size = 10) +
   theme(legend.position = "bottom",
-        strip.placement = "outside",
-        strip.text = element_text(face = "bold", size = 8.5),
-        axis.text.x = element_text(size = 7.5))
+        strip.text = element_text(face = "bold", size = 11),
+        axis.text.y = element_text(size = 9))
 ```
 
 The best-fitting modified accumulator model included large developmental changes in efficiency across all languages ($\beta = XYZ - XYZ$). This finding suggests that we can robustly reject pure accumulation models of early word learning. Instead, children get vastly more efficient over development. 
