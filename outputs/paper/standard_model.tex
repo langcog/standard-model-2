@@ -372,6 +372,18 @@ level of variation (\(\alpha\)) and their acceleration rate
 As we will show, such a model fits a range of data vastly better than
 models without these terms.
 
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{standard_model_files/figure-pdf/fig-schematic-1.pdf}
+
+}
+
+\caption{\label{fig-schematic}}
+
+\end{figure}%
+
 \subsection{Model comparison}\label{model-comparison}
 
 We used the standard reduction of the Rasch model to a mixed effects
@@ -409,7 +421,91 @@ Though these models were better from a statistical perspective
 we examined (see Supplemental Table XYZ and Figure XYZ for all model
 fits).
 
-\pandocbounded{\includegraphics[keepaspectratio]{../figs/longitudinal/glmer_ladder_main.png}}
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{standard_model_files/figure-pdf/fig-glmer-ladder-1.pdf}
+
+}
+
+\caption{\label{fig-glmer-ladder}}
+
+\end{figure}%
+
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1760}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1520}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.0720}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.0880}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.2160}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.0800}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.2160}}@{}}
+
+\caption{\label{tbl-datasets}}
+
+\tabularnewline
+
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Panel
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Dataset
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Citation
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+N children
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Admins/kid (median, range)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Age range
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Input/recordings
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Wordbank longitudinal & English (American) &
+(\textbf{CITE?})
+& NA & NA & NA & --- \\
+Wordbank longitudinal & Norwegian &
+(\textbf{CITE?})
+& NA & NA & NA & --- \\
+Wordbank longitudinal & French (Quebecois) &
+(\textbf{CITE?})
+& NA & NA & NA & --- \\
+Wordbank longitudinal & Japanese &
+(\textbf{CITE?})
+& NA & NA & NA & --- \\
+Input-observed (IO) & BabyView &
+(\textbf{CITE?})
+& 22 & 5 (1--8) & 6--32 mo & Head-cam, n=5739 videos \\
+Input-observed (IO) & SEEDLingS &
+(\textbf{CITE?})
+& 44 & 12 (6--13) & 6--17 mo & LENA, n=525 day recordings \\
+Input-observed (IO) & AM2018 &
+(\textbf{CITE?})
+& 66 & 3 (1--3) & 16--24 mo & LENA, n=126 recordings \\
+Input-observed (IO) & FMW2013 &
+(\textbf{CITE?})
+& 51 & 3 (1--3) & 18--30 mo & LENA, n=51 recordings \\
+
+\end{longtable}
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../figs/longitudinal/predictors_alpha_zeta_panel.png}
+
+}
+
+\caption{\label{fig-demographics}}
+
+\end{figure}%
+
 The best-fitting modified accumulator model included large developmental
 changes in efficiency across all languages (\(\beta = XYZ - XYZ\)). This
 finding suggests that we can robustly reject pure accumulation models of
@@ -424,13 +520,15 @@ strategies for word learning
 {[}(\textbf{smith2002?});(\textbf{markman1988?});etc{]}, or other
 sources.
 
-\begin{figure}[H]
+\begin{figure}
 
-{\centering \pandocbounded{\includegraphics[keepaspectratio]{../figs/longitudinal/exposure_to_learn_EN.png}}
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../figs/longitudinal/exposure_to_learn_EN.png}
 
 }
 
-\caption{Figure 2.}
+\caption{\label{fig-efficiency}}
 
 \end{figure}%
 
@@ -466,6 +564,18 @@ longitudinal input data from BabyView (N=20) and SEEDLings (N=44)
 datasets, which contain child-specific estimates of input, and Peekbank
 (N=XYZ), which contains child-specific estimates of processing speed.
 
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{standard_model_files/figure-pdf/fig-io-partition-1.pdf}
+
+}
+
+\caption{\label{fig-io-partition}}
+
+\end{figure}%
+
 Thus, modeling human learning requires positing other sources of
 variability and acceleration. Sources of variability could include from
 variation in interactional input quality, genetic variation between
@@ -482,6 +592,18 @@ We end by providing a quantitative comparison between within-child human
 learning and LLM scaling laws, showing that children's early language
 learning is strikingly different from LLM scaling: it shows both steeper
 scaling and greater variance in growth rate.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{standard_model_files/figure-pdf/fig-llm-acceleration-1.pdf}
+
+}
+
+\caption{\label{fig-llm-acceleration}}
+
+\end{figure}%
 
 \section{Discussion}\label{discussion}
 
