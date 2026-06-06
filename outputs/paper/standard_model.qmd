@@ -6,9 +6,10 @@ author:
 
 title: Variability and acceleration in the growth of children’s early vocabulary
 title-short: Variability and acceleration
-keywords: American Chemical Society, LaTeX
+keywords: Early word learning; Bayesian data analysis; Large language models
 abstract: |
-  This is the abstract.
+  Children’s early word learning is alternatively portrayed as either a process of gradual accumulation or as an inferential process that results in rapid mapping. How can these two views be rectified? Here we present a statistical model that describes both the acceleration of children's vocabulary growth and its remarkable variability across children. This model shows how changes in children's learning efficiency mean that younger children accumulate knowledge slowly while older children make rapid inferences. Further, the model can be used to estimate how much variation between children is due to differences in home language environment, a key policy-relevant question. Estimates from four longitudinal datasets converge with a recent meta-analysis in suggesting XYZ% of total variance. Finally, we show that, in contrast to children, large language models are not well-described by this model: they show standard accumulator dynamics and very limited variability across a number of dimensions. These results suggest ...
+
 bibliography: bibliography.bib
 format:
   acs-pdf:
@@ -21,7 +22,7 @@ format:
   acs-html: default
 ---
 
-<!-- quarto add quarto-journals/acs -->
+Children’s early language learning is often portrayed as a process of accumulation and gradual learning, with statistical learning, mutual exclusivity and input viewpoints highlighting the accumulation nature. In contrast, studies of processing and word mapping highlight the increases in efficiency that happen over the same  period. How can these two views be rectified? One clue comes from examining the two key signatures of early vocabulary growth: variability and acceleration. What is the shape of this acceleration? And what is the source of variability, from children’s input or otherwise?? We present a quantitative model that unify these views while explaining both the variability and acceleration of children’s early language growth. The resulting model provides a good quantitative explanation for longitude vocabulary growth across large population of children. It also shows that by their increasing efficiency, and their ability of children, learning fundamentally different ways than large language, models, which show classic accumulator dynamics.
 
 Children’s early vocabulary grows very rapidly during early childhood, with large variation between children. The nature of this growth has theoretical, practical, and methodological importance.
 
@@ -41,38 +42,24 @@ Overall, our analysis supports a view in which children’s vocabulary growth is
 
 Finally, we explore an application of the same framework to large language models. Making use of GPT-2 models trained on human developmental data, we show that – in contrast to children – these models do appear to function as pure accumulators. This analysis exposes a critical disanalogy between LLMs and human learners and suggests a potential route for understanding the vast “data gap” between children and large language models (Frank, 2023). 
 
-# Data
-
-We start with the MB-CDI
-
-Across XYZ different language samples (N=XYZ), variability between children is extremely high, and increases with development. 
 
 Here we ask whether these two signatures of vocabulary growth - variation and acceleration - are consistent with pure accumulator models, which are prevalent in the word learning literature and which characterize the scaling dynamics of large language models.
 
-We use psychometric models to characterize how human vocabulary growth scales with data. 
-Using Bayesian data analysis, we investigate longitudinal growth in vocabulary across two languages (English, N=XYZ and Norwegian, N=XYZ). 
 
 # Model 
 
-We start with a simple accumulator model that merges ideas from item response theory and learning theory (McMurray, Kachergis): 
+We start with a simple accumulator model that merges ideas from item response theory and learning theory (McMurray, Kachergis). We begin with the Rasch model.
 
-Kid i learning word has probability logit($\eta_ij$)
+Child $i$ produces word $j$ has probability ($\eta_ij$)
 
-$$\eta_ij = \theta_i - \delta_j$$
+$$P(w_{i,j}=1 \mid \theta_i, \delta_j) =\frac{\exp(\theta_i - \delta_j)}{1 + \exp(\theta_i - \delta_j)}$$
+This is an IRT model – specifically a Rasch model – where $\theta_i$ is child $i$'s ability and $\delta_j$ is word $j$'s difficulty. Following @kachergis2021, we consider a simple accumulator model ("pure accumulator"), specifying that $\theta_i$ is not a single parameter for a child but instead a function of accumulation over time. In the simplest form: 
 
-This is an IRT model – specifically a Rasch model – where $\theta$ is ability and $\delta$ is word difficulty. But we augment this by specifying that $\theta$ is not a single parameter for a child but instead a function of accumulation over time. In the simplest form: 
+$$\theta_i  = log(r_i) + log(t)$$
 
-$$\theta_i  = log(r_i) + log(t),$$
+\noindent where $r_i$ is the child's rate of language innput (in tokens per month) and $t$ is the child's age in months. In the exponential, this formulation produces a simple rate X time computation. In other words, ability increases over time. This form instantiates the basic hypothesis that the only thing that changes over time is more input, and the only source of variation between children is variation in rate. 
 
-\noindent where t is months and r is word tokens per month
-
-And 
-
-$$\delta_j = \psi_j$$
-
-When exponentiated, this gives us a simple rate X time computation. In other words, ability increases over time. This form instantiates the basic hypothesis that the only thing that changes over time is more input, and the only source of variation between children is variation in rate.
-
-We augment this model in two ways. First, we add variation related to accumulation rate:
+This model does not have any way to capture variation across children. Thus, we augment this model by adding this model in two ways. First, we add variation related to accumulation rate:
 
 $$\theta_i  = log(\alpha_i) + log(r_i) + log(t)$$
 
@@ -89,20 +76,42 @@ This final model instantiates the idea that children vary in their base level of
 
 As we will show, such a model fits a range of data vastly better than models without these terms. 
 
+
+
+<!-- A second question is about the nature of acceleration. If $\kappa$ > 1, then acceleration is steeper than pure accumulator dynamics would predict.  -->
+
+## Model comparison
+
+We used the standard reduction of the Rasch model to a mixed effects regression model [@jss_paper] to fit the set of models described above. 
+
+We fit these models to data on children's language production. Our primary data source is the MacArthur-Bates Communicative Development Inventories [MB-CDI; @fenson1994;@marchman2021], a popular parent report instrument in which parents are asked to indicate which words their child produces and understand. Here we focus exclusively on production, which is used with older children and which tends to be a more reliable measure [@frank2021;others]. We make use of data from Wordbank [@frank2017], an open repository of data from the MB-CDI. Since our efficiency variation model is not identifiable in cross-sectional data, we focus on those datasets that include substantial amounts of longitudinal data, which come from American English (N=XYZ), Norwegian (N=XYZ), Quebec French (N=XYZ), and Japanese (N=XYZ). 
+
+The efficiency change was the best fitting model across all four datasets (as well as two smaller ones; see SI), with AIC differences of XYZ--XYZ. Figure 1 shows the four primary model variants: pure accumulator models and models that include population-level efficiency change predict no variation (A, B). Allowing both efficiency (intercept) and efficiency change (slope) to vary across individuals results in substantially better fit. 
+
+Power-law growth models (in which growth in ability is a function of the logarithm of age) showed statistically better fits than exponential growth models (in which growth in ability is a linear function of age). Though these models were better from a statistical perspective ($\delta$AIC XYZ -- XYZ), differences were small within the age range we examined (see Supplemental Table XYZ and Figure XYZ for all model fits). 
+
+![Figure 1.](../figs/longitudinal/glmer_ladder_main.png)
+The best-fitting modified accumulator model included large developmental changes in efficiency across all languages ($\beta = XYZ - XYZ$). This finding suggests that we can robustly reject pure accumulation models of early word learning. Instead, children get vastly more efficient over development. 
+
+
+
+This change in efficiency could come from a variety of sources, including general maturation of memory and attention, specific changes in word recognition or processing [@fernald1998;@frank2026], the increasing sophistication of inferential strategies for word learning [@smith2002;@markman1988;etc], or other sources. 
+
+![Figure 2.](../figs/longitudinal/exposure_to_learn_EN.png)
+
+As an illustration of this change in efficiency, Figure 2 shows a model-derived estimate of the average number of times a child would need to hear a word before producing it (See SI: Changes in Word Efficiency), using frequency estimates from the CHILDES Corpus [@mcwhinney2020;@sanchez2019]. Across different word classes (e.g., nouns, verbs, closed class words), efficiency increases exponentially, such that early-learned words such as "ball" may be heard tens of thousands of times before they are produced, while later learned words such as "vitamin" might only be heard tens of times before being produced. 
+
+
+## Estimating input 
+
+
+Under a range of plausible assumptions about variation in input, all children show supra-linear scaling of growth, even accounting for accumulation dynamics.
+
 As discussed above, one important question is how much of variance is due to variance in rate. We explore this by asking about the parameter $\pi$,
 
 $$\pi = \frac{\sigma_\alpha^2}{\sigma_\alpha^2 + \sigma_r^2}$$
 
 If $\pi$ > .5, then the majority of variation between individuals is not due to pure accumulation rate. 
-
-A second question is about the nature of acceleration. If $\kappa$ > 1, then acceleration is steeper than pure accumulator dynamics would predict. 
-
-
-## Model comparison
-
-
-
-Under a range of plausible assumptions about variation in input, all children show supra-linear scaling of growth, even accounting for accumulation dynamics.
 
 In addition, 80-90% of between-child variation remains unexplained by input quantity. 
 These conclusions are supported by analysis of longitudinal input data from BabyView (N=20) and SEEDLings (N=44) datasets, which contain child-specific estimates of input, and Peekbank (N=XYZ), which contains child-specific estimates of processing speed. 
