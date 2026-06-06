@@ -94,12 +94,99 @@ This final model instantiates the idea that children vary in their base level of
 
 As we will show, such a model fits a range of data vastly better than models without these terms.
 
-```{r}
+```{r fig-schematic, fig.width=13, fig.height=6.5}
 #| label: fig-schematic
 #| fig-cap: ""
-#| fig-width: 13
-#| fig-height: 3.2
-make_fig1_schematic()
+# Schematic walk through the model ladder. Five columns are model
+# variants (A → E); the top row shows the latent ability theta_i(t),
+# the bottom row shows expected vocabulary proportion plogis(theta_i).
+# Each panel shows five quantiles of the simulated child population
+# (10/25/50/75/90) using the Wordbank palette, so the per-quantile
+# colors match Fig 2.
+ages <- seq(8, 30, length.out = 80)
+a0   <- 19
+L    <- log(ages / a0)
+qs   <- c(0.1, 0.25, 0.5, 0.75, 0.9)
+z    <- qnorm(qs)
+
+# population parameters chosen to be illustrative, not estimated
+variants <- tibble::tribble(
+  ~name,                          ~kappa_pop, ~sigma_alpha, ~sigma_kappa, ~sigma_r, ~eq,
+  "(A) pure accumulator",         1,           0,            0,            0,       r"($\theta = \log(r) + \log(t)$)",
+  "(B) + acceleration",           2.5,         0,            0,            0,       r"($\theta = \log(r) + \kappa\,\log(t)$)",
+  "(C) + efficiency variance",    2.5,         1.3,          0,            0,       r"($\theta = \log(\alpha_i) + \log(r) + \kappa\,\log(t)$)",
+  "(D) + per-kid acceleration",   2.5,         1.3,          0.8,          0,       r"($\theta = \log(\alpha_i) + \log(r) + \kappa_i\,\log(t)$)",
+  "(E) + per-kid input variance", 2.5,         1.3,          0.8,          0.4,     r"($\theta = \log(\alpha_i) + \log(r_i) + \kappa_i\,\log(t)$)"
+)
+
+# For each model x quantile x age, theta and vocab
+sim <- variants |>
+  mutate(name = factor(name, levels = name), panel_order = seq_along(name)) |>
+  rowwise() |>
+  do({
+    v <- .
+    bind_rows(lapply(seq_along(qs), function(i) {
+      tibble(
+        name = v$name, panel_order = v$panel_order,
+        qprob = qs[i], qprob_f = factor(as.character(qs[i]),
+                                        levels = c("0.1","0.25","0.5","0.75","0.9")),
+        age   = ages,
+        theta = z[i] * v$sigma_alpha +
+                z[i] * v$sigma_r +                       # input lifts intercept
+                (v$kappa_pop + z[i] * v$sigma_kappa) * L,
+        eq    = v$eq
+      )
+    }))
+  }) |>
+  ungroup() |>
+  mutate(vocab = plogis(theta))
+
+# annotation table — one equation per panel
+eq_lab <- variants |>
+  mutate(name = factor(name, levels = name)) |>
+  select(name, eq)
+
+# vertical line size: median bold, others thinner
+lwidth <- function(qf) ifelse(as.character(qf) == "0.5", 0.95, 0.55)
+
+p_theta <- ggplot(sim,
+                  aes(age, theta, color = qprob_f, group = qprob_f)) +
+  geom_line(aes(linewidth = lwidth(qprob_f))) +
+  geom_label(data = eq_lab,
+             aes(x = -Inf, y = Inf,
+                 label = latex2exp::TeX(eq, output = "character")),
+             inherit.aes = FALSE, parse = TRUE,
+             hjust = -0.05, vjust = 1.4, size = 2.4, label.size = 0,
+             fill = scales::alpha("white", 0.8)) +
+  facet_wrap(~ name, nrow = 1) +
+  scale_color_manual(values = WORDBANK_PALETTE, name = "Percentile",
+                     labels = c("10th", "25th", "50th", "75th", "90th"),
+                     drop = FALSE) +
+  scale_linewidth_identity() +
+  coord_cartesian(ylim = c(-4, 8)) +
+  labs(x = NULL, y = expression(theta[i](t))) +
+  theme_minimal(base_size = 9) +
+  theme(strip.text = element_text(face = "bold", size = 9),
+        legend.position = "bottom",
+        panel.grid.minor = element_blank())
+
+p_vocab <- ggplot(sim,
+                  aes(age, vocab, color = qprob_f, group = qprob_f)) +
+  geom_line(aes(linewidth = lwidth(qprob_f))) +
+  facet_wrap(~ name, nrow = 1) +
+  scale_color_manual(values = WORDBANK_PALETTE, name = "Percentile",
+                     labels = c("10th", "25th", "50th", "75th", "90th"),
+                     drop = FALSE) +
+  scale_linewidth_identity() +
+  scale_y_continuous(limits = c(0, 1), breaks = c(0, 0.5, 1)) +
+  labs(x = "age (months)", y = "expected vocabulary proportion") +
+  theme_minimal(base_size = 9) +
+  theme(strip.text = element_blank(),  # suppress strip on lower row
+        legend.position = "bottom",
+        panel.grid.minor = element_blank())
+
+(p_theta / p_vocab) + plot_layout(guides = "collect", heights = c(1, 1)) &
+  theme(legend.position = "bottom")
 ```
 
 <!-- A second question is about the nature of acceleration. If $\kappa$ > 1, then acceleration is steeper than pure accumulator dynamics would predict.  -->
@@ -117,53 +204,61 @@ Power-law growth models (in which growth in ability is a function of the logarit
 ```{r fig-glmer-ladder, fig.width=11, fig.height=7}
 #| label: fig-glmer-ladder
 #| fig-cap: ""
-# Replicate the glmer-ladder main panel (cf. glmer_ladder/04b_plot.R):
-# empirical kid trajectories (thin lines + points) + per-kid quantile
-# predictions from each model (A, B_log, C_log, D_log) across the four
-# main-text languages.
+# Replicates glmer_ladder/04b_plot.R style: empirical kid trajectories
+# (grey lines + points) overlaid with the per-kid quantile predictions
+# from each model. C_log and D_log get the full 10/25/50/75/90 fan
+# (Wordbank palette); A and B_log have no per-kid variation so the
+# quantiles collapse — we show only the median for them.
 qtiles <- ladder$qtiles |>
-  filter(model %in% c("A", "B_log", "C_log", "D_log"),
-         qprob %in% c(0.1, 0.5, 0.9))
+  filter(model %in% c("A", "B_log", "C_log", "D_log")) |>
+  mutate(qprob_f = factor(qprob, levels = c(0.1, 0.25, 0.5, 0.75, 0.9),
+                          labels = c("0.1", "0.25", "0.5", "0.75", "0.9")))
 emp <- ladder$emp |>
   mutate(child_lang = paste(lang_slug, child_id, sep = "::"))
 
-model_lab <- c("A" = "(A) accumulator",
+model_lab <- c("A"     = "(A) accumulator",
                "B_log" = "(B) + pop. acceleration",
                "C_log" = "(C) + per-kid efficiency",
                "D_log" = "(D) + per-kid acceleration")
 qtiles$model_label <- factor(model_lab[qtiles$model], levels = model_lab)
-
-lang_lab  <- ladder$lang_labels
+lang_lab <- ladder$lang_labels
 emp$lang_label    <- factor(lang_lab[emp$lang_slug],    levels = lang_lab)
 qtiles$lang_label <- factor(lang_lab[qtiles$lang_slug], levels = lang_lab)
-# replicate per-model for facetting
+# replicate empirical data per model for facetting (grey background)
 emp_facet <- bind_rows(lapply(names(model_lab), function(m)
   emp |> mutate(model_label = factor(model_lab[m], levels = model_lab))))
+
+# split quantiles by model: full fan for C_log/D_log, median only for A/B_log
+qt_fan    <- filter(qtiles, model %in% c("C_log", "D_log"))
+qt_median <- filter(qtiles, !model %in% c("C_log", "D_log"),
+                    qprob_f == "0.5")
 
 ggplot() +
   geom_line(data = emp_facet,
             aes(age, vocab, group = child_lang),
-            color = "grey55", alpha = 0.18, linewidth = 0.2) +
-  geom_point(data = emp_facet,
-             aes(age, vocab),
-             color = "grey35", alpha = 0.18, size = 0.35) +
-  geom_line(data = qtiles,
-            aes(age, vocab, group = qprob,
-                linewidth = factor(qprob), color = factor(qprob))) +
-  facet_grid(lang_label ~ model_label, scales = "free_y", switch = "y") +
-  scale_color_manual(values = c("0.1" = "#1f77b4", "0.5" = "#d62728",
-                                "0.9" = "#1f77b4"),
-                     labels = c("10th", "median", "90th"),
-                     name = "model quantile") +
-  scale_linewidth_manual(values = c("0.1" = 0.55, "0.5" = 0.9, "0.9" = 0.55),
-                         labels = c("10th", "median", "90th"),
-                         name = "model quantile") +
-  labs(x = "age (months)", y = "vocabulary (items produced)") +
+            color = "grey25", alpha = 0.15, linewidth = 0.25) +
+  geom_point(data = emp_facet, aes(age, vocab),
+             color = "grey25", alpha = 0.20, size = 0.25) +
+  geom_line(data = qt_fan,
+            aes(age, vocab, color = qprob_f, group = qprob_f,
+                linewidth = ifelse(as.character(qprob_f) == "0.5",
+                                   0.95, 0.55))) +
+  geom_line(data = qt_median,
+            aes(age, vocab, color = qprob_f, group = qprob_f),
+            linewidth = 0.95) +
+  facet_grid(lang_label ~ model_label, scales = "free_y", space = "fixed",
+             switch = "y") +
+  scale_color_manual(values = WORDBANK_PALETTE, name = "Percentile",
+                     labels = c("10th", "25th", "50th", "75th", "90th"),
+                     drop = FALSE) +
+  scale_linewidth_identity() +
+  labs(x = "Age (months)", y = "Productive vocabulary") +
   theme_minimal(base_size = 9) +
   theme(strip.text = element_text(size = 8, face = "bold"),
         strip.placement = "outside",
         panel.grid.minor = element_blank(),
-        legend.position = "bottom")
+        legend.position = "bottom",
+        panel.spacing = unit(0.4, "lines"))
 ```
 
 ```{r tbl-datasets}

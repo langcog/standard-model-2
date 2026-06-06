@@ -23,6 +23,15 @@ STUDY_PAL <- c("BabyView"  = "#E69F00",
                "AM2018"    = "#009E73",
                "FMW2013"   = "#D55E00")
 
+# Wordbank quantile palette (matches glmer_ladder/04b_plot.R) — used in
+# Fig 1 schematic + Fig 2 model ladder so the 10/25/50/75/90 quantile
+# fans line up visually across the manuscript.
+WORDBANK_PALETTE <- c("0.1"  = "#1f78b4",   # dark blue
+                      "0.25" = "#a6cee3",   # light blue
+                      "0.5"  = "#33a02c",   # green
+                      "0.75" = "#fdbf6f",   # gold
+                      "0.9"  = "#e31a1c")   # red
+
 # The four main-text Wordbank longitudinal languages
 PAPER_LANGS <- c("english_american", "norwegian",
                  "french_quebecois", "japanese")
