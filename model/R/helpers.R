@@ -245,6 +245,19 @@ variant_hyperpriors <- function(name) {
     no_freq_slopes = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
                           sigma_zeta_prior_sd = 1,
                           s_prior_mean = 0, s_prior_sd = 0.001),
+    # D' (input-on-slope): M_best plus a gamma_in channel regressing the
+    # per-child slope on the imputed input deviation log_r_dev_i =
+    # (sigma_r^2/sigma_xi^2)(xi_i - mu_r). Routes to log_irt_long_dprime.stan
+    # via the _dprime dispatch in fit_longitudinal.R, which ALSO pins
+    # rho_xi_zeta = 0 (so the only intercept-slope coupling is gamma_in).
+    # gamma = Cov(xi, kappa)/sigma_r^2, hence sigma_r-sensitive -- pair with
+    # the STAN_SIGMA_R_OVERRIDE sweep. gamma_in_prior_sd = 5 is weakly
+    # informative (pi_alpha ~ 0.91 => sigma_xi^2/sigma_r^2 ~ 11, so even a
+    # small slope-on-intercept regression maps to gamma of order 1).
+    no_freq_slopes_dprime = list(beta_c_prior_mean = 0, beta_c_prior_sd = 0.001,
+                                 sigma_zeta_prior_sd = 1,
+                                 s_prior_mean = 0, s_prior_sd = 0.001,
+                                 gamma_in_prior_sd = 5),
     # M_best (no_freq + slopes) with global start time s freed.
     # Used to investigate whether onset-time effects (per-child or
     # population) help with the 4-panel demo "compressed at top, wide

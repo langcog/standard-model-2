@@ -117,7 +117,14 @@ DEFAULT_PRIORS <- list(
   gamma_std_prior_sd    = 0.001,
   mu_std_prior_mean     = 0,
   mu_std_prior_sd       = 1,
-  sigma_std_prior_sd    = 1
+  sigma_std_prior_sd    = 1,
+  # Input-on-slope channel (D') -- only used by log_irt_long_dprime.stan.
+  # gamma_in regresses the per-child slope on the imputed input deviation
+  # log_r_dev_i = (sigma_r^2/sigma_xi^2)(xi_i - mu_r). Pinned tight at 0 by
+  # default so a fit that doesn't opt in matches M_best; the `_dprime`
+  # variant frees it (gamma_in_prior_sd ~ 5).
+  gamma_in_prior_mean   = 0,
+  gamma_in_prior_sd     = 0.001
 )
 
 ## Defaults for fitting.
