@@ -14,6 +14,8 @@ format:
 suppressPackageStartupMessages({
   library(here); library(dplyr); library(ggplot2); library(patchwork)
 })
+source(here("paper", "_helpers.R"))
+ladder <- readRDS(here("paper", "cache", "fig2_glmer_ladder.rds"))
 knitr::opts_chunk$set(
   echo = FALSE, message = FALSE, warning = FALSE,
   fig.align = "center", out.width = "100%", dpi = 300
@@ -85,4 +87,64 @@ mk <- function(traj, ttl) {
 
 mk(parallel, "(A) stable between-child differences (intercepts vary)") +
 mk(fanning,  "(B) diverging trajectories (slopes vary)")
+```
+
+```{r fig-glmer-ladder-linear, fig.width=8, fig.height=5}
+#| label: fig-glmer-ladder-linear
+#| fig-cap: ""
+# Supplemental Figure 2: the LINEAR-age model variants (A, B, C, D),
+# matching the main-text Figure of the log-age models. Same data and
+# plotting conventions; here ability grows linearly in age rather than
+# in log-age. Within the observed age range the fits are very similar
+# to the log-age models (see main text dAIC comparison).
+qtiles <- ladder$qtiles |>
+  filter(model %in% c("A", "B_lin", "C_lin", "D_lin")) |>
+  mutate(qprob_f = factor(qprob, levels = c(0.1, 0.25, 0.5, 0.75, 0.9),
+                          labels = c("0.1", "0.25", "0.5", "0.75", "0.9")))
+emp <- ladder$emp |>
+  mutate(child_lang = paste(lang_slug, child_id, sep = "::"))
+
+model_lab <- c("A"     = "(A) accumulator",
+               "B_lin" = "(B) + pop. acceleration",
+               "C_lin" = "(C) + per-child efficiency",
+               "D_lin" = "(D) + per-child acceleration")
+qtiles$model_label <- factor(model_lab[qtiles$model], levels = model_lab)
+lang_lab <- ladder$lang_labels
+emp$lang_label    <- factor(lang_lab[emp$lang_slug],    levels = lang_lab)
+qtiles$lang_label <- factor(lang_lab[qtiles$lang_slug], levels = lang_lab)
+emp_facet <- bind_rows(lapply(names(model_lab), function(m)
+  emp |> mutate(model_label = factor(model_lab[m], levels = model_lab))))
+
+qt_fan    <- filter(qtiles, model %in% c("C_lin", "D_lin"))
+qt_median <- filter(qtiles, !model %in% c("C_lin", "D_lin"),
+                    qprob_f == "0.5")
+
+ggplot() +
+  geom_line(data = filter(emp_facet,
+                          language %in% c("English (American)", "Norwegian")),
+            aes(age, vocab, group = child_lang),
+            color = "grey25", alpha = 0.03, linewidth = 0.25) +
+  geom_line(data = filter(emp_facet,
+                          !(language %in% c("English (American)", "Norwegian"))),
+            aes(age, vocab, group = child_lang),
+            color = "grey25", alpha = 0.25, linewidth = 0.25) +
+  geom_line(data = qt_fan,
+            aes(age, vocab, color = qprob_f, group = qprob_f,
+                linewidth = ifelse(as.character(qprob_f) == "0.5", 0.95, 0.55))) +
+  geom_line(data = qt_median,
+            aes(age, vocab, color = qprob_f, group = qprob_f),
+            linewidth = 0.95) +
+  facet_grid(lang_label ~ model_label, scales = "free_y", space = "fixed",
+             switch = "y") +
+  scale_color_manual(values = WORDBANK_PALETTE, name = "Percentile",
+                     labels = c("10th", "25th", "50th", "75th", "90th"),
+                     drop = FALSE) +
+  scale_linewidth_identity() +
+  labs(x = "Age (months)", y = "Productive vocabulary") +
+  theme_minimal(base_size = 9) +
+  theme(strip.text = element_text(size = 8, face = "bold"),
+        strip.placement = "outside",
+        panel.grid.minor = element_blank(),
+        legend.position = "bottom",
+        panel.spacing = unit(0.4, "lines"))
 ```
