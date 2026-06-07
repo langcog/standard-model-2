@@ -172,24 +172,31 @@ $$P(w_{i,j}=1 \mid \theta_i, \delta_j) =\frac{\exp(\theta_i - \delta_j)}{1 + \ex
 
 Following @kachergis2022, we can write our first model a simple Rasch-style accumulator model ("M1: pure accumulator"), specifying that $\theta_i$ is not a single parameter but instead a function of accumulation over time. In the simplest form: 
   
-  $$M1: \theta_i  = log(r_i) + log(t)$$
+  $$\theta_i  = log(r_i) + log(t)$$
   
-  \noindent where $r_i$ is the child's rate of language input (in tokens per month) and $t$ is the child's (age in months). In the exponential, this formulation produces a simple rate X time computation. In other words, ability increases over time. This form instantiates the basic hypothesis that the only thing that changes over time is more input, and the only source of variation between children is variation in rate. 
+  \noindent where $r_i$ is the child's rate of language input (in tokens per month) and $t$ is the child's (age in months); note that we use log age to simulate linear accumulation because $\exp(\theta) = r \cdot t$. This form instantiates the basic hypothesis that the only thing that changes over time is more input, and the only source of variation between children is variation in rate. 
 
 We compare this model to an accelerating accumulator model, in which the amount learned from each exposure increases with time by a multiplicative factor $kappa$ (which manifests as an exponent on time in the full Rasch model).
 
-$$M2: \theta_i  = log(r_i) + \kappa ~ log(t)$$
-Neither of these models has any way to capture variation across children beyond variation in input rate. Thus, we augment the basic accumulator in two ways. First, we assume that children vary in their accumulation efficiency, $\alpha_i$, which is a multiplier on how much information they receive from each exposure to a word:
-  
-  $$M3: \theta_i  = log(\alpha_i) + log(r_i) + \kappa ~ log(t)$$
-Second, we assume that the rate of acceleration also varies between children:
-  
-  $$M4: \theta_i  = log(\alpha_i) + log(r_i) + \kappa_i ~ log(t)$$
-This final model instantiates the idea that children vary in their base rate of efficiency ($\alpha_i$) and their acceleration rate ($\kappa_i$), instantiating essentially a longitudinal growth model in which children vary on their slope and intercept. As we will show, this model provides a good description of variation in children's longitudinal growth trajectories.
+$$\theta_i  = log(r_i) + \kappa ~ log(t)$$
+Neither of these models has any way to capture variation across children beyond variation in input rate. Thus, we augment the basic accelerating accumulator in two ways, rewriting it as the the sum of two individually variable quantities:
+
+$$\theta_i = \xi_i + \zeta_i ~ log(t)$$
+The intercept term $\xi_i = log(\alpha_i) + log(\r_i)$ then assumes that there is both rate-related and non-rate variation in children's efficiency. Similarly, the slope term $\zeta_i = \kappa_i + \gamma_i \log r_i$ decomposes acceleration into rate-related and non-rate-related acceleration. 
+
+This final model instantiates the idea that children vary in their base rate of efficiency and their acceleration, instantiating  a longitudinal growth model in which children vary on their slope and intercept. As we will show, this model provides a good description of variation in children's longitudinal growth trajectories.
+
+This family of models is not identifiable from cross-sectional data
+
+The different models described above are not identifiable in cross-sectional data. [WHY]. 
 
 
 # Results
 
+To fit these longitudinal growth models, we retrieved longitudinal data on children's vocabulary from Wordbank [@frank2017], an open archive of data from the MacArthur-Bates Communicative Development Inventory and its international adaptations. Table \@ref(tab:tbl-datasets) shows the four longitudinal datasets in Wordbank with $>100$ observations. 
+ 
+
+<!-- he longitudinal, item-level design is what rescues the κ>1 claim from McMurray — κ is pinned by within-child slopes, δ_j by item intercepts, so they're separately identified. McMurray's defusing only bites for aggregate cross-sectional curves. Worth stating as a strength. -->
 
 ```{r tbl-datasets}
 #| label: tbl-datasets
@@ -246,7 +253,6 @@ table1 |>
 ```
 
 
-We make use of all longitudinal data from Wordbank [@frank2017]
 
 as well as.  
 

@@ -140,20 +140,6 @@
  
 
 
-\usepackage{booktabs}
-\usepackage{longtable}
-\usepackage{array}
-\usepackage{multirow}
-\usepackage{wrapfig}
-\usepackage{float}
-\usepackage{colortbl}
-\usepackage{pdflscape}
-\usepackage{tabu}
-\usepackage{threeparttable}
-\usepackage{threeparttablex}
-\usepackage[normalem]{ulem}
-\usepackage{makecell}
-\usepackage{xcolor}
 \makeatletter
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
 \AtBeginDocument{%
@@ -334,42 +320,45 @@ ability \(\theta_i\) and each word \(j\) has a difficulty \(\delta_j\).
 The probability that child \(i\) produces word \(j\) is
 
 \[P(w_{i,j}=1 \mid \theta_i, \delta_j) =\frac{\exp(\theta_i - \delta_j)}{1 + \exp(\theta_i - \delta_j)}\]
+In what follows, we assume that \(\delta_j\) is a property of individual
+wo
+
 Following (\textbf{kachergis2022?}), we can write our first model a
 simple Rasch-style accumulator model (``M1: pure accumulator''),
 specifying that \(\theta_i\) is not a single parameter but instead a
 function of accumulation over time. In the simplest form:
 
-\[\theta_i  = log(r_i) + log(t)\]
+\[M1: \theta_i  = log(r_i) + log(t)\]
 
-\noindent where \(r_i\) is the child's rate of language innput (in
-tokens per month) and \(t\) is the child's (age in months). In the
-exponential, this formulation produces a simple rate X time computation.
-In other words, ability increases over time. This form instantiates the
-basic hypothesis that the only thing that changes over time is more
-input, and the only source of variation between children is variation in
-rate.
+\noindent where \(r_i\) is the child's rate of language input (in tokens
+per month) and \(t\) is the child's (age in months). In the exponential,
+this formulation produces a simple rate X time computation. In other
+words, ability increases over time. This form instantiates the basic
+hypothesis that the only thing that changes over time is more input, and
+the only source of variation between children is variation in rate.
 
-This model does not have any way to capture variation across children
-beyond variation input rate. Thus, we augment this model in two ways.
-First, we add variation related to accumulation rate:
+We compare this model to an accelerating accumulator model, in which the
+amount learned from each exposure increases with time by a
+multiplicative factor \(kappa\) (which manifests as an exponent on time
+in the full Rasch model).
 
-\[\theta_i  = log(\alpha_i) + log(r_i) + log(t)\]
+\[M2: \theta_i  = log(r_i) + \kappa ~ log(t)\] Neither of these models
+has any way to capture variation across children beyond variation in
+input rate. Thus, we augment the basic accumulator in two ways. First,
+we assume that children vary in their accumulation efficiency,
+\(\alpha_i\), which is a multiplier on how much information they receive
+from each exposure to a word:
 
-In this formulation,
+\[M3: \theta_i  = log(\alpha_i) + log(r_i) + \kappa ~ log(t)\] Second,
+we assume that the rate of acceleration also varies between children:
 
-Second, we add a temporal acceleration component (an exponent):
-
-\[\theta_i  = log(\alpha_i) + log(r_i) + \kappa_i * log(t)\]
-
-When exponentiated, this turns into
-\[\alpha_i * r_i  * t \exp{\kappa_i}\].
-
-This final model instantiates the idea that children vary in their base
-level of variation (\(\alpha\)) and their acceleration rate
-(\(\kappa\)).
-
-As we will show, such a model fits a range of data vastly better than
-models without these terms.
+\[M4: \theta_i  = log(\alpha_i) + log(r_i) + \kappa_i ~ log(t)\] This
+final model instantiates the idea that children vary in their base rate
+of efficiency (\(\alpha_i\)) and their acceleration rate (\(\kappa_i\)),
+instantiating essentially a longitudinal growth model in which children
+vary on their slope and intercept. As we will show, this model provides
+a good description of variation in children's longitudinal growth
+trajectories.
 
 \section{Results}\label{results}
 
