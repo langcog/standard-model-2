@@ -199,7 +199,7 @@
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same}
 \hypersetup{
-  pdftitle={Variability and acceleration in the growth of children's early vocabulary},
+  pdftitle={Efficiency and acceleration in the accumulation of children's early vocabulary},
   pdfauthor={Michael C. Frank},
   pdfkeywords={Early word learning; Bayesian data analysis; Large
 language models},
@@ -211,49 +211,33 @@ language models},
   pdfcreator={LaTeX via pandoc}}
 
 
-\title{Variability and acceleration in the growth of children's early
-vocabulary}
+\title{Efficiency and acceleration in the accumulation of children's
+early vocabulary}
 \author{Michael C. Frank}
 \date{}
 \begin{document}
 \maketitle
 \begin{abstract}
-Children's early word learning is alternatively portrayed as either a
-process of gradual accumulation or as an inferential process that
-results in rapid mapping. How can these two views be rectified? Here we
-present a statistical model that describes both the acceleration of
-children's vocabulary growth and its remarkable variability across
-children. This model shows how changes in children's learning efficiency
-mean that younger children accumulate knowledge slowly while older
-children make rapid inferences. Further, the model can be used to
-estimate how much variation between children is due to differences in
-home language environment, a key policy-relevant question. Estimates
-from four longitudinal datasets converge with a recent meta-analysis in
-suggesting XYZ\% of total variance. Finally, we show that, in contrast
+Children learn hundreds of words over the first few years of their life.
+This process begins slowly but increases until only a few exposures to a
+word are necessary for a child to learn it. Yet there are also wide
+variations between children, and the distribution across children has
+not not been accurately characterized. Here we present a statistical
+model describing this process as accelerating accumulation, with
+children varying in both the slope and intercept of their accumulation.
+Using data from four languages, this model provides a good
+characterization of longitudinal growth and provides insights into the
+sources of age and socioeconomic variation. Using data on children's
+early language environment, the model also can be used to estimate how
+much variation between children is due to differences in language input,
+finding estimates that converge with recent meta-analyses. In contrast
 to children, large language models are not well-described by this model:
 they show standard accumulator dynamics and very limited variability
-across a number of dimensions. These results suggest \ldots{}
+across a number of dimensions.
 \end{abstract}
 
 
 \setstretch{1.05}
-Children's early language learning is often portrayed as a process of
-accumulation and gradual learning, with statistical learning, mutual
-exclusivity and input viewpoints highlighting the accumulation nature.
-In contrast, studies of processing and word mapping highlight the
-increases in efficiency that happen over the same period. How can these
-two views be rectified? One clue comes from examining the two key
-signatures of early vocabulary growth: variability and acceleration.
-What is the shape of this acceleration? And what is the source of
-variability, from children's input or otherwise?? We present a
-quantitative model that unify these views while explaining both the
-variability and acceleration of children's early language growth. The
-resulting model provides a good quantitative explanation for longitude
-vocabulary growth across large population of children. It also shows
-that by their increasing efficiency, and their ability of children,
-learning fundamentally different ways than large language, models, which
-show classic accumulator dynamics.
-
 Children's early vocabulary grows very rapidly during early childhood,
 with large variation between children. The nature of this growth has
 theoretical, practical, and methodological importance.
@@ -329,33 +313,45 @@ characterize the scaling dynamics of large language models.
 
 \section{Model}\label{model}
 
-We start with a simple accumulator model that merges ideas from item
-response theory and learning theory (McMurray 2007;
-\textbf{kachergis2021?}). We begin with the Rasch model.
+\begin{figure}
 
-Child \(i\) produces word \(j\) has probability (\(\eta_ij\))
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{standard_model_files/figure-pdf/fig-schematic-1.pdf}
+
+}
+
+\caption{\label{fig-schematic}}
+
+\end{figure}%
+
+We present a nested set of accumulator-type models, many of which have
+been presented in the literature. As we show below, each refinement of
+the model contributes to its ability to describe the variability between
+children. We start with the Rasch model from psychometrics (Rasch 1960;
+Bond and Fox 2013), which assumes that each child \(i\) has a learning
+ability \(\theta_i\) and each word \(j\) has a difficulty \(\delta_j\).
+The probability that child \(i\) produces word \(j\) is
 
 \[P(w_{i,j}=1 \mid \theta_i, \delta_j) =\frac{\exp(\theta_i - \delta_j)}{1 + \exp(\theta_i - \delta_j)}\]
-This is an IRT model -- specifically a Rasch model -- where \(\theta_i\)
-is child \(i\)'s ability and \(\delta_j\) is word \(j\)'s difficulty.
-Following (\textbf{kachergis2021?}), we consider a simple accumulator
-model (``pure accumulator''), specifying that \(\theta_i\) is not a
-single parameter for a child but instead a function of accumulation over
-time. In the simplest form:
+Following (\textbf{kachergis2022?}), we can write our first model a
+simple Rasch-style accumulator model (``M1: pure accumulator''),
+specifying that \(\theta_i\) is not a single parameter but instead a
+function of accumulation over time. In the simplest form:
 
 \[\theta_i  = log(r_i) + log(t)\]
 
 \noindent where \(r_i\) is the child's rate of language innput (in
-tokens per month) and \(t\) is the child's age in months. In the
+tokens per month) and \(t\) is the child's (age in months). In the
 exponential, this formulation produces a simple rate X time computation.
 In other words, ability increases over time. This form instantiates the
 basic hypothesis that the only thing that changes over time is more
 input, and the only source of variation between children is variation in
 rate.
 
-This model does not have any way to capture variation across children.
-Thus, we augment this model by adding this model in two ways. First, we
-add variation related to accumulation rate:
+This model does not have any way to capture variation across children
+beyond variation input rate. Thus, we augment this model in two ways.
+First, we add variation related to accumulation rate:
 
 \[\theta_i  = log(\alpha_i) + log(r_i) + log(t)\]
 
@@ -375,17 +371,39 @@ level of variation (\(\alpha\)) and their acceleration rate
 As we will show, such a model fits a range of data vastly better than
 models without these terms.
 
-\begin{figure}
+\section{Results}\label{results}
 
-\centering{
+\begingroup\fontsize{8}{10}\selectfont
 
-\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{standard_model_files/figure-pdf/fig-schematic-1.pdf}
+\begin{longtable}[t]{lllrll}
 
-}
+\caption{\label{tbl-datasets}}
 
-\caption{\label{fig-schematic}}
+\tabularnewline
 
-\end{figure}%
+\toprule
+Dataset & Citation & N & Admins (mean) & Ages & Recordings\\
+\midrule
+English (American) & {}[@CITE] & 1,874 & 1.3 & 8–30 mo & —\\
+Norwegian & {}[@CITE] & 1,676 & 1.6 & 8–36 mo & —\\
+French (Quebecois) & {}[@CITE] & 179 & 1.1 & 8–30 mo & —\\
+Japanese & {}[@CITE] & 178 & 1.3 & 8–36 mo & —\\
+BabyView & {}[@CITE] & 22 & 5.0 & 6–32 mo & Head-cam (n = 5,739 videos)\\
+\addlinespace
+SEEDLingS & {}[@CITE] & 44 & 12.0 & 6–17 mo & LENA day (n = 525 recordings)\\
+AM2018 & {}[@CITE] & 66 & 3.0 & 16–24 mo & LENA (n = 126 recordings)\\
+FMW2013 & {}[@CITE] & 51 & 3.0 & 18–30 mo & LENA (n = 51 recordings)\\
+\bottomrule
+
+\end{longtable}
+
+\endgroup{}
+
+We make use of all longitudinal data from Wordbank (\textbf{frank2017?})
+
+as well as.
+
+Table @ref(tab:tbl-datasets) gives details of all included data.
 
 \subsection{Model comparison}\label{model-comparison}
 
@@ -437,44 +455,6 @@ English (American) and Norwegian panels to avoid overplotting.}
 
 \end{figure}%
 
-\begingroup\fontsize{8}{10}\selectfont
-
-\begin{longtable}[t]{lllrll}
-
-\caption{\label{tbl-datasets}}
-
-\tabularnewline
-
-\toprule
-Dataset & Citation & N & Admins (mean) & Ages & Recordings\\
-\midrule
-English (American) & {}[@CITE] & 1,874 & 1.3 & 8–30 mo & —\\
-Norwegian & {}[@CITE] & 1,676 & 1.6 & 8–36 mo & —\\
-French (Quebecois) & {}[@CITE] & 179 & 1.1 & 8–30 mo & —\\
-Japanese & {}[@CITE] & 178 & 1.3 & 8–36 mo & —\\
-BabyView & {}[@CITE] & 22 & 5.0 & 6–32 mo & Head-cam (n = 5,739 videos)\\
-\addlinespace
-SEEDLingS & {}[@CITE] & 44 & 12.0 & 6–17 mo & LENA day (n = 525 recordings)\\
-AM2018 & {}[@CITE] & 66 & 3.0 & 16–24 mo & LENA (n = 126 recordings)\\
-FMW2013 & {}[@CITE] & 51 & 3.0 & 18–30 mo & LENA (n = 51 recordings)\\
-\bottomrule
-
-\end{longtable}
-
-\endgroup{}
-
-\begin{figure}
-
-\centering{
-
-\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{standard_model_files/figure-pdf/fig-demographics-1.pdf}
-
-}
-
-\caption{\label{fig-demographics}}
-
-\end{figure}%
-
 The best-fitting modified accumulator model included large developmental
 changes in efficiency across all languages (\(\beta = XYZ - XYZ\)). This
 finding suggests that we can robustly reject pure accumulation models of
@@ -488,6 +468,23 @@ in word recognition or processing (\textbf{fernald1998?};
 strategies for word learning
 {[}(\textbf{smith2002?});(\textbf{markman1988?});etc{]}, or other
 sources.
+
+\subsection{Modeling demographic
+variation}\label{modeling-demographic-variation}
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{standard_model_files/figure-pdf/fig-demographics-1.pdf}
+
+}
+
+\caption{\label{fig-demographics}}
+
+\end{figure}%
+
+\subsection{Changing efficiency}\label{changing-efficiency}
 
 \begin{figure}
 
@@ -590,6 +587,10 @@ the author.
 
 \phantomsection\label{refs}
 \begin{CSLReferences}{1}{0}
+\bibitem[\citeproctext]{ref-bond2013}
+Bond, Trevor G, and Christine M Fox. 2013. \emph{Applying the Rasch
+Model: Fundamental Measurement in the Human Sciences}. Psychology Press.
+
 \bibitem[\citeproctext]{ref-hidaka2013}
 Hidaka, Shohei. 2013. {``A Computational Model Associating Learning
 Process, Word Attributes, and Age of Acquisition.''} \emph{PloS One} 8
@@ -603,6 +604,11 @@ McMurray, Bob. 2007. {``Defusing the Childhood Vocabulary Explosion.''}
 Mollica, Francis, and Steven T Piantadosi. 2017. {``How Data Drive Early
 Word Learning: A Cross-Linguistic Waiting Time Analysis.''} \emph{Open
 Mind} 1 (2): 67--77.
+
+\bibitem[\citeproctext]{ref-rasch1960}
+Rasch, Georg. 1960. \emph{Probabilistic Models for Some Intelligence and
+Attainment Tests}. Copenhagen, Denmark: Danish Institute for Educational
+Research.
 
 \end{CSLReferences}
 

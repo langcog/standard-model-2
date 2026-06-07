@@ -350,21 +350,35 @@ This change in efficiency could come from a variety of sources, including genera
 #| fig-cap: ""
 # Per-kid BLUPs (xi = intercept, zeta = log-age slope) from each language's
 # D_log fit, joined with Wordbank demographics. For each (language, outcome)
-# we regress the z-scored random effect on sex + caregiver education
-# (birth order dropped: see PR thread — Japanese has 0 birth-order
-# coverage and French Quebecois has 34/178). Coefficients are in SDs of
-# the outcome, directly comparable across languages.
+# we regress the z-scored random effect on sex + maternal education.
 #
-# We add a meta-analytic summary across the four languages per (term,
-# outcome) using random-effects inverse-variance weighting (REML).
+# Maternal education enters as CONTINUOUS years (Wordbank's harmonized
+# categories mapped to approximate years of schooling), standardized
+# within-language. This (a) puts the differently-grained category sets on
+# one scale (Norwegian has 4 levels, English/French 7), (b) uses 1 df
+# instead of k-1, and (c) yields one slope per language we can pool.
+# Birth order is dropped (sparse outside Norwegian). Sex is kept for all
+# four languages; Japanese has NO maternal-education data, so it
+# contributes to the sex term only.
+ED_YEARS <- c("None" = 0, "Primary" = 6, "Some Secondary" = 9,
+              "Secondary" = 12, "Some College" = 14, "College" = 16,
+              "Some Graduate" = 18, "Graduate" = 20)
+
 fit_one <- function(d, outcome) {
   d <- d |>
-    mutate(y = as.numeric(scale(.data[[outcome]]))) |>
-    filter(!is.na(y), !is.na(sex), !is.na(caregiver_ed_3))
+    mutate(y = as.numeric(scale(.data[[outcome]])),
+           ed_years = unname(ED_YEARS[as.character(caregiver_ed)])) |>
+    filter(!is.na(y), !is.na(sex))
   if (nrow(d) < 30) return(NULL)
-  m <- lm(y ~ sex + caregiver_ed_3, data = d)
-  broom::tidy(m, conf.int = TRUE) |>
-    mutate(outcome = outcome, n = nrow(d))
+  has_ed <- sum(!is.na(d$ed_years)) >= 30
+  if (has_ed) {
+    dd <- filter(d, !is.na(ed_years))
+    m  <- lm(y ~ sex + scale(ed_years), data = dd)
+  } else {
+    dd <- d
+    m  <- lm(y ~ sex, data = dd)   # Japanese: sex only
+  }
+  broom::tidy(m, conf.int = TRUE) |> mutate(outcome = outcome, n = nrow(dd))
 }
 combos <- expand.grid(
   lang_slug = unique(demo_blups$lang_slug),
@@ -378,10 +392,12 @@ coefs <- bind_rows(lapply(seq_len(nrow(combos)), function(i) {
 })) |>
   filter(term != "(Intercept)")
 
-# Random-effects meta-analysis per (outcome, term) across languages
+# Random-effects meta-analysis per (outcome, term) across the languages
+# that contribute that term (4 for sex, 3 for education).
 meta_summary <- coefs |>
   group_by(outcome, term) |>
   group_modify(~ {
+    if (nrow(.x) < 2) return(tibble())
     res <- tryCatch(
       metafor::rma(yi = .x$estimate, sei = .x$std.error,
                    method = "REML", control = list(stepadj = 0.5)),
@@ -389,7 +405,7 @@ meta_summary <- coefs |>
     if (is.null(res)) return(tibble())
     tibble(estimate = as.numeric(res$beta),
            conf.low = res$ci.lb, conf.high = res$ci.ub,
-           k = res$k)
+           std.error = res$se, k = res$k)
   }) |>
   ungroup() |>
   mutate(lang_slug = "_meta_")
@@ -397,12 +413,10 @@ meta_summary <- coefs |>
 coefs_all <- bind_rows(coefs, meta_summary) |>
   mutate(
     term_label = recode(term,
-      "sexMale"                 = "Male\n(vs Female)",
-      "caregiver_ed_3College"   = "College\n(vs ≤Some Col.)",
-      "caregiver_ed_3Graduate+" = "Graduate+\n(vs ≤Some Col.)") |>
+      "sexMale"         = "Male\n(vs Female)",
+      "scale(ed_years)" = "Maternal education\n(per SD, years)") |>
       factor(levels = rev(c("Male\n(vs Female)",
-                            "College\n(vs ≤Some Col.)",
-                            "Graduate+\n(vs ≤Some Col.)"))),
+                            "Maternal education\n(per SD, years)"))),
     outcome = factor(outcome, levels = c("xi", "zeta"),
                      labels = c("Efficiency~(xi)",
                                 "'Change in efficiency'~(zeta)")),
