@@ -46,7 +46,7 @@ ad <- get_administration_data(language = LANG)
 # bilingual studies with "Bilingual" in dataset_origin_name; we also drop
 # the Edgin dataset (a Down-syndrome clinical sample). For monolingual TD
 # languages (e.g. Norwegian, Japanese) this removes nothing.
-EXCLUDE_DATASETS <- c("Edgin")
+EXCLUDE_DATASETS <- c("Edgin", "Byers")
 n_before <- nrow(ad)
 ad <- ad |>
   filter(!grepl("Bilingual", dataset_origin_name, ignore.case = TRUE),
@@ -144,9 +144,11 @@ prod <- raw_long |>
                                 tolower(value) == "produces"))
 
 ## Some kids may have only WG admins after the merge (since WG comp items dropped) —
-## re-check ≥2 admins on production-eligible data.
+## re-check ≥2 admins on production-eligible data. An administration is a
+## (child, age) occasion (WG+WS at the same age count once), matching the
+## one-admin-per-(child,age) collapse below and the Stan bundle.
 admins_per_kid_prod <- prod |>
-  distinct(child_id, age, form) |>
+  distinct(child_id, age) |>
   count(child_id)
 keep_kids <- admins_per_kid_prod |> filter(n >= 2) |> pull(child_id)
 prod <- prod |> filter(child_id %in% keep_kids)
@@ -154,11 +156,19 @@ cat(sprintf("After production filter, kids retained: %d / %d\n",
             length(keep_kids), length(long_kids)))
 
 ## ---- Step 4: build clean df ----
+## Collapse to one administration per (child, age): merge WG+WS taken at
+## the same age and any same-form retests that month into a single
+## observation per word (produced if produced in any admin that month),
+## mirroring the Stan bundle prepare scripts. Without this, words on both
+## checklists (e.g. Thal's both-forms design) and repeat administrations
+## (Smith retests) are double-counted as independent observations.
 df <- prod |>
-  transmute(child_id, age, form,
+  transmute(child_id, age,
              item = item_definition,
              produces) |>
-  filter(!is.na(produces), !is.na(item), !is.na(age))
+  filter(!is.na(produces), !is.na(item), !is.na(age)) |>
+  group_by(child_id, age, item) |>
+  summarise(produces = max(produces), .groups = "drop")
 
 ## remove items not appearing at least 100 times (avoids tiny-item RE that just adds df)
 item_keep <- df |> count(item) |> filter(n >= 100) |> pull(item)
@@ -167,7 +177,7 @@ cat(sprintf("Items kept (≥100 obs): %d\n", length(item_keep)))
 
 ## summary
 n_kids <- length(unique(df$child_id))
-n_admins <- df |> distinct(child_id, age, form) |> nrow()
+n_admins <- df |> distinct(child_id, age) |> nrow()
 n_items <- length(unique(df$item))
 n_obs <- nrow(df)
 cat(sprintf("\n=== Final %s data ===\n  kids=%d  admins=%d  items=%d  obs=%d\n",
