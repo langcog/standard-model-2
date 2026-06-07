@@ -94,6 +94,39 @@
 \makeatother
 
 
+% definitions for citeproc citations
+\NewDocumentCommand\citeproctext{}{}
+\NewDocumentCommand\citeproc{mm}{%
+  \begingroup\def\citeproctext{#2}\cite{#1}\endgroup}
+\makeatletter
+ % allow citations to break across lines
+ \let\@cite@ofmt\@firstofone
+ % avoid brackets around text for \cite:
+ \def\@biblabel#1{}
+ \def\@cite#1#2{{#1\if@tempswa , #2\fi}}
+\makeatother
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newenvironment{CSLReferences}[2] % #1 hanging-indent, #2 entry-spacing
+ {\begin{list}{}{%
+  \setlength{\itemindent}{0pt}
+  \setlength{\leftmargin}{0pt}
+  \setlength{\parsep}{0pt}
+  % turn on hanging indent if param 1 is 1
+  \ifodd #1
+   \setlength{\leftmargin}{\cslhangindent}
+   \setlength{\itemindent}{-1\cslhangindent}
+  \fi
+  % set entry spacing
+  \setlength{\itemsep}{#2\baselineskip}}}
+ {\end{list}}
+\usepackage{calc}
+\newcommand{\CSLBlock}[1]{\hfill\break\parbox[t]{\linewidth}{\strut\ignorespaces#1\strut}}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{\strut#1\strut}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{\strut#1\strut}}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
 
 
 
@@ -107,6 +140,20 @@
  
 
 
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
 \makeatletter
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
 \AtBeginDocument{%
@@ -222,9 +269,9 @@ a time before which children know no words. Thus, absolute levels of
 variability can be calculated.
 
 One dominant viewpoint is that this growth can be characterized as a
-process of accumulation (McMurray 2007; Mitchell \& McMurray, 2009;
-Hidaka, 2013; Mollica \& Piantadosi, 2017; Kachergis et al., 2021). This
-pure accumulator view connects with a viewpoint in which the quantity of
+process of accumulation (McMurray 2007; \textbf{mitchell2009?}; Hidaka
+2013; Mollica and Piantadosi 2017; \textbf{kachergis2022?}). This pure
+accumulator view connects with a viewpoint in which the quantity of
 language that children hear has a strong causal role in the speed of
 their learning (Fernald papers; Bergeleson 1001). It also connects with
 the idea that large language models -- whose learning scales in
@@ -234,7 +281,7 @@ might be good models for children's learning.
 But important parts of this proposal have not been fleshed out. For
 example, how much variation is due to input quantity vs.~other sources?
 Meta-analysis of this relationship suggests it's there but not that big
-(Coffey \& Snedeker 2026). Could be quality as well, of course.
+(\textbf{coffey2026?}). Could be quality as well, of course.
 
 Furthermore, how does the accumulation process relate to the rapid
 growth of vocabulary? On some models, accumulation by itself can produce
@@ -273,7 +320,7 @@ developmental data, we show that -- in contrast to children -- these
 models do appear to function as pure accumulators. This analysis exposes
 a critical disanalogy between LLMs and human learners and suggests a
 potential route for understanding the vast ``data gap'' between children
-and large language models (Frank, 2023).
+and large language models (\textbf{frank2023?}).
 
 Here we ask whether these two signatures of vocabulary growth -
 variation and acceleration - are consistent with pure accumulator
@@ -283,8 +330,8 @@ characterize the scaling dynamics of large language models.
 \section{Model}\label{model}
 
 We start with a simple accumulator model that merges ideas from item
-response theory and learning theory (McMurray, Kachergis). We begin with
-the Rasch model.
+response theory and learning theory (McMurray 2007;
+\textbf{kachergis2021?}). We begin with the Rasch model.
 
 Child \(i\) produces word \(j\) has probability (\(\eta_ij\))
 
@@ -385,70 +432,36 @@ fits).
 
 }
 
-\caption{\label{fig-glmer-ladder}}
+\caption{\label{fig-glmer-ladder}Note, transparency is higher for
+English (American) and Norwegian panels to avoid overplotting.}
 
 \end{figure}%
 
+\begingroup\fontsize{8}{10}\selectfont
 
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1818}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1570}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.0744}}
-  >{\raggedleft\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.0909}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1653}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.0826}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.2479}}@{}}
+\begin{longtable}[t]{lllrlll}
 
 \caption{\label{tbl-datasets}}
 
 \tabularnewline
 
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Panel
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Dataset
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Citation
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
-N children
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Admins / kid (mean)
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Age range
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Input / recordings
-\end{minipage} \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-Wordbank longitudinal & English (American) &
-(\textbf{CITE?})
-& 1,874 & 1.3 & 8--30 mo & --- \\
-Wordbank longitudinal & Norwegian &
-(\textbf{CITE?})
-& 1,676 & 1.6 & 8--36 mo & --- \\
-Wordbank longitudinal & French (Quebecois) &
-(\textbf{CITE?})
-& 179 & 1.1 & 8--30 mo & --- \\
-Wordbank longitudinal & Japanese &
-(\textbf{CITE?})
-& 178 & 1.3 & 8--36 mo & --- \\
-Input-observed (IO) & BabyView &
-(\textbf{CITE?})
-& 22 & 5.0 & 6--32 mo & Head-cam (n = 5,739 videos) \\
-Input-observed (IO) & SEEDLingS &
-(\textbf{CITE?})
-& 44 & 12.0 & 6--17 mo & LENA day (n = 525 recordings) \\
-Input-observed (IO) & AM2018 &
-(\textbf{CITE?})
-& 66 & 3.0 & 16--24 mo & LENA (n = 126 recordings) \\
-Input-observed (IO) & FMW2013 &
-(\textbf{CITE?})
-& 51 & 3.0 & 18--30 mo & LENA (n = 51 recordings) \\
+\toprule
+Panel & Dataset & Citation & N children & Admins / kid (mean) & Age range & Input / recordings\\
+\midrule
+Wordbank longitudinal & English (American) & {}[@CITE] & 1,874 & 1.3 & 8–30 mo & —\\
+Wordbank longitudinal & Norwegian & {}[@CITE] & 1,676 & 1.6 & 8–36 mo & —\\
+Wordbank longitudinal & French (Quebecois) & {}[@CITE] & 179 & 1.1 & 8–30 mo & —\\
+Wordbank longitudinal & Japanese & {}[@CITE] & 178 & 1.3 & 8–36 mo & —\\
+Input-observed (IO) & BabyView & {}[@CITE] & 22 & 5.0 & 6–32 mo & Head-cam (n = 5,739 videos)\\
+\addlinespace
+Input-observed (IO) & SEEDLingS & {}[@CITE] & 44 & 12.0 & 6–17 mo & LENA day (n = 525 recordings)\\
+Input-observed (IO) & AM2018 & {}[@CITE] & 66 & 3.0 & 16–24 mo & LENA (n = 126 recordings)\\
+Input-observed (IO) & FMW2013 & {}[@CITE] & 51 & 3.0 & 18–30 mo & LENA (n = 51 recordings)\\
+\bottomrule
 
 \end{longtable}
+
+\endgroup{}
 
 \begin{figure}
 
@@ -574,6 +587,24 @@ https://bergelsonlab.fas.harvard.edu/sites/g/files/omnuum3941/files/2025-01/meyl
 Claude Code was used for literature review, code generation,
 visualization, and simulation infrastructure. All writing is original to
 the author.
+
+\phantomsection\label{refs}
+\begin{CSLReferences}{1}{0}
+\bibitem[\citeproctext]{ref-hidaka2013}
+Hidaka, Shohei. 2013. {``A Computational Model Associating Learning
+Process, Word Attributes, and Age of Acquisition.''} \emph{PloS One} 8
+(11).
+
+\bibitem[\citeproctext]{ref-mcmurray2007}
+McMurray, Bob. 2007. {``Defusing the Childhood Vocabulary Explosion.''}
+\emph{Science} 317 (5838): 631--31.
+
+\bibitem[\citeproctext]{ref-mollica2017}
+Mollica, Francis, and Steven T Piantadosi. 2017. {``How Data Drive Early
+Word Learning: A Cross-Linguistic Waiting Time Analysis.''} \emph{Open
+Mind} 1 (2): 67--77.
+
+\end{CSLReferences}
 
 
 
