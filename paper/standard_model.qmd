@@ -75,47 +75,55 @@ Here we ask whether these two signatures of vocabulary growth - variation and ac
 #| label: fig-schematic
 #| fig-cap: ""
 # Schematic walk through the model ladder. Four columns are model
-# variants (A → D); the top row shows the latent ability theta_i(t),
-# the bottom row shows expected vocabulary proportion plogis(theta_i).
-# Each panel shows five quantiles of the simulated child population
-# (10/25/50/75/90) using the Wordbank palette, so the per-quantile
-# colors match Fig 2.
+# variants (A → D). Top row: latent ability theta_i(t). Bottom row: the
+# expected VOCABULARY curve, summed over a distribution of word
+# difficulties — V(t) = mean_j plogis(theta_i(t) - delta_j). This is the
+# McMurray (2007) construction: even a pure accumulator (A, kappa=1)
+# produces an accelerating vocabulary curve because theta sweeps through
+# the difficulty distribution. The SAME Gaussian difficulty distribution
+# is used in every panel (the same words), so the columns differ only in
+# the latent dynamics (kappa) and between-child variance (sigma_alpha,
+# sigma_kappa), not in the word set. Five quantiles (10/25/50/75/90) in
+# the Wordbank palette match Fig 2.
 ages <- seq(8, 30, length.out = 80)
-a0   <- 19
-L    <- log(ages / a0)
+A0   <- 8                                  # anchor age: log(t/A0) >= 0
+L    <- log(ages / A0)
 qs   <- c(0.1, 0.25, 0.5, 0.75, 0.9)
 z    <- qnorm(qs)
 
+XI0     <- -2.0                            # median intercept (log r + log alpha)
+KAPPA_A <- 2.5                             # acceleration for B/C/D
+# shared word-difficulty distribution (Gaussian, McMurray 2007)
+DELTA   <- qnorm(ppoints(150), mean = 0, sd = 1.5)
+vocab_of <- function(th) vapply(th, function(x) mean(plogis(x - DELTA)), numeric(1))
+
 # population parameters chosen to be illustrative, not estimated.
 variants <- tibble::tribble(
-  ~name,                          ~kappa_pop, ~sigma_alpha, ~sigma_kappa, ~sigma_r, ~eq,
-  "(A) pure accumulator",         1,           0,            0,            0,       r"($\theta = \log(r) + \log(t)$)",
-  "(B) + acceleration",           2.5,         0,            0,            0,       r"($\theta = \log(r) + \kappa\,\log(t)$)",
-  "(C) + efficiency variance",    2.5,         1.3,          0,            0,       r"($\theta = \log(\alpha_i) + \log(r) + \kappa\,\log(t)$)",
-  "(D) + per-child acceleration",   2.5,         1.3,          0.8,          0,       r"($\theta = \log(\alpha_i) + \log(r) + \kappa_i\,\log(t)$)"
+  ~name,                          ~kappa_pop, ~sigma_alpha, ~sigma_kappa, ~eq,
+  "(A) pure accumulator",         1,           0,            0,            r"($\theta = \log(r) + \log(t)$)",
+  "(B) + acceleration",           KAPPA_A,     0,            0,            r"($\theta = \log(r) + \kappa\,\log(t)$)",
+  "(C) + efficiency variance",    KAPPA_A,     1.1,          0,            r"($\theta = \log(\alpha_i) + \log(r) + \kappa\,\log(t)$)",
+  "(D) + per-child acceleration", KAPPA_A,     1.1,          0.7,          r"($\theta = \log(\alpha_i) + \log(r) + \kappa_i\,\log(t)$)"
 )
 
-# For each model x quantile x age, theta and vocab
+# For each model x quantile x age: theta and the summed vocabulary curve
 sim <- variants |>
   mutate(name = factor(name, levels = name), panel_order = seq_along(name)) |>
   rowwise() |>
   do({
     v <- .
     bind_rows(lapply(seq_along(qs), function(i) {
+      th <- XI0 + z[i] * v$sigma_alpha +
+            (v$kappa_pop + z[i] * v$sigma_kappa) * L
       tibble(
         name = v$name, panel_order = v$panel_order,
         qprob = qs[i], qprob_f = factor(as.character(qs[i]),
                                         levels = c("0.1","0.25","0.5","0.75","0.9")),
-        age   = ages,
-        theta = z[i] * v$sigma_alpha +
-          z[i] * v$sigma_r +                       # input lifts intercept
-          (v$kappa_pop + z[i] * v$sigma_kappa) * L,
-        eq    = v$eq
+        age   = ages, theta = th, vocab = vocab_of(th), eq = v$eq
       )
     }))
   }) |>
-  ungroup() |>
-  mutate(vocab = plogis(theta))
+  ungroup()
 
 # annotation table — one equation per panel
 eq_lab <- variants |>
@@ -139,7 +147,7 @@ p_theta <- ggplot(sim,
                      labels = c("10th", "25th", "50th", "75th", "90th"),
                      drop = FALSE) +
   scale_linewidth_identity() +
-  coord_cartesian(ylim = c(-4, 8)) +
+  coord_cartesian(ylim = c(-3.5, 4.5)) +
   labs(x = NULL, y = expression(theta[i](t))) +
   theme_minimal(base_size = 9) +
   theme(strip.text = element_text(face = "bold", size = 9),
