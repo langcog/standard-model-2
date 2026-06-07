@@ -162,4 +162,35 @@ io_summary <- list(
 saveRDS(io_summary, file.path(CACHE, "fig5_io_summary.rds"))
 cat(sprintf("Wrote %s\n", file.path(CACHE, "fig5_io_summary.rds")))
 
+## ---- 5. Figure 4: per-word "exposures to 50%" (EN M_best) --------
+# For each word, solve the typical kid's age at 50% production from the
+# linear predictor, then count cumulative exposures of that word by that
+# age. Derived from the EN M_best (no_freq_slopes) longitudinal fit +
+# CHILDES frequencies. (Mirrors model/scripts/exposure_to_learn.R.)
+lb   <- readRDS(here("fits", "long_subset_data.rds"))
+lsd  <- lb$stan_data
+log_H <- lsd$log_H; a0 <- lsd$a0; mu_r <- lsd$mu_r
+ldraws    <- as.data.frame(readRDS(here("fits", "summaries",
+                                        "long_no_freq_slopes.draws.rds")))
+kappa_typ <- 1 + median(ldraws$delta)           # typical kid: log_alpha = 0
+xi_typ    <- mu_r                               # log_r = mu_r
+psi <- read_csv(here("fits", "summaries", "long_no_freq_slopes_psi.csv"),
+                show_col_types = FALSE) |> rename(delta_j = delta_j_median)
+FREQ_MIN <- 1e-5                                # drop CHILDES no-match floor items
+exposure_items <- lb$word_info |>
+  mutate(jj = row_number()) |>
+  left_join(psi |> select(jj, delta_j), by = "jj") |>
+  filter(!is.na(delta_j), prob >= FREQ_MIN) |>
+  mutate(lexical_class = factor(lb$class_levels[cc], levels = lb$class_levels),
+         t_50   = a0 * exp((delta_j - log_H - xi_typ) / kappa_typ),
+         N_word = exp(xi_typ) * exp(log_H) * t_50 * prob) |>
+  select(item, lexical_class, delta_j, prob, t_50, N_word)
+saveRDS(list(items = exposure_items,
+             meta  = list(mu_r = mu_r, kappa_typ = kappa_typ,
+                          n_items = nrow(exposure_items))),
+        file.path(CACHE, "fig4_exposure.rds"))
+cat(sprintf("Wrote %s (%d items, kappa=%.2f)\n",
+            file.path(CACHE, "fig4_exposure.rds"),
+            nrow(exposure_items), kappa_typ))
+
 cat("\nAll caches built.\n")

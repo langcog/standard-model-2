@@ -27,6 +27,7 @@ suppressPackageStartupMessages({
   library(ggplot2); library(patchwork); library(latex2exp)
   library(knitr); library(scales); library(stringr); library(forcats)
   library(broom); library(png); library(grid); library(gridExtra)
+  library(ggrepel)
 })
 source(here("paper", "_helpers.R"))
 
@@ -37,6 +38,7 @@ ladder     <- readRDS(file.path(CACHE, "fig2_glmer_ladder.rds"))
 demo_blups <- readRDS(file.path(CACHE, "blups_demographics.rds"))
 io_summary <- readRDS(file.path(CACHE, "fig5_io_summary.rds"))
 aic        <- readRDS(file.path(CACHE, "aic_summary.rds"))
+exposure   <- readRDS(file.path(CACHE, "fig4_exposure.rds"))
 
 # Inline range: how much worse the best (D) model becomes when age enters
 # linearly rather than as log-age, across the four languages (dAIC of
@@ -508,11 +510,45 @@ Sex effects show the predicted female advantage across all four languages, but t
 
 ## Growth in ability leads to rapid changes in learning times for individual words
 
-```{r fig-efficiency, out.width="100%"}
+```{r fig-efficiency, fig.width=10, fig.height=6}
 #| label: fig-efficiency
 #| fig-cap: ""
-knitr::include_graphics(
-  here("outputs", "figs", "longitudinal", "exposure_to_learn_EN.png"))
+# Per-word "exposures to 50% production" for a typical English child,
+# from the M_best fit + CHILDES frequencies (data in fig4_exposure.rds;
+# see paper/build_cache.R section 5 and model/scripts/exposure_to_learn.R).
+# Each point is a word; x = predicted age at 50% production, y = cumulative
+# exposures of that word by that age (log scale). Lines: per-class lm fits.
+items <- exposure$items
+meta  <- exposure$meta
+
+# label the extreme word per class on log-exposure (balanced across classes)
+labels_df <- items |>
+  mutate(log_N = log10(N_word)) |>
+  group_by(lexical_class) |>
+  arrange(log_N) |>
+  slice(c(1, n())) |>
+  ungroup()
+
+ggplot(items, aes(t_50, N_word, colour = lexical_class)) +
+  geom_point(alpha = 0.55, size = 1.1) +
+  geom_smooth(method = "lm", se = FALSE, linewidth = 0.7, formula = y ~ x) +
+  geom_label_repel(data = labels_df, aes(label = item),
+                   size = 2.8, alpha = 0.95, show.legend = FALSE,
+                   box.padding = 0.4, max.overlaps = Inf,
+                   min.segment.length = 0) +
+  scale_y_log10(labels = scales::label_number(big.mark = ",")) +
+  scale_x_continuous(limits = c(10, 40)) +
+  scale_colour_brewer(palette = "Dark2", name = "Class") +
+  labs(x = "Age (months) when word is produced at 50%",
+       y = "Cumulative exposures of THIS word at that age",
+       title = "How many times has a typical kid heard each word by the time they produce it?",
+       subtitle = sprintf(
+         "EN M_best at I=500 (%d items; CHILDES no-match floor items excluded). Typical kid: log r=%.2f, kappa=%.2f. Lines: per-class lm fits.",
+         meta$n_items, meta$mu_r, meta$kappa_typ)) +
+  theme_minimal(base_size = 11) +
+  theme(plot.title = element_text(face = "bold"),
+        plot.subtitle = element_text(size = 9, colour = "grey25"),
+        legend.position = "bottom")
 ```
 
 As an illustration of this change in efficiency, Figure 2 shows a model-derived estimate of the average number of times a child would need to hear a word before producing it (See SI: Changes in Word Efficiency), using frequency estimates from the CHILDES Corpus [@mcwhinney2020;@sanchez2019]. Across different word classes (e.g., nouns, verbs, closed class words), efficiency increases exponentially, such that early-learned words such as "ball" may be heard tens of thousands of times before they are produced, while later learned words such as "vitamin" might only be heard tens of times before being produced. 
