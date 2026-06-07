@@ -31,8 +31,8 @@ suppressPackageStartupMessages({
 source(here("paper", "_helpers.R"))
 
 # load cached data — produced by `Rscript paper/build_cache.R`
+# (Table 1 is built inline in its own chunk, not cached.)
 CACHE <- here("paper", "cache")
-table1     <- readRDS(file.path(CACHE, "table1_datasets.rds"))
 ladder     <- readRDS(file.path(CACHE, "fig2_glmer_ladder.rds"))
 demo_blups <- readRDS(file.path(CACHE, "blups_demographics.rds"))
 io_summary <- readRDS(file.path(CACHE, "fig5_io_summary.rds"))
@@ -277,17 +277,52 @@ ggplot() +
 # Wordbank rows are pulled from outputs/glmer_ladder/00_language_survey.csv;
 # IO rows are hardcoded from each bundle's actual extracts. Citation column
 # is a [@CITE] placeholder for the author to fill in.
-tbl_render <- table1 |>
+# Table 1 is built inline (not cached) so the numbers and names are easy
+# to edit here. Wordbank longitudinal rows are derived from the language
+# survey CSV (outputs/glmer_ladder/00_language_survey.csv); input-observed
+# (IO) rows are hardcoded from each dataset's extract. The Citation column
+# holds [@CITE] placeholders for the author to fill in.
+
+# --- Wordbank longitudinal rows (from the survey) ---
+survey <- read_csv(
+  here("outputs", "glmer_ladder", "00_language_survey.csv"),
+  show_col_types = FALSE)
+
+wb_rows <- survey |>
+  filter(language %in% LANG_LABELS[PAPER_LANGS]) |>
+  # keep the paper's language order
+  mutate(language = factor(language, levels = LANG_LABELS[PAPER_LANGS])) |>
+  arrange(language) |>
+  transmute(
+    dataset        = as.character(language),
+    citation       = "[@CITE]",
+    n_kids         = long_kids,                 # longitudinal kids only
+    admins_per_kid = round(admins / total_kids, 1),
+    age_range      = paste0(age_min, "–", age_max, " mo"),
+    input_info     = "—"
+  )
+
+# --- Input-observed (IO) rows (hardcoded from each dataset's extract) ---
+io_rows <- tibble::tribble(
+                  ~dataset,    ~citation, ~n_kids, ~admins_per_kid, ~age_range, ~input_info,
+  "BabyView",  "[@CITE]", 22L,     5.0,  "6–32 mo",  "Head-cam (n = 5,739 videos)",
+  "SEEDLingS", "[@CITE]", 44L,     12.0, "6–17 mo",  "LENA day (n = 525 recordings)",
+  "AM2018",    "[@CITE]", 66L,     3.0,  "16–24 mo", "LENA (n = 126 recordings)",
+  "FMW2013",   "[@CITE]", 51L,     3.0,  "18–30 mo", "LENA (n = 51 recordings)"
+)
+
+table1 <- bind_rows(wb_rows, io_rows)
+
+
+table1 |>
   mutate(n_kids = format(n_kids, big.mark = ","),
          admins_per_kid = sprintf("%.1f", admins_per_kid)) |>
   knitr::kable(
-    col.names = c("Panel", "Dataset", "Citation",
-                  "N children", "Admins / kid (mean)",
-                  "Age range", "Input / recordings"),
-    align = "lllrlll"
-  ) 
-
-kableExtra::kable_styling(tbl_render, font_size = 8)
+    col.names = c("Dataset", "Citation",
+                  "N", "Admins (mean)",
+                  "Ages", "Recordings"),
+    align = "lllrlll") |>
+  kableExtra::kable_styling(font_size = 8)
 ```
 
 ```{r fig-demographics, fig.width=9, fig.height=5.5}

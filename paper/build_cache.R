@@ -28,38 +28,10 @@ WORDBANKR_LABELS <- c("english_american" = "English (American)",
 CACHE <- here("paper", "cache")
 dir.create(CACHE, recursive = TRUE, showWarnings = FALSE)
 
-## ---- 1. dataset table values from the language survey -----------
-survey <- read_csv(here("outputs", "glmer_ladder", "00_language_survey.csv"),
-                   show_col_types = FALSE)
+## (Table 1 is built inline in the tbl-datasets chunk of the manuscript,
+##  not cached, so its numbers/names can be edited directly there.)
 
-wb_rows <- survey |>
-  filter(language %in% LANG_LABELS) |>
-  mutate(
-    panel       = "Wordbank longitudinal",
-    dataset     = language,
-    n_kids      = long_kids,
-    admins_per_kid_mean = round(admins / total_kids, 1),
-    age_range   = paste0(age_min, "–", age_max, " mo"),
-    input_info  = "—",
-    citation    = "[@CITE]"
-  ) |>
-  select(panel, dataset, citation, n_kids,
-         admins_per_kid = admins_per_kid_mean, age_range, input_info)
-
-io_rows <- tibble::tribble(
-  ~panel,                ~dataset,    ~citation, ~n_kids, ~admins_per_kid, ~age_range,  ~input_info,
-  "Input-observed (IO)", "BabyView",  "[@CITE]", 22L,     5.0,             "6–32 mo",   "Head-cam (n = 5,739 videos)",
-  "Input-observed (IO)", "SEEDLingS", "[@CITE]", 44L,     12.0,            "6–17 mo",   "LENA day (n = 525 recordings)",
-  "Input-observed (IO)", "AM2018",    "[@CITE]", 66L,     3.0,             "16–24 mo",  "LENA (n = 126 recordings)",
-  "Input-observed (IO)", "FMW2013",   "[@CITE]", 51L,     3.0,             "18–30 mo",  "LENA (n = 51 recordings)"
-)
-
-table1 <- bind_rows(wb_rows, io_rows)
-saveRDS(table1, file.path(CACHE, "table1_datasets.rds"))
-cat(sprintf("Wrote %s (%d rows)\n",
-            file.path(CACHE, "table1_datasets.rds"), nrow(table1)))
-
-## ---- 2. glmer-ladder predictions + empirical points -------------
+## ---- 1. glmer-ladder predictions + empirical points -------------
 sc <- readRDS(here("outputs", "glmer_ladder", "sim_cache.rds"))
 
 # keep only the four paper languages and the log-age models
