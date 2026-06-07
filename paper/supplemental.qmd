@@ -1,0 +1,88 @@
+---
+title: "Supplemental Information"
+format:
+  pdf:
+    documentclass: article
+    geometry: margin=1in
+    fontsize: 11pt
+    linestretch: 1.05
+    colorlinks: true
+    keep-tex: true
+---
+
+```{r si-setup, include=FALSE}
+suppressPackageStartupMessages({
+  library(here); library(dplyr); library(ggplot2); library(patchwork)
+})
+knitr::opts_chunk$set(
+  echo = FALSE, message = FALSE, warning = FALSE,
+  fig.align = "center", out.width = "100%", dpi = 300
+)
+```
+
+```{r fig-cross-sectional-confound, fig.width=9, fig.height=4}
+#| label: fig-cross-sectional-confound
+#| fig-cap: ""
+# Why longitudinal data are needed to identify per-child acceleration.
+#
+# A single cross-sectional snapshot — one ability estimate per child at
+# their observed age — is consistent with qualitatively different
+# individual-trajectory structures. We draw ONE set of cross-sectional
+# points (identical in both panels) and overlay two generative stories
+# that each pass through every point exactly:
+#   (A) stable between-child differences: every child shares the
+#       population slope and differs only in intercept (parallel lines);
+#   (B) diverging trajectories: every child starts from a common early
+#       ability and differs in slope (a fan).
+# With one observation per child the two are indistinguishable — only
+# repeated measurement of the same child reveals which holds.
+
+set.seed(42)
+N         <- 28
+a0        <- 6                       # reference age; log(t/a0) > 0 over 8-30
+kappa_pop <- 2.5                     # population acceleration (slope on log-age)
+sigma_xi  <- 1.0                     # between-child intercept spread
+
+ages_obs <- runif(N, 8, 30)
+L_obs    <- log(ages_obs / a0)
+# cross-sectional cloud: ability rises with log-age + between-child noise
+theta_obs <- kappa_pop * L_obs + rnorm(N, 0, sigma_xi)
+pts <- data.frame(age = ages_obs, theta = theta_obs)
+
+age_grid <- seq(8, 30, length.out = 60)
+L_grid   <- log(age_grid / a0)
+
+# (A) parallel: each child same slope kappa_pop, intercept set to hit point
+parallel <- bind_rows(lapply(seq_len(N), function(i) {
+  xi <- theta_obs[i] - kappa_pop * L_obs[i]
+  data.frame(child = i, age = age_grid, theta = xi + kappa_pop * L_grid)
+}))
+
+# (B) fanning: common early origin theta0, slope set to hit point
+theta0 <- min(theta_obs) - 1.5       # origin below the cloud so all slopes > 0
+fanning <- bind_rows(lapply(seq_len(N), function(i) {
+  kappa_i <- (theta_obs[i] - theta0) / L_obs[i]
+  data.frame(child = i, age = age_grid, theta = theta0 + kappa_i * L_grid)
+}))
+
+yr <- range(theta_obs) + c(-1, 1)
+mk <- function(traj, ttl) {
+  ggplot() +
+    geom_line(data = traj, aes(age, theta, group = child),
+              color = "#2b8cbe", alpha = 0.35, linewidth = 0.3) +
+    geom_line(data = data.frame(age = age_grid,
+                                theta = kappa_pop * L_grid +
+                                        (mean(theta_obs) - kappa_pop * mean(L_obs))),
+              aes(age, theta), linetype = "dashed",
+              color = "grey45", linewidth = 0.4) +
+    geom_point(data = pts, aes(age, theta), size = 1.3, color = "grey15") +
+    coord_cartesian(ylim = yr) +
+    labs(x = "age (months)", y = expression(ability~theta), title = ttl) +
+    theme_minimal(base_size = 10) +
+    theme(plot.title = element_text(size = 10, face = "bold"),
+          panel.grid.minor = element_blank())
+}
+
+mk(parallel, "(A) stable between-child differences (intercepts vary)") +
+mk(fanning,  "(B) diverging trajectories (slopes vary)")
+```
