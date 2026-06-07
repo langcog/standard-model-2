@@ -41,6 +41,21 @@ cat(sprintf("=== Extracting longitudinal data for %s ===\n", LANG))
 
 ## ---- Step 1: admin table; identify longitudinal kids ----
 ad <- get_administration_data(language = LANG)
+
+# Restrict to monolingual, typically-developing children. Wordbank stores
+# bilingual studies with "Bilingual" in dataset_origin_name; we also drop
+# the Edgin dataset (a Down-syndrome clinical sample). For monolingual TD
+# languages (e.g. Norwegian, Japanese) this removes nothing.
+EXCLUDE_DATASETS <- c("Edgin")
+n_before <- nrow(ad)
+ad <- ad |>
+  filter(!grepl("Bilingual", dataset_origin_name, ignore.case = TRUE),
+         !(dataset_name %in% EXCLUDE_DATASETS))
+if (nrow(ad) < n_before) {
+  cat(sprintf("Excluded %d admins from bilingual / clinical datasets (monolingual-TD filter)\n",
+              n_before - nrow(ad)))
+}
+
 ad_kept <- ad |> filter(form %in% FORM_KEEP)
 cat(sprintf("Forms in language: %s\n  Kept: %s\n",
             paste(sort(unique(ad$form)), collapse = ", "),
