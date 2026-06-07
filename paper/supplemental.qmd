@@ -91,7 +91,7 @@ mk(fanning,  "(B) diverging trajectories (slopes vary)")
 
 ```{r fig-glmer-ladder-linear, fig.width=8, fig.height=5}
 #| label: fig-glmer-ladder-linear
-#| fig-cap: ""
+#| fig-cap: "Linear ability growth model variants. See main text for model fit comparisons."
 # Supplemental Figure 2: the LINEAR-age model variants (A, B, C, D),
 # matching the main-text Figure of the log-age models. Same data and
 # plotting conventions; here ability grows linearly in age rather than

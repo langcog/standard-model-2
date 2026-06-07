@@ -140,6 +140,20 @@
  
 
 
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
 \makeatletter
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
 \AtBeginDocument{%
@@ -451,8 +465,8 @@ and a random effect of word difficulty. Successive models added random
 intercepts (model C) and slopes (model D) by child. Model D, which
 incorporated variation in acceleration and efficiency, was the best
 fitting model across all four datasets, with AIC and BIC differences
-shown in \textbf{?@tbl-aic}. Figure~\ref{fig-glmer-ladder} shows the fit
-of the four model variants; the increasing spread of children's
+shown in Table~\ref{tbl-aic}. Figure~\ref{fig-glmer-ladder} shows the
+fit of the four model variants; the increasing spread of children's
 trajectories with age is especially noticeable for low-vocabulary older
 children {[}who may be classified as ``late talkers''; Fernald and
 Marchman (2012); Rescorla (2011){]}.
@@ -464,9 +478,35 @@ that ability grows linearly in time, which would lead to exponential
 increases in the probability of word production. We fit linear-time
 models, but found that they were dispreferred statistically, though
 differences were relatively small within the restricted age range for
-which we have data (\(\delta\)AIC
-\texttt{RENDER\ AIC\ RANGE\ FOR\ LOG\ AGE\ VS\ LINEAR\ VARIANTS}; see
-Supplemental Figure 2 for model fits).
+which we have data (\(\delta\)AIC 169--4,138; see Supplemental Figure 2
+for model fits).
+
+\begingroup\fontsize{8}{10}\selectfont
+
+\begin{longtable}[t]{llrrrrrrrr}
+
+\caption{\label{tbl-aic}}
+
+\tabularnewline
+
+\toprule
+\multicolumn{2}{c}{ } & \multicolumn{4}{c}{$\Delta$AIC} & \multicolumn{4}{c}{$\Delta$BIC} \\
+\cmidrule(l{3pt}r{3pt}){3-6} \cmidrule(l{3pt}r{3pt}){7-10}
+Model & Age & English & Norwegian & French (Q.) & Japanese & English & Norwegian & French (Q.) & Japanese\\
+\midrule
+A. accumulator & — & 1,721,195 & 2,299,678 & 66,408 & 95,222 & 1,721,143 & 2,299,625 & 66,367 & 95,181\\
+B. + acceleration & linear & 925,989 & 1,389,719 & 44,967 & 41,321 & 925,950 & 1,389,679 & 44,936 & 41,290\\
+B. + acceleration & log & 929,263 & 1,360,175 & 43,091 & 39,171 & 929,224 & 1,360,135 & 43,061 & 39,140\\
+C. + efficiency var. & linear & 153,291 & 131,294 & 4,746 & 3,864 & 153,265 & 131,267 & 4,726 & 3,843\\
+C. + efficiency var. & log & 150,361 & 115,789 & 3,407 & 3,239 & 150,335 & 115,763 & 3,386 & 3,218\\
+\addlinespace
+D. + acceleration var. & linear & 711 & 4,138 & 250 & 169 & 711 & 4,138 & 250 & 169\\
+D. + acceleration var. & log & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+\bottomrule
+
+\end{longtable}
+
+\endgroup{}
 
 \begin{figure}
 
