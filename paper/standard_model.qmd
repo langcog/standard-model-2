@@ -38,7 +38,7 @@ demo_blups <- readRDS(file.path(CACHE, "blups_demographics.rds"))
 io_summary <- readRDS(file.path(CACHE, "fig5_io_summary.rds"))
 
 knitr::opts_chunk$set(
-  echo = FALSE, message = FALSE, warning = FALSE,
+  echo = FALSE, message = FALSE, warning = FALSE, cache=TRUE,
   fig.align = "center", out.width = "100%", dpi = 300
 )
 ```
@@ -61,7 +61,7 @@ Critically, we make use of new data resources, first connecting between vocabula
 
 Overall, our analysis supports a view in which children’s vocabulary growth is not a pure process of accumulation but rather one that accelerates rapidly over time. Further, although variation in input rate accounts for significant variation in learning speed, it is limited to approximately 10% of total variation across datasets. 
 
-Finally, we explore an application of the same framework to large language models. Making use of GPT-2 models trained on human developmental data, we show that – in contrast to children – these models do appear to function as pure accumulators. This analysis exposes a critical disanalogy between LLMs and human learners and suggests a potential route for understanding the vast “data gap” between children and large language models (Frank, 2023). 
+Finally, we explore an application of the same framework to large language models. Making use of GPT-2 models trained on human developmental data, we show that – in contrast to children – these models do appear to function as pure accumulators. This analysis exposes a critical disanalogy between LLMs and human learners and suggests a potential route for understanding the vast “data gap” between children and large language models [@frank2023]. 
 
 
 Here we ask whether these two signatures of vocabulary growth - variation and acceleration - are consistent with pure accumulator models, which are prevalent in the word learning literature and which characterize the scaling dynamics of large language models.
@@ -69,7 +69,7 @@ Here we ask whether these two signatures of vocabulary growth - variation and ac
 
 # Model 
 
-We start with a simple accumulator model that merges ideas from item response theory and learning theory (McMurray, Kachergis). We begin with the Rasch model.
+We start with a simple accumulator model that merges ideas from item response theory and learning theory [@mcmurray2007;@kachergis2021]. We begin with the Rasch model.
 
 Child $i$ produces word $j$ has probability ($\eta_ij$)
 
@@ -97,7 +97,7 @@ This final model instantiates the idea that children vary in their base level of
 
 As we will show, such a model fits a range of data vastly better than models without these terms.
 
-```{r fig-schematic, fig.width=11, fig.height=6.5}
+```{r fig-schematic, fig.width=7, fig.height=4.5}
 #| label: fig-schematic
 #| fig-cap: ""
 # Schematic walk through the model ladder. Four columns are model
@@ -121,7 +121,7 @@ variants <- tibble::tribble(
   "(A) pure accumulator",         1,           0,            0,            0,       r"($\theta = \log(r) + \log(t)$)",
   "(B) + acceleration",           2.5,         0,            0,            0,       r"($\theta = \log(r) + \kappa\,\log(t)$)",
   "(C) + efficiency variance",    2.5,         1.3,          0,            0,       r"($\theta = \log(\alpha_i) + \log(r) + \kappa\,\log(t)$)",
-  "(D) + per-kid acceleration",   2.5,         1.3,          0.8,          0,       r"($\theta = \log(\alpha_i) + \log(r) + \kappa_i\,\log(t)$)"
+  "(D) + per-child acceleration",   2.5,         1.3,          0.8,          0,       r"($\theta = \log(\alpha_i) + \log(r) + \kappa_i\,\log(t)$)"
 )
 
 # For each model x quantile x age, theta and vocab
@@ -206,9 +206,9 @@ The efficiency change was the best fitting model across all four datasets (as we
 
 Power-law growth models (in which growth in ability is a function of the logarithm of age) showed statistically better fits than exponential growth models (in which growth in ability is a linear function of age). Though these models were better from a statistical perspective ($\delta$AIC XYZ -- XYZ), differences were small within the age range we examined (see Supplemental Table XYZ and Figure XYZ for all model fits). 
 
-```{r fig-glmer-ladder, fig.width=11, fig.height=7}
+```{r fig-glmer-ladder, fig.width=8, fig.height=5}
 #| label: fig-glmer-ladder
-#| fig-cap: ""
+#| fig-cap: "Note, transparency is higher for English (American) and Norwegian panels to avoid overplotting."
 # Replicates glmer_ladder/04b_plot.R style: empirical kid trajectories
 # (grey lines + points) overlaid with the per-kid quantile predictions
 # from each model. C_log and D_log get the full 10/25/50/75/90 fan
@@ -223,8 +223,8 @@ emp <- ladder$emp |>
 
 model_lab <- c("A"     = "(A) accumulator",
                "B_log" = "(B) + pop. acceleration",
-               "C_log" = "(C) + per-kid efficiency",
-               "D_log" = "(D) + per-kid acceleration")
+               "C_log" = "(C) + per-child efficiency",
+               "D_log" = "(D) + per-child acceleration")
 qtiles$model_label <- factor(model_lab[qtiles$model], levels = model_lab)
 lang_lab <- ladder$lang_labels
 emp$lang_label    <- factor(lang_lab[emp$lang_slug],    levels = lang_lab)
@@ -239,11 +239,16 @@ qt_median <- filter(qtiles, !model %in% c("C_log", "D_log"),
                     qprob_f == "0.5")
 
 ggplot() +
-  geom_line(data = emp_facet,
+  geom_line(data = filter(emp_facet, 
+                          language %in% c("English (American)", "Norwegian")),
             aes(age, vocab, group = child_lang),
-            color = "grey25", alpha = 0.15, linewidth = 0.25) +
-  geom_point(data = emp_facet, aes(age, vocab),
-             color = "grey25", alpha = 0.20, size = 0.25) +
+            color = "grey25", alpha = 0.05, linewidth = 0.25) +
+  geom_line(data = filter(emp_facet, 
+                          !(language %in% c("English (American)", "Norwegian"))),
+            aes(age, vocab, group = child_lang),
+            color = "grey25", alpha = 0.25, linewidth = 0.25) +
+  # geom_point(data = emp_facet, aes(age, vocab),
+  #            color = "grey25", alpha = 0.20, size = 0.25) +
   geom_line(data = qt_fan,
             aes(age, vocab, color = qprob_f, group = qprob_f,
                 linewidth = ifelse(as.character(qprob_f) == "0.5",
