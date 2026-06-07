@@ -36,6 +36,15 @@ CACHE <- here("paper", "cache")
 ladder     <- readRDS(file.path(CACHE, "fig2_glmer_ladder.rds"))
 demo_blups <- readRDS(file.path(CACHE, "blups_demographics.rds"))
 io_summary <- readRDS(file.path(CACHE, "fig5_io_summary.rds"))
+aic        <- readRDS(file.path(CACHE, "aic_summary.rds"))
+
+# Inline range: how much worse the best (D) model becomes when age enters
+# linearly rather than as log-age, across the four languages (dAIC of
+# D_lin relative to the best model, D_log).
+.dlin <- aic |> filter(model == "D_lin") |> pull(dAIC)
+aic_loglin_range <- sprintf("%s--%s",
+  format(round(min(.dlin)), big.mark = ","),
+  format(round(max(.dlin)), big.mark = ","))
 
 knitr::opts_chunk$set(
   echo = FALSE, message = FALSE, warning = FALSE, cache=TRUE,
@@ -265,7 +274,55 @@ table1 |>
 
 Taking advantage of the equivalence of Rasch models to generalized linear mixed effects models [@deboeck2011], we fit the set of models shown in Figure @fig-schematic as a series of logistic regressions. Each model predicted the probability of an individual child producing a particular word as a function of age (either unmodified in model A or multiplied by a constant in model B) and a random effect of word difficulty. Successive models added  random intercepts (model C) and slopes (model D) by child. Model D, which incorporated variation in acceleration and efficiency, was the best fitting model across all four datasets, with AIC and BIC differences shown in @tbl-aic. @fig-glmer-ladder shows the fit of the four model variants; the increasing spread of children's trajectories with age is especially noticeable for low-vocabulary older children [who may be classified as "late talkers"; @fernald2012; @rescorla2011].
 
-Following the literature, we primarily investigate linear accumulator models, which show power-law growth of ability over time because $\theta$ is a function of $\log(t)$. However, it is also possible that ability grows linearly in time, which would lead to exponential increases in the probability of word production. We fit linear-time models, but found that they were dispreferred statistically, though differences were relatively small within the restricted age range for which we have data ($\delta$AIC `RENDER AIC RANGE FOR LOG AGE VS LINEAR VARIANTS`; see Supplemental Figure 2 for model fits). 
+Following the literature, we primarily investigate linear accumulator models, which show power-law growth of ability over time because $\theta$ is a function of $\log(t)$. However, it is also possible that ability grows linearly in time, which would lead to exponential increases in the probability of word production. We fit linear-time models, but found that they were dispreferred statistically, though differences were relatively small within the restricted age range for which we have data ($\delta$AIC `r aic_loglin_range`; see Supplemental Figure 2 for model fits).
+
+```{r tbl-aic}
+#| label: tbl-aic
+#| tbl-cap: ""
+# Model-comparison table: dAIC and dBIC of each model variant relative to
+# the best model within each language (the best is always D log-age, dAIC
+# = dBIC = 0). Models without a per-child slope (A, B) have no log/linear
+# distinction at the accumulation step; we tabulate B/C/D in both age
+# bases. Values built from aic_summary (paper/build_cache.R <- glmer ladder).
+lang_order <- c("english_american","norwegian","french_quebecois","japanese")
+lang_short <- c(english_american="English", norwegian="Norwegian",
+                french_quebecois="French (Q.)", japanese="Japanese")
+mod_lab <- c(A="A. accumulator",
+             B_lin="B. + acceleration", B_log="B. + acceleration",
+             C_lin="C. + efficiency var.", C_log="C. + efficiency var.",
+             D_lin="D. + acceleration var.", D_log="D. + acceleration var.")
+age_lab <- c(A="—", B_lin="linear", B_log="log", C_lin="linear",
+             C_log="log", D_lin="linear", D_log="log")
+mod_order <- c("A","B_lin","B_log","C_lin","C_log","D_lin","D_log")
+
+tab <- aic |>
+  mutate(Model = mod_lab[model], Age = age_lab[model],
+         lang_slug = factor(lang_slug, levels = lang_order)) |>
+  select(model, Model, Age, lang_slug, dAIC) |>
+  tidyr::pivot_wider(names_from = lang_slug, values_from = dAIC) |>
+  mutate(model = factor(model, levels = mod_order)) |>
+  arrange(model) |>
+  select(Model, Age, all_of(lang_order))
+
+# dBIC, same shape, to append as a second column block
+tabB <- aic |>
+  mutate(lang_slug = factor(lang_slug, levels = lang_order),
+         model = factor(model, levels = mod_order)) |>
+  select(model, lang_slug, dBIC) |>
+  tidyr::pivot_wider(names_from = lang_slug, values_from = dBIC) |>
+  arrange(model) |> select(all_of(lang_order))
+
+fmt <- function(x) ifelse(x == 0, "0", format(round(x), big.mark = ","))
+out <- cbind(tab[, c("Model","Age")],
+             lapply(tab[, lang_order], fmt) |> as.data.frame(),
+             lapply(tabB,             fmt) |> as.data.frame())
+
+knitr::kable(out, align = c("l","l", rep("r", 8)),
+             col.names = c("Model", "Age", rep(unname(lang_short[lang_order]), 2))) |>
+  kableExtra::add_header_above(c(" " = 2, "$\\\\Delta$AIC" = 4, "$\\\\Delta$BIC" = 4),
+                               escape = FALSE) |>
+  kableExtra::kable_styling(latex_options = "scale_down", font_size = 8)
+```
 
 ```{r fig-glmer-ladder, fig.width=8, fig.height=5}
 #| label: fig-glmer-ladder

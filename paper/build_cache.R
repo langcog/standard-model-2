@@ -34,10 +34,10 @@ dir.create(CACHE, recursive = TRUE, showWarnings = FALSE)
 ## ---- 1. glmer-ladder predictions + empirical points -------------
 sc <- readRDS(here("outputs", "glmer_ladder", "sim_cache.rds"))
 
-# keep only the four paper languages and the log-age models
+# keep all 7 model variants for the four paper languages: the main-text
+# figure filters to the log-age models, the supplement to the linear ones.
 qt <- sc$qtiles |>
-  filter(lang_slug %in% PAPER_LANGS,
-         model %in% c("A", "B_log", "C_log", "D_log"))
+  filter(lang_slug %in% PAPER_LANGS)
 ep <- sc$emp |>
   filter(lang_slug %in% PAPER_LANGS)
 
@@ -47,6 +47,19 @@ saveRDS(list(qtiles = qt, emp = ep, langs = PAPER_LANGS,
 cat(sprintf("Wrote %s (qtiles=%d, emp=%d rows)\n",
             file.path(CACHE, "fig2_glmer_ladder.rds"),
             nrow(qt), nrow(ep)))
+
+## ---- 1b. AIC/BIC model-comparison summary -----------------------
+# dAIC / dBIC of every model variant relative to the best model within
+# each language (main-text comparison table + inline log-vs-linear range).
+aic_summary <- as.data.frame(sc$summ) |>
+  filter(lang_slug %in% PAPER_LANGS) |>
+  group_by(lang_slug) |>
+  mutate(dAIC = AIC - min(AIC), dBIC = BIC - min(BIC)) |>
+  ungroup() |>
+  select(lang_slug, language, model, AIC, BIC, dAIC, dBIC, df, n_obs, n_kids)
+saveRDS(aic_summary, file.path(CACHE, "aic_summary.rds"))
+cat(sprintf("Wrote %s (%d rows)\n",
+            file.path(CACHE, "aic_summary.rds"), nrow(aic_summary)))
 
 ## ---- 3. BLUPs from D_log fits + Wordbank demographics ----------
 extract_blups <- function(lang_slug) {
