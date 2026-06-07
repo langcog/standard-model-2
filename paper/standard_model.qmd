@@ -51,7 +51,9 @@ Children’s early vocabulary grows very rapidly during early childhood, with la
 
 From a theoretical perspective, growth mechanisms shed light on children’s fundamental learning mechanisms and how they change across childhood. From a practical perspective, variation in growth is an important precursor — and predictor — of academic achievement. From a methodological perspective, vocabulary also affords a unique psychometric opportunity to study human variation because, unlike nearly all important human psychological metrics, there is a true zero point - a time before which children know no words. Thus, absolute levels of variability can be calculated. 
 
-One dominant viewpoint is that this growth can be characterized as a process of accumulation [@mcmurray2007; @mitchell2009; @hidaka2013; @mollica2017; @kachergis2022]. This pure accumulator view connects with a viewpoint in which the quantity of language that children hear has a strong causal role in the speed of their learning (Fernald papers; Bergeleson 1001). It also connects with the idea that large language models – whose learning scales in predictable, accumulator-like ways (Kaplan, Chinchilla, scaling laws) – might be good models for children’s learning. 
+One dominant viewpoint is that this growth can be characterized as a process of accumulation [@mcmurray2007; @mitchell2009; @hidaka2013; @mollica2017; @kachergis2022]. This pure accumulator view connects with a viewpoint in which the quantity of language that children hear has a strong causal role in the speed of their learning [@fernald2012]. 
+
+<!-- It also connects with the idea that large language models – whose learning scales in predictable, accumulator-like ways (Kaplan, Chinchilla, scaling laws) – might be good models for children’s learning.  -->
 
 But important parts of this proposal have not been fleshed out. For example, how much variation is due to input quantity vs. other sources? Meta-analysis of this relationship suggests it’s there but not that big [@coffey2026]. Could be quality as well, of course.
 
@@ -194,17 +196,11 @@ The intercept term $\xi_i = log(\alpha_i) + log(\r_i)$ then assumes that there i
 
 This final model instantiates the idea that children vary in their base rate of efficiency and their acceleration, instantiating  a longitudinal growth model in which children vary on their slope and intercept. As we will show, this model provides a good description of variation in children's longitudinal growth trajectories.
 
-This family of models is not identifiable from cross-sectional data
-
-The different models described above are not identifiable in cross-sectional data. [WHY]. 
-
+The different models described above are not distinguishable from the cross-sectional, aggregate data that are typically considered in many analyses of early vocabulary. First, aggregate data do not allow for the estimation of individual word difficulties, thus the distribution of difficulties remains latent and different difficulty distributions can be posited to explain the accelerating shape of vocabulary growth [@mcmurray2007; @mitchell2009]. Second, cross-sectional data do not allow for accurate estimation of whether variation is due to differences in efficiency (intercept) or acceleration (slope) (see Supplemental Figure 1). Thus, our analyses below are critically enabled by the presence of longitudinal data documenting children's knowledge of individual words. 
 
 # Results
 
-To fit these longitudinal growth models, we retrieved longitudinal data on children's vocabulary from Wordbank [@frank2017], an open archive of data from the MacArthur-Bates Communicative Development Inventory and its international adaptations. Table \@ref(tab:tbl-datasets) shows the four longitudinal datasets in Wordbank with $>100$ observations. 
- 
-
-<!-- he longitudinal, item-level design is what rescues the κ>1 claim from McMurray — κ is pinned by within-child slopes, δ_j by item intercepts, so they're separately identified. McMurray's defusing only bites for aggregate cross-sectional curves. Worth stating as a strength. -->
+We first retrieved longitudinal data on children's vocabulary from Wordbank [@frank2017], an open archive of data from the MacArthur-Bates Communicative Development Inventory and its international adaptations. Table @tbl-datasets shows the four longitudinal datasets in Wordbank that contained more than $>100$ children with multiple observations.  
 
 ```{r tbl-datasets}
 #| label: tbl-datasets
