@@ -22,7 +22,7 @@ knitr::opts_chunk$set(
 
 ```{r fig-cross-sectional-confound, fig.width=9, fig.height=4}
 #| label: fig-cross-sectional-confound
-#| fig-cap: ""
+#| fig-cap: "Non-identifiability of growth models in cross-sectional data. Panels show the same simulated data, reflecting the possibility of stable between-child intercept differences (A) vs. varying growth slopes (B)."
 # Why longitudinal data are needed to identify per-child acceleration.
 #
 # A single cross-sectional snapshot — one ability estimate per child at

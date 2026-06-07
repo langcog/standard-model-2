@@ -268,6 +268,21 @@ variability between children, not just the central tendency and 2) that
 we directly connect quantitative estimates of language exposure to the
 rate of vocabulary growth.
 
+We fit these models to data on children's language production. Our
+primary data source is the MacArthur-Bates Communicative Development
+Inventories {[}MB-CDI;
+(\textbf{fenson1994?});(\textbf{marchman2021?}){]}, a popular parent
+report instrument in which parents are asked to indicate which words
+their child produces and understand. Here we focus exclusively on
+production, which is used with older children and which tends to be a
+more reliable measure {[}(\textbf{frank2021?});others{]}. We make use of
+data from Wordbank (\textbf{frank2017?}), an open repository of data
+from the MB-CDI. Since our efficiency variation model is not
+identifiable in cross-sectional data, we focus on those datasets that
+include substantial amounts of longitudinal data, which come from
+American English (N=XYZ), Norwegian (N=XYZ), Quebec French (N=XYZ), and
+Japanese (N=XYZ).
+
 Critically, we make use of new data resources, first connecting between
 vocabulary growth and data-driven estimates of the general range of
 language input quantity available to children (study 1), then to
@@ -317,8 +332,6 @@ ability \(\theta_i\) and each word \(j\) has a difficulty \(\delta_j\).
 The probability that child \(i\) produces word \(j\) is
 
 \[P(w_{i,j}=1 \mid \theta_i, \delta_j) =\frac{\exp(\theta_i - \delta_j)}{1 + \exp(\theta_i - \delta_j)}\]
-In what follows, we assume that \(\delta_j\) is a property of individual
-wo
 
 Following (\textbf{kachergis2022?}), we can write our first model a
 simple Rasch-style accumulator model (``M1: pure accumulator''),
@@ -354,27 +367,50 @@ This final model instantiates the idea that children vary in their base
 rate of efficiency and their acceleration, instantiating a longitudinal
 growth model in which children vary on their slope and intercept. As we
 will show, this model provides a good description of variation in
-children's longitudinal growth trajectories.
+children's longitudinal growth trajectories. Figure~\ref{fig-schematic}
+shows schematic predictions from a pure accumulator model (A), an
+accelerating accumulator (B) in comparison to models including
+child-level variation in efficiency (C) and both efficiency and
+acceleration (D). Each model's predictions are represented as ability
+scores (\(\theta\)) across age and then also projected into proportion
+correct scores on a discrete set of vocabulary items, representing an
+observed accuracy score that is subject to compression at floor and
+ceiling.
 
-The different models described above are not distinguishable from the
-cross-sectional, aggregate data that are typically considered in many
-analyses of early vocabulary. First, aggregate data do not allow for the
-estimation of individual word difficulties, thus the distribution of
-difficulties remains latent and different difficulty distributions can
-be posited to explain the accelerating shape of vocabulary growth
-(McMurray 2007; \textbf{mitchell2009?}). Second, cross-sectional data do
-not allow for accurate estimation of whether variation is due to
-differences in efficiency (intercept) or acceleration (slope) (see
-Supplemental Figure 1). Thus, our analyses below are critically enabled
-by the presence of longitudinal data documenting children's knowledge of
-individual words.
+A variety of previous work has focused on estimating the difficulty of
+individual words (\textbf{goodman2008?}; Hidaka 2013; \textbf{roy2015?};
+\textbf{braginsky2020?}; \textbf{kachergis2022?}). These analyses reveal
+that there is predictable word-level difficulty information but that
+only a modest portion of the variation between words is carried by
+frequency information. Words can be hard for a child to acquire because
+they vary also in the complexity and concreteness of their meanings,
+their syntactic category and syntactic context, their phonology, and
+many other factors. In the current work, we estimate word difficulty as
+a free parameter, and focus instead on variation between children.
+
+Our analysis generally depends on the availability of longitudinal data
+at the item level. The different models described above are not
+distinguishable from the cross-sectional, aggregate data that are
+typically considered in many analyses of early vocabulary. First,
+aggregate data do not allow for the estimation of individual word
+difficulties, thus the distribution of difficulties remains latent and
+different difficulty distributions can be posited to explain the
+accelerating shape of vocabulary growth (McMurray 2007;
+\textbf{mitchell2009?}). Second, cross-sectional data do not allow for
+accurate estimation of whether variation is due to differences in
+efficiency (intercept) or acceleration (slope) (see Supplemental Figure
+1).
 
 \section{Results}\label{results}
+
+\subsection{Children's longitudinal growth reflects differences in both
+efficiency and
+acceleration}\label{childrens-longitudinal-growth-reflects-differences-in-both-efficiency-and-acceleration}
 
 We first retrieved longitudinal data on children's vocabulary from
 Wordbank (\textbf{frank2017?}), an open archive of data from the
 MacArthur-Bates Communicative Development Inventory and its
-international adaptations. Table Table~\ref{tbl-datasets} shows the four
+international adaptations. Table~\ref{tbl-datasets} shows the four
 longitudinal datasets in Wordbank that contained more than \(>100\)
 children with multiple observations.
 
@@ -404,38 +440,12 @@ FMW2013 & {}[@CITE] & 51 & 3.0 & 18–30 mo & LENA (n = 51 recordings)\\
 
 \endgroup{}
 
-as well as.
-
-Table @ref(tab:tbl-datasets) gives details of all included data.
-
-\subsection{Model comparison}\label{model-comparison}
-
-We used the standard reduction of the Rasch model to a mixed effects
-regression model (\textbf{jss\_paper?}) to fit the set of models
-described above.
-
-We fit these models to data on children's language production. Our
-primary data source is the MacArthur-Bates Communicative Development
-Inventories {[}MB-CDI;
-(\textbf{fenson1994?});(\textbf{marchman2021?}){]}, a popular parent
-report instrument in which parents are asked to indicate which words
-their child produces and understand. Here we focus exclusively on
-production, which is used with older children and which tends to be a
-more reliable measure {[}(\textbf{frank2021?});others{]}. We make use of
-data from Wordbank (\textbf{frank2017?}), an open repository of data
-from the MB-CDI. Since our efficiency variation model is not
-identifiable in cross-sectional data, we focus on those datasets that
-include substantial amounts of longitudinal data, which come from
-American English (N=XYZ), Norwegian (N=XYZ), Quebec French (N=XYZ), and
-Japanese (N=XYZ).
-
-The efficiency change was the best fitting model across all four
-datasets (as well as two smaller ones; see SI), with AIC differences of
-XYZ--XYZ. Figure 1 shows the four primary model variants: pure
-accumulator models and models that include population-level efficiency
-change predict no variation (A, B). Allowing both efficiency (intercept)
-and efficiency change (slope) to vary across individuals results in
-substantially better fit.
+Taking advantage of the equivalence of Rasch models to linear mixed
+effects models (De Boeck et al. 2011), we fit the set of models shown in
+Figure Figure~\ref{fig-schematic}. The model incorporating variation in
+acceleration and efficiency was the best fitting model across all four
+datasets, with AIC and BIC differences shown in \textbf{?@tbl-aic}.
+Figure~\ref{fig-glmer-ladder} reveals
 
 Power-law growth models (in which growth in ability is a function of the
 logarithm of age) showed statistically better fits than exponential
@@ -593,6 +603,12 @@ the author.
 \bibitem[\citeproctext]{ref-bond2013}
 Bond, Trevor G, and Christine M Fox. 2013. \emph{Applying the Rasch
 Model: Fundamental Measurement in the Human Sciences}. Psychology Press.
+
+\bibitem[\citeproctext]{ref-deboeck2011}
+De Boeck, Paul, Marjan Bakker, Robert Zwitser, Michel Nivard, Abe
+Hofman, Francis Tuerlinckx, and Ivailo Partchev. 2011. {``The Estimation
+of Item Response Models with the Lmer Function from the Lme4 Package in
+r.''} \emph{Journal of Statistical Software} 39: 1--28.
 
 \bibitem[\citeproctext]{ref-hidaka2013}
 Hidaka, Shohei. 2013. {``A Computational Model Associating Learning
