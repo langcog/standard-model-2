@@ -26,6 +26,19 @@ d <- long %>%
          !is.na(produces)) %>%
   select(-any_of("prob"))
 
+# Collapse to one administration per (child, age): merge WG+WS taken at
+# the same age into a single observation per word (produced if produced
+# in any admin that month). Mirrors prepare_longitudinal_data.R; without
+# it, kids measured on both forms at one age double-count shared words.
+n_rows0 <- nrow(d)
+d <- d %>%
+  group_by(child_id, age, item) %>%
+  summarise(produces = max(produces),
+            lexical_category = dplyr::first(lexical_category),
+            .groups = "drop")
+message(sprintf("  collapse to one admin per (child,age): %d -> %d rows",
+                n_rows0, nrow(d)))
+
 message(sprintf("  input: %d rows, %d children, %d items",
                 nrow(d), length(unique(d$child_id)),
                 length(unique(d$item))))
@@ -128,7 +141,7 @@ message(sprintf("  subset: %d rows, %d children, %d items",
 
 # Build admin keys and indices
 d <- d %>%
-  mutate(admin_key = paste(child_id, age, form, sep = "_"),
+  mutate(admin_key = paste(child_id, age, sep = "_"),
          aa = as.integer(factor(admin_key)),
          ii = as.integer(factor(child_id)),
          jj = as.integer(factor(item)),

@@ -8,8 +8,10 @@
 ## Reads:   fits/long_items.rds (from pull_longitudinal.R)
 ## Writes:  fits/long_subset_data.rds (Stan-ready bundle)
 ##
-## Each (child, age, form) combination is its own admin so a child who
-## took both WG and WS at the same age contributes two admin rows.
+## Each (child, age) is one administration: WG+WS taken at the same age,
+## and any repeat same-form administrations that month, are merged into a
+## single admin (one latent ability per child-age), each word counted
+## once (produced if produced in any admin that month).
 
 source("model/R/config.R")
 source("model/R/helpers.R")
@@ -45,7 +47,7 @@ suppressPackageStartupMessages(library(wordbankr))
 if (!is.null(.adm)) {
   .excl <- .adm %>%
     filter(grepl("Bilingual", dataset_origin_name, ignore.case = TRUE) |
-             dataset_name == "Edgin") %>%
+             dataset_name %in% c("Edgin", "Byers")) %>%
     pull(child_id) %>% unique()
   n0 <- length(unique(d$child_id))
   d  <- d %>% filter(!child_id %in% .excl)
@@ -55,6 +57,21 @@ if (!is.null(.adm)) {
 } else {
   message("  monolingual-TD filter: wordbankr unavailable, skipped")
 }
+
+# Collapse to one administration per (child, age): merge WG+WS taken at
+# the same age and any repeat same-form administrations into a single
+# observation per word. A word counts as produced if produced in ANY
+# admin that month (monotone acquisition). Without this, Thal (both forms
+# at one age) and Smith (same-form retests) double-count shared words,
+# inflating N and the apparent precision.
+n_rows0 <- nrow(d)
+d <- d %>%
+  group_by(child_id, age, item) %>%
+  summarise(produces = max(produces),
+            lexical_category = dplyr::first(lexical_category),
+            .groups = "drop")
+message(sprintf("  collapse to one admin per (child,age): %d -> %d rows",
+                n_rows0, nrow(d)))
 
 # Wordbank item_definition often has parenthetical qualifiers (e.g.
 # "go (verb)", "no (response)"); strip them for the lowercased join,
@@ -172,7 +189,7 @@ message(sprintf("  subset: %d rows, %d children, %d items",
 
 # Build admin keys and indices
 d <- d %>%
-  mutate(admin_key = paste(child_id, age, form, sep = "_"),
+  mutate(admin_key = paste(child_id, age, sep = "_"),
          aa = as.integer(factor(admin_key)),
          ii = as.integer(factor(child_id)),
          jj = as.integer(factor(item)),
