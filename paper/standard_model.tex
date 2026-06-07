@@ -5,8 +5,10 @@
 \PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
 %
 \documentclass[
-]{pnas-new}
+  11pt,
+]{article}
 \usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
 \usepackage{amsmath,amssymb}
 \setcounter{secnumdepth}{-\maxdimen} % remove section numbering
 \usepackage{iftex}
@@ -29,6 +31,7 @@
   \usepackage[]{microtype}
   \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
 }{}
+\usepackage{setspace}
 \makeatletter
 \@ifundefined{KOMAClassName}{% if non-KOMA class
   \IfFileExists{parskip.sty}{%
@@ -105,27 +108,6 @@
 
 
 \makeatletter
-\let\oldlt\longtable
-\let\endoldlt\endlongtable
-
-\def\longtable{\@ifnextchar[\longtable@i \longtable@ii}
-\def\longtable@i[#1]{%
-  % Temporarily fool longtable into thinking we're in onecolumn mode
-  \@twocolumnfalse
-  \oldlt[#1]%
-}
-\def\longtable@ii{%
-  % Temporarily fool longtable into thinking we're in onecolumn mode  
-  \@twocolumnfalse
-  \oldlt
-}
-\def\endlongtable{%
-  \endoldlt
-  % Restore twocolumn flag
-  \@twocolumntrue
-}
-\makeatother
-\makeatletter
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
 \AtBeginDocument{%
 \ifdefined\contentsname
@@ -182,34 +164,12 @@ language models},
   pdfcreator={LaTeX via pandoc}}
 
 
-\templatetype{pnasresearcharticle}
-
 \title{Variability and acceleration in the growth of children's early
 vocabulary}
-
-\newcommand{\equalcont}{1}
-
-\newcommand{\correspond}{1}
-
-\author[aff-1%
-%
-%
-]{Michael C. Frank}
-
-\affil[aff-1]{Department of Psychology, Stanford University}
-
-
-
-
-
-
-
-\keywords{Early word learning; Bayesian data analysis; Large language
-models}
-
+\author{Michael C. Frank}
+\date{}
 \begin{document}
 \maketitle
-
 \begin{abstract}
 Children's early word learning is alternatively portrayed as either a
 process of gradual accumulation or as an inferential process that
@@ -228,12 +188,8 @@ they show standard accumulator dynamics and very limited variability
 across a number of dimensions. These results suggest \ldots{}
 \end{abstract}
 
-\dates{This manuscript was compiled on \today}
-\doi{\url{www.pnas.org/cgi/doi/10.1073/pnas.XXXXXXXXXX}}
 
-\thispagestyle{firststyle}
-\ifthenelse{\boolean{shortarticle}}{\ifthenelse{\boolean{singlecolumn}}{\abscontentformatted}{\abscontent}}{}
-
+\setstretch{1.05}
 Children's early language learning is often portrayed as a process of
 accumulation and gradual learning, with statistical learning, mutual
 exclusivity and input viewpoints highlighting the accumulation nature.

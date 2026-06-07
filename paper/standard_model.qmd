@@ -12,10 +12,13 @@ abstract: |
 
 bibliography: standard_model.bib
 format:
-  pnas-pdf:
+  pdf:
+    documentclass: article
+    geometry: margin=1in
+    fontsize: 11pt
+    linestretch: 1.05
+    colorlinks: true
     keep-tex: true
-    template-options:
-      type: pnasresearcharticle  # also: pnasmathematics, pnasinvited
 ---
 
 ```{r setup, include=FALSE}
