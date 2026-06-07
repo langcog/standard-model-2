@@ -39,6 +39,7 @@ demo_blups <- readRDS(file.path(CACHE, "blups_demographics.rds"))
 io_summary <- readRDS(file.path(CACHE, "fig5_io_summary.rds"))
 aic        <- readRDS(file.path(CACHE, "aic_summary.rds"))
 exposure   <- readRDS(file.path(CACHE, "fig4_exposure.rds"))
+llm_slopes <- readRDS(file.path(CACHE, "fig6_llm_slopes.rds"))
 
 # Inline range: how much worse the best (D) model becomes when age enters
 # linearly rather than as log-age, across the four languages (dAIC of
@@ -629,24 +630,35 @@ Thus, modeling human learning requires positing other sources of variability and
 
 We end by providing a quantitative comparison between within-child human learning and LLM scaling laws, showing that children’s early language learning is strikingly different from LLM scaling: it shows both steeper scaling and greater variance in growth rate.
 
-```{r fig-llm-acceleration, fig.width=6, fig.height=3}
+```{r fig-llm-acceleration, fig.width=7, fig.height=4}
 #| label: fig-llm-acceleration
 #| fig-cap: ""
-# Best-guess two-panel composite (will iterate). Each panel is an
-# existing PNG composed via grid; replace with chunked plots once we
-# decide which LLM-vs-children comparison to feature.
-panel_paths <- list(
-  A = here("outputs", "figs", "longitudinal",
-           "chang_bergen_slope_comparison.png"),
-  B = here("outputs", "figs", "schematic", "D1_scaling_disanalogy.png"))
-p_to_grob <- function(path) {
-  if (!file.exists(path)) return(grid::nullGrob())
-  grid::rasterGrob(png::readPNG(path), interpolate = TRUE)
-}
-gridExtra::grid.arrange(
-  p_to_grob(panel_paths$A),
-  ncol = 1
-)
+# Children's per-child kappa_i vs. LLM per-word sigmoid slopes (Chang &
+# Bergen 2022), placed on a common "logit per natural-log experience"
+# axis. Data cached by paper/build_cache.R section 6 (fig6_llm_slopes.rds):
+# `sl` is the per-instance long frame; `sm` the per-population summary
+# (median, 95% interval, n) available for inline numbers.
+sl <- llm_slopes$slopes
+sm <- llm_slopes$summary
+
+slope_pal <- c("Children (English)"   = "#c41e37",
+               "Children (Norwegian)" = "#fb9a99",
+               "BERT"   = "#1f78b4", "GPT-2"  = "#33a02c",
+               "BiLSTM" = "#a6cee3", "LSTM"   = "#b2df8a")
+
+ggplot(sl, aes(slope_natural, fill = label, colour = label)) +
+  geom_density(alpha = 0.35, linewidth = 0.5) +
+  geom_vline(xintercept = 1, linetype = "dashed", colour = "grey55",
+             linewidth = 0.4) +
+  annotate("text", x = 1.4, y = 0.5, label = "kappa = 1\n(unit accumulator)",
+           hjust = 0, vjust = 0.5, size = 3.0, colour = "grey45") +
+  scale_fill_manual(values = slope_pal, name = NULL) +
+  scale_colour_manual(values = slope_pal, name = NULL) +
+  coord_cartesian(xlim = c(0, 22)) +
+  labs(x = "slope on log(experience): logit per natural-log unit",
+       y = "density") +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom")
 ```
 
 
