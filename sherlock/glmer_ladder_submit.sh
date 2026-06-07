@@ -5,7 +5,7 @@
 ##   bash sherlock/glmer_ladder_submit.sh            # just build the manifest, print sbatch lines
 ##   bash sherlock/glmer_ladder_submit.sh smoke      # submit ONE small task (Japanese B_log)
 ##   bash sherlock/glmer_ladder_submit.sh nor_big    # submit Norwegian D_log alone (timing test)
-##   bash sherlock/glmer_ladder_submit.sh all        # submit the full 49-cell array
+##   bash sherlock/glmer_ladder_submit.sh all        # submit the full array (35 cells)
 ##
 ## Manifest at sherlock/glmer_ladder_manifest.csv, one row per (lang, model).
 
@@ -13,7 +13,12 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-LANGS=(english_american norwegian finnish french_quebecois japanese spanish_mexican french_french)
+# By-study units: English fans into its three datasets (Thal/Smith/
+# Marchman); Norwegian (Kristoffersen) and Japanese (Tsuji+Hagihara,
+# contributed as one bundle) are single datasets kept whole. The
+# Bayesian D/D' fits stay pooled-per-language; only this glmer ladder
+# (+ the demographic regressions downstream) is run by-study.
+LANGS=(thal smith marchman norwegian japanese)
 MODELS=(A B_log B_lin C_log C_lin D_log D_lin)
 
 MANIFEST="sherlock/glmer_ladder_manifest.csv"
@@ -49,7 +54,7 @@ case "$ACTION" in
     sbatch --array="$NOR_BIG_TASK" sherlock/glmer_ladder.slurm
     ;;
   all)
-    echo "Submitting full 49-cell array..."
+    echo "Submitting full array (35 cells)..."
     sbatch --array="1-$N" sherlock/glmer_ladder.slurm
     ;;
   "")

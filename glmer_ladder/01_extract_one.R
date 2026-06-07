@@ -9,12 +9,19 @@
 ##
 ## Usage:
 ##   Rscript glmer_ladder/01_extract_one.R "English (American)"
+##   Rscript glmer_ladder/01_extract_one.R "English (American)" --by-dataset
 ##   Rscript glmer_ladder/01_extract_one.R Norwegian
 ##   Rscript glmer_ladder/01_extract_one.R Japanese
 ##
-## Output: fits/glmer_ladder/data_<lang_slug>.rds
-##   contains: df (kid, age, item, produces), child_meta, item_meta,
-##              language, forms_kept, n_kids, n_admins, n_items, n_obs
+## Output: fits/glmer_ladder/data_<slug>.rds
+##   contains: df (kid, age, item, produces), language, dataset,
+##              forms_kept, n_kids, n_admins, n_items, n_obs
+##
+## With --by-dataset the language is split into its constituent Wordbank
+## datasets, one file per dataset (slug = lowercased dataset_name), so the
+## ladder can be fit as by-study replicates rather than one pooled model.
+## Used for English (Thal / Smith / Marchman); Norwegian (single dataset)
+## and Japanese (Tsuji+Hagihara, contributed as one bundle) are left whole.
 
 source("model/R/config.R")
 suppressPackageStartupMessages({
@@ -22,6 +29,8 @@ suppressPackageStartupMessages({
 })
 
 args <- commandArgs(trailingOnly = TRUE)
+BY_DATASET <- "--by-dataset" %in% args
+args <- args[args != "--by-dataset"]
 LANG <- if (length(args) >= 1) args[1] else "Japanese"
 
 # Form variants we treat as "WG-equivalent" or "WS-equivalent". A few
@@ -162,35 +171,51 @@ cat(sprintf("After production filter, kids retained: %d / %d\n",
 ## mirroring the Stan bundle prepare scripts. Without this, words on both
 ## checklists (e.g. Thal's both-forms design) and repeat administrations
 ## (Smith retests) are double-counted as independent observations.
-df <- prod |>
+## Attach dataset_name (one per child) so the language can optionally be
+## split into its constituent datasets (--by-dataset).
+child_dataset <- ad_long |> distinct(child_id, dataset_name)
+
+df_all <- prod |>
   transmute(child_id, age,
              item = item_definition,
              produces) |>
   filter(!is.na(produces), !is.na(item), !is.na(age)) |>
   group_by(child_id, age, item) |>
-  summarise(produces = max(produces), .groups = "drop")
+  summarise(produces = max(produces), .groups = "drop") |>
+  left_join(child_dataset, by = "child_id")
 
-## remove items not appearing at least 100 times (avoids tiny-item RE that just adds df)
-item_keep <- df |> count(item) |> filter(n >= 100) |> pull(item)
-df <- df |> filter(item %in% item_keep)
-cat(sprintf("Items kept (≥100 obs): %d\n", length(item_keep)))
+## Apply the >=100-obs item filter (within the unit), summarise, and save
+## one unit (a whole language, or one dataset). The filter is per-unit so
+## a per-dataset extract keeps items with >=100 obs *in that dataset*.
+write_unit <- function(d, unit_slug, unit_label) {
+  item_keep <- d |> count(item) |> filter(n >= 100) |> pull(item)
+  d <- d |> filter(item %in% item_keep)
+  n_kids   <- length(unique(d$child_id))
+  n_admins <- d |> distinct(child_id, age) |> nrow()
+  n_items  <- length(unique(d$item))
+  n_obs    <- nrow(d)
+  cat(sprintf("\n=== %s ===\n  kids=%d  admins=%d  items=%d  obs=%d\n",
+              unit_label, n_kids, n_admins, n_items, n_obs))
+  out_rds <- file.path(out_dir, sprintf("data_%s.rds", unit_slug))
+  saveRDS(list(
+    df         = d |> select(child_id, age, item, produces),
+    language   = LANG,
+    dataset    = unit_label,
+    forms_kept = forms_in_lang,
+    n_kids     = n_kids,
+    n_admins   = n_admins,
+    n_items    = n_items,
+    n_obs      = n_obs
+  ), out_rds)
+  cat(sprintf("Wrote %s\n", out_rds))
+}
 
-## summary
-n_kids <- length(unique(df$child_id))
-n_admins <- df |> distinct(child_id, age) |> nrow()
-n_items <- length(unique(df$item))
-n_obs <- nrow(df)
-cat(sprintf("\n=== Final %s data ===\n  kids=%d  admins=%d  items=%d  obs=%d\n",
-            LANG, n_kids, n_admins, n_items, n_obs))
-
-## save
-saveRDS(list(
-  df       = df,
-  language = LANG,
-  forms_kept = forms_in_lang,
-  n_kids   = n_kids,
-  n_admins = n_admins,
-  n_items  = n_items,
-  n_obs    = n_obs
-), out_rds)
-cat(sprintf("Wrote %s\n", out_rds))
+if (BY_DATASET) {
+  for (ds in sort(unique(df_all$dataset_name))) {
+    ds_slug <- gsub("[^A-Za-z0-9]+", "_", tolower(ds))
+    ds_slug <- gsub("^_+|_+$", "", ds_slug)
+    write_unit(df_all |> filter(dataset_name == ds), ds_slug, ds)
+  }
+} else {
+  write_unit(df_all, slug, LANG)
+}
