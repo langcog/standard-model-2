@@ -12,10 +12,13 @@ abstract: |
 
 bibliography: standard_model.bib
 format:
-  pnas-pdf:
+  pdf:
+    documentclass: article
+    geometry: margin=1in
+    fontsize: 11pt
+    linestretch: 1.05
+    colorlinks: true
     keep-tex: true
-    template-options:
-      type: pnasresearcharticle  # also: pnasmathematics, pnasinvited
 ---
 
 ```{r setup, include=FALSE}
@@ -46,9 +49,9 @@ Children’s early vocabulary grows very rapidly during early childhood, with la
 
 From a theoretical perspective, growth mechanisms shed light on children’s fundamental learning mechanisms and how they change across childhood. From a practical perspective, variation in growth is an important precursor — and predictor — of academic achievement. From a methodological perspective, vocabulary also affords a unique psychometric opportunity to study human variation because, unlike nearly all important human psychological metrics, there is a true zero point - a time before which children know no words. Thus, absolute levels of variability can be calculated. 
 
-One dominant viewpoint is that this growth can be characterized as a process of accumulation (McMurray 2007; Mitchell & McMurray, 2009; Hidaka, 2013; Mollica & Piantadosi, 2017; Kachergis et al., 2021). This pure accumulator view connects with a viewpoint in which the quantity of language that children hear has a strong causal role in the speed of their learning (Fernald papers; Bergeleson 1001). It also connects with the idea that large language models – whose learning scales in predictable, accumulator-like ways (Kaplan, Chinchilla, scaling laws) – might be good models for children’s learning. 
+One dominant viewpoint is that this growth can be characterized as a process of accumulation [@mcmurray2007; @mitchell2009; @hidaka2013; @mollica2017; @kachergis2022]. This pure accumulator view connects with a viewpoint in which the quantity of language that children hear has a strong causal role in the speed of their learning (Fernald papers; Bergeleson 1001). It also connects with the idea that large language models – whose learning scales in predictable, accumulator-like ways (Kaplan, Chinchilla, scaling laws) – might be good models for children’s learning. 
 
-But important parts of this proposal have not been fleshed out. For example, how much variation is due to input quantity vs. other sources? Meta-analysis of this relationship suggests it’s there but not that big (Coffey & Snedeker 2026). Could be quality as well, of course.
+But important parts of this proposal have not been fleshed out. For example, how much variation is due to input quantity vs. other sources? Meta-analysis of this relationship suggests it’s there but not that big [@coffey2026]. Could be quality as well, of course.
 
 Furthermore, how does the accumulation process relate to the rapid growth of vocabulary? On some models, accumulation by itself can produce an exponential “vocabulary explosion” while the child’s own learning abilities remain constant. On other accounts, however, the child’s own abilities change over development. These changes could be due to the accumulation of language allowing bootstrapping (e.g., via mutual excusivity or the shape bias), they could be through faster processing (Fernald rich get richer), or they could be via general maturation (e.g., better memory, faster processing). Or all of these. 
 
