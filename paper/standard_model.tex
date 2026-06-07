@@ -125,6 +125,20 @@
   \@twocolumntrue
 }
 \makeatother
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
 \makeatletter
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
 \AtBeginDocument{%
@@ -433,66 +447,31 @@ fits).
 
 \end{figure}%
 
+\begingroup\fontsize{8}{10}\selectfont
 
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1818}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1570}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.0744}}
-  >{\raggedleft\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.0909}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1653}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.0826}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.2479}}@{}}
+\begin{longtable}[t]{lllrlll}
 
 \caption{\label{tbl-datasets}}
 
 \tabularnewline
 
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Panel
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Dataset
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Citation
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
-N children
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Admins / kid (mean)
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Age range
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Input / recordings
-\end{minipage} \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-Wordbank longitudinal & English (American) &
-(\textbf{CITE?})
-& 1,874 & 1.3 & 8--30 mo & --- \\
-Wordbank longitudinal & Norwegian &
-(\textbf{CITE?})
-& 1,676 & 1.6 & 8--36 mo & --- \\
-Wordbank longitudinal & French (Quebecois) &
-(\textbf{CITE?})
-& 179 & 1.1 & 8--30 mo & --- \\
-Wordbank longitudinal & Japanese &
-(\textbf{CITE?})
-& 178 & 1.3 & 8--36 mo & --- \\
-Input-observed (IO) & BabyView &
-(\textbf{CITE?})
-& 22 & 5.0 & 6--32 mo & Head-cam (n = 5,739 videos) \\
-Input-observed (IO) & SEEDLingS &
-(\textbf{CITE?})
-& 44 & 12.0 & 6--17 mo & LENA day (n = 525 recordings) \\
-Input-observed (IO) & AM2018 &
-(\textbf{CITE?})
-& 66 & 3.0 & 16--24 mo & LENA (n = 126 recordings) \\
-Input-observed (IO) & FMW2013 &
-(\textbf{CITE?})
-& 51 & 3.0 & 18--30 mo & LENA (n = 51 recordings) \\
+\toprule
+Panel & Dataset & Citation & N children & Admins / kid (mean) & Age range & Input / recordings\\
+\midrule
+Wordbank longitudinal & English (American) & {}[@CITE] & 1,874 & 1.3 & 8–30 mo & —\\
+Wordbank longitudinal & Norwegian & {}[@CITE] & 1,676 & 1.6 & 8–36 mo & —\\
+Wordbank longitudinal & French (Quebecois) & {}[@CITE] & 179 & 1.1 & 8–30 mo & —\\
+Wordbank longitudinal & Japanese & {}[@CITE] & 178 & 1.3 & 8–36 mo & —\\
+Input-observed (IO) & BabyView & {}[@CITE] & 22 & 5.0 & 6–32 mo & Head-cam (n = 5,739 videos)\\
+\addlinespace
+Input-observed (IO) & SEEDLingS & {}[@CITE] & 44 & 12.0 & 6–17 mo & LENA day (n = 525 recordings)\\
+Input-observed (IO) & AM2018 & {}[@CITE] & 66 & 3.0 & 16–24 mo & LENA (n = 126 recordings)\\
+Input-observed (IO) & FMW2013 & {}[@CITE] & 51 & 3.0 & 18–30 mo & LENA (n = 51 recordings)\\
+\bottomrule
 
 \end{longtable}
+
+\endgroup{}
 
 \begin{figure}
 
