@@ -35,6 +35,27 @@ d <- long %>%
   filter(language == !!language, !is.na(produces)) %>%
   select(-any_of("prob"))
 
+# Restrict to monolingual, typically-developing children (matching the
+# glmer-ladder extraction): exclude bilingual studies (dataset_origin_name
+# contains "Bilingual") and the Edgin Down-syndrome clinical sample. For
+# monolingual-TD languages (e.g. Norwegian) this removes nothing.
+suppressPackageStartupMessages(library(wordbankr))
+.adm <- tryCatch(get_administration_data(language = language),
+                 error = function(e) NULL)
+if (!is.null(.adm)) {
+  .excl <- .adm %>%
+    filter(grepl("Bilingual", dataset_origin_name, ignore.case = TRUE) |
+             dataset_name == "Edgin") %>%
+    pull(child_id) %>% unique()
+  n0 <- length(unique(d$child_id))
+  d  <- d %>% filter(!child_id %in% .excl)
+  message(sprintf("  monolingual-TD filter: excluded %d children (%d -> %d)",
+                  n0 - length(unique(d$child_id)), n0,
+                  length(unique(d$child_id))))
+} else {
+  message("  monolingual-TD filter: wordbankr unavailable, skipped")
+}
+
 # Wordbank item_definition often has parenthetical qualifiers (e.g.
 # "go (verb)", "no (response)"); strip them for the lowercased join,
 # parallel to prepare_longitudinal_norwegian.R.
