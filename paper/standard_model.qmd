@@ -200,11 +200,11 @@ The different models described above are not distinguishable from the cross-sect
 
 # Results
 
-We first retrieved longitudinal data on children's vocabulary from Wordbank [@frank2017], an open archive of data from the MacArthur-Bates Communicative Development Inventory and its international adaptations. Table @tbl-datasets shows the four longitudinal datasets in Wordbank that contained more than $>100$ children with multiple observations.  
+We first retrieved longitudinal data on children's vocabulary from Wordbank [@frank2017], an open archive of data from the MacArthur-Bates Communicative Development Inventory and its international adaptations. @tbl-datasets shows the four longitudinal datasets in Wordbank that contained more than $>100$ children with multiple observations.  
 
 ```{r tbl-datasets}
 #| label: tbl-datasets
-#| tbl-cap: ""
+#| tbl-cap: "Characteristics of the datasets."
 # Wordbank rows are pulled from outputs/glmer_ladder/00_language_survey.csv;
 # IO rows are hardcoded from each bundle's actual extracts. Citation column
 # is a [@CITE] placeholder for the author to fill in.
@@ -257,10 +257,6 @@ table1 |>
 ```
 
 
-
-as well as.  
-
-Table \@ref(tab:tbl-datasets) gives details of all included data. 
 
 
 
