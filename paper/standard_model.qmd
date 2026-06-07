@@ -629,7 +629,7 @@ Thus, modeling human learning requires positing other sources of variability and
 
 We end by providing a quantitative comparison between within-child human learning and LLM scaling laws, showing that children’s early language learning is strikingly different from LLM scaling: it shows both steeper scaling and greater variance in growth rate.
 
-```{r fig-llm-acceleration, fig.width=11, fig.height=4.5}
+```{r fig-llm-acceleration, fig.width=6, fig.height=3}
 #| label: fig-llm-acceleration
 #| fig-cap: ""
 # Best-guess two-panel composite (will iterate). Each panel is an
@@ -645,8 +645,7 @@ p_to_grob <- function(path) {
 }
 gridExtra::grid.arrange(
   p_to_grob(panel_paths$A),
-  p_to_grob(panel_paths$B),
-  ncol = 2
+  ncol = 1
 )
 ```
 
