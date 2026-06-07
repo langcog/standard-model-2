@@ -332,17 +332,13 @@ ggplot() +
         panel.spacing = unit(0.4, "lines"))
 ```
 
-The best-fitting modified accumulator model included large developmental changes in efficiency across all languages ($\beta = XYZ - XYZ$). This finding suggests that we can robustly reject pure accumulation models of early word learning. Instead, children get vastly more efficient over development. 
+
+## Efficiency and acceleration relate to separate demographic predictors
 
 
-This change in efficiency could come from a variety of sources, including general maturation of memory and attention, specific changes in word recognition or processing [@fernald1998;@frank2026], the increasing sophistication of inferential strategies for word learning [@smith2002;@markman1988;etc], or other sources. 
-
-## Modeling demographic variation 
-
-
-```{r fig-demographics, fig.width=9, fig.height=5.5}
+```{r fig-demographics, fig.width=7, fig.height=4.5}
 #| label: fig-demographics
-#| fig-cap: ""
+#| fig-cap: "Regression coefficients predicting individual children's efficiency and acceleration as a function of gender and maternal education. Black dots show meta-analytic estimates from a random-effects meta analysis. Error bars show 95\\% confidence intervals."
 # Per-kid BLUPs (xi = intercept, zeta = log-age slope) from each language's
 # D_log fit, joined with Wordbank demographics. For each (language, outcome)
 # we regress the z-scored random effect on sex + maternal education.
@@ -400,7 +396,8 @@ meta_summary <- coefs |>
     if (is.null(res)) return(tibble())
     tibble(estimate = as.numeric(res$beta),
            conf.low = res$ci.lb, conf.high = res$ci.ub,
-           std.error = res$se, k = res$k)
+           std.error = res$se, k = res$k, 
+           p = res$pval)
   }) |>
   ungroup() |>
   mutate(lang_slug = "_meta_")
@@ -414,7 +411,7 @@ coefs_all <- bind_rows(coefs, meta_summary) |>
                             "Maternal education\n(per SD, years)"))),
     outcome = factor(outcome, levels = c("xi", "zeta"),
                      labels = c("Efficiency~(xi)",
-                                "'Change in efficiency'~(zeta)")),
+                                "Acceleration~(zeta)")),
     lang_label = factor(c(LANG_LABELS, "_meta_" = "Meta-analytic")[lang_slug],
                         levels = c(LANG_LABELS[ladder$langs],
                                    "Meta-analytic")))
@@ -424,6 +421,7 @@ plot_pal <- c(setNames(unname(LANG_PAL[ladder$langs]),
 
 coefs_all <- coefs_all |>
   mutate(is_meta = lang_label == "Meta-analytic")
+
 ggplot(coefs_all,
        aes(estimate, term_label, color = lang_label,
            group = lang_label, size = is_meta)) +
@@ -444,10 +442,14 @@ ggplot(coefs_all,
         axis.text.y = element_text(size = 9))
 ```
 
+Children's vocabulary is known to be related to a number of sociodemographic predictors, including sex and maternal education (which is interpreted as a proxy for socioeconomic status). In particular, female children show consistently larger vocabularies than male children across dozens of languages and countries [@erikson2012;@frank2021]. Similarly, children of more educated mothers tend to show larger vocabularies, though this effect is somewhat more heterogeneous across countries and languages [@frank2021].
+
+Our longitudinal model offers a summary of individual children's growth in terms of both their efficiency (intercept) and their acceleration (slope). This decomposition allows us to ask whether these two demographics effects -- sex and maternal education -- are seen in efficiency, acceleration, or both. For each child in our analysis, we extracted the best linear unbiased prediction (BLUP) from our models. We then regressed intercept and slope terms against each demographic predictor separately for each language. @fig-demographics shows the coefficients from this analysis, along with a cross-language meta-analytic estimate. 
+
+Sex effects show the predicted female advantage across all four languages, but this effect manifests itself only in efficiency  ($\beta = `r round(meta_summary$estimate[2],2)`$, $p = `r papaja::apa_p(meta_summary$p)[2]`$) not acceleration ($\beta = `r round(meta_summary$estimate[4],2)`$, $p = `r papaja::apa_p(meta_summary$p)[4]`$). In contrast, though maternal education data were only available for three languages, effects were numerically present in both measures, though stronger in acceleration ($\beta = `r round(meta_summary$estimate[3],2)`$, $p = `r papaja::apa_p(meta_summary$p)[3]`$) than in efficiency ($\beta = `r round(meta_summary$estimate[1],2)`$, $p = `r papaja::apa_p(meta_summary$p)[1]`$). One interpretation of these findings is that sex effects reflect a small constant offset in average ability. In contrast, socioeconomic differences as reflected in maternal education might continue to compound across development [@fernald2013;@hart2003].
 
 
-
-## Changing efficiency 
+## Growth in ability leads to rapid changes in learning times for individual words
 
 ```{r fig-efficiency, out.width="100%"}
 #| label: fig-efficiency
@@ -563,7 +565,13 @@ gridExtra::grid.arrange(
 
 # Discussion
 
-Coffey 2026 variance decomposition
+What we did
+
+Longitudinal growth models efficiency and acceleration. Two different paramters. 
+
+Where doe acceleration come from? Could come from a variety of sources, including general maturation of memory and attention, specific changes in word recognition or processing [@fernald1998;@frank2026], the increasing sophistication of inferential strategies for word learning [@smith2002;@markman1988;etc], or other sources. 
+
+Role of input: Coffey 2026 variance decomposition
 
 Blingualism 
 
