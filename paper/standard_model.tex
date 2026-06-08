@@ -225,19 +225,18 @@ and very limited variability.
 
 \setstretch{1.05}
 Children's early vocabulary grows very rapidly during early childhood,
-with large variation between children (Fenson et al. 1994, 2007; Michael
-C. Frank et al. 2021). The growth has theoretical, practical, and
-methodological importance. From a theoretical perspective, growth
-mechanisms shed light on children's fundamental learning mechanisms and
-how they change across childhood (McMurray 2007; Bloom 2002; Michael C.
-Frank et al. 2021). From a practical perspective, early vocabulary is an
-important precursor -- and predictor -- of academic achievement
-{[}Marchman and Fernald (2008);CITES{]}. From a methodological
-perspective, vocabulary also affords a unique psychometric opportunity
-to study human variation because, unlike nearly all important human
-psychological metrics, there is a true zero point -- a time before which
-children know no words. Thus, absolute levels of variability can be
-calculated.
+with large variation between children (Fenson et al. 1994, 2007; Frank
+et al. 2021). The growth has theoretical, practical, and methodological
+importance. From a theoretical perspective, growth mechanisms shed light
+on children's fundamental learning mechanisms and how they change across
+childhood (McMurray 2007; Bloom 2002; Frank et al. 2021). From a
+practical perspective, early vocabulary is an important precursor -- and
+predictor -- of academic achievement {[}Marchman and Fernald
+(2008);CITES{]}. From a methodological perspective, vocabulary also
+affords a unique psychometric opportunity to study human variation
+because, unlike nearly all important human psychological metrics, there
+is a true zero point -- a time before which children know no words.
+Thus, absolute levels of variability can be calculated.
 
 One dominant viewpoint is that children's vocabulary growth can be
 characterized as a process of accumulation (McMurray 2007; Mitchell and
@@ -288,17 +287,23 @@ small number of high-quality instances is sufficient for learning
 some words take much longer to learn?
 
 The goal of this work is to address these puzzles through systematic
-investigation and extension of accumulator models. Following previous
-work, we consider that children's learning ability might accelerate
-across development (Hidaka 2013); in the bucket metaphor, the drops get
-bigger as children get older. We begin by extending the psychometric
-accumulator model of Kachergis, Marchman, and Frank (2022): our key move
-is to model variation in individual children's learning efficiency and
-the acceleration of their learning. This extension defines a
-longitudinal growth model that can be fit to data, and that provides a
-simple reconciliation between slow accumulation and fast mapping: the
-number of examples of a word necessary for learning declines by multiple
-orders of magnitude from age one to age three.
+investigation and extension of accumulator models. All models start with
+the observation that the overall size of children's vocabulary increases
+supra-linearly. But does this growth imply changes in the underlying
+process?
+
+Following previous work, we start with the idea that children's
+\emph{internal learning ability} (not just their observed vocabulary
+growth) accelerates across development (Hidaka 2013). In the bucket
+metaphor, the drops get bigger as children get older. We begin by
+extending the psychometric accumulator model of Kachergis, Marchman, and
+Frank (2022): our key addition is to describe variation between
+individual children by modeling both their individual learning
+efficiency and the acceleration of their learning. This extension
+defines a longitudinal growth model that can be fit to data, and that
+provides a simple reconciliation between slow accumulation and fast
+mapping: the number of examples of a word necessary for learning
+declines by multiple orders of magnitude from age one to age three.
 
 To constrain our model, we use data from the MacArthur-Bates
 Communicative Development Inventories {[}MB-CDI; Fenson et al.
@@ -306,9 +311,9 @@ Communicative Development Inventories {[}MB-CDI; Fenson et al.
 instrument in which parents are asked to indicate which words their
 child produces and understands. Here we focus exclusively on production,
 which is used with older children and which tends to be a more reliable
-measure {[}Michael C. Frank et al. (2021);others{]}. We make use of
-longitudinal data from Wordbank (Michael C. Frank et al. 2017), an open
-repository of data from the MB-CDI.
+measure (Frank et al. 2021). We make use of longitudinal data from
+Wordbank (Frank et al. 2017), an open repository of data from the
+MB-CDI.
 
 To address questions about the relationship between language input and
 growth, we fit a Bayesian version of our growth model. We make use of
@@ -329,8 +334,8 @@ models trained on human developmental data, we show that -- in contrast
 to children -- these models do appear to function as pure accumulators.
 This analysis exposes a critical disanalogy between LLMs and human
 learners and suggests a potential route for understanding the vast
-``data gap'' between children and large language models (Michael C.
-Frank 2023; Warstadt et al. 2023).
+``data gap'' between children and large language models (Frank 2023;
+Warstadt et al. 2023).
 
 \section{Model}\label{model}
 
@@ -364,7 +369,7 @@ accumulation over time. In the simplest form:
 \[\text{M1: }\theta_i(t)  = \log(r_i) + \log(t/a_0)\]
 
 \noindent where \(r_i\) is the child's rate of language input (in tokens
-per month) and \(t\) is the child's age (in months, centered at
+per month) and \(t\) is the child's age (in months, anchored at
 \(a_0\)); note that we use log age to simulate linear accumulation
 because \(\exp(\theta) = r \cdot t\). This form instantiates the basic
 hypothesis that the only thing that changes over time is more input, and
@@ -375,7 +380,7 @@ which the amount learned from each exposure increases with time by an
 exponent \(\kappa\).
 
 \[\text{M2: }\theta_i(t)  = \log(r_i) + \kappa ~ \log(t/a_0)\]
-\noindent When \(\kappa>\), each successive month yields more
+\noindent When \(\kappa>1\), each successive month yields more
 accumulation than the last.
 
 Neither of these models has any way to capture variation across children
@@ -390,23 +395,25 @@ variable quantities:
 The intercept term in both models \(\xi_i = \log(r_i) + \log(\alpha_i)\)
 can then decompose individual variation into both input rate-related and
 other variation in children's efficiency. Similarly, in M4, the slope
-term \(\kappa_i = \kappa + \gamma \log r_i + \zeta_i\) decomposes
-acceleration into a population term, input-related acceleration, and a
-child‑specific residual acceleration \(\zeta_i\) (the part not explained
-by input). The coefficient \(\gamma\) then captures the strength of the
-relationship between input and acceleration.
+term \(\kappa_i = \kappa + \gamma \log r_i + \zeta_i\) adds
+\emph{individual variation in acceleration}, decomposing acceleration
+into a population term, input-related acceleration, and a child‑specific
+residual acceleration \(\zeta_i\) (the part not explained by input). The
+coefficient \(\gamma\) then captures the strength of the relationship
+between input and acceleration.
 
 Model 4 instantiates the idea that children vary in their base rate of
-efficiency and their acceleration, instantiating a longitudinal growth
-model in which children vary on their slope and intercept. Note that,
-while we define the relationship of \(\xi_i\) and \(\zeta_i\) to a
-child's input \(r_i\), we can nevertheless fit the simplest form of the
-model by just allowing these parameters to vary as random child-level
-slopes and intercepts.
+efficiency and their acceleration, creating variant of a standard
+longitudinal growth model in which children vary on their slope and
+intercept (Grimm, Ram, and Estabrook 2016). Note that, while we define
+the relationship of \(\xi_i\) and \(\kappa_i\) to a child's input
+\(r_i\), we can nevertheless fit the simplest form of the model by just
+allowing these parameters to vary as random child-level slopes and
+intercepts.
 
 As we will show, this model provides a good description of variation in
 children's longitudinal growth trajectories. Figure~\ref{fig-schematic}
-shows schematic predictions from a pure accumulator model (M1), an
+(top) shows schematic predictions from a pure accumulator model (M1), an
 accelerating accumulator (M2) in comparison to models including
 child-level variation in efficiency (M3) and both efficiency and
 acceleration (M4). Each model's predictions are represented as ability
@@ -415,17 +422,17 @@ correct scores on a discrete set of vocabulary items, representing an
 observed accuracy score that is subject to compression at floor and
 ceiling.
 
-A variety of previous work has focused on estimating the difficulty of
+A variety of previous work has focused on estimating the properties of
 individual words (Goodman, Dale, and Li 2008; Hidaka 2013; Roy et al.
-2015; Braginsky et al. 2019; Kachergis, Marchman, and Frank 2022). These
-analyses reveal that there is predictable word-level difficulty
-information but that only a modest portion of the variation between
-words is carried by frequency information. Words can be hard for a child
-to acquire because they vary also in the complexity and concreteness of
-their meanings, their syntactic category and syntactic context, their
-phonology, and many other factors. In the current work, we estimate word
-difficulty as a free parameter, and focus instead on variation between
-children.
+2015; Braginsky et al. 2019; Kachergis, Marchman, and Frank 2022;
+Kachergis et al. 2022). These analyses reveal that there is predictable
+word-level difficulty information but that only a modest portion of the
+variation between words is carried by frequency information. Words can
+be hard for a child to acquire because they vary also in the complexity
+and concreteness of their meanings, their syntactic category and
+syntactic context, their phonology, and many other factors. In the
+current work, we estimate word difficulty as a free parameter, and focus
+instead on variation between children.
 
 Our analysis generally depends on the availability of longitudinal data
 at the item level. The different models described above are not
@@ -446,9 +453,9 @@ efficiency and
 acceleration}\label{childrens-longitudinal-growth-reflects-differences-in-both-efficiency-and-acceleration}
 
 We first retrieved longitudinal data on monolingual,
-typically-developing children's vocabulary from Wordbank (Michael C.
-Frank et al. 2017), an open archive of data from the MacArthur-Bates
-Communicative Development Inventory and its international adaptations.
+typically-developing children's vocabulary from Wordbank (Frank et al.
+2017), an open archive of data from the MacArthur-Bates Communicative
+Development Inventory and its international adaptations.
 Table~\ref{tbl-datasets} shows the four longitudinal datasets in
 Wordbank that contained more than \(>100\) children with multiple
 observations.
@@ -464,14 +471,12 @@ observations.
 \toprule
 Dataset & Citation & N & Admins (mean) & Ages & Recordings\\
 \midrule
-English (American) & @thal2013,@marchman2013, L. Smith & 1,874 & 1.3 & 8–30 mo & —\\
 Norwegian & @simonsen2014 & 1,676 & 1.6 & 8–36 mo & —\\
-French (Quebecois) & {}[@CITE] & 179 & 1.1 & 8–30 mo & —\\
 Japanese & @hagihara2023 & 178 & 1.3 & 8–36 mo & —\\
 BabyView & @long2024 & 22 & 5.0 & 6–32 mo & Headcam (n = 5,739 videos)\\
-\addlinespace
 SEEDLingS & @egan2025 & 44 & 12.0 & 6–17 mo & LENA (n = 525 recordings)\\
 AM2018 & @adams2018 & 66 & 3.0 & 16–24 mo & LENA (n = 126 recordings)\\
+\addlinespace
 FMW2013 & @fernald2013 & 51 & 3.0 & 18–30 mo & LENA (n = 51 recordings)\\
 \bottomrule
 
@@ -486,16 +491,15 @@ regressions. As described above, this initial set of fits do not attempt
 to estimate the relationship with input but instead simply attempt to
 describe the distribution of vocabulary growth curves. Each model
 predicted the probability of an individual child producing a particular
-word as a function of age (either unmodified in model A or multiplied by
-a constant in model B) and a random effect of word difficulty.
-Successive models add random intercepts (model C) and slopes (model D)
-by child.
+word as a function of age (either unmodified in M1 or multiplied by a
+constant in M2) and a random effect of word difficulty. Successive
+models add random intercepts (M3) and slopes (M4) by child.
 
-Model D, which incorporated variation in acceleration and efficiency,
+Model 4, which incorporated variation in acceleration and efficiency,
 was the best fitting model across all datasets, with AIC and BIC
-differences shown in Table~\ref{tbl-aic}. Figure~\ref{fig-glmer-ladder}
-shows the fit of the four model variants; the increasing spread of
-children's trajectories with age is especially noticeable for
+differences shown in Table~\ref{tbl-aic}. Figure~\ref{fig-schematic}
+(bottom) shows the fit of the four model variants; the increasing spread
+of children's trajectories with age is especially noticeable for
 low-vocabulary older children {[}who may be classified as ``late
 talkers''; Fernald and Marchman (2012); Rescorla (2011){]}.\footnote{Following
   the literature, we primarily investigate linear accumulator models,
@@ -505,51 +509,35 @@ talkers''; Fernald and Marchman (2012); Rescorla (2011){]}.\footnote{Following
   the probability of word production. We fit linear-time models, but
   found that they were dispreferred statistically, though differences
   were relatively small within the restricted age range for which we
-  have data (\(\delta\)AIC 169--4,138; see Supplemental Figure 2 for
-  model fits).}
+  have data (\(\delta\)AIC 0--4,301; see Supplemental Figure 2 for model
+  fits).}
 
 \begingroup\fontsize{8}{10}\selectfont
 
-\begin{longtable}[t]{llrrrrrrrr}
+\begin{longtable}[t]{llrrrrr}
 
 \caption{\label{tbl-aic}}
 
 \tabularnewline
 
 \toprule
-\multicolumn{2}{c}{ } & \multicolumn{4}{c}{$\Delta$AIC} & \multicolumn{4}{c}{$\Delta$BIC} \\
-\cmidrule(l{3pt}r{3pt}){3-6} \cmidrule(l{3pt}r{3pt}){7-10}
-Model & Age & English & Norwegian & French (Q.) & Japanese & English & Norwegian & French (Q.) & Japanese\\
+\multicolumn{2}{c}{ } & \multicolumn{5}{c}{$\Delta$AIC} \\
+\cmidrule(l{3pt}r{3pt}){3-7}
+Model & Age & Thal & Smith & Marchman & Norwegian & Japanese\\
 \midrule
-M1. accumulator & — & 1,721,195 & 2,299,678 & 66,408 & 95,222 & 1,721,143 & 2,299,625 & 66,367 & 95,181\\
-M2. + acceleration & linear & 925,989 & 1,389,719 & 44,967 & 41,321 & 925,950 & 1,389,679 & 44,936 & 41,290\\
-M2. + acceleration & log & 929,263 & 1,360,175 & 43,091 & 39,171 & 929,224 & 1,360,135 & 43,061 & 39,140\\
-M3. + efficiency var. & linear & 153,291 & 131,294 & 4,746 & 3,864 & 153,265 & 131,267 & 4,726 & 3,843\\
-M3. + efficiency var. & log & 150,361 & 115,789 & 3,407 & 3,239 & 150,335 & 115,763 & 3,386 & 3,218\\
+M1. accumulator & — & 703,220 & 273,732 & 251,211 & 2,281,606 & 94,503\\
+M2. + acceleration & linear & 206,553 & 179,872 & 134,596 & 1,377,615 & 41,169\\
+M2. + acceleration & log & 204,930 & 178,471 & 133,877 & 1,348,013 & 39,054\\
+M3. + efficiency var. & linear & 35,856 & 17,418 & 13,752 & 130,625 & 3,850\\
+M3. + efficiency var. & log & 34,219 & 15,356 & 13,135 & 115,116 & 3,227\\
 \addlinespace
-M4. + acceleration var. & linear & 711 & 4,138 & 250 & 169 & 711 & 4,138 & 250 & 169\\
-M4. + acceleration var. & log & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+M4. + acceleration var. & linear & 1,134 & 553 & 0 & 4,301 & 169\\
+M4. + acceleration var. & log & 0 & 0 & 30 & 0 & 0\\
 \bottomrule
 
 \end{longtable}
 
 \endgroup{}
-
-\begin{figure}
-
-\centering{
-
-\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{standard_model_files/figure-pdf/fig-glmer-ladder-1.pdf}
-
-}
-
-\caption{\label{fig-glmer-ladder}Individual children's longitudinal
-vocabulary growth trajectories across age in four languages. The same
-data are plotted in each column of panels, with overlaid models of
-increasing complexity (colored lines). Transparency is higher for
-English (American) and Norwegian panels to avoid overplotting.}
-
-\end{figure}%
 
 \subsection{Efficiency and acceleration relate to separate demographic
 predictors}\label{efficiency-and-acceleration-relate-to-separate-demographic-predictors}
@@ -574,11 +562,10 @@ Children's vocabulary is known to be related to a number of
 sociodemographic predictors, including sex and maternal education (which
 is interpreted as a proxy for socioeconomic status). In particular,
 female children show consistently larger vocabularies than male children
-across dozens of languages and countries (Eriksson et al. 2012; Michael
-C. Frank et al. 2021). Similarly, children of more educated mothers tend
-to show larger vocabularies, though this effect is somewhat more
-heterogeneous across countries and languages (Michael C. Frank et al.
-2021).
+across dozens of languages and countries (Eriksson et al. 2012; Frank et
+al. 2021). Similarly, children of more educated mothers tend to show
+larger vocabularies, though this effect is somewhat more heterogeneous
+across countries and languages (Frank et al. 2021).
 
 Our longitudinal model offers a summary of individual children's growth
 in terms of both their efficiency (intercept) and their acceleration
@@ -593,11 +580,11 @@ meta-analytic estimate.
 
 Sex effects show the predicted female advantage across all four
 languages, but this effect manifests itself only in efficiency
-(\(\beta = -0.36\), \(p = < .001\)) not acceleration (\(\beta = 0.01\),
-\(p = .888\)). In contrast, though maternal education data were only
+(\(\beta = -0.33\), \(p = < .001\)) not acceleration (\(\beta = 0\),
+\(p = .939\)). In contrast, though maternal education data were only
 available for three languages, effects were numerically present in both
-measures, though stronger in acceleration (\(\beta = 0.07\),
-\(p = .042\)) than in efficiency (\(\beta = 0.04\), \(p = .056\)). One
+measures, though stronger in acceleration (\(\beta = 0.03\),
+\(p = .096\)) than in efficiency (\(\beta = 0.06\), \(p = .157\)). One
 interpretation of these findings is that sex effects reflect a small
 constant offset in average ability. In contrast, socioeconomic
 differences as reflected in maternal education might continue to
@@ -702,12 +689,15 @@ What we did
 Longitudinal growth models efficiency and acceleration. Two different
 paramters.
 
-Where doe acceleration come from? Could come from a variety of sources,
+Where does acceleration come from? Could come from a variety of sources,
 including general maturation of memory and attention, specific changes
 in word recognition or processing (Fernald et al. 1998;
 \textbf{frank2026?}), the increasing sophistication of inferential
 strategies for word learning {[}(\textbf{smith2002?});Markman and
 Wachtel (1988);etc{]}, or other sources.
+
+Mitchell and McMurray (2009) prove that acceleration does not result
+from simply leverage of vocabulary --
 
 Role of input: Coffey 2026 variance decomposition
 
@@ -819,20 +809,25 @@ Frank, Michael C. 2023. {``Bridging the Data Gap Between Children and
 Large Language Models.''} \emph{Trends in Cognitive Sciences} 27 (11):
 990--92.
 
-\bibitem[\citeproctext]{ref-frank2017}
-Frank, Michael C., Mika Braginsky, Daniel Yurovsky, and Virginia A.
-Marchman. 2017. {``Wordbank: An Open Repository for Developmental
-Vocabulary Data.''} \emph{Journal of Child Language} 44 (3): 677--94.
-
 \bibitem[\citeproctext]{ref-frank2021}
 Frank, Michael C, Mika Braginsky, Daniel Yurovsky, and Virginia A
 Marchman. 2021. \emph{Variability and Consistency in Early Language
 Learning: The Wordbank Project}. MIT Press.
 
+\bibitem[\citeproctext]{ref-frank2017}
+Frank, Michael C, Mika Braginsky, Daniel Yurovsky, and Virginia A.
+Marchman. 2017. {``Wordbank: An Open Repository for Developmental
+Vocabulary Data.''} \emph{Journal of Child Language} 44 (3): 677--94.
+
 \bibitem[\citeproctext]{ref-goodman2008}
 Goodman, Judith C, Philip S Dale, and Ping Li. 2008. {``Does Frequency
 Count? Parental Input and the Acquisition of Vocabulary.''}
 \emph{Journal of Child Language} 35 (3): 515--31.
+
+\bibitem[\citeproctext]{ref-grimm2016}
+Grimm, Kevin J, Nilam Ram, and Ryne Estabrook. 2016. \emph{Growth
+Modeling: Structural Equation and Multilevel Modeling Approaches}.
+Guilford Publications.
 
 \bibitem[\citeproctext]{ref-hart2003}
 Hart, Betty, and Todd R Risley. 2003. {``The Early Catastrophe: The 30
@@ -842,6 +837,13 @@ Million Word Gap by Age 3.''} \emph{American Educator} 27 (1): 4--9.
 Hidaka, Shohei. 2013. {``A Computational Model Associating Learning
 Process, Word Attributes, and Age of Acquisition.''} \emph{PloS One} 8
 (11).
+
+\bibitem[\citeproctext]{ref-kachergis2022b}
+Kachergis, George, Virginia A Marchman, Philip S Dale, Jessica
+Mankewitz, and Michael C Frank. 2022. {``Online Computerized Adaptive
+Tests of Children's Vocabulary Development in English and Mexican
+Spanish.''} \emph{Journal of Speech, Language, and Hearing Research} 65
+(6): 2288--308.
 
 \bibitem[\citeproctext]{ref-kachergis2022}
 Kachergis, George, Virginia A Marchman, and Michael C Frank. 2022.
@@ -904,14 +906,14 @@ Exist?''} \emph{Developmental Disabilities Research Reviews} 17 (2):
 141--50.
 
 \bibitem[\citeproctext]{ref-roy2015}
-Roy, Brandon C., Michael C. Frank, Philip DeCamp, Matthew Miller, and
-Deb Roy. 2015. {``Predicting the Birth of a Spoken Word.''}
+Roy, Brandon C., Michael C Frank, Philip DeCamp, Matthew Miller, and Deb
+Roy. 2015. {``Predicting the Birth of a Spoken Word.''}
 \emph{Proceedings of the National Academy of Sciences} 112 (41):
 12663--68.
 
 \bibitem[\citeproctext]{ref-sanchez2019}
 Sanchez, Alessandro, Stephan C. Meylan, Mika Braginsky, Kyle E.
-MacDonald, Daniel Yurovsky, and Michael C. Frank. 2019. {``Childes-Db: A
+MacDonald, Daniel Yurovsky, and Michael C Frank. 2019. {``Childes-Db: A
 Flexible and Reproducible Interface to the Child Language Data Exchange
 System.''} \emph{Behavior Research Methods} 51 (4): 1928--41.
 
