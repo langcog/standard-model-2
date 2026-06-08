@@ -12,10 +12,12 @@ format:
 
 ```{r si-setup, include=FALSE}
 suppressPackageStartupMessages({
-  library(here); library(dplyr); library(ggplot2); library(patchwork)
+  library(here); library(dplyr); library(tidyr); library(ggplot2)
+  library(patchwork); library(latex2exp); library(knitr); library(kableExtra)
 })
 source(here("paper", "_helpers.R"))
 ladder <- readRDS(here("paper", "cache", "fig2_glmer_ladder.rds"))
+aic    <- readRDS(here("paper", "cache", "aic_summary.rds"))
 knitr::opts_chunk$set(
   echo = FALSE, message = FALSE, warning = FALSE,
   fig.align = "center", out.width = "100%", dpi = 300
@@ -89,25 +91,27 @@ mk(parallel, "(A) stable between-child differences (intercepts vary)") +
 mk(fanning,  "(B) diverging trajectories (slopes vary)")
 ```
 
-```{r fig-glmer-ladder-linear, fig.width=8, fig.height=5}
-#| label: fig-glmer-ladder-linear
-#| fig-cap: "Linear ability growth model variants. See main text for model fit comparisons."
-# Supplemental Figure 2: the LINEAR-age model variants (A, B, C, D),
-# matching the main-text Figure of the log-age models. Same data and
-# plotting conventions; here ability grows linearly in age rather than
-# in log-age. Within the observed age range the fits are very similar
-# to the log-age models (see main text dAIC comparison).
+```{r fig-glmer-ladder-full, fig.width=10, fig.height=6}
+#| label: fig-glmer-ladder-full
+#| fig-cap: ""
+# [MCF: caption on next pass.] FULL model ladder: all seven variants
+# (A; B/C/D in both linear- and log-age) x all five datasets. The main
+# text shows only the best-fitting model (M4 / D_log); this is the
+# exhaustive comparison, including the linear-age variants that never
+# appear in the main text. Same data + plotting conventions throughout.
+# [Prior caption: "Linear ability growth model variants. See main text
+#  for model fit comparisons."]
 qtiles <- ladder$qtiles |>
-  filter(model %in% c("A", "B_lin", "C_lin", "D_lin")) |>
+  filter(model %in% c("A", "B_lin", "B_log", "C_lin", "C_log", "D_lin", "D_log")) |>
   mutate(qprob_f = factor(qprob, levels = c(0.1, 0.25, 0.5, 0.75, 0.9),
                           labels = c("0.1", "0.25", "0.5", "0.75", "0.9")))
 emp <- ladder$emp |>
   mutate(child_lang = paste(lang_slug, child_id, sep = "::"))
 
-model_lab <- c("A"     = "(A) accumulator",
-               "B_lin" = "(B) + pop. acceleration",
-               "C_lin" = "(C) + per-child efficiency",
-               "D_lin" = "(D) + per-child acceleration")
+model_lab <- c("A"     = "M1",
+               "B_lin" = "M2 (lin)", "B_log" = "M2 (log)",
+               "C_lin" = "M3 (lin)", "C_log" = "M3 (log)",
+               "D_lin" = "M4 (lin)", "D_log" = "M4 (log)")
 qtiles$model_label <- factor(model_lab[qtiles$model], levels = model_lab)
 lang_lab <- ladder$lang_labels
 emp$lang_label    <- factor(lang_lab[emp$lang_slug],    levels = lang_lab)
@@ -115,8 +119,10 @@ qtiles$lang_label <- factor(lang_lab[qtiles$lang_slug], levels = lang_lab)
 emp_facet <- bind_rows(lapply(names(model_lab), function(m)
   emp |> mutate(model_label = factor(model_lab[m], levels = model_lab))))
 
-qt_fan    <- filter(qtiles, model %in% c("C_lin", "D_lin"))
-qt_median <- filter(qtiles, !model %in% c("C_lin", "D_lin"),
+# full fan for the per-child-variation models (C/D, both age bases);
+# median only for A and the population-slope B models.
+qt_fan    <- filter(qtiles, model %in% c("C_lin", "C_log", "D_lin", "D_log"))
+qt_median <- filter(qtiles, !model %in% c("C_lin", "C_log", "D_lin", "D_log"),
                     qprob_f == "0.5")
 
 ggplot() +
@@ -317,4 +323,86 @@ data gap may be harder to close than raw data counts suggest.
 <!-- [BIB NEEDED] Kaplan et al. (2020) and Hoffmann et al. (2022) are named
      in text but have NO verified bib entries yet — do not promote with live
      @ markers until added. -->
+```{r fig-schematic-theta, fig.width=8, fig.height=2.6}
+#| label: fig-schematic-theta
+#| fig-cap: ""
+# [MCF: caption on next pass.] Latent-ability (theta) version of the
+# main-text model buildup (M1->M4). The main text shows only the vocab-
+# space projection of these curves; here is theta_i(t) itself, before it
+# is pushed through the word-difficulty distribution. Illustrative
+# parameters, not estimated.
+ages <- seq(8, 30, length.out = 80)
+A0 <- 8; L <- log(ages / A0)
+qs <- c(0.1, 0.25, 0.5, 0.75, 0.9); z <- qnorm(qs)
+XI0 <- -2.0; KAPPA_A <- 2.5
+variants <- tibble::tribble(
+  ~name,                       ~kappa_pop, ~sigma_alpha, ~sigma_kappa, ~eq,
+  "(M1) accumulator",          1,           0,            0,            r"($\theta = \log(r) + \log(t)$)",
+  "(M2) + acceleration",       KAPPA_A,     0,            0,            r"($\theta = \log(r) + \kappa\,\log(t)$)",
+  "(M3) + efficiency var.",    KAPPA_A,     1.1,          0,            r"($\theta = \xi_i + \kappa\,\log(t)$)",
+  "(M4) + per-child accel.",   KAPPA_A,     1.1,          0.7,          r"($\theta = \xi_i + \kappa_i\,\log(t)$)"
+)
+sim <- variants |>
+  mutate(name = factor(name, levels = name)) |>
+  rowwise() |>
+  do({ v <- .
+    bind_rows(lapply(seq_along(qs), function(i) {
+      tibble(name = v$name,
+             qprob_f = factor(as.character(qs[i]),
+                              levels = c("0.1","0.25","0.5","0.75","0.9")),
+             age = ages,
+             theta = XI0 + z[i]*v$sigma_alpha + (v$kappa_pop + z[i]*v$sigma_kappa)*L,
+             eq = v$eq)
+    })) }) |>
+  ungroup()
+eq_lab <- variants |> mutate(name = factor(name, levels = name)) |> select(name, eq)
+lwidth <- function(qf) ifelse(as.character(qf) == "0.5", 0.95, 0.55)
+ggplot(sim, aes(age, theta, color = qprob_f, group = qprob_f)) +
+  geom_line(aes(linewidth = lwidth(qprob_f))) +
+  geom_label(data = eq_lab, aes(x = -Inf, y = Inf,
+             label = latex2exp::TeX(eq, output = "character")),
+             inherit.aes = FALSE, parse = TRUE, hjust = -0.05, vjust = 1.4,
+             size = 2.4, label.size = 0, fill = scales::alpha("white", 0.8)) +
+  facet_wrap(~ name, nrow = 1) +
+  scale_color_manual(values = WORDBANK_PALETTE, name = "Percentile",
+                     labels = c("10th","25th","50th","75th","90th"), drop = FALSE) +
+  scale_linewidth_identity() +
+  coord_cartesian(ylim = c(-3.5, 4.5)) +
+  labs(x = "age (months)", y = expression(theta[i](t))) +
+  theme_minimal(base_size = 9) +
+  theme(strip.text = element_text(face = "bold", size = 8),
+        legend.position = "bottom", panel.grid.minor = element_blank())
+```
+
+```{r tbl-bic}
+#| label: tbl-bic
+#| tbl-cap: ""
+# [MCF: caption on next pass.] Delta-BIC companion to the main-text
+# Delta-AIC table: BIC difference of each model variant from the best
+# model within each dataset.
+lang_order <- c("thal","smith","marchman","norwegian","japanese")
+lang_short <- c(thal="Thal", smith="Smith", marchman="Marchman",
+                norwegian="Norwegian", japanese="Japanese")
+mod_lab <- c(A="M1. accumulator",
+             B_lin="M2. + acceleration", B_log="M2. + acceleration",
+             C_lin="M3. + efficiency var.", C_log="M3. + efficiency var.",
+             D_lin="M4. + acceleration var.", D_log="M4. + acceleration var.")
+age_lab <- c(A="—", B_lin="linear", B_log="log", C_lin="linear",
+             C_log="log", D_lin="linear", D_log="log")
+mod_order <- c("A","B_lin","B_log","C_lin","C_log","D_lin","D_log")
+tabB <- aic |>
+  mutate(Model = mod_lab[model], Age = age_lab[model],
+         lang_slug = factor(lang_slug, levels = lang_order)) |>
+  select(model, Model, Age, lang_slug, dBIC) |>
+  tidyr::pivot_wider(names_from = lang_slug, values_from = dBIC) |>
+  mutate(model = factor(model, levels = mod_order)) |>
+  arrange(model) |>
+  select(Model, Age, all_of(lang_order))
+fmt <- function(x) ifelse(x == 0, "0", format(round(x), big.mark = ","))
+out <- cbind(tabB[, c("Model","Age")],
+             lapply(tabB[, lang_order], fmt) |> as.data.frame())
+knitr::kable(out, align = c("l","l", rep("r", 5)),
+             col.names = c("Model", "Age", unname(lang_short[lang_order]))) |>
+  kableExtra::add_header_above(c(" " = 2, "$\\\\Delta$BIC" = 5), escape = FALSE) |>
+  kableExtra::kable_styling(latex_options = "scale_down", font_size = 8)
 ```
