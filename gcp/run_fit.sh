@@ -69,5 +69,16 @@ Rscript sherlock/extract_scalar_draws.R "$TAG" 2>&1 | tee -a "$LOG"
 Rscript sherlock/extract_delta_j_slim.R "$TAG" 2>&1 | tee -a "$LOG"
 Rscript sherlock/extract_loo_thinned.R "$TAG" 2>&1 | tee -a "$LOG"
 
+# Reclaim disk: extraction succeeded (set -e would have aborted otherwise),
+# so the slim summaries hold everything downstream needs and the
+# self-contained fit RDS remains for recovery. The raw sampler CSVs
+# (tens to ~160 GB per fit) are now redundant. Without this, a D -> D'
+# chain accumulates two CSV sets and fills the boot disk mid-fit.
+CSV_DIR="$STANDARD_MODEL_FITS_DIR/csvs_$TAG"
+if [ -d "$CSV_DIR" ]; then
+  echo "Reclaiming $(du -sh "$CSV_DIR" 2>/dev/null | cut -f1) from $CSV_DIR" | tee -a "$LOG"
+  rm -rf "$CSV_DIR"
+fi
+
 echo "==== Done: $TAG ====" | tee -a "$LOG"
 echo "end: $(date)" | tee -a "$LOG"
