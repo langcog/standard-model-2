@@ -632,7 +632,7 @@ We end by providing a quantitative comparison between within-child human learnin
 
 ```{r fig-llm-acceleration, fig.width=7, fig.height=4}
 #| label: fig-llm-acceleration
-#| fig-cap: ""
+#| fig-cap: "Comparison of acceleration slopes (kappa) estimated in our experiments for children in English and Norwegian, vs. LLM slopes per model estimated by Chang & Bergen (2022) and in our experiments."
 # Children's per-child kappa_i vs. LLM per-word sigmoid slopes (Chang &
 # Bergen 2022), placed on a common "logit per natural-log experience"
 # axis. Data cached by paper/build_cache.R section 6 (fig6_llm_slopes.rds):
