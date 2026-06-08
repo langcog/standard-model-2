@@ -4,14 +4,22 @@
 ## (kept here because the panel layout is verbose).
 
 # ---- palettes & labels ------------------------------------------------
-LANG_PAL <- c("english_american" = "#E69F00",
+# By-study units (English split into Thal/Smith/Marchman) plus the legacy
+# whole-language keys (kept for any non-ladder reference).
+LANG_PAL <- c("thal"             = "#E69F00",
+              "smith"            = "#009E73",
+              "marchman"         = "#CC79A7",
+              "english_american" = "#E69F00",
               "norwegian"        = "#56B4E9",
               "french_quebecois" = "#009E73",
               "japanese"         = "#D55E00",
               "finnish"          = "#CC79A7",
               "english_british"  = "#999999")
 
-LANG_LABELS <- c("english_american" = "English (American)",
+LANG_LABELS <- c("thal"             = "English (Thal)",
+                 "smith"            = "English (Smith)",
+                 "marchman"         = "English (Marchman)",
+                 "english_american" = "English (American)",
                  "norwegian"        = "Norwegian",
                  "french_quebecois" = "French (Quebecois)",
                  "japanese"         = "Japanese",
@@ -32,9 +40,8 @@ WORDBANK_PALETTE <- c("0.1"  = "#1f78b4",   # dark blue
                       "0.75" = "#fdbf6f",   # gold
                       "0.9"  = "#e31a1c")   # red
 
-# The four main-text Wordbank longitudinal languages
-PAPER_LANGS <- c("english_american", "norwegian",
-                 "french_quebecois", "japanese")
+# The five main-text by-study units (English split into its 3 datasets)
+PAPER_LANGS <- c("thal", "smith", "marchman", "norwegian", "japanese")
 
 # ---- Figure 1 schematic ----------------------------------------------
 # Stand-alone illustrative ggplot — no data needed; pure model display.

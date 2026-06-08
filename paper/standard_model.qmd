@@ -287,9 +287,9 @@ Model D, which incorporated variation in acceleration and efficiency, was the be
 # = dBIC = 0). Models without a per-child slope (A, B) have no log/linear
 # distinction at the accumulation step; we tabulate B/C/D in both age
 # bases. Values built from aic_summary (paper/build_cache.R <- glmer ladder).
-lang_order <- c("english_american","norwegian","french_quebecois","japanese")
-lang_short <- c(english_american="English", norwegian="Norwegian",
-                french_quebecois="French (Q.)", japanese="Japanese")
+lang_order <- c("thal","smith","marchman","norwegian","japanese")
+lang_short <- c(thal="Thal", smith="Smith", marchman="Marchman",
+                norwegian="Norwegian", japanese="Japanese")
 mod_lab <- c(A="M1. accumulator",
              B_lin="M2. + acceleration", B_log="M2. + acceleration",
              C_lin="M3. + efficiency var.", C_log="M3. + efficiency var.",
@@ -320,9 +320,9 @@ out <- cbind(tab[, c("Model","Age")],
              lapply(tab[, lang_order], fmt) |> as.data.frame(),
              lapply(tabB,             fmt) |> as.data.frame())
 
-knitr::kable(out, align = c("l","l", rep("r", 8)),
+knitr::kable(out, align = c("l","l", rep("r", 10)),
              col.names = c("Model", "Age", rep(unname(lang_short[lang_order]), 2))) |>
-  kableExtra::add_header_above(c(" " = 2, "$\\\\Delta$AIC" = 4, "$\\\\Delta$BIC" = 4),
+  kableExtra::add_header_above(c(" " = 2, "$\\\\Delta$AIC" = 5, "$\\\\Delta$BIC" = 5),
                                escape = FALSE) |>
   kableExtra::kable_styling(latex_options = "scale_down", font_size = 8)
 ```
@@ -342,10 +342,10 @@ qtiles <- ladder$qtiles |>
 emp <- ladder$emp |>
   mutate(child_lang = paste(lang_slug, child_id, sep = "::"))
 
-model_lab <- c("1"     = "(M1) accumulator",
-               "2_log" = "(M2) + pop. acceleration",
-               "3_log" = "(M3) + per-child efficiency",
-               "4_log" = "(M4) + per-child acceleration")
+model_lab <- c("A"     = "(M1) accumulator",
+               "B_log" = "(M2) + pop. acceleration",
+               "C_log" = "(M3) + per-child efficiency",
+               "D_log" = "(M4) + per-child acceleration")
 qtiles$model_label <- factor(model_lab[qtiles$model], levels = model_lab)
 lang_lab <- ladder$lang_labels
 emp$lang_label    <- factor(lang_lab[emp$lang_slug],    levels = lang_lab)
@@ -355,8 +355,8 @@ emp_facet <- bind_rows(lapply(names(model_lab), function(m)
   emp |> mutate(model_label = factor(model_lab[m], levels = model_lab))))
 
 # split quantiles by model: full fan for C_log/D_log, median only for A/B_log
-qt_fan    <- filter(qtiles, model %in% c("M3_log", "M4_log"))
-qt_median <- filter(qtiles, !model %in% c("M3_log", "M4_log"),
+qt_fan    <- filter(qtiles, model %in% c("C_log", "D_log"))
+qt_median <- filter(qtiles, !model %in% c("C_log", "D_log"),
                     qprob_f == "0.5")
 
 ggplot() +
