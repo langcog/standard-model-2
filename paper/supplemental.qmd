@@ -148,3 +148,173 @@ ggplot() +
         legend.position = "bottom",
         panel.spacing = unit(0.4, "lines"))
 ```
+
+<!-- ===================================================================
+     DRAFT TEXT FOR PROMOTION (agent-authored, in verbatim `md` blocks).
+     Each block below is draft prose Mike can edit and lift into the main
+     text or keep here. Citation markers reference keys already present in
+     standard_model.bib unless flagged "[BIB NEEDED]".
+     ==================================================================== -->
+
+```md
+## Relation to prior accumulator models  [draft for promotion — MCF to review]
+
+Our model is one member of a family of accumulator models of early
+vocabulary, and the family is easiest to compare in a single set of
+coordinates. Writing the latent ability of child $i$ on word $j$ at
+age $t$ as
+
+$$\eta_{ij}(t) = \log r_i + \log \alpha_i + \kappa_i \log t - \delta_j,$$
+
+every prior model in this tradition is a special case that fixes one or
+more of three quantities: the between-child variance in efficiency
+($\sigma_\alpha$), the population scaling exponent ($\kappa_{\text{pop}}$),
+and — critically — the between-child variance in that exponent
+($\sigma_\kappa$). Mapping each prior model into these coordinates makes
+the comparison structural rather than notational.
+
+**McMurray [-@mcmurray2007]** is a pure accumulator: every word fills at a
+single unit rate ($\kappa = 1$) and children do not differ
+($\sigma_\alpha = \sigma_\kappa = 0$). Its central insight is that the
+*vocabulary* curve accelerates even when the underlying rate does not,
+because ability sweeps through a distribution of word difficulties — the
+construction reproduced in panel (A) of our schematic. Acceleration here
+is a population-level property of the difficulty distribution, not a
+change in the child. This corresponds to our M1.
+
+**Mitchell & McMurray [-@mitchell2009]** add a leverage term: already-known
+words speed the acquisition of new ones. They prove that this feedback
+shifts *when* words are acquired but cannot manufacture acceleration that
+is not already present in the difficulty distribution. In our coordinates
+it moves the timing of acquisition without changing $\kappa$, and — being
+non-linear in accumulated vocabulary — it is the one prior model that does
+not embed cleanly in the linear predictor above.
+
+**Hidaka [-@hidaka2013]** introduces a rate-change process in which ability
+grows as $t^{D+1}$; his exponent $D$ is exactly $\kappa_{\text{pop}} - 1$
+in our notation, so $D > 0$ is population-level acceleration
+($\kappa_{\text{pop}} > 1$). This is our M2. The acceleration is shared
+across children ($\sigma_\kappa = 0$). Hidaka relates $D$ to word
+imageability — i.e. a *per-word* scaling exponent — which is an
+interesting direction we do not pursue here.
+
+**Mollica & Piantadosi [-@mollica2017]** model each word as a Gamma
+waiting-time process in which acquisition occurs after roughly ten
+"effective learning instances." In our coordinates this is again a pure
+accumulator ($\kappa = 1$); the per-word variation they capture lives in
+the Gamma shape parameter, which corresponds to a per-word discrimination
+(a 2PL extension) rather than to per-child structure.
+
+**Kachergis et al. [-@kachergis2022]** are the first to free
+$\sigma_\alpha$: they cast vocabulary as a Rasch model in which each child
+has their own latent ability, unifying the accumulator and item-response
+traditions. This is our M3. But the scaling exponent remains shared across
+children ($\sigma_\kappa = 0$), and the model is proposed as a framework
+rather than fit to longitudinal individual data.
+
+Reading down this list, the literature progressively frees parameters —
+McMurray fixes all three, Hidaka frees $\kappa_{\text{pop}}$, Kachergis
+frees $\sigma_\alpha$ — but every model holds $\sigma_\kappa = 0$.
+
+| Model | $\sigma_\alpha$ | $\kappa_{\text{pop}}$ | $\sigma_\kappa$ | per-word $\delta_j$ |
+|---|:--:|:--:|:--:|:--:|
+| McMurray (2007)            | 0 | 1     | 0 | free |
+| Mitchell & McMurray (2009) | 0 | 1     | 0 | free + leverage |
+| Hidaka (2013), rate-change | 0 | $D+1$ | 0 | free |
+| Mollica & Piantadosi (2017)| 0 | 1     | 0 | free |
+| Kachergis et al. (2022)    | free | free | 0 | free |
+| **This work (M4)**         | **free** | **free** | **free** | **free** |
+
+Our contribution is to free $\sigma_\kappa$: children differ not only in
+how efficient they are but in how steeply their learning accelerates. This
+is the load-bearing addition — it is what lets the model fit the widening
+fan of trajectories with age (M4 vs M3 in the main text). It is also a
+falsifiable claim rather than a parameter convenience: if $\sigma_\kappa$
+were near zero the model would collapse onto Kachergis et al., but the
+estimated per-child slope variance is well above zero and large relative
+to the efficiency variance $\sigma_\alpha$ (main text, Figure 2 and
+Results).
+```
+
+```md
+## Comparing children and language models on one slope axis  [draft for promotion — MCF to review]
+
+The comparison to language models in Figure 6 places children and models
+on a single, literally shared axis: the slope of the acquisition sigmoid
+in log-experience. Both populations have sigmoidal per-word acquisition
+curves, and the slope of that sigmoid is directly comparable.
+
+On the child side, our linear predictor makes this slope exact.
+Differentiating $\eta_{ij}(t)$ with respect to $\log t$ gives $\kappa_i$:
+the logit-probability that a child produces a word rises linearly in
+log-age with slope equal to that child's scaling exponent. The per-child
+sigmoid slope *is* $\kappa_i$, by construction.
+
+On the model side, @chang2022 fit a four-parameter logistic to each
+(model, word) pair, describing how the model's surprisal for a word falls
+over training. Re-expressed as the fraction of a word's surprisal
+reduction achieved so far, their fit is a sigmoid in
+$\log_{10}(\text{training steps})$ with slope $1/\text{scale}_w$.
+Dividing by $\ln 10$ converts this to natural-log units — the same units
+as $\kappa_i$ — so the two slopes can be read off the same axis.
+
+The result is a striking separation (Figure 6). Language models cluster
+near a slope of one — the unit-accumulator boundary, where each log-unit
+of additional experience yields a fixed increment of learning. Children
+sit in a broad distribution roughly an order of magnitude higher. On the
+shared axis, children's word learning accelerates with experience in a way
+that these models' does not.
+
+Three caveats bound this comparison. First, the variability is asymmetric:
+children's slopes vary across *children*, whereas a single model is a
+deterministic learner, so model slopes vary across *words* within a run
+rather than across replicate learners. Second, the steep child slope is
+the *per-child* quantity; a researcher fitting a single sigmoid to
+cross-sectional Wordbank data per word would recover a shallower slope,
+because marginalizing over the population attenuates it. Third, the models
+in @chang2022 were trained on adult written text rather than
+child-directed speech, so part of the gap could reflect the input
+distribution rather than the learner. Models trained directly on CHILDES
+(Feng et al., forthcoming) provide the matched-input test: if the gap
+largely persists, it is structural; if it shrinks substantially, the input
+distribution is doing more of the work than we currently attribute to it.
+
+<!-- [BIB NEEDED] Feng et al. (CHILDES-trained GPT) — no verified entry yet;
+     named in text only. Daunizeau (2017) logistic-Gaussian approximation is
+     used in the derivation note but not needed for this prose. -->
+```
+
+```md
+## Connection to neural scaling laws  [draft for promotion — MCF to review; most speculative of the three]
+
+The per-word picture above connects to a more familiar aggregate
+phenomenon: neural scaling laws. A model's loss falls as a smooth power
+law in the amount of training data, and this descent is remarkably
+regular — different runs, and different model sizes, trace nearly the same
+curve (Kaplan et al., 2020; Hoffmann et al., 2022). Our per-word analysis
+is the micro-level counterpart of that regularity. Each word is acquired
+along a sigmoid whose slope sits near the unit-accumulator value, and the
+spread of those slopes — across words and across runs — is small. The
+aggregate smoothness of scaling laws and the per-word $\kappa \approx 1$
+we recover are two views of the same property: language models convert
+experience into knowledge as near-pure accumulators, with little
+instance-to-instance variation.
+
+Children depart from this picture on both axes at once. Their per-instance
+scaling is far steeper ($\kappa \approx 10$), and they vary substantially
+from one another in that exponent ($\sigma_\kappa$ well above zero). The
+"data gap" between children and language models [@frank2023; @warstadt2023]
+is therefore not only that children reach adult competence from orders of
+magnitude less input. It is that children convert experience into knowledge
+through a different scaling relationship — steeper, and far more variable
+across individuals — than the one that scaling laws describe for models.
+
+This connection is analogical rather than formal: scaling laws characterize
+aggregate loss, whereas our $\kappa$ characterizes per-item acquisition,
+and the two need not move together. We offer it as a framing for why the
+data gap may be harder to close than raw data counts suggest.
+
+<!-- [BIB NEEDED] Kaplan et al. (2020) and Hoffmann et al. (2022) are named
+     in text but have NO verified bib entries yet — do not promote with live
+     @ markers until added. -->
+```
