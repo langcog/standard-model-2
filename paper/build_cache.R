@@ -14,16 +14,23 @@ suppressPackageStartupMessages({
   library(lme4); library(broom.mixed); library(posterior); library(wordbankr)
 })
 
-PAPER_LANGS <- c("english_american", "norwegian",
-                 "french_quebecois", "japanese")
-LANG_LABELS <- c("english_american" = "English (American)",
-                 "norwegian"        = "Norwegian",
-                 "french_quebecois" = "French (Quebecois)",
-                 "japanese"         = "Japanese")
-WORDBANKR_LABELS <- c("english_american" = "English (American)",
-                      "norwegian"        = "Norwegian",
-                      "french_quebecois" = "French (Quebecois)",
-                      "japanese"         = "Japanese")
+## By-study units: English fans into its three contributed datasets
+## (Thal/Smith/Marchman); Norwegian (Kristoffersen) and Japanese
+## (Tsuji+Hagihara) are single bundles kept whole. The Bayesian D/D'
+## fits stay pooled-per-language; only the glmer ladder + demographics
+## run by-study.
+PAPER_LANGS <- c("thal", "smith", "marchman", "norwegian", "japanese")
+LANG_LABELS <- c(thal = "English (Thal)", smith = "English (Smith)",
+                 marchman = "English (Marchman)",
+                 norwegian = "Norwegian", japanese = "Japanese")
+# Each unit -> Wordbank language + (optional) dataset_name filter, used to
+# pull the right per-child demographics. The English units share one
+# English pull, split by dataset_name; NO/JA take the whole language.
+UNIT_LANG    <- c(thal = "English (American)", smith = "English (American)",
+                  marchman = "English (American)",
+                  norwegian = "Norwegian", japanese = "Japanese")
+UNIT_DATASET <- c(thal = "Thal", smith = "Smith", marchman = "Marchman",
+                  norwegian = NA, japanese = NA)
 
 CACHE <- here("paper", "cache")
 dir.create(CACHE, recursive = TRUE, showWarnings = FALSE)
@@ -88,7 +95,9 @@ cat(sprintf("  total BLUPs: %d kids across %d languages\n",
             nrow(blups), length(unique(blups$lang_slug))))
 
 cat("Pulling Wordbank demographics ...\n")
-get_demo <- function(lang_label) {
+# Pull each unique language once (keeping dataset_name), then assign to
+# units. English's three datasets share one pull, split by dataset_name.
+get_demo_lang <- function(lang_label) {
   forms <- c("WS", "WG")
   ad <- bind_rows(lapply(forms, function(f) {
     tryCatch(
@@ -99,7 +108,7 @@ get_demo <- function(lang_label) {
   }))
   if (is.null(ad) || nrow(ad) == 0) return(NULL)
   ad |>
-    group_by(child_id) |>
+    group_by(child_id, dataset_name) |>
     summarise(
       sex          = sex[!is.na(sex)][1],
       birth_order  = birth_order[!is.na(birth_order)][1],
@@ -107,10 +116,14 @@ get_demo <- function(lang_label) {
       .groups = "drop"
     )
 }
+demo_by_lang <- setNames(lapply(unique(UNIT_LANG), get_demo_lang),
+                         unique(UNIT_LANG))
 
-demos <- bind_rows(lapply(PAPER_LANGS, function(l) {
-  d <- get_demo(WORDBANKR_LABELS[l])
-  if (is.null(d)) NULL else mutate(d, lang_slug = l)
+demos <- bind_rows(lapply(PAPER_LANGS, function(u) {
+  d <- demo_by_lang[[ UNIT_LANG[[u]] ]]
+  if (is.null(d)) return(NULL)
+  if (!is.na(UNIT_DATASET[[u]])) d <- filter(d, dataset_name == UNIT_DATASET[[u]])
+  d |> select(-dataset_name) |> mutate(lang_slug = u)
 }))
 cat(sprintf("  demographics: %d rows\n", nrow(demos)))
 

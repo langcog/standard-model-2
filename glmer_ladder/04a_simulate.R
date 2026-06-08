@@ -82,56 +82,40 @@ predict_curves <- function(fit, model_id, ages, n_sim = 500, a0 = NA_real_,
   out
 }
 
-## ---- Main form per language (largest item set) ----------------------
-main_form_for <- function(lang_slug) {
+## ---- Item set + empirical vocabulary --------------------------------
+## After the one-admin-per-(child,age) collapse each dataset has a single
+## merged item set (no WG/WS split), so "vocabulary" is simply the sum of
+## productions over all items in the dataset.
+all_items <- function(lang_slug) {
   d <- readRDS(file.path(LADDER_DIR, sprintf("data_%s.rds", lang_slug)))
-  d$df |>
-    distinct(form, item) |>
-    count(form, name = "n_items") |>
-    slice_max(n_items, n = 1, with_ties = FALSE) |>
-    pull(form)
-}
-main_form_items <- function(lang_slug) {
-  d <- readRDS(file.path(LADDER_DIR, sprintf("data_%s.rds", lang_slug)))
-  d$df |>
-    filter(form == MAIN_FORM[[lang_slug]]) |>
-    distinct(item) |>
-    pull(item)
+  d$df |> distinct(item) |> pull(item)
 }
 
-## ---- Empirical scatter (main form only) -----------------------------
 empirical_for <- function(lang_slug) {
   path <- file.path(LADDER_DIR, sprintf("data_%s.rds", lang_slug))
   if (!file.exists(path)) return(NULL)
   d <- readRDS(path)
-  main_form <- MAIN_FORM[[lang_slug]]
-  n_main_items <- length(main_form_items(lang_slug))
+  n_items <- length(all_items(lang_slug))
   d$df |>
-    filter(form == main_form) |>
-    distinct(child_id, age, item, .keep_all = TRUE) |>
     group_by(child_id, age) |>
     summarise(vocab = sum(produces, na.rm = TRUE), .groups = "drop") |>
-    mutate(language = d$language, lang_slug = lang_slug,
-            form = main_form, n_items = n_main_items)
+    mutate(language = d$language, lang_slug = lang_slug, n_items = n_items)
 }
 
-## ---- Languages + models ---------------------------------------------
-## Spanish (Mexican) excluded: WS-only, narrow age window, n=119 →
-## degenerate D fits. We still simulate the 6 comparable languages.
-LANGS  <- c("english_american", "norwegian", "finnish",
-            "french_quebecois", "japanese", "french_french")
+## ---- Datasets (by-study units) + models -----------------------------
+## English fans into its three contributed datasets (Thal / Smith /
+## Marchman); Norwegian (Kristoffersen) and Japanese (Tsuji+Hagihara) are
+## single bundles kept whole. The Bayesian D/D' fits stay pooled-per-
+## language; only this glmer ladder is run by-study.
+LANGS  <- c("thal", "smith", "marchman", "norwegian", "japanese")
 LANG_LABELS <- c(
-  english_american = "English (American)",
-  norwegian        = "Norwegian",
-  finnish          = "Finnish",
-  french_quebecois = "French (Quebecois)",
-  japanese         = "Japanese",
-  french_french    = "French (French)"
+  thal      = "English (Thal)",
+  smith     = "English (Smith)",
+  marchman  = "English (Marchman)",
+  norwegian = "Norwegian",
+  japanese  = "Japanese"
 )
 MODELS <- c("A", "B_lin", "B_log", "C_lin", "C_log", "D_lin", "D_log")
-
-MAIN_FORM <- setNames(sapply(LANGS, main_form_for), LANGS)
-cat("Main form per language:\n"); print(MAIN_FORM)
 
 cat("\nBuilding empirical spaghetti data...\n")
 emp <- bind_rows(lapply(LANGS, empirical_for))
@@ -165,9 +149,9 @@ for (lang in LANGS) {
     if (is.na(a0)) a0 <- median(emp$age[emp$lang_slug == lang], na.rm = TRUE)
     ar  <- age_ranges[age_ranges$lang_slug == lang, ]
     ages_lang <- seq(ar$age_min, ar$age_max, by = 1)
-    items_main <- main_form_items(lang)
+    items_all <- all_items(lang)
     pr <- predict_curves(fit, mid, ages_lang, n_sim = N_SIM_KIDS, a0 = a0,
-                          keep_items = items_main)
+                          keep_items = items_all)
     pr$lang_slug <- lang; pr$model <- mid
     all_preds[[paste(lang, mid, sep = "/")]] <- pr
     rm(fit); gc(verbose = FALSE)
@@ -200,8 +184,7 @@ saveRDS(list(
   LANG_LABELS = LANG_LABELS,
   MODELS      = MODELS,
   N_SIM_KIDS  = N_SIM_KIDS,
-  age_ranges  = age_ranges,
-  MAIN_FORM   = MAIN_FORM
+  age_ranges  = age_ranges
 ), OUT_CACHE)
 cat(sprintf("Wrote %s\n", OUT_CACHE))
 cat("\nNow run: Rscript glmer_ladder/04b_plot.R\n")
