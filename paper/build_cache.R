@@ -193,4 +193,67 @@ cat(sprintf("Wrote %s (%d items, kappa=%.2f)\n",
             file.path(CACHE, "fig4_exposure.rds"),
             nrow(exposure_items), kappa_typ))
 
+## ---- 6. Figure 6A: children-vs-LLM scaling slopes ---------------
+# Port of model/scripts/chang_bergen_comparison.R. Places two populations
+# on a common "logit per natural-log experience" axis:
+#   LLMs  : per-(model, word) sigmoid slope = (1/ParamScale)/ln(10)
+#           from Chang & Bergen (2022) fits (data/chang_bergen_2022/).
+#   Kids  : per-child kappa_i = 1 + delta + zeta_i, sampled from the
+#           Bayesian D posterior (long_no_freq_slopes; EN + Norwegian).
+# Cached as a tidy long frame + per-population summary so the manuscript
+# chunk only plots and reports numbers.
+CB_DIR <- here("data", "chang_bergen_2022")
+LMS <- c("bert", "bilstm", "gpt2", "lstm")
+lm_slopes <- bind_rows(lapply(LMS, function(lm) {
+  d <- read.delim(file.path(CB_DIR, sprintf("%s_sigmoids.txt", lm)),
+                  stringsAsFactors = FALSE)
+  d$model <- lm; d
+})) |>
+  mutate(surprisal_range = ParamUpper - ParamLower,
+         slope_natural   = (1 / ParamScale) / log(10)) |>
+  # drop degenerate sigmoid fits (numerical edges / never-learned words)
+  filter(is.finite(slope_natural), ParamScale > 0.01, ParamScale < 10,
+         surprisal_range > 1.0) |>
+  mutate(label = factor(model, levels = c("bert", "gpt2", "bilstm", "lstm"),
+                        labels = c("BERT", "GPT-2", "BiLSTM", "LSTM")),
+         category = "LLMs (Chang & Bergen 2022)") |>
+  select(label, category, slope_natural)
+
+as_num <- function(x) as.numeric(unlist(x))
+sample_kappa <- function(draws_path, label, N_kids = 5000, n_draws = 50) {
+  draws      <- as.data.frame(readRDS(draws_path))
+  delta      <- as_num(draws$delta)
+  sigma_zeta <- as_num(draws$sigma_zeta)
+  set.seed(2026)
+  idx <- sample.int(length(delta), size = n_draws)
+  bind_rows(lapply(idx, function(d) {
+    n <- ceiling(N_kids / n_draws)
+    data.frame(label = label, category = "Children (this work)",
+               slope_natural = 1 + delta[d] + rnorm(n, 0, sigma_zeta[d]))
+  }))
+}
+kid_slopes <- bind_rows(
+  sample_kappa(here("fits", "summaries", "long_no_freq_slopes.draws.rds"),
+               "Children (English)"),
+  sample_kappa(here("fits", "summaries",
+                    "long_no_freq_slopes_norwegian.draws.rds"),
+               "Children (Norwegian)"))
+
+llm_slope_levels <- c("Children (English)", "Children (Norwegian)",
+                      "BERT", "GPT-2", "BiLSTM", "LSTM")
+slopes <- bind_rows(kid_slopes, lm_slopes) |>
+  mutate(label    = factor(label, levels = llm_slope_levels),
+         category = factor(category, levels = c("Children (this work)",
+                                                "LLMs (Chang & Bergen 2022)")))
+slope_summary <- slopes |>
+  group_by(label, category) |>
+  summarise(median = median(slope_natural),
+            q025   = quantile(slope_natural, 0.025),
+            q975   = quantile(slope_natural, 0.975),
+            n      = n(), .groups = "drop")
+saveRDS(list(slopes = slopes, summary = slope_summary),
+        file.path(CACHE, "fig6_llm_slopes.rds"))
+cat(sprintf("Wrote %s (%d slope rows)\n",
+            file.path(CACHE, "fig6_llm_slopes.rds"), nrow(slopes)))
+
 cat("\nAll caches built.\n")
