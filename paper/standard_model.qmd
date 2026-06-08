@@ -78,105 +78,105 @@ Overall, our analysis supports a view in which children’s vocabulary growth is
 # Model 
 
 
-```{r fig-schematic, fig.width=7, fig.height=4.5}
+```{r fig-schematic, fig.width=8, fig.height=6}
 #| label: fig-schematic
 #| fig-cap: ""
-# Schematic walk through the model ladder. Four columns are model
-# variants (A → D). Top row: latent ability theta_i(t). Bottom row: the
-# expected VOCABULARY curve, summed over a distribution of word
-# difficulties — V(t) = mean_j plogis(theta_i(t) - delta_j). This is the
-# McMurray (2007) construction: even a pure accumulator (A, kappa=1)
-# produces an accelerating vocabulary curve because theta sweeps through
-# the difficulty distribution. The SAME Gaussian difficulty distribution
-# is used in every panel (the same words), so the columns differ only in
-# the latent dynamics (kappa) and between-child variance (sigma_alpha,
-# sigma_kappa), not in the word set. Five quantiles (10/25/50/75/90) in
-# the Wordbank palette match Fig 2.
+# CONSOLIDATED model figure (vocab space). [MCF: caption on next pass.]
+#   (A) Top: illustrative vocabulary buildup M1->M4 — the expected
+#       vocabulary curve V(t) = mean_j plogis(theta_i(t) - delta_j), summed
+#       over a shared Gaussian word-difficulty distribution (McMurray 2007:
+#       even a pure accumulator accelerates because theta sweeps through the
+#       difficulty distribution). Same words in every panel. The theta-space
+#       version of these panels now lives in the Supplement.
+#   (B) Bottom: the best-fitting model (M4 / D_log) fit to the real data
+#       across the five datasets — empirical grey trajectories + the
+#       10/25/50/75/90 quantile fan. The full 7-model ladder is in the
+#       Supplement.
+# [Prior fig-glmer-ladder caption, kept for reuse: "Individual children's
+#  longitudinal vocabulary growth trajectories across age in four languages.
+#  The same data are plotted in each column of panels, with overlaid models
+#  of increasing complexity. Transparency is higher for English (American)
+#  and Norwegian panels to avoid overplotting."]
+
+## ---- (A) illustrative vocab-space buildup (schematic) ----
 ages <- seq(8, 30, length.out = 80)
 A0   <- 8                                  # anchor age: log(t/A0) >= 0
 L    <- log(ages / A0)
 qs   <- c(0.1, 0.25, 0.5, 0.75, 0.9)
 z    <- qnorm(qs)
-
 XI0     <- -2.0                            # median intercept (log r + log alpha)
-KAPPA_A <- 2.5                             # acceleration for B/C/D
-# shared word-difficulty distribution (Gaussian, McMurray 2007)
-DELTA   <- qnorm(ppoints(150), mean = 0, sd = 1.5)
+KAPPA_A <- 2.5                             # acceleration for M2-M4
+DELTA   <- qnorm(ppoints(150), mean = 0, sd = 1.5)   # shared difficulties
 vocab_of <- function(th) vapply(th, function(x) mean(plogis(x - DELTA)), numeric(1))
 
-# population parameters chosen to be illustrative, not estimated.
 variants <- tibble::tribble(
-  ~name,                          ~kappa_pop, ~sigma_alpha, ~sigma_kappa, ~eq,
-  "(A) pure accumulator",         1,           0,            0,            r"($\theta = \log(r) + \log(t)$)",
-  "(B) + acceleration",           KAPPA_A,     0,            0,            r"($\theta = \log(r) + \kappa\,\log(t)$)",
-  "(C) + efficiency variance",    KAPPA_A,     1.1,          0,            r"($\theta = \log(\alpha_i) + \log(r) + \kappa\,\log(t)$)",
-  "(D) + per-child acceleration", KAPPA_A,     1.1,          0.7,          r"($\theta = \log(\alpha_i) + \log(r) + \kappa_i\,\log(t)$)"
+  ~name,                       ~kappa_pop, ~sigma_alpha, ~sigma_kappa,
+  "(M1) accumulator",          1,           0,            0,
+  "(M2) + acceleration",       KAPPA_A,     0,            0,
+  "(M3) + efficiency var.",    KAPPA_A,     1.1,          0,
+  "(M4) + per-child accel.",   KAPPA_A,     1.1,          0.7
 )
-
-# For each model x quantile x age: theta and the summed vocabulary curve
 sim <- variants |>
-  mutate(name = factor(name, levels = name), panel_order = seq_along(name)) |>
+  mutate(name = factor(name, levels = name)) |>
   rowwise() |>
   do({
     v <- .
     bind_rows(lapply(seq_along(qs), function(i) {
-      th <- XI0 + z[i] * v$sigma_alpha +
-            (v$kappa_pop + z[i] * v$sigma_kappa) * L
-      tibble(
-        name = v$name, panel_order = v$panel_order,
-        qprob = qs[i], qprob_f = factor(as.character(qs[i]),
-                                        levels = c("0.1","0.25","0.5","0.75","0.9")),
-        age   = ages, theta = th, vocab = vocab_of(th), eq = v$eq
-      )
+      th <- XI0 + z[i] * v$sigma_alpha + (v$kappa_pop + z[i] * v$sigma_kappa) * L
+      tibble(name = v$name,
+             qprob_f = factor(as.character(qs[i]),
+                              levels = c("0.1","0.25","0.5","0.75","0.9")),
+             age = ages, vocab = vocab_of(th))
     }))
   }) |>
   ungroup()
-
-# annotation table — one equation per panel
-eq_lab <- variants |>
-  mutate(name = factor(name, levels = name)) |>
-  select(name, eq)
-
-# vertical line size: median bold, others thinner
 lwidth <- function(qf) ifelse(as.character(qf) == "0.5", 0.95, 0.55)
 
-p_theta <- ggplot(sim,
-                  aes(age, theta, color = qprob_f, group = qprob_f)) +
-  geom_line(aes(linewidth = lwidth(qprob_f))) +
-  geom_label(data = eq_lab,
-             aes(x = -Inf, y = Inf,
-                 label = latex2exp::TeX(eq, output = "character")),
-             inherit.aes = FALSE, parse = TRUE,
-             hjust = -0.05, vjust = 1.4, size = 2.4, label.size = 0,
-             fill = scales::alpha("white", 0.8)) +
-  facet_wrap(~ name, nrow = 1) +
-  scale_color_manual(values = WORDBANK_PALETTE, name = "Percentile",
-                     labels = c("10th", "25th", "50th", "75th", "90th"),
-                     drop = FALSE) +
-  scale_linewidth_identity() +
-  coord_cartesian(ylim = c(-3.5, 4.5)) +
-  labs(x = NULL, y = expression(theta[i](t))) +
-  theme_minimal(base_size = 9) +
-  theme(strip.text = element_text(face = "bold", size = 9),
-        legend.position = "bottom",
-        panel.grid.minor = element_blank())
-
-p_vocab <- ggplot(sim,
-                  aes(age, vocab, color = qprob_f, group = qprob_f)) +
+p_schematic <- ggplot(sim, aes(age, vocab, color = qprob_f, group = qprob_f)) +
   geom_line(aes(linewidth = lwidth(qprob_f))) +
   facet_wrap(~ name, nrow = 1) +
   scale_color_manual(values = WORDBANK_PALETTE, name = "Percentile",
-                     labels = c("10th", "25th", "50th", "75th", "90th"),
-                     drop = FALSE) +
+                     labels = c("10th","25th","50th","75th","90th"), drop = FALSE) +
   scale_linewidth_identity() +
   scale_y_continuous(limits = c(0, 1), breaks = c(0, 0.5, 1)) +
-  labs(x = "age (months)", y = "expected vocabulary proportion") +
+  labs(x = NULL, y = "expected vocab.\nproportion") +
   theme_minimal(base_size = 9) +
-  theme(strip.text = element_blank(),  # suppress strip on lower row
-        legend.position = "bottom",
-        panel.grid.minor = element_blank())
+  theme(strip.text = element_text(face = "bold", size = 8),
+        legend.position = "bottom", panel.grid.minor = element_blank())
 
-(p_theta / p_vocab) + plot_layout(guides = "collect", heights = c(1, 1)) &
+## ---- (B) best model (M4 / D_log) fit to real data, 5 datasets ----
+qt_mb <- ladder$qtiles |>
+  filter(model == "D_log") |>
+  mutate(qprob_f = factor(qprob, levels = c(0.1,0.25,0.5,0.75,0.9),
+                          labels = c("0.1","0.25","0.5","0.75","0.9")))
+emp <- ladder$emp |> mutate(child_lang = paste(lang_slug, child_id, sep = "::"))
+lang_lab <- ladder$lang_labels
+emp$lang_label   <- factor(lang_lab[emp$lang_slug],   levels = lang_lab)
+qt_mb$lang_label <- factor(lang_lab[qt_mb$lang_slug], levels = lang_lab)
+
+p_mbest <- ggplot() +
+  geom_line(data = filter(emp, language %in% c("English (American)", "Norwegian")),
+            aes(age, vocab, group = child_lang),
+            color = "grey25", alpha = 0.03, linewidth = 0.25) +
+  geom_line(data = filter(emp, !(language %in% c("English (American)", "Norwegian"))),
+            aes(age, vocab, group = child_lang),
+            color = "grey25", alpha = 0.25, linewidth = 0.25) +
+  geom_line(data = qt_mb,
+            aes(age, vocab, color = qprob_f, group = qprob_f,
+                linewidth = ifelse(as.character(qprob_f) == "0.5", 0.95, 0.55))) +
+  facet_wrap(~ lang_label, nrow = 1, scales = "free_y") +
+  scale_color_manual(values = WORDBANK_PALETTE, name = "Percentile",
+                     labels = c("10th","25th","50th","75th","90th"), drop = FALSE) +
+  scale_linewidth_identity() +
+  labs(x = "Age (months)", y = "Productive vocabulary") +
+  theme_minimal(base_size = 9) +
+  theme(strip.text = element_text(face = "bold", size = 8),
+        legend.position = "bottom", panel.grid.minor = element_blank(),
+        panel.spacing = unit(0.3, "lines"))
+
+(p_schematic / p_mbest) +
+  plot_layout(guides = "collect", heights = c(1, 1.1)) +
+  plot_annotation(tag_levels = "A") &
   theme(legend.position = "bottom")
 ```
 
@@ -307,90 +307,18 @@ tab <- aic |>
   arrange(model) |>
   select(Model, Age, all_of(lang_order))
 
-# dBIC, same shape, to append as a second column block
-tabB <- aic |>
-  mutate(lang_slug = factor(lang_slug, levels = lang_order),
-         model = factor(model, levels = mod_order)) |>
-  select(model, lang_slug, dBIC) |>
-  tidyr::pivot_wider(names_from = lang_slug, values_from = dBIC) |>
-  arrange(model) |> select(all_of(lang_order))
-
+# Main text: dAIC only (dBIC moved to a supplemental table, tbl-bic).
 fmt <- function(x) ifelse(x == 0, "0", format(round(x), big.mark = ","))
 out <- cbind(tab[, c("Model","Age")],
-             lapply(tab[, lang_order], fmt) |> as.data.frame(),
-             lapply(tabB,             fmt) |> as.data.frame())
+             lapply(tab[, lang_order], fmt) |> as.data.frame())
 
-knitr::kable(out, align = c("l","l", rep("r", 10)),
-             col.names = c("Model", "Age", rep(unname(lang_short[lang_order]), 2))) |>
-  kableExtra::add_header_above(c(" " = 2, "$\\\\Delta$AIC" = 5, "$\\\\Delta$BIC" = 5),
+knitr::kable(out, align = c("l","l", rep("r", 5)),
+             col.names = c("Model", "Age", unname(lang_short[lang_order]))) |>
+  kableExtra::add_header_above(c(" " = 2, "$\\\\Delta$AIC" = 5),
                                escape = FALSE) |>
   kableExtra::kable_styling(latex_options = "scale_down", font_size = 8)
 ```
 
-```{r fig-glmer-ladder, fig.width=8, fig.height=5}
-#| label: fig-glmer-ladder
-#| fig-cap: "Individual children's longitudinal vocabulary growth trajectories across age in four languages. The same data are plotted in each column of panels, with overlaid models of increasing complexity (colored lines). Transparency is higher for English (American) and Norwegian panels to avoid overplotting."
-# Replicates glmer_ladder/04b_plot.R style: empirical kid trajectories
-# (grey lines + points) overlaid with the per-kid quantile predictions
-# from each model. C_log and D_log get the full 10/25/50/75/90 fan
-# (Wordbank palette); A and B_log have no per-kid variation so the
-# quantiles collapse — we show only the median for them.
-qtiles <- ladder$qtiles |>
-  filter(model %in% c("A", "B_log", "C_log", "D_log")) |>
-  mutate(qprob_f = factor(qprob, levels = c(0.1, 0.25, 0.5, 0.75, 0.9),
-                          labels = c("0.1", "0.25", "0.5", "0.75", "0.9")))
-emp <- ladder$emp |>
-  mutate(child_lang = paste(lang_slug, child_id, sep = "::"))
-
-model_lab <- c("A"     = "(M1) accumulator",
-               "B_log" = "(M2) + pop. acceleration",
-               "C_log" = "(M3) + per-child efficiency",
-               "D_log" = "(M4) + per-child acceleration")
-qtiles$model_label <- factor(model_lab[qtiles$model], levels = model_lab)
-lang_lab <- ladder$lang_labels
-emp$lang_label    <- factor(lang_lab[emp$lang_slug],    levels = lang_lab)
-qtiles$lang_label <- factor(lang_lab[qtiles$lang_slug], levels = lang_lab)
-# replicate empirical data per model for facetting (grey background)
-emp_facet <- bind_rows(lapply(names(model_lab), function(m)
-  emp |> mutate(model_label = factor(model_lab[m], levels = model_lab))))
-
-# split quantiles by model: full fan for C_log/D_log, median only for A/B_log
-qt_fan    <- filter(qtiles, model %in% c("C_log", "D_log"))
-qt_median <- filter(qtiles, !model %in% c("C_log", "D_log"),
-                    qprob_f == "0.5")
-
-ggplot() +
-  geom_line(data = filter(emp_facet, 
-                          language %in% c("English (American)", "Norwegian")),
-            aes(age, vocab, group = child_lang),
-            color = "grey25", alpha = 0.03, linewidth = 0.25) +
-  geom_line(data = filter(emp_facet, 
-                          !(language %in% c("English (American)", "Norwegian"))),
-            aes(age, vocab, group = child_lang),
-            color = "grey25", alpha = 0.25, linewidth = 0.25) +
-  # geom_point(data = emp_facet, aes(age, vocab),
-  #            color = "grey25", alpha = 0.20, size = 0.25) +
-  geom_line(data = qt_fan,
-            aes(age, vocab, color = qprob_f, group = qprob_f,
-                linewidth = ifelse(as.character(qprob_f) == "0.5",
-                                   0.95, 0.55))) +
-  geom_line(data = qt_median,
-            aes(age, vocab, color = qprob_f, group = qprob_f),
-            linewidth = 0.95) +
-  facet_grid(lang_label ~ model_label, scales = "free_y", space = "fixed",
-             switch = "y") +
-  scale_color_manual(values = WORDBANK_PALETTE, name = "Percentile",
-                     labels = c("10th", "25th", "50th", "75th", "90th"),
-                     drop = FALSE) +
-  scale_linewidth_identity() +
-  labs(x = "Age (months)", y = "Productive vocabulary") +
-  theme_minimal(base_size = 9) +
-  theme(strip.text = element_text(size = 8, face = "bold"),
-        strip.placement = "outside",
-        panel.grid.minor = element_blank(),
-        legend.position = "bottom",
-        panel.spacing = unit(0.4, "lines"))
-```
 
 
 ## Efficiency and acceleration relate to separate demographic predictors
@@ -462,6 +390,10 @@ meta_summary <- coefs |>
   ungroup() |>
   mutate(lang_slug = "_meta_")
 
+# Units that actually contribute a demographic coefficient (Smith has no
+# sex/ed data, so it drops out of the regressions — keep it out of the
+# legend/palette too rather than showing an empty key).
+present_units <- intersect(ladder$langs, unique(coefs$lang_slug))
 coefs_all <- bind_rows(coefs, meta_summary) |>
   mutate(
     term_label = recode(term,
@@ -473,10 +405,10 @@ coefs_all <- bind_rows(coefs, meta_summary) |>
                      labels = c("Efficiency~(xi)",
                                 "Acceleration~(zeta)")),
     lang_label = factor(c(LANG_LABELS, "_meta_" = "Meta-analytic")[lang_slug],
-                        levels = c(LANG_LABELS[ladder$langs],
+                        levels = c(LANG_LABELS[present_units],
                                    "Meta-analytic")))
-plot_pal <- c(setNames(unname(LANG_PAL[ladder$langs]),
-                       unname(LANG_LABELS[ladder$langs])),
+plot_pal <- c(setNames(unname(LANG_PAL[present_units]),
+                       unname(LANG_LABELS[present_units])),
               "Meta-analytic" = "black")
 
 coefs_all <- coefs_all |>
