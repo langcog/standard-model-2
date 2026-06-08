@@ -1,6 +1,6 @@
 ---
 name: gpt2-childes-training
-description: Train GPT-2 (or similar small transformer) from scratch on CHILDES-scale corpora on academic SLURM clusters, logging per-CDI-word surprisal trajectories at log-spaced training steps. Use when extending Chang & Bergen (2022) / Feng et al. (2024, 2026) word-acquisition pipelines to new training data or new model variants. Covers GPU selection, Python env setup pitfalls, HF Trainer callback patterns, per-word surprisal eval design, and 4-PL sigmoid fitting. Generic across SLURM-based HPC clusters; Sherlock-specific bits are flagged.
+description: Train GPT-2 (or similar small transformer) from scratch on CHILDES-scale corpora on academic SLURM clusters, logging per-CDI-word surprisal trajectories at log-spaced training steps. Use when extending Chang & Bergen (2022) / Feng et al. (2024, 2026) word-acquisition pipelines to new training data or new model variants. Covers GPU selection, Python env setup pitfalls, HF Trainer callback patterns, per-word surprisal eval design, 4-PL sigmoid fitting, and the disjoint-chunk design for measuring data-identity variance. Generic across SLURM-based HPC clusters, with worked Sherlock (Kerberos, L40S, venv) and Marlowe (DGX H100, ControlMaster+Duo, conda, preempt partition, LFS-via-media) specifics flagged.
 ---
 
 # Training small transformer LMs on CHILDES-scale data with per-word surprisal trajectories
@@ -184,6 +184,99 @@ Use `--array=42,0,123` to launch 3 seeds in parallel as separate jobs. Each gets
 
 3 seeds is the minimum for reliable inference; 5 is better if you can afford the compute. In the SM2 feng_eval run the three seed medians were 0.72, 0.74, 0.74 — strong reproducibility, confirming we have enough seeds.
 
+### 11. Porting to Marlowe (Stanford DGX H100 SuperPOD)
+
+Validated end-to-end on Marlowe 2026-06 for the data-variance pilot. Marlowe is
+all-H100, so it's ~2× faster than Sherlock's L40S per step (a 10M-word /
+~19M-BPE run is ~2h on one H100 vs ~8h for the 24.5M-word run on Sherlock).
+
+**Data is self-contained in the public `styfeng/TinyDialogues` repo** — no need
+for Steven's private code or a Sherlock rsync:
+- `data/CHILDES_data.zip` (LFS) → unzips to `CHILDES_{train,val}_ordered.txt`
+  **directly under `data/`** (NOT `data/CHILDES/` as the original Sherlock
+  script's paths assumed — check before wiring paths).
+- `tokenizers/GPT2_CHILDES/` (the trained tokenizer) and
+  `tokenizers/GPT2-small_config/config.json` are small regular files — a
+  `--filter=blob:none` sparse-checkout of `tokenizers/` avoids pulling the 292 MB repo.
+
+**No `git-lfs` on Marlowe.** A plain clone fetches only the LFS pointer for
+`CHILDES_data.zip`. Fetch the real 230 MB object via the media endpoint, which
+resolves LFS server-side:
+```
+curl -sL -o CHILDES_data.zip \
+  "https://media.githubusercontent.com/media/styfeng/TinyDialogues/main/data/CHILDES_data.zip"
+```
+(`raw.githubusercontent.com` serves the *pointer*; `media.githubusercontent.com/media/...` serves the *file*.)
+
+**SSH auth is password + Duo (no Kerberos/keys).** For agent-driven or scripted
+work, use SSH ControlMaster: add to `~/.ssh/config`
+```
+Host marlowe
+    HostName login.marlowe.stanford.edu
+    User <sunetid>
+    ControlMaster auto
+    ControlPath ~/.ssh/cm-%r@%h:%p
+    ControlPersist 12h
+```
+Authenticate once interactively (`ssh marlowe`), then every later
+`ssh marlowe '...'` / `scp` reuses the socket with no re-auth for 12h.
+
+**Lmod only initializes in a LOGIN shell.** `ssh marlowe 'bash -c "module ..."'`
+fails ("module: command not found") and `sbatch`/`conda` aren't on PATH. Drive
+remote commands with a login shell reading stdin:
+```
+ssh marlowe 'bash -ls' <<'EOF'
+module load slurm conda/24.3.0-0
+...
+EOF
+```
+Bonus: avoids nested-quote hell. (Also: never put an unquoted `(` in a remote
+`echo` line inside `bash -lc "..."` — it's a syntax error. The heredoc form
+sidesteps this.)
+
+**SLURM specifics:**
+- Partitions: `preempt` (**4 h** wall, evictable within 15 min, qos `normal`),
+  `batch` (2-day, frequently **DOWN**), `hero` (30-day, large allocations).
+  For pilot/preemptible work use `preempt`. Nodes are 8×H100.
+- GPU request is `#SBATCH -G 1` (not `--gres=gpu:1`). No `--constraint` needed —
+  every node is Hopper.
+- Account is **required**: `#SBATCH -A marlowe-<projectID>` (e.g.
+  `marlowe-m000102` for the normal/preempt qos; `marlowe-<projectID>-pm05` is the
+  medium qos). Omitting it → "ACCOUNT ERROR". Discover yours with
+  `sacctmgr -nP show assoc user=$USER format=Account,Partition,QOS`.
+- Scratch is **group-shared `/scratch/<projectID>`** (e.g. `/scratch/m000102`),
+  NOT `/scratch/$USER`. `$HOME` is tiny — put venvs/conda envs, HF cache, pip
+  cache, and data there.
+
+**Python via the conda module** (cluster glibc is current, so the Sherlock
+miniconda-version dance doesn't apply):
+```
+module load conda/24.3.0-0
+conda create -y -p /scratch/<projectID>/<you>/env python=3.11
+/scratch/.../env/bin/pip install "torch==2.4.*" --index-url https://download.pytorch.org/whl/cu124
+/scratch/.../env/bin/pip install --only-binary=:all: numpy scipy pandas pyarrow transformers datasets accelerate tokenizers
+```
+torch cu124 wheels run fine on H100 (`torch 2.4.1+cu124`, `transformers 4.49`).
+Other useful modules: `cuda12.9/toolkit/12.9.1`, `cudnn/cuda12/9.3.0.75`, `gcc/13.1.0`.
+
+### 12. Measuring data-identity variance (the disjoint-chunk design)
+
+To ask whether *which* CHILDES data a model sees moves the per-word slope
+(vs. seed or architecture), train on two **disjoint** subsamples holding
+tokenizer, seed, eval set, and epoch count fixed — data identity is then the
+only independent variable. `make_disjoint_chunks.py` splits
+`CHILDES_train_ordered.txt` by **BPE-token budget** (so the two chunks have
+equal gradient steps), assigning whole conversations so none is split:
+- `--mode random` (shuffle, then two disjoint draws) estimates pure subsample
+  variance; `--mode contiguous` (first-N vs last-N) gives two developmental
+  slices — a stronger "does data matter at all" probe.
+- The full corpus is **46.9 M BPE ≈ 24.5 M words** (GPT2_CHILDES fertility ~1.9
+  BPE/word). Two random-disjoint 19 M-BPE (~10 M-word) chunks come out equal to
+  ~0.002 %. Eval contexts come from the held-out **val** set, so they're
+  independent of whichever training chunk a model sees — no leakage asymmetry.
+- Coverage at this scale matches the full run: 609/611 CDI words present, 578
+  with ≥50 val occurrences.
+
 ## Reference implementation
 
 `model/scripts/feng_eval/` in this repo:
@@ -191,6 +284,8 @@ Use `--array=42,0,123` to launch 3 seeds in parallel as separate jobs. Each gets
 - `extract_cdi_contexts.py` — one-shot context pre-extraction from a held-out val set
 - `surprisal_callback.py` — HF TrainerCallback with the log-spaced schedule, batched gather, length-bucketing, header backfill
 - `train_gpt2_childes.py` — self-contained training driver matching Feng et al. 2026 CHILDES condition
+- `make_disjoint_chunks.py` — split the corpus into two disjoint BPE-budgeted chunks (data-variance design; §12)
+- `cdi_words.txt` — the 611 Chang & Bergen CDI words (from the `Token` column of `data/chang_bergen_2022/bert_sigmoids.txt`)
 - `fit_per_word_sigmoid.py` — 4-PL fits via scipy curve_fit, outputs in Chang & Bergen's TSV schema
 - `feng_chang_bergen_comparison.R` — kids + CHILDES + BookCorpus density plot
 - `finalize.sh` — end-to-end one-command runner (rsync → fit → plot → summary)
@@ -200,15 +295,30 @@ SLURM scripts in `sherlock/`:
 - `feng_smoke.slurm` — 30-min smoke test on a small CHILDES subset
 - `feng_train_gpt2.slurm` — 24-h full training, array=42,0,123
 
+Marlowe scripts in `model/scripts/feng_eval/marlowe/`:
+
+- `stage_marlowe.sh` — login-node staging (clone, LFS-via-media fetch, conda env, contexts, split)
+- `train_gpt2_childes.slurm` — `preempt`-partition array job, one task per chunk
+
 ## Quick reproduction checklist
 
 Adapt to a new cluster by:
 
-1. Replace the LMOD init path in the SLURM scripts (`source <path>`).
-2. Replace the GPU constraint with whatever your cluster exposes for Ampere+ generations.
-3. Replace `/scratch/$USER` with your cluster's scratch path.
-4. If your cluster's Python module isn't 3.12, adjust the venv creation step and pip-wheel constraints accordingly.
-5. Replace the SLURM `--constraint` with the equivalent for your scheduler.
+1. Replace the LMOD init path in the SLURM scripts (`source <path>`), or use a
+   login shell (`bash -ls`) so Lmod self-initializes (see §11).
+2. Replace the GPU constraint/request with your cluster's syntax (`--constraint`
+   by generation on Sherlock; bare `-G N` on all-H100 Marlowe — no constraint).
+3. Replace `/scratch/$USER` with your cluster's scratch path (group-shared
+   `/scratch/<projectID>` on Marlowe).
+4. Pick the Python provisioning that fits: venv-on-module (Sherlock, old glibc)
+   or the `conda` module (Marlowe). Match torch wheels to the CUDA runtime
+   (cu121 on Sherlock, cu124 on Marlowe H100).
+5. Set the scheduler account/partition (`-A marlowe-<projectID>`, `-p preempt`
+   on Marlowe; `--constraint=GPU_GEN:...` on Sherlock).
 6. The Python code, HF callback, sigmoid fit, and plot logic are cluster-agnostic.
 
-A clean smoke test takes ~30 min and validates the entire pipeline before you commit to multi-hour real runs. Always smoke test on a new cluster.
+A clean smoke test takes ~30 min and validates the entire pipeline before you
+commit to multi-hour real runs. Always smoke test on a new cluster. (Marlowe
+worked end-to-end on the first real run, but `preempt`'s 4 h cap + 15-min
+eviction window means you should still confirm a single run completes before
+fanning out an array.)
