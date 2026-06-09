@@ -37,6 +37,7 @@ CACHE <- here("paper", "cache")
 ladder     <- readRDS(file.path(CACHE, "fig2_glmer_ladder.rds"))
 demo_blups <- readRDS(file.path(CACHE, "blups_demographics.rds"))
 io_summary <- readRDS(file.path(CACHE, "fig5_io_summary.rds"))
+input3     <- readRDS(file.path(CACHE, "fig3_input.rds"))
 aic        <- readRDS(file.path(CACHE, "aic_summary.rds"))
 exposure   <- readRDS(file.path(CACHE, "fig4_exposure.rds"))
 llm_slopes <- readRDS(file.path(CACHE, "fig6_llm_slopes.rds"))
@@ -456,64 +457,69 @@ Estimating children's input range is notoriously tricky, since the rate of langu
 ## Input modestly predicts efficiency and acceleration for individual children
 
 
-```{r fig-io-partition, fig.width=11, fig.height=4.5}
+```{r fig-io-partition, fig.width=11, fig.height=3.8}
 #| label: fig-io-partition
 #| fig-cap: ""
-# Two-panel: (A) observed vocabulary trajectories per IO study; (B) age-
-# dependent variance decomposition under the additive gamma model. Panel
-# B uses sigma_r, sigma_alpha, sigma_zeta, gamma at posterior median (see
-# experiments.md §30 for the diagnostic / wide-delta refit).
-obs <- io_summary$obs |>
-  mutate(study = factor(study, levels = names(STUDY_PAL)))
-p_obs <- ggplot(obs, aes(age, prop, color = study)) +
-  geom_point(alpha = 0.35, size = 0.6) +
-  geom_smooth(se = FALSE, method = "loess", span = 0.7, linewidth = 0.7,
-              formula = y ~ x) +
-  scale_color_manual(values = STUDY_PAL, name = "study") +
-  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.25)) +
-  labs(x = "age (months)", y = "vocabulary proportion produced",
-       title = "(A) IO datasets: observed growth") +
-  theme_minimal(base_size = 10) +
-  theme(legend.position = "bottom",
-        plot.title = element_text(face = "bold", size = 10))
+# [MCF: caption on next pass.] INPUT triptych -- one quantity (the input
+# share of between-child variance, 1 - pi) seen three ways:
+#   (A) vs AGE (continuous; intercept channel) -- replaces the old stacked
+#       variance-partition bar (which was a0-dependent + discontinuous).
+#   (B) ANALYTIC sensitivity to the external sigma_r pin, with refit anchors
+#       (see Supplemental Methods derivation).
+#   (C) per model (EN D, NO D, IO wide-delta) vs the meta-analytic band.
+# INTERCEPT CHANNEL ONLY for now; the slope channel (pi_zeta) drops in with
+# the D' fits. NO D is the OLD pre-dedup summary (placeholder) until the
+# salvage lands. Built by paper/build_input_cache.R -> fig3_input (=input3).
+# [Prior fig-io-partition: (A) IO observed growth + (B) stacked variance
+#  partition -- both dropped per the input-figure redesign; the IO observed
+#  curves + input-split move to the Supplement.]
+ip <- input3
+MODEL_PAL <- c("English (D)" = "#E69F00", "Norwegian (D)" = "#56B4E9",
+               "Input-observed" = "#009E73")
+YMAX <- 0.28
+pct  <- scales::percent_format(accuracy = 1)
 
-# Variance partition (additive form, mean of slope channel)
-p   <- io_summary$params
-a0  <- 15; ages <- seq(8, 30, length.out = 60); L <- log(ages / a0)
-sr2 <- p$sigma_r^2; sa2 <- p$sigma_alpha^2
-sz2 <- p$sigma_zeta_add^2; g <- p$gamma_add
-parts <- tibble(age = rep(ages, 4),
-                L   = rep(L,    4),
-                component = factor(rep(c("Input: intercept",
-                                         "Input: slope (γ)",
-                                         "Efficiency: intercept",
-                                         "Efficiency: slope"),
-                                       each = length(ages)),
-                  levels = c("Efficiency: slope", "Input: slope (γ)",
-                             "Efficiency: intercept", "Input: intercept"))) |>
-  mutate(var = case_when(
-    component == "Input: intercept"      ~ sr2,
-    component == "Input: slope (γ)"      ~ pmax(L^2 * g^2 * sr2 + 2 * L * g * sr2, 0),
-    component == "Efficiency: intercept" ~ sa2,
-    component == "Efficiency: slope"     ~ L^2 * sz2
-  ))
+pA <- ggplot(ip$panelA, aes(age, input_share, color = model)) +
+  geom_line(linewidth = 0.9) +
+  scale_color_manual(values = MODEL_PAL, name = NULL) +
+  scale_y_continuous(limits = c(0, YMAX), labels = pct) +
+  labs(x = "age (months)", y = "input share of variance", title = "(A) vs. age") +
+  theme_minimal(base_size = 9) +
+  theme(legend.position = "bottom", panel.grid.minor = element_blank(),
+        plot.title = element_text(face = "bold", size = 9))
 
-p_partition <- ggplot(parts, aes(age, var, fill = component)) +
-  geom_area(alpha = 0.95) +
-  scale_fill_manual(values = c(
-    "Input: intercept"      = "#B4D7E8",
-    "Input: slope (γ)"      = "#1F77B4",
-    "Efficiency: intercept" = "#003D7A",
-    "Efficiency: slope"     = "#E8A0A8"), name = NULL) +
-  labs(x = "age (months)",
-       y = expression(Var[i](theta[it])),
-       title = "(B) Variance partition (γ-additive, wide-delta)") +
-  theme_minimal(base_size = 10) +
-  theme(legend.position = "bottom",
-        plot.title = element_text(face = "bold", size = 10),
-        legend.text = element_text(size = 8))
+pB <- ggplot(ip$panelB_curve, aes(sigma_r, input_share, color = model)) +
+  annotate("rect", xmin = ip$sr_range[1], xmax = ip$sr_range[2],
+           ymin = 0, ymax = YMAX, fill = "grey85", alpha = 0.5) +
+  geom_vline(xintercept = ip$sr_main, linetype = "dashed", color = "grey40") +
+  geom_line(linewidth = 0.9) +
+  geom_point(data = ip$panelB_anchors, aes(sigma_r, input_share, color = model),
+             shape = 21, fill = "white", size = 2.2, stroke = 0.9) +
+  scale_color_manual(values = MODEL_PAL, guide = "none") +
+  scale_y_continuous(limits = c(0, YMAX), labels = pct) +
+  labs(x = expression(sigma[r] ~ "(pinned input SD)"), y = NULL,
+       title = "(B) vs. the input-rate pin") +
+  theme_minimal(base_size = 9) +
+  theme(panel.grid.minor = element_blank(),
+        plot.title = element_text(face = "bold", size = 9))
 
-p_obs + p_partition + plot_layout(widths = c(1, 1))
+pcd <- ip$panelC |> mutate(source = factor(source, levels = source))
+mr  <- dplyr::filter(pcd, kind == "meta")
+pC <- ggplot(dplyr::filter(pcd, kind == "model"), aes(source, input_share)) +
+  annotate("rect", xmin = -Inf, xmax = Inf, ymin = mr$lo, ymax = mr$hi,
+           fill = "grey85", alpha = 0.6) +
+  geom_hline(yintercept = mr$input_share, linetype = "dashed", color = "grey40") +
+  geom_pointrange(aes(ymin = lo, ymax = hi, color = source), fatten = 3) +
+  scale_color_manual(values = MODEL_PAL, guide = "none") +
+  scale_y_continuous(limits = c(0, YMAX), labels = pct) +
+  labs(x = NULL, y = NULL, title = "(C) vs. meta-analysis") +
+  theme_minimal(base_size = 9) +
+  theme(panel.grid.minor = element_blank(),
+        axis.text.x = element_text(angle = 20, hjust = 1),
+        plot.title = element_text(face = "bold", size = 9))
+
+(pA | pB | pC) + plot_layout(widths = c(1, 1, 0.95), guides = "collect") &
+  theme(legend.position = "bottom")
 ```
 
 While the population estimates of input-sensitivity given above match our expectations from meta-analyses, they do not offer a direct estimate of input couplings within individual children. For this, we turn to a set of four longitudinal datasets that include dense home recordings (see @tab-datasets). Three of these include day-long audio recordings using LENA (Language Environment Analysis) recorders, which offer an automated adult word count estimate that has been validated by a number of transcription studies [@cristia2021]. The last includes short video recordings of egocentric video recorded in children's homes, with word counts estimated from automated transcripts. Each of these provides a noisy proxy for total home input, but nevertheless allows us to estimate models that include individual input. 
@@ -636,6 +642,8 @@ Furthermore, how does the accumulation process relate to the rapid growth of voc
 
 Thus, modeling human learning requires positing other sources of variability and acceleration. Sources of variability could include from variation in interactional input quality, genetic variation between children, environmental richness not captured by input, etc. Sources of acceleration could include increases in processing efficiency, learning-to-learn including mutual exclusivity, shape bias, syntactic bootstrapping, as well as domain general changes in perception, processing speed, memory, attention or other aspects of cognition. The key to understanding children’s data efficiency may thus lie in better understanding when and how children’s learning accelerates with maturation and experience. 
 
+
+Continuous variation or clusters? [@pinstock2026;@singletary2025] We think it's just continuous variation (Supplement)
 
 Network models and their predictions e.g. [@steyvers2005;@hills2009;@fourtassi2020]
 
