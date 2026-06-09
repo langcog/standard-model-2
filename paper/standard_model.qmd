@@ -11,6 +11,11 @@ abstract: |
   \noindent Children learn hundreds of words over the first few years of their life. This process begins slowly but increases until only a few exposures to a word are necessary for a child to learn it. Yet there are also wide variations between children, and the nature of this variation has not been accurately characterized. Here we present a statistical model describing this process as accelerating accumulation, with children varying in both the slope and intercept of their accumulation. Using data from three languages, this model provides a good characterization of longitudinal growth and gives insights into the sources of age and socioeconomic variation. Using dense observations of children's early language environment, the model also can be used to estimate how much variation between children is due to differences in language input, finding estimates that converge with recent meta-analyses. In contrast to children, large language models are not well-described by this model: they show standard accumulator dynamics and very limited variability. 
 
 bibliography: standard_model.bib
+# Dataset citations appear as plain text in Table 1 (kable can't render
+# [@key] markers); list their bib keys here so they still appear in the
+# References. Add @marchman / @smith dataset keys once they exist in the bib.
+nocite: |
+  @thal2013, @simonsen2014, @hagihara2023, @long2024, @egan2025, @adams2018, @fernald2013
 format:
   pdf:
     documentclass: article
@@ -223,48 +228,34 @@ We first retrieved longitudinal data on monolingual, typically-developing childr
 ```{r tbl-datasets}
 #| label: tbl-datasets
 #| tbl-cap: "Characteristics of the datasets."
-# Wordbank rows are pulled from outputs/glmer_ladder/00_language_survey.csv;
-# IO rows are hardcoded from each bundle's actual extracts. Citation column
-# is a [@CITE] placeholder for the author to fill in.
-# Table 1 is built inline (not cached) so the numbers and names are easy
-# to edit here. Wordbank longitudinal rows are derived from the language
-# survey CSV (outputs/glmer_ladder/00_language_survey.csv); input-observed
-# (IO) rows are hardcoded from each dataset's extract. The Citation column
-# holds [@CITE] placeholders for the author to fill in.
-
-# --- Wordbank longitudinal rows (from the survey) ---
-survey <- read_csv(
-  here("outputs", "glmer_ladder", "00_language_survey.csv"),
-  show_col_types = FALSE)
-
-wb_rows <- survey |>
-  filter(language %in% LANG_LABELS[PAPER_LANGS]) |>
-  # keep the paper's language order
-  mutate(language = factor(language, levels = LANG_LABELS[PAPER_LANGS])) |>
-  arrange(language) |>
-  transmute(
-    dataset        = as.character(language),
-    citation       = "[@CITE]",
-    n_kids         = long_kids,                 # longitudinal kids only
-    admins_per_kid = round(admins / total_kids, 1),
-    age_range      = paste0(age_min, "–", age_max, " mo"),
-    input_info     = "—"
-  )
-
-# --- Input-observed (IO) rows (hardcoded from each dataset's extract) ---
-io_rows <- tibble::tribble(
-                  ~dataset,    ~citation, ~n_kids, ~admins_per_kid, ~age_range, ~input_info,
-  "BabyView",  "@long2024", 22L,     5.0,  "6–32 mo",  "Headcam (n = 5,739 videos)",
-  "SEEDLingS", "@egan2025", 44L,     12.0, "6–17 mo",  "LENA (n = 525 recordings)",
-  "AM2018",    "@adams2018", 66L,     3.0,  "16–24 mo", "LENA (n = 126 recordings)",
-  "FMW2013",   "@fernald2013", 51L,     3.0,  "18–30 mo", "LENA (n = 51 recordings)"
+# Built inline (not cached) so names/numbers are easy to edit. Wordbank
+# longitudinal rows are now PER STUDY (the analysis is by-study: English
+# splits into Thal/Smith/Marchman). Counts are from the extracted bundles
+# fits/glmer_ladder/data_<study>.rds — n_kids = longitudinal kids retained
+# after the production filter, admins (mean) = n_admins / n_kids, age range
+# from the bundle. (The old code filtered the language-level survey CSV by
+# LANG_LABELS[PAPER_LANGS]; after the by-study switch those labels no longer
+# match any survey row, which silently dropped all the English datasets.)
+#
+# The Citation column is PLAIN TEXT because kable does not render [@key]
+# markers; the matching bib keys are listed in `nocite:` in the YAML header
+# so the references still appear in the bibliography.
+# [MCF: confirm the English (Thal/Smith/Marchman) dataset citations + years;
+#  @smith / @marchman dataset keys are not yet in standard_model.bib.]
+table1 <- tibble::tribble(
+  ~dataset,             ~citation,                        ~n_kids, ~admins_per_kid, ~age_range, ~input_info,
+  # --- Wordbank longitudinal datasets (by study) ---
+  "English (Thal)",     "Thal et al. (20XX)",             653L,    3.0,  "12–29 mo", "—",
+  "English (Smith)",    "Smith et al. (20XX)",            314L,    2.8,  "16–30 mo", "—",
+  "English (Marchman)", "Marchman et al. (20XX)",         314L,    2.3,  "16–30 mo", "—",
+  "Norwegian",          "Simonsen et al. (2014)",         1676L,   3.8,  "8–36 mo",  "—",
+  "Japanese",           "Hagihara et al. (2023)",         178L,    2.4,  "8–34 mo",  "—",
+  # --- Input-observed (IO) datasets ---
+  "BabyView",           "Long et al. (2024)",             22L,     5.0,  "6–32 mo",  "Headcam (n = 5,739 videos)",
+  "SEEDLingS",          "Egan-Dailey & Bergelson (2025)", 44L,     12.0, "6–17 mo",  "LENA (n = 525 recordings)",
+  "AM2018",             "Adams et al. (2018)",            66L,     3.0,  "16–24 mo", "LENA (n = 126 recordings)",
+  "FMW2013",            "Fernald et al. (2013)",          51L,     3.0,  "18–30 mo", "LENA (n = 51 recordings)"
 )
-
-table1 <- bind_rows(wb_rows, io_rows) 
-table1$citation[table1$dataset == "Norwegian"] <- "@simonsen2014"
-table1$citation[table1$dataset == "Japanese"] <- "@hagihara2023"
-table1$citation[table1$dataset == "English (American)"] <- "@thal2013,@marchman2013, L. Smith"
-
 
 table1 |>
   mutate(n_kids = format(n_kids, big.mark = ","),
@@ -273,7 +264,7 @@ table1 |>
     col.names = c("Dataset", "Citation",
                   "N", "Admins (mean)",
                   "Ages", "Recordings"),
-    align = "lllrlll") |>
+    align = "llrrll") |>
   kableExtra::kable_styling(font_size = 8)
 ```
 
