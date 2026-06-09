@@ -18,6 +18,7 @@ if (length(args) == 0) stop("Usage: extract_loo_thinned.R <tag1> [<tag2> ...]")
 suppressPackageStartupMessages({
   library(posterior)
   library(loo)
+  library(cmdstanr)
 })
 
 FITS_DIR <- Sys.getenv("STANDARD_MODEL_FITS_DIR",
@@ -114,10 +115,23 @@ chunked_loo <- function(ll, chunk_obs = CHUNK_OBS) {
 # ---------- per-tag driver ----------------------------------------------
 extract_one <- function(tag) {
   in_path  <- file.path(FITS_DIR, paste0(tag, ".rds"))
-  if (!file.exists(in_path)) { cat("MISSING:", in_path, "\n"); return(NULL) }
+  csv_dir  <- file.path(FITS_DIR, paste0("csvs_", tag))
   cat(sprintf("\n== %s ==\n", tag))
-  cat(sprintf("Reading %s ...\n", in_path))
-  fit <- readRDS(in_path)
+  if (file.exists(in_path)) {
+    cat(sprintf("Reading %s ...\n", in_path))
+    fit <- readRDS(in_path)
+  } else {
+    # No self-contained RDS (e.g. STAN_SKIP_SAVE_OBJECT runs, or a recovery
+    # after a failed save): reconstruct the fit straight from the CSVs.
+    csvs <- if (dir.exists(csv_dir))
+      list.files(csv_dir, pattern = "\\.csv$", full.names = TRUE) else character(0)
+    if (length(csvs) == 0) {
+      cat("MISSING:", in_path, "and no CSVs in", csv_dir, "\n"); return(NULL)
+    }
+    cat(sprintf("RDS absent; reconstructing from %d CSVs in %s ...\n",
+                length(csvs), csv_dir))
+    fit <- cmdstanr::as_cmdstan_fit(csvs)
+  }
   stopifnot(inherits(fit, "CmdStanMCMC"))
 
   cat("Extracting log_lik draws (memory-heavy step)...\n")

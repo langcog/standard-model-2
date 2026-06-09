@@ -696,12 +696,23 @@ fit_variant_cmdstanr <- function(stan_data, tag,
   # Wrapped in try() so a save_object failure (typically OOM/disk-full
   # during the internal read_cmdstan_csv) doesn't kill the script
   # before we've at least preserved the CSVs in csv_dir.
-  saved <- try(csm$save_object(file = fit_file), silent = FALSE)
-  if (inherits(saved, "try-error")) {
-    message(sprintf("[%s] save_object FAILED -- CSVs preserved at %s",
+  if (Sys.getenv("STAN_SKIP_SAVE_OBJECT", unset = "0") == "1") {
+    # Skip the self-contained .rds entirely. save_object() reads ALL the
+    # log_lik draws into memory (OOM on large N -- the process gets Killed,
+    # which try() cannot catch) and writes a huge file (disk-full). The
+    # CSVs in csv_dir hold everything; downstream extraction reads them
+    # directly (recover_from_csvs.R + extract_loo_thinned.R), so the .rds
+    # is unnecessary. This is the safe path for the big longitudinal fits.
+    message(sprintf("[%s] STAN_SKIP_SAVE_OBJECT=1: skipping save_object; CSVs at %s",
                     tag, csv_dir))
-    message("Recover via: cmdstanr::as_cmdstan_fit(list.files('",
-            csv_dir, "', pattern = 'csv$', full.names = TRUE))")
+  } else {
+    saved <- try(csm$save_object(file = fit_file), silent = FALSE)
+    if (inherits(saved, "try-error")) {
+      message(sprintf("[%s] save_object FAILED -- CSVs preserved at %s",
+                      tag, csv_dir))
+      message("Recover via: cmdstanr::as_cmdstan_fit(list.files('",
+              csv_dir, "', pattern = 'csv$', full.names = TRUE))")
+    }
   }
   csm
 }

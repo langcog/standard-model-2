@@ -64,20 +64,32 @@ time Rscript model/scripts/fit_longitudinal.R "$VARIANT" "$DATASET" 2>&1 | tee -
 echo "end fit: $(date)" | tee -a "$LOG"
 echo "==== Extracting: $TAG ====" | tee -a "$LOG"
 
-Rscript sherlock/extract_summary_table_only.R "$TAG" 2>&1 | tee -a "$LOG"
-Rscript sherlock/extract_scalar_draws.R "$TAG" 2>&1 | tee -a "$LOG"
-Rscript sherlock/extract_delta_j_slim.R "$TAG" 2>&1 | tee -a "$LOG"
-Rscript sherlock/extract_loo_thinned.R "$TAG" 2>&1 | tee -a "$LOG"
+if [ "${STAN_SKIP_SAVE_OBJECT:-0}" = "1" ]; then
+  # save_object was skipped (no <tag>.rds): extract the slim summaries
+  # straight from the persistent CSVs. recover_from_csvs gives the scalar
+  # summary + scalar draws + delta_j; extract_loo_thinned falls back to the
+  # CSVs for LOO. Neither loads the full draws set, so neither can OOM.
+  Rscript sherlock/recover_from_csvs.R "$TAG" 2>&1 | tee -a "$LOG"
+  Rscript sherlock/extract_loo_thinned.R "$TAG" 2>&1 | tee -a "$LOG"
+else
+  Rscript sherlock/extract_summary_table_only.R "$TAG" 2>&1 | tee -a "$LOG"
+  Rscript sherlock/extract_scalar_draws.R "$TAG" 2>&1 | tee -a "$LOG"
+  Rscript sherlock/extract_delta_j_slim.R "$TAG" 2>&1 | tee -a "$LOG"
+  Rscript sherlock/extract_loo_thinned.R "$TAG" 2>&1 | tee -a "$LOG"
+fi
 
-# Reclaim disk: extraction succeeded (set -e would have aborted otherwise),
-# so the slim summaries hold everything downstream needs and the
-# self-contained fit RDS remains for recovery. The raw sampler CSVs
-# (tens to ~160 GB per fit) are now redundant. Without this, a D -> D'
-# chain accumulates two CSV sets and fills the boot disk mid-fit.
+# Reclaim the raw sampler CSVs (tens to ~210 GB per fit) -- but ONLY if the
+# slim summary was actually written. A failed/empty extraction must keep
+# the CSVs as the sole recovery copy; deleting them regardless is how EN D'
+# was lost. Without reclaiming at all, a D -> D' chain accumulates two CSV
+# sets and fills the boot disk mid-fit.
+SUMM_FILE="$STANDARD_MODEL_FITS_DIR/summaries/${TAG}.summary.rds"
 CSV_DIR="$STANDARD_MODEL_FITS_DIR/csvs_$TAG"
-if [ -d "$CSV_DIR" ]; then
-  echo "Reclaiming $(du -sh "$CSV_DIR" 2>/dev/null | cut -f1) from $CSV_DIR" | tee -a "$LOG"
+if [ -f "$SUMM_FILE" ] && [ -d "$CSV_DIR" ]; then
+  echo "Reclaiming $(du -sh "$CSV_DIR" 2>/dev/null | cut -f1) from $CSV_DIR (summary present)" | tee -a "$LOG"
   rm -rf "$CSV_DIR"
+elif [ -d "$CSV_DIR" ]; then
+  echo "NOT reclaiming $CSV_DIR: $SUMM_FILE missing -- CSVs preserved for recovery" | tee -a "$LOG"
 fi
 
 echo "==== Done: $TAG ====" | tee -a "$LOG"
