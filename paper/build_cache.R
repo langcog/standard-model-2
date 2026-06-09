@@ -175,26 +175,53 @@ io_summary <- list(
 saveRDS(io_summary, file.path(CACHE, "fig5_io_summary.rds"))
 cat(sprintf("Wrote %s\n", file.path(CACHE, "fig5_io_summary.rds")))
 
-## ---- 5. Figure 4: per-word "exposures to 50%" (EN M_best) --------
-# For each word, solve the typical kid's age at 50% production from the
-# linear predictor, then count cumulative exposures of that word by that
-# age. Derived from the EN M_best (no_freq_slopes) longitudinal fit +
-# CHILDES frequencies. (Mirrors model/scripts/exposure_to_learn.R.)
+## ---- 5. Figure 4: per-word "exposures to 50% production" ---------
+# For a typical English child, solve the age at which each word reaches
+# 50% production from the fitted linear predictor, then count that word's
+# cumulative input exposures by that age. Uses the Bayesian longitudinal
+# fit `long_no_freq_slopes`, which estimates per-child variation in BOTH
+# efficiency (sigma_alpha) and acceleration (sigma_zeta) — the Bayesian
+# counterpart of the glmer M4 (D_log). The typical-child curve uses the
+# population values (log_alpha = 0; kappa = 1 + median(delta)). CHILDES
+# word frequencies via childes-db. (Mirrors model/scripts/exposure_to_learn.R.)
 lb   <- readRDS(here("fits", "long_subset_data.rds"))
 lsd  <- lb$stan_data
+# log_H: log waking hours/month (~365); a0: anchor age (mo); mu_r: typical
+# log input rate (tokens/hr).
 log_H <- lsd$log_H; a0 <- lsd$a0; mu_r <- lsd$mu_r
 ldraws    <- as.data.frame(readRDS(here("fits", "summaries",
                                         "long_no_freq_slopes.draws.rds")))
-kappa_typ <- 1 + median(ldraws$delta)           # typical kid: log_alpha = 0
-xi_typ    <- mu_r                               # log_r = mu_r
+kappa_typ <- 1 + median(ldraws$delta)           # population scaling exponent
+xi_typ    <- mu_r                               # typical intercept: log_r = mu_r, log_alpha = 0
 psi <- read_csv(here("fits", "summaries", "long_no_freq_slopes_psi.csv"),
                 show_col_types = FALSE) |> rename(delta_j = delta_j_median)
 FREQ_MIN <- 1e-5                                # drop CHILDES no-match floor items
+
+# Lexical-class fix: the upstream scheme lumps CDI *people* (mailman, aunt,
+# doctor, ...) and *places/events* (woods, camping, park, zoo, ...) into
+# "other" alongside genuine non-nouns. Reclassify those concrete nouns as
+# "nouns"; keep only sound effects, social routines, and time words as
+# "other" (these 42 items stay):
+stay_other <- c(
+  # animal sounds / sound effects
+  "baa baa","choo choo","cockadoodledoo","grrr","meow","moo","ouch",
+  "quack quack","uh oh","vroom","woof woof","yum yum",
+  # games / social routines
+  "bye","call (on phone)","give me five!","go potty","gonna get you!",
+  "hello","hi","night night","no","pattycake","peekaboo","please",
+  "shh/shush/hush","so big!","thank you","this little piggy","turn around","yes",
+  # time words
+  "after","before","day","later","morning","night","now","time",
+  "today","tomorrow","tonight","yesterday")
+
 exposure_items <- lb$word_info |>
   mutate(jj = row_number()) |>
   left_join(psi |> select(jj, delta_j), by = "jj") |>
   filter(!is.na(delta_j), prob >= FREQ_MIN) |>
-  mutate(lexical_class = factor(lb$class_levels[cc], levels = lb$class_levels),
+  mutate(lexical_class = as.character(lb$class_levels[cc]),
+         lexical_class = if_else(lexical_class == "other" & !(item %in% stay_other),
+                                 "nouns", lexical_class),
+         lexical_class = factor(lexical_class, levels = lb$class_levels),
          t_50   = a0 * exp((delta_j - log_H - xi_typ) / kappa_typ),
          N_word = exp(xi_typ) * exp(log_H) * t_50 * prob) |>
   select(item, lexical_class, delta_j, prob, t_50, N_word)
