@@ -1871,12 +1871,23 @@ both (English +0.18/+0.36, Mandarin-Tw, Spanish-Arg); null (Danish, Czech,
 Spanish-Mex). Anomalies to scrutinize: French-French acc = **−0.28**,
 Spanish-Eur/Mex eff < 0.
 
-**Status / reproducibility.** Pipeline running (~31 langs, sex+matEd, cached
-per-language frames, resumable). **Scripts are currently in `/tmp`
-(`xsec_pipeline.R`, etc.) — TODO: promote to `model/scripts/` + a cache dir
-so this is reproducible and other sessions can rerun.** Wordbank pulls (not
-glmer) are the bottleneck; Sherlock not used (compute nodes lack internet for
-`wordbankr`).
+**Sex result (the validated, headline channel).** Female **efficiency**
+advantage in 26/31 languages; meta −0.52 [−0.60,−0.44], ~0 on acceleration.
+Matches longitudinal closely: meta −0.52 (x-sec) vs −0.67 (long, k=4);
+per-language Norwegian −0.86 (x-sec) vs −0.89 (long). MatEd meta: efficiency
++0.10 vs +0.14 (long); acceleration +0.28 both, but long k=2 (weak check) and
+x-sec acceleration is the inflated channel. Spanish/French matEd anomalies =
+skewed/ill-mapped education distributions (e.g. Spanish-Eur ~78% high-ed →
+unstable efficiency), not data errors; sex (balanced) unaffected.
+
+**Status / reproducibility.** Promoted from `/tmp` to a committed, reproducible
+pipeline: [`cross_sectional_demographics/`](../cross_sectional_demographics/)
+(`00_build.R` + `cross-sectional_demographics.qmd` + committed `cache/fits.rds`,
+`cache/scatter.rds`; per-language frames/fits gitignored + regenerable). The
+notebook produces the scatter data-checks, a cross-sectional forest+meta figure
+(parallels `fig-demographics`), a combined cross-sectional+longitudinal figure
+(paper candidate), and anomaly diagnostics. Wordbank pulls (not glmer) are the
+bottleneck; Sherlock not used (compute nodes lack internet for `wordbankr`).
 
 ---
 
