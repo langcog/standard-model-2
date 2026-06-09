@@ -10,6 +10,19 @@ format:
     keep-tex: true
 ---
 
+# Supplemental Methods
+
+## Mixed effects model details
+
+
+
+
+## Efficiency computation
+
+
+
+# Supplemental Results
+
 ```{r si-setup, include=FALSE}
 suppressPackageStartupMessages({
   library(here); library(dplyr); library(tidyr); library(ggplot2)
@@ -25,6 +38,8 @@ knitr::opts_chunk$set(
   fig.align = "center", out.width = "100%", dpi = 300
 )
 ```
+
+
 
 ```{r fig-cross-sectional-confound, fig.width=9, fig.height=4}
 #| label: fig-cross-sectional-confound

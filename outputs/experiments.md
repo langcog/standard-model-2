@@ -1831,15 +1831,7 @@ future users.
   forms, and place-names with `*` annotations) match what the form
   actually printed. Replace any wrong mapping in
   `manual_overrides` and rerun.
-- **Norwegian longitudinal fit.** Data already pulled (1 562 kids,
-  4.2M rows). Needs CHILDES-matched word frequencies; after the English
-  longitudinal fit lands, adapt.
-- **Within-child input variance** from BabyView or Seedlings: use it
-  to constrain σ_r more tightly, replacing the pooled Sperry/HR/WF
-  estimate. Would pin down the RQ4 answer inside the sensitivity range.
-- **Other-language cross-sectional robustness fits** for languages
-  with CDI + CHILDES coverage, to test whether π_α and the RQ1 pattern
-  are English-specific.
+
 
 ### Model extensions
 - **Correlated (ξ, ζ) prior with LKJ.** Implemented in
