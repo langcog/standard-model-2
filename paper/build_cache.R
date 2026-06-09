@@ -269,4 +269,90 @@ saveRDS(list(slopes = slopes, summary = slope_summary),
 cat(sprintf("Wrote %s (%d slope rows)\n",
             file.path(CACHE, "fig6_llm_slopes.rds"), nrow(slopes)))
 
+## ---- 7. Input-rate variation table (sigma_r supplement) ----------
+# Per-source input rate in tokens/hr and tokens/month, plus the implied
+# sigma_r (= SD of log tokens/hr across children) and the 1-SD
+# multiplicative factor exp(sigma_r). Two provenance tiers:
+#   * computed  : recomputed from the committed per-dyad CSV
+#                 data/sperry/hourly_tokens_Sperry_HartRisley.csv, using the
+#                 best channel per study (Sperry adult-to-child; S&W all
+#                 speech; HR/W&F mother CDS), both whole-sample pooled and
+#                 within-SES-stratum (means subtracted per band first).
+#   * literature: canonical numbers from input_estimation/validation_set.csv
+#                 (curated from the source PDFs).
+# Tokens/month = tokens/hr x H, H = 365 waking hr/mo (12 hr/day x 30.44
+# days/mo; matches MODEL_CONSTANTS$log_H). Mirrors
+# model/scripts/input_rate_table.R but pulls the cross-cultural rows from
+# the validation set rather than its hand-entered estimates.
+H_PER_MONTH <- 365
+
+ir <- read_csv(here("data", "sperry", "hourly_tokens_Sperry_HartRisley.csv"),
+               show_col_types = FALSE) |>
+  rename(mother = mother_child_tokens_hr, all_speech = all_tokens_hr,
+         adult_child = adult_child_tokens_hr) |>
+  mutate(best = case_when(dataset == "Sperry" ~ adult_child,
+                          dataset == "Soderstrom & Wittebolle" ~ all_speech,
+                          TRUE ~ mother),
+         channel = case_when(dataset == "Sperry" ~ "adult-to-child",
+                             dataset == "Soderstrom & Wittebolle" ~ "all speech",
+                             TRUE ~ "mother CDS"))
+ir_summ <- function(x) {
+  x <- x[!is.na(x) & x > 0]; lx <- log(x); m <- mean(lx); s <- sd(lx)
+  tibble(n = length(x), mean_hr = exp(m), lo_hr = exp(m - s),
+         hi_hr = exp(m + s), sigma_r = s)
+}
+ir_pooled <- ir |> group_by(dataset, channel) |> reframe(ir_summ(best)) |>
+  mutate(sample = "all kids pooled")
+ir_within <- ir |> filter(dataset %in% c("Hart & Risley", "Sperry"),
+                          !is.na(best), best > 0) |>
+  mutate(lx = log(best)) |>
+  group_by(dataset, channel, sample) |> mutate(dev = lx - mean(lx)) |>
+  group_by(dataset, channel) |>
+  reframe(n = n(), mean_hr = exp(mean(lx)), sigma_r = sd(dev),
+          lo_hr = exp(mean(lx) - sd(dev)), hi_hr = exp(mean(lx) + sd(dev))) |>
+  mutate(sample = "within-stratum pooled")
+ir_comp <- bind_rows(ir_pooled, ir_within) |>
+  transmute(source = dataset, sample, channel, n, mean_hr, lo_hr, hi_hr,
+            sigma_r, kind = "computed")
+
+# Cross-cultural / LENA rows: canonical numbers from the validation set.
+vs <- read_csv(here("input_estimation", "validation_set.csv"),
+               show_col_types = FALSE)
+vrow <- function(src, samp = NULL) {
+  r <- vs[vs$source == src, ]
+  if (!is.null(samp)) r <- r[r$sample_label == samp, ]
+  r[1, ]
+}
+seed <- vrow("Bergelson et al. 2018 (Day by day)", "SEEDLingS subset")
+tsel <- vrow("Casillas Brown & Levinson 2020")
+clo  <- vrow("Coffey et al. 2024 (lower bound)")
+chi  <- vrow("Coffey et al. 2024 (upper bound)")
+ir_lit <- tibble(
+  source  = c("Bergelson 2018 (SEEDLingS, LENA)",
+              "Casillas 2020 (Tseltal Mayan)",
+              "Coffey et al. 2024 (plausible envelope)"),
+  sample  = c("US daylong, 6--7 mo", "Chiapas daylong", "cross-cultural bounds"),
+  channel = c("all adult (AWC)", "child-directed", "CDS to all-input"),
+  n       = c(seed$n_kids, tsel$n_kids, NA_integer_),
+  mean_hr = c(seed$tokens_per_hour_mean, tsel$tokens_per_hour_mean, NA_real_),
+  lo_hr   = c(exp(seed$log_r_mean - seed$log_r_sd), NA_real_,
+              clo$tokens_per_hour_mean),
+  hi_hr   = c(exp(seed$log_r_mean + seed$log_r_sd), NA_real_,
+              chi$tokens_per_hour_mean),
+  sigma_r = c(seed$log_r_sd, NA_real_, NA_real_),
+  kind    = "literature")
+
+row_order <- c("Hart & Risley", "Soderstrom & Wittebolle", "Sperry",
+               "Weisleder & Fernald", "Bergelson 2018 (SEEDLingS, LENA)",
+               "Casillas 2020 (Tseltal Mayan)",
+               "Coffey et al. 2024 (plausible envelope)")
+input_rate_table <- bind_rows(ir_comp, ir_lit) |>
+  mutate(mean_mo = mean_hr * H_PER_MONTH,
+         source = factor(source, levels = row_order)) |>
+  arrange(source, sample) |>
+  mutate(source = as.character(source))
+saveRDS(input_rate_table, file.path(CACHE, "input_rate_table.rds"))
+cat(sprintf("Wrote %s (%d rows)\n",
+            file.path(CACHE, "input_rate_table.rds"), nrow(input_rate_table)))
+
 cat("\nAll caches built.\n")

@@ -492,3 +492,72 @@ ggplot(hist_df, aes(z)) +
   theme(strip.text = element_text(size = 8, face = "bold"),
         panel.grid.minor = element_blank())
 ```
+
+```{r tbl-input-rates}
+#| label: tbl-input-rates
+#| tbl-cap: ""
+# Input-rate variation table (sigma_r supplement). Reads
+# paper/cache/input_rate_table.rds (built by build_cache.R section 7):
+# computed rows from the committed Sperry/HR/SW/WF per-dyad CSV; literature
+# rows (SEEDLingS, Casillas, Coffey envelope) from input_estimation/
+# validation_set.csv. Columns are formatted for display here.
+irt <- readRDS(here("paper", "cache", "input_rate_table.rds"))
+fmt_n <- function(x) ifelse(is.na(x), "—", format(round(x), big.mark = ","))
+fmt_K <- function(x) ifelse(is.na(x), "—",
+                            paste0(format(round(x / 1000), big.mark = ","), "K"))
+irt |>
+  mutate(
+    source  = gsub("&", "\\\\&", source),   # escape for LaTeX (escape = FALSE below)
+    n       = ifelse(is.na(n), "—", as.character(n)),
+    tok_hr  = fmt_n(mean_hr),
+    sd_band = ifelse(is.na(lo_hr) | is.na(hi_hr), "—",
+                     paste0(fmt_n(lo_hr), "--", fmt_n(hi_hr))),
+    tok_mo  = fmt_K(mean_mo),
+    sr      = ifelse(is.na(sigma_r), "—", sprintf("%.2f", sigma_r)),
+    sdx     = ifelse(is.na(sigma_r), "—", sprintf("%.2f$\\times$", exp(sigma_r)))) |>
+  select(source, sample, channel, n, tok_hr, sd_band, tok_mo, sr, sdx) |>
+  knitr::kable(escape = FALSE,
+               align = c("l", "l", "l", "r", "r", "r", "r", "r", "r"),
+               col.names = c("Source", "Sample", "Channel", "n",
+                             "tok/hr", "$\\pm$1 SD", "tok/mo",
+                             "$\\sigma_r$", "1-SD")) |>
+  kableExtra::kable_styling(latex_options = c("scale_down", "hold_position"),
+                            font_size = 8)
+```
+
+```md
+## Estimating the input-rate prior: units and conversions  [draft for promotion — MCF to review]
+
+The model represents each child's input as a log rate,
+$\log r_i \sim \mathcal{N}(\mu_r, \sigma_r^2)$, measured in **adult tokens
+per waking hour**. @tbl-input-rates collects published estimates of this
+rate, expressed in shared units so they can be compared and so that the
+implied between-child spread $\sigma_r$ is visible on one scale.
+
+Conventions used throughout:
+
+- **Tokens/hour to tokens/month.** We multiply by $H = 365$ waking hours
+  per month ($12\text{ hr/day} \times 30.44\text{ days/mo}$), the model's
+  constant.
+- **$\sigma_r$ is on the log scale** — the SD of $\log(\text{tokens/hr})$
+  across children within a sample. Its exponential $e^{\sigma_r}$ is the
+  multiplicative factor for a one-SD shift in input (e.g.
+  $\sigma_r = 0.53 \Rightarrow 1.7\times$), and the 16th–84th percentile
+  spread is $e^{2\sigma_r}$.
+- **Channel.** Studies count different speaker sets; we take the channel
+  closest to "tokens reaching the child" — adult-to-child for Sperry,
+  all-adult LENA word counts for SEEDLingS, and maternal CDS for Hart &
+  Risley and Weisleder & Fernald.
+- **Pooled vs. within-stratum.** For Hart & Risley and Sperry we report
+  $\sigma_r$ both across all children (which mixes in SES and site
+  gradients) and within stratum (subtracting each band's mean first); the
+  latter is the cleaner within-population estimate.
+- **Minutes to tokens.** Where a source reports minutes of speech per hour
+  rather than token counts (Casillas; the Coffey bounds), we convert at
+  $\approx 200$ words/min ($0.3$ s/word, the Brent-corpus CDS rate used by
+  @coffey2024); those rows are accurate to roughly $\pm 20\%$.
+
+Rows marked *computed* are recomputed here from per-dyad data; *literature*
+rows are taken from the curated validation set in `input_estimation/`.
+```
+
