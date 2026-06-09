@@ -14,10 +14,12 @@ format:
 suppressPackageStartupMessages({
   library(here); library(dplyr); library(tidyr); library(ggplot2)
   library(patchwork); library(latex2exp); library(knitr); library(kableExtra)
+  library(diptest)
 })
 source(here("paper", "_helpers.R"))
 ladder <- readRDS(here("paper", "cache", "fig2_glmer_ladder.rds"))
 aic    <- readRDS(here("paper", "cache", "aic_summary.rds"))
+blups  <- readRDS(here("paper", "cache", "blups_demographics.rds"))
 knitr::opts_chunk$set(
   echo = FALSE, message = FALSE, warning = FALSE,
   fig.align = "center", out.width = "100%", dpi = 300
@@ -323,6 +325,8 @@ data gap may be harder to close than raw data counts suggest.
 <!-- [BIB NEEDED] Kaplan et al. (2020) and Hoffmann et al. (2022) are named
      in text but have NO verified bib entries yet — do not promote with live
      @ markers until added. -->
+```
+
 ```{r fig-schematic-theta, fig.width=8, fig.height=2.6}
 #| label: fig-schematic-theta
 #| fig-cap: ""
@@ -405,4 +409,71 @@ knitr::kable(out, align = c("l","l", rep("r", 5)),
              col.names = c("Model", "Age", unname(lang_short[lang_order]))) |>
   kableExtra::add_header_above(c(" " = 2, "$\\\\Delta$BIC" = 5), escape = FALSE) |>
   kableExtra::kable_styling(latex_options = "scale_down", font_size = 8)
+```
+
+```{r blup-prep, include=FALSE}
+# Per-child BLUP distributions (efficiency xi, acceleration zeta) from the
+# D_log (M4) fits, used for the dip-test table and histogram below. We
+# z-score WITHIN dataset (datasets differ in scale) and drop a handful of
+# extreme BLUPs (|z| > 4) that come from sparsely-observed children rather
+# than distinct subgroups.
+study_lab <- c(thal = "English (Thal)", smith = "English (Smith)",
+               marchman = "English (Marchman)", norwegian = "Norwegian",
+               japanese = "Japanese")
+bz <- blups |>
+  group_by(lang_slug) |>
+  mutate(xz = as.numeric(scale(xi)), zz = as.numeric(scale(zeta))) |>
+  ungroup() |>
+  filter(is.finite(xz), is.finite(zz), abs(xz) <= 4, abs(zz) <= 4) |>
+  mutate(study = factor(study_lab[lang_slug], levels = unname(study_lab)))
+```
+
+```{r tbl-blup-dip}
+#| label: tbl-blup-dip
+#| tbl-cap: ""
+# Hartigan's dip test of unimodality on the per-child BLUPs, by dataset and
+# pooled. Large p is consistent with a single mode — i.e. continuous
+# between-child variation rather than discrete latent classes. Computed on
+# the within-dataset z-scored values from blup-prep.
+dip_row <- function(d, label) {
+  tibble::tibble(Dataset = label, N = nrow(d),
+                 eff = diptest::dip.test(d$xz)$p.value,
+                 acc = diptest::dip.test(d$zz)$p.value)
+}
+diptab <- bind_rows(
+  lapply(names(study_lab), function(s)
+    dip_row(filter(bz, lang_slug == s), study_lab[[s]])),
+  dip_row(bz, "Pooled"))
+pfmt <- function(p) ifelse(p >= 0.995, ">0.99", sprintf("%.2f", p))
+diptab |>
+  mutate(eff = pfmt(eff), acc = pfmt(acc)) |>
+  knitr::kable(align = c("l", "r", "r", "r"), escape = FALSE,
+               col.names = c("Dataset", "N",
+                             "Efficiency ($\\xi$)", "Acceleration ($\\zeta$)")) |>
+  kableExtra::kable_styling(font_size = 9, latex_options = "hold_position")
+```
+
+```{r fig-blup-hist, fig.width=7, fig.height=6.5}
+#| label: fig-blup-hist
+#| fig-cap: ""
+# Histograms of the per-child BLUPs (within-dataset z-scored): efficiency
+# (xi) and acceleration (zeta), one row per dataset. Dashed curve is the
+# standard-normal reference. Distributions are single-moded (cf. dip-test
+# table), consistent with continuous between-child variation.
+hist_df <- bz |>
+  select(study, xz, zz) |>
+  pivot_longer(c(xz, zz), names_to = "param", values_to = "z") |>
+  mutate(param = factor(param, levels = c("xz", "zz"),
+                        labels = c("Efficiency~(xi)", "Acceleration~(zeta)")))
+ggplot(hist_df, aes(z)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 30,
+                 fill = "#2b8cbe", colour = "white", linewidth = 0.1) +
+  stat_function(fun = dnorm, colour = "grey30", linetype = "dashed",
+                linewidth = 0.4) +
+  facet_grid(study ~ param, scales = "free_y",
+             labeller = labeller(param = label_parsed)) +
+  labs(x = "per-child BLUP (z-scored within dataset)", y = "density") +
+  theme_minimal(base_size = 9) +
+  theme(strip.text = element_text(size = 8, face = "bold"),
+        panel.grid.minor = element_blank())
 ```
