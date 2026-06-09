@@ -38,6 +38,7 @@ from transformers import (
     DataCollatorForLanguageModeling,
     Trainer,
     TrainingArguments,
+    EarlyStoppingCallback,
     set_seed,
 )
 
@@ -70,6 +71,11 @@ def main():
                     help="Subsample CDI contexts to N per word for callback eval.")
     ap.add_argument("--no_save", action="store_true",
                     help="Skip saving any model checkpoints (we don't need them)")
+    ap.add_argument("--early_stopping_patience", type=int, default=0,
+                    help="If >0, early-stop on eval_loss with this patience and "
+                         "load the best-val model at end (used for the developmental "
+                         "ladder, where each rung is read at convergence). Forces "
+                         "per-epoch checkpointing (save_total_limit=1).")
     args = ap.parse_args()
 
     set_seed(args.seed)
@@ -139,7 +145,10 @@ def main():
           f"val blocks: {len(lm_dataset['validation'])}", flush=True)
 
     # ---- Training ----
-    save_strategy = "no" if args.no_save else "epoch"
+    early_stop = args.early_stopping_patience > 0
+    # Early-stopping needs per-epoch checkpoints + load-best so the on_train_end
+    # surprisal eval reads the best-val ("converged") model. Overrides --no_save.
+    save_strategy = "epoch" if early_stop else ("no" if args.no_save else "epoch")
     targs = TrainingArguments(
         output_dir=args.output_dir,
         overwrite_output_dir=True,
@@ -161,6 +170,9 @@ def main():
         eval_strategy="epoch",
         save_strategy=save_strategy,
         save_total_limit=args.save_total_limit,
+        load_best_model_at_end=early_stop,
+        metric_for_best_model="eval_loss" if early_stop else None,
+        greater_is_better=False if early_stop else None,
         # match Feng et al.: no shuffling within epoch
         # HF Trainer arg name is `dataloader_drop_last`/`dataloader_shuffle`;
         # the shuffling flag controls in-epoch shuffling for train loader.
@@ -187,6 +199,11 @@ def main():
         max_per_word=args.eval_max_per_word,
     )
 
+    callbacks = [callback]
+    if early_stop:
+        callbacks.append(EarlyStoppingCallback(
+            early_stopping_patience=args.early_stopping_patience))
+
     trainer = NoShuffleTrainer(
         model=model,
         args=targs,
@@ -194,7 +211,7 @@ def main():
         eval_dataset=lm_dataset["validation"],
         tokenizer=tokenizer,
         data_collator=DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False),
-        callbacks=[callback],
+        callbacks=callbacks,
     )
 
     trainer.train()
