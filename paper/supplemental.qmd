@@ -492,3 +492,47 @@ ggplot(hist_df, aes(z)) +
   theme(strip.text = element_text(size = 8, face = "bold"),
         panel.grid.minor = element_blank())
 ```
+
+<!-- ===================================================================
+     DRAFT TEXT FOR PROMOTION (agent-authored, verbatim `md` block).
+     Documents the analytic sigma_r sensitivity used in Fig 3 panel B.
+     MCF to review and lift into Supplemental Methods (input section).
+     ==================================================================== -->
+
+```md
+## Analytic input-rate ($\sigma_r$) sensitivity  [draft for promotion — MCF to review]
+
+The input/efficiency variance split is identified only by the external pin on
+the population SD of log input rate, $\sigma_r$ — we do not observe input in the
+longitudinal data. Because every reported input share therefore rests on a
+quantity we assume rather than estimate, we map how the conclusion moves as
+$\sigma_r$ ranges over its plausible values (panel B of @fig-io-partition).
+
+The data identify the *total* between-child intercept variance,
+$\sigma_\xi^2 = \sigma_\alpha^2 + \sigma_r^2$ (the spread of children's ability
+at the reference age $a_0$), very precisely; the pin only decides how that fixed
+total is *split* into an efficiency part $\sigma_\alpha^2$ and an input part
+$\sigma_r^2$. Holding $\sigma_\xi^2$ at its fitted value, the input share is then
+a closed form,
+
+$$1-\pi_\alpha(\sigma_r) = \frac{\sigma_r^2}{\sigma_\xi^2},$$
+
+which we evaluate across the plausible $\sigma_r$ range *without refitting* — the
+analytic sensitivity curve.
+
+This is first-order: it treats $\sigma_\xi^2$ as itself invariant to the pin.
+Refits at off-pin values reveal a small second-order feedback — pinning a larger
+$\sigma_r$ slightly *shrinks* the estimated total variance (for English,
+$\sigma_\xi^2$ falls from 3.57 at $\sigma_r=0.53$ to 3.22 at $\sigma_r=0.80$). The
+analytic curve therefore slightly *understates* the input share at large
+$\sigma_r$ (≈18% analytic vs. ≈20% by refit at $\sigma_r=0.80$), an error of about
+two points of $\pi_\alpha$ in the conservative direction for the size of the
+input effect. The open points in panel B are these refit anchors; the gap
+between point and curve is the second-order term.
+
+We use the analytic curve, anchored by the few refits we have, rather than a
+dense refit sweep: the qualitative conclusion — input accounts for a modest share
+even at the top of the plausible $\sigma_r$ range — is unaffected by the
+~2-point correction, whereas a full sweep of the Norwegian model alone would cost
+roughly half a day of compute per pin value.
+```
