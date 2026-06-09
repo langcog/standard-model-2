@@ -214,9 +214,31 @@ stay_other <- c(
   "after","before","day","later","morning","night","now","time",
   "today","tomorrow","tonight","yesterday")
 
-exposure_items <- lb$word_info |>
-  mutate(jj = row_number()) |>
-  left_join(psi |> select(jj, delta_j), by = "jj") |>
+# Join word difficulties (delta_j) to words. Prefer joining by item NAME so
+# the mapping survives item-set changes between the fit and the data bundle.
+# Fall back to the positional jj/row-number join ONLY when the two are the
+# same length; otherwise the rows misalign and delta_j gets bolted onto the
+# wrong words, silently breaking Figure 4 (this happened when a May fit with
+# 671 items was joined to a re-cleaned June bundle with 682).
+wi <- lb$word_info |> mutate(jj = row_number())
+psi_item_col <- intersect(c("item", "item_definition", "word"), names(psi))
+if (length(psi_item_col) > 0) {
+  exposure_items <- wi |>
+    inner_join(psi |> transmute(item = .data[[psi_item_col[1]]], delta_j),
+               by = "item")
+} else {
+  if (nrow(psi) != nrow(wi)) {
+    stop(sprintf(paste0(
+      "build_cache section 5: psi has %d items but word_info has %d, and psi ",
+      "has no item-name column. A positional (row-number) join would MISALIGN ",
+      "delta_j with words and silently break Figure 4. Re-fit the longitudinal ",
+      "model on the current data bundle (so its psi matches long_subset_data.rds), ",
+      "or export psi with an item column."), nrow(psi), nrow(wi)))
+  }
+  exposure_items <- wi |> left_join(psi |> select(jj, delta_j), by = "jj")
+}
+
+exposure_items <- exposure_items |>
   filter(!is.na(delta_j), prob >= FREQ_MIN) |>
   mutate(lexical_class = as.character(lb$class_levels[cc]),
          lexical_class = if_else(lexical_class == "other" & !(item %in% stay_other),
@@ -225,6 +247,19 @@ exposure_items <- lb$word_info |>
          t_50   = a0 * exp((delta_j - log_H - xi_typ) / kappa_typ),
          N_word = exp(xi_typ) * exp(log_H) * t_50 * prob) |>
   select(item, lexical_class, delta_j, prob, t_50, N_word)
+
+# Sanity guard: in a valid fit, word difficulty is strongly NEGATIVELY
+# correlated with frequency (frequent words are easier). A weak or positive
+# correlation means delta_j is misaligned with words -- stop rather than write
+# a wrong Figure 4.
+.dfreq_cor <- cor(exposure_items$delta_j, log(exposure_items$prob))
+if (is.na(.dfreq_cor) || .dfreq_cor > -0.2) {
+  stop(sprintf(paste0(
+    "build_cache section 5: cor(delta_j, log prob) = %.2f (expected strongly ",
+    "negative). delta_j looks misaligned with words -- Figure 4 would be wrong. ",
+    "Check that psi and long_subset_data.rds come from the same item set."),
+    .dfreq_cor))
+}
 saveRDS(list(items = exposure_items,
              meta  = list(mu_r = mu_r, kappa_typ = kappa_typ,
                           n_items = nrow(exposure_items))),
