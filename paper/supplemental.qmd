@@ -492,3 +492,50 @@ ggplot(hist_df, aes(z)) +
   theme(strip.text = element_text(size = 8, face = "bold"),
         panel.grid.minor = element_blank())
 ```
+
+```md
+## Changes in word efficiency: computing exposures-to-learn  [draft for promotion — MCF to review]
+
+To turn the fitted model into a concrete count of exposures (main text,
+@fig-efficiency), we ask, for a *typical* English-learning child, how many
+times a word has been heard by the age at which that child has a 50%
+chance of producing it.
+
+Under the full model (M4), a child's expected ability at age $t$ is
+$\theta(t) = \xi + \kappa\,\log(t/a_0)$, with efficiency intercept $\xi$,
+scaling exponent $\kappa$, and anchor age $a_0$. For the typical child we
+use the population values: $\xi = \bar\mu_r$, the mean log input rate (with
+the residual efficiency term $\log\alpha_i = 0$), and $\kappa = \bar\kappa$,
+the population scaling exponent (posterior median $\approx 11$). These come
+from the Bayesian longitudinal fit, which estimates per-child variation in
+both efficiency and acceleration; only its population-level values enter
+the typical-child curve. A word $j$ with difficulty $\delta_j$ reaches 50%
+production at the age where the linear predictor crosses zero,
+$$ t_{50}(j) \;=\; a_0 \, \exp\!\left( \frac{\delta_j - \log H - \bar\mu_r}{\bar\kappa} \right), $$
+where $\log H$ is an offset for the child's waking hours per month
+($\approx 365$) that converts the input *rate* into a cumulative *count*.
+(For the median child this is also, approximately, the age at which half of
+children produce the word.)
+
+The cumulative number of exposures to word $j$ by age $t_{50}$ is the total
+input heard, times the word's relative frequency:
+$$ N_j \;=\; \underbrace{e^{\bar\mu_r}}_{\text{tokens/hr}} \cdot \underbrace{H}_{\text{hr/mo}} \cdot \, t_{50}(j) \cdot p_j, $$
+where $p_j$ is the relative frequency of word $j$ in the CHILDES corpus
+[@macwhinney2000; @sanchez2019], estimated from parsed transcripts via
+childes-db. Word difficulties $\delta_j$ are posterior medians from the
+fit. We drop items whose CHILDES frequency is below $10^{-5}$ (no-match
+floor and tokenization mismatches such as multi-word phrases and sound
+effects).
+
+Because $\bar\kappa \gg 1$, the map from difficulty to age is steeply
+compressive: a harder word is reached only at a much later age, by which
+point the child has accumulated far more total input. This produces the
+order-of-magnitude decline in exposures-to-learn described in the main
+text — early words are heard tens of thousands of times before they are
+produced, whereas later-learned words follow after only tens of exposures.
+
+For lexical class, we treat the CDI *people* (e.g. "mailman", "doctor") and
+*place/event* words (e.g. "woods", "camping", "park") as nouns; only sound
+effects, social routines (e.g. "no", "thank you"), and time words remain in
+the residual "other" category.
+```
