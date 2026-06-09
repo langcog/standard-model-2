@@ -66,11 +66,18 @@ echo "==== Extracting: $TAG ====" | tee -a "$LOG"
 
 if [ "${STAN_SKIP_SAVE_OBJECT:-0}" = "1" ]; then
   # save_object was skipped (no <tag>.rds): extract the slim summaries
-  # straight from the persistent CSVs. recover_from_csvs gives the scalar
-  # summary + scalar draws + delta_j; extract_loo_thinned falls back to the
-  # CSVs for LOO. Neither loads the full draws set, so neither can OOM.
+  # straight from the persistent CSVs. recover_from_csvs streams the scalar
+  # columns (incl. gamma_in) + delta_j with `cut` -- low RAM at any size.
   Rscript sherlock/recover_from_csvs.R "$TAG" 2>&1 | tee -a "$LOG"
-  Rscript sherlock/extract_loo_thinned.R "$TAG" 2>&1 | tee -a "$LOG"
+  # extract_loo_thinned still builds a cmdstanr fit object (as_cmdstan_fit),
+  # which OOMs above ~150 GB of CSV (Norwegian). Skip LOO for those -- the
+  # variance decomposition doesn't need it.
+  CSV_GB=$(du -s "$STANDARD_MODEL_FITS_DIR/csvs_$TAG" 2>/dev/null | awk '{print int($1/1048576)}')
+  if [ "${CSV_GB:-999}" -lt 150 ]; then
+    Rscript sherlock/extract_loo_thinned.R "$TAG" 2>&1 | tee -a "$LOG"
+  else
+    echo "Skipping LOO: csvs_$TAG is ${CSV_GB} GB (> 150 GB threshold, would OOM)" | tee -a "$LOG"
+  fi
 else
   Rscript sherlock/extract_summary_table_only.R "$TAG" 2>&1 | tee -a "$LOG"
   Rscript sherlock/extract_scalar_draws.R "$TAG" 2>&1 | tee -a "$LOG"

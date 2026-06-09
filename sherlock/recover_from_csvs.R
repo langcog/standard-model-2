@@ -1,63 +1,75 @@
-## Recover a fit's slim summary + scalar draws + delta_j medians directly
-## from persistent CSV files, bypassing the save_object() step that
-## previously OOM'd on disk-full.
+## Recover a fit's slim scalar summary + draws (+ delta_j medians) directly
+## from the cmdstan CSVs, WITHOUT building a cmdstanr fit object.
+##
+## Why: cmdstanr::as_cmdstan_fit() parses/indexes the full CSV -- including
+## the millions of log_lik columns -- and OOM-kills even a 512 GB machine on
+## the big fits (Norwegian, ~210 GB). Here we find the columns we want by
+## NAME in the header and stream just those out with `cut`, so RAM stays
+## tiny at any fit size. (extract_loo_thinned still needs log_lik and is
+## guarded by a size check in run_fit.sh.)
 ##
 ## Usage: Rscript sherlock/recover_from_csvs.R <tag> [<csv_dir>]
-##   tag      - output tag (e.g. long_no_freq_slopes_norwegian)
-##   csv_dir  - directory of cmdstan CSV files (default: fits/csvs_<tag>)
 
-suppressPackageStartupMessages({
-  library(cmdstanr)
-  library(posterior)
-})
+suppressPackageStartupMessages({ library(dplyr); library(posterior) })
 
 args <- commandArgs(trailingOnly = TRUE)
 if (length(args) == 0) stop("Usage: Rscript sherlock/recover_from_csvs.R <tag> [<csv_dir>]")
 TAG <- args[1]
-
-FITS_DIR <- Sys.getenv("STANDARD_MODEL_FITS_DIR",
-                       unset = "fits")
-CSV_DIR  <- if (length(args) >= 2) args[2] else
-            file.path(FITS_DIR, sprintf("csvs_%s", TAG))
+FITS_DIR <- Sys.getenv("STANDARD_MODEL_FITS_DIR", unset = "fits")
+CSV_DIR  <- if (length(args) >= 2) args[2] else file.path(FITS_DIR, sprintf("csvs_%s", TAG))
 SUMM_DIR <- file.path(FITS_DIR, "summaries")
 dir.create(SUMM_DIR, recursive = TRUE, showWarnings = FALSE)
 
+SCALAR_PARS <- c("sigma_alpha", "sigma_xi", "sigma_zeta", "rho_xi_zeta",
+                 "pi_alpha", "delta", "s", "sigma_s",
+                 "gamma_in")   # D' input-on-slope coupling (the point of D')
+
 csv_files <- sort(list.files(CSV_DIR, pattern = "\\.csv$", full.names = TRUE))
-cat(sprintf("[%s] %d CSV files found in %s\n", TAG, length(csv_files), CSV_DIR))
+cat(sprintf("[%s] %d CSV files in %s\n", TAG, length(csv_files), CSV_DIR))
 if (length(csv_files) == 0) stop("No CSVs found.")
 
-fit <- cmdstanr::as_cmdstan_fit(csv_files)
+## --- header: locate each wanted column by name (no full parse) ---
+hdr  <- system(sprintf("grep -v '^#' %s | head -1", shQuote(csv_files[1])), intern = TRUE)
+cols <- strsplit(hdr, ",", fixed = TRUE)[[1]]
+present     <- SCALAR_PARS[SCALAR_PARS %in% cols]
+scalar_idx  <- match(present, cols)
+dj_idx      <- grep("^delta_j(\\[|$|\\.)", cols)        # per-word difficulties (optional)
+want_idx    <- sort(c(scalar_idx, dj_idx))
+want_names  <- cols[want_idx]
+cat(sprintf("[%s] scalars: %s | delta_j cols: %d\n", TAG,
+            paste(present, collapse = ", "), length(dj_idx)))
+if (!length(scalar_idx)) stop("No scalar params found in header.")
+fields <- paste(want_idx, collapse = ",")
 
-# Scalar params we care about (same set as extract_summary_table_only.R).
-SCALAR_PARS <- c("sigma_alpha", "sigma_xi", "sigma_zeta", "rho_xi_zeta",
-                 "pi_alpha", "delta", "s", "sigma_s")
-present <- SCALAR_PARS[SCALAR_PARS %in% fit$metadata()$stan_variables]
-cat(sprintf("[%s] scalar pars present: %s\n", TAG, paste(present, collapse = ", ")))
+## --- stream just those columns out of every chain (low RAM) ---
+draws_list <- lapply(seq_along(csv_files), function(ch) {
+  cmd <- sprintf("grep -v '^#' %s | tail -n +2 | cut -d, -f%s", shQuote(csv_files[ch]), fields)
+  con <- pipe(cmd, "r"); on.exit(close(con))
+  m <- as.matrix(read.csv(con, header = FALSE))
+  colnames(m) <- want_names
+  d <- as.data.frame(m); d$.chain <- ch; d$.iteration <- seq_len(nrow(d)); d
+})
+d <- bind_rows(draws_list)
+cat(sprintf("[%s] extracted %d draws across %d chains\n", TAG, nrow(d), length(csv_files)))
 
-cat(sprintf("[%s] computing scalar summary...\n", TAG))
-slim <- fit$summary(variables = present,
-                    mean = mean,
-                    lo95 = ~ quantile(.x, 0.025, na.rm = TRUE),
-                    median = median,
-                    hi95 = ~ quantile(.x, 0.975, na.rm = TRUE),
-                    ess_bulk = posterior::ess_bulk,
-                    rhat = posterior::rhat)
-print(slim)
-saveRDS(slim, file.path(SUMM_DIR, paste0(TAG, ".summary.rds")))
-cat(sprintf("[%s] wrote summary.rds (%d rows)\n", TAG, nrow(slim)))
+## --- scalar summary + draws ---
+dd <- as_draws_df(d[, c(".chain", ".iteration", present)])
+summ <- summarise_draws(dd, mean, median, sd,
+                        q025 = ~quantile(.x, 0.025, names = FALSE),
+                        q975 = ~quantile(.x, 0.975, names = FALSE),
+                        ess_bulk, rhat)
+names(summ)[1] <- "variable"
+print(as.data.frame(summ))
+saveRDS(as.data.frame(summ), file.path(SUMM_DIR, paste0(TAG, ".summary.rds")))
+saveRDS(dd, file.path(SUMM_DIR, paste0(TAG, ".draws.rds")))
+cat(sprintf("[%s] wrote .summary.rds + .draws.rds\n", TAG))
 
-cat(sprintf("[%s] extracting scalar draws...\n", TAG))
-sc_draws <- fit$draws(variables = present, format = "draws_df")
-saveRDS(sc_draws, file.path(SUMM_DIR, paste0(TAG, ".draws.rds")))
-cat(sprintf("[%s] wrote draws.rds (%d draws)\n", TAG, nrow(sc_draws)))
-
-cat(sprintf("[%s] extracting delta_j medians...\n", TAG))
-dj <- fit$draws(variables = "delta_j", format = "draws_df")
-dj_mat <- as.data.frame(dj)
-dj_cols <- grep("^delta_j", names(dj_mat), value = TRUE)
-dj_med <- apply(dj_mat[, dj_cols, drop = FALSE], 2, median)
-out_csv <- data.frame(jj = seq_along(dj_med), delta_j_median = unname(dj_med))
-write.csv(out_csv, file.path(SUMM_DIR, paste0(TAG, "_psi.csv")), row.names = FALSE)
-cat(sprintf("[%s] wrote _psi.csv (%d items)\n", TAG, nrow(out_csv)))
-
+## --- delta_j medians (for the exposure figure) ---
+if (length(dj_idx)) {
+  djcols <- want_names[want_names %in% cols[dj_idx]]
+  dj_med <- apply(d[, djcols, drop = FALSE], 2, median)
+  write.csv(data.frame(jj = seq_along(dj_med), delta_j_median = unname(dj_med)),
+            file.path(SUMM_DIR, paste0(TAG, "_psi.csv")), row.names = FALSE)
+  cat(sprintf("[%s] wrote _psi.csv (%d items)\n", TAG, length(dj_med)))
+}
 cat(sprintf("[%s] DONE\n", TAG))
