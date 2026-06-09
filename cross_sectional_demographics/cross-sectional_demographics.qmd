@@ -1,0 +1,177 @@
+---
+title: "Cross-sectional demographic decomposition: sex & maternal education"
+subtitle: "Efficiency vs. acceleration of vocabulary growth across Wordbank languages"
+format:
+  html:
+    toc: true
+    fig-width: 10
+    code-fold: true
+    embed-resources: true
+---
+
+```{r setup}
+#| include: false
+suppressPackageStartupMessages({
+  library(here); library(dplyr); library(tidyr); library(ggplot2)
+  library(forcats); library(stringr)
+})
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE,
+                      fig.align = "center", dpi = 130)
+DIR     <- here("cross_sectional_demographics")
+fits    <- readRDS(file.path(DIR, "cache", "fits.rds"))
+scatter <- readRDS(file.path(DIR, "cache", "scatter.rds"))
+
+ED_YEARS <- c("None"=0,"Primary"=6,"Some Secondary"=9,"Secondary"=12,
+              "Some College"=14,"College"=16,"Some Graduate"=18,"Graduate"=20)
+ed_group <- function(y) cut(y, breaks = c(-1,12,16,99),
+                            labels = c("≤ Secondary","College","Graduate+"))
+# order languages by cross-sectional sex-efficiency (most female-advantaged first)
+sex_order <- fits$xsec |> filter(predictor=="sex") |> arrange(eff) |> pull(language)
+```
+
+Reproducible companion to `paper/standard_model.qmd`'s longitudinal
+demographic analysis. Same model on cross-sectional Wordbank data:
+`produces ~ predictor * log(age/a0) + (1|item) + (1|child)`, monolingual-TD,
+one admin per child. Built by `00_build.R`.
+
+# 1. Data check: production by age & sex
+
+```{r fig-scatter-sex}
+#| fig-width: 11
+#| fig-height: 12
+sx <- scatter |> filter(!is.na(sex), sex %in% c("Male","Female")) |>
+  mutate(language = factor(language, levels = sex_order))
+ggplot(sx, aes(age, prop, colour = sex, fill = sex)) +
+  geom_point(alpha = 0.05, size = 0.3) +
+  geom_smooth(method = "loess", se = TRUE, span = 0.9, linewidth = 0.7, alpha = 0.15) +
+  facet_wrap(~ language, ncol = 5) +
+  scale_colour_manual(values = c(Female="#d81b60", Male="#1e88e5"), name = NULL) +
+  scale_fill_manual(values = c(Female="#d81b60", Male="#1e88e5"), name = NULL) +
+  coord_cartesian(ylim = c(0, 1)) +
+  labs(x = "age (months)", y = "proportion of words produced") +
+  theme_minimal(base_size = 9) + theme(legend.position = "bottom")
+```
+
+# 2. Data check: production by age & maternal education
+
+```{r fig-scatter-mated}
+#| fig-width: 11
+#| fig-height: 8
+me_langs <- fits$xsec |> filter(predictor=="matEd") |> pull(language)
+me <- scatter |> filter(language %in% me_langs, !is.na(ed_years)) |>
+  mutate(ed_grp = ed_group(ed_years))
+ggplot(me, aes(age, prop, colour = ed_grp, fill = ed_grp)) +
+  geom_point(alpha = 0.05, size = 0.3) +
+  geom_smooth(method = "loess", se = TRUE, span = 0.9, linewidth = 0.7, alpha = 0.15) +
+  facet_wrap(~ language, ncol = 4) +
+  scale_colour_brewer(palette = "Dark2", name = "Maternal ed.", na.translate = FALSE) +
+  scale_fill_brewer(palette = "Dark2", name = "Maternal ed.", na.translate = FALSE) +
+  coord_cartesian(ylim = c(0, 1)) +
+  labs(x = "age (months)", y = "proportion of words produced") +
+  theme_minimal(base_size = 9) + theme(legend.position = "bottom")
+```
+
+# 3. Cross-sectional demographic effects (parallels `fig-demographics`)
+
+Per-language effects on **efficiency** (intercept at a0) and **acceleration**
+(log-age slope), with a random-effects meta-analytic estimate. Sex coded as
+*Male* effect (negative = female advantage); maternal ed per SD of years.
+
+```{r fig-forest-xsec}
+#| fig-width: 10
+#| fig-height: 9
+forest_df <- fits$xsec |>
+  pivot_longer(c(eff, acc), names_to = "component", values_to = "estimate") |>
+  mutate(se = if_else(component == "eff", eff_se, acc_se),
+         component = recode(component, eff = "Efficiency", acc = "Acceleration"),
+         component = factor(component, levels = c("Efficiency","Acceleration")),
+         lo = estimate - 1.96*se, hi = estimate + 1.96*se,
+         predictor = recode(predictor, sex = "Sex (Male vs Female)",
+                            matEd = "Maternal education (per SD)"))
+meta_df <- fits$meta |>
+  mutate(component = recode(component, efficiency = "Efficiency", acceleration = "Acceleration"),
+         component = factor(component, levels = c("Efficiency","Acceleration")),
+         predictor = recode(predictor, sex = "Sex (Male vs Female)",
+                            matEd = "Maternal education (per SD)"))
+
+plot_forest <- function(pred) {
+  d <- forest_df |> filter(predictor == pred) |>
+    mutate(language = fct_reorder(language, estimate, .fun = function(x) x[1]))
+  m <- meta_df |> filter(predictor == pred)
+  ggplot(d, aes(estimate, language)) +
+    geom_vline(xintercept = 0, linetype = "dashed", colour = "grey60") +
+    geom_pointrange(aes(xmin = lo, xmax = hi), size = 0.3, colour = "grey30") +
+    geom_vline(data = m, aes(xintercept = estimate), colour = "#c41e37", linewidth = 0.5) +
+    geom_rect(data = m, aes(xmin = ci.lb, xmax = ci.ub, ymin = -Inf, ymax = Inf),
+              inherit.aes = FALSE, fill = "#c41e37", alpha = 0.12) +
+    facet_wrap(~ component, scales = "free_x") +
+    labs(x = "estimate (logits)", y = NULL, title = pred,
+         subtitle = "grey = per-language; red band = random-effects meta-analytic 95% CI") +
+    theme_minimal(base_size = 9) +
+    theme(plot.title = element_text(face = "bold"))
+}
+plot_forest("Sex (Male vs Female)")
+plot_forest("Maternal education (per SD)")
+```
+
+```{r meta-table}
+fits$meta |>
+  mutate(across(c(estimate, ci.lb, ci.ub, pval, tau2), ~round(., 3))) |>
+  knitr::kable(caption = "Cross-sectional random-effects meta-analysis")
+```
+
+# 4. Cross-sectional **and** longitudinal together (paper candidate)
+
+The meta-analytic cross-sectional estimate next to the longitudinal estimate
+(raw per-child BLUPs from the paper's D_log fits, same units). Cross-sectional
+recovers **efficiency** accurately; **acceleration** is inflated cross-sectionally.
+
+```{r fig-combined}
+#| fig-width: 9
+#| fig-height: 5
+combine <- bind_rows(
+  fits$meta      |> mutate(method = "Cross-sectional (meta, this notebook)"),
+  fits$long_meta |> mutate(method = "Longitudinal (meta, paper BLUPs)")
+) |>
+  mutate(component = recode(component, efficiency = "Efficiency", acceleration = "Acceleration"),
+         component = factor(component, levels = c("Acceleration","Efficiency")),
+         predictor = recode(predictor, sex = "Sex (Male vs Female)",
+                            matEd = "Maternal education (per SD)"))
+ggplot(combine, aes(estimate, component, colour = method)) +
+  geom_vline(xintercept = 0, linetype = "dashed", colour = "grey60") +
+  geom_pointrange(aes(xmin = ci.lb, xmax = ci.ub),
+                  position = position_dodge(width = 0.5), size = 0.5) +
+  facet_wrap(~ predictor, scales = "free_x") +
+  scale_colour_manual(values = c("Cross-sectional (meta, this notebook)" = "#1e88e5",
+                                 "Longitudinal (meta, paper BLUPs)" = "#c41e37"), name = NULL) +
+  labs(x = "estimate (logits, per SD predictor)", y = NULL) +
+  theme_minimal(base_size = 10) + theme(legend.position = "bottom")
+```
+
+# 5. Anomaly checks
+
+Flagged from the cross-sectional table: French (French) maternal-ed
+*acceleration* < 0, and Spanish (European/Mexican) maternal-ed *efficiency*
+< 0. Inspect the maternal-ed coding and the raw curves.
+
+```{r anomaly-coding}
+# what maternal-ed categories actually appear, and how the curves separate
+chk <- scatter |> filter(language %in% c("French (French)","Spanish (European)","Spanish (Mexican)"),
+                         !is.na(ed_years)) |>
+  mutate(ed_grp = ed_group(ed_years))
+chk |> count(language, ed_years, ed_grp) |>
+  pivot_wider(names_from = language, values_from = n, values_fill = 0) |>
+  knitr::kable(caption = "Maternal-ed (years) composition in the anomaly languages")
+```
+
+```{r fig-anomaly}
+#| fig-width: 9
+#| fig-height: 3.5
+ggplot(chk, aes(age, prop, colour = ed_grp, fill = ed_grp)) +
+  geom_smooth(method = "loess", se = TRUE, span = 0.9, linewidth = 0.8, alpha = 0.15) +
+  facet_wrap(~ language, scales = "free_x") +
+  scale_colour_brewer(palette = "Dark2", name = "Maternal ed.") +
+  scale_fill_brewer(palette = "Dark2", name = "Maternal ed.") +
+  labs(x = "age (months)", y = "proportion produced") +
+  theme_minimal(base_size = 9) + theme(legend.position = "bottom")
+```
