@@ -8,7 +8,7 @@ title: Efficiency and acceleration in the accumulation of children’s early voc
 title-short: Efficiency and acceleration 
 keywords: Early word learning; Bayesian data analysis; Large language models
 abstract: |
-  \noindent Children learn hundreds of words over the first few years of their life. This process begins slowly but increases until only a few exposures to a word are necessary for a child to learn it. Yet there are also wide variations between children, and the distribution across children has not been accurately characterized. Here we present a statistical model describing this process as accelerating accumulation, with children varying in both the slope and intercept of their accumulation. Using data from three languages, this model provides a good characterization of longitudinal growth and provides insights into the sources of age and socioeconomic variation. Using dense observations of children's early language environment, the model also can be used to estimate how much variation between children is due to differences in language input, finding estimates that converge with recent meta-analyses. In contrast to children, large language models are not well-described by this model: they show standard accumulator dynamics and very limited variability. 
+  \noindent Children learn hundreds of words over the first few years of their life. This process begins slowly but increases until only a few exposures to a word are necessary for a child to learn it. Yet there are also wide variations between children, and the nature of this variation has not been accurately characterized. Here we present a statistical model describing this process as accelerating accumulation, with children varying in both the slope and intercept of their accumulation. Using data from three languages, this model provides a good characterization of longitudinal growth and gives insights into the sources of age and socioeconomic variation. Using dense observations of children's early language environment, the model also can be used to estimate how much variation between children is due to differences in language input, finding estimates that converge with recent meta-analyses. In contrast to children, large language models are not well-described by this model: they show standard accumulator dynamics and very limited variability. 
 
 bibliography: standard_model.bib
 format:
@@ -56,10 +56,9 @@ knitr::opts_chunk$set(
 ```
 
 
-
 Children’s early vocabulary grows very rapidly during early childhood, with large variation between children [@fenson1994;@fenson2007;@frank2021]. The growth has theoretical, practical, and methodological importance. From a theoretical perspective, growth mechanisms shed light on children’s fundamental learning mechanisms and how they change across childhood [@mcmurray2007;@bloom2002;@frank2021]. From a practical perspective, early vocabulary is an important precursor -- and predictor -- of academic achievement [@marchman2008;CITES]. From a methodological perspective, vocabulary also affords a unique psychometric opportunity to study human variation because, unlike nearly all important human psychological metrics, there is a true zero point -- a time before which children know no words. Thus, absolute levels of variability can be calculated. 
 
-One dominant viewpoint is that children's vocabulary growth can be characterized as a process of accumulation [@mcmurray2007; @mitchell2009; @hidaka2013; @mollica2017; @kachergis2022]. Each distinct word (type) can be conceptualized as a "bucket," and every token of language input then is a "drop" that falls into its respective bucket. When each bucket is full, the word is learned [@mcmurray2007;@kachergis2022]. These models have been used to recover interpretable differences in "bucket size," often based on word properties including concreteness and syntactic category [@hidaka2013;@kachergis2022].
+One dominant viewpoint is that children's vocabulary growth can be characterized as a process of accumulation [@mcmurray2007; @mitchell2009; @hidaka2013; @mollica2017; @kachergis2022]. Each distinct word (type) can be conceptualized as a "bucket," and every token of language input then is a "drop" that falls into its respective bucket. When each bucket is full, the word is learned [@mcmurray2007;@kachergis2022]. These models have been used to recover interpretable differences in "bucket size," often based on word properties including concreteness and syntactic category [@hidaka2013;@kachergis2022]. They also provide a graded explanation for the widely-observed "vocabulary spurt" phenomenon -- in which children's rate of vocabulary learning appears to increase dramatically  [@frank2021;@ganger2004;@gomezdiaz2024]. 
 
 The accumulator view connects with a viewpoint in which the quantity of language that children hear plays a strong causal role in the speed of their learning [@fernald2012]. Indeed, there is systematic evidence that variation in children's input is related to variation in vocabulary [@fernald2012;@weisleder2013;CITES]. Studies of input have identified systematic variation in *quantity* in terms of sheer amount of tokens as well as variation in *quality*. Measuring what makes input high quality has been challenging, but higher quality input likely has higher lexical diversity, longer sentences, more declarative and interrogative content relative to imperatives, and more elaborated discourse [LOTS OF CITES]. 
 
@@ -67,9 +66,9 @@ A naïve interpretation of the accumulator view would suggest that most of the v
 
 As this discussion indicates, despite the promise of the accumulator viewpoint, it has not been used successfully to understand variation between individuals. Instead, the majority of applications have focused on variation between words. Further, the rapidity of children's early word learning stands as a rebuke to this view. Sometimes a small number of examples is enough to form a lasting representation [@markson1997;@woodward1994]. Perhaps only a small number of high-quality instances is sufficient for learning [@trueswell2013;@mollica2017], but if so, why do some words take much longer to learn?
 
-The goal of this work is to address these puzzles through systematic investigation and extension of accumulator models. All models start with the observation that the overall size of children's vocabulary increases supra-linearly. But does this growth imply changes in the underlying process?
+The goal of this work is to address these puzzles through systematic investigation and extension of accumulator models. All models seek to explain the observation that the overall size of children's vocabulary increases supra-linearly. Does this growth imply developmental changes in the underlying process?
 
-Following previous work, we start with the idea that children's *internal learning ability* (not just their observed vocabulary growth) accelerates across development [@hidaka2013]. In the bucket metaphor, the drops get bigger as children get older. We begin by extending the psychometric accumulator model of @kachergis2022: our key addition is to describe variation between individual children by modeling both their individual learning efficiency and the acceleration of their learning. This extension defines a longitudinal growth model that can be fit to data, and that provides a simple reconciliation between slow accumulation and fast mapping: the number of examples of a word necessary for learning declines by multiple orders of magnitude from age one to age three. 
+Following previous work, we start with the idea that children's *internal learning ability* (not just their observed vocabulary growth) accelerates across development [@hidaka2013;@mayor2010]. In the bucket metaphor, the drops get bigger as children get older. We begin by extending the psychometric accumulator model of @kachergis2022: our key addition is to describe variation between individual children by modeling both their individual learning efficiency and the acceleration of their learning. This extension defines a longitudinal growth model that can be fit to data, and that provides a simple reconciliation between slow accumulation and fast mapping: the number of examples of a word necessary for learning declines by multiple orders of magnitude from age one to age three. 
 
 To constrain our model, we use data from the MacArthur-Bates Communicative Development Inventories [MB-CDI; @fenson1994;@marchman2021], a popular parent report instrument in which parents are asked to indicate which words their child produces and understands. Here we focus exclusively on production, which is used with older children and which tends to be a more reliable measure [@frank2021]. We make use of longitudinal data from Wordbank [@frank2017], an open repository of data from the MB-CDI. 
 
@@ -440,64 +439,22 @@ Children's vocabulary is known to be related to a number of sociodemographic pre
 
 Our longitudinal model offers a summary of individual children's growth in terms of both their efficiency (intercept) and their acceleration (slope). This decomposition allows us to ask whether these two demographics effects -- sex and maternal education -- are seen in efficiency, acceleration, or both. For each child in our analysis, we extracted the best linear unbiased prediction (BLUP) from our models. We then regressed intercept and slope terms against each demographic predictor separately for each language. @fig-demographics shows the coefficients from this analysis, along with a cross-language meta-analytic estimate. 
 
-Sex effects show the predicted female advantage across all four languages, but this effect manifests itself only in efficiency  ($\beta = `r round(meta_summary$estimate[2],2)`$, $p = `r papaja::apa_p(meta_summary$p)[2]`$) not acceleration ($\beta = `r round(meta_summary$estimate[4],2)`$, $p = `r papaja::apa_p(meta_summary$p)[4]`$). In contrast, though maternal education data were only available for three languages, effects were numerically present in both measures, though stronger in acceleration ($\beta = `r round(meta_summary$estimate[3],2)`$, $p = `r papaja::apa_p(meta_summary$p)[3]`$) than in efficiency ($\beta = `r round(meta_summary$estimate[1],2)`$, $p = `r papaja::apa_p(meta_summary$p)[1]`$). One interpretation of these findings is that sex effects reflect a small constant offset in average ability. In contrast, socioeconomic differences as reflected in maternal education might continue to compound across development [@fernald2013;@hart2003].
+Sex effects show the predicted female advantage across all four datasets, but this effect manifests itself only in efficiency  ($\beta = `r round(meta_summary$estimate[2],2)`$, $p = `r papaja::apa_p(meta_summary$p)[2]`$) not acceleration ($\beta = `r round(meta_summary$estimate[4],2)`$, $p = `r papaja::apa_p(meta_summary$p)[4]`$). In contrast, though maternal education data were only available for two languages, effects were numerically present in both measures, though neither was significant ( efficiency: $\beta = `r round(meta_summary$estimate[1],2)`$, $p = `r papaja::apa_p(meta_summary$p)[1]`$; acceleration: $\beta = `r round(meta_summary$estimate[3],2)`$, $p = `r papaja::apa_p(meta_summary$p)[3]`$). One interpretation of these findings is that sex effects reflect a small constant offset in average ability. In contrast, socioeconomic differences as reflected in maternal education might continue to compound across development [@fernald2013;@hart2003].
 
+## Population input-related variation corresponds to meta-analytic estimates
 
-## Growth in ability leads to rapid changes in learning times for individual words
+In our prior model fits, we fit population variation in efficiency and acceleration without considering the connection to language input. We next consider whether this relationship can be estimated at a population level. We use markov chain monte carlo to fit the full version of model 4, with both efficiency and acceleration linked to input variation (see Supplemental Methods for full model specification). We estimate these linkages by assuming a known level of population variation in language input rate: $\sigma_r$. We can then examine the variance due to input variation vs. population by fitting the parameters $\pi_\xi = \frac{\sigma_\alpha^2}{\sigma_\alpha^2 + \sigma_r^2}$ and $\pi_\kappa = \frac{\sigma_\alpha^2}{\sigma_\zeta^2 + \sigma_r^2}$, which respectively define the proportion of population variation in efficiency and acceleration due to input variation. 
 
-```{r fig-efficiency, fig.width=7, fig.height=4}
-#| label: fig-efficiency
-#| fig-cap: ""
-# Per-word "exposures to 50% production" for a typical English child,
-# from the M_best fit + CHILDES frequencies (data in fig4_exposure.rds;
-# see paper/build_cache.R section 5 and model/scripts/exposure_to_learn.R).
-# Each point is a word; x = predicted age at 50% production, y = cumulative
-# exposures of that word by that age (log scale). Lines: per-class lm fits.
-items <- exposure$items
-meta  <- exposure$meta
+Estimating children's input range is notoriously tricky, since the rate of language that children hear varies across cultures, families, activities, and measurement occasions [@coffey2024]. To establish a range of plausible values for $\sigma_r$, we surveyed the literature for plausible estimates [CITES;@sperry2018;@coffey2024]. In our main simulations we set $\sigma_r=.53$, a value drawn from @sperry2018, who estimated a mean of 419k tokens per month ($\pm$1 SD: 329k -- 957k). See Supplemental Methods for other input estimates.
 
-# label the extreme word per class on log-exposure (balanced across classes)
-labels_df <- items |>
-  mutate(log_N = log10(N_word)) |>
-  group_by(lexical_class) |>
-  arrange(log_N) |>
-  slice(c(1, n())) |>
-  ungroup()
+[results]
 
-ggplot(items, aes(t_50, N_word, colour = lexical_class)) +
-  geom_point(alpha = 0.55, size = 1.1) +
-  geom_smooth(method = "lm", se = FALSE, linewidth = 0.7, formula = y ~ x) +
-  geom_label_repel(data = labels_df, aes(label = item),
-                   size = 2.8, alpha = 0.95, show.legend = FALSE,
-                   box.padding = 0.4, max.overlaps = Inf,
-                   min.segment.length = 0) +
-  scale_y_log10(labels = scales::label_number(big.mark = ",")) +
-  scale_x_continuous(limits = c(10, 40)) +
-  scale_colour_brewer(palette = "Dark2", name = "Class") +
-  labs(x = "Age (months) when word is produced at 50%",
-       y = "Cumulative exposures of word at that age") +
-  theme_minimal(base_size = 11) +
-  theme(plot.title = element_text(face = "bold"),
-        plot.subtitle = element_text(size = 9, colour = "grey25"),
-        legend.position = "bottom")
-```
+[Sensitivity checks]
 
-As an illustration of this change in efficiency, Figure 2 shows a model-derived estimate of the average number of times a child would need to hear a word before producing it (See SI: Changes in Word Efficiency), using frequency estimates from the CHILDES Corpus [@mcwhinney2020;@sanchez2019]. Across different word classes (e.g., nouns, verbs, closed class words), efficiency increases exponentially, such that early-learned words such as "ball" may be heard tens of thousands of times before they are produced, while later learned words such as "vitamin" might only be heard tens of times before being produced. 
+[relation to meta-analysis]
 
+## Input modestly predicts efficiency and acceleration for individual children
 
-## Estimating input 
-
-
-Under a range of plausible assumptions about variation in input, all children show supra-linear scaling of growth, even accounting for accumulation dynamics.
-
-As discussed above, one important question is how much of variance is due to variance in rate. We explore this by asking about the parameter $\pi$,
-
-$$\pi = \frac{\sigma_\alpha^2}{\sigma_\alpha^2 + \sigma_r^2}$$
-
-If $\pi$ > .5, then the majority of variation between individuals is not due to pure accumulation rate. 
-
-In addition, 80-90% of between-child variation remains unexplained by input quantity. 
-These conclusions are supported by analysis of longitudinal input data from BabyView (N=20) and SEEDLings (N=44) datasets, which contain child-specific estimates of input, and Peekbank (N=XYZ), which contains child-specific estimates of processing speed.
 
 ```{r fig-io-partition, fig.width=11, fig.height=4.5}
 #| label: fig-io-partition
@@ -559,10 +516,69 @@ p_partition <- ggplot(parts, aes(age, var, fill = component)) +
 p_obs + p_partition + plot_layout(widths = c(1, 1))
 ```
 
+While the population estimates of input-sensitivity given above match our expectations from meta-analyses, they do not offer a direct estimate of input couplings within individual children. For this, we turn to a set of four longitudinal datasets that include dense home recordings (see @tab-datasets). Three of these include day-long audio recordings using LENA (Language Environment Analysis) recorders, which offer an automated adult word count estimate that has been validated by a number of transcription studies [@cristia2021]. The last includes short video recordings of egocentric video recorded in children's homes, with word counts estimated from automated transcripts. Each of these provides a noisy proxy for total home input, but nevertheless allows us to estimate models that include individual input. 
 
-Thus, modeling human learning requires positing other sources of variability and acceleration. Sources of variability could include from variation in interactional input quality, genetic variation between children, environmental richness not captured by input, etc. Sources of acceleration could include increases in processing efficiency, learning-to-learn including mutual exclusivity, shape bias, syntactic bootstrapping, as well as domain general changes in perception, processing speed, memory, attention or other aspects of cognition. The key to understanding children’s data efficiency may thus lie in better understanding when and how children’s learning accelerates with maturation and experience. 
+We fit the same model linking input estimates to variation in efficiency and acceleration, but this time with observations of $r_i$ for each child. Results for $\pi_alpha$ and $\pi_zeta$ are shown in @fig-io-partition. 
 
-We end by providing a quantitative comparison between within-child human learning and LLM scaling laws, showing that children’s early language learning is strikingly different from LLM scaling: it shows both steeper scaling and greater variance in growth rate.
+[RESULTS]
+
+## Processing speed is strongly associated with efficiency 
+
+Two of the datasets we included also include longitudinal reaction time data from the looking-while-listening paradigm (LWL), archived in the Peekbank repository [@zettersten2022]. In LWL, children see two pictures (e.g. a book and a car) and their eye movements are recorded as they hear a sentence that refers to one of the pictures (e.g., "look at the book"). If the child is looking at the distractor image (the car), then their reaction time to shift their eyes to the target provides an index of their speed of word recognition [@fernald2008;@frank2026].
+
+We fit a modification of our model to this subset of the data (N=XYZ). Efficiency and acceleration terms included *both* input and LWL reaction time as predictors. 
+
+
+
+## Growth in ability leads to rapid changes in learning times for individual words
+
+```{r fig-efficiency, fig.width=7, fig.height=4}
+#| label: fig-efficiency
+#| fig-cap: ""
+# Per-word "exposures to 50% production" for a typical English child,
+# from the M_best fit + CHILDES frequencies (data in fig4_exposure.rds;
+# see paper/build_cache.R section 5 and model/scripts/exposure_to_learn.R).
+# Each point is a word; x = predicted age at 50% production, y = cumulative
+# exposures of that word by that age (log scale). Lines: per-class lm fits.
+items <- exposure$items
+meta  <- exposure$meta
+
+# label the extreme word per class on log-exposure (balanced across classes)
+n_to_label <- 3
+  
+labels_df <- items |>
+  mutate(log_N = log10(N_word)) |>
+  group_by(lexical_class) |>
+  arrange(log_N) |>
+  slice(c(1:n_to_label, (n() - n_to_label):n())) |>
+  ungroup()
+
+ggplot(items, aes(t_50, N_word, colour = lexical_class)) +
+  geom_point(alpha = 0.55, size = 1.1) +
+  geom_smooth(method = "lm", se = FALSE, linewidth = 0.7, formula = y ~ x) +
+  geom_label_repel(data = labels_df, aes(label = item),
+                   size = 2.8, alpha = 0.95, show.legend = FALSE,
+                   box.padding = 0.4, max.overlaps = Inf,
+                   min.segment.length = 0) +
+  scale_y_log10(labels = scales::label_number(big.mark = ","),
+                breaks = c(100,1000,10000,100000), 
+                limits = c(100, 1000000)) +
+  scale_x_continuous(limits = c(10, 40)) +
+  scale_colour_brewer(palette = "Dark2", name = "Class") +
+  labs(x = "Age (months) when 50% of children produce word",
+       y = "Cumulative exposures at AoA") +
+  theme_minimal(base_size = 11) +
+  theme(plot.title = element_text(face = "bold"),
+        plot.subtitle = element_text(size = 9, colour = "grey25"),
+        legend.position = "bottom")
+```
+
+As an illustration of the changes in efficiency and acceleration that we observe in our data, we computed the average proportion of exposures necessary for a child to learn a word across ages. @fig-efficiency shows a model-derived estimate of the average number of times a word is heard before more than 50% of children produce it (See SI: Changes in Word Efficiency), using frequency estimates from the CHILDES Corpus [@macwhinney2000;@sanchez2019]. 
+
+Across different word classes (e.g., nouns, verbs, closed class words), efficiency increases exponentially, such that early-learned words such as "book" may be heard tens of thousands of times before they are produced, while later learned words such as "vitamin" might only be heard hundreds times before being produced. Indeed, this analysis likely understates the degree of change in efficiency as it assumes that each exposure to a word is equally meaningful. In fact, individual exposures vary widely in how much information they give. Sometimes words are overheard rather than directed to the child, or lack physical context to allow for clear inference [@effective_learning_instances_erika;@trueswell2014;@mollica2017]. Thus, in line with both intuition and experiments, the total number of exposures required on average to learn a word might indeed be only a small handful by age three [@markson1997;@bloom2002].
+
+## Large language models do not show acceleration in their vocabulary growth
+
 
 ```{r fig-llm-acceleration, fig.width=7, fig.height=4}
 #| label: fig-llm-acceleration
@@ -595,7 +611,13 @@ ggplot(sl, aes(slope_natural, fill = label, colour = label)) +
   theme(legend.position = "bottom")
 ```
 
+Small-scale language models trained on developmentally-realistic corpora have become a useful tool for understanding early language development [@huebner2022;@futtrell2026;@frank2025]. For our final experiments, we were interested in whether large language models show the same patterns of developmental change in efficiency or acceleration. We made use of work by @chang2022, who extracted per-word acquisition curves from language models. They computed logistic fits to the surprisal (negative log probability) of individual words across training, estimating 
 
+We can compare 
+
+@evanston2023 investigated 
+
+We end by providing a quantitative comparison between within-child human learning and LLM scaling laws, showing that children’s early language learning is strikingly different from LLM scaling: it shows both steeper scaling and greater variance in growth rate.
 
 # Discussion
 
@@ -609,18 +631,55 @@ Where does acceleration come from? Could come from a variety of sources, includi
 
 Role of input: Coffey 2026 variance decomposition
 
-<!-- Children’s early word learning is alternatively portrayed as either a process of gradual accumulation or as an inferential process that results in rapid mapping. How can these two views be rectified?  -->
-
-<!-- Children’s early language learning is often portrayed as a process of accumulation and gradual learning, with statistical learning, mutual exclusivity and input viewpoints highlighting the accumulation nature. In contrast, studies of processing and word mapping highlight the increases in efficiency that happen over the same  period. How can these two views be rectified? One clue comes from examining the two key signatures of early vocabulary growth: variability and acceleration. What is the shape of this acceleration? And what is the source of variability, from children’s input or otherwise?? We present a quantitative model that unify these views while explaining both the variability and acceleration of children’s early language growth. The resulting model provides a good quantitative explanation for longitude vocabulary growth across large population of children. It also shows that by their increasing efficiency, and their ability of children, learning fundamentally different ways than large language, models, which show classic accumulator dynamics. -->
 
 Furthermore, how does the accumulation process relate to the rapid growth of vocabulary? On some models, accumulation by itself can produce an exponential “vocabulary explosion” while the child’s own learning abilities remain constant. On other accounts, however, the child’s own abilities change over development. These changes could be due to the accumulation of language allowing bootstrapping (e.g., via mutual excusivity or the shape bias), they could be through faster processing (Fernald rich get richer), or they could be via general maturation (e.g., better memory, faster processing). Or all of these. 
 
+Thus, modeling human learning requires positing other sources of variability and acceleration. Sources of variability could include from variation in interactional input quality, genetic variation between children, environmental richness not captured by input, etc. Sources of acceleration could include increases in processing efficiency, learning-to-learn including mutual exclusivity, shape bias, syntactic bootstrapping, as well as domain general changes in perception, processing speed, memory, attention or other aspects of cognition. The key to understanding children’s data efficiency may thus lie in better understanding when and how children’s learning accelerates with maturation and experience. 
+
+
+Network models and their predictions e.g. [@steyvers2005;@hills2009;@fourtassi2020]
 
 <!-- Blingualism  -->
 
 <!-- International adoption -->
 
 <!-- https://bergelsonlab.fas.harvard.edu/sites/g/files/omnuum3941/files/2025-01/meylan_bergelson_2021_ARL.pdf	 -->
+
+
+# Methods
+
+## Data and Code
+
+Data were retrieved from Wordbank using the `wordbankr` package [@frank2017], childes-db using childesr [@sanchez2019], and peekbank using peekbankr [@zettersten2022]. BabyView data are from release 2025.2, specifically those used by @tan2026. SEEDLings data are downloaded from the materials provided by @egan2025.
+
+Reproducible code for this paper is available at http://github.com/langcog/standard-model-2. 
+
+## Models
+
+### Frequentist models 
+
+Initial models were fit with `glmer` [@glmer], with the following specifications:
+
+* M1: `produces ~ offset(log_age) + (1 | item)` 
+* M2: `produces ~ 1 + log_age + (1 | item)` 
+* M3: `produces ~ 1 + log_age + (1 | item) + (1 | child)` 
+* M4: `produces ~ 1 + log_age + (1 | item) + (log_age | child)` 
+
+Linear variants reported in the supplement used linear age rather than log age. 
+
+### Bayesian models
+
+Bayesian models were fit using Stan [@stan].
+
+Priors
+
+Inference
+
+### Input
+
+### GPT-2 models
+
+We trained XYZ
 
 # References
 

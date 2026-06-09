@@ -10,6 +10,19 @@ format:
     keep-tex: true
 ---
 
+# Supplemental Methods
+
+## Mixed effects model details
+
+
+
+
+## Efficiency computation
+
+
+
+# Supplemental Results
+
 ```{r si-setup, include=FALSE}
 suppressPackageStartupMessages({
   library(here); library(dplyr); library(tidyr); library(ggplot2)
@@ -23,6 +36,8 @@ knitr::opts_chunk$set(
   fig.align = "center", out.width = "100%", dpi = 300
 )
 ```
+
+
 
 ```{r fig-cross-sectional-confound, fig.width=9, fig.height=4}
 #| label: fig-cross-sectional-confound
@@ -323,6 +338,8 @@ data gap may be harder to close than raw data counts suggest.
 <!-- [BIB NEEDED] Kaplan et al. (2020) and Hoffmann et al. (2022) are named
      in text but have NO verified bib entries yet — do not promote with live
      @ markers until added. -->
+```     
+     
 ```{r fig-schematic-theta, fig.width=8, fig.height=2.6}
 #| label: fig-schematic-theta
 #| fig-cap: ""
