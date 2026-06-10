@@ -3,29 +3,43 @@
 Bayesian accumulator model of early word learning, linking language
 input, vocabulary outcomes, and individual differences. Successor to
 Kachergis, Marchman, & Frank (2021). See
-[`outputs/model_explainer.pdf`](outputs/model_explainer.pdf) for the model
-specification and [`outputs/experiments.md`](outputs/experiments.md) for a
-running log of fits and findings.
+[`reports/model_explainer.pdf`](reports/model_explainer.pdf) for the model
+specification and [`journal/experiments.md`](journal/experiments.md) for the
+running log of fits and findings (LLM arc: [`journal/experiments_llm.md`](journal/experiments_llm.md)).
 
 ## Layout
 
 ```
 standard_model_2/
-├── Makefile                        ← single entry point for all workflows
-├── model/
-│   ├── stan/                       ← Stan models (cross-sectional + longitudinal)
-│   ├── R/                          ← config + helpers + PPC (sourced by scripts)
-│   ├── scripts/                    ← driver scripts (numbered in workflow order)
-│   ├── fits/                       ← output .rds files (gitignored)
-│   └── figs/                       ← output .png figures (gitignored)
-├── outputs/
-│   ├── model_explainer.{tex,pdf}   ← durable model specification
-│   ├── experiments.md              ← running log: each fit + backlog
-│   ├── model_summaries.md          ← literature review notes
-│   └── _archive/                   ← superseded standalone findings files
-├── data/                  ← raw external inputs (Sperry, BabyView, etc.)
-└── sherlock/                       ← SLURM scripts for remote fits
+├── Makefile                ← local build targets (make with no args prints usage)
+├── MOVES.md                ← old→new path map from the 2026-06 reorg
+├── paper/                  ← the manuscript (.qmd, build_*.R, cache/)
+├── model/                  ← shared engine
+│   ├── stan/               ← Stan models
+│   ├── R/                  ← config + helpers (sourced by scripts)
+│   └── scripts/            ← driver scripts (the studies below index into here)
+├── studies/                ← one analysis per subdir + provenance map (README.md)
+│   ├── glmer_ladder/             ← Fig 2, Table 2 (model ladder)
+│   ├── cross_sectional_demographics/  ← demographics figure
+│   ├── input_estimation/         ← σ_r literature band
+│   └── {proc_dp,io_pooled,longitudinal,llm}/  ← provenance stubs → model/scripts
+├── cluster/                ← compute helpers
+│   ├── gcp/                ← Google Cloud VM launchers
+│   └── sherlock/           ← Stanford Sherlock SLURM jobs + extractors
+├── data/                   ← raw external inputs (Sperry, BabyView, peekbank, …)
+├── fits/                   ← model fit outputs (heavy .rds gitignored; summaries/ tracked)
+├── figs/                   ← figures (PNGs gitignored) + their source CSVs
+├── reports/                ← standalone docs: explainer, derivations, slides, proposal
+├── journal/                ← project history (the system of record)
+│   ├── experiments.md      ← numbered log of every fit + finding + backlog
+│   ├── experiments_llm.md  ← the LLM / GPU arc
+│   ├── PROVENANCE.md       ← per-asset provenance for the slide deck
+│   └── notes/  results/  archive/
+└── papers/                 ← literature PDFs
 ```
+
+For per-claim provenance (which scripts/fits/figures back each paper element),
+see [`studies/README.md`](studies/README.md).
 
 ## Local workflow (small fits on your laptop)
 
@@ -39,17 +53,17 @@ make analyze NAME=2pl   # plots + scalar summary
 
 Full list of targets: `make` with no argument prints usage.
 
-## Remote workflow (Sherlock — for the bigger fits)
+## Remote workflow (Sherlock / GCP — for the bigger fits)
 
-See [`sherlock/README.md`](sherlock/README.md) for step-by-step. One-liner:
+See [`cluster/sherlock/README.md`](cluster/sherlock/README.md) for step-by-step. One-liner:
 
 ```bash
 # On Sherlock login node, after one-time setup:
-sbatch sherlock/long_fit.slurm long_2pl_slopes_nor
+sbatch cluster/sherlock/long_fit.slurm long_2pl_slopes_nor
 ```
 
 Results land in `$SCRATCH/standard_model_2/fits/` and are synced home via
-`rsync`. See Sherlock README for the full cycle.
+`rsync`. GCP launchers live in [`cluster/gcp/`](cluster/gcp/).
 
 ## Getting started (on a fresh clone)
 
@@ -57,22 +71,18 @@ Results land in `$SCRATCH/standard_model_2/fits/` and are synced home via
 git clone <repo> standard_model_2
 cd standard_model_2
 
-# Local only — install R packages:
-Rscript sherlock/setup_R.R          # works both locally and on Sherlock
+# Install R packages (works locally and on Sherlock):
+Rscript cluster/sherlock/setup_R.R
 
 # Wordbank longitudinal data is pulled by model/scripts/pull_longitudinal.R
 # (requires childesr / wordbankr; uses preprocessed bundles when available
-# at fits/long_subset_data.rds).
-#
-# The Sperry / Hart-Risley / Weisleder-Fernald per-recording rate CSV
-# lives at data/sperry/hourly_tokens_Sperry_HartRisley.csv.
+# at fits/long_subset_data.rds). The Sperry / Hart-Risley / Weisleder-Fernald
+# per-recording rate CSV lives at data/sperry/hourly_tokens_Sperry_HartRisley.csv.
 
-# Sanity check
 make smoke
 ```
 
 The code auto-detects the project root (by searching for `Makefile` in
 the cwd and parents), or respects the env var `STANDARD_MODEL_ROOT`.
 Output paths can be redirected with `STANDARD_MODEL_FITS_DIR` and
-`STANDARD_MODEL_FIGS_DIR` — used on Sherlock to send outputs to
-`$SCRATCH`.
+`STANDARD_MODEL_FIGS_DIR` — used on Sherlock to send outputs to `$SCRATCH`.

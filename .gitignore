@@ -35,11 +35,11 @@ texput.log
 # Large Stan fits and figs — regenerable, take a lot of space.
 # Intermediate data (subsets) are reproducible from scripts.
 fits/**/*.rds
-outputs/figs/**/*.png
+figs/**/*.png
 # But keep the directories themselves so scripts don't have to mkdir
 !fits/.gitkeep
-!outputs/figs/.gitkeep
-!outputs/figs/**/.gitkeep
+!figs/.gitkeep
+!figs/**/.gitkeep
 # And keep the pulled raw data — these need wordbankr/childesr (R >= 4.4
 # and mysql headers) which Sherlock's R 4.2 can't handle. Commit the
 # intermediate files so Sherlock can skip those packages.
@@ -107,13 +107,21 @@ secrets/
 .positai
 
 # Feng eval partial-training snapshots (overwritten frequently; only final committed)
-outputs/feng_eval/seed*_partial.csv
+fits/feng_eval/seed*_partial.csv
 
+# LaTeX build artifacts from the standalone docs in reports/
+reports/**/*.aux
+reports/**/*.log
+reports/**/*.out
 
 # --- Office lock files
 ~$*
 .claude/scheduled_tasks.lock
-sherlock/glmer_ladder_manifest.csv
+cluster/sherlock/glmer_ladder_manifest.csv
 
 # Quarto auto-generated render artifacts
-outputs/paper/standard_model_files/
+paper/standard_model_files/
+
+# Stray default R plot dumps
+Rplots.pdf
+**/Rplots.pdf

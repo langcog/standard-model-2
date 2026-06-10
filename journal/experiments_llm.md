@@ -14,9 +14,9 @@ distinct question.
 σ_κ ≈ 3.5), and (3) re-asking the acceleration question on a **development-matched
 axis** (distinct input, not training steps).
 
-Background docs: [`outputs/llm_variability_plan.md`](llm_variability_plan.md),
-[`outputs/marlowe_pilot_results.md`](marlowe_pilot_results.md),
-[`outputs/feng_evaluation_report.md`](feng_evaluation_report.md). Cluster
+Background docs: [`journal/notes/llm_variability_plan.md`](notes/llm_variability_plan.md),
+[`journal/notes/marlowe_pilot_results.md`](notes/marlowe_pilot_results.md),
+[`journal/notes/feng_evaluation_report.md`](notes/feng_evaluation_report.md). Cluster
 how-to: the [`gpt2-childes-training`](../.claude/skills/gpt2-childes-training.md)
 skill.
 
@@ -74,9 +74,9 @@ distribution accounts for ~0 of the 10× gap — it is structural.**
 3.22 → 2.36 → 1.85 → 1.35 → 0.84 → 0.69 → **0.74** as training reached
 convergence. **Only fully-trained fits are the meaningful comparand.**
 
-**Artifacts.** [`outputs/feng_evaluation_report.md`](feng_evaluation_report.md);
+**Artifacts.** [`journal/notes/feng_evaluation_report.md`](notes/feng_evaluation_report.md);
 `data/feng_2026/gpt2_childes_seed{0,42,123}_sigmoids.txt`;
-`outputs/figs/longitudinal/feng_chang_bergen_slope_comparison.png`; pipeline in
+`figs/longitudinal/feng_chang_bergen_slope_comparison.png`; pipeline in
 [`model/scripts/feng_eval/`](../model/scripts/feng_eval/); SLURM
 `sherlock/feng_train_gpt2.slurm`.
 
@@ -110,8 +110,8 @@ per-word variance conflates true data-effect with fit noise; 10M absolute slopes
 are depressed by plateau bias, so only the within-scale A-vs-B comparison is valid.
 
 **Artifacts.** `data/feng_2026/gpt2_childes_chunk{A,B}_seed42_sigmoids.txt`;
-[`outputs/marlowe_pilot_results.md`](marlowe_pilot_results.md);
-`outputs/figs/longitudinal/marlowe_data_variance_pilot.png`;
+[`journal/notes/marlowe_pilot_results.md`](notes/marlowe_pilot_results.md);
+`figs/longitudinal/marlowe_data_variance_pilot.png`;
 `model/scripts/feng_eval/pilot_data_variance_plot.R`. **PR #20 (merged).**
 
 ---
@@ -191,7 +191,7 @@ verified `load_best_model_at_end` loads the best checkpoint) and `--max_eval_blo
 (subsample the per-epoch val eval used for early-stopping; 99s→6s/epoch, 16×).
 
 **Result** (reproduce: [`ladder_analysis_final.R`](../model/scripts/feng_eval/ladder_analysis_final.R);
-data [`outputs/feng_eval/ladder_bestval.csv`](feng_eval/ladder_bestval.csv)):
+data [`fits/feng_eval/ladder_bestval.csv`](feng_eval/ladder_bestval.csv)):
 
 - **Trajectory decelerates** across all 5 seeds (concave in log-input; mean
   held-out CDI surprisal 7.8 → 4.6 nats over 0.5M → 24M words) — opposite to
@@ -211,8 +211,8 @@ data [`outputs/feng_eval/ladder_bestval.csv`](feng_eval/ladder_bestval.csv)):
 **rate** (κ ~1.2 vs ~10), **variability** (CV 7% vs 35%), **shape** (decelerating
 vs accelerating).
 
-**Artifacts.** `ladder_analysis_final.R`, `outputs/feng_eval/ladder_bestval.csv`,
-`ladder_kappa_summary.csv`, `outputs/figs/longitudinal/ladder_development_final.png`
+**Artifacts.** `ladder_analysis_final.R`, `fits/feng_eval/ladder_bestval.csv`,
+`ladder_kappa_summary.csv`, `figs/longitudinal/ladder_development_final.png`
 (figure regenerates from the script).
 
 ---

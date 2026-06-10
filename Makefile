@@ -7,10 +7,10 @@
 ##   make diagnostics      Fit the 2x2 diagnostic sweep + LOO comparison.
 ##   make analyze          Produce RQ-aligned plots from fits.
 ##   make analyze-all      Run analyze over all 4 variants.
-##   make explainer        Recompile outputs/model_explainer.pdf from .tex.
+##   make explainer        Recompile reports/model_explainer.pdf from .tex.
 ##   make all              recovery -> data -> diagnostics -> analyze-all.
 ##   make clean-fits       Delete fits/ (force refit next run).
-##   make clean-figs       Delete outputs/figs/.
+##   make clean-figs       Delete regenerable figure PNGs under figs/.
 ##   make clean            Both.
 ##
 ## Data-size knobs for prepare_data (defaults 500 children x 200 items):
@@ -99,7 +99,7 @@ analyze-all:
 	$(RSCRIPT) $(R_FLAGS) $(SCRIPTS)/04_analyze.R all
 
 explainer:
-	cd outputs && pdflatex -interaction=nonstopmode model_explainer.tex > /dev/null \
+	cd reports && pdflatex -interaction=nonstopmode model_explainer.tex > /dev/null \
 	    && pdflatex -interaction=nonstopmode model_explainer.tex > /dev/null \
 	    ; rm -f model_explainer.aux model_explainer.log \
 	            model_explainer.out model_explainer.toc
@@ -108,7 +108,7 @@ explainer:
 # fits + outputs/figs. Safe to run any number of times (no-op if the
 # source files are gone).
 migrate:
-	@mkdir -p fits outputs/figs
+	@mkdir -p fits figs
 	@for v in baseline fix_delta fix_s both_fixed; do \
 	  [ -f model/wordbank_fit_$$v.rds ] && \
 	    mv model/wordbank_fit_$$v.rds fits/wordbank_$$v.rds && \
@@ -124,13 +124,13 @@ migrate:
 	  mv model/recovery_fit.rds fits/recovery.rds && \
 	  echo "moved recovery_fit.rds -> fits/recovery.rds" || true
 	@for f in model/*.png; do \
-	  [ -f "$$f" ] && mv "$$f" outputs/figs/ && echo "moved $$f -> figs/" || true; \
+	  [ -f "$$f" ] && mv "$$f" figs/ && echo "moved $$f -> figs/" || true; \
 	done
 
 clean-fits:
 	rm -rf fits
 
 clean-figs:
-	rm -rf outputs/figs
+	find figs -name '*.png' -type f -delete   # only regenerable PNGs; keeps tracked result CSVs
 
 clean: clean-fits clean-figs

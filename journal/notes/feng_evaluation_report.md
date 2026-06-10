@@ -56,7 +56,7 @@ Total training: 114,520 steps (20 epochs, 45,807 1024-token blocks of CHILDES). 
 
 **All three CDS-matched seeds give nearly identical medians (0.72, 0.74, 0.74) — strong seed-to-seed reproducibility. The CDS-matched GPT-2 sits inside the same tight cluster as the 4 BookCorpus-trained LMs (0.76–0.96), all far below kids (10.3).**
 
-**Headline plot:** [outputs/figs/longitudinal/feng_chang_bergen_slope_comparison.png](outputs/figs/longitudinal/feng_chang_bergen_slope_comparison.png) (Feng-CHILDES blue, C&B-BookCorpus green densities overlap almost exactly at the mode; children red is at a completely separate location ~10×).
+**Headline plot:** [figs/longitudinal/feng_chang_bergen_slope_comparison.png](figs/longitudinal/feng_chang_bergen_slope_comparison.png) (Feng-CHILDES blue, C&B-BookCorpus green densities overlap almost exactly at the mode; children red is at a completely separate location ~10×).
 
 ### Evolution of partial fits as training progressed (seed 42)
 
@@ -76,7 +76,7 @@ The slope settled at 0.74 once training reached convergence. During training the
 
 ## Caveats
 
-- **Partial-fit bias.** During training, per-word ParamScale estimates are unstable. Diagnostic per-word plots at 61 evals (`outputs/figs/longitudinal/feng_per_word_trajectories.png`) show two opposing biases:
+- **Partial-fit bias.** During training, per-word ParamScale estimates are unstable. Diagnostic per-word plots at 61 evals (`figs/longitudinal/feng_per_word_trajectories.png`) show two opposing biases:
   - *Shallowest-slope words* (e.g., `soft`, `cute`, `stay`): trajectories are still descending nearly linearly on log-step axis; the 4-PL fit reduces to a straight line because the lower asymptote hasn't been reached. As more training comes in these will become more sigmoidal and slopes will *increase*.
   - *Steepest-slope words* (e.g., `clap`, `yogurt`, `raisin`): trajectories look like step functions, fit with very small ParamScale → spuriously high slope. These are rare words (30-50 occurrences) where late-step noise dominates.
   Between 33 and 58 evals, 56% of common words shifted |Δslope| > 1.0. The median sits near 0.7-0.9 across recent snapshots and should be relatively stable as the two biases partly cancel, but final-training fits remain the meaningful comparand.
@@ -84,7 +84,7 @@ The slope settled at 0.74 once training reached convergence. During training the
 - **Tokenizer coverage.** A CHILDES-trained BPE tokenizer might segment some CDI items differently than C&B's GPT-2 tokenizer. In our case all 611 C&B CDI words are single tokens (see Single-token coverage section), so this concern doesn't apply here.
 - **Seed-as-replicate.** We treat 3 seeds as the LM-side analog of between-instance variability. This is a closer analog than C&B's single-seed setup but still likely underestimates true variance.
 - **CHILDES validation set as eval distribution.** CDI-word occurrences are drawn from the CHILDES validation set, not from a held-out wordbank-style probe set. This may favor words that are common in CHILDES specifically.
-- **Per-word vs. per-instance.** The kid-side $\kappa_i$ is per-child (so different kids learning the same word have different slopes). The LM-side slope is per-word (so different words for the same model have different slopes). Both index "between-instance" variation but they're different kinds of instances. See `outputs/chang_bergen_derivation.tex` Section 4.
+- **Per-word vs. per-instance.** The kid-side $\kappa_i$ is per-child (so different kids learning the same word have different slopes). The LM-side slope is per-word (so different words for the same model have different slopes). Both index "between-instance" variation but they're different kinds of instances. See `reports/chang_bergen_derivation.tex` Section 4.
 
 ## Open questions
 
@@ -109,7 +109,7 @@ sbatch --array=42,0,123 sherlock/feng_train_gpt2.slurm
 # 3. Sigmoid fits + sigmoid TSVs (locally, after rsync of surprisal CSVs)
 for seed in 42 0 123; do
   python model/scripts/feng_eval/fit_per_word_sigmoid.py \
-    --surprisal_csv outputs/feng_eval/surprisal_gpt2_childes_seed${seed}.csv \
+    --surprisal_csv fits/feng_eval/surprisal_gpt2_childes_seed${seed}.csv \
     --out_tsv       data/feng_2026/gpt2_childes_seed${seed}_sigmoids.txt
 done
 

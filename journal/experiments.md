@@ -2,7 +2,7 @@
 
 A running record of fits, findings, and backlog for the standard-model
 project. For the durable model specification, see
-[`model_explainer.pdf`](model_explainer.pdf). The shared
+[`model_explainer.pdf`](../reports/model_explainer.pdf). The shared
 **child- and item-sampling strategy** (used identically across Wordbank
 longitudinal, BabyView, and future datasets) is documented in §
 "Sampling strategy: children and items" of the explainer.
@@ -14,6 +14,23 @@ longitudinal, BabyView, and future datasets) is documented in §
 - 🟢 completed
 - 🟡 running / active
 - ⚪ queued / backlog
+
+---
+
+## Analysis inventory (current snapshot, 2026-06-10)
+
+Quick map of the analyses behind the paper. Detail in the numbered entries below;
+per-claim provenance in [`/studies/README.md`](../studies/README.md).
+
+| analysis | datasets | input | where | status |
+|---|---|---|---|---|
+| **glmer ladder** (Fig 2, Table 2) | 10 units incl. by-study English (thal/smith/marchman) + NO + JP | — | Sherlock | done (by-study fits 2026-06-07) |
+| **io-imputed D** (`long_no_freq_slopes[_norwegian]`) | EN, NO longitudinal | imputed (σ_r pinned) | local | done, KEEP (intercept share π_α; rhat≈1.09 on σ_α) |
+| ~~**io-imputed D′**~~ DROPPED 2026-06-09 | EN, NO | — | — | confounded slope (entry 32); GCP stopped |
+| **io-pooled** (`io_pooled_widedelta` + γ) | 4: AM2018, BabyView, FMW2013, SEEDLingS | observed (LENA/head-cam) | local | done (refit 2026-06-02); intercept share ~2.8%; slope γ + |
+| **proc D′0–D′3** (`proc_dp`, Fig 3E) | 3: AM2018, FM2012, FMW2013 | observed (AM2018,FMW2013) + imputed (FM2012) | Sherlock | done (entry 33); selected D′1, processing→efficiency |
+| **cross-sectional demographics** (Fig demog.) | 31 Wordbank languages | — | local | uncapped refit running (entry 31) |
+| **LLM** (Fig 5) | GPT-2 / CHILDES | — | Sherlock/Marlowe | see [`experiments_llm.md`](experiments_llm.md) |
 
 ---
 
@@ -32,7 +49,7 @@ as 0.624 [0.50, 0.72] against true 0.61.
 **Key finding:** the collapsed-ξ parameterization (`log_irt.stan`) is
 well-identified and samples cleanly on synthetic data.
 
-**Artifacts:** `fits/recovery.rds`, `outputs/figs/recovery_*.png`.
+**Artifacts:** `fits/recovery.rds`, `figs/recovery_*.png`.
 
 ---
 
@@ -106,7 +123,7 @@ Also: new "within-age ability SD" PPC panel shows observed SD rises
 from ~1.0 at 16 mo to ~1.6 at 30 mo, while model predicts a flat ~2.2.
 Confirms σ_α is inflated relative to real within-age dispersion.
 
-**Artifacts:** `fits/wordbank_*.rds`, `outputs/figs/ppc_*.png`.
+**Artifacts:** `fits/wordbank_*.rds`, `figs/ppc_*.png`.
 
 ---
 
@@ -204,7 +221,7 @@ approaches σ_α, π_α becomes more sensitive.
 **Artifacts:**
 `fits/sensitivity_sigma_r_2pl.rds`,
 `fits/wordbank_2pl_sigmaR_*.rds` (full-data replication),
-`outputs/figs/sensitivity_*_2pl.png`.
+`figs/sensitivity_*_2pl.png`.
 
 ---
 
@@ -286,8 +303,8 @@ distribution (not using any real child's inferred posterior):
   noise misses some of the within-child irregularity in real trajectories,
   but reproduces the population-level shape.
 
-**Artifacts:** `outputs/figs/long_2pl_slopes_ppc_variance_marginal.png`,
-`outputs/figs/long_2pl_slopes_ppc_spaghetti_marginal.png`.
+**Artifacts:** `figs/long_2pl_slopes_ppc_variance_marginal.png`,
+`figs/long_2pl_slopes_ppc_spaghetti_marginal.png`.
 
 ---
 
@@ -552,7 +569,7 @@ therefore mostly attributable to age-varying *efficiency*, not
 age-varying input rate. Documented in `model_explainer.tex`
 §Assumptions.
 
-**Artifacts:** `outputs/figs/io/input_rate_vs_age.png`.
+**Artifacts:** `figs/io/input_rate_vs_age.png`.
 
 ---
 
@@ -681,11 +698,11 @@ story as M3 but with a worse-conditioned interpretation).
 
 **Artifacts.**
 - `fits/summaries/long_{m0,m1,baseline,slopes,class_beta_slopes,m5,no_freq_slopes}.{summary,draws,loo}.rds`
-- `outputs/figs/longitudinal/nested_family_scalars.png`
-- `outputs/figs/longitudinal/nested_family_loo.png`
-- `outputs/figs/longitudinal/nested_family_summary.csv`
-- `outputs/figs/longitudinal/nested_family_loo_ranking.csv`
-- `outputs/figs/longitudinal/nested_family_loo_steps.csv`
+- `figs/longitudinal/nested_family_scalars.png`
+- `figs/longitudinal/nested_family_loo.png`
+- `figs/longitudinal/nested_family_summary.csv`
+- `figs/longitudinal/nested_family_loo_ranking.csv`
+- `figs/longitudinal/nested_family_loo_steps.csv`
 
 ---
 
@@ -748,7 +765,7 @@ instead.
 **Implication for paper framing.** The "all children show
 super-linear scaling" headline is robust across languages. The clean
 parameterization for the comparison is `(1 + δ + ζ_i)` — not δ alone.
-The disanalogy figure (`outputs/figs/schematic/D1_scaling_disanalogy.png`)
+The disanalogy figure (`figs/schematic/D1_scaling_disanalogy.png`)
 should label the kid scaling exponent as `1 + δ + ζ_i` rather than
 `1 + δ`, and the population mean of that quantity is the natural
 cross-language summary.
@@ -962,8 +979,8 @@ not blocking.
 
 **Artifacts.**
 - `model/scripts/sigma_r_analytical_sensitivity.R`
-- `outputs/figs/longitudinal/sigma_r_analytical_sensitivity.png`
-- `outputs/figs/longitudinal/sigma_r_analytical_sensitivity.csv`
+- `figs/longitudinal/sigma_r_analytical_sensitivity.png`
+- `figs/longitudinal/sigma_r_analytical_sensitivity.csv`
 - `fits/summaries/long_no_freq_slopes_sigmaR_0p80.{summary,draws}.rds`
 
 ---
@@ -1172,7 +1189,7 @@ The correlation structure is real but a sidebar finding.
 - Stan models: [`log_irt_long.stan`](../model/stan/log_irt_long.stan) (independent s_i toggle), [`log_irt_long_si_corr.stan`](../model/stan/log_irt_long_si_corr.stan) (trivariate LKJ)
 - Variants: `no_freq_si_only`, `no_freq_slopes_si`, `no_freq_slopes_si_corr` in [`helpers.R`](../model/R/helpers.R)
 - LOO files: `fits/summaries/long_no_freq_*_si{_corr}.loo.rds` (gitignored, regenerable via `sherlock/extract_loo_thinned.R`)
-- Figure: [`outputs/figs/longitudinal/quantile_demo.png`](figs/longitudinal/quantile_demo.png) (7-panel comparison)
+- Figure: [`figs/longitudinal/quantile_demo.png`](figs/longitudinal/quantile_demo.png) (7-panel comparison)
 
 ---
 
@@ -1276,7 +1293,7 @@ finding.
 - [`model/stan/log_irt_long_si_reparam.stan`](../model/stan/log_irt_long_si_reparam.stan): (σ_total, p_zeta) reparam only
 - [`model/stan/log_irt_long_si_signed.stan`](../model/stan/log_irt_long_si_signed.stan): reparam + signed s_i (headline variant)
 - Variants `no_freq_slopes_si_reparam`, `no_freq_slopes_si_signed` in [`helpers.R`](../model/R/helpers.R)
-- Figure: [`outputs/figs/longitudinal/quantile_demo.png`](figs/longitudinal/quantile_demo.png) (6-panel; panel 6 is signed s_i)
+- Figure: [`figs/longitudinal/quantile_demo.png`](figs/longitudinal/quantile_demo.png) (6-panel; panel 6 is signed s_i)
 
 > **Update (2026-05-23).** Sections 23–28 below back out the §22 conclusion.
 > After scaling to I=500, signed s_i developed multi-mode posteriors that the
@@ -1536,7 +1553,7 @@ plots are smooth and stable.
 
 The slide deck now uses the following figures and tables. Each is
 generated by a single script reading from `fits/summaries/` and (where
-needed) the bundle. Provenance map in [`outputs/PROVENANCE.md`](PROVENANCE.md).
+needed) the bundle. Provenance map in [`journal/PROVENANCE.md`](PROVENANCE.md).
 
 **Vocab-space quantile fans (model vs empirical).**
 - [`m_best_quantile_I500.png`](figs/longitudinal/m_best_quantile_I500.png)
@@ -1578,7 +1595,7 @@ needed) the bundle. Provenance map in [`outputs/PROVENANCE.md`](PROVENANCE.md).
   per-class lm fits (`exposure_to_learn.R`). Slide 21.
 
 **Parameter table.**
-- [`outputs/param_table.csv`](param_table.csv) + `.md`, plus the .xlsx
+- [`journal/results/param_table.csv`](param_table.csv) + `.md`, plus the .xlsx
   Mike maintains for the slide (`param_table.R`). Slides 22, 32.
 
 **Supporting infrastructure.**
@@ -1625,7 +1642,7 @@ accumulator), B_lin↔B_log (exponential vs power-law growth), B→C
 (per-kid intercept), C→D (per-kid slope = "is σ_ζ > 0 needed?").
 
 **Data.** Wordbank survey ([`00_survey_languages.R`](../glmer_ladder/00_survey_languages.R)
-→ [`outputs/glmer_ladder/00_language_survey.csv`](glmer_ladder/00_language_survey.csv))
+→ [`fits/glmer_ladder/00_language_survey.csv`](glmer_ladder/00_language_survey.csv))
 kept languages with ≥100 kids with ≥2 admins (any form). WG + WS
 combined at the item level, production only. 7 languages qualified:
 English (American) 1840 kids, Norwegian 1676, Finnish 236, French
@@ -1665,7 +1682,7 @@ for downstream demographic analysis.
 `04b_plot` (cache → figures, ~7 s; iterate here). The 04 split keeps
 the 500-kid × 42-fit bootstrap out of the plot-iteration loop.
 
-**Prediction figures** ([`outputs/figs/glmer_ladder/`](figs/glmer_ladder/)).
+**Prediction figures** ([`figs/glmer_ladder/`](figs/glmer_ladder/)).
 Per (lang, model): bootstrap 500 kids from the fit's *BLUP* distribution
 (not MVN(0,Σ̂) — the unshrunken parametric draws produce extreme
 intercept/slope combos absent from the data and blow up the upper
@@ -1881,13 +1898,102 @@ skewed/ill-mapped education distributions (e.g. Spanish-Eur ~78% high-ed →
 unstable efficiency), not data errors; sex (balanced) unaffected.
 
 **Status / reproducibility.** Promoted from `/tmp` to a committed, reproducible
-pipeline: [`cross_sectional_demographics/`](../cross_sectional_demographics/)
+pipeline: [`studies/cross_sectional_demographics/`](../studies/cross_sectional_demographics/)
 (`00_build.R` + `cross-sectional_demographics.qmd` + committed `cache/fits.rds`,
 `cache/scatter.rds`; per-language frames/fits gitignored + regenerable). The
 notebook produces the scatter data-checks, a cross-sectional forest+meta figure
 (parallels `fig-demographics`), a combined cross-sectional+longitudinal figure
 (paper candidate), and anomaly diagnostics. Wordbank pulls (not glmer) are the
 bottleneck; Sherlock not used (compute nodes lack internet for `wordbankr`).
+
+**Update 2026-06-10 — uncap the per-language subsample.** Building the full
+Table 1 dataset inventory exposed a "wall of 1,200s" in the cross-sectional Ns.
+Verified NOT a collation bug: `00_build.R` capped each language at `n_sub=1200`
+children (glmer tractability), and exactly the 17 languages with >1,200 eligible
+kids pin at the cap (all sub-cap Ns match the archive to the child, checked via a
+full `get_administration_data` pull with the same eligibility filter). Decision
+(MCF): **uncap and refit** so Table 1 reports true archive Ns (`n_sub` → `Inf`;
+EN 8,685 kids ≈5M rows, NO 7,358; nAGQ=0 bobyqa). Frames + fits cleared for the
+17 capped slugs; the 14 sub-cap caches stay valid (cap never bound → identical
+frames). Refit running (`logs/xsec_uncapped.log`); on completion: rebuild
+`table1_datasets.csv`, re-render Fig 2 composite + Table 1, compare meta estimates
+capped vs uncapped (expect tighter CIs, same signs, k unchanged 31/17).
+
+---
+
+## 🟢 32. Input on the acceleration channel: the D′ confound → use observed IO (2026-06-09)
+
+**Question.** Does language input predict *acceleration* (the κ slope), not just
+efficiency (the ξ intercept)? We fit D′ = D + an input→slope coupling `gamma_in`,
+on EN and NO longitudinal (`long_no_freq_slopes_dprime`, GCP sm2-fit-01/02, 2000/1000×4).
+
+**Finding — D′'s `gamma_in` is confounded and uninterpretable with *imputed* input.**
+With imputed input, `log_r_dev ∝ (ξ − μ_r)`, so `gamma_in = Cov(ξ,κ)/σ_r²` is just the
+**intercept–slope coupling** (= D's free ρ_ξζ = −0.137; same Cov(ξ,κ) ≈ −1.2). That
+coupling is negative (ceiling / fan-closing) and, since the intercept is ~92% efficiency,
+reflects **efficiency**, not input. Imputation can't separate input- from efficiency-driven
+slope coupling (both ∝ ξ). EN D′ `gamma_in = −4.26` is this artifact. **Observed** input
+(IO pooled) gives the real, **positive** input→slope (γ = +2.1 to +3.4); proc, anchored by
+observed LENA in 2/3 datasets, recovers **+0.8** (entry 33), confirming the de-confounding.
+
+**Decisions.** Drop D′; keep D for the intercept share π_α; use **observed IO** for the
+slope-input story (Fig 3). GCP stopped.
+
+**Fig 3 input-share inventory (intercept channel).**
+
+| source | input share (1−π_α) | π_α | rhat | status |
+|---|---|---|---|---|
+| io_pooled_widedelta (OBSERVED) | **2.8%** [2.0, 3.8] | 0.972 | 1.003 | local ✓ |
+| EN D imputed (`long_no_freq_slopes`) | 7.7% | 0.923 | 1.09 | local ✓ |
+| NO D imputed (`long_no_freq_slopes_norwegian`) | 3.9% | 0.961 | 1.09 | local ✓ |
+
+Convergent: input is a **small** share of intercept variance either way (observed 2.8% vs
+imputed 3.9–7.7%). Caveat: imputed D σ_α/π_α rhat ≈ 1.09 (mild; IO clean at 1.003).
+
+## 🟢 33. Processing (LWL reaction-time) regression ladder `proc_dp` D′0–D′3 (2026-06-09)
+
+**Goal.** Add the processing channel as a regression on D′: does processing speed predict
+efficiency (ξ) and/or acceleration (κ) beyond input?
+
+**Model** ([`model/stan/log_irt_long_proc_dp.stan`](../model/stan/log_irt_long_proc_dp.stan)),
+regression (not indicator) form: `ξ_i = μ_r + σ_r·z_r + β_ξ·rt0 + log_α`;
+`κ_i = (1+δ) + γ_in·σ_r·z_r + β_k0·rt0 + β_k1·rt1 + ζ`, with rt0/rt1 the per-child latent
+RT level/slope measured by LWL, observed LENA (`z_lena`), σ_r and σ_lena pinned, and the
+residuals (log_α, ζ) independent of input & RT → clean input/processing/residual partition.
+Ladder via prior-SD toggles: D′0 {γ_in}, D′1 +β_ξ, D′2 +β_k0, D′3 +β_k1.
+
+**Data** (`model/scripts/prepare_proc_dp_bundle.R`): 3 datasets linked via peekbankr 2026.1
+lab IDs ↔ Stanford item-level CDI — AM2018 (67 kids, observed LENA), FM2012 (120, imputed),
+FMW2013 (42, observed LENA); I=226, N=116,728, N_lwl=952, V=97. ≤30-mo cap, n_trials_rt≥5,
+log-RT winsorized. (fernald_totlot/Fernald 2006 dropped: no item-level CDI.)
+
+**Final ladder** (Sherlock 28678043–46, 1000+1000×4, 96G; 0 divergences, rhat ≤ 1.06, LOO valid):
+
+| rung | β_ξ (rt0→ξ) | β_k0 (rt0→κ) | β_k1 (rt1→κ) | γ_in | ΔLOO vs best |
+|---|---|---|---|---|---|
+| D′0 input-only | — | — | — | +0.82 [−0.31,1.99] | −1.2 (0.6) |
+| **D′1 +rt0→ξ** | **−1.88 [−3.01,−0.72]** | — | — | +0.75 | **best** |
+| D′2 +rt0→κ | −1.93 | −0.26 [−1.76,1.32] | — | +0.75 | −0.6 (0.5) |
+| D′3 +rt1→κ | −1.84 | −0.35 | −0.24 [−1.71,1.32] | +0.71 | −1.1 (0.5) |
+
+**Conclusions.** (1) Processing → **efficiency** is real: β_ξ ≈ −1.9, CI excludes 0, stable
+across rungs; D′1 beats input-only by 1.2±0.6 elpd. (2) Processing does **not** predict
+acceleration — both κ rungs null. (3) γ_in stays + (de-confounded, consistent with IO).
+(4) **ξ-variance partition (D′1): input 10.9% [9.3,12.6], processing 3.1% [0.4,7.3],
+residual 86.0%.** (5) σ_ζ=3.7 acceleration heterogeneity unexplained. **Selected: D′1.**
+Fixes for the record: init `s=0.01` (not 0, `<lower=0>` boundary); pin σ_lambda=0.001
+(no-init bernoulli-NaN); loo(cores=1) + 96G (24G OOM'd at LOO).
+
+## 🟢 34. fig-efficiency: validate `delta_j` against production, not frequency (2026-06-09)
+
+`fig-efficiency` / `fig4_exposure.rds` looked broken (per-word `delta_j` seemed misaligned),
+nearly triggering a re-fit. The fit was **fine**: `cor(delta_j, data production rate) = −0.974`
+(mommy/ball easy, in/if/would hard). The real bug was `build_cache.R`'s sanity guard testing
+`delta_j` vs **frequency** (`cor < −0.2`) — but for CDI words frequency ⊥ difficulty
+(high-freq function words are late-learned, cor ≈ 0), so it **false-alarmed on a good fit**.
+Fix: guard now checks `delta_j` vs the data's per-item production rate. Rebuilt
+`fig4_exposure.rds` (book ≈13k exposures @16mo, country ≈683 @36mo). No re-fit; GCP stayed off.
+Lesson: validate `delta_j` against production, not frequency.
 
 ---
 
