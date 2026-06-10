@@ -8,7 +8,7 @@ title: Efficiency and acceleration in the accumulation of children’s early voc
 title-short: Efficiency and acceleration 
 keywords: Early word learning; Bayesian data analysis; Large language models
 abstract: |
-  \noindent Children learn hundreds of words over the first few years of their life. This process begins slowly but increases until only a few exposures to a word are necessary for a child to learn it. Yet there are also wide variations between children, and the nature of this variation has not been accurately characterized. Here we present a statistical model describing this process as accelerating accumulation, with children varying in both the slope and intercept of their accumulation. Using data from three languages, this model provides a good characterization of longitudinal growth and gives insights into the sources of socioeconomic variation. Using dense observations of children's early language environment, the model also can be used to estimate how much variation between children is due to differences in language input, finding estimates that converge with recent meta-analyses. In contrast to children, large language models are not well-described by this model: they show standard accumulator dynamics and very limited variability. 
+  \noindent Children learn hundreds of words over the first few years of their life. This process begins slowly but increases until only a few exposures to a word are necessary for a child to learn it. Yet there are also wide variations between children, and the nature of this variation has not been accurately characterized. Here we present a statistical model describing this process as accelerating accumulation, with children varying in both the slope and intercept of their accumulation. Using data from three languages, this model provides a good characterization of longitudinal growth and gives insights into the sources of age and socioeconomic variation. Using dense observations of children's early language environment, the model also can be used to estimate how much variation between children is due to differences in language input, finding estimates that converge with recent meta-analyses. In contrast to children, large language models are not well-described by this model: they show standard accumulator dynamics and very limited variability. 
 
 bibliography: standard_model.bib
 # Dataset citations appear as plain text in Table 1 (kable can't render
@@ -217,7 +217,7 @@ As we will show, this model provides a good description of variation in children
 
 A variety of previous work has focused on estimating the properties of individual words  [@goodman2008;@hidaka2013;@roy2015;@braginsky2019;@kachergis2022;@kachergis2022b]. These analyses reveal that there is predictable word-level difficulty information but that only a modest portion of the variation between words is carried by frequency information. Words can be hard for a child to acquire because they vary also in the complexity and concreteness of their meanings, their syntactic category and syntactic context, their phonology, and many other factors. In the current work, we estimate word difficulty as a free parameter, and focus instead on variation between children. 
 
-Our analysis generally depends on the availability of longitudinal data at the item level. The different models described above are not distinguishable from the cross-sectional, aggregate data that are typically considered in many analyses of early vocabulary. First, aggregate data do not allow for the estimation of individual word difficulties, thus the distribution of difficulties remains latent and different difficulty distributions can be posited to explain the accelerating shape of vocabulary growth [@mcmurray2007; @mitchell2009]. Second, cross-sectional data do not allow for identification of whether individual children's variation is due to differences in efficiency (intercept) or acceleration (slope) (see Supplemental Figure 1). 
+Our analysis generally depends on the availability of longitudinal data at the item level. The different models described above are not distinguishable from the cross-sectional, aggregate data that are typically considered in many analyses of early vocabulary. First, aggregate data do not allow for the estimation of individual word difficulties, thus the distribution of difficulties remains latent and different difficulty distributions can be posited to explain the accelerating shape of vocabulary growth [@mcmurray2007; @mitchell2009]. Second, cross-sectional data do not allow for accurate estimation of whether variation is due to differences in efficiency (intercept) or acceleration (slope) (see Supplemental Figure 1). 
 
 # Results
 
@@ -242,27 +242,19 @@ We first retrieved longitudinal data on monolingual, typically-developing childr
 # so the references still appear in the bibliography.
 # [MCF: confirm the English (Thal/Smith/Marchman) dataset citations + years;
 #  @smith / @marchman dataset keys are not yet in standard_model.bib.]
-# [MCF: NEW for processing analyses --- (a) FM2012 row added (Fernald & Marchman
-#  2012, @fernald2012 -- already in bib; confirm wording). (b) "LWL" column =
-#  count of LWL/eye-tracking sessions in the processing model (proc_dp bundle,
-#  QC'd <=30mo & >=5 RT trials): AM2018 440, FM2012 419, FMW2013 93. (c) NOTE the
-#  N column is the INPUT-analysis subsample (AM2018 66 / FMW2013 51); the LWL
-#  sessions come from the slightly different processing subsample (kids 67 / 40) --
-#  decide whether to reconcile N or footnote it. (d) confirm "Input"/"LWL" headers.]
 table1 <- tibble::tribble(
-  ~dataset,             ~citation,                        ~n_kids, ~admins_per_kid, ~age_range, ~input_info,                  ~lwl_info,
+  ~dataset,             ~citation,                        ~n_kids, ~admins_per_kid, ~age_range, ~input_info,
   # --- Wordbank longitudinal datasets (by study) ---
-  "English (Thal)",     "Thal et al. (20XX)",             653L,    3.0,  "12–29 mo", "—",                              "—",
-  "English (Smith)",    "Smith et al. (20XX)",            314L,    2.8,  "16–30 mo", "—",                              "—",
-  "English (Marchman)", "Marchman et al. (20XX)",         314L,    2.3,  "16–30 mo", "—",                              "—",
-  "Norwegian",          "Simonsen et al. (2014)",         1676L,   3.8,  "8–36 mo",  "—",                              "—",
-  "Japanese",           "Hagihara et al. (2023)",         178L,    2.4,  "8–34 mo",  "—",                              "—",
-  # --- Input- and/or processing-observed datasets ---
-  "BabyView",           "Long et al. (2024)",             22L,     5.0,  "6–32 mo",  "Headcam (n = 5,739 videos)",     "—",
-  "SEEDLingS",          "Egan-Dailey & Bergelson (2025)", 44L,     12.0, "6–17 mo",  "LENA (n = 525 recordings)",      "—",
-  "AM2018",             "Adams et al. (2018)",            66L,     3.0,  "16–24 mo", "LENA (n = 126 recordings)",      "440 sessions",
-  "FMW2013",            "Fernald et al. (2013)",          51L,     3.0,  "18–30 mo", "LENA (n = 51 recordings)",       "93 sessions",
-  "FM2012",             "Fernald & Marchman (2012)",      119L,    3.3,  "14–30 mo", "—",                              "419 sessions"
+  "English (Thal)",     "Thal et al. (20XX)",             653L,    3.0,  "12–29 mo", "—",
+  "English (Smith)",    "Smith et al. (20XX)",            314L,    2.8,  "16–30 mo", "—",
+  "English (Marchman)", "Marchman et al. (20XX)",         314L,    2.3,  "16–30 mo", "—",
+  "Norwegian",          "Simonsen et al. (2014)",         1676L,   3.8,  "8–36 mo",  "—",
+  "Japanese",           "Hagihara et al. (2023)",         178L,    2.4,  "8–34 mo",  "—",
+  # --- Input-observed (IO) datasets ---
+  "BabyView",           "Long et al. (2024)",             22L,     5.0,  "6–32 mo",  "Headcam (n = 5,739 videos)",
+  "SEEDLingS",          "Egan-Dailey & Bergelson (2025)", 44L,     12.0, "6–17 mo",  "LENA (n = 525 recordings)",
+  "AM2018",             "Adams et al. (2018)",            66L,     3.0,  "16–24 mo", "LENA (n = 126 recordings)",
+  "FMW2013",            "Fernald et al. (2013)",          51L,     3.0,  "18–30 mo", "LENA (n = 51 recordings)"
 )
 
 table1 |>
@@ -271,8 +263,8 @@ table1 |>
   knitr::kable(
     col.names = c("Dataset", "Citation",
                   "N", "Admins (mean)",
-                  "Ages", "Input", "LWL"),
-    align = "llrrlll") |>
+                  "Ages", "Recordings"),
+    align = "llrrll") |>
   kableExtra::kable_styling(font_size = 8)
 ```
 
