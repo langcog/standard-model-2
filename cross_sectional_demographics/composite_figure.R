@@ -4,107 +4,101 @@
 ##
 ## Input: `fits` = readRDS("cross_sectional_demographics/cache/fits.rds")
 ##   $xsec      per-(language,predictor) cross-sectional eff/acc (+ se)
-##   $meta      cross-sectional random-effects meta (per predictor x component)
 ##   $long      longitudinal raw-BLUP effects per by-study unit
-##   $long_meta longitudinal meta
-## Returns a patchwork object (Panel A by-language over Panel B meta).
+## Sex and maternal ed use INDEPENDENT language sets (each: n >= the
+## predictor's threshold), so sex keeps its full breadth even where maternal
+## ed is missing. Both predictors report BOTH efficiency and acceleration.
+## Returns a patchwork object: sex forest / maternal-ed forest / meta summary.
 
 suppressPackageStartupMessages({
-  library(dplyr); library(tidyr); library(ggplot2); library(forcats); library(patchwork)
+  library(dplyr); library(tidyr); library(ggplot2); library(forcats)
+  library(patchwork); library(metafor)
 })
 
-make_demographics_composite <- function(fits, mated_min_n = 300,
-                                         drop_langs = c("French (French)")) {
-  COL_XS <- "#1e88e5"; COL_LO <- "#c41e37"
-  pred_lab <- c(sex = "Sex (male vs female)", matEd = "Maternal ed. (per SD)")
-  comp_lev <- c("Efficiency", "Acceleration")
+make_demographics_composite <- function(fits, sex_min_n = 300, mated_min_n = 300,
+                                         drop_matEd = c("French (French)")) {
+  COL_XS <- "#1e88e5"; COL_LO <- "#c41e37"; comp_lev <- c("Efficiency", "Acceleration")
 
-  ## consistent language set: matEd languages with n >= threshold, minus drops
-  keep_langs <- fits$xsec |>
-    filter(predictor == "matEd", n_kids >= mated_min_n,
-           !language %in% drop_langs) |>
-    pull(language)
+  sex_langs   <- fits$xsec |> filter(predictor == "sex",   n_kids >= sex_min_n) |> pull(language)
+  mated_langs <- fits$xsec |> filter(predictor == "matEd", n_kids >= mated_min_n,
+                                     !language %in% drop_matEd) |> pull(language)
 
   ## longitudinal by-study units -> cross-sectional language names (pool English)
   long_map <- c(thal="English (American)", smith="English (American)",
                 marchman="English (American)", norwegian="Norwegian",
                 japanese="Japanese")
-  long_lang <- fits$long |>
-    mutate(language = unname(long_map[language])) |>
-    filter(!is.na(language), language %in% keep_langs) |>
+  long_lang <- fits$long |> mutate(language = unname(long_map[language])) |>
+    filter(!is.na(language)) |>
     group_by(language, predictor) |>
     summarise(eff = weighted.mean(eff, 1/eff_se^2), eff_se = sqrt(1/sum(1/eff_se^2)),
               acc = weighted.mean(acc, 1/acc_se^2), acc_se = sqrt(1/sum(1/acc_se^2)),
               .groups = "drop")
 
-  to_long <- function(df) {
-    df |>
-      pivot_longer(c(eff, acc), names_to = "component", values_to = "estimate") |>
-      mutate(se = if_else(component == "eff", eff_se, acc_se),
-             lo = estimate - 1.96*se, hi = estimate + 1.96*se,
-             component = recode(component, eff = "Efficiency", acc = "Acceleration"),
-             component = factor(component, levels = comp_lev),
-             predictor = factor(pred_lab[predictor], levels = pred_lab)) |>
-      select(language, predictor, component, estimate, lo, hi)
+  to_long <- function(df) df |>
+    pivot_longer(c(eff, acc), names_to = "component", values_to = "estimate") |>
+    mutate(se = if_else(component == "eff", eff_se, acc_se),
+           lo = estimate - 1.96*se, hi = estimate + 1.96*se,
+           component = factor(recode(component, eff = "Efficiency", acc = "Acceleration"),
+                              levels = comp_lev)) |>
+    select(language, predictor, component, estimate, lo, hi)
+
+  ## random-effects meta per (predictor, component) over the DISPLAYED languages
+  meta_for <- function(pred, langs) {
+    s <- fits$xsec |> filter(predictor == pred, language %in% langs)
+    one <- function(b, se) {
+      m <- tryCatch(rma(yi = b, sei = se, method = "REML",
+                        control = list(stepadj = 0.5, maxiter = 1000)), error = function(e) NULL)
+      if (is.null(m)) c(NA, NA, NA) else c(as.numeric(m$beta), m$ci.lb, m$ci.ub)
+    }
+    e <- one(s$eff, s$eff_se); a <- one(s$acc, s$acc_se)
+    tibble(predictor = pred,
+           component = factor(comp_lev, levels = comp_lev),
+           est = c(e[1], a[1]), ci.lb = c(e[2], a[2]), ci.ub = c(e[3], a[3]))
   }
-  xs <- fits$xsec |> filter(predictor %in% c("sex","matEd"), language %in% keep_langs) |> to_long()
-  lo <- to_long(long_lang)
+  meta_sex <- meta_for("sex", sex_langs); meta_med <- meta_for("matEd", mated_langs)
 
-  ## language order: by cross-sectional SEX efficiency (most female-advantaged top)
-  ord <- xs |> filter(predictor == pred_lab["sex"], component == "Efficiency") |>
-    arrange(estimate) |> pull(language)
-  xs$language <- factor(xs$language, levels = ord)
-  lo$language <- factor(lo$language, levels = ord)
+  ## one by-language forest (efficiency | acceleration), x-sec + longitudinal
+  forest <- function(pred, langs, meta, title) {
+    xs <- fits$xsec |> filter(predictor == pred, language %in% langs) |> to_long()
+    lo <- long_lang |> filter(predictor == pred, language %in% langs) |> to_long()
+    ord <- xs |> filter(component == "Efficiency") |> arrange(estimate) |> pull(language)
+    xs$language <- factor(xs$language, levels = ord); lo$language <- factor(lo$language, levels = ord)
+    ggplot(xs, aes(estimate, language)) +
+      geom_rect(data = meta, aes(xmin = ci.lb, xmax = ci.ub, ymin = -Inf, ymax = Inf),
+                inherit.aes = FALSE, fill = COL_XS, alpha = 0.08) +
+      geom_vline(xintercept = 0, linetype = "dashed", colour = "grey65", linewidth = 0.3) +
+      geom_pointrange(aes(xmin = lo, xmax = hi), colour = COL_XS, shape = 16, size = 0.22) +
+      geom_point(data = lo, aes(estimate, language), colour = COL_LO, shape = 18, size = 2.4) +
+      facet_wrap(~ component, scales = "free_x") +
+      labs(x = NULL, y = NULL, title = title) +
+      theme_minimal(base_size = 9) +
+      theme(plot.title = element_text(face = "bold", size = 10),
+            axis.text.y = element_text(size = 7), strip.text = element_text(face = "bold", size = 8.5),
+            panel.grid.minor = element_blank())
+  }
+  pSex <- forest("sex", sex_langs, meta_sex, "A. Sex (male vs female)")
+  pMed <- forest("matEd", mated_langs, meta_med, "B. Maternal education (per SD)") +
+    labs(x = "effect on latent ability (logits, per SD predictor)")
 
-  meta <- fits$meta |>
-    filter(predictor %in% c("sex","matEd")) |>
-    mutate(component = recode(component, efficiency = "Efficiency", acceleration = "Acceleration"),
-           component = factor(component, levels = comp_lev),
-           predictor = factor(pred_lab[predictor], levels = pred_lab))
-
-  ## ---- Panel A: by-language, efficiency + acceleration, both methods ----
-  pA <- ggplot(xs, aes(estimate, language)) +
-    geom_rect(data = meta, aes(xmin = ci.lb, xmax = ci.ub, ymin = -Inf, ymax = Inf),
-              inherit.aes = FALSE, fill = COL_XS, alpha = 0.08) +
-    geom_vline(xintercept = 0, linetype = "dashed", colour = "grey65", linewidth = 0.3) +
-    geom_pointrange(aes(xmin = lo, xmax = hi, colour = "Cross-sectional"),
-                    shape = 16, size = 0.25, fatten = 2.2) +
-    geom_point(data = lo, aes(estimate, language, colour = "Longitudinal"),
-               shape = 18, size = 2.6) +
-    facet_grid(predictor ~ component, scales = "free_x") +
-    scale_colour_manual(values = c("Cross-sectional" = COL_XS, "Longitudinal" = COL_LO),
-                        name = NULL) +
-    labs(x = "effect on latent ability (logits, per SD predictor)", y = NULL,
-         title = "A. Per-language demographic effects") +
-    theme_minimal(base_size = 9) +
-    theme(plot.title = element_text(face = "bold", size = 11),
-          axis.text.y = element_text(size = 7.5),
-          strip.text = element_text(face = "bold", size = 8.5),
-          legend.position = "none",
-          panel.grid.minor = element_blank())
-
-  ## ---- Panel B: condensed meta (cross-sectional vs longitudinal) ----
-  comb <- bind_rows(meta |> mutate(method = "Cross-sectional"),
-                    fits$long_meta |> filter(predictor %in% c("sex","matEd")) |>
-                      mutate(component = recode(component, efficiency = "Efficiency",
-                                                acceleration = "Acceleration"),
-                             component = factor(component, levels = comp_lev),
-                             predictor = factor(pred_lab[predictor], levels = pred_lab),
-                             method = "Longitudinal"))
-  pB <- ggplot(comb, aes(estimate, fct_rev(component), colour = method)) +
+  ## condensed meta panel (cross-sectional vs longitudinal)
+  long_meta <- fits$long_meta |> filter(predictor %in% c("sex","matEd")) |>
+    transmute(predictor, component = factor(recode(component, efficiency="Efficiency",
+              acceleration="Acceleration"), levels = comp_lev),
+              est = estimate, ci.lb, ci.ub, method = "Longitudinal")
+  comb <- bind_rows(bind_rows(meta_sex, meta_med) |> mutate(method = "Cross-sectional"), long_meta) |>
+    mutate(predictor = recode(predictor, sex = "Sex", matEd = "Maternal ed."))
+  pMeta <- ggplot(comb, aes(est, fct_rev(component), colour = method)) +
     geom_vline(xintercept = 0, linetype = "dashed", colour = "grey65", linewidth = 0.3) +
     geom_pointrange(aes(xmin = ci.lb, xmax = ci.ub),
-                    position = position_dodge(width = 0.5), size = 0.45, fatten = 2.5) +
+                    position = position_dodge(width = 0.5), size = 0.45) +
     facet_wrap(~ predictor, scales = "free_x") +
-    scale_colour_manual(values = c("Cross-sectional" = COL_XS, "Longitudinal" = COL_LO),
-                        name = NULL) +
-    labs(x = "meta-analytic estimate (logits, per SD predictor)", y = NULL,
-         title = "B. Meta-analytic summary") +
+    scale_colour_manual(values = c("Cross-sectional" = COL_XS, "Longitudinal" = COL_LO), name = NULL) +
+    labs(x = "meta-analytic estimate (logits, per SD)", y = NULL, title = "C. Meta-analytic summary") +
     theme_minimal(base_size = 9) +
-    theme(plot.title = element_text(face = "bold", size = 11),
-          strip.text = element_text(face = "bold", size = 8.5),
-          legend.position = "bottom", panel.grid.minor = element_blank())
+    theme(plot.title = element_text(face = "bold", size = 10), legend.position = "bottom",
+          strip.text = element_text(face = "bold", size = 8.5), panel.grid.minor = element_blank())
 
-  (pA / pB) + plot_layout(heights = c(2.5, 1)) &
-    theme(plot.margin = margin(4, 8, 4, 4))
+  (pSex / pMed / pMeta) +
+    plot_layout(heights = c(length(sex_langs) + 3, length(mated_langs) + 3, 11)) &
+    theme(plot.margin = margin(3, 8, 3, 4))
 }
