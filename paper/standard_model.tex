@@ -140,6 +140,20 @@
  
 
 
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
 \makeatletter
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
 \AtBeginDocument{%
@@ -205,21 +219,23 @@ early vocabulary}
 \maketitle
 \begin{abstract}
 \noindent Children learn hundreds of words over the first few years of
-their life. This process begins slowly but increases until only a few
-exposures to a word are necessary for a child to learn it. Yet there are
-also wide variations between children, and the nature of this variation
-has not been accurately characterized. Here we present a statistical
-model describing this process as accelerating accumulation, with
-children varying in both the slope and intercept of their accumulation.
-Using data from three languages, this model provides a good
-characterization of longitudinal growth and gives insights into the
-sources of age and socioeconomic variation. Using dense observations of
-children's early language environment, the model also can be used to
-estimate how much variation between children is due to differences in
-language input, finding estimates that converge with recent
-meta-analyses. In contrast to children, large language models are not
+their life. This process begins slowly but soon children are acquiring
+multiple words per day. Yet there are also wide variations between
+children, and the nature of this variation has not been accurately
+characterized. We present a statistical model describing this process as
+accelerating accumulation, with children varying in their overall
+learning efficiency and their acceleration. This model provides a good
+characterization of longitudinal growth across three languages and gives
+insight into the sources of sociodemographic variation. Using dense
+observations of children's early language environment and word
+recognition speed, the model also can be used to estimate how much
+variation between children is due to differences in language input and
+processing. In contrast to children, large language models are not
 well-described by this model: they show standard accumulator dynamics
-and very limited variability.
+with no acceleration and very limited variability. In sum, our model
+provides a quantitative characterization of key signatures of early
+vocabulary growth, providing a target for future mechanistic learning
+models.
 \end{abstract}
 
 
@@ -464,32 +480,88 @@ Table~\ref{tbl-datasets} shows the four longitudinal datasets in
 Wordbank that contained more than \(>100\) children with multiple
 observations.
 
-\begingroup\fontsize{8}{10}\selectfont
+\begin{landscape}\begingroup\fontsize{8}{10}\selectfont
 
-\begin{longtable}[t]{llrrll}
+\begin{longtable}[t]{llrrrrrclrr}
 
-\caption{\label{tbl-datasets}Characteristics of the datasets.}
+\caption{\label{tbl-datasets}Characteristics of all datasets used in the
+paper. N and ages reflect the analysis samples (post-exclusion).
+Cross-sectional rows pool all contributed Wordbank datasets for a
+language, subsampled to at most 1,200 children. For AM2018 and FMW2013,
+which enter both the input and processing analyses with slightly
+different inclusion criteria, N is the union of the two subsamples.}
 
 \tabularnewline
 
 \toprule
-Dataset & Citation & N & Admins (mean) & Ages & Recordings\\
+\multicolumn{4}{c}{ } & \multicolumn{3}{c}{Age (months)} & \multicolumn{4}{c}{ } \\
+\cmidrule(l{3pt}r{3pt}){5-7}
+Citation & Language & N & Admins & Mean & Min & Max & Long. & Input & Recordings & LWL sessions\\
 \midrule
-English (Thal) & Thal et al. (20XX) & 653 & 3.0 & 12–29 mo & —\\
-English (Smith) & Smith et al. (20XX) & 314 & 2.8 & 16–30 mo & —\\
-English (Marchman) & Marchman et al. (20XX) & 314 & 2.3 & 16–30 mo & —\\
-Norwegian & Simonsen et al. (2014) & 1,676 & 3.8 & 8–36 mo & —\\
-Japanese & Hagihara et al. (2023) & 178 & 2.4 & 8–34 mo & —\\
-\addlinespace
-BabyView & Long et al. (2024) & 22 & 5.0 & 6–32 mo & Headcam (n = 5,739 videos)\\
-SEEDLingS & Egan-Dailey \& Bergelson (2025) & 44 & 12.0 & 6–17 mo & LENA (n = 525 recordings)\\
-AM2018 & Adams et al. (2018) & 66 & 3.0 & 16–24 mo & LENA (n = 126 recordings)\\
-FMW2013 & Fernald et al. (2013) & 51 & 3.0 & 18–30 mo & LENA (n = 51 recordings)\\
+\endfirsthead
+\multicolumn{11}{@{}l}{\textit{(continued)}}\\
+\toprule
+\multicolumn{4}{c}{ } & \multicolumn{3}{c}{Age (months)} & \multicolumn{4}{c}{ } \\
+\cmidrule(l{3pt}r{3pt}){5-7}
+Citation & Language & N & Admins & Mean & Min & Max & Long. & Input & Recordings & LWL sessions\\
+\midrule
+\endhead
+
+\endfoot
 \bottomrule
+\endlastfoot
+\addlinespace[0.3em]
+\multicolumn{11}{l}{\textbf{Wordbank longitudinal}}\\
+\hspace{1em}Thal et al. (20XX) & English (American) & 653 & 1,947 & 19.1 & 12 & 29 & yes &  &  & \\
+\hspace{1em}Smith et al. (20XX) & English (American) & 314 & 878 & 21.9 & 16 & 30 & yes &  &  & \\
+\hspace{1em}Marchman et al. (20XX) & English (American) & 314 & 714 & 22.6 & 16 & 30 & yes &  &  & \\
+\hspace{1em}Simonsen et al. (2014) & Norwegian & 1,676 & 6,347 & 25.1 & 8 & 36 & yes &  &  & \\
+\hspace{1em}Hagihara et al. (2023) & Japanese & 178 & 425 & 17.4 & 8 & 34 & yes &  &  & \\
+\addlinespace[0.3em]
+\multicolumn{11}{l}{\textbf{Input / processing}}\\
+\hspace{1em}Long et al. (2024) & English (American) & 22 & 103 & 18.6 & 9 & 32 & yes & headcam & 5,739 & \\
+\hspace{1em}Egan-Dailey \& Bergelson (2025) & English (American) & 44 & 514 & 12.2 & 6 & 18 & yes & LENA & 525 & \\
+\hspace{1em}Adams et al. (2018) & English (American) & 67 & 167 & 20.1 & 13 & 27 & yes & LENA & 126 & 440\\
+\hspace{1em}Fernald et al. (2013) & English (American) & 60 & 142 & 23.2 & 18 & 30 & yes & LENA & 51 & 93\\
+\hspace{1em}Fernald \& Marchman (2012) & English (American) & 119 & 393 & 22.9 & 14 & 30 & yes &  &  & 419\\
+\addlinespace[0.3em]
+\multicolumn{11}{l}{\textbf{Wordbank cross-sectional}}\\
+\hspace{1em}Frank et al. (2017) & Arabic (Saudi) & 258 & 258 & 11.9 & 8 & 16 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Cantonese & 1,200 & 1,200 & 23.4 & 16 & 30 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Catalan & 1,200 & 1,200 & 19.6 & 8 & 30 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Croatian & 627 & 627 & 19.0 & 8 & 30 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Czech & 493 & 493 & 23.0 & 16 & 30 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Danish & 1,200 & 1,200 & 20.9 & 8 & 36 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Dutch & 446 & 446 & 15.6 & 8 & 31 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & English (American) & 1,200 & 1,200 & 19.3 & 8 & 30 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & English (Australian) & 1,200 & 1,200 & 20.5 & 12 & 30 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Estonian & 1,200 & 1,200 & 23.3 & 16 & 30 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Finnish & 234 & 234 & 16.5 & 9 & 24 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & French (French) & 1,200 & 1,200 & 21.6 & 8 & 30 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & German & 1,181 & 1,181 & 24.1 & 18 & 30 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Hebrew & 534 & 534 & 27.4 & 11 & 35 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Hungarian & 369 & 369 & 23.1 & 16 & 30 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Italian & 1,200 & 1,200 & 20.5 & 7 & 36 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Japanese & 846 & 846 & 20.4 & 8 & 36 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Kigiriama & 205 & 205 & 16.1 & 8 & 30 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Korean & 1,200 & 1,200 & 23.0 & 8 & 36 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Latvian & 683 & 683 & 22.3 & 8 & 36 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Mandarin (Beijing) & 1,056 & 1,056 & 23.0 & 16 & 30 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Mandarin (Taiwanese) & 1,200 & 1,200 & 21.8 & 8 & 36 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Norwegian & 1,200 & 1,200 & 23.3 & 8 & 36 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Portuguese (European) & 1,200 & 1,200 & 19.4 & 8 & 30 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Russian & 1,200 & 1,200 & 21.4 & 8 & 36 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Slovak & 1,200 & 1,200 & 20.0 & 8 & 36 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Spanish (Argentinian) & 783 & 783 & 23.3 & 16 & 33 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Spanish (European) & 1,005 & 1,005 & 18.4 & 8 & 30 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Spanish (Mexican) & 1,200 & 1,200 & 18.9 & 8 & 30 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Swedish & 1,200 & 1,200 & 18.9 & 8 & 28 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Turkish & 1,200 & 1,200 & 21.4 & 8 & 36 &  &  &  & \\*
 
 \end{longtable}
 
 \endgroup{}
+\end{landscape}
 
 Taking advantage of the equivalence of Rasch models to generalized
 linear mixed effects models (De Boeck et al. 2011), we fit the set of
