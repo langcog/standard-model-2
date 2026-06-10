@@ -24,6 +24,13 @@ format:
     linestretch: 1.05
     colorlinks: true
     keep-tex: true
+    # pdflscape: needed by kableExtra::landscape() (Table 1). Declared
+    # explicitly because kableExtra's automatic dependency injection is
+    # unreliable in Quarto (dropped on cached-chunk replay), which makes
+    # the compile fail with "Environment landscape undefined."
+    include-in-header:
+      text: |
+        \usepackage{pdflscape}
 ---
 
 ```{r setup, include=FALSE}
