@@ -76,6 +76,12 @@ def main():
                          "load the best-val model at end (used for the developmental "
                          "ladder, where each rung is read at convergence). Forces "
                          "per-epoch checkpointing (save_total_limit=1).")
+    ap.add_argument("--max_eval_blocks", type=int, default=0,
+                    help="If >0, subsample the val set to this many blocks for the "
+                         "per-epoch eval_loss (used for early-stopping/best-model "
+                         "selection only). Cuts per-epoch eval cost massively; the "
+                         "CDI-word competence readout is unaffected (it uses the "
+                         "surprisal callback, not eval_loss).")
     args = ap.parse_args()
 
     set_seed(args.seed)
@@ -144,6 +150,15 @@ def main():
     print(f"[train] grouped train blocks: {len(lm_dataset['train'])}, "
           f"val blocks: {len(lm_dataset['validation'])}", flush=True)
 
+    # Subsample the val set used for per-epoch eval_loss (early-stopping / best-model
+    # selection). This does NOT affect the CDI-word competence readout, which comes
+    # from the surprisal callback. Big speedup: full CHILDES val is ~8k blocks (~100s
+    # per epoch); a few hundred blocks gives a stable enough eval_loss for stopping.
+    eval_dataset = lm_dataset["validation"]
+    if args.max_eval_blocks > 0 and len(eval_dataset) > args.max_eval_blocks:
+        eval_dataset = eval_dataset.select(range(args.max_eval_blocks))
+        print(f"[train] eval_loss on subsampled {len(eval_dataset)} val blocks", flush=True)
+
     # ---- Training ----
     early_stop = args.early_stopping_patience > 0
     # Early-stopping needs per-epoch checkpoints + load-best so the on_train_end
@@ -208,14 +223,19 @@ def main():
         model=model,
         args=targs,
         train_dataset=lm_dataset["train"],
-        eval_dataset=lm_dataset["validation"],
+        eval_dataset=eval_dataset,
         tokenizer=tokenizer,
         data_collator=DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False),
         callbacks=callbacks,
     )
 
     trainer.train()
-    if not args.no_save:
+    if early_stop:
+        # Confirms the best-val model was identified (and thus loaded by
+        # load_best_model_at_end before the on_train_end surprisal eval).
+        print(f"[train] best_model_checkpoint={trainer.state.best_model_checkpoint} "
+              f"best_metric={trainer.state.best_metric}", flush=True)
+    if not args.no_save and not early_stop:
         trainer.save_model(os.path.join(args.output_dir, "final"))
     print(f"[train] DONE. surprisal log: {args.surprisal_csv}", flush=True)
 
