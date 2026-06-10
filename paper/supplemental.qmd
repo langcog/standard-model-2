@@ -10,18 +10,6 @@ format:
     keep-tex: true
 ---
 
-# Supplemental Methods
-
-## Mixed effects model details
-
-
-
-
-## Efficiency computation
-
-
-
-# Supplemental Results
 
 ```{r si-setup, include=FALSE}
 suppressPackageStartupMessages({
@@ -39,145 +27,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-
-
-```{r fig-cross-sectional-confound, fig.width=9, fig.height=4}
-#| label: fig-cross-sectional-confound
-#| fig-cap: "Non-identifiability of growth models in cross-sectional data. Panels show the same simulated data, reflecting the possibility of stable between-child intercept differences (A) vs. varying growth slopes (B)."
-# Why longitudinal data are needed to identify per-child acceleration.
-#
-# A single cross-sectional snapshot — one ability estimate per child at
-# their observed age — is consistent with qualitatively different
-# individual-trajectory structures. We draw ONE set of cross-sectional
-# points (identical in both panels) and overlay two generative stories
-# that each pass through every point exactly:
-#   (A) stable between-child differences: every child shares the
-#       population slope and differs only in intercept (parallel lines);
-#   (B) diverging trajectories: every child starts from a common early
-#       ability and differs in slope (a fan).
-# With one observation per child the two are indistinguishable — only
-# repeated measurement of the same child reveals which holds.
-
-set.seed(42)
-N         <- 28
-a0        <- 6                       # reference age; log(t/a0) > 0 over 8-30
-kappa_pop <- 2.5                     # population acceleration (slope on log-age)
-sigma_xi  <- 1.0                     # between-child intercept spread
-
-ages_obs <- runif(N, 8, 30)
-L_obs    <- log(ages_obs / a0)
-# cross-sectional cloud: ability rises with log-age + between-child noise
-theta_obs <- kappa_pop * L_obs + rnorm(N, 0, sigma_xi)
-pts <- data.frame(age = ages_obs, theta = theta_obs)
-
-age_grid <- seq(8, 30, length.out = 60)
-L_grid   <- log(age_grid / a0)
-
-# (A) parallel: each child same slope kappa_pop, intercept set to hit point
-parallel <- bind_rows(lapply(seq_len(N), function(i) {
-  xi <- theta_obs[i] - kappa_pop * L_obs[i]
-  data.frame(child = i, age = age_grid, theta = xi + kappa_pop * L_grid)
-}))
-
-# (B) fanning: common early origin theta0, slope set to hit point
-theta0 <- min(theta_obs) - 1.5       # origin below the cloud so all slopes > 0
-fanning <- bind_rows(lapply(seq_len(N), function(i) {
-  kappa_i <- (theta_obs[i] - theta0) / L_obs[i]
-  data.frame(child = i, age = age_grid, theta = theta0 + kappa_i * L_grid)
-}))
-
-yr <- range(theta_obs) + c(-1, 1)
-mk <- function(traj, ttl) {
-  ggplot() +
-    geom_line(data = traj, aes(age, theta, group = child),
-              color = "#2b8cbe", alpha = 0.35, linewidth = 0.3) +
-    geom_line(data = data.frame(age = age_grid,
-                                theta = kappa_pop * L_grid +
-                                        (mean(theta_obs) - kappa_pop * mean(L_obs))),
-              aes(age, theta), linetype = "dashed",
-              color = "grey45", linewidth = 0.4) +
-    geom_point(data = pts, aes(age, theta), size = 1.3, color = "grey15") +
-    coord_cartesian(ylim = yr) +
-    labs(x = "age (months)", y = expression(ability~theta), title = ttl) +
-    theme_minimal(base_size = 10) +
-    theme(plot.title = element_text(size = 10, face = "bold"),
-          panel.grid.minor = element_blank())
-}
-
-mk(parallel, "(A) stable between-child differences (intercepts vary)") +
-mk(fanning,  "(B) diverging trajectories (slopes vary)")
-```
-
-```{r fig-glmer-ladder-full, fig.width=10, fig.height=6}
-#| label: fig-glmer-ladder-full
-#| fig-cap: ""
-# [MCF: caption on next pass.] FULL model ladder: all seven variants
-# (A; B/C/D in both linear- and log-age) x all five datasets. The main
-# text shows only the best-fitting model (M4 / D_log); this is the
-# exhaustive comparison, including the linear-age variants that never
-# appear in the main text. Same data + plotting conventions throughout.
-# [Prior caption: "Linear ability growth model variants. See main text
-#  for model fit comparisons."]
-qtiles <- ladder$qtiles |>
-  filter(model %in% c("A", "B_lin", "B_log", "C_lin", "C_log", "D_lin", "D_log")) |>
-  mutate(qprob_f = factor(qprob, levels = c(0.1, 0.25, 0.5, 0.75, 0.9),
-                          labels = c("0.1", "0.25", "0.5", "0.75", "0.9")))
-emp <- ladder$emp |>
-  mutate(child_lang = paste(lang_slug, child_id, sep = "::"))
-
-model_lab <- c("A"     = "M1",
-               "B_lin" = "M2 (lin)", "B_log" = "M2 (log)",
-               "C_lin" = "M3 (lin)", "C_log" = "M3 (log)",
-               "D_lin" = "M4 (lin)", "D_log" = "M4 (log)")
-qtiles$model_label <- factor(model_lab[qtiles$model], levels = model_lab)
-lang_lab <- ladder$lang_labels
-emp$lang_label    <- factor(lang_lab[emp$lang_slug],    levels = lang_lab)
-qtiles$lang_label <- factor(lang_lab[qtiles$lang_slug], levels = lang_lab)
-emp_facet <- bind_rows(lapply(names(model_lab), function(m)
-  emp |> mutate(model_label = factor(model_lab[m], levels = model_lab))))
-
-# full fan for the per-child-variation models (C/D, both age bases);
-# median only for A and the population-slope B models.
-qt_fan    <- filter(qtiles, model %in% c("C_lin", "C_log", "D_lin", "D_log"))
-qt_median <- filter(qtiles, !model %in% c("C_lin", "C_log", "D_lin", "D_log"),
-                    qprob_f == "0.5")
-
-ggplot() +
-  geom_line(data = filter(emp_facet,
-                          language %in% c("English (American)", "Norwegian")),
-            aes(age, vocab, group = child_lang),
-            color = "grey25", alpha = 0.03, linewidth = 0.25) +
-  geom_line(data = filter(emp_facet,
-                          !(language %in% c("English (American)", "Norwegian"))),
-            aes(age, vocab, group = child_lang),
-            color = "grey25", alpha = 0.25, linewidth = 0.25) +
-  geom_line(data = qt_fan,
-            aes(age, vocab, color = qprob_f, group = qprob_f,
-                linewidth = ifelse(as.character(qprob_f) == "0.5", 0.95, 0.55))) +
-  geom_line(data = qt_median,
-            aes(age, vocab, color = qprob_f, group = qprob_f),
-            linewidth = 0.95) +
-  facet_grid(lang_label ~ model_label, scales = "free_y", space = "fixed",
-             switch = "y") +
-  scale_color_manual(values = WORDBANK_PALETTE, name = "Percentile",
-                     labels = c("10th", "25th", "50th", "75th", "90th"),
-                     drop = FALSE) +
-  scale_linewidth_identity() +
-  labs(x = "Age (months)", y = "Productive vocabulary") +
-  theme_minimal(base_size = 9) +
-  theme(strip.text = element_text(size = 8, face = "bold"),
-        strip.placement = "outside",
-        panel.grid.minor = element_blank(),
-        legend.position = "bottom",
-        panel.spacing = unit(0.4, "lines"))
-```
-
-<!-- ===================================================================
-     DRAFT TEXT FOR PROMOTION (agent-authored, in verbatim `md` blocks).
-     Each block below is draft prose Mike can edit and lift into the main
-     text or keep here. Citation markers reference keys already present in
-     standard_model.bib unless flagged "[BIB NEEDED]".
-     ==================================================================== -->
+# Comparison with Prior Models
 
 ```md
 ## Relation to prior accumulator models  [draft for promotion — MCF to review]
@@ -258,6 +108,204 @@ estimated per-child slope variance is well above zero and large relative
 to the efficiency variance $\sigma_\alpha$ (main text, Figure 2 and
 Results).
 ```
+
+# Nonidentifiability in Cross-Sectional Data
+
+```{r fig-cross-sectional-confound, fig.width=9, fig.height=4}
+#| label: fig-cross-sectional-confound
+#| fig-cap: "Non-identifiability of growth models in cross-sectional data. Panels show the same simulated data, reflecting the possibility of stable between-child intercept differences (A) vs. varying growth slopes (B)."
+# Why longitudinal data are needed to identify per-child acceleration.
+#
+# A single cross-sectional snapshot — one ability estimate per child at
+# their observed age — is consistent with qualitatively different
+# individual-trajectory structures. We draw ONE set of cross-sectional
+# points (identical in both panels) and overlay two generative stories
+# that each pass through every point exactly:
+#   (A) stable between-child differences: every child shares the
+#       population slope and differs only in intercept (parallel lines);
+#   (B) diverging trajectories: every child starts from a common early
+#       ability and differs in slope (a fan).
+# With one observation per child the two are indistinguishable — only
+# repeated measurement of the same child reveals which holds.
+
+set.seed(42)
+N         <- 28
+a0        <- 6                       # reference age; log(t/a0) > 0 over 8-30
+kappa_pop <- 2.5                     # population acceleration (slope on log-age)
+sigma_xi  <- 1.0                     # between-child intercept spread
+
+ages_obs <- runif(N, 8, 30)
+L_obs    <- log(ages_obs / a0)
+# cross-sectional cloud: ability rises with log-age + between-child noise
+theta_obs <- kappa_pop * L_obs + rnorm(N, 0, sigma_xi)
+pts <- data.frame(age = ages_obs, theta = theta_obs)
+
+age_grid <- seq(8, 30, length.out = 60)
+L_grid   <- log(age_grid / a0)
+
+# (A) parallel: each child same slope kappa_pop, intercept set to hit point
+parallel <- bind_rows(lapply(seq_len(N), function(i) {
+  xi <- theta_obs[i] - kappa_pop * L_obs[i]
+  data.frame(child = i, age = age_grid, theta = xi + kappa_pop * L_grid)
+}))
+
+# (B) fanning: common early origin theta0, slope set to hit point
+theta0 <- min(theta_obs) - 1.5       # origin below the cloud so all slopes > 0
+fanning <- bind_rows(lapply(seq_len(N), function(i) {
+  kappa_i <- (theta_obs[i] - theta0) / L_obs[i]
+  data.frame(child = i, age = age_grid, theta = theta0 + kappa_i * L_grid)
+}))
+
+yr <- range(theta_obs) + c(-1, 1)
+mk <- function(traj, ttl) {
+  ggplot() +
+    geom_line(data = traj, aes(age, theta, group = child),
+              color = "#2b8cbe", alpha = 0.35, linewidth = 0.3) +
+    geom_line(data = data.frame(age = age_grid,
+                                theta = kappa_pop * L_grid +
+                                        (mean(theta_obs) - kappa_pop * mean(L_obs))),
+              aes(age, theta), linetype = "dashed",
+              color = "grey45", linewidth = 0.4) +
+    geom_point(data = pts, aes(age, theta), size = 1.3, color = "grey15") +
+    coord_cartesian(ylim = yr) +
+    labs(x = "age (months)", y = expression(ability~theta), title = ttl) +
+    theme_minimal(base_size = 10) +
+    theme(plot.title = element_text(size = 10, face = "bold"),
+          panel.grid.minor = element_blank())
+}
+
+mk(parallel, "(A) stable between-child differences (intercepts vary)") +
+mk(fanning,  "(B) diverging trajectories (slopes vary)")
+```
+
+# Datasets Used
+
+
+```{r tbl-datasets}
+#| label: tbl-datasets
+#| tbl-cap: "Characteristics of all datasets used in the paper. N and ages reflect the analysis samples (post-exclusion). Cross-sectional rows pool all contributed Wordbank datasets for a language, subsampled to at most 1,200 children. For AM2018 and FMW2013, which enter both the input and processing analyses with slightly different inclusion criteria, N is the union of the two subsamples."
+# Reads paper/cache/table1_datasets.csv, built by paper/build_table1.R from
+# the analysis bundles (glmer_ladder bundles; io_pooled + proc_dp bundles;
+# cross_sectional_demographics frames). Re-run that script when subsamples
+# change; the CSV is committed so rendering needs no fit bundles.
+#
+# The Citation column is PLAIN TEXT because kable does not render [@key]
+# markers; the matching bib keys are listed in `nocite:` in the YAML header
+# so the references still appear in the bibliography.
+# [MCF: (a) confirm Thal/Smith/Marchman citations + years (@smith/@marchman
+#  keys still missing from the bib). (b) cross-sectional rows currently cite
+#  Wordbank (@frank2017) -- swap in per-language CDI-adaptation citations if
+#  you prefer. (c) caption wording is a first pass. (d) the intro sentence
+#  above still says "four longitudinal datasets" -- needs updating for the
+#  by-study table.]
+table1 <- read.csv(file.path(CACHE, "table1_datasets.csv")) |>
+  mutate(across(c(input, longitudinal), ~ ifelse(is.na(.x), "", .x)),
+         n = format(n, big.mark = ","),
+         n_admins = format(n_admins, big.mark = ","),
+         mean_age = sprintf("%.1f", mean_age),
+         across(c(n_recordings, n_lwl),
+                ~ ifelse(is.na(.x), "", format(.x, big.mark = ","))))
+
+grp_n <- table(factor(table1$group, levels = unique(table1$group)))
+table1 |>
+  select(-group) |>
+  knitr::kable(
+    col.names = c("Citation", "Language", "N", "Admins",
+                  "Mean", "Min", "Max", "Long.", "Input", "Recordings", "LWL sessions"),
+    align = "llrrrrrclrr") |>
+  kableExtra::add_header_above(c(" " = 4, "Age (months)" = 3, " " = 4)) |>
+  kableExtra::pack_rows(index = grp_n) |>
+  # Quarto forces longtable in PDF (scale_down is a no-op there), so the
+  # oversize table goes on a landscape page until it moves to the supplement.
+  kableExtra::kable_styling(font_size = 8, latex_options = "repeat_header") |>
+  kableExtra::landscape()
+```
+
+
+
+# Full Cross-Linguistic Model Ladder
+
+```{r fig-glmer-ladder-full, fig.width=10, fig.height=6}
+#| label: fig-glmer-ladder-full
+#| fig-cap: ""
+# [MCF: caption on next pass.] FULL model ladder: all seven variants
+# (A; B/C/D in both linear- and log-age) x all five datasets. The main
+# text shows only the best-fitting model (M4 / D_log); this is the
+# exhaustive comparison, including the linear-age variants that never
+# appear in the main text. Same data + plotting conventions throughout.
+# [Prior caption: "Linear ability growth model variants. See main text
+#  for model fit comparisons."]
+qtiles <- ladder$qtiles |>
+  filter(model %in% c("A", "B_lin", "B_log", "C_lin", "C_log", "D_lin", "D_log")) |>
+  mutate(qprob_f = factor(qprob, levels = c(0.1, 0.25, 0.5, 0.75, 0.9),
+                          labels = c("0.1", "0.25", "0.5", "0.75", "0.9")))
+emp <- ladder$emp |>
+  mutate(child_lang = paste(lang_slug, child_id, sep = "::"))
+
+model_lab <- c("A"     = "M1",
+               "B_lin" = "M2 (lin)", "B_log" = "M2 (log)",
+               "C_lin" = "M3 (lin)", "C_log" = "M3 (log)",
+               "D_lin" = "M4 (lin)", "D_log" = "M4 (log)")
+qtiles$model_label <- factor(model_lab[qtiles$model], levels = model_lab)
+lang_lab <- ladder$lang_labels
+emp$lang_label    <- factor(lang_lab[emp$lang_slug],    levels = lang_lab)
+qtiles$lang_label <- factor(lang_lab[qtiles$lang_slug], levels = lang_lab)
+emp_facet <- bind_rows(lapply(names(model_lab), function(m)
+  emp |> mutate(model_label = factor(model_lab[m], levels = model_lab))))
+
+# full fan for the per-child-variation models (C/D, both age bases);
+# median only for A and the population-slope B models.
+qt_fan    <- filter(qtiles, model %in% c("C_lin", "C_log", "D_lin", "D_log"))
+qt_median <- filter(qtiles, !model %in% c("C_lin", "C_log", "D_lin", "D_log"),
+                    qprob_f == "0.5")
+
+ggplot() +
+  geom_line(data = filter(emp_facet,
+                          language %in% c("English (American)", "Norwegian")),
+            aes(age, vocab, group = child_lang),
+            color = "grey25", alpha = 0.03, linewidth = 0.25) +
+  geom_line(data = filter(emp_facet,
+                          !(language %in% c("English (American)", "Norwegian"))),
+            aes(age, vocab, group = child_lang),
+            color = "grey25", alpha = 0.25, linewidth = 0.25) +
+  geom_line(data = qt_fan,
+            aes(age, vocab, color = qprob_f, group = qprob_f,
+                linewidth = ifelse(as.character(qprob_f) == "0.5", 0.95, 0.55))) +
+  geom_line(data = qt_median,
+            aes(age, vocab, color = qprob_f, group = qprob_f),
+            linewidth = 0.95) +
+  facet_grid(lang_label ~ model_label, scales = "free_y", space = "fixed",
+             switch = "y") +
+  scale_color_manual(values = WORDBANK_PALETTE, name = "Percentile",
+                     labels = c("10th", "25th", "50th", "75th", "90th"),
+                     drop = FALSE) +
+  scale_linewidth_identity() +
+  labs(x = "Age (months)", y = "Productive vocabulary") +
+  theme_minimal(base_size = 9) +
+  theme(strip.text = element_text(size = 8, face = "bold"),
+        strip.placement = "outside",
+        panel.grid.minor = element_blank(),
+        legend.position = "bottom",
+        panel.spacing = unit(0.4, "lines"))
+```
+
+
+
+
+
+
+
+
+
+
+<!-- ===================================================================
+     DRAFT TEXT FOR PROMOTION (agent-authored, in verbatim `md` blocks).
+     Each block below is draft prose Mike can edit and lift into the main
+     text or keep here. Citation markers reference keys already present in
+     standard_model.bib unless flagged "[BIB NEEDED]".
+     ==================================================================== -->
+
+
 
 ```md
 ## Comparing children and language models on one slope axis  [draft for promotion — MCF to review]

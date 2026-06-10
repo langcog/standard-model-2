@@ -45,7 +45,10 @@ LANGS <- c("English (American)","Norwegian","Danish","Portuguese (European)","Tu
   "Hungarian","Finnish","Kigiriama")
 
 ## ---- per-language item frame (one admin per child, linked by data_id) ----
-build_frame <- function(L, n_sub = 1200, seed = 2026) {
+## n_sub: per-language child cap. Was 1200 (glmer tractability); now Inf --
+## full eligible samples, so Table 1 Ns are true archive counts (the cap
+## produced a suspicious wall of 1,200s). nAGQ=0 keeps the big fits feasible.
+build_frame <- function(L, n_sub = Inf, seed = 2026) {
   cf <- file.path(FRAMES, paste0(slug(L), ".rds"))
   if (file.exists(cf)) return(readRDS(cf))
   ad <- get_administration_data(language = L, include_demographic_info = TRUE) |>
