@@ -122,6 +122,12 @@ for (L in LANGS) {
 xsec <- do.call(rbind, fits)
 scatter_df <- do.call(rbind, scatter)
 
+## Sign convention: report SEX as the FEMALE-vs-male effect (positive = female
+## advantage), so all coefficients are on a "more vocabulary" scale. The fits
+## use Male as the contrast level (pMale), so negate the sex rows here. matEd
+## (higher ed = positive) is already on that scale.
+xsec <- xsec |> mutate(across(c(eff, acc), ~ if_else(predictor == "sex", -.x, .x)))
+
 ## ---- random-effects meta-analysis per predictor x component ----
 as_meta <- function(b, s) {
   ok <- is.finite(b) & is.finite(s) & s > 0
