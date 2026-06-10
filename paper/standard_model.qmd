@@ -303,54 +303,12 @@ Estimating children's input range is notoriously tricky, since the rate of langu
 # [Prior fig-io-partition: (A) IO observed growth + (B) stacked variance
 #  partition -- both dropped per the input-figure redesign; the IO observed
 #  curves + input-split move to the Supplement.]
-ip <- input3
-MODEL_PAL <- c("English (D)" = "#E69F00", "Norwegian (D)" = "#56B4E9",
-               "Input-observed" = "#009E73")
-YMAX <- 0.28
-pct  <- scales::percent_format(accuracy = 1)
+ip  <- input3
+pct <- scales::percent_format(accuracy = 1)
 
-pA <- ggplot(ip$panelA, aes(age, input_share, color = model)) +
-  geom_line(linewidth = 0.9) +
-  scale_color_manual(values = MODEL_PAL, name = NULL) +
-  scale_y_continuous(limits = c(0, YMAX), labels = pct) +
-  labs(x = "age (months)", y = "input share of variance", title = "(A) vs. age") +
-  theme_minimal(base_size = 9) +
-  theme(legend.position = "bottom", panel.grid.minor = element_blank(),
-        plot.title = element_text(face = "bold", size = 9))
-
-pB <- ggplot(ip$panelB_curve, aes(sigma_r, input_share, color = model)) +
-  annotate("rect", xmin = ip$sr_range[1], xmax = ip$sr_range[2],
-           ymin = 0, ymax = YMAX, fill = "grey85", alpha = 0.5) +
-  geom_vline(xintercept = ip$sr_main, linetype = "dashed", color = "grey40") +
-  geom_line(linewidth = 0.9) +
-  geom_point(data = ip$panelB_anchors, aes(sigma_r, input_share, color = model),
-             shape = 21, fill = "white", size = 2.2, stroke = 0.9) +
-  scale_color_manual(values = MODEL_PAL, guide = "none") +
-  scale_y_continuous(limits = c(0, YMAX), labels = pct) +
-  labs(x = expression(sigma[r] ~ "(pinned input SD)"), y = NULL,
-       title = "(B) vs. the input-rate pin") +
-  theme_minimal(base_size = 9) +
-  theme(panel.grid.minor = element_blank(),
-        plot.title = element_text(face = "bold", size = 9))
-
-pcd <- ip$panelC |> mutate(source = factor(source, levels = source))
-mr  <- dplyr::filter(pcd, kind == "meta")
-pC <- ggplot(dplyr::filter(pcd, kind == "model"), aes(source, input_share)) +
-  annotate("rect", xmin = -Inf, xmax = Inf, ymin = mr$lo, ymax = mr$hi,
-           fill = "grey85", alpha = 0.6) +
-  geom_hline(yintercept = mr$input_share, linetype = "dashed", color = "grey40") +
-  geom_pointrange(aes(ymin = lo, ymax = hi, color = source), fatten = 3) +
-  scale_color_manual(values = MODEL_PAL, guide = "none") +
-  scale_y_continuous(limits = c(0, YMAX), labels = pct) +
-  labs(x = NULL, y = NULL, title = "(C) vs. meta-analysis") +
-  theme_minimal(base_size = 9) +
-  theme(panel.grid.minor = element_blank(),
-        axis.text.x = element_text(angle = 20, hjust = 1),
-        plot.title = element_text(face = "bold", size = 9))
-
-## --- (D) input fan + (E) processing fan: model curves over grey per-child
-## spaghetti. Children split into quartiles on the model predictor (io log_r_dev
-## / proc centred log-RT), labelled by percentile; data built in build_input_cache.R.
+## TOP ROW (the *effect*, observed input only): per-child trajectories split
+## into quartiles on the model predictor (io log_r_dev / proc centred log-RT),
+## model curves over grey spaghetti. Conceptually prior, so shown first.
 fan_panel <- function(curves, spag, title) ggplot() +
   geom_line(data = spag, aes(age, vocab, group = ii), color = "grey75",
             alpha = 0.35, linewidth = 0.25) +
@@ -361,17 +319,54 @@ fan_panel <- function(curves, spag, title) ggplot() +
   theme_minimal(base_size = 9) +
   theme(legend.position = "bottom", panel.grid.minor = element_blank(),
         plot.title = element_text(face = "bold", size = 9))
-pD <- fan_panel(ip$panelD_curves, ip$panelD_spag, "(D) Language input")
-pE <- fan_panel(ip$panelE_curves, ip$panelE_spag, "(E) Processing speed")
+pA <- fan_panel(ip$panelD_curves, ip$panelD_spag, "(A) Language input (observed)")
+pB <- fan_panel(ip$panelE_curves, ip$panelE_spag, "(B) Processing speed")
 
-top <- (pA | pB | pC) + plot_layout(widths = c(1, 1, 0.95), guides = "collect")
-bot <- (pD | pE) + plot_layout(guides = "collect")
-(top / bot) + plot_layout(heights = c(1, 1.15)) &
-  theme(legend.position = "bottom")
+## BOTTOM ROW (the *quantification*).
+## (C) factor x channel variance partition: input and processing shares of
+## EFFICIENCY (xi) and ACCELERATION (kappa) variance. The headline -- input is
+## modest on both channels; processing loads on efficiency but not acceleration.
+FACTOR_PAL <- c("Input" = "#009E73", "Processing" = "#CC79A7")
+mr <- ip$meta
+pC <- ggplot(ip$panel_partition, aes(channel, med, color = factor)) +
+  annotate("rect", xmin = -Inf, xmax = Inf, ymin = mr$lo, ymax = mr$hi,
+           fill = "grey85", alpha = 0.55) +
+  geom_hline(yintercept = mr$mid, linetype = "dashed", color = "grey50") +
+  geom_pointrange(aes(ymin = lo, ymax = hi),
+                  position = position_dodge(width = 0.45), fatten = 3, linewidth = 0.9) +
+  scale_color_manual(values = FACTOR_PAL, name = NULL) +
+  scale_y_continuous(labels = pct, limits = c(0, NA)) +
+  labs(x = NULL, y = "share of between-child variance",
+       title = "(C) Variance partition by channel") +
+  theme_minimal(base_size = 9) +
+  theme(legend.position = "bottom", panel.grid.minor = element_blank(),
+        plot.title = element_text(face = "bold", size = 9))
+
+## (D) robustness of the input-efficiency share to the external sigma_r pin
+## (EN/NO refit anchors); shaded = plausible sigma_r band, dashed = main value.
+MODEL_PAL <- c("English (D)" = "#E69F00", "Norwegian (D)" = "#56B4E9")
+pD <- ggplot(ip$panelB_curve, aes(sigma_r, input_share, color = model)) +
+  annotate("rect", xmin = ip$sr_range[1], xmax = ip$sr_range[2],
+           ymin = 0, ymax = 0.28, fill = "grey85", alpha = 0.5) +
+  geom_vline(xintercept = ip$sr_main, linetype = "dashed", color = "grey40") +
+  geom_line(linewidth = 0.9) +
+  geom_point(data = ip$panelB_anchors, aes(sigma_r, input_share, color = model),
+             shape = 21, fill = "white", size = 2.2, stroke = 0.9) +
+  scale_color_manual(values = MODEL_PAL, name = NULL) +
+  scale_y_continuous(limits = c(0, 0.28), labels = pct) +
+  labs(x = expression(sigma[r] ~ "(pinned input SD)"),
+       y = "input share of efficiency", title = "(D) Sensitivity to input SD") +
+  theme_minimal(base_size = 9) +
+  theme(legend.position = "bottom", panel.grid.minor = element_blank(),
+        plot.title = element_text(face = "bold", size = 9))
+
+top <- (pA | pB) + plot_layout(guides = "collect") & theme(legend.position = "bottom")
+bot <- (pC | pD)
+top / bot + plot_layout(heights = c(1, 1))
 ```
 
 While the population estimates of input-sensitivity given above match our expectations from meta-analyses, they do not offer a direct estimate of input couplings within individual children, and they do not allow us to estimate the separate contributions of language input to efficiency and acceleration. For this, we turn to a set of four longitudinal datasets that include dense home recordings. Three include day-long audio recordings using LENA (Language Environment Analysis) recorders, which offer an automated adult word count estimate that has been validated by transcription studies [@cristia2021]. The last includes short video recordings of egocentric video recorded in children's homes, with word counts estimated from automated transcripts [@long2024]. Each of these metrics provides a noisy proxy for total home input, but nevertheless allows us to estimate models that include individual input.
-We thus fit the same model linking input estimates to variation in efficiency and acceleration, but this time with observations of $r_i$ for each child, allowing us to fit the full version of Model 4 described above, in which language input could contribute to both efficiency and acceleration. @fig-io-partition (panel C) shows a small separation of trajectories by input quartile, but the key question of interest is how this variation partitions across efficiency and acceleration.
+We thus fit the same model linking input estimates to variation in efficiency and acceleration, but this time with observations of $r_i$ for each child, allowing us to fit the full version of Model 4 described above, in which language input could contribute to both efficiency and acceleration. @fig-io-partition (panel A) shows a small separation of trajectories by input quartile, but the key question of interest is how this variation partitions across efficiency and acceleration.
 
 Results for $\pi_alpha$ and $\pi_zeta$ are shown in @fig-io-partition. Overall, we observe small but highly reliable effects of language input on both efficiency adn acce
 
