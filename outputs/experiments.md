@@ -1814,6 +1814,83 @@ future users.
 
 ---
 
+## 🟡 31. Cross-sectional demographic decomposition: sex & maternal ed across many languages (2026-06-09, in progress)
+
+**Motivation.** The longitudinal demographic analysis (paper §"Efficiency
+and acceleration relate to separate demographic predictors") only has
+maternal ed for ~3 languages (after the by-study split: Marchman + Norwegian,
+~2) and sex for ~4. Wordbank has *no* further longitudinal CDI data with
+maternal ed (surveyed: Danish has 6,112 kids but **0** with ≥2 admins; same
+for German, Italian, etc. — the big norming samples are cross-sectional).
+Strategy B: recover the efficiency-vs-acceleration split from **cross-sectional**
+data via the population predictor×age interaction, expanding to ~13 languages
+(maternal ed) and ~30 (sex), giving a parallel two-axis design (paper finding:
+**sex → efficiency**, **maternal ed → acceleration**).
+
+**Model.** Per language, one admin per child, item-level Rasch GLMM:
+`produces ~ predictor * log(age/a0) + (1|item) + (1|child)`, `glmer`, `nAGQ=0`,
+`a0 = median age`. `predictor`-main = effect on **efficiency** (intercept);
+`predictor:log_age` = effect on **acceleration** (slope). Monolingual-TD =
+exclude `dataset_origin_name ~ "Bilingual"` + clinical (`Edgin`, `Byers`);
+**not** `is_norming` (which is study-membership, stricter than mono-TD — it
+drops ~half of monolingual Norwegian). Québec French excluded (bilingual);
+English (British) excluded (TEDS twins, short form).
+
+**⚠️ Bug others should know about.** Linking item data to the sampled admin
+**by `child_id` silently conflates a longitudinal child's multiple admins**
+(item rows summed/duplicated across admins, all mislabeled with one age →
+sumscores up to 8× form size; models include the extra rows). **Fix: link by
+`data_id` (the admin).** Symptom: Norwegian scatter proportions capped at
+~0.25; `max items/admin` ≫ form size. Cross-sectional-only languages (Danish)
+are unaffected; heavily-longitudinal ones (Norwegian) were materially biased.
+
+**Validation (Marchman + Norwegian, where we have both methods),** raw
+log(age/a0) so coefficients match the longitudinal raw-BLUP regressions
+(regress raw ξ_i, ζ_i on scale(matEd)):
+
+| | x-sec eff | long eff | x-sec acc | long acc |
+|---|--:|--:|--:|--:|
+| Marchman | +0.29 | +0.26 | +0.66 | +0.41 |
+| Norwegian | +0.12 | +0.08 | +0.52 | +0.22 |
+
+**→ Efficiency channel validates (x-sec ≈ long); acceleration is
+systematically inflated ~1.5–2.3× cross-sectionally** (sign/order right, CIs
+overlap because longitudinal acceleration is noisy). Methodological reading:
+the predictor×age interaction over-attributes to slope (cf. SI Fig 1 — per-child
+slope variance isn't cleanly identified cross-sectionally). **Implication:**
+the **sex → efficiency** cross-linguistic analysis is on solid ground;
+maternal-ed *acceleration* loadings are directional/upper-bound.
+NB: z-scoring ξ and ζ *separately* (sd ζ ≫ sd ξ) makes the longitudinal effect
+look efficiency-dominant — an artifact; use raw BLUP units to compare.
+
+**Maternal-ed results (13 languages, corrected, std log-age, per SD matEd).**
+Real cross-national structure in *how* SES loads:
+efficiency-only (German +0.30, Latvian +0.23, Portuguese +0.11);
+acceleration-only (Norwegian +0.21, Spanish-Eur +0.14);
+both (English +0.18/+0.36, Mandarin-Tw, Spanish-Arg); null (Danish, Czech,
+Spanish-Mex). Anomalies to scrutinize: French-French acc = **−0.28**,
+Spanish-Eur/Mex eff < 0.
+
+**Sex result (the validated, headline channel).** Female **efficiency**
+advantage in 26/31 languages; meta −0.52 [−0.60,−0.44], ~0 on acceleration.
+Matches longitudinal closely: meta −0.52 (x-sec) vs −0.67 (long, k=4);
+per-language Norwegian −0.86 (x-sec) vs −0.89 (long). MatEd meta: efficiency
++0.10 vs +0.14 (long); acceleration +0.28 both, but long k=2 (weak check) and
+x-sec acceleration is the inflated channel. Spanish/French matEd anomalies =
+skewed/ill-mapped education distributions (e.g. Spanish-Eur ~78% high-ed →
+unstable efficiency), not data errors; sex (balanced) unaffected.
+
+**Status / reproducibility.** Promoted from `/tmp` to a committed, reproducible
+pipeline: [`cross_sectional_demographics/`](../cross_sectional_demographics/)
+(`00_build.R` + `cross-sectional_demographics.qmd` + committed `cache/fits.rds`,
+`cache/scatter.rds`; per-language frames/fits gitignored + regenerable). The
+notebook produces the scatter data-checks, a cross-sectional forest+meta figure
+(parallels `fig-demographics`), a combined cross-sectional+longitudinal figure
+(paper candidate), and anomaly diagnostics. Wordbank pulls (not glmer) are the
+bottleneck; Sherlock not used (compute nodes lack internet for `wordbankr`).
+
+---
+
 ## Backlog (⚪)
 
 ### Data / robustness
