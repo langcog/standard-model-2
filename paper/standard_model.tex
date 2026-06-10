@@ -445,9 +445,10 @@ aggregate data do not allow for the estimation of individual word
 difficulties, thus the distribution of difficulties remains latent and
 different difficulty distributions can be posited to explain the
 accelerating shape of vocabulary growth (McMurray 2007; Mitchell and
-McMurray 2009). Second, cross-sectional data do not allow for accurate
-estimation of whether variation is due to differences in efficiency
-(intercept) or acceleration (slope) (see Supplemental Figure 1).
+McMurray 2009). Second, cross-sectional data do not allow for
+identification of whether individual children's variation is due to
+differences in efficiency (intercept) or acceleration (slope) (see
+Supplemental Figure 1).
 
 \section{Results}\label{results}
 
@@ -465,7 +466,7 @@ observations.
 
 \begingroup\fontsize{8}{10}\selectfont
 
-\begin{longtable}[t]{lllrll}
+\begin{longtable}[t]{llrrll}
 
 \caption{\label{tbl-datasets}Characteristics of the datasets.}
 
@@ -474,13 +475,16 @@ observations.
 \toprule
 Dataset & Citation & N & Admins (mean) & Ages & Recordings\\
 \midrule
-Norwegian & @simonsen2014 & 1,676 & 1.6 & 8–36 mo & —\\
-Japanese & @hagihara2023 & 178 & 1.3 & 8–36 mo & —\\
-BabyView & @long2024 & 22 & 5.0 & 6–32 mo & Headcam (n = 5,739 videos)\\
-SEEDLingS & @egan2025 & 44 & 12.0 & 6–17 mo & LENA (n = 525 recordings)\\
-AM2018 & @adams2018 & 66 & 3.0 & 16–24 mo & LENA (n = 126 recordings)\\
+English (Thal) & Thal et al. (20XX) & 653 & 3.0 & 12–29 mo & —\\
+English (Smith) & Smith et al. (20XX) & 314 & 2.8 & 16–30 mo & —\\
+English (Marchman) & Marchman et al. (20XX) & 314 & 2.3 & 16–30 mo & —\\
+Norwegian & Simonsen et al. (2014) & 1,676 & 3.8 & 8–36 mo & —\\
+Japanese & Hagihara et al. (2023) & 178 & 2.4 & 8–34 mo & —\\
 \addlinespace
-FMW2013 & @fernald2013 & 51 & 3.0 & 18–30 mo & LENA (n = 51 recordings)\\
+BabyView & Long et al. (2024) & 22 & 5.0 & 6–32 mo & Headcam (n = 5,739 videos)\\
+SEEDLingS & Egan-Dailey \& Bergelson (2025) & 44 & 12.0 & 6–17 mo & LENA (n = 525 recordings)\\
+AM2018 & Adams et al. (2018) & 66 & 3.0 & 16–24 mo & LENA (n = 126 recordings)\\
+FMW2013 & Fernald et al. (2013) & 51 & 3.0 & 18–30 mo & LENA (n = 51 recordings)\\
 \bottomrule
 
 \end{longtable}
@@ -703,8 +707,8 @@ necessary for a child to learn a word across ages.
 Figure~\ref{fig-efficiency} shows a model-derived estimate of the
 average number of times a word is heard before more than 50\% of
 children produce it (See SI: Changes in Word Efficiency), using
-frequency estimates from the CHILDES Corpus (\textbf{macwhinney2000?};
-Sanchez et al. 2019).
+frequency estimates from the CHILDES Corpus (MacWhinney 2000; Sanchez et
+al. 2019).
 
 Across different word classes (e.g., nouns, verbs, closed class words),
 efficiency increases exponentially, such that early-learned words such
@@ -800,6 +804,9 @@ processing speed, memory, attention or other aspects of cognition. The
 key to understanding children's data efficiency may thus lie in better
 understanding when and how children's learning accelerates with
 maturation and experience.
+
+Continuous variation or clusters? (Pinstock and Schramm 2026; Singletary
+et al. 2025) We think it's just continuous variation (Supplement)
 
 Network models and their predictions e.g. (\textbf{steyvers2005?};
 \textbf{hills2009?}; Fourtassi, Bian, and Frank 2020)
@@ -999,6 +1006,13 @@ Grimm, Kevin J, Nilam Ram, and Ryne Estabrook. 2016. \emph{Growth
 Modeling: Structural Equation and Multilevel Modeling Approaches}.
 Guilford Publications.
 
+\bibitem[\citeproctext]{ref-hagihara2023}
+Hagihara, Hiromichi, Monica Barbir, Mikako Ishibashi, Yasuhiro Kanakogi,
+Masaharu Kato, Irena Lovcevic, Youtao Lu, et al. 2023. {``A Sharable
+Merged Dataset on {Japanese} Children's Vocabulary Measures Using the
+{Japanese} {MacArthur}--{Bates} {Communicative} {Development}
+{Inventory}.''} OSF. \url{https://doi.org/10.17605/osf.io/s5ydw}.
+
 \bibitem[\citeproctext]{ref-hart2003}
 Hart, Betty, and Todd R Risley. 2003. {``The Early Catastrophe: The 30
 Million Word Gap by Age 3.''} \emph{American Educator} 27 (1): 4--9.
@@ -1025,6 +1039,10 @@ Long, Bria, Robert Z Sparks, Violet Xiang, Stefan Stojanov, Zi Yin,
 Grace E Keene, Alvin WM Tan, et al. 2024. {``The BabyView Dataset:
 High-Resolution Egocentric Videos of Infants' and Young Children's
 Everyday Experiences.''} \emph{arXiv Preprint arXiv:2406.10447}.
+
+\bibitem[\citeproctext]{ref-macwhinney2000}
+MacWhinney, Brian. 2000. \emph{The {CHILDES} Project: Tools for
+Analyzing Talk}. Vol. 1. Psychology Press.
 
 \bibitem[\citeproctext]{ref-marchman2021}
 Marchman, Virginia A, Philip Dale, and Larry Fenson. 2021.
@@ -1066,6 +1084,12 @@ Mollica, Francis, and Steven T Piantadosi. 2017. {``How Data Drive Early
 Word Learning: A Cross-Linguistic Waiting Time Analysis.''} \emph{Open
 Mind} 1 (2): 67--77.
 
+\bibitem[\citeproctext]{ref-pinstock2026}
+Pinstock, Eveline, and Satyam Antonio Schramm. 2026. {``Vocabulary
+Trajectories in {German}-Speaking Children from 18 Months to Three
+Years: A Growth Mixture Model.''} \emph{Journal of Child Language} 53
+(1): 62--79. \url{https://doi.org/10.1017/S0305000924000503}.
+
 \bibitem[\citeproctext]{ref-rasch1960}
 Rasch, Georg. 1960. \emph{Probabilistic Models for Some Intelligence and
 Attainment Tests}. Copenhagen, Denmark: Danish Institute for Educational
@@ -1087,6 +1111,27 @@ Sanchez, Alessandro, Stephan C. Meylan, Mika Braginsky, Kyle E.
 MacDonald, Daniel Yurovsky, and Michael C Frank. 2019. {``Childes-Db: A
 Flexible and Reproducible Interface to the Child Language Data Exchange
 System.''} \emph{Behavior Research Methods} 51 (4): 1928--41.
+
+\bibitem[\citeproctext]{ref-simonsen2014}
+Simonsen, Hanne Gram, Kristian Emil Kristoffersen, Dorthe Bleses, Sonja
+Wehberg, and Rune Nørgård Jørgensen. 2014. {``The {Norwegian}
+{Communicative} {Development} {Inventories}: Reliability, Main
+Developmental Trends and Gender Differences.''} \emph{First Language} 34
+(1): 3--23. \url{https://doi.org/10.1177/0142723713510997}.
+
+\bibitem[\citeproctext]{ref-singletary2025}
+Singletary, Britt, Hui Jiang, Winifred Graham Wilberforce, Daniela
+Avelar, Kristina Strother-Garcia, and Laura M. Justice. 2025.
+{``Examining Early Vocabulary Growth Trajectories in Late Talkers in a
+Low-Income Longitudinal Sample.''} \emph{Infancy} 30 (4): e70036.
+\url{https://doi.org/10.1111/infa.70036}.
+
+\bibitem[\citeproctext]{ref-thal2013}
+Thal, Donna J., Virginia A. Marchman, and J. Bruce Tomblin. 2013.
+{``Late Talking Toddlers: Characterization and Prediction of Continued
+Delay.''} In \emph{Late Talkers: Language Development, Interventions,
+and Outcomes}, edited by L. Rescorla and P. Dale. Baltimore, MD: Brookes
+Publishing.
 
 \bibitem[\citeproctext]{ref-trueswell2013}
 Trueswell, John C, Tamara Nicol Medina, Alon Hafri, and Lila R Gleitman.
