@@ -1,11 +1,11 @@
 # Slide deck provenance map
 
-Maps each load-bearing asset in `outputs/slides/standard_model_pptx.pdf`
+Maps each load-bearing asset in `reports/slides/standard_model_pptx.pdf`
 to the script that produces it, the fits it depends on, and the bundle
 data it consumes.
 
 **Anchor**: revised PowerPoint deck rendered to PDF at
-`outputs/slides/standard_model_pptx.pdf` (May 23, 2026; 46 slides). Mike
+`reports/slides/standard_model_pptx.pdf` (May 23, 2026; 46 slides). Mike
 edits the `.pptx` directly; the `.qmd` source is retired.
 
 **Conventions:**
@@ -29,7 +29,7 @@ edits the `.pptx` directly; the `.qmd` source is retired.
 | 4 | `precursor_acceleration.png` | Pre-existing Wordbank empirical fan; **byte-match confirmed in PPTX media (image2.png)** | current |
 | 5 | `precursor_acceleration.png` (same figure reused) | — | current |
 | 6 | `kachergis_buckets.png` | Static schematic from Kachergis et al. 2021 | static |
-| 7 | `irt.png` | Static schematic (converted from `irt.pdf` by `outputs/slides/build_pptx.py` for PPT compatibility) | static |
+| 7 | `irt.png` | Static schematic (converted from `irt.pdf` by `reports/slides/build_pptx.py` for PPT compatibility) | static |
 | 8 | Coffey & Snedeker forest plot | External — copied from C&S 2026 manuscript | static |
 | 9 | "This work" outline | (no figure) | — |
 
@@ -57,7 +57,7 @@ The 4-step build: `pure → +α → +κ_pop → +ζ_i`. **No s_i step** (per §2
 | 20 | `theta_spaghetti_4panel_I200.png` | Script: [`model/scripts/theta_spaghetti_4panel_I200.R`](../model/scripts/theta_spaghetti_4panel_I200.R). Same fits + bundle as slide 19. | current |
 | 21 | `m_best_quantile_EN_NO_wordbank.png` | Script: [`model/scripts/quantile_demo_mbest_EN_NO_wordbank.R`](../model/scripts/quantile_demo_mbest_EN_NO_wordbank.R). Fits: `long_no_freq_slopes` (EN), `long_no_freq_slopes_norwegian` (NO). Bundles: `long_subset_data.rds`, `long_subset_data_nor.rds`. Empirical: `long_items.rds` (wordbank-wide) via `build_xsec_empirical_wordbank`. | current |
 | 22 | `exposure_to_learn_EN.png` | Script: [`model/scripts/exposure_to_learn.R`](../model/scripts/exposure_to_learn.R). Fit: `long_no_freq_slopes` (EN). Bundle: `long_subset_data.rds` (uses `word_info$prob` for per-word CHILDES freq). | current |
-| 23 | "Best-fitting model: parameter posteriors" table (EN, NO M_best columns) | Script: [`model/scripts/param_table.R`](../model/scripts/param_table.R). Outputs: `outputs/param_table.{csv,md,xlsx}`. Pulls from `fits/summaries/long_no_freq_slopes{,_norwegian}.summary.rds`. | current |
+| 23 | "Best-fitting model: parameter posteriors" table (EN, NO M_best columns) | Script: [`model/scripts/param_table.R`](../model/scripts/param_table.R). Outputs: `journal/results/param_table.{csv,md,xlsx}`. Pulls from `fits/summaries/long_no_freq_slopes{,_norwegian}.summary.rds`. | current |
 | 24 | "Cross-language acceleration" text | Numbers from §25 of `experiments.md`; same fits as slide 23. | current |
 
 ## Slides 25–28 (input quantity)

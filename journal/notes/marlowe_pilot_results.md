@@ -1,8 +1,8 @@
 # Data-variance pilot — results
 
 **Run 2026-06-08 on Marlowe (Stanford DGX H100).** Companion to
-[`outputs/marlowe_pilot_runbook.md`](marlowe_pilot_runbook.md) and
-[`outputs/llm_variability_plan.md`](llm_variability_plan.md).
+[`journal/notes/marlowe_pilot_runbook.md`](marlowe_pilot_runbook.md) and
+[`journal/notes/llm_variability_plan.md`](llm_variability_plan.md).
 
 ## Question
 
@@ -44,7 +44,7 @@ PNGs are not version-controlled per repo convention.)*
 | Children σ_κ | ~3.5 (median ~10) | 40–270× the data-identity shift |
 
 (Reproduce: `Rscript model/scripts/feng_eval/pilot_data_variance_plot.R`;
-numbers in `outputs/feng_eval/pilot_slope_summary.csv`.)
+numbers in `fits/feng_eval/pilot_slope_summary.csv`.)
 
 ## Interpretation
 
@@ -83,11 +83,11 @@ plateau → underestimated slope.) The most informative main-study axis may be
 ## Artifacts
 
 - `data/feng_2026/gpt2_childes_chunk{A,B}_seed42_sigmoids.txt` — per-word 4-PL fits
-- `outputs/feng_eval/surprisal_gpt2_childes_chunk{A,B}_seed42.csv` — raw surprisal trajectories (72 log-spaced steps × 609 words)
-- `outputs/feng_eval/pilot_split_manifest.json` — the random-disjoint split (line indices, token counts)
-- `outputs/feng_eval/pilot_cdi_coverage.csv` — CDI single-token / occurrence coverage
-- `outputs/feng_eval/pilot_slope_summary.csv` — the statistics above
-- `outputs/figs/longitudinal/marlowe_data_variance_pilot.png` — the figure
+- `fits/feng_eval/surprisal_gpt2_childes_chunk{A,B}_seed42.csv` — raw surprisal trajectories (72 log-spaced steps × 609 words)
+- `fits/feng_eval/pilot_split_manifest.json` — the random-disjoint split (line indices, token counts)
+- `fits/feng_eval/pilot_cdi_coverage.csv` — CDI single-token / occurrence coverage
+- `fits/feng_eval/pilot_slope_summary.csv` — the statistics above
+- `figs/longitudinal/marlowe_data_variance_pilot.png` — the figure
 - `model/scripts/feng_eval/pilot_data_variance_plot.R` — reproducible stats + figure
 
 ## Next (deferred)

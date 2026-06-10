@@ -152,7 +152,7 @@ rsync sherlock:/scratch/users/mcfrank/standard_model_2/summaries/<tag>.{summary,
 ### Step 4: Rebuild figure
 
 `Rscript model/scripts/quantile_demo.R` — script already configured to
-pick up the 5 variants. Outputs `outputs/figs/longitudinal/quantile_demo.png`.
+pick up the 5 variants. Outputs `figs/longitudinal/quantile_demo.png`.
 
 ### Step 5: Update explainer + experiments.md
 
@@ -216,14 +216,14 @@ s=6 fits in the same comparison.
 - **Update model_explainer.tex** "Per-child onset" section with new
   σ_s / δ / κ_pop values.
 - **Rebuild slide 21** (4-panel demo → 5-panel) in
-  `outputs/slides/standard_model_external.tex`.
+  `reports/slides/standard_model_external.tex`.
 - **Update slide 17** (unified model comparison) with the new κ_pop.
 
 ### 4a. Input estimation + σ_r sensitivity at s=6 (NEW, 2026-05-17)
 
 The current input-estimation + σ_r sensitivity slides (deck slides 19–21)
 and the `quality_multiplier_implied` appendix all derive from the s=0.5
-cross-sectional 2PL fits in `outputs/experiments.md §4` and §18. With
+cross-sectional 2PL fits in `journal/experiments.md §4` and §18. With
 s=6 now the canonical pin, these need to be re-derived to be internally
 consistent with the rest of the headline.
 
@@ -276,8 +276,8 @@ abstracts.
 
 If a fresh session needs to pick this up, the entry points are:
 - This file (read first for current state).
-- `outputs/experiments.md` §22 for the mixing-fix backstory.
-- `outputs/model_explainer.tex` "Per-child onset s_i" section for the
+- `journal/experiments.md` §22 for the mixing-fix backstory.
+- `reports/model_explainer.tex` "Per-child onset s_i" section for the
   signed-s_i mechanics.
 - `model/R/helpers.R` `variant_hyperpriors()` for active-variant
   definitions.

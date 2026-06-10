@@ -191,12 +191,12 @@ each = tens of CPU-hours total. Trivial.
 
 For the new session to ground itself:
 
-- **`outputs/slides/standard_model.qmd`**: the talk deck. The
+- **`reports/slides/standard_model.qmd`**: the talk deck. The
   "Connecting to LLMs" section (currently slides ~32–36) shows the
   current LM comparison via the C&B method.
-- **`outputs/model_explainer.tex`**: full mathematical specification
+- **`reports/model_explainer.tex`**: full mathematical specification
   of the IRT-accumulator. The `κ_i` parameter is the focus.
-- **`outputs/experiments.md`**: log of all SM2 experiments. The §
+- **`journal/experiments.md`**: log of all SM2 experiments. The §
   with current LM comparison numbers is the baseline.
 - **`input_estimation/`**: empirical input-rate data and validation
   set. `validation_set.csv` is the canonical reference for the

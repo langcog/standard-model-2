@@ -4,7 +4,7 @@
 
 This is a side quest off the **Standard Model 2** project (`github.com/langcog/standard-model-2`). The main project fits a Bayesian psychometric model of early word learning (Wordbank CDI data) and characterizes two signatures: **acceleration** (per-child scaling exponent $\kappa_i$ on cumulative input) and **variability** (between-child spread).
 
-The current external-facing deck (`outputs/slides/standard_model_external.pdf`) ends with a **comparison to LLM word-acquisition slopes** drawn from Chang & Bergen (2022). On a common axis (sigmoid slope of $P(\text{word acquired})$ on $\log$-experience, in nat-log units), kids cluster at $\kappa_i \sim 10$ while LMs cluster near $1$ — about a 10× gap.
+The current external-facing deck (`reports/slides/standard_model_external.pdf`) ends with a **comparison to LLM word-acquisition slopes** drawn from Chang & Bergen (2022). On a common axis (sigmoid slope of $P(\text{word acquired})$ on $\log$-experience, in nat-log units), kids cluster at $\kappa_i \sim 10$ while LMs cluster near $1$ — about a 10× gap.
 
 **Issue:** Chang & Bergen trained their LMs on BookCorpus + WikiText (adult written text). That conflates two factors:
 
@@ -15,7 +15,7 @@ Feng et al. (2026) train GPT-style models on CHILDES (paper PDF in `papers/feng_
 
 ## Your task
 
-Produce a new version of `outputs/figs/longitudinal/chang_bergen_slope_comparison.png` that adds Feng et al.'s CHILDES-trained models alongside (or in place of) Chang & Bergen's BookCorpus-trained models. Same axis, same sigmoid-slope statistic, same CDI vocabulary set.
+Produce a new version of `figs/longitudinal/chang_bergen_slope_comparison.png` that adds Feng et al.'s CHILDES-trained models alongside (or in place of) Chang & Bergen's BookCorpus-trained models. Same axis, same sigmoid-slope statistic, same CDI vocabulary set.
 
 **Hypothesis to evaluate:** the structural-difference hypothesis predicts the kid-vs-LM gap will largely *remain* even when LM training is CDS-matched. If it shrinks substantially, the input-distribution explanation deserves more weight.
 
@@ -26,13 +26,13 @@ Produce a new version of `outputs/figs/longitudinal/chang_bergen_slope_compariso
    - Do they save training-step-by-step checkpoints / surprisal trajectories? Or only end-of-training models?
    - If they don't release per-step surprisal, we'll need to retrain following their setup.
 2. **`papers/chang_bergen_2022.pdf`** — the original LM-word-acquisition pipeline we're extending.
-3. **`outputs/chang_bergen_derivation.tex`** — derivation of why per-word $1/\text{ParamScale}$ on $\log$-steps is the right statistic. Also documents the unit conversion (`× ln(10)`) we use.
+3. **`reports/chang_bergen_derivation.tex`** — derivation of why per-word $1/\text{ParamScale}$ on $\log$-steps is the right statistic. Also documents the unit conversion (`× ln(10)`) we use.
 
 ## What's already in the repo
 
 - **`data/chang_bergen_2022/{bert,bilstm,gpt2,lstm}_sigmoids.txt`** — Chang & Bergen's per-(LM, word) sigmoid fit parameters (`ParamUpper, ParamLower, ParamXmid, ParamScale`), ~600 CDI words × 4 architectures. Same format you'll want to produce for Feng et al.'s models.
 - **`model/scripts/chang_bergen_comparison.R`** — current pipeline that reads those files, computes $0.434/\text{ParamScale}$ (logit per nat-log step), and plots against our $\kappa_i$ posterior. Read this to understand the target output format.
-- **`outputs/figs/longitudinal/chang_bergen_slope_comparison.png`** — the existing figure your work would update.
+- **`figs/longitudinal/chang_bergen_slope_comparison.png`** — the existing figure your work would update.
 - **`fits/summaries/long_no_freq_slopes.draws.rds`** — our English M_best posterior. The kid-side $\kappa_i$ distribution is sampled from this in the existing comparison script (lines 88–110 of `chang_bergen_comparison.R`).
 
 ## What you need to do
@@ -78,15 +78,15 @@ Adapt `model/scripts/chang_bergen_comparison.R` to add Feng et al.'s models. Two
 - **Option B:** Replace Chang & Bergen's models with Feng's, since CDS-matched is the cleaner comparison.
 
 Mike will likely want both versions for the deck. Save as:
-- `outputs/figs/longitudinal/feng_slope_comparison.png` (Feng-only)
-- `outputs/figs/longitudinal/feng_chang_bergen_slope_comparison.png` (combined)
+- `figs/longitudinal/feng_slope_comparison.png` (Feng-only)
+- `figs/longitudinal/feng_chang_bergen_slope_comparison.png` (combined)
 
 ### Phase 4 — write a brief report
 
-In `outputs/feng_evaluation_report.md`, write 1–2 pages covering:
+In `journal/notes/feng_evaluation_report.md`, write 1–2 pages covering:
 
 1. What models you used / which path (A or B) you took.
-2. Per-model median + IQR of `slope_natural`, in the same format as the existing Chang & Bergen table in `outputs/chang_bergen_derivation.tex`.
+2. Per-model median + IQR of `slope_natural`, in the same format as the existing Chang & Bergen table in `reports/chang_bergen_derivation.tex`.
 3. The headline: does the kid-vs-LM gap persist with CDS-matched training?
 4. Caveats specific to Feng's setup (vocab size differences, tokenization, CHILDES preprocessing, sample sizes).
 
@@ -101,8 +101,8 @@ In `outputs/feng_evaluation_report.md`, write 1–2 pages covering:
 ## Deliverables
 
 - `data/feng_2026/<model>_sigmoids.txt` (per-word sigmoid params, one file per Feng model)
-- `outputs/figs/longitudinal/feng_slope_comparison.png` (and/or combined version)
-- `outputs/feng_evaluation_report.md` (1–2 page report)
+- `figs/longitudinal/feng_slope_comparison.png` (and/or combined version)
+- `journal/notes/feng_evaluation_report.md` (1–2 page report)
 - A small commit to the standard-model-2 repo with all of the above, plus any fitting scripts under `model/scripts/`
 
 ## What NOT to do
