@@ -97,7 +97,7 @@ make_demographics_composite <- function(fits, sex_min_n = 300, mated_min_n = 300
             axis.text.y = element_text(size = 7), strip.text = element_text(face = "bold", size = 8.5),
             panel.grid.minor = element_blank())
   }
-  pSex <- forest("sex", sex_langs, meta_sex, "A. Sex (male vs female)")
+  pSex <- forest("sex", sex_langs, meta_sex, "A. Sex (female vs male)")
   pMed <- forest("matEd", mated_langs, meta_med, "B. Maternal education (per SD)") +
     labs(x = "effect on latent ability (logits, per SD predictor)")
 

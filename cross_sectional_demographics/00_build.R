@@ -166,6 +166,8 @@ long <- bind_rows(lapply(unique(blups$lang_slug), function(u) {
   }
   bind_rows(rows)
 }))
+## same female-vs-male sign convention as xsec (the lm uses sexMale)
+long <- long |> mutate(across(c(eff, acc), ~ if_else(predictor == "sex", -.x, .x)))
 long_meta <- bind_rows(lapply(c("sex","matEd"), function(p) {
   s <- long |> filter(predictor == p)
   bind_rows(cbind(predictor = p, component = "efficiency",   as_meta(s$eff, s$eff_se)),
