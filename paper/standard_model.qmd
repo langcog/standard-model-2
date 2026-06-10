@@ -43,6 +43,8 @@ suppressPackageStartupMessages({
 })
 source(here("paper", "_helpers.R"))
 
+XYZ <- "VALUE NOT SPECIFIED"
+
 # load cached data — produced by `Rscript paper/build_cache.R`
 # (Table 1 is built inline in its own chunk, not cached.)
 CACHE <- here("paper", "cache")
@@ -241,81 +243,26 @@ Model 4, which incorporated variation in acceleration and efficiency, was the be
 ```{r fig-demographics, fig.width=7.5, fig.height=13}
 #| label: fig-demographics
 #| fig-cap: "Regression coefficients predicting individual children's efficiency and acceleration as a function of gender and maternal education. Panels A and B show data from individual languages (both longitudinal and cross-sectional); blue regions show meta-analytic estimates from a random-effects meta analysis. Error bars show 95\\% confidence intervals. Panel C shows a meta-analytic summary for cross-sectional and longitudinal datasets."
-# Per-kid BLUPs (xi = intercept, zeta = log-age slope) from each language's
-# D_log fit, joined with Wordbank demographics. For each (language, outcome)
-# we regress the z-scored random effect on sex + maternal education.
-#
-# Maternal education enters as CONTINUOUS years (Wordbank's harmonized
-# categories mapped to approximate years of schooling), standardized
-# within-language. This (a) puts the differently-grained category sets on
-# one scale (Norwegian has 4 levels, English/French 7), (b) uses 1 df
-# instead of k-1, and (c) yields one slope per language we can pool.
-# Birth order is dropped (sparse outside Norwegian). Sex is kept for all
-# four languages; Japanese has NO maternal-education data, so it
-# contributes to the sex term only.
-ED_YEARS <- c("None" = 0, "Primary" = 6, "Some Secondary" = 9,
-              "Secondary" = 12, "Some College" = 14, "College" = 16,
-              "Some Graduate" = 18, "Graduate" = 20)
 
-fit_one <- function(d, outcome) {
-  d <- d |>
-    mutate(y = as.numeric(scale(.data[[outcome]])),
-           ed_years = unname(ED_YEARS[as.character(caregiver_ed)])) |>
-    filter(!is.na(y), !is.na(sex))
-  if (nrow(d) < 30) return(NULL)
-  has_ed <- sum(!is.na(d$ed_years)) >= 30
-  if (has_ed) {
-    dd <- filter(d, !is.na(ed_years))
-    m  <- lm(y ~ sex + scale(ed_years), data = dd)
-  } else {
-    dd <- d
-    m  <- lm(y ~ sex, data = dd)   # Japanese: sex only
-  }
-  broom::tidy(m, conf.int = TRUE) |> mutate(outcome = outcome, n = nrow(dd))
-}
-combos <- expand.grid(
-  lang_slug = unique(demo_blups$lang_slug),
-  outcome   = c("xi", "zeta"),
-  stringsAsFactors = FALSE
-)
-coefs <- bind_rows(lapply(seq_len(nrow(combos)), function(i) {
-  d <- filter(demo_blups, lang_slug == combos$lang_slug[i])
-  res <- fit_one(d, combos$outcome[i])
-  if (is.null(res)) NULL else mutate(res, lang_slug = combos$lang_slug[i])
-})) |>
-  filter(term != "(Intercept)")
-
-# Random-effects meta-analysis per (outcome, term) across the languages
-# that contribute that term (4 for sex, 3 for education).
-meta_summary <- coefs |>
-  group_by(outcome, term) |>
-  group_modify(~ {
-    if (nrow(.x) < 2) return(tibble())
-    res <- tryCatch(
-      metafor::rma(yi = .x$estimate, sei = .x$std.error,
-                   method = "REML", control = list(stepadj = 0.5)),
-      error = function(e) NULL)
-    if (is.null(res)) return(tibble())
-    tibble(estimate = as.numeric(res$beta),
-           conf.low = res$ci.lb, conf.high = res$ci.ub,
-           std.error = res$se, k = res$k, 
-           p = res$pval)
-  }) |>
-  ungroup() |>
-  mutate(lang_slug = "_meta_")
-
-# --- Figure: cross-sectional + longitudinal demographic composite ---
-# meta_summary (above) is the LONGITUDINAL z-scored meta that still drives the
-# inline beta/p values in the text. The figure itself is now the cross-
-# sectional + longitudinal composite (Panel A per-language efficiency &
-# acceleration for sex and maternal ed; Panel B meta), built by
 # cross_sectional_demographics/composite_figure.R from that directory's
-# committed cache (cache/fits.rds <- 00_build.R). The cross-sectional arm
-# spans many more languages than the longitudinal one.
+# committed cache (cache/fits.rds <- 00_build.R): sex and maternal-ed effects
+# on efficiency and acceleration, per language with a meta-analysis (Panel C).
 # [MCF: the caption and the two surrounding paragraphs describe the OLD
 #  longitudinal-only figure and need rewriting for the composite.]
 source(here("cross_sectional_demographics", "composite_figure.R"))
 xsec_fits <- readRDS(here("cross_sectional_demographics", "cache", "fits.rds"))
+
+# Inline beta/p values in the text below read from meta_summary, which is now
+# the CROSS-SECTIONAL meta-analytic main effects plotted in Panel C, ordered to
+# match the inline indices: [1] maternal-ed efficiency, [2] sex efficiency,
+# [3] maternal-ed acceleration, [4] sex acceleration.
+meta_summary <- panelC_meta(xsec_fits)
+meta_summary <- meta_summary[c(
+  which(meta_summary$predictor == "matEd" & meta_summary$component == "efficiency"),
+  which(meta_summary$predictor == "sex"   & meta_summary$component == "efficiency"),
+  which(meta_summary$predictor == "matEd" & meta_summary$component == "acceleration"),
+  which(meta_summary$predictor == "sex"   & meta_summary$component == "acceleration")), ]
+
 make_demographics_composite(xsec_fits)
 ```
 
@@ -323,21 +270,21 @@ Children's vocabulary is known to be related to a number of sociodemographic pre
 
 Our model offers a summary of children's growth in terms of both their efficiency (intercept) and their acceleration (slope). This decomposition allows us to ask whether these two demographics effects -- sex and maternal education -- are seen in efficiency, acceleration, or both. For each child in our analysis, we extracted the best linear unbiased prediction (BLUP) from our models. We then regressed intercept and slope terms against each demographic predictor separately for each language. Although we cannot fit individual children's growth trajectories in cross-sectional data, we can also in principle apply the same model to recover population parameters based on cross-sectional data, so we did so for an additional group of datasets for which sex and maternal education information were available. 
 
-@fig-demographics shows the coefficients from this analysis, along with a cross-language meta-analytic estimate. The data show the female advantage across all included datasets, but this effect manifests itself primarily in efficiency  ($\beta = `r round(meta_summary$estimate[2],2)`$, $p = `r papaja::apa_p(meta_summary$p)[2]`$), rather than acceleration ($\beta = `r round(meta_summary$estimate[4],2)`$, $p = `r papaja::apa_p(meta_summary$p)[4]`$). In contrast, maternal education effects were present in both measures, but stronger in acceleration ( efficiency: $\beta = `r round(meta_summary$estimate[1],2)`$, $p = `r papaja::apa_p(meta_summary$p)[1]`$; acceleration: $\beta = `r round(meta_summary$estimate[3],2)`$, $p = `r papaja::apa_p(meta_summary$p)[3]`$). One interpretation of these findings is that sex effects reflect a small constant offset in average ability. In contrast, socioeconomic differences -- as reflected in maternal education -- might continue to compound across development [@fernald2013;@hart2003].
+@fig-demographics shows the per-language coefficients from this analysis, along with a cross-language meta-analytic estimate for both the cross-sectional and longitudinal data (which largely agree). Examining the cross-sectional data since this analysis includes more datasets, the female advantage is apparent across all datasets, but this effect manifests itself more substantially efficiency  ($\beta = `r round(meta_summary$estimate[2],2)`$, $p = `r papaja::apa_p(meta_summary$p)[2]`$) than acceleration ($\beta = `r round(meta_summary$estimate[4],2)`$, $p = `r papaja::apa_p(meta_summary$p)[4]`$). In contrast, maternal education effects were present in both measures, but stronger in acceleration ( efficiency: $\beta = `r round(meta_summary$estimate[1],2)`$, $p = `r papaja::apa_p(meta_summary$p)[1]`$; acceleration: $\beta = `r round(meta_summary$estimate[3],2)`$, $p = `r papaja::apa_p(meta_summary$p)[3]`$). One interpretation of these findings is that sex effects reflect a small constant offset in average ability. In contrast, socioeconomic differences -- as reflected in maternal education -- might continue to compound across development [@fernald2013;@hart2003].
 
 ## Population input-related variation corresponds to meta-analytic estimates
 
-In our prior model fits, we fit population variation in efficiency and acceleration without considering the connection to language input. We next consider whether this relationship can be estimated at a population level. We use markov chain monte carlo to fit the full version of model 4, with both efficiency and acceleration linked to input variation (see Supplemental Methods for full model specification). We estimate these linkages by assuming a known level of population variation in language input rate: $\sigma_r$. We can then examine the variance due to input variation vs. population by fitting the parameters $\pi_\xi = \frac{\sigma_\alpha^2}{\sigma_\alpha^2 + \sigma_r^2}$ and $\pi_\kappa = \frac{\sigma_\alpha^2}{\sigma_\zeta^2 + \sigma_r^2}$, which respectively define the proportion of population variation in efficiency and acceleration due to input variation. 
+In our prior model fits, we fit population variation in efficiency and acceleration without considering the connection to language input. We next consider whether this relationship can be estimated at a population level. We use markov chain monte carlo to fit a version of model 4 with linkages to input rate. 
 
-Estimating children's input range is notoriously tricky, since the rate of language that children hear varies across cultures, families, activities, and measurement occasions [@coffey2024]. To establish a range of plausible values for $\sigma_r$, we surveyed the literature for plausible estimates [CITES;@sperry2018;@coffey2024]. In our main simulations we set $\sigma_r=.53$, a value drawn from @sperry2018, who estimated a mean of 419k tokens per month ($\pm$1 SD: 329k -- 957k). See Supplemental Methods for other input estimates.
+We first estimate these linkages at the population level by assuming a known level of population variation in language input rate: $\sigma_r$.
+We can then examine the variance due to input variation vs. population by fitting the parameter $\pi_\alpha = \frac{\sigma_\alpha^2}{\sigma_\alpha^2 + \sigma_r^2}$, which defines the proportion of population variation in efficiency due to input variation. Importantly, this parameter is directly comparable to the meta-analytic estimates reported earlier [@anderson2021;@coffey2026]. This model -- which does not include individual child-level input data -- can not distinguish input contributions to efficiency vs. acceleration, but it provides a large dataset to begin analyzing the question. 
 
-[results]
+Estimating children's input range is notoriously tricky, since the rate of language that children hear varies across cultures, families, activities, and measurement occasions [@coffey2024]. To anchor our model using a range of population values for $\sigma_r$, we surveyed the literature for plausible estimates (see SI: Population Input Range Estimation). In our main simulations we set $\sigma_r=.53$, a value drawn from @sperry2018, who estimated a mean of 419k tokens per month ($\pm$1 SD: 329k -- 957k). We provide sensitivity analysis for alternative values based on an analytic computation of the relationship between $\sigma_r$ and $\pi_\alpha$ (see SI: $\sigma_r$ Sensitivity Analysis).
 
-[Sensitivity checks]
+@fig-io-partition shows the results of this analysis for both English and Norwegian longitudinal data (combined N=`r `XYZ`). $\pi_\alpha$ was `r XYZ` (CI: `r XYZ`) for English and `r XYZ` (CI: `r XYZ`) for Norwegian, both largely consistent with the previous meta-analyses. Sensitivity analysis showed that only implausibly large input variation would produce substantially higher values. 
 
-[relation to meta-analysis]
 
-## Input modestly predicts efficiency and acceleration for individual children
+## Input predicts efficiency and acceleration for individual children
 
 
 ```{r fig-io-partition, fig.width=11, fig.height=7.4}

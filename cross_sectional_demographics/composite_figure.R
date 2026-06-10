@@ -15,6 +15,31 @@ suppressPackageStartupMessages({
   library(patchwork); library(metafor)
 })
 
+## Cross-sectional meta-analytic main effects shown in Panel C (and the
+## per-panel meta bands of the figure). Uses the SAME language filtering as
+## make_demographics_composite(), so values match the plot exactly. Returns
+## predictor x component with estimate, 95% CI, and p-value. The manuscript's
+## fig-demographics inline beta/p values read from this.
+panelC_meta <- function(fits, sex_min_n = 300, mated_min_n = 300,
+                        drop_matEd = c("French (French)")) {
+  sex_langs   <- fits$xsec |> filter(predictor == "sex",   n_kids >= sex_min_n) |> pull(language)
+  mated_langs <- fits$xsec |> filter(predictor == "matEd", n_kids >= mated_min_n,
+                                     !language %in% drop_matEd) |> pull(language)
+  one <- function(b, s) {
+    m <- tryCatch(rma(yi = b, sei = s, method = "REML",
+                      control = list(stepadj = 0.5, maxiter = 1000)), error = function(e) NULL)
+    if (is.null(m)) c(NA, NA, NA, NA) else c(as.numeric(m$beta), m$ci.lb, m$ci.ub, m$pval)
+  }
+  rows <- function(pred, langs) {
+    s <- fits$xsec |> filter(predictor == pred, language %in% langs)
+    e <- one(s$eff, s$eff_se); a <- one(s$acc, s$acc_se)
+    data.frame(predictor = pred, component = c("efficiency", "acceleration"),
+               estimate = c(e[1], a[1]), conf.low = c(e[2], a[2]),
+               conf.high = c(e[3], a[3]), p = c(e[4], a[4]), stringsAsFactors = FALSE)
+  }
+  rbind(rows("sex", sex_langs), rows("matEd", mated_langs))
+}
+
 make_demographics_composite <- function(fits, sex_min_n = 300, mated_min_n = 300,
                                          drop_matEd = c("French (French)")) {
   COL_XS <- "#1e88e5"; COL_LO <- "#c41e37"; comp_lev <- c("Efficiency", "Acceleration")
