@@ -227,53 +227,42 @@ We first retrieved longitudinal data on monolingual, typically-developing childr
 
 ```{r tbl-datasets}
 #| label: tbl-datasets
-#| tbl-cap: "Characteristics of the datasets."
-# Built inline (not cached) so names/numbers are easy to edit. Wordbank
-# longitudinal rows are now PER STUDY (the analysis is by-study: English
-# splits into Thal/Smith/Marchman). Counts are from the extracted bundles
-# fits/glmer_ladder/data_<study>.rds — n_kids = longitudinal kids retained
-# after the production filter, admins (mean) = n_admins / n_kids, age range
-# from the bundle. (The old code filtered the language-level survey CSV by
-# LANG_LABELS[PAPER_LANGS]; after the by-study switch those labels no longer
-# match any survey row, which silently dropped all the English datasets.)
+#| tbl-cap: "Characteristics of all datasets used in the paper. N and ages reflect the analysis samples (post-exclusion). Cross-sectional rows pool all contributed Wordbank datasets for a language, subsampled to at most 1,200 children. For AM2018 and FMW2013, which enter both the input and processing analyses with slightly different inclusion criteria, N is the union of the two subsamples."
+# Reads paper/cache/table1_datasets.csv, built by paper/build_table1.R from
+# the analysis bundles (glmer_ladder bundles; io_pooled + proc_dp bundles;
+# cross_sectional_demographics frames). Re-run that script when subsamples
+# change; the CSV is committed so rendering needs no fit bundles.
 #
 # The Citation column is PLAIN TEXT because kable does not render [@key]
 # markers; the matching bib keys are listed in `nocite:` in the YAML header
 # so the references still appear in the bibliography.
-# [MCF: confirm the English (Thal/Smith/Marchman) dataset citations + years;
-#  @smith / @marchman dataset keys are not yet in standard_model.bib.]
-# [MCF: NEW for processing analyses --- (a) FM2012 row added (Fernald & Marchman
-#  2012, @fernald2012 -- already in bib; confirm wording). (b) "LWL" column =
-#  count of LWL/eye-tracking sessions in the processing model (proc_dp bundle,
-#  QC'd <=30mo & >=5 RT trials): AM2018 440, FM2012 419, FMW2013 93. (c) NOTE the
-#  N column is the INPUT-analysis subsample (AM2018 66 / FMW2013 51); the LWL
-#  sessions come from the slightly different processing subsample (kids 67 / 40) --
-#  decide whether to reconcile N or footnote it. (d) confirm "Input"/"LWL" headers.]
-table1 <- tibble::tribble(
-  ~dataset,             ~citation,                        ~n_kids, ~admins_per_kid, ~age_range, ~input_info,                  ~lwl_info,
-  # --- Wordbank longitudinal datasets (by study) ---
-  "English (Thal)",     "Thal et al. (20XX)",             653L,    3.0,  "12–29 mo", "—",                              "—",
-  "English (Smith)",    "Smith et al. (20XX)",            314L,    2.8,  "16–30 mo", "—",                              "—",
-  "English (Marchman)", "Marchman et al. (20XX)",         314L,    2.3,  "16–30 mo", "—",                              "—",
-  "Norwegian",          "Simonsen et al. (2014)",         1676L,   3.8,  "8–36 mo",  "—",                              "—",
-  "Japanese",           "Hagihara et al. (2023)",         178L,    2.4,  "8–34 mo",  "—",                              "—",
-  # --- Input- and/or processing-observed datasets ---
-  "BabyView",           "Long et al. (2024)",             22L,     5.0,  "6–32 mo",  "Headcam (n = 5,739 videos)",     "—",
-  "SEEDLingS",          "Egan-Dailey & Bergelson (2025)", 44L,     12.0, "6–17 mo",  "LENA (n = 525 recordings)",      "—",
-  "AM2018",             "Adams et al. (2018)",            66L,     3.0,  "16–24 mo", "LENA (n = 126 recordings)",      "440 sessions",
-  "FMW2013",            "Fernald et al. (2013)",          51L,     3.0,  "18–30 mo", "LENA (n = 51 recordings)",       "93 sessions",
-  "FM2012",             "Fernald & Marchman (2012)",      119L,    3.3,  "14–30 mo", "—",                              "419 sessions"
-)
+# [MCF: (a) confirm Thal/Smith/Marchman citations + years (@smith/@marchman
+#  keys still missing from the bib). (b) cross-sectional rows currently cite
+#  Wordbank (@frank2017) -- swap in per-language CDI-adaptation citations if
+#  you prefer. (c) caption wording is a first pass. (d) the intro sentence
+#  above still says "four longitudinal datasets" -- needs updating for the
+#  by-study table.]
+table1 <- read.csv(file.path(CACHE, "table1_datasets.csv")) |>
+  mutate(across(c(input, longitudinal), ~ ifelse(is.na(.x), "", .x)),
+         n = format(n, big.mark = ","),
+         n_admins = format(n_admins, big.mark = ","),
+         mean_age = sprintf("%.1f", mean_age),
+         across(c(n_recordings, n_lwl),
+                ~ ifelse(is.na(.x), "", format(.x, big.mark = ","))))
 
+grp_n <- table(factor(table1$group, levels = unique(table1$group)))
 table1 |>
-  mutate(n_kids = format(n_kids, big.mark = ","),
-         admins_per_kid = sprintf("%.1f", admins_per_kid)) |>
+  select(-group) |>
   knitr::kable(
-    col.names = c("Dataset", "Citation",
-                  "N", "Admins (mean)",
-                  "Ages", "Input", "LWL"),
-    align = "llrrlll") |>
-  kableExtra::kable_styling(font_size = 8)
+    col.names = c("Citation", "Language", "N", "Admins",
+                  "Mean", "Min", "Max", "Long.", "Input", "Recordings", "LWL sessions"),
+    align = "llrrrrrclrr") |>
+  kableExtra::add_header_above(c(" " = 4, "Age (months)" = 3, " " = 4)) |>
+  kableExtra::pack_rows(index = grp_n) |>
+  # Quarto forces longtable in PDF (scale_down is a no-op there), so the
+  # oversize table goes on a landscape page until it moves to the supplement.
+  kableExtra::kable_styling(font_size = 8, latex_options = "repeat_header") |>
+  kableExtra::landscape()
 ```
 
 Taking advantage of the equivalence of Rasch models to generalized linear mixed effects models [@deboeck2011], we fit the set of models shown in @fig-schematic as a series of logistic regressions. As described above, this initial set of fits do not attempt to estimate the relationship with input but instead simply attempt to describe the distribution of vocabulary growth curves. Each model predicted the probability of an individual child producing a particular word as a function of age (either unmodified in M1 or multiplied by a constant in M2) and a random effect of word difficulty. Successive models add random intercepts (M3) and slopes (M4) by child.
