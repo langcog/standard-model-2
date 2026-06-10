@@ -171,7 +171,7 @@ CSVs in `runs_ladder/` on Marlowe scratch (`/scratch/m000102/mcfrank/llm_var_pil
 
 ---
 
-## 🟡 L4. Marlowe — developmental-ladder grid (5 seeds × 11 rungs) (2026-06-09, running)
+## 🟢 L4. ccn2 A40s — developmental-ladder grid (5 seeds × 11 rungs) (2026-06-10)
 
 **Design.** 5 seeds [42, 0, 123, 7, 99] × **11 nested** rungs
 [0.5, 1, 1.5, 2, 3, 4, 6, 8, 12, 16, 24]M words = 55 runs. Each rung trained to
@@ -179,23 +179,66 @@ convergence via **early-stopping** (patience 4 on eval_loss, load best-val model
 ceiling 40 epochs. Seed = init + that individual's nested input stream (the total
 between-individual factor matched to kids' unpartitioned σ_κ).
 
-**Goal.** (1) Per-word developmental sigmoid κ_w — fittable at 11 rungs, unit-mapped
-vs kids; (2) **between-seed σ_κ** of the developmental trajectory — the LM analog
-of σ_κ ≈ 3.5. The acceleration *and* its individual variability, from one grid.
+**Where it ran.** Moved off Marlowe (its `preempt` queue stalled under a hero run)
+to the lab **ccn2 A40 box** (8× A40, no SLURM). Round-robin dispatcher over free
+GPUs: [`ccn2/run_ladder_grid_ccn2.sh`](../model/scripts/feng_eval/ccn2/run_ladder_grid_ccn2.sh).
+~38 A40-GPU-hours overnight; **55/55 clean** (exit 0).
 
-**Pipeline change.** Added `--early_stopping_patience` to
-[`train_gpt2_childes.py`](../model/scripts/feng_eval/train_gpt2_childes.py)
-(additive, default-off; forces per-epoch checkpoint + load-best so the final
-surprisal eval = competence at convergence). Branch `claude/ladder-experiment`.
-Grid SLURM: `model/scripts/feng_eval/marlowe/train_ladder_grid.slurm`.
+**Pipeline changes** to [`train_gpt2_childes.py`](../model/scripts/feng_eval/train_gpt2_childes.py)
+(both additive, default-off): `--early_stopping_patience` (per-epoch checkpoint +
+load best-val, so the on_train_end surprisal eval = competence at convergence —
+verified `load_best_model_at_end` loads the best checkpoint) and `--max_eval_blocks`
+(subsample the per-epoch val eval used for early-stopping; 99s→6s/epoch, 16×).
 
-**Status (2026-06-09).** Smoke = job **341454** (array idx 0 = seed 42 / 0.5M,
-real settings) **queued on preempt**, validating the early-stop edit before the
-full `--array=1-54` launch. Samples for all 5 seeds × 11 rungs generated.
+**Result** (reproduce: [`ladder_analysis_final.R`](../model/scripts/feng_eval/ladder_analysis_final.R);
+data [`outputs/feng_eval/ladder_bestval.csv`](feng_eval/ladder_bestval.csv)):
 
-**Expected (priors from L1–L3).** Between-seed σ_κ likely small (seed SD ≈ 0.01
-at full data in L1; data identity negligible in L2), so 5 seeds should bound it;
-extend if unstable.
+- **Trajectory decelerates** across all 5 seeds (concave in log-input; mean
+  held-out CDI surprisal 7.8 → 4.6 nats over 0.5M → 24M words) — opposite to
+  children's acceleration, now replicated across individuals.
+- **Per-word dev-axis κ ≈ 1.17** (per-seed medians 1.05–1.24; 0.434/ParamScale,
+  unit-matched to the training-axis 0.74 and kids' ~10). The shallow LM slope is
+  **not** an axis artifact — it survives the move from training-step to
+  distinct-input scaling.
+- **Between-seed σ_κ ≈ 0.08 (CV 7%)** vs children's σ_κ ≈ 3.5 (CV ~35%). LM
+  "individuals" develop near-identically — between-instance variability is
+  categorically absent even with seed + data varied jointly.
+- **Individuals converge with input**: between-seed competence SD shrinks from
+  ~0.12 nats (0.5M) to ~0.02–0.03 (12–16M) — the *opposite* of children's
+  age-divergence. (Overlap-confound check → L5.)
+
+**Headline.** The LM-vs-kid disanalogy now stands on three matched-axis legs:
+**rate** (κ ~1.2 vs ~10), **variability** (CV 7% vs 35%), **shape** (decelerating
+vs accelerating).
+
+**Artifacts.** `ladder_analysis_final.R`, `outputs/feng_eval/ladder_bestval.csv`,
+`ladder_kappa_summary.csv`, `outputs/figs/longitudinal/ladder_development_final.png`
+(figure regenerates from the script).
+
+---
+
+## 🟡 L5. ccn2 A40s — disjoint-CHILDES-halves ladder control (2026-06-10, running)
+
+**Question.** Does L4's "individuals converge with input" survive *genuinely
+disjoint* data? In L4 two seeds shared ≈ B/24.5M of their nested data (~25% at 6M,
+~98% at 24M), so top-rung convergence was partly mechanical. This removes the
+confound.
+
+**Design.** CHILDES split into **2 disjoint random halves** (poolA/poolB,
+~12.2M words each; A∩B = ∅ at every budget) via `make_disjoint_chunks.py
+--target_tokens 0`. 2 pools × 3 seeds × 8 rungs (0.5M–12M) = **48 runs**, same
+pipeline. Pool = fixed disjoint split; seed = within-pool init+shuffle. Dispatcher:
+[`ccn2/run_disjoint_ladder_ccn2.sh`](../model/scripts/feng_eval/ccn2/run_disjoint_ladder_ccn2.sh).
+
+**Analysis (planned).** At each budget, decompose **between-pool** (disjoint data)
+vs **within-pool between-seed** variance. Both shrinking with input ⇒ convergence
+is genuine input-averaging, not the overlap artifact; a large, *persistent*
+between-pool component would overturn the L4 convergence claim.
+
+**Status (2026-06-10).** 48-run grid launched on 7 free A40s; ~one evening.
+Limits to state: only 2 disjoint pools (paired A-vs-B contrast, n=2 at pool level);
+CHILDES halves are distributionally similar, so low power to *find* divergence —
+that is the affirmative job of the BabyLM control (backlog).
 
 ---
 
@@ -210,14 +253,26 @@ extend if unstable.
   SSH ControlMaster for the password+Duo login. H100s ~2× L40S/step.
 - **Sherlock.** L40S/Ampere via `--constraint=GPU_GEN:...`, venv-on-python-module,
   Kerberos/GSSAPI. ~7–8h per full 24.5M-token run.
+- **ccn2 (lab A40 box).** 8× A40 48GB, **no SLURM** — pick GPUs via
+  `CUDA_VISIBLE_DEVICES`, round-robin dispatcher keeps 1 run/GPU (GPT-2-small ~31GB,
+  so 1/GPU). Shared multi-tenant: reclaim parked GPUs with `sudo kill` (lab owns it).
+  Self-contained env on `/data2` (miniconda via conda-forge channel + `ensurepip`;
+  `/` is near-full). SSH ControlMaster reseeded by an interactive login; the socket
+  drops under heavy node load, so monitoring tolerates hiccups while jobs run
+  detached. ~38 GPU-hours for the full 55-run ladder, overnight, free.
 - Full cluster how-to and gotchas: the
   [`gpt2-childes-training`](../.claude/skills/gpt2-childes-training.md) skill.
 
 ## Open questions / backlog (⚪)
 
-- **Unit-matched curvature.** Fit per-word developmental sigmoids on the L4 11-rung
-  grid; map to κ-equivalent and overlay vs kids — is the LM trajectory
-  decelerating where kids accelerate, in matched units?
+- **Finer ladder.** L4's per-word sigmoids fit on 11 points are serviceable but
+  coarse (fit-noise inflates the κ IQRs). 15–20 budgets would sharpen κ_w — trivially
+  cheap now that the A40 pipeline is proven.
+- **BabyLM-100M disjoint control (Option 3, the affirmative leg for L5).** 4 disjoint
+  ~24M subsets of the BabyLM mix (heterogeneous register: web + spoken), 2 seeds each.
+  Genuinely *compositionally* different disjoint data — if individuals still converge,
+  the L4/L5 convergence claim is strong. Hold the `GPT2_CHILDES` tokenizer + CHILDES-val
+  CDI probe fixed; split at the document level (unstratified) so subsets differ in mix.
 - **Architecture × budget.** Cross the ladder with a within-GPT-2 arch sweep
   (LR / width / depth) — a later addition, not needed for seed-variance-in-development.
 - **Compute-controlled C&B control (from L1).** Does the slope shift with many
