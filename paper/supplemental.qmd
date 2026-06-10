@@ -183,7 +183,7 @@ mk(fanning,  "(B) diverging trajectories (slopes vary)")
 
 ```{r tbl-datasets}
 #| label: tbl-datasets
-#| tbl-cap: "Characteristics of all datasets used in the paper. N and ages reflect the analysis samples (post-exclusion). Cross-sectional rows pool all contributed Wordbank datasets for a language, subsampled to at most 1,200 children. For AM2018 and FMW2013, which enter both the input and processing analyses with slightly different inclusion criteria, N is the union of the two subsamples."
+#| tbl-cap: "Characteristics of all datasets used in the paper. N and ages reflect the analysis samples (post-exclusion). Cross-sectional rows pool all contributed Wordbank datasets for a language. For AM2018 and FMW2013, which enter both the input and processing analyses with slightly different inclusion criteria, N is the union of the two subsamples."
 # Reads paper/cache/table1_datasets.csv, built by paper/build_table1.R from
 # the analysis bundles (glmer_ladder bundles; io_pooled + proc_dp bundles;
 # cross_sectional_demographics frames). Re-run that script when subsamples
@@ -221,7 +221,82 @@ table1 |>
   kableExtra::landscape()
 ```
 
+# AIC and BIC for Longitudinal Models
 
+
+```{r tbl-aic}
+#| label: tbl-aic
+#| tbl-cap: ""
+# Model-comparison table: dAIC and dBIC of each model variant relative to
+# the best model within each language (the best is always D log-age, dAIC
+# = dBIC = 0). Models without a per-child slope (A, B) have no log/linear
+# distinction at the accumulation step; we tabulate B/C/D in both age
+# bases. Values built from aic_summary (paper/build_cache.R <- glmer ladder).
+lang_order <- c("thal","smith","marchman","norwegian","japanese")
+lang_short <- c(thal="Thal", smith="Smith", marchman="Marchman",
+                norwegian="Norwegian", japanese="Japanese")
+mod_lab <- c(A="M1. accumulator",
+             B_lin="M2. + acceleration", B_log="M2. + acceleration",
+             C_lin="M3. + efficiency var.", C_log="M3. + efficiency var.",
+             D_lin="M4. + acceleration var.", D_log="M4. + acceleration var.")
+age_lab <- c(A="—", B_lin="linear", B_log="log", C_lin="linear",
+             C_log="log", D_lin="linear", D_log="log")
+mod_order <- c("A","B_lin","B_log","C_lin","C_log","D_lin","D_log")
+
+tab <- aic |>
+  mutate(Model = mod_lab[model], Age = age_lab[model],
+         lang_slug = factor(lang_slug, levels = lang_order)) |>
+  select(model, Model, Age, lang_slug, dAIC) |>
+  tidyr::pivot_wider(names_from = lang_slug, values_from = dAIC) |>
+  mutate(model = factor(model, levels = mod_order)) |>
+  arrange(model) |>
+  select(Model, Age, all_of(lang_order))
+
+# Main text: dAIC only (dBIC moved to a supplemental table, tbl-bic).
+fmt <- function(x) ifelse(x == 0, "0", format(round(x), big.mark = ","))
+out <- cbind(tab[, c("Model","Age")],
+             lapply(tab[, lang_order], fmt) |> as.data.frame())
+
+knitr::kable(out, align = c("l","l", rep("r", 5)),
+             col.names = c("Model", "Age", unname(lang_short[lang_order]))) |>
+  kableExtra::add_header_above(c(" " = 2, "$\\\\Delta$AIC" = 5),
+                               escape = FALSE) |>
+  kableExtra::kable_styling(latex_options = "scale_down", font_size = 8)
+```
+
+
+```{r tbl-bic}
+#| label: tbl-bic
+#| tbl-cap: ""
+# [MCF: caption on next pass.] Delta-BIC companion to the main-text
+# Delta-AIC table: BIC difference of each model variant from the best
+# model within each dataset.
+lang_order <- c("thal","smith","marchman","norwegian","japanese")
+lang_short <- c(thal="Thal", smith="Smith", marchman="Marchman",
+                norwegian="Norwegian", japanese="Japanese")
+mod_lab <- c(A="M1. accumulator",
+             B_lin="M2. + acceleration", B_log="M2. + acceleration",
+             C_lin="M3. + efficiency var.", C_log="M3. + efficiency var.",
+             D_lin="M4. + acceleration var.", D_log="M4. + acceleration var.")
+age_lab <- c(A="—", B_lin="linear", B_log="log", C_lin="linear",
+             C_log="log", D_lin="linear", D_log="log")
+mod_order <- c("A","B_lin","B_log","C_lin","C_log","D_lin","D_log")
+tabB <- aic |>
+  mutate(Model = mod_lab[model], Age = age_lab[model],
+         lang_slug = factor(lang_slug, levels = lang_order)) |>
+  select(model, Model, Age, lang_slug, dBIC) |>
+  tidyr::pivot_wider(names_from = lang_slug, values_from = dBIC) |>
+  mutate(model = factor(model, levels = mod_order)) |>
+  arrange(model) |>
+  select(Model, Age, all_of(lang_order))
+fmt <- function(x) ifelse(x == 0, "0", format(round(x), big.mark = ","))
+out <- cbind(tabB[, c("Model","Age")],
+             lapply(tabB[, lang_order], fmt) |> as.data.frame())
+knitr::kable(out, align = c("l","l", rep("r", 5)),
+             col.names = c("Model", "Age", unname(lang_short[lang_order]))) |>
+  kableExtra::add_header_above(c(" " = 2, "$\\\\Delta$BIC" = 5), escape = FALSE) |>
+  kableExtra::kable_styling(latex_options = "scale_down", font_size = 8)
+```
 
 # Full Cross-Linguistic Model Ladder
 
@@ -464,38 +539,6 @@ ggplot(sim, aes(age, theta, color = qprob_f, group = qprob_f)) +
   patchwork::plot_layout(guides = "collect")
 ```
 
-```{r tbl-bic}
-#| label: tbl-bic
-#| tbl-cap: ""
-# [MCF: caption on next pass.] Delta-BIC companion to the main-text
-# Delta-AIC table: BIC difference of each model variant from the best
-# model within each dataset.
-lang_order <- c("thal","smith","marchman","norwegian","japanese")
-lang_short <- c(thal="Thal", smith="Smith", marchman="Marchman",
-                norwegian="Norwegian", japanese="Japanese")
-mod_lab <- c(A="M1. accumulator",
-             B_lin="M2. + acceleration", B_log="M2. + acceleration",
-             C_lin="M3. + efficiency var.", C_log="M3. + efficiency var.",
-             D_lin="M4. + acceleration var.", D_log="M4. + acceleration var.")
-age_lab <- c(A="—", B_lin="linear", B_log="log", C_lin="linear",
-             C_log="log", D_lin="linear", D_log="log")
-mod_order <- c("A","B_lin","B_log","C_lin","C_log","D_lin","D_log")
-tabB <- aic |>
-  mutate(Model = mod_lab[model], Age = age_lab[model],
-         lang_slug = factor(lang_slug, levels = lang_order)) |>
-  select(model, Model, Age, lang_slug, dBIC) |>
-  tidyr::pivot_wider(names_from = lang_slug, values_from = dBIC) |>
-  mutate(model = factor(model, levels = mod_order)) |>
-  arrange(model) |>
-  select(Model, Age, all_of(lang_order))
-fmt <- function(x) ifelse(x == 0, "0", format(round(x), big.mark = ","))
-out <- cbind(tabB[, c("Model","Age")],
-             lapply(tabB[, lang_order], fmt) |> as.data.frame())
-knitr::kable(out, align = c("l","l", rep("r", 5)),
-             col.names = c("Model", "Age", unname(lang_short[lang_order]))) |>
-  kableExtra::add_header_above(c(" " = 2, "$\\\\Delta$BIC" = 5), escape = FALSE) |>
-  kableExtra::kable_styling(latex_options = "scale_down", font_size = 8)
-```
 
 ```{r blup-prep, include=FALSE}
 # Per-child BLUP distributions (efficiency xi, acceleration zeta) from the
