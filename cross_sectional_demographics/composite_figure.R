@@ -42,6 +42,23 @@ make_demographics_composite <- function(fits, sex_min_n = 300, mated_min_n = 300
                               levels = comp_lev)) |>
     select(language, predictor, component, estimate, lo, hi)
 
+  ## shared x-limits per component (so sex & maternal-ed panels align and the
+  ## efficiency crossover is visible). Acceleration is capped so a couple of
+  ## small-n languages with very wide CIs don't blow out the axis.
+  all_ll <- bind_rows(
+    fits$xsec |> filter(predictor == "sex",   language %in% sex_langs)   |> to_long(),
+    fits$xsec |> filter(predictor == "matEd", language %in% mated_langs) |> to_long(),
+    long_lang |> filter(predictor == "sex",   language %in% sex_langs)   |> to_long(),
+    long_lang |> filter(predictor == "matEd", language %in% mated_langs) |> to_long())
+  eff_lim <- all_ll |> filter(component == "Efficiency") |>
+    summarise(lo = min(lo, na.rm = TRUE), hi = max(hi, na.rm = TRUE))
+  eff_lim <- c(eff_lim$lo, eff_lim$hi) + c(-0.05, 0.05)
+  acc_hw  <- max(abs(all_ll$estimate[all_ll$component == "Acceleration"]), na.rm = TRUE) + 0.7
+  acc_lim <- c(-acc_hw, acc_hw)
+  cap_acc <- function(d) d |>
+    mutate(lo = if_else(component == "Acceleration", pmax(lo, acc_lim[1]), lo),
+           hi = if_else(component == "Acceleration", pmin(hi, acc_lim[2]), hi))
+
   ## random-effects meta per (predictor, component) over the DISPLAYED languages
   meta_for <- function(pred, langs) {
     s <- fits$xsec |> filter(predictor == pred, language %in% langs)
@@ -63,10 +80,14 @@ make_demographics_composite <- function(fits, sex_min_n = 300, mated_min_n = 300
     lo <- long_lang |> filter(predictor == pred, language %in% langs) |> to_long()
     ord <- xs |> filter(component == "Efficiency") |> arrange(estimate) |> pull(language)
     xs$language <- factor(xs$language, levels = ord); lo$language <- factor(lo$language, levels = ord)
+    xs <- cap_acc(xs); lo <- cap_acc(lo)
+    lim_df <- tibble(component = factor(rep(comp_lev, each = 2), levels = comp_lev),
+                     x = c(eff_lim, acc_lim), language = ord[1])
     ggplot(xs, aes(estimate, language)) +
       geom_rect(data = meta, aes(xmin = ci.lb, xmax = ci.ub, ymin = -Inf, ymax = Inf),
                 inherit.aes = FALSE, fill = COL_XS, alpha = 0.08) +
       geom_vline(xintercept = 0, linetype = "dashed", colour = "grey65", linewidth = 0.3) +
+      geom_blank(data = lim_df, aes(x = x, y = language)) +
       geom_pointrange(aes(xmin = lo, xmax = hi), colour = COL_XS, shape = 16, size = 0.22) +
       geom_point(data = lo, aes(estimate, language), colour = COL_LO, shape = 18, size = 2.4) +
       facet_wrap(~ component, scales = "free_x") +
