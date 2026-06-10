@@ -282,81 +282,26 @@ knitr::kable(out, align = c("l","l", rep("r", 5)),
 ```{r fig-demographics, fig.width=7.5, fig.height=13}
 #| label: fig-demographics
 #| fig-cap: "Regression coefficients predicting individual children's efficiency and acceleration as a function of gender and maternal education. Black dots show meta-analytic estimates from a random-effects meta analysis. Error bars show 95\\% confidence intervals."
-# Per-kid BLUPs (xi = intercept, zeta = log-age slope) from each language's
-# D_log fit, joined with Wordbank demographics. For each (language, outcome)
-# we regress the z-scored random effect on sex + maternal education.
-#
-# Maternal education enters as CONTINUOUS years (Wordbank's harmonized
-# categories mapped to approximate years of schooling), standardized
-# within-language. This (a) puts the differently-grained category sets on
-# one scale (Norwegian has 4 levels, English/French 7), (b) uses 1 df
-# instead of k-1, and (c) yields one slope per language we can pool.
-# Birth order is dropped (sparse outside Norwegian). Sex is kept for all
-# four languages; Japanese has NO maternal-education data, so it
-# contributes to the sex term only.
-ED_YEARS <- c("None" = 0, "Primary" = 6, "Some Secondary" = 9,
-              "Secondary" = 12, "Some College" = 14, "College" = 16,
-              "Some Graduate" = 18, "Graduate" = 20)
-
-fit_one <- function(d, outcome) {
-  d <- d |>
-    mutate(y = as.numeric(scale(.data[[outcome]])),
-           ed_years = unname(ED_YEARS[as.character(caregiver_ed)])) |>
-    filter(!is.na(y), !is.na(sex))
-  if (nrow(d) < 30) return(NULL)
-  has_ed <- sum(!is.na(d$ed_years)) >= 30
-  if (has_ed) {
-    dd <- filter(d, !is.na(ed_years))
-    m  <- lm(y ~ sex + scale(ed_years), data = dd)
-  } else {
-    dd <- d
-    m  <- lm(y ~ sex, data = dd)   # Japanese: sex only
-  }
-  broom::tidy(m, conf.int = TRUE) |> mutate(outcome = outcome, n = nrow(dd))
-}
-combos <- expand.grid(
-  lang_slug = unique(demo_blups$lang_slug),
-  outcome   = c("xi", "zeta"),
-  stringsAsFactors = FALSE
-)
-coefs <- bind_rows(lapply(seq_len(nrow(combos)), function(i) {
-  d <- filter(demo_blups, lang_slug == combos$lang_slug[i])
-  res <- fit_one(d, combos$outcome[i])
-  if (is.null(res)) NULL else mutate(res, lang_slug = combos$lang_slug[i])
-})) |>
-  filter(term != "(Intercept)")
-
-# Random-effects meta-analysis per (outcome, term) across the languages
-# that contribute that term (4 for sex, 3 for education).
-meta_summary <- coefs |>
-  group_by(outcome, term) |>
-  group_modify(~ {
-    if (nrow(.x) < 2) return(tibble())
-    res <- tryCatch(
-      metafor::rma(yi = .x$estimate, sei = .x$std.error,
-                   method = "REML", control = list(stepadj = 0.5)),
-      error = function(e) NULL)
-    if (is.null(res)) return(tibble())
-    tibble(estimate = as.numeric(res$beta),
-           conf.low = res$ci.lb, conf.high = res$ci.ub,
-           std.error = res$se, k = res$k, 
-           p = res$pval)
-  }) |>
-  ungroup() |>
-  mutate(lang_slug = "_meta_")
-
-# --- Figure: cross-sectional + longitudinal demographic composite ---
-# meta_summary (above) is the LONGITUDINAL z-scored meta that still drives the
-# inline beta/p values in the text. The figure itself is now the cross-
-# sectional + longitudinal composite (Panel A per-language efficiency &
-# acceleration for sex and maternal ed; Panel B meta), built by
+# Cross-sectional + longitudinal demographic composite, built by
 # cross_sectional_demographics/composite_figure.R from that directory's
-# committed cache (cache/fits.rds <- 00_build.R). The cross-sectional arm
-# spans many more languages than the longitudinal one.
+# committed cache (cache/fits.rds <- 00_build.R): sex and maternal-ed effects
+# on efficiency and acceleration, per language with a meta-analysis (Panel C).
 # [MCF: the caption and the two surrounding paragraphs describe the OLD
 #  longitudinal-only figure and need rewriting for the composite.]
 source(here("cross_sectional_demographics", "composite_figure.R"))
 xsec_fits <- readRDS(here("cross_sectional_demographics", "cache", "fits.rds"))
+
+# Inline beta/p values in the text below read from meta_summary, which is now
+# the CROSS-SECTIONAL meta-analytic main effects plotted in Panel C, ordered to
+# match the inline indices: [1] maternal-ed efficiency, [2] sex efficiency,
+# [3] maternal-ed acceleration, [4] sex acceleration.
+meta_summary <- panelC_meta(xsec_fits)
+meta_summary <- meta_summary[c(
+  which(meta_summary$predictor == "matEd" & meta_summary$component == "efficiency"),
+  which(meta_summary$predictor == "sex"   & meta_summary$component == "efficiency"),
+  which(meta_summary$predictor == "matEd" & meta_summary$component == "acceleration"),
+  which(meta_summary$predictor == "sex"   & meta_summary$component == "acceleration")), ]
+
 make_demographics_composite(xsec_fits)
 ```
 
