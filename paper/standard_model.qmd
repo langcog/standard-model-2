@@ -317,7 +317,7 @@ knitr::kable(out, align = c("l","l", rep("r", 5)),
 ## Efficiency and acceleration relate to separate demographic predictors
 
 
-```{r fig-demographics, fig.width=7.5, fig.height=12}
+```{r fig-demographics, fig.width=7.5, fig.height=13}
 #| label: fig-demographics
 #| fig-cap: "Regression coefficients predicting individual children's efficiency and acceleration as a function of gender and maternal education. Black dots show meta-analytic estimates from a random-effects meta analysis. Error bars show 95\\% confidence intervals."
 # Per-kid BLUPs (xi = intercept, zeta = log-age slope) from each language's
