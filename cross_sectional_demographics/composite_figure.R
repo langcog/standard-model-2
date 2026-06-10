@@ -107,12 +107,23 @@ make_demographics_composite <- function(fits, sex_min_n = 300, mated_min_n = 300
               acceleration="Acceleration"), levels = comp_lev),
               est = estimate, ci.lb, ci.ub, method = "Longitudinal")
   comb <- bind_rows(bind_rows(meta_sex, meta_med) |> mutate(method = "Cross-sectional"), long_meta) |>
-    mutate(predictor = recode(predictor, sex = "Sex", matEd = "Maternal ed."))
-  pMeta <- ggplot(comb, aes(est, fct_rev(component), colour = method)) +
+    mutate(predictor = factor(recode(predictor, sex = "Sex", matEd = "Maternal ed."),
+                              levels = c("Sex", "Maternal ed.")),
+           method = factor(method, levels = c("Cross-sectional", "Longitudinal")),
+           ci.lb = if_else(component == "Acceleration", pmax(ci.lb, acc_lim[1]), ci.lb),
+           ci.ub = if_else(component == "Acceleration", pmin(ci.ub, acc_lim[2]), ci.ub))
+  # same grid as A/B (efficiency | acceleration columns; sex / maternal-ed rows)
+  # and the same per-component x-limits, so all three panels align.
+  limC <- tidyr::crossing(
+    predictor = factor(c("Sex","Maternal ed."), levels = c("Sex","Maternal ed.")),
+    tibble(component = factor(rep(comp_lev, each = 2), levels = comp_lev),
+           x = c(eff_lim, acc_lim))) |>
+    mutate(method = factor("Cross-sectional", levels = c("Cross-sectional","Longitudinal")))
+  pMeta <- ggplot(comb, aes(est, fct_rev(method), colour = method)) +
     geom_vline(xintercept = 0, linetype = "dashed", colour = "grey65", linewidth = 0.3) +
-    geom_pointrange(aes(xmin = ci.lb, xmax = ci.ub),
-                    position = position_dodge(width = 0.5), size = 0.45) +
-    facet_wrap(~ predictor, scales = "free_x") +
+    geom_blank(data = limC, aes(x = x, y = method)) +
+    geom_pointrange(aes(xmin = ci.lb, xmax = ci.ub), size = 0.5) +
+    facet_grid(predictor ~ component, scales = "free_x") +
     scale_colour_manual(values = c("Cross-sectional" = COL_XS, "Longitudinal" = COL_LO), name = NULL) +
     labs(x = "meta-analytic estimate (logits, per SD)", y = NULL, title = "C. Meta-analytic summary") +
     theme_minimal(base_size = 9) +
@@ -120,6 +131,6 @@ make_demographics_composite <- function(fits, sex_min_n = 300, mated_min_n = 300
           strip.text = element_text(face = "bold", size = 8.5), panel.grid.minor = element_blank())
 
   (pSex / pMed / pMeta) +
-    plot_layout(heights = c(length(sex_langs) + 3, length(mated_langs) + 3, 11)) &
+    plot_layout(heights = c(length(sex_langs) + 3, length(mated_langs) + 3, 15)) &
     theme(plot.margin = margin(3, 8, 3, 4))
 }

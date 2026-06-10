@@ -134,7 +134,7 @@ see anomaly section).
 
 ```{r fig-composite}
 #| fig-width: 8
-#| fig-height: 12
+#| fig-height: 13
 source(here("cross_sectional_demographics", "composite_figure.R"))
 make_demographics_composite(fits)
 ```
