@@ -419,7 +419,7 @@ Estimating children's input range is notoriously tricky, since the rate of langu
 ## Input modestly predicts efficiency and acceleration for individual children
 
 
-```{r fig-io-partition, fig.width=11, fig.height=3.8}
+```{r fig-io-partition, fig.width=11, fig.height=7.4}
 #| label: fig-io-partition
 #| fig-cap: ""
 # [MCF: caption on next pass.] INPUT triptych -- one quantity (the input
@@ -480,7 +480,25 @@ pC <- ggplot(dplyr::filter(pcd, kind == "model"), aes(source, input_share)) +
         axis.text.x = element_text(angle = 20, hjust = 1),
         plot.title = element_text(face = "bold", size = 9))
 
-(pA | pB | pC) + plot_layout(widths = c(1, 1, 0.95), guides = "collect") &
+## --- (D) input fan + (E) processing fan: model curves over grey per-child
+## spaghetti. Children split into quartiles on the model predictor (io log_r_dev
+## / proc centred log-RT), labelled by percentile; data built in build_input_cache.R.
+fan_panel <- function(curves, spag, title) ggplot() +
+  geom_line(data = spag, aes(age, vocab, group = ii), color = "grey75",
+            alpha = 0.35, linewidth = 0.25) +
+  geom_line(data = curves, aes(age, vocab, color = q), linewidth = 1.1) +
+  scale_color_viridis_d(end = 0.9, name = "predictor percentile") +
+  scale_y_continuous(limits = c(0, 1), labels = pct) +
+  labs(x = "age (months)", y = "proportion produced", title = title) +
+  theme_minimal(base_size = 9) +
+  theme(legend.position = "bottom", panel.grid.minor = element_blank(),
+        plot.title = element_text(face = "bold", size = 9))
+pD <- fan_panel(ip$panelD_curves, ip$panelD_spag, "(D) Language input")
+pE <- fan_panel(ip$panelE_curves, ip$panelE_spag, "(E) Processing speed")
+
+top <- (pA | pB | pC) + plot_layout(widths = c(1, 1, 0.95), guides = "collect")
+bot <- (pD | pE) + plot_layout(guides = "collect")
+(top / bot) + plot_layout(heights = c(1, 1.15)) &
   theme(legend.position = "bottom")
 ```
 

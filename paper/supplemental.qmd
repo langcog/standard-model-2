@@ -393,6 +393,29 @@ ggplot(sim, aes(age, theta, color = qprob_f, group = qprob_f)) +
         legend.position = "bottom", panel.grid.minor = element_blank())
 ```
 
+```{r fig-proc-splits, fig.width=9, fig.height=7}
+#| label: fig-proc-splits
+#| fig-cap: ""
+# [MCF: caption on next pass.] Empirical vocabulary trajectories for the three
+# processing datasets, each child split at the median by LWL reaction time (top)
+# and by LENA input (bottom). Spaghetti coloured by dataset; black line = loess
+# mean per group. The model-based quartile FANS are in main-text Fig 3 (D/E);
+# these are the raw empirical splits underneath them. Data: build_input_cache.R.
+.fi  <- readRDS(here("paper", "cache", "fig3_input.rds"))
+.PAL <- c(AM2018 = "#E69F00", FM2012 = "#56B4E9", FMW2013 = "#009E73")
+.spa <- function(d, ttl) ggplot(d, aes(age, vocab)) +
+  geom_line(aes(group = ii, color = ds), alpha = 0.35, linewidth = 0.3) +
+  geom_smooth(aes(group = 1), method = "loess", se = FALSE, color = "black",
+              linewidth = 0.9, span = 0.9) +
+  facet_wrap(vars(grp)) +
+  scale_color_manual(values = .PAL, name = "Dataset") +
+  labs(title = ttl, x = "age (months)", y = "proportion produced") +
+  theme_bw(base_size = 9) + theme(legend.position = "right")
+(.spa(.fi$panelSupp_rt,    "(A) Vocabulary by processing speed (LWL RT)") /
+ .spa(.fi$panelSupp_input, "(B) Vocabulary by input (LENA)")) +
+  patchwork::plot_layout(guides = "collect")
+```
+
 ```{r tbl-bic}
 #| label: tbl-bic
 #| tbl-cap: ""
