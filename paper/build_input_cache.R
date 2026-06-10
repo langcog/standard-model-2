@@ -88,8 +88,74 @@ meta <- tibble(source = "Coffey 2026 (meta)", kind = "meta",
                input_share = 0.055, lo = 0.04, hi = 0.07)
 panelC <- bind_rows(panelC, meta)
 
+## ---- Panels D/E: input & processing fans (model curves + per-child spaghetti) ----
+## D = io_pooled input fan; E = proc_dp RT fan. Children are split into quartiles
+## on the model's PREDICTOR (io log_r_dev / proc rt0 = centred log-RT) and labelled
+## by percentile. Curves = model-predicted vocab at each quartile's median
+## predictor; spaghetti = per-child empirical trajectories (drawn grey in the chunk).
+PCT_LEVS <- c("0–25%", "25–50%", "50–75%", "75–100%")
+qfac <- function(x) factor(PCT_LEVS[cut(x, quantile(x, 0:4/4), include.lowest = TRUE,
+                                        labels = FALSE)], levels = PCT_LEVS)
+
+## (E) proc_dp processing fan (D'1, the selected rung)
+pb   <- readRDS(here("fits", "proc_dp_all_subset_data.rds")); psd <- pb$stan_data
+pdr  <- readRDS(here("fits", "summaries", "proc_dp1_all.draws.rds"))
+ppsi <- read.csv(here("fits", "summaries", "proc_dp1_all_psi.csv"))
+pwi  <- pb$word_info[order(pb$word_info$jj), ]
+plp  <- log(pwi$prob); pdj <- ppsi$delta_j[order(ppsi$jj)]
+pbx  <- median(pdr$beta_xi); pdel <- median(pdr$delta)
+prt  <- pb$lwl |> group_by(ii, dataset_name) |>
+  summarise(m = mean(lwl_log_rt), .groups = "drop") |>
+  group_by(dataset_name) |> mutate(rt0 = m - mean(m)) |> ungroup()   # centred log-RT = predictor
+prt$q <- qfac(prt$rt0)
+pages <- seq(13, 30, by = 0.5)
+panelE_curves <- bind_rows(lapply(PCT_LEVS, function(L) {
+  rt0q <- median(prt$rt0[prt$q == L])
+  tibble(q = factor(L, levels = PCT_LEVS), age = pages,
+         vocab = vapply(pages, function(t)
+           mean(plogis((psd$mu_r + pbx * rt0q) + (1 + pdel) * log(t / psd$a0) + plp + psd$log_H - pdj)),
+           numeric(1))) }))
+panelE_spag <- pb$df |> group_by(ii, age) |> summarise(vocab = mean(produces), .groups = "drop") |>
+  inner_join(prt |> select(ii, q), by = "ii")
+
+## (D) io_pooled input fan (reuse iofit loaded above)
+iob   <- readRDS(here("fits", "io_pooled_subset_data.rds")); isd <- iob$stan_data
+iosum <- function(v) iofit$summary(v, ~quantile(.x, .5, names = FALSE))[[2]]
+ilrd  <- iosum("log_r_dev"); idj <- iosum("delta_j")
+iref  <- mean(iosum("study_ability_mean")); idel <- iosum("delta")[1]; ibc <- iosum("beta_c")[1]
+iwi   <- iob$word_info[order(iob$word_info$jj), ]; ilp <- log(iwi$prob)
+ich   <- tibble(ii = seq_along(ilrd), lrd = ilrd, q = qfac(ilrd))
+iages <- seq(floor(min(isd$admin_age)), ceiling(max(isd$admin_age)), by = 0.5)
+panelD_curves <- bind_rows(lapply(PCT_LEVS, function(L) {
+  lrdq <- median(ich$lrd[ich$q == L])
+  tibble(q = factor(L, levels = PCT_LEVS), age = iages,
+         vocab = vapply(iages, function(t)
+           mean(plogis((iref + lrdq) + (1 + idel) * log(t / isd$a0) + ibc * ilp + isd$log_H - idj)),
+           numeric(1))) }))
+panelD_spag <- iob$df |> group_by(ii, age) |> summarise(vocab = mean(produces), .groups = "drop") |>
+  inner_join(ich |> select(ii, q), by = "ii")
+cat(sprintf("Fans: proc beta_xi=%.2f; io beta_c=%.2f. proc RT quartiles n=%s\n",
+            pbx, ibc, paste(as.integer(table(prt$q)), collapse = "/")))
+
+## ---- Supplement: empirical proc splits (median RT / median input), per dataset ----
+## Cached here (rather than read live in the supplement) so the supplement chunk
+## needs no fit bundle. Median split on the predictor; spaghetti coloured by dataset.
+DL <- c(adams_marchman_2018 = "AM2018", fernald_marchman_2012 = "FM2012", fmw_2013 = "FMW2013")
+svoc <- pb$df |> group_by(ii, dataset_name, age) |> summarise(vocab = mean(produces), .groups = "drop") |>
+  mutate(ds = factor(DL[dataset_name], levels = DL))
+srt_grp  <- prt |> transmute(ii, grp = factor(ifelse(m < median(m), "Slower processors", "Faster processors"),
+                                              levels = c("Slower processors", "Faster processors")))
+sinp_grp <- pb$lena |> group_by(ii) |> summarise(z = mean(z_lena), .groups = "drop") |>
+  mutate(grp = factor(ifelse(z < median(z), "Lower input", "Higher input"),
+                      levels = c("Lower input", "Higher input")))
+panelSupp_rt    <- svoc |> inner_join(srt_grp, by = "ii")
+panelSupp_input <- svoc |> inner_join(sinp_grp |> select(ii, grp), by = "ii")
+
 saveRDS(list(panelA = panelA, panelB_curve = panelB_curve,
              panelB_anchors = panelB_anchors, panelC = panelC,
+             panelD_curves = panelD_curves, panelD_spag = panelD_spag,
+             panelE_curves = panelE_curves, panelE_spag = panelE_spag,
+             panelSupp_rt = panelSupp_rt, panelSupp_input = panelSupp_input,
              sr_main = 0.53, sr_range = c(0.40, 0.70),  # plausible band: MCF to set
              a0 = a0, intercept_only = TRUE,
              no_is_placeholder = TRUE),
