@@ -317,7 +317,7 @@ knitr::kable(out, align = c("l","l", rep("r", 5)),
 ## Efficiency and acceleration relate to separate demographic predictors
 
 
-```{r fig-demographics, fig.width=7, fig.height=4.5}
+```{r fig-demographics, fig.width=7.5, fig.height=9}
 #| label: fig-demographics
 #| fig-cap: "Regression coefficients predicting individual children's efficiency and acceleration as a function of gender and maternal education. Black dots show meta-analytic estimates from a random-effects meta analysis. Error bars show 95\\% confidence intervals."
 # Per-kid BLUPs (xi = intercept, zeta = log-age slope) from each language's
@@ -383,48 +383,19 @@ meta_summary <- coefs |>
   ungroup() |>
   mutate(lang_slug = "_meta_")
 
-# Units that actually contribute a demographic coefficient (Smith has no
-# sex/ed data, so it drops out of the regressions — keep it out of the
-# legend/palette too rather than showing an empty key).
-present_units <- intersect(ladder$langs, unique(coefs$lang_slug))
-coefs_all <- bind_rows(coefs, meta_summary) |>
-  mutate(
-    term_label = recode(term,
-      "sexMale"         = "Male\n(vs Female)",
-      "scale(ed_years)" = "Maternal education\n(per SD, years)") |>
-      factor(levels = rev(c("Male\n(vs Female)",
-                            "Maternal education\n(per SD, years)"))),
-    outcome = factor(outcome, levels = c("xi", "zeta"),
-                     labels = c("Efficiency~(xi)",
-                                "Acceleration~(zeta)")),
-    lang_label = factor(c(LANG_LABELS, "_meta_" = "Meta-analytic")[lang_slug],
-                        levels = c(LANG_LABELS[present_units],
-                                   "Meta-analytic")))
-plot_pal <- c(setNames(unname(LANG_PAL[present_units]),
-                       unname(LANG_LABELS[present_units])),
-              "Meta-analytic" = "black")
-
-coefs_all <- coefs_all |>
-  mutate(is_meta = lang_label == "Meta-analytic")
-
-ggplot(coefs_all,
-       aes(estimate, term_label, color = lang_label,
-           group = lang_label, size = is_meta)) +
-  geom_vline(xintercept = 0, linetype = "dashed", color = "grey55") +
-  geom_pointrange(aes(xmin = conf.low, xmax = conf.high),
-                  position = position_dodge(width = 0.70),
-                  fatten = 3) +
-  facet_wrap(~ outcome, ncol = 2, scales = "free_x",
-             labeller = label_parsed) +
-  scale_color_manual(values = plot_pal, name = NULL, drop = FALSE) +
-  scale_size_manual(values = c(`FALSE` = 0.35, `TRUE` = 0.65),
-                    guide = "none") +
-  guides(color = guide_legend(nrow = 1)) +
-  labs(x = "regression coefficient (z-scored outcome)", y = NULL) +
-  theme_minimal(base_size = 10) +
-  theme(legend.position = "bottom",
-        strip.text = element_text(face = "bold", size = 11),
-        axis.text.y = element_text(size = 9))
+# --- Figure: cross-sectional + longitudinal demographic composite ---
+# meta_summary (above) is the LONGITUDINAL z-scored meta that still drives the
+# inline beta/p values in the text. The figure itself is now the cross-
+# sectional + longitudinal composite (Panel A per-language efficiency &
+# acceleration for sex and maternal ed; Panel B meta), built by
+# cross_sectional_demographics/composite_figure.R from that directory's
+# committed cache (cache/fits.rds <- 00_build.R). The cross-sectional arm
+# spans many more languages than the longitudinal one.
+# [MCF: the caption and the two surrounding paragraphs describe the OLD
+#  longitudinal-only figure and need rewriting for the composite.]
+source(here("cross_sectional_demographics", "composite_figure.R"))
+xsec_fits <- readRDS(here("cross_sectional_demographics", "cache", "fits.rds"))
+make_demographics_composite(xsec_fits)
 ```
 
 Children's vocabulary is known to be related to a number of sociodemographic predictors, including sex and maternal education (which is interpreted as a proxy for socioeconomic status). In particular, female children show consistently larger vocabularies than male children across dozens of languages and countries [@eriksson2012;@frank2021]. Similarly, children of more educated mothers tend to show larger vocabularies, though this effect is somewhat more heterogeneous across countries and languages [@frank2021].
