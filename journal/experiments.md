@@ -1995,6 +1995,19 @@ Fix: guard now checks `delta_j` vs the data's per-item production rate. Rebuilt
 `fig4_exposure.rds` (book ≈13k exposures @16mo, country ≈683 @36mo). No re-fit; GCP stayed off.
 Lesson: validate `delta_j` against production, not frequency.
 
+**Update 2026-06-10 — committed the guard fix + caught a stale-psi bug.** The guard fix above
+was never committed (lost across sessions); re-applied. The actual trigger of the section-5
+error was a **stale psi**: `long_no_freq_slopes_psi.csv` on disk was the **May pre-dedup**
+extraction (671 items), but the EN fit was re-run post-dedup in June on the 682-item bundle
+(`long_subset_data.rds`). The 671-vs-682 count guard was correctly refusing to pair stale
+`delta_j` with the current bundle. (A first pass wrongly "fixed" this by reverting to the old
+671 bundle — which would have locked Figure 4 to the May fit; MCF caught it by asking whether
+the params were from the recent GCP run.) Correct fix: re-pulled the recent **682-item**
+`delta_j` from GCP node `sm2-fit-01` (2026-06-08 extraction — the fit CSVs were already gc'd,
+but `recover_from_csvs.R` had written the psi), keeping the 682 bundle. Verified:
+`cor(delta_j, production) = −0.974`; 606 items after the freq floor; book 13.1k exp @16.1mo,
+country 683 @35.8mo; `if`/`would` learned ~35mo despite 35–47k exposures — freq⊥difficulty made vivid.
+
 ---
 
 ## Backlog (⚪)

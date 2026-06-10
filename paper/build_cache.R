@@ -39,7 +39,7 @@ dir.create(CACHE, recursive = TRUE, showWarnings = FALSE)
 ##  not cached, so its numbers/names can be edited directly there.)
 
 ## ---- 1. glmer-ladder predictions + empirical points -------------
-sc <- readRDS(here("outputs", "glmer_ladder", "sim_cache.rds"))
+sc <- readRDS(here("fits", "glmer_ladder", "sim_cache.rds"))
 
 # keep all 7 model variants for the four paper languages: the main-text
 # figure filters to the log-age models, the supplement to the linear ones.
@@ -184,6 +184,10 @@ cat(sprintf("Wrote %s\n", file.path(CACHE, "fig5_io_summary.rds")))
 # counterpart of the glmer M4 (D_log). The typical-child curve uses the
 # population values (log_alpha = 0; kappa = 1 + median(delta)). CHILDES
 # word frequencies via childes-db. (Mirrors model/scripts/exposure_to_learn.R.)
+# Pair the recent post-dedup EN fit with its OWN bundle. long_no_freq_slopes's
+# psi has 682 items (re-pulled from the GCP node, 2026-06-08 extraction), which
+# matches long_subset_data.rds (the dedup'd June bundle). The earlier 671-item
+# psi that triggered the count-mismatch was a STALE May extraction — refreshed.
 lb   <- readRDS(here("fits", "long_subset_data.rds"))
 lsd  <- lb$stan_data
 # log_H: log waking hours/month (~365); a0: anchor age (mo); mu_r: typical
@@ -232,7 +236,7 @@ if (length(psi_item_col) > 0) {
       "build_cache section 5: psi has %d items but word_info has %d, and psi ",
       "has no item-name column. A positional (row-number) join would MISALIGN ",
       "delta_j with words and silently break Figure 4. Re-fit the longitudinal ",
-      "model on the current data bundle (so its psi matches long_subset_data.rds), ",
+      "model on the current data bundle (so its psi matches the bundle read above), ",
       "or export psi with an item column."), nrow(psi), nrow(wi)))
   }
   exposure_items <- wi |> left_join(psi |> select(jj, delta_j), by = "jj")
@@ -248,17 +252,23 @@ exposure_items <- exposure_items |>
          N_word = exp(xi_typ) * exp(log_H) * t_50 * prob) |>
   select(item, lexical_class, delta_j, prob, t_50, N_word)
 
-# Sanity guard: in a valid fit, word difficulty is strongly NEGATIVELY
-# correlated with frequency (frequent words are easier). A weak or positive
-# correlation means delta_j is misaligned with words -- stop rather than write
-# a wrong Figure 4.
-.dfreq_cor <- cor(exposure_items$delta_j, log(exposure_items$prob))
-if (is.na(.dfreq_cor) || .dfreq_cor > -0.2) {
+# Sanity guard: in a valid fit, word difficulty (delta_j) is strongly NEGATIVELY
+# correlated with the data's per-item PRODUCTION rate (easy words are produced by
+# more children). It is NOT correlated with frequency: for CDI words frequency is
+# ~orthogonal to difficulty (high-frequency function words like "in"/"if" are
+# late-learned, cor ~ 0), so the old frequency-based guard false-alarmed on good
+# fits -- the actual misalignment test is against production (see journal entry 34).
+.prod <- lb$df |> dplyr::group_by(jj) |>
+  dplyr::summarise(p = mean(produces), .groups = "drop") |>
+  dplyr::left_join(lb$word_info |> dplyr::select(jj, item), by = "jj")
+.align <- cor(exposure_items$delta_j,
+              .prod$p[match(exposure_items$item, .prod$item)], use = "complete.obs")
+if (is.na(.align) || .align > -0.5) {
   stop(sprintf(paste0(
-    "build_cache section 5: cor(delta_j, log prob) = %.2f (expected strongly ",
+    "build_cache section 5: cor(delta_j, production rate) = %.2f (expected strongly ",
     "negative). delta_j looks misaligned with words -- Figure 4 would be wrong. ",
-    "Check that psi and long_subset_data.rds come from the same item set."),
-    .dfreq_cor))
+    "Check that psi and the data bundle come from the same item set."),
+    .align))
 }
 saveRDS(list(items = exposure_items,
              meta  = list(mu_r = mu_r, kappa_typ = kappa_typ,
@@ -378,7 +388,7 @@ ir_comp <- bind_rows(ir_pooled, ir_within) |>
             sigma_r, kind = "computed")
 
 # Cross-cultural / LENA rows: canonical numbers from the validation set.
-vs <- read_csv(here("input_estimation", "validation_set.csv"),
+vs <- read_csv(here("studies", "input_estimation", "validation_set.csv"),
                show_col_types = FALSE)
 vrow <- function(src, samp = NULL) {
   r <- vs[vs$source == src, ]
