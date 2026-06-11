@@ -75,13 +75,26 @@ Vkap <- pd$gamma_in^2 * srP^2 +
 pr_eff <- pd$beta_xi^2 * pd$sigma_rt0^2 / Vxi
 pr_acc <- (pd$beta_k0^2 * pd$sigma_rt0^2 + pd$beta_k1^2 * pd$sigma_rt1^2 +
            2 * pd$beta_k0 * pd$beta_k1 * rho * pd$sigma_rt0 * pd$sigma_rt1) / Vkap
+## Imputed-input efficiency shares (1 - pi_alpha) from the EN/NO D fits, to
+## show alongside the observed io estimate: input->efficiency is ~3-8% whether
+## input is observed or imputed. (No imputed pi_zeta: the D' slope fits were
+## dropped as confounded, so EN/NO appear on the efficiency channel only.)
+pp <- function(factor, channel, source, kind, m, lo, hi)
+  tibble(factor = factor, channel = channel, source = source, kind = kind,
+         med = m, lo = lo, hi = hi)
+qq <- function(x) c(median(x), quantile(x, .05, names = FALSE), quantile(x, .95, names = FALSE))
 panel_partition <- bind_rows(
-  tibble(factor = "Input",      channel = "Efficiency",   !!!qfac3(in_eff)),
-  tibble(factor = "Input",      channel = "Acceleration", !!!qfac3(in_acc)),
-  tibble(factor = "Processing", channel = "Efficiency",   !!!qfac3(pr_eff)),
-  tibble(factor = "Processing", channel = "Acceleration", !!!qfac3(pr_acc))
+  do.call(pp, c(list("Input","Efficiency","Observed (io)","observed"), as.list(qq(in_eff)))),
+  do.call(pp, c(list("Input","Acceleration","Observed (io)","observed"), as.list(qq(in_acc)))),
+  do.call(pp, c(list("Processing","Efficiency","Processing","observed"), as.list(qq(pr_eff)))),
+  do.call(pp, c(list("Processing","Acceleration","Processing","observed"), as.list(qq(pr_acc)))),
+  pp("Input","Efficiency","English (imputed)",  "imputed", 1 - en$pi_alpha, 1 - en$pi_hi, 1 - en$pi_lo),
+  pp("Input","Efficiency","Norwegian (imputed)","imputed", 1 - no$pi_alpha, 1 - no$pi_hi, 1 - no$pi_lo)
 ) |> mutate(factor  = factor(factor,  levels = c("Input", "Processing")),
-            channel = factor(channel, levels = c("Efficiency", "Acceleration")))
+            channel = factor(channel, levels = c("Efficiency", "Acceleration")),
+            kind    = factor(kind, levels = c("observed", "imputed")),
+            source  = factor(source, levels = c("Observed (io)", "English (imputed)",
+                                                "Norwegian (imputed)", "Processing")))
 
 ## ---- Panel B: analytic sensitivity (EN, NO) + refit anchors ----
 ## Holding sigma_xi^2 at its fitted (data-determined) value, the input
