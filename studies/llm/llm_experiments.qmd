@@ -1,0 +1,266 @@
+---
+title: "LLM word-learning experiments: methods, results, and paper claims"
+subtitle: "GPT-2 vs children on a development-matched axis"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: true
+    df-print: kable
+execute:
+  warning: false
+  message: false
+---
+
+```{r setup}
+knitr::opts_knit$set(root.dir = here::here())  # resolve data paths from repo root
+library(dplyr); library(readr); library(tidyr); library(ggplot2); library(purrr)
+```
+
+## What this notebook is
+
+A walkthrough of the LLM side of the Standard Model 2 comparison. The SM2 model
+gives children **two signatures**: an **acceleration** (per-child scaling
+exponent κ on cumulative experience, κ_pop ≈ 10) and a **variability** (between-child
+spread, σ_κ ≈ 3.5). This notebook asks whether language models share either, and
+documents every experiment, the statistic it uses, and the paper claim it backs.
+Narrative log: [`journal/experiments_llm.md`](../../journal/experiments_llm.md).
+
+**The one thing to keep straight** (this is the recurring confusion): there are
+**two different "experience" axes**, and the same Chang & Bergen per-word sigmoid
+statistic is computed on both. See §1.
+
+::: {.callout-note}
+## The five experiments at a glance
+| | experiment | statistic | "experience" axis | answers |
+|---|---|---|---|---|
+| **L1** | CHILDES-trained GPT-2, 3 seeds (vs BookCorpus) | C&B per-word slope | **training steps** (within run) | input distribution ≠ the gap |
+| **L2** | data-variance pilot, 2 disjoint 10M chunks | C&B per-word slope | **training steps** | data *identity* ≈ no variance |
+| **L3** | developmental ladder, 1 seed × 6 budgets | best-val competence | **distinct input** (across runs) | *(pilot for L4)* |
+| **L4** | developmental ladder, 5 seeds × 11 budgets | C&B per-word slope **on the budget axis** + aggregate | **distinct input** | rate, variability, shape — all three |
+| **L5** | disjoint-halves control, 2 pools × 3 seeds | aggregate developmental slope | **distinct input** | convergence ≠ overlap artifact |
+:::
+
+## 1. The statistic: Chang & Bergen's per-word sigmoid
+
+For a word *w*, fit a 4-parameter logistic to (mean surprisal) vs (log experience):
+
+$$S_w(x) = \text{lower}_w + \frac{\text{upper}_w - \text{lower}_w}{1 + \exp((x - \text{mid}_w)/\text{scale}_w)}$$
+
+The **per-word slope** is `0.434 / scale` (logit per natural-log unit of
+experience) — the LM analog of a child's κ_i. Filter to fits with
+`0.01 < scale < 10` and `(upper − lower) > 1` nat. Implementation:
+[`fit_per_word_sigmoid.py`](fit_per_word_sigmoid.py).
+
+**The two axes.** "Experience" can mean:
+
+1. **Training steps** (Chang & Bergen's original; L1, L2): surprisal vs
+   `log10(steps)` *within a single training run*. Over 20 epochs the model
+   re-sees the same corpus, so this conflates **optimization convergence** with
+   data scaling — it is *not* development.
+2. **Distinct input budget** (the ladder; L4, L5): competence vs
+   `log10(words trained on)` *across separately-converged models*. This is the
+   real developmental analog — more *distinct* input, each model read to
+   convergence. The per-word slope on this axis is the unit-matched κ.
+
+Both give a κ in the same units; only the second answers a developmental question.
+
+```{r kid-reference}
+# kid-side reference numbers (from the SM2 Bayesian fits; see project memory / paper)
+kid <- tibble(kappa_pop = 10.3, sigma_kappa = 3.5)  # English M_best: median kappa_i, between-child SD
+```
+
+## 2. L1 — Training-axis slopes: CHILDES vs BookCorpus
+
+Retrained GPT-2-small on **CHILDES** (Feng et al. spec, 3 seeds) and refit the
+C&B per-word sigmoid on the training-step axis, vs Chang & Bergen's
+BookCorpus/WikiText LMs. **Claim tested:** is the kid-vs-LM gap an
+*input-distribution* artifact (adult text vs child-directed speech)?
+
+```{r L1}
+# C&B filters: meaningful transition only (0.01 < scale < 10, surprisal range > 1)
+load_sig <- function(path, label) {
+  read_tsv(path, show_col_types = FALSE) |>
+    transmute(model = label, scale = ParamScale, slope = 0.434/ParamScale,
+              rng = ParamUpper - ParamLower) |>
+    filter(is.finite(slope), scale > 0.01, scale < 10, rng > 1)
+}
+childes <- map_dfr(c(42,0,123), ~load_sig(
+  sprintf("fits/llm/sigmoids/gpt2_childes_seed%d_sigmoids.txt", .x), sprintf("CHILDES seed %d", .x)))
+book <- map_dfr(c("bert","gpt2","bilstm","lstm"), ~load_sig(
+  sprintf("data/chang_bergen_2022/%s_sigmoids.txt", .x), sprintf("BookCorpus %s", .x)))
+bind_rows(childes, book) |> group_by(model) |>
+  summarise(n = n(), median_slope = round(median(slope),3),
+            iqr = sprintf("[%.2f, %.2f]", quantile(slope,.25), quantile(slope,.75)), .groups="drop") |>
+  arrange(median_slope)
+```
+
+**Result.** CHILDES-trained seeds cluster at **0.72–0.74**, inside the BookCorpus
+cluster (0.76–0.96) — all ~14× below children (κ ≈ 10). **CDS-matched training
+does not move the slope**: input distribution explains ≈ 0 of the gap.
+*(Also note the tight 3-seed agreement — first hint that LM between-instance
+variance is ~0; σ across seed medians ≈ 0.01.)*
+
+::: {.callout-important}
+## Caveat carried by L1
+This is the **training-step axis** — the slope is partly an optimization-rate, not
+a pure developmental rate. L4 redoes it on the distinct-input axis and the
+conclusion survives. The C&B figure in the deck (`chang_bergen_slope_summary.csv`)
+is this analysis.
+:::
+
+## 3. L2 — Data-identity pilot (variance from *which* data)
+
+Two GPT-2-small on **two disjoint 10M-word CHILDES chunks**, same seed/tokenizer/
+eval. **Claim tested:** does the *identity* of the training data create
+between-instance variance? (Gates whether we need many disjoint corpora.)
+
+```{r L2}
+chunkAB <- map_dfr(c("A","B"), ~{
+  read_tsv(sprintf("fits/llm/sigmoids/gpt2_childes_chunk%s_seed42_sigmoids.txt", .x), show_col_types = FALSE) |>
+    transmute(chunk = .x, Token, scale = ParamScale, slope = 0.434/ParamScale, rng = ParamUpper-ParamLower) |>
+    filter(is.finite(slope), scale > 0.01, scale < 10, rng > 1)
+})
+paired <- chunkAB |> select(chunk, Token, slope) |>
+  pivot_wider(names_from = chunk, values_from = slope) |> filter(!is.na(A), !is.na(B))
+tibble(
+  pearson = round(cor(paired$A, paired$B), 3),
+  spearman = round(cor(paired$A, paired$B, method = "spearman"), 3),
+  median_A = round(median(paired$A), 3), median_B = round(median(paired$B), 3),
+  paired_median_diff = round(median(paired$A - paired$B), 3))
+```
+
+**Result.** Per-word slopes across *disjoint* data correlate **Pearson 0.76 /
+Spearman 0.88**; the per-LM summary shifts only ~0.01–0.07 vs children's σ_κ ≈ 3.5.
+**Data identity is a negligible variance source.** (Same C&B statistic, training
+axis. Full write-up + figure: `pilot_data_variance_plot.R`.)
+
+## 4. L4 — The developmental ladder (the main result)
+
+5 seeds × 11 nested budgets (0.5M…24M words), each trained **to best-val
+convergence**; competence = held-out CDI surprisal at the best-val model. Each
+seed = an "individual" (its own init + input stream). This is the
+**distinct-input axis**. Both the aggregate developmental slope and the per-word
+C&B sigmoid **on the budget axis** are computed here.
+
+```{r L4-load}
+d <- read_csv("fits/llm/ladder_bestval.csv", show_col_types = FALSE) |>
+  mutate(surprisal = as.numeric(surprisal), lnw = log(words), l10w = log10(words))
+agg <- d |> group_by(seed, words, lnw) |> summarise(m = mean(surprisal), .groups="drop")
+```
+
+### 4a. Shape: development *decelerates* (vs children accelerate)
+
+```{r L4-shape}
+#| fig-width: 8
+#| fig-height: 4
+ggplot(agg, aes(words, m, color = factor(seed))) +
+  geom_line(alpha=.8) + geom_point(size=1) +
+  scale_x_log10(breaks=c(.5,1,2,4,8,16,24)*1e6, labels=c("0.5M","1M","2M","4M","8M","16M","24M")) +
+  labs(x="distinct input (words, log)", y="best-val CDI surprisal (nats)", color="seed",
+       title="Competence improves with diminishing returns (concave) — across all 5 seeds") +
+  theme_minimal()
+```
+
+Surprisal 7.8 → 4.6 nats, **concave in log-input** (Δ per e-fold shrinks): the
+neural scaling-law shape. Children *accelerate* (super-linear vocab growth). Same
+competence axis, opposite curvature.
+
+### 4b. Rate: per-word κ on the development axis ≈ 1.2
+
+The C&B 4-PL, now fit per word to competence vs `log10(budget)` across the 11
+converged models (this is `ladder_analysis_final.R`):
+
+```{r L4-kappa}
+four_pl <- function(x, y) tryCatch({
+  f <- nls(y ~ lo + (up-lo)/(1+exp((x-mid)/sc)),
+           start=list(up=max(y), lo=min(y), mid=mean(x), sc=0.5),
+           lower=c(up=min(y)-5, lo=min(y)-5, mid=min(x)-3, sc=1e-3),
+           upper=c(up=max(y)+5, lo=max(y)+5, mid=max(x)+3, sc=50),
+           algorithm="port", control=nls.control(maxiter=200, warnOnly=TRUE))
+  tibble(sc = unname(coef(f)["sc"]), rng = unname(coef(f)["up"]-coef(f)["lo"]))
+}, error=function(e) tibble(sc=NA_real_, rng=NA_real_))
+
+pw <- d |> group_by(seed, word) |> filter(n()==11) |>
+  group_modify(~four_pl(.x$l10w, .x$surprisal)) |> ungroup() |>
+  mutate(kappa = 0.434/sc) |> filter(sc>0.01, sc<10, rng>1)
+kpseed <- pw |> group_by(seed) |> summarise(kappa_med = median(kappa), .groups="drop")
+tibble(kappa_pop_LM = round(mean(kpseed$kappa_med),3),
+       sigma_kappa_LM = round(sd(kpseed$kappa_med),4),
+       CV_pct = round(100*sd(kpseed$kappa_med)/mean(kpseed$kappa_med),1),
+       kids_kappa = 10.3, kids_sigma = 3.5, kids_CV_pct = 34)
+```
+
+**κ_dev ≈ 1.17** (per-seed medians 1.05–1.24) — matches the training-axis ~0.74
+ballpark, ~9× below children. The shallow slope is **not** an axis artifact.
+
+### 4c. Variability: between-seed σ_κ ≈ 0.08 (CV 7%) — categorically absent
+
+The five individuals' per-word κ medians span 1.05–1.24: **σ_κ ≈ 0.08, CV 7%**, vs
+children's σ_κ ≈ 3.5 / CV ≈ 34%. And the seeds **converge with input** — between-seed
+competence SD shrinks 0.12 → 0.03 nats (0.5M → 16M), the opposite of children's
+age-divergence.
+
+```{r L4-converge}
+agg |> group_by(words) |> summarise(between_seed_sd = round(sd(m),3), .groups="drop")
+```
+
+## 5. L5 — Disjoint-halves control (convergence isn't an overlap artifact)
+
+The L4 nested design has two seeds sharing ≈ B/24.5M of their data (~98% at 24M),
+so some convergence is mechanical. L5: **2 disjoint CHILDES halves** (A ∩ B = ∅) ×
+3 seeds × 8 budgets. Decompose **between-pool** (disjoint data) vs
+**within-pool-between-seed** developmental slope.
+
+```{r L5}
+dd <- read_csv("fits/llm/disjoint_bestval.csv", show_col_types = FALSE) |>
+  mutate(surprisal=as.numeric(surprisal), lnw=log(words))
+slp <- dd |> group_by(pool, seed, words, lnw) |> summarise(m=mean(surprisal), .groups="drop") |>
+  group_by(pool, seed) |> summarise(slope = coef(lm(m ~ lnw))[2], .groups="drop")
+pool_mean <- slp |> group_by(pool) |> summarise(s = mean(slope), .groups="drop")
+tibble(
+  between_pool_slope_gap = round(abs(diff(pool_mean$s)), 4),          # disjoint data
+  within_pool_seed_sd    = round(mean(c(sd(slp$slope[slp$pool=="A"]), sd(slp$slope[slp$pool=="B"]))), 4),
+  L4_nested_seed_sd      = 0.021)
+```
+
+**Result.** Between-pool slope gap **0.021** (zero shared data) ≈ within-pool
+seed SD **0.026** ≈ the L4 nested figure **0.021**. Disjoint data adds **no**
+extra between-individual variability. The convergence is genuine input-averaging,
+not the overlap confound.
+
+## 6. Synthesis — what we have, and what maps to the paper
+
+```{r synthesis}
+tribble(
+  ~claim, ~legs, ~axis, ~status,
+  "LMs learn ~10x shallower than kids (rate)", "L1 (0.74), L4 (kappa 1.2)", "training + distinct-input", "solid",
+  "Input distribution doesn't explain the gap", "L1 (CHILDES vs BookCorpus)", "training", "solid",
+  "LM between-instance variance ~0 (variability)", "L1 seeds, L2 data, L4 sigma_k 0.08", "both", "solid",
+  "LM development decelerates; kids accelerate (shape)", "L4 (concave, 5 seeds)", "distinct-input", "solid",
+  "Convergence is not a data-overlap artifact", "L5 (disjoint pools)", "distinct-input", "solid",
+  "Holds for compositionally different data", "BabyLM control", "distinct-input", "PENDING (backlog)"
+)
+```
+
+**Three matched-axis legs for the paper:** rate (κ ≈ 1.2 vs ~10), variability
+(σ_κ ≈ 0.08 / CV 7% vs ~3.5 / 34%), shape (decelerating vs accelerating). L5 adds
+overlap-robustness. The honest gaps:
+
+- **Per-word κ at 11 budgets is fit-noisy** (the κ IQRs are wide — see the right
+  panel of `ladder_development_final.png`). A finer ladder (15–20 budgets) would
+  sharpen κ_w. The *aggregate* slope and the *σ_κ* are robust; the per-word κ
+  *distribution* is the soft part.
+- **Affirmative variation leg is pending.** L5 rules out the overlap artifact but
+  CHILDES halves are distributionally similar (low power to *find* divergence).
+  The BabyLM-100M register-mix control is the affirmative test ("converges even on
+  compositionally different data") — backlog.
+- **Provenance:** raw surprisal trajectories in `fits/llm/surprisal/{grid,disjoint}/`;
+  run logs + sampling manifests in `fits/llm/provenance/`; best-val extracts
+  (`ladder_bestval.csv`, `disjoint_bestval.csv`) are what the analyses above read.
+
+**Promote-to-paper candidates:** the three-leg matched-axis comparison (rate +
+variability + shape) and the L5 overlap control are paper-ready. Hold the per-word
+κ_w distribution until the finer ladder; frame the BabyLM control as the planned
+strengthening.
+```

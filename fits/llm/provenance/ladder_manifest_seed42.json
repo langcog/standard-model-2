@@ -1,0 +1,84 @@
+{
+  "seed": 42,
+  "total_words": 24457574,
+  "total_conversations": 9342,
+  "rungs": [
+    {
+      "target_words": 500000,
+      "tag": "0.5M",
+      "actual_words": 507634,
+      "conversations": 176,
+      "file": "/data2/mcfrank/ladder/chunks/ladder_seed42/CHILDES_ladder_seed42_0.5M.txt"
+    },
+    {
+      "target_words": 1000000,
+      "tag": "1M",
+      "actual_words": 1000275,
+      "conversations": 355,
+      "file": "/data2/mcfrank/ladder/chunks/ladder_seed42/CHILDES_ladder_seed42_1M.txt"
+    },
+    {
+      "target_words": 1500000,
+      "tag": "1.5M",
+      "actual_words": 1502901,
+      "conversations": 546,
+      "file": "/data2/mcfrank/ladder/chunks/ladder_seed42/CHILDES_ladder_seed42_1.5M.txt"
+    },
+    {
+      "target_words": 2000000,
+      "tag": "2M",
+      "actual_words": 2001264,
+      "conversations": 738,
+      "file": "/data2/mcfrank/ladder/chunks/ladder_seed42/CHILDES_ladder_seed42_2M.txt"
+    },
+    {
+      "target_words": 3000000,
+      "tag": "3M",
+      "actual_words": 3006885,
+      "conversations": 1080,
+      "file": "/data2/mcfrank/ladder/chunks/ladder_seed42/CHILDES_ladder_seed42_3M.txt"
+    },
+    {
+      "target_words": 4000000,
+      "tag": "4M",
+      "actual_words": 4003101,
+      "conversations": 1449,
+      "file": "/data2/mcfrank/ladder/chunks/ladder_seed42/CHILDES_ladder_seed42_4M.txt"
+    },
+    {
+      "target_words": 6000000,
+      "tag": "6M",
+      "actual_words": 6000777,
+      "conversations": 2231,
+      "file": "/data2/mcfrank/ladder/chunks/ladder_seed42/CHILDES_ladder_seed42_6M.txt"
+    },
+    {
+      "target_words": 8000000,
+      "tag": "8M",
+      "actual_words": 8005943,
+      "conversations": 2994,
+      "file": "/data2/mcfrank/ladder/chunks/ladder_seed42/CHILDES_ladder_seed42_8M.txt"
+    },
+    {
+      "target_words": 12000000,
+      "tag": "12M",
+      "actual_words": 12015132,
+      "conversations": 4499,
+      "file": "/data2/mcfrank/ladder/chunks/ladder_seed42/CHILDES_ladder_seed42_12M.txt"
+    },
+    {
+      "target_words": 16000000,
+      "tag": "16M",
+      "actual_words": 16005942,
+      "conversations": 6040,
+      "file": "/data2/mcfrank/ladder/chunks/ladder_seed42/CHILDES_ladder_seed42_16M.txt"
+    },
+    {
+      "target_words": 24000000,
+      "tag": "24M",
+      "actual_words": 24005759,
+      "conversations": 9158,
+      "file": "/data2/mcfrank/ladder/chunks/ladder_seed42/CHILDES_ladder_seed42_24M.txt"
+    }
+  ]
+}

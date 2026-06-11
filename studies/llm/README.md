@@ -1,13 +1,22 @@
 # llm — large language model comparison  ·  Fig 5
 
-**Provenance stub.** Code lives in `model/scripts/feng_eval/`, indexed here.
+Comparison of GPT-2 word learning to children's, on a development-matched axis.
 
-- **Pipeline:** `model/scripts/feng_eval/` (GPT-2 / CHILDES training + CDI surprisal scoring)
-- **Marlowe staging:** `model/scripts/feng_eval/marlowe/stage_marlowe.sh` (Stanford Marlowe GPU cluster)
-- **Cluster jobs:** `cluster/sherlock/feng_train_gpt2.slurm`, `feng_smoke.slurm`
-- **Chang & Bergen comparison:** `model/scripts/chang_bergen_comparison.R`
-- **Eval outputs:** `fits/feng_eval/` (surprisal CSVs, ladder summaries)
-- **Slopes:** `fits/glmer_mbest_*` → `paper/cache/fig6_llm_slopes.rds`
-- **Headline:** LLMs show standard accumulator dynamics — no acceleration, very limited variability.
+**Start here:** [`llm_experiments.qmd`](llm_experiments.qmd) — the analysis walkthrough
+(every claim, which use the Chang & Bergen sigmoid, mapping to paper claims).
+Running log: [`/journal/experiments_llm.md`](../../journal/experiments_llm.md).
 
-Narrative: see [`/journal/experiments_llm.md`](../../journal/experiments_llm.md).
+**Layout**
+- **Pipeline (training + scoring):** `train_gpt2_childes.py`, `surprisal_callback.py`,
+  `extract_cdi_contexts.py`, `make_ladder_samples.py`, `make_disjoint_chunks.py`,
+  `fit_per_word_sigmoid.py`, `cdi_words.txt`.
+- **Analysis:** `ladder_analysis_final.R` (developmental ladder, L4),
+  `disjoint_analysis.R` (overlap control, L5), `pilot_data_variance_plot.R` (L2),
+  `chang_bergen_comparison.R` / `feng_chang_bergen_comparison.R` (training-axis slopes, L1).
+- **Cluster scripts:** `cluster/marlowe/`, `cluster/ccn2/`, `cluster/sherlock/feng_*`.
+- **Fits / data:** `fits/llm/` — `ladder_bestval.csv`, `disjoint_bestval.csv`,
+  per-word `sigmoids/`, raw `surprisal/` trajectories, run `provenance/`.
+
+**Headline:** on a matched axis, LMs differ from children in *rate* (κ ≈ 1.2 vs ~10),
+*variability* (between-instance σ_κ ≈ 0.08 vs ~3.5), and *shape* (decelerating vs
+accelerating) — and the convergence is not a data-overlap artifact (L5).
