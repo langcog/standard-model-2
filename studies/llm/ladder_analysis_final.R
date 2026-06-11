@@ -90,5 +90,5 @@ g <- (p1 | p2) + plot_annotation(
                      mean(kpseed$kappa_med)),
   theme = theme(plot.title = element_text(face="bold", size=12),
                 plot.subtitle = element_text(size=8.6, color="grey30")))
-ggsave("figs/longitudinal/ladder_development_final.png", g, width = 10.5, height = 4.6, dpi = 150)
-cat("\nwrote figs/longitudinal/ladder_development_final.png\n")
+ggsave("figs/llm/ladder_development_final.png", g, width = 10.5, height = 4.6, dpi = 150)
+cat("\nwrote figs/llm/ladder_development_final.png\n")
