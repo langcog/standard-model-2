@@ -15,7 +15,7 @@
 ##   cache/fits.rds            COMMITTED: xsec fits + meta + longitudinal
 ##   cache/scatter.rds         COMMITTED: per-child proportion for scatters
 ##
-## Run: Rscript cross_sectional_demographics/00_build.R
+## Run: Rscript studies/cross_sectional_demographics/00_build.R
 ## Re-run is cheap (frames + fits cached); delete a cache file to recompute.
 
 suppressPackageStartupMessages({
@@ -23,7 +23,7 @@ suppressPackageStartupMessages({
   library(lme4); library(metafor)
 })
 
-DIR     <- here("cross_sectional_demographics")
+DIR     <- here("studies", "cross_sectional_demographics")
 FRAMES  <- file.path(DIR, "cache", "frames")
 FITDIR  <- file.path(DIR, "cache", "fits")
 dir.create(FRAMES, recursive = TRUE, showWarnings = FALSE)

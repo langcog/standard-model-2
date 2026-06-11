@@ -7,7 +7,7 @@
 ##     FMW2013 (in both analyses, slightly different QC subsets) N / admins /
 ##     ages are the UNION of the two subsamples
 ##   * Wordbank cross-sectional — the 31 languages in the fig-demographics
-##     cross-sectional arm (cross_sectional_demographics/00_build.R; one
+##     cross-sectional arm (studies/cross_sectional_demographics/00_build.R; one
 ##     admin per child, full archive N per language as of the 2026-06-11
 ##     uncapped refit — no per-language subsample cap)
 ##
@@ -87,7 +87,7 @@ io_rows <- bind_rows(
 
 ## ---- Wordbank cross-sectional (fig-demographics arm) ----
 xs_rows <- bind_rows(lapply(
-  sort(list.files(here("cross_sectional_demographics", "cache", "frames"), full.names = TRUE)),
+  sort(list.files(here("studies", "cross_sectional_demographics", "cache", "frames"), full.names = TRUE)),
   function(f) {
     fr <- readRDS(f); ch <- fr |> distinct(child_id, age)
     tibble::tibble(group = "Wordbank cross-sectional",
