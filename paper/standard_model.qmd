@@ -321,26 +321,27 @@ pIO <- fan_panel(ip$panelD_curves, ip$panelD_spag, "(C) Observed input")
 pPR <- fan_panel(ip$panelE_curves, ip$panelE_spag, "(D) Processing speed")
 
 ## BOTTOM ROW (the *quantification*).
-## (E) factor x channel variance partition: input and processing shares of
-## EFFICIENCY (xi) and ACCELERATION (kappa) variance. Headline -- input modest
-## on both; processing loads on efficiency but ~0 on acceleration.
+## (E) factor x channel variance partition -- DIRECT MEASUREMENT only: the
+## observed io (input) and proc (processing) shares of EFFICIENCY (xi) and
+## ACCELERATION (kappa) variance, against the meta band. Headline -- input
+## modest on both; processing loads on efficiency but ~0 on acceleration.
+## The IMPUTED EN/NO population estimates no longer appear here; they are a
+## different inference (sigma_r-anchored, not a within-child measurement) and
+## live in panel F (the sigma_r consistency check) instead.
 FACTOR_PAL <- c("Input" = "#009E73", "Processing" = "#CC79A7")
 mr <- ip$meta
-pPart <- ggplot(ip$panel_partition,
-                aes(channel, med, color = factor, shape = kind, group = source)) +
+pPart <- ggplot(dplyr::filter(ip$panel_partition, kind == "observed"),
+                aes(channel, med, color = factor, group = factor)) +
   annotate("rect", xmin = -Inf, xmax = Inf, ymin = mr$lo, ymax = mr$hi,
            fill = "grey85", alpha = 0.55) +
   geom_hline(yintercept = mr$mid, linetype = "dashed", color = "grey50") +
   geom_pointrange(aes(ymin = lo, ymax = hi),
-                  position = position_dodge(width = 0.7), fatten = 2.6, linewidth = 0.85,
-                  fill = "white", stroke = 0.9) +
+                  position = position_dodge(width = 0.5), fatten = 3, linewidth = 0.9) +
   scale_color_manual(values = FACTOR_PAL, name = NULL) +
-  scale_shape_manual(values = c(observed = 16, imputed = 21),
-                     labels = c(observed = "observed", imputed = "imputed (EN/NO)"), name = NULL) +
   scale_y_continuous(labels = pct, limits = c(0, NA),
-                     expand = expansion(mult = c(0, 0.10))) +
+                     expand = expansion(mult = c(0, 0.08))) +
   labs(x = NULL, y = "share of between-child variance",
-       title = "(E) Variance partition by channel") +
+       title = "(E) Direct measurement: observed input & processing") +
   theme_minimal(base_size = 9) +
   theme(legend.position = "bottom", panel.grid.minor = element_blank(),
         plot.title = element_text(face = "bold", size = 9))
