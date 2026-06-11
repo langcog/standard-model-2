@@ -637,32 +637,27 @@ In our prior model fits, we fit population variation in efficiency and
 acceleration without considering the connection to language input. We
 next consider whether this relationship can be estimated at a population
 level. We use markov chain monte carlo to fit a version of model 4 with
-linkages to input rate.
+a linkage between efficiency and input rate such that
+\(\xi_i = \log(r_i) + \log(\alpha_i)\), where \(r_i\) is not known but
+we assume that there is a population variation in language input rate:
+\(\sigma_r\). This model -- which does not include individual
+child-level input data -- can not distinguish whether input contributes
+to efficiency or instead to acceleration. Instead, because the
+accumulator model makes predictions about links between the actual
+amount of input children receive and what they learn, this model can ask
+what proportion of observed variation between children is plausibly due
+to input-related variation.
 
-We first estimate these linkages at the population level by assuming a
-known level of population variation in language input rate:
-\(\sigma_r\). We can then examine the variance due to input variation
-vs.~population by fitting the parameter
-\(\pi_\alpha = \frac{\sigma_\alpha^2}{\sigma_\alpha^2 + \sigma_r^2}\),
-which defines the proportion of population variation in efficiency due
-to input variation. Importantly, this parameter is directly comparable
-to the meta-analytic estimates reported earlier (Anderson et al. 2021;
-Coffey and Snedeker 2026). This model -- which does not include
-individual child-level input data -- can not distinguish input
-contributions to efficiency vs.~acceleration, but it provides a large
-dataset to begin analyzing the question.
-
-Estimating children's input range is notoriously tricky, since the rate
-of language that children hear varies across cultures, families,
-activities, and measurement occasions (Coffey et al. 2024). To anchor
-our model using a range of population values for \(\sigma_r\), we
-surveyed the literature for plausible estimates (see SI: Population
-Input Range Estimation). In our main simulations we set
-\(\sigma_r=.53\), a value drawn from Sperry, Sperry, and Miller (2019),
-who estimated a mean of 419k tokens per month (\pm1 SD: 329k -- 957k).
-We provide sensitivity analysis for alternative values based on an
-analytic computation of the relationship between \(\sigma_r\) and
-\(\pi_\alpha\) (see SI: \(\sigma_r\) Sensitivity Analysis).
+Fitting this model requires a guess about the range of input variation
+present in the populations for which we have dense longitudinal data
+(English-learning children in the US and Norwegian-learning children in
+Norway). Leaving aside the question of the specific sampling processes
+that led to our data, estimating children's input range is notoriously
+tricky: The rate of language that children hear varies across cultures,
+families, activities, and measurement occasions (Coffey et al. 2024).
+Thus, we consider the share of variation due to input across a range of
+plausible values, anchored via a range of estimates in the published
+literature (see SI: Population Input Range Estimation).
 
 Figure~\ref{fig-io-partition} shows the results of this analysis for
 both English and Norwegian longitudinal data (combined N=2957).
@@ -1338,12 +1333,6 @@ Smith, Linda B., Susan S. Jones, Barbara Landau, Lisa Gershkoff-Stowe,
 and Larissa Samuelson. 2002. {``Object Name Learning Provides on-the-Job
 Training for Attention.''} \emph{Psychological Science} 13 (1): 13--19.
 \url{https://doi.org/10.1111/1467-9280.00403}.
-
-\bibitem[\citeproctext]{ref-sperry2019}
-Sperry, Douglas E., Linda L. Sperry, and Peggy J. Miller. 2019.
-{``Reexamining the Verbal Environments of Children from Different
-Socioeconomic Backgrounds.''} \emph{Child Development} 90 (4): 1303--18.
-\url{https://doi.org/10.1111/cdev.13072}.
 
 \bibitem[\citeproctext]{ref-steyvers2005}
 Steyvers, Mark, and Joshua B. Tenenbaum. 2005. {``The Large-Scale

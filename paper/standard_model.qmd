@@ -97,23 +97,7 @@ Overall, our analysis supports a view in which children’s vocabulary growth is
 
 ```{r fig-schematic, fig.width=8, fig.height=6}
 #| label: fig-schematic
-#| fig-cap: ""
-# CONSOLIDATED model figure (vocab space). [MCF: caption on next pass.]
-#   (A) Top: illustrative vocabulary buildup M1->M4 — the expected
-#       vocabulary curve V(t) = mean_j plogis(theta_i(t) - delta_j), summed
-#       over a shared Gaussian word-difficulty distribution (McMurray 2007:
-#       even a pure accumulator accelerates because theta sweeps through the
-#       difficulty distribution). Same words in every panel. The theta-space
-#       version of these panels now lives in the Supplement.
-#   (B) Bottom: the best-fitting model (M4 / D_log) fit to the real data
-#       across the five datasets — empirical grey trajectories + the
-#       10/25/50/75/90 quantile fan. The full 7-model ladder is in the
-#       Supplement.
-# [Prior fig-glmer-ladder caption, kept for reuse: "Individual children's
-#  longitudinal vocabulary growth trajectories across age in four languages.
-#  The same data are plotted in each column of panels, with overlaid models
-#  of increasing complexity. Transparency is higher for English (American)
-#  and Norwegian panels to avoid overplotting."]
+#| fig-cap: "(A) Schematic predictions of all four models for vocabulary growth across age. Pure accumulator (M1) and accelerating accumulator (M2) models predict no variability across children, while M3 predicts variation and M4 predicts an increasing spread across chidren. (B) Best fitting model (M4) for five datasets. Gray lines show individual children's trajectories; colored lines show bootstrapped predictions at standard quantiles. Transparency is higher for panels with denser data to avoid overplotting."
 
 ## ---- (A) illustrative vocab-space buildup (schematic) ----
 ages <- seq(8, 30, length.out = 80)
@@ -279,14 +263,13 @@ Our model offers a summary of children's growth in terms of both their efficienc
 
 ## Population input-related variation corresponds to meta-analytic estimates
 
-In our prior model fits, we fit population variation in efficiency and acceleration without considering the connection to language input. We next consider whether this relationship can be estimated at a population level. We use markov chain monte carlo to fit a version of model 4 with linkages to input rate. 
+In our prior model fits, we fit population variation in efficiency and acceleration without considering the connection to language input. We next consider whether this relationship can be estimated at a population level. We use markov chain monte carlo to fit a version of model 4 with a linkage between efficiency and input rate such that $\xi_i = \log(r_i) + \log(\alpha_i)$, where $r_i$ is not known but we assume that there is a population variation in language input rate: $\sigma_r$. This model -- which does not include individual child-level input data -- can not distinguish whether input contributes to efficiency or instead to acceleration. Instead, because the accumulator model makes predictions about links between the actual amount of input children receive and what they learn, this model can ask what proportion of observed variation between children is plausibly due to input-related variation. 
 
-We first estimate these linkages at the population level by assuming a known level of population variation in language input rate: $\sigma_r$.
-We can then examine the variance due to input variation vs. population by fitting the parameter $\pi_\alpha = \frac{\sigma_\alpha^2}{\sigma_\alpha^2 + \sigma_r^2}$, which defines the proportion of population variation in efficiency due to input variation. Importantly, this parameter is directly comparable to the meta-analytic estimates reported earlier [@anderson2021;@coffey2026]. This model -- which does not include individual child-level input data -- can not distinguish input contributions to efficiency vs. acceleration, but it provides a large dataset to begin analyzing the question. 
+Fitting this model requires a guess about the range of input variation present in the populations for which we have dense longitudinal data (English-learning children in the US and Norwegian-learning children in Norway). Leaving aside the question of the specific sampling processes that led to our data, estimating children's input range is notoriously tricky: The rate of language that children hear varies across cultures, families, activities, and measurement occasions [@coffey2024]. Thus, we consider the share of variation due to input across a range of plausible values, anchored via a range of estimates in the published literature  (see SI: Population Input Range Estimation). 
 
-Estimating children's input range is notoriously tricky, since the rate of language that children hear varies across cultures, families, activities, and measurement occasions [@coffey2024]. To anchor our model using a range of population values for $\sigma_r$, we surveyed the literature for plausible estimates (see SI: Population Input Range Estimation). In our main simulations we set $\sigma_r=.53$, a value drawn from @sperry2019, who estimated a mean of 419k tokens per month (\pm1 SD: 329k -- 957k). We provide sensitivity analysis for alternative values based on an analytic computation of the relationship between $\sigma_r$ and $\pi_\alpha$ (see SI: $\sigma_r$ Sensitivity Analysis).
+<!-- In our main simulations we set $\sigma_r=.53$, a value drawn from @sperry2019, who estimated a mean of 419k tokens per month (\pm1 SD: 329k -- 957k). We provide sensitivity analysis for alternative values based on an analytic computation of the relationship between $\sigma_r$ and $\pi_\alpha$ (see SI: $\sigma_r$ Sensitivity Analysis). -->
 
-@fig-io-partition shows the results of this analysis for both English and Norwegian longitudinal data (combined N=`r io_part$n_total`). $\pi_\alpha$ was `r sprintf("%.3f", io_part$en_pi)` (CI: `r sprintf("[%.3f, %.3f]", io_part$en_lo, io_part$en_hi)`) for English and `r sprintf("%.3f", io_part$no_pi)` (CI: `r sprintf("[%.3f, %.3f]", io_part$no_lo, io_part$no_hi)`) for Norwegian, both largely consistent with the previous meta-analyses. Sensitivity analysis showed that only implausibly large input variation would produce substantially higher values. 
+@fig-io-partition (panel F) shows the results models fit with three values for each language, interpolated with an analytic estimate of the relationship between $\sigma_r$ and the total proportion of variance in efficiency that could be attributed to input. Within the range of plausible input values from the literature, we observed a strong congruence between the model estimates of input variance (EN: `r XYZ`, NO: `r XYZ`) and the meta-analytic range reported by @coffey2026 (4--7%). This consistency both supports the overall plausibility of the model and provides a second route for estimating the significant but modest contribution of input quantity to variation in children's outcomes. 
 
 
 ## Input predicts both efficiency and acceleration, while processing speed relates only to efficiency
@@ -372,15 +355,12 @@ bot <- (pPart | pSens)
 top / bot + plot_layout(heights = c(1, 1.05))
 ```
 
-While the population estimates of input-sensitivity given above match our expectations from meta-analyses, they do not offer a direct estimate of input couplings within individual children, and they do not allow us to estimate the separate contributions of language input and language processing to efficiency and acceleration. 
+Population estimates of input sensitivit do not offer a direct estimate of input couplings within individual children, and they do not allow us to estimate the separate contributions of language input and language processing to efficiency and acceleration.For this, we turn to a set of five longitudinal datasets (described shown in SI: Datasets) that include either dense home recordings, longitudinal LWL processing data, or both. Three include recordings from day-long audio recordings using LENA (Language Environment Analysis) recorders, which offer an automated adult word count estimate that has been validated by transcription studies [@cristia2021]. One includes short video recordings of egocentric video recorded in children's homes, with word counts estimated from automated transcripts [@long2024]. Each of these metrics provides a noisy proxy for total home input, but nevertheless allows us to estimate models that include individual input. Further, four of the five include multiple LWL sessions per individual, offering data on children's word recognition speed ($w_i$).
 
-For this, we turn to a set of five longitudinal datasets that include either dense home recordings, longitudinal LWL processing data, or both. Three include recordings from day-long audio recordings using LENA (Language Environment Analysis) recorders, which offer an automated adult word count estimate that has been validated by transcription studies [@cristia2021]. One includes short video recordings of egocentric video recorded in children's homes, with word counts estimated from automated transcripts [@long2024]. Each of these metrics provides a noisy proxy for total home input, but nevertheless allows us to estimate models that include individual input. And four of the five include multiple LWL sessions per individual.
+We investigated several variants of Model 4 (See SI: Predicting 
+a version of Model 4 to this dataset, with modifications to allow input and acceleration to contribute to both acceleration and efficiency. We then fit this model to the joint dataset but with observations of $r_i$ and $w_i$ for individual children.
 
-We thus fit the same model linking input estimates to variation in efficiency and acceleration, but this time with observations of $r_i$,  for each child, allowing us to fit the full version of Model 4 described above, in which language input could contribute to both efficiency and acceleration. We additionally a
-
-@fig-io-partition (panel C) shows a small separation of trajectories by input quartile, but the key question of interest is how this variation partitions across efficiency and acceleration.
-
-Results for $\pi_\alpha$ and $\pi_\zeta$ are shown in @fig-io-partition. Overall, we observe small but highly reliable effects of language input on both efficiency and acceleration. These effects are also in the range of the meta-analyses, but they suggest that input-related differences -- though small -- could compound through their effect on acceleration. 
+@fig-io-partition (B) shows small but highly reliable effects of language input on both efficiency and acceleration. These effects are also in the range of the meta-analyses, but they suggest that input-related differences -- though small -- could compound through their effect on acceleration. In contrast, processing predicted *only* efficiency and not acceleration.  
 
 ## Growth in ability leads to rapid changes in learning times for individual words
 
@@ -461,10 +441,10 @@ ggplot(sl, aes(slope_natural, fill = group, colour = group)) +
   annotate("text", x = 1.6, y = 0.92, hjust = 0, vjust = 1, size = 3.0,
            colour = "grey45",
            label = "kappa = 1\nunit accumulator\n(no acceleration)") +
-  annotate("segment", x = 2.7, xend = 1.15, y = 1.2, yend = 1.2,
-           arrow = arrow(length = unit(0.12, "cm")), colour = "#2c7fb8") +
-  annotate("text", x = 2.8, y = 1.2, hjust = 0, vjust = 0.5, size = 2.8,
-           colour = "#2c7fb8", label = "all LMs cluster here") +
+  # annotate("segment", x = 2.7, xend = 1.15, y = 1.2, yend = 1.2,
+  #          arrow = arrow(length = unit(0.12, "cm")), colour = "#2c7fb8") +
+  # annotate("text", x = 2.8, y = 1.2, hjust = 0, vjust = 0.5, size = 2.8,
+  #          colour = "#2c7fb8", label = "all LMs cluster here") +
   scale_fill_manual(values = slope_pal, name = NULL) +
   scale_colour_manual(values = slope_pal, name = NULL) +
   coord_cartesian(xlim = c(0, 22)) +
@@ -503,6 +483,8 @@ Furthermore, how does the accumulation process relate to the rapid growth of voc
 Thus, modeling human learning requires positing other sources of variability and acceleration. Sources of variability could include from variation in interactional input quality, genetic variation between children, environmental richness not captured by input, etc. Sources of acceleration could include increases in processing efficiency, learning-to-learn including mutual exclusivity, shape bias, syntactic bootstrapping, as well as domain general changes in perception, processing speed, memory, attention or other aspects of cognition. The key to understanding children’s data efficiency may thus lie in better understanding when and how children’s learning accelerates with maturation and experience. 
 
 
+Quantity vs quality!!
+
 Continuous variation or clusters? [@pinstock2026;@singletary2025] We think it's just continuous variation (Supplement)
 
 Network models and their predictions e.g. [@steyvers2005;@hills2009;@fourtassi2020]
@@ -539,9 +521,25 @@ Linear variants reported in the supplement used linear age rather than log age.
 
 Bayesian models were fit using Stan [@stan].
 
+
+
 Priors
 
 Inference
+
+
+### Input and processing models
+
+```{md}
+$$\xi_i = \mu_r + \sigma_r z_{r,i} + \beta_\xi\, \mathrm{rt0}_i + \log\alpha_i$$
+$$\kappa_i = (1+\delta) + \gamma_{\text{in}}\,\sigma_r z_{r,i} + \beta_{k0}\,\mathrm{rt0}_i + \beta_{k1}\,\mathrm{rt1}_i + \zeta_i$$
+$$\theta_i(t) = \xi_i + \kappa_i \log\!\big((t-s)/a_0\big) + \text{item terms}$$
+
+with two measurement channels feeding the latent predictors:
+
+Processing (LWL): $\text{lwl_log_rt}_n \sim \mathcal N\big(\tau_s + \mathrm{rt0}_i + (\psi_s + \mathrm{rt1}i),\ell z_n,\ \sigma{\text{lwl}}\big)$ — each child's RT level (rt0) and age-slope (rt1) are latent traits read off their looking-while-listening trials.
+Input (LENA/headcam): $z_{\text{lena},v} \sim \mathcal N(z_{r,i},\ \sigma_{\text{lena}})$ — standardized within-study log input rate is a noisy read of the child's input position.
+```
 
 ### Input
 
