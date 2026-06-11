@@ -324,14 +324,59 @@ kid_slopes <- bind_rows(
                     "long_no_freq_slopes_norwegian.draws.rds"),
                "Children (Norwegian)"))
 
-llm_slope_levels <- c("Children (English)", "Children (Norwegian)",
-                      "BERT", "GPT-2", "BiLSTM", "LSTM")
-slopes <- bind_rows(kid_slopes, lm_slopes) |>
-  mutate(label    = factor(label, levels = llm_slope_levels),
+# ---- Our CHILDES-trained GPT-2 (this work): two experience axes ----
+# Same per-word C&B slope statistic; category "LLMs (this work)".
+# (a) TRAINING-step axis: per-word sigmoid over training checkpoints (3 seeds, L1).
+childes_train <- bind_rows(lapply(c(42, 0, 123), function(s) {
+  read.delim(here("fits", "llm", "sigmoids",
+                  sprintf("gpt2_childes_seed%d_sigmoids.txt", s)),
+             stringsAsFactors = FALSE)
+})) |>
+  mutate(surprisal_range = ParamUpper - ParamLower,
+         slope_natural   = (1 / ParamScale) / log(10)) |>
+  filter(is.finite(slope_natural), ParamScale > 0.01, ParamScale < 10,
+         surprisal_range > 1.0) |>
+  transmute(label = "GPT-2 / CHILDES (training)", category = "LLMs (this work)",
+            slope_natural)
+
+# (b) DEVELOPMENT axis: per-word sigmoid over DISTINCT-INPUT budgets, refit across
+# the converged-model ladder. Update fits/llm/ladder_bestval_finer.csv when the
+# final seeds land and re-run this script; the figure regenerates from it.
+four_pl_scale <- function(x, y) tryCatch({
+  f <- nls(y ~ lo + (up - lo) / (1 + exp((x - mid) / sc)),
+           start = list(up = max(y), lo = min(y), mid = mean(x), sc = 0.5),
+           lower = c(up = min(y)-5, lo = min(y)-5, mid = min(x)-3, sc = 1e-3),
+           upper = c(up = max(y)+5, lo = max(y)+5, mid = max(x)+3, sc = 50),
+           algorithm = "port", control = nls.control(maxiter = 200, warnOnly = TRUE))
+  c(sc = unname(coef(f)["sc"]), rng = unname(coef(f)["up"] - coef(f)["lo"]))
+}, error = function(e) c(sc = NA_real_, rng = NA_real_))
+ladder <- readr::read_csv(here("fits", "llm", "ladder_bestval_finer.csv"),
+                          show_col_types = FALSE) |>
+  mutate(l10w = log10(words))
+n_budgets <- max(dplyr::count(ladder, seed, word)$n)   # full-ladder rung count
+childes_dev <- ladder |>
+  group_by(seed, word) |> filter(dplyr::n() == n_budgets) |>
+  group_modify(~{ p <- four_pl_scale(.x$l10w, .x$surprisal)
+                  tibble::tibble(sc = p["sc"], rng = p["rng"]) }) |>
+  ungroup() |>
+  filter(is.finite(sc), sc > 0.01, sc < 10, rng > 1) |>
+  transmute(label = "GPT-2 / CHILDES (development)", category = "LLMs (this work)",
+            slope_natural = 0.434 / sc)
+
+# group column for the single-panel figure: kids by language; BookCorpus pooled;
+# our two CHILDES axes kept separate (training vs development).
+slopes <- bind_rows(
+  kid_slopes    |> mutate(label = as.character(label), group = label),
+  lm_slopes     |> mutate(label = as.character(label), group = "LMs: BookCorpus (C&B)"),
+  childes_train |> mutate(group = "LMs: CHILDES (training)"),
+  childes_dev   |> mutate(group = "LMs: CHILDES (development)")) |>
+  mutate(group = factor(group, levels = c(
+           "Children (English)", "Children (Norwegian)", "LMs: BookCorpus (C&B)",
+           "LMs: CHILDES (training)", "LMs: CHILDES (development)")),
          category = factor(category, levels = c("Children (this work)",
-                                                "LLMs (Chang & Bergen 2022)")))
+                            "LLMs (Chang & Bergen 2022)", "LLMs (this work)")))
 slope_summary <- slopes |>
-  group_by(label, category) |>
+  group_by(group, category) |>
   summarise(median = median(slope_natural),
             q025   = quantile(slope_natural, 0.025),
             q975   = quantile(slope_natural, 0.975),
