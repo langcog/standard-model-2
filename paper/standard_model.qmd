@@ -244,13 +244,13 @@ Model 4, which incorporated variation in acceleration and efficiency, was the be
 #| label: fig-demographics
 #| fig-cap: "Regression coefficients predicting individual children's efficiency and acceleration as a function of gender and maternal education. Panels A and B show data from individual languages (both longitudinal and cross-sectional); blue regions show meta-analytic estimates from a random-effects meta analysis. Error bars show 95\\% confidence intervals. Panel C shows a meta-analytic summary for cross-sectional and longitudinal datasets."
 
-# cross_sectional_demographics/composite_figure.R from that directory's
+# studies/cross_sectional_demographics/composite_figure.R from that directory's
 # committed cache (cache/fits.rds <- 00_build.R): sex and maternal-ed effects
 # on efficiency and acceleration, per language with a meta-analysis (Panel C).
 # [MCF: the caption and the two surrounding paragraphs describe the OLD
 #  longitudinal-only figure and need rewriting for the composite.]
-source(here("cross_sectional_demographics", "composite_figure.R"))
-xsec_fits <- readRDS(here("cross_sectional_demographics", "cache", "fits.rds"))
+source(here("studies", "cross_sectional_demographics", "composite_figure.R"))
+xsec_fits <- readRDS(here("studies", "cross_sectional_demographics", "cache", "fits.rds"))
 
 # Inline beta/p values in the text below read from meta_summary, which is now
 # the CROSS-SECTIONAL meta-analytic main effects plotted in Panel C, ordered to

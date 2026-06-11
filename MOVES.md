@@ -16,7 +16,7 @@ update its paths and delete its row here.
 | `sherlock/` | `cluster/sherlock/` | compute helpers |
 | `glmer_ladder/` | `studies/glmer_ladder/` | study code (self-contained) |
 | `input_estimation/` | `studies/input_estimation/` | study code (self-contained) |
-| `cross_sectional_demographics/` | `studies/cross_sectional_demographics/` | **PENDING** — moved after the live uncap refit finishes |
+| `cross_sectional_demographics/` | `studies/cross_sectional_demographics/` | **DONE** (2026-06-11) — moved after the uncap refit landed |
 | `outputs/figs/` | `figs/` | merged into the existing figs/; `io/` merged |
 | `outputs/slides/` | `reports/slides/` | |
 | `outputs/marlowe/` | `reports/marlowe/` | grant proposal |

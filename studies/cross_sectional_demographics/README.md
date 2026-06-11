@@ -45,6 +45,6 @@ regressions and are directly comparable.
 ## Reproduce
 
 ```bash
-Rscript cross_sectional_demographics/00_build.R         # ~hours first run (pulls); cached after
-quarto render cross_sectional_demographics/cross-sectional_demographics.qmd
+Rscript studies/cross_sectional_demographics/00_build.R         # ~hours first run (pulls); cached after
+quarto render studies/cross_sectional_demographics/cross-sectional_demographics.qmd
 ```
