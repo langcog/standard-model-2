@@ -250,6 +250,11 @@ exposure_items <- exposure_items |>
          lexical_class = factor(lexical_class, levels = lb$class_levels),
          t_50   = a0 * exp((delta_j - log_H - xi_typ) / kappa_typ),
          N_word = exp(xi_typ) * exp(log_H) * t_50 * prob) |>
+  # Drop the residual "other" class (social routines etc.): it's a mishmash of
+  # heterogeneous categories, so it's excluded from Figure 4. The reclassify
+  # step above first rescues concrete nouns mislabeled "other" into "nouns".
+  filter(lexical_class != "other") |>
+  mutate(lexical_class = droplevels(lexical_class)) |>
   select(item, lexical_class, delta_j, prob, t_50, N_word)
 
 # Sanity guard: in a valid fit, word difficulty (delta_j) is strongly NEGATIVELY
