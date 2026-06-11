@@ -2,7 +2,7 @@
 #SBATCH --job-name=joint_io_proc
 #SBATCH --output=%x_%j.out
 #SBATCH --error=%x_%j.err
-#SBATCH --time=06:00:00
+#SBATCH --time=16:00:00
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=32G
 #SBATCH --partition=normal
