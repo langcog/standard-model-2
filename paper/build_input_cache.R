@@ -156,6 +156,41 @@ panelD_spag <- iob$df |> group_by(ii, age) |> summarise(vocab = mean(produces), 
 cat(sprintf("Fans: proc beta_xi=%.2f; io beta_c=%.2f. proc RT quartiles n=%s\n",
             pbx, ibc, paste(as.integer(table(prt$q)), collapse = "/")))
 
+## ---- (top row, "io-imputed") EN/NO model-IMPLIED input fans ----
+## Input is imputed for EN/NO (no LENA), so we do NOT split kids by it (that
+## redraws the efficiency gradient). Instead: quartile curves at
+## xi = mu_r + sigma_r * z_q (normal quartile midpoints) over grey per-child
+## trajectories -- the model-implied input slice. Narrative: io-imputed -> io -> proc.
+zq <- qnorm(c(.125, .375, .625, .875))
+mi_fan <- function(bundle, summ, psi_csv, draws, n_spag = 150, seed = 1) {
+  b  <- readRDS(here("fits", bundle)); sd <- b$stan_data
+  s  <- as.data.frame(readRDS(here("fits", "summaries", summ)))
+  gv <- function(v) s$median[s$variable == v]
+  sigma_r <- sqrt(max(gv("sigma_xi")^2 - gv("sigma_alpha")^2, 1e-6))
+  kappa   <- 1 + median(as.data.frame(readRDS(here("fits", "summaries", draws)))$delta)
+  psi <- read.csv(here("fits", "summaries", psi_csv))
+  wi  <- b$word_info[order(b$word_info$jj), ]
+  dj  <- psi$delta_j_median[match(wi$jj, psi$jj)]; dj <- dj[!is.na(dj)]
+  ages <- seq(8, 30, by = 0.5)
+  curves <- bind_rows(lapply(seq_along(zq), function(i) {
+    xi <- sd$mu_r + sigma_r * zq[i]
+    tibble(q = factor(PCT_LEVS[i], levels = PCT_LEVS), age = ages,
+           vocab = vapply(ages, function(t) mean(plogis(xi + sd$log_H + kappa * log(t / sd$a0) - dj)),
+                          numeric(1))) }))
+  set.seed(seed)
+  kids <- sample(unique(b$df$child_id), min(n_spag, n_distinct(b$df$child_id)))
+  spag <- b$df |> filter(child_id %in% kids) |> group_by(child_id, age) |>
+    summarise(vocab = mean(produces), .groups = "drop")
+  list(curves = curves, spag = spag, sigma_r = sigma_r)
+}
+en_mi <- mi_fan("long_subset_data.rds", "long_no_freq_slopes.summary.rds",
+                "long_no_freq_slopes_psi.csv", "long_no_freq_slopes.draws.rds")
+no_mi <- mi_fan("long_subset_data_nor.rds", "long_no_freq_slopes_norwegian.summary.rds",
+                "long_no_freq_slopes_norwegian_psi.csv", "long_no_freq_slopes_norwegian.draws.rds")
+panelEN_curves <- en_mi$curves; panelEN_spag <- en_mi$spag
+panelNO_curves <- no_mi$curves; panelNO_spag <- no_mi$spag
+cat(sprintf("EN/NO model-implied input fans: sigma_r EN=%.2f NO=%.2f\n", en_mi$sigma_r, no_mi$sigma_r))
+
 ## ---- Supplement: empirical proc splits (median RT / median input), per dataset ----
 ## Cached here (rather than read live in the supplement) so the supplement chunk
 ## needs no fit bundle. Median split on the predictor; spaghetti coloured by dataset.
@@ -174,6 +209,8 @@ saveRDS(list(panel_partition = panel_partition, meta = meta,
              panelB_curve = panelB_curve, panelB_anchors = panelB_anchors,
              panelD_curves = panelD_curves, panelD_spag = panelD_spag,
              panelE_curves = panelE_curves, panelE_spag = panelE_spag,
+             panelEN_curves = panelEN_curves, panelEN_spag = panelEN_spag,
+             panelNO_curves = panelNO_curves, panelNO_spag = panelNO_spag,
              panelSupp_rt = panelSupp_rt, panelSupp_input = panelSupp_input,
              sr_main = 0.53, sr_range = c(0.40, 0.70),  # plausible band: MCF to set
              a0 = a0, intercept_only = TRUE,
