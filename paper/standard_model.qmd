@@ -332,11 +332,13 @@ pPart <- ggplot(ip$panel_partition,
            fill = "grey85", alpha = 0.55) +
   geom_hline(yintercept = mr$mid, linetype = "dashed", color = "grey50") +
   geom_pointrange(aes(ymin = lo, ymax = hi),
-                  position = position_dodge(width = 0.6), fatten = 2.4, linewidth = 0.8) +
+                  position = position_dodge(width = 0.7), fatten = 2.6, linewidth = 0.85,
+                  fill = "white", stroke = 0.9) +
   scale_color_manual(values = FACTOR_PAL, name = NULL) +
-  scale_shape_manual(values = c(observed = 16, imputed = 1),
+  scale_shape_manual(values = c(observed = 16, imputed = 21),
                      labels = c(observed = "observed", imputed = "imputed (EN/NO)"), name = NULL) +
-  scale_y_continuous(labels = pct, limits = c(0, NA)) +
+  scale_y_continuous(labels = pct, limits = c(0, NA),
+                     expand = expansion(mult = c(0, 0.10))) +
   labs(x = NULL, y = "share of between-child variance",
        title = "(E) Variance partition by channel") +
   theme_minimal(base_size = 9) +
