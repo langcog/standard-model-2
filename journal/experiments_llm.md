@@ -217,7 +217,7 @@ vs accelerating).
 
 ---
 
-## 🟡 L5. ccn2 A40s — disjoint-CHILDES-halves ladder control (2026-06-10, running)
+## 🟢 L5. ccn2 A40s — disjoint-CHILDES-halves ladder control (2026-06-10)
 
 **Question.** Does L4's "individuals converge with input" survive *genuinely
 disjoint* data? In L4 two seeds shared ≈ B/24.5M of their nested data (~25% at 6M,
@@ -227,18 +227,25 @@ confound.
 **Design.** CHILDES split into **2 disjoint random halves** (poolA/poolB,
 ~12.2M words each; A∩B = ∅ at every budget) via `make_disjoint_chunks.py
 --target_tokens 0`. 2 pools × 3 seeds × 8 rungs (0.5M–12M) = **48 runs**, same
-pipeline. Pool = fixed disjoint split; seed = within-pool init+shuffle. Dispatcher:
-[`ccn2/run_disjoint_ladder_ccn2.sh`](../model/scripts/feng_eval/ccn2/run_disjoint_ladder_ccn2.sh).
+pipeline. Pool = fixed disjoint split; seed = within-pool init+shuffle. Dispatchers:
+[`ccn2/run_disjoint_ladder_ccn2.sh`](../model/scripts/feng_eval/ccn2/run_disjoint_ladder_ccn2.sh);
+analysis [`disjoint_analysis.R`](../model/scripts/feng_eval/disjoint_analysis.R)
+(data [`fits/feng_eval/disjoint_bestval.csv`](../fits/feng_eval/disjoint_bestval.csv)).
 
-**Analysis (planned).** At each budget, decompose **between-pool** (disjoint data)
-vs **within-pool between-seed** variance. Both shrinking with input ⇒ convergence
-is genuine input-averaging, not the overlap artifact; a large, *persistent*
-between-pool component would overturn the L4 convergence claim.
+**Result (48/48 clean). The overlap confound is ruled out — convergence is real.**
+Per-individual developmental slope: **between-pool gap = 0.021** (Pool A −0.962 vs
+Pool B −0.983, *zero shared data*) ≈ **within-pool between-seed SD = 0.026** ≈ the
+**L4 nested-grid between-seed SD = 0.021**. So genuinely disjoint training data
+produces *no more* between-individual variability than same/overlapping data. The
+between-pool competence gap shrinks with input just like the within-pool seed
+spread (0.08→0.001 nats over 0.5M→12M), tracking each other throughout. Both
+pools' six trajectories intermingle (`figs/longitudinal/disjoint_control.png`).
 
-**Status (2026-06-10).** 48-run grid launched on 7 free A40s; ~one evening.
-Limits to state: only 2 disjoint pools (paired A-vs-B contrast, n=2 at pool level);
-CHILDES halves are distributionally similar, so low power to *find* divergence —
-that is the affirmative job of the BabyLM control (backlog).
+**Takeaway.** L4's "individuals converge with input" is not a B/24.5M overlap
+artifact — models trained on disjoint halves of CHILDES develop at the same rate
+and converge to the same competence. Caveat retained: only 2 pools, and CHILDES
+halves are distributionally similar (low power to *find* divergence) → the
+affirmative leg is the BabyLM register-mix control (backlog).
 
 ---
 
