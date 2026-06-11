@@ -427,4 +427,32 @@ saveRDS(input_rate_table, file.path(CACHE, "input_rate_table.rds"))
 cat(sprintf("Wrote %s (%d rows)\n",
             file.path(CACHE, "input_rate_table.rds"), nrow(input_rate_table)))
 
+## ---- 8. io-partition scalars (population pi_alpha, EN + NO) --------
+# Population input-efficiency partition reported inline in the paper section
+# "Population input-related variation": pi_alpha = share of efficiency (xi)
+# variance attributable to input, from the imputed-input D fits
+# (long_no_freq_slopes[_norwegian], sigma_r pinned). Combined N from the fit
+# bundles. NO summary is the 2026-06-11 post-dedup refit (experiments.md #35).
+io_pa <- function(tag) {
+  s <- as.data.frame(readRDS(here("fits", "summaries", paste0(tag, ".summary.rds"))))
+  r <- s[s$variable == "pi_alpha", ]
+  c(pi = r$mean, lo = r$q025, hi = r$q975)
+}
+io_nk <- function(bundle) {
+  b <- readRDS(here("fits", bundle))
+  if (!is.null(b$n_kids)) b$n_kids else length(unique(b$df$child_id))
+}
+en_pa <- io_pa("long_no_freq_slopes")
+no_pa <- io_pa("long_no_freq_slopes_norwegian")
+io_partition <- list(
+  en_pi = unname(en_pa["pi"]), en_lo = unname(en_pa["lo"]), en_hi = unname(en_pa["hi"]),
+  no_pi = unname(no_pa["pi"]), no_lo = unname(no_pa["lo"]), no_hi = unname(no_pa["hi"]),
+  n_en  = io_nk("long_subset_data.rds"),
+  n_no  = io_nk("long_subset_data_nor.rds"))
+io_partition$n_total <- io_partition$n_en + io_partition$n_no
+saveRDS(io_partition, file.path(CACHE, "io_partition.rds"))
+cat(sprintf("Wrote %s (EN pi_alpha %.3f, NO pi_alpha %.3f, N %d)\n",
+            file.path(CACHE, "io_partition.rds"),
+            io_partition$en_pi, io_partition$no_pi, io_partition$n_total))
+
 cat("\nAll caches built.\n")

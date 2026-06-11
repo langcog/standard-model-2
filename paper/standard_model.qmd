@@ -55,6 +55,7 @@ input3     <- readRDS(file.path(CACHE, "fig3_input.rds"))
 aic        <- readRDS(file.path(CACHE, "aic_summary.rds"))
 exposure   <- readRDS(file.path(CACHE, "fig4_exposure.rds"))
 llm_slopes <- readRDS(file.path(CACHE, "fig6_llm_slopes.rds"))
+io_part    <- readRDS(file.path(CACHE, "io_partition.rds"))
 
 # Inline range: how much worse the best (D) model becomes when age enters
 # linearly rather than as log-age, across the four languages (dAIC of
@@ -281,7 +282,7 @@ We can then examine the variance due to input variation vs. population by fittin
 
 Estimating children's input range is notoriously tricky, since the rate of language that children hear varies across cultures, families, activities, and measurement occasions [@coffey2024]. To anchor our model using a range of population values for $\sigma_r$, we surveyed the literature for plausible estimates (see SI: Population Input Range Estimation). In our main simulations we set $\sigma_r=.53$, a value drawn from @sperry2018, who estimated a mean of 419k tokens per month ($\pm$1 SD: 329k -- 957k). We provide sensitivity analysis for alternative values based on an analytic computation of the relationship between $\sigma_r$ and $\pi_\alpha$ (see SI: $\sigma_r$ Sensitivity Analysis).
 
-@fig-io-partition shows the results of this analysis for both English and Norwegian longitudinal data (combined N=`r `XYZ`). $\pi_\alpha$ was `r XYZ` (CI: `r XYZ`) for English and `r XYZ` (CI: `r XYZ`) for Norwegian, both largely consistent with the previous meta-analyses. Sensitivity analysis showed that only implausibly large input variation would produce substantially higher values. 
+@fig-io-partition shows the results of this analysis for both English and Norwegian longitudinal data (combined N=`r io_part$n_total`). $\pi_\alpha$ was `r sprintf("%.3f", io_part$en_pi)` (CI: `r sprintf("[%.3f, %.3f]", io_part$en_lo, io_part$en_hi)`) for English and `r sprintf("%.3f", io_part$no_pi)` (CI: `r sprintf("[%.3f, %.3f]", io_part$no_lo, io_part$no_hi)`) for Norwegian, both largely consistent with the previous meta-analyses. Sensitivity analysis showed that only implausibly large input variation would produce substantially higher values. 
 
 
 ## Observed input predicts both efficiency and acceleration
