@@ -462,19 +462,7 @@ even at the top of the plausible $\sigma_r$ range — is unaffected by the
 roughly half a day of compute per pin value.
 ```
 
-
-
-
-
-
-<!-- ===================================================================
-     DRAFT TEXT FOR PROMOTION (agent-authored, in verbatim `md` blocks).
-     Each block below is draft prose Mike can edit and lift into the main
-     text or keep here. Citation markers reference keys already present in
-     standard_model.bib unless flagged "[BIB NEEDED]".
-     ==================================================================== -->
-
-
+# Computing Acceleration in LLMs
 
 ```md
 ## Comparing children and language models on one slope axis  [draft for promotion — MCF to review]
@@ -523,6 +511,20 @@ distribution is doing more of the work than we currently attribute to it.
      named in text only. Daunizeau (2017) logistic-Gaussian approximation is
      used in the derivation note but not needed for this prose. -->
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ```md
 ## Connection to neural scaling laws  [draft for promotion — MCF to review; most speculative of the three]

@@ -180,6 +180,20 @@
  
 
 
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
 \usepackage{pdflscape}
 \makeatletter
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
@@ -672,8 +686,9 @@ previous meta-analyses. Sensitivity analysis showed that only
 implausibly large input variation would produce substantially higher
 values.
 
-\subsection{Observed input predicts both efficiency and
-acceleration}\label{observed-input-predicts-both-efficiency-and-acceleration}
+\subsection{Input predicts both efficiency and acceleration, while
+processing speed relates only to
+efficiency}\label{input-predicts-both-efficiency-and-acceleration-while-processing-speed-relates-only-to-efficiency}
 
 \begin{figure}
 
@@ -690,21 +705,27 @@ acceleration}\label{observed-input-predicts-both-efficiency-and-acceleration}
 While the population estimates of input-sensitivity given above match
 our expectations from meta-analyses, they do not offer a direct estimate
 of input couplings within individual children, and they do not allow us
-to estimate the separate contributions of language input to efficiency
-and acceleration. For this, we turn to a set of four longitudinal
-datasets that include dense home recordings. Three include day-long
-audio recordings using LENA (Language Environment Analysis) recorders,
-which offer an automated adult word count estimate that has been
-validated by transcription studies (Cristia et al. 2021). The last
-includes short video recordings of egocentric video recorded in
-children's homes, with word counts estimated from automated transcripts
-(Long et al. 2024). Each of these metrics provides a noisy proxy for
-total home input, but nevertheless allows us to estimate models that
-include individual input. We thus fit the same model linking input
-estimates to variation in efficiency and acceleration, but this time
-with observations of \(r_i\) for each child, allowing us to fit the full
-version of Model 4 described above, in which language input could
-contribute to both efficiency and acceleration.
+to estimate the separate contributions of language input and language
+processing to efficiency and acceleration.
+
+For this, we turn to a set of five longitudinal datasets that include
+either dense home recordings, longitudinal LWL processing data, or both.
+Three include recordings from day-long audio recordings using LENA
+(Language Environment Analysis) recorders, which offer an automated
+adult word count estimate that has been validated by transcription
+studies (Cristia et al. 2021). One includes short video recordings of
+egocentric video recorded in children's homes, with word counts
+estimated from automated transcripts (Long et al. 2024). Each of these
+metrics provides a noisy proxy for total home input, but nevertheless
+allows us to estimate models that include individual input. And four of
+the five include multiple LWL sessions per individual.
+
+We thus fit the same model linking input estimates to variation in
+efficiency and acceleration, but this time with observations of \(r_i\),
+for each child, allowing us to fit the full version of Model 4 described
+above, in which language input could contribute to both efficiency and
+acceleration. We additionally a
+
 Figure~\ref{fig-io-partition} (panel C) shows a small separation of
 trajectories by input quartile, but the key question of interest is how
 this variation partitions across efficiency and acceleration.
@@ -715,17 +736,6 @@ reliable effects of language input on both efficiency and acceleration.
 These effects are also in the range of the meta-analyses, but they
 suggest that input-related differences -- though small -- could compound
 through their effect on acceleration.
-
-\subsection{Processing speed is strongly associated with
-efficiency}\label{processing-speed-is-strongly-associated-with-efficiency}
-
-Two of the datasets we included also include longitudinal reaction time
-data from the looking-while-listening paradigm (LWL), archived in the
-Peekbank repository (Zettersten et al. 2023).
-
-We fit a modification of our model to this subset of the data (N=XYZ).
-Efficiency and acceleration terms included \emph{both} input and LWL
-reaction time as predictors.
 
 \subsection{Growth in ability leads to rapid changes in learning times
 for individual
@@ -779,10 +789,14 @@ growth}\label{large-language-models-do-not-show-acceleration-in-their-vocabulary
 
 }
 
-\caption{\label{fig-llm-acceleration}Comparison of acceleration slopes
-(kappa) estimated in our experiments for children in English and
-Norwegian, vs.~LLM slopes per model estimated by Chang \& Bergen (2022)
-and in our experiments.}
+\caption{\label{fig-llm-acceleration}Acceleration slopes (kappa = slope
+of competence on log experience). Children's by-child kappa\_i (English,
+Norwegian) sit \textasciitilde10x above the kappa = 1 unit-accumulator
+boundary. Language models' by-word slopes cluster at kappa
+\textasciitilde= 1 across three populations: BookCorpus models from
+Chang \& Bergen (2022, training axis), and our CHILDES-trained GPT-2 on
+both the training axis and the distinct-input development axis
+(converged-model ladder).}
 
 \end{figure}%
 
