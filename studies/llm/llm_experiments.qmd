@@ -19,16 +19,24 @@ library(dplyr); library(readr); library(tidyr); library(ggplot2); library(purrr)
 
 ## What this notebook is
 
-A walkthrough of the LLM side of the Standard Model 2 comparison. The SM2 model
-gives children **two signatures**: an **acceleration** (per-child scaling
-exponent κ on cumulative experience, κ_pop ≈ 10) and a **variability** (between-child
-spread, σ_κ ≈ 3.5). This notebook asks whether language models share either, and
-documents every experiment, the statistic it uses, and the paper claim it backs.
-Narrative log: [`journal/experiments_llm.md`](../../journal/experiments_llm.md).
+A walkthrough of the LLM side of the paper. The paper's two headline signatures
+of children's vocabulary growth are **efficiency** (the intercept ξ_i — overall
+learning rate) and **acceleration** (the slope κ_i — how fast learning speeds up
+with experience), with between-child *variability* a secondary signature. The
+model is M4: $\theta_i(t) = \xi_i + \kappa_i \log(t/a_0)$, and **κ = 1 is the
+"unit accumulator"** (no acceleration); children sit at **κ_pop ≈ 10** (strong
+acceleration).
 
-**The one thing to keep straight** (this is the recurring confusion): there are
-**two different "experience" axes**, and the same Chang & Bergen per-word sigmoid
-statistic is computed on both. See §1.
+The LLM section's claim (paper §"Large language models do not show acceleration")
+is the **acceleration disanalogy**: GPT-2 — even trained on child-directed speech
+— behaves as a **pure accumulator (κ ≈ 1)**, with very limited variability. This
+notebook documents the experiments behind that claim, the statistic each uses,
+and how each maps to the paper. Narrative log:
+[`journal/experiments_llm.md`](../../journal/experiments_llm.md).
+
+**Read §1 first** — it is the *linking hypothesis*: why an LM's per-word learning
+curve has a slope we can identify with the model's κ. This is the non-obvious
+step the whole comparison rests on.
 
 ::: {.callout-note}
 ## The five experiments at a glance
@@ -37,37 +45,94 @@ statistic is computed on both. See §1.
 | **L1** | CHILDES-trained GPT-2, 3 seeds (vs BookCorpus) | C&B per-word slope | **training steps** (within run) | input distribution ≠ the gap |
 | **L2** | data-variance pilot, 2 disjoint 10M chunks | C&B per-word slope | **training steps** | data *identity* ≈ no variance |
 | **L3** | developmental ladder, 1 seed × 6 budgets | best-val competence | **distinct input** (across runs) | *(pilot for L4)* |
-| **L4** | developmental ladder, 5 seeds × 11 budgets | C&B per-word slope **on the budget axis** + aggregate | **distinct input** | rate, variability, shape — all three |
+| **L4** | developmental ladder, 5 seeds × 11 budgets | C&B per-word slope **on the budget axis** + aggregate | **distinct input** | acceleration (κ≈1), + variability, shape |
 | **L5** | disjoint-halves control, 2 pools × 3 seeds | aggregate developmental slope | **distinct input** | convergence ≠ overlap artifact |
 :::
 
-## 1. The statistic: Chang & Bergen's per-word sigmoid
+## 1. The linking hypothesis: why a per-word slope *is* κ
 
-For a word *w*, fit a 4-parameter logistic to (mean surprisal) vs (log experience):
+This is the conceptual move the whole comparison depends on, so it's worth being
+explicit. It has two steps: (a) why, *in our model*, a per-word learning curve has
+slope κ; and (b) why we can read the *same* quantity off a language model.
 
-$$S_w(x) = \text{lower}_w + \frac{\text{upper}_w - \text{lower}_w}{1 + \exp((x - \text{mid}_w)/\text{scale}_w)}$$
+### 1a. In the accumulator model, the per-word slope on log-experience **is** κ
 
-The **per-word slope** is `0.434 / scale` (logit per natural-log unit of
-experience) — the LM analog of a child's κ_i. Filter to fits with
-`0.01 < scale < 10` and `(upper − lower) > 1` nat. Implementation:
-[`fit_per_word_sigmoid.py`](fit_per_word_sigmoid.py).
+In the model, a child's latent ability accumulates with experience as
+$$\theta_i(t) = \xi_i + \kappa_i \,\log(t/a_0),$$
+and each word *j* is produced with a Rasch/IRT probability that compares ability
+to the word's difficulty $\delta_j$:
+$$P(\text{produce } j \mid i, t) = \operatorname{logistic}\big(\theta_i(t) - \delta_j\big)
+   = \operatorname{logistic}\big(\underbrace{\kappa_i}_{\text{slope}}\log(t/a_0) + \underbrace{(\xi_i - \delta_j)}_{\text{offset}}\big).$$
 
-**The two axes.** "Experience" can mean:
+So for **any single word**, $P(\text{known})$ traces a **logistic (sigmoid) in
+log-experience**. The word's difficulty $\delta_j$ and the child's efficiency
+$\xi_i$ only set the **offset** — *when* the word crosses 50% (its midpoint). The
+**slope** of that sigmoid on the log-experience axis is **κ_i** — the
+acceleration, shared across all of a child's words.
 
-1. **Training steps** (Chang & Bergen's original; L1, L2): surprisal vs
-   `log10(steps)` *within a single training run*. Over 20 epochs the model
-   re-sees the same corpus, so this conflates **optimization convergence** with
-   data scaling — it is *not* development.
-2. **Distinct input budget** (the ladder; L4, L5): competence vs
-   `log10(words trained on)` *across separately-converged models*. This is the
-   real developmental analog — more *distinct* input, each model read to
-   convergence. The per-word slope on this axis is the unit-matched κ.
+That gives the boundary that organizes everything:
 
-Both give a κ in the same units; only the second answers a developmental question.
+- **κ = 1** is the **unit accumulator** (McMurray): ability = log(cumulative
+  evidence), so one log-unit of evidence buys exactly one logit of competence —
+  *no acceleration*.
+- **κ > 1**: each log-unit of evidence buys *more* than one logit — self-reinforcing
+  **acceleration**. Children sit at κ ≈ 10.
+
+### 1b. Chang & Bergen read the same slope off an LM
+
+We can't see an LM's latent θ, but we *can* see its competence on each word as a
+function of experience: the (negative) surprisal it assigns, which maps
+monotonically to a probability. Chang & Bergen fit, **per word**, the same
+4-parameter logistic to (mean surprisal) vs log-experience:
+$$S_w(x) = \text{lower}_w + \frac{\text{upper}_w - \text{lower}_w}{1 + \exp((x - \text{mid}_w)/\text{scale}_w)},
+\qquad \text{slope} = 0.434 / \text{scale}_w$$
+(0.434 = $\log_{10}e$, converting the per-`log10` slope to logit-per-natural-log).
+**The linking hypothesis is that this per-word slope is the LM's κ** — logits of
+competence gained per log-unit of experience, in the same units as a child's κ_i.
+Under it, a slope of 1 means the LM is a pure unit accumulator; a slope of 10
+would mean it accelerates like a child. Implementation:
+[`fit_per_word_sigmoid.py`](fit_per_word_sigmoid.py); C&B filters
+`0.01 < scale < 10`, `(upper − lower) > 1` nat.
+
+```{r linking-graphic}
+#| fig-width: 7
+#| fig-height: 3.2
+#| fig-cap: "The linking hypothesis. Each curve is one word's P(known) (or scaled LM competence) vs log-experience. Difficulty/efficiency shift a word left/right (offset); the SLOPE through the midpoint is κ. κ=1 is the unit accumulator (LMs); children sit near κ=10."
+x <- seq(-3, 3, length.out = 200)
+sig <- function(x, kappa, mid) plogis(kappa * (x - mid))
+df <- bind_rows(
+  tibble(x, p = sig(x, 1, -1.2), kappa = "κ = 1  (unit accumulator — LMs)", word = "w1"),
+  tibble(x, p = sig(x, 1,  0.4), kappa = "κ = 1  (unit accumulator — LMs)", word = "w2"),
+  tibble(x, p = sig(x, 6, -1.0), kappa = "κ = 6  (accelerating — children)", word = "w1"),
+  tibble(x, p = sig(x, 6,  0.6), kappa = "κ = 6  (accelerating — children)", word = "w2"))
+ggplot(df, aes(x, p, group = interaction(kappa, word), color = kappa)) +
+  geom_line(linewidth = 0.9) +
+  scale_color_manual(values = c("κ = 1  (unit accumulator — LMs)" = "#4575b4",
+                                "κ = 6  (accelerating — children)" = "#d73027")) +
+  labs(x = "log experience", y = "P(word known)", color = NULL,
+       subtitle = "two words each; offset = when the word is learned, slope = κ = how fast") +
+  theme_minimal(base_size = 11) + theme(legend.position = "top")
+```
+
+### 1c. Two wrinkles to keep explicit
+
+1. **Per-child vs per-word.** Children's κ_i is *per-child* (one slope, shared
+   across that child's words). The LM slope is *per-word* (it varies across words
+   within one model). Both are "logit-per-log-experience" slopes; we compare the
+   LM's per-word slope *distribution* to children's per-child κ_i *distribution*.
+   Different "instances," same construct (acceleration rate).
+2. **Which experience axis** (the L1-vs-L4 distinction):
+   - **Training steps** (C&B original; L1, L2): surprisal vs `log10(steps)`
+     *within one run*. Over 20 epochs the model re-sees the same corpus, so this
+     mixes optimization convergence with data scaling — not strictly development.
+   - **Distinct input** (the ladder; L4, L5): competence vs `log10(words)`
+     *across separately-converged models*. The development-matched axis.
+
+   Both yield a κ in the same units; the ladder is the cleaner developmental
+   version. **Both land at κ ≈ 1** — which is the robustness that matters.
 
 ```{r kid-reference}
-# kid-side reference numbers (from the SM2 Bayesian fits; see project memory / paper)
-kid <- tibble(kappa_pop = 10.3, sigma_kappa = 3.5)  # English M_best: median kappa_i, between-child SD
+kid <- tibble(kappa_pop = 10.3, sigma_kappa = 3.5)  # English M_best (SM2 fits): median kappa_i, between-child SD
 ```
 
 ## 2. L1 — Training-axis slopes: CHILDES vs BookCorpus
@@ -229,38 +294,67 @@ seed SD **0.026** ≈ the L4 nested figure **0.021**. Disjoint data adds **no**
 extra between-individual variability. The convergence is genuine input-averaging,
 not the overlap confound.
 
-## 6. Synthesis — what we have, and what maps to the paper
+## 6. Synthesis — mapping to the paper
+
+The paper's LLM section is **"Large language models do not show acceleration"**:
+its existing figure plots children's per-child κ_i against LM per-word slopes on a
+common axis, with the **κ = 1 unit-accumulator** line as the reference. Everything
+here either *is* that result or strengthens it. Ordered by the paper's signatures
+(acceleration first, then efficiency/variability):
 
 ```{r synthesis}
 tribble(
-  ~claim, ~legs, ~axis, ~status,
-  "LMs learn ~10x shallower than kids (rate)", "L1 (0.74), L4 (kappa 1.2)", "training + distinct-input", "solid",
-  "Input distribution doesn't explain the gap", "L1 (CHILDES vs BookCorpus)", "training", "solid",
-  "LM between-instance variance ~0 (variability)", "L1 seeds, L2 data, L4 sigma_k 0.08", "both", "solid",
-  "LM development decelerates; kids accelerate (shape)", "L4 (concave, 5 seeds)", "distinct-input", "solid",
-  "Convergence is not a data-overlap artifact", "L5 (disjoint pools)", "distinct-input", "solid",
-  "Holds for compositionally different data", "BabyLM control", "distinct-input", "PENDING (backlog)"
+  ~"signature / claim", ~evidence, ~axis, ~"in paper?",
+  "ACCELERATION: LMs are pure accumulators, κ≈1 (no acceleration)", "L1 (κ 0.72-0.74), L4 (κ_dev 1.17)", "training + distinct-input", "yes (fig-llm, training axis) — L4 strengthens",
+  "  ...not an input-distribution artifact (CDS vs adult)", "L1 (CHILDES ≈ BookCorpus)", "training", "yes",
+  "  ...not a training-vs-development artifact", "L4 (κ≈1 on distinct-input axis too)", "distinct-input", "NEW",
+  "  ...LM curve decelerates where kids accelerate (shape)", "L4 (concave, all 5 seeds)", "distinct-input", "NEW",
+  "VARIABILITY (demoted): LM between-instance σ_κ≈0 ", "L1 seeds, L2 data, L4 σ_κ 0.08 (CV 7%)", "both", "abstract mentions; not yet a figure",
+  "  ...convergence is real, not a data-overlap artifact", "L5 (disjoint pools, gap 0.021)", "distinct-input", "NEW",
+  "  ...holds for compositionally different data", "BabyLM register-mix control", "distinct-input", "PENDING (backlog)"
 )
 ```
 
-**Three matched-axis legs for the paper:** rate (κ ≈ 1.2 vs ~10), variability
-(σ_κ ≈ 0.08 / CV 7% vs ~3.5 / 34%), shape (decelerating vs accelerating). L5 adds
-overlap-robustness. The honest gaps:
+**The headline that maps cleanest to the paper:** LMs sit at the **κ ≈ 1 unit-accumulator
+boundary** that children exceed by ~10×. The paper already makes this on the C&B
+*training-step* axis; **L4 is the same result on the development-matched
+distinct-input axis** (κ_dev ≈ 1.17), which closes the obvious "but that's just
+optimization, not development" objection — the strongest single addition. The
+*deceleration* (concave vs children's convex) is a second, sharper framing of the
+same "no acceleration" point. Variability is the paper's demoted signature, so the
+σ_κ result and L5 are supporting, not headline.
 
-- **Per-word κ at 11 budgets is fit-noisy** (the κ IQRs are wide — see the right
-  panel of `ladder_development_final.png`). A finer ladder (15–20 budgets) would
-  sharpen κ_w. The *aggregate* slope and the *σ_κ* are robust; the per-word κ
-  *distribution* is the soft part.
-- **Affirmative variation leg is pending.** L5 rules out the overlap artifact but
-  CHILDES halves are distributionally similar (low power to *find* divergence).
-  The BabyLM-100M register-mix control is the affirmative test ("converges even on
-  compositionally different data") — backlog.
-- **Provenance:** raw surprisal trajectories in `fits/llm/surprisal/{grid,disjoint}/`;
-  run logs + sampling manifests in `fits/llm/provenance/`; best-val extracts
-  (`ladder_bestval.csv`, `disjoint_bestval.csv`) are what the analyses above read.
+### On the figure noise (the right panel of `ladder_development_final.png`)
 
-**Promote-to-paper candidates:** the three-leg matched-axis comparison (rate +
-variability + shape) and the L5 overlap control are paper-ready. Hold the per-word
-κ_w distribution until the finer ladder; frame the BabyLM control as the planned
+That panel is the **per-word κ distribution** (5 seed densities). It's jagged
+because each per-word κ is a 4-PL sigmoid fit to only **11 budget points** — too
+few to pin a 4-parameter logistic per word, so the right tail and bumps are
+**fitting noise, not signal**. Two distinct fixes for two distinct quantities:
+
+- **Per-word κ *distribution* (the noisy panel) → finer ladder.** 15–20 budgets
+  would constrain each word's sigmoid far better and smooth the density. This is
+  the right fix if we want to *show* the distribution.
+- **Between-individual σ_κ (the variability number) → more seeds.** σ_κ is the SD
+  of 5 per-seed medians; the *median* per seed is already robust (so σ_κ ≈ 0.08 is
+  trustworthy), but more seeds would tighten its confidence interval.
+
+Both are now cheap on the A40s (the pipeline is proven; ~a night each). **But note
+what we actually need for the paper:** the acceleration headline rests on the
+*central* κ (median ≈ 1.17, robust at 11 budgets) vs children's ≈ 10 — that does
+**not** need the finer ladder. The noisy per-word density only matters if we
+promote the *variability* signature to its own figure; given the paper demotes
+variability, the cleanest move is to (a) report the median κ for the acceleration
+claim now, and (b) run a finer ladder only if we decide the per-word distribution
+earns a panel. My recommendation: **finer ladder (≈16 budgets) × current 5 seeds**
+— it cleans the distribution *and* tightens σ_κ in one sweep, for one night of A40 time.
+
+**Provenance.** Raw surprisal trajectories: `fits/llm/surprisal/{grid,disjoint}/`;
+dispatch logs + sampling manifests: `fits/llm/provenance/`; the best-val extracts
+the analyses read: `fits/llm/ladder_bestval.csv`, `fits/llm/disjoint_bestval.csv`.
+
+**Promote-to-paper now:** the κ≈1 acceleration disanalogy on *both* axes (extends
+the existing fig-llm with the development-axis point + the deceleration framing) and
+the L5 overlap control. Hold the per-word κ *distribution* for a finer ladder; frame
+the BabyLM control as the planned
 strengthening.
 ```
