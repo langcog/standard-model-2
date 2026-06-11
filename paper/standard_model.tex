@@ -180,20 +180,6 @@
  
 
 
-\usepackage{booktabs}
-\usepackage{longtable}
-\usepackage{array}
-\usepackage{multirow}
-\usepackage{wrapfig}
-\usepackage{float}
-\usepackage{colortbl}
-\usepackage{pdflscape}
-\usepackage{tabu}
-\usepackage{threeparttable}
-\usepackage{threeparttablex}
-\usepackage[normalem]{ulem}
-\usepackage{makecell}
-\usepackage{xcolor}
 \usepackage{pdflscape}
 \makeatletter
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
@@ -777,9 +763,9 @@ experiments, the total number of exposures required on average to learn
 a word might indeed be only a small handful by age three (Markson and
 Bloom 1997; Bloom 2002).
 
-\subsection{Large language models do not show acceleration in their
+\subsection{Large language models show no acceleration in their
 vocabulary
-growth}\label{large-language-models-do-not-show-acceleration-in-their-vocabulary-growth}
+growth}\label{large-language-models-show-no-acceleration-in-their-vocabulary-growth}
 
 \begin{figure}
 
@@ -808,16 +794,38 @@ language models show the same patterns of developmental change in
 efficiency or acceleration. We made use of work by Chang and Bergen
 (2022), who extracted per-word acquisition curves from language models.
 They computed logistic fits to the surprisal (negative log probability)
-of individual words across training, estimating
+of individual words across training, estimating a curve for each word.
+Critically for our purposes, the slope of these logistic curves provides
+a direct analogue to our \(\kappa\) parameter capturing acceleration in
+the accumulation process (see SI: Computing acceleration in LLMs).
 
-We can compare
+We compared the word-by-word acceleration of small-scale LLMs to
+children across several experiments. First, we extracted slopes from
+fits provided by Chang and Bergen (2022), in which four different
+language model architectures (LSTM, BiLSTM, GPT-2, and BERT) were fit to
+standard corpora (BookCorpus and WikiText-103). This training setup was
+disanalogous with our studies of children in at least two ways, however.
+First, models were not trained on child directed speech, so we retrained
+new GPT-2 (small) models on 24.5M words from CHILDES, following the
+protocol in Feng, Goodman, and Frank (2024). Second, both these models
+and those trained by Chang and Bergen (2022) were trained to
+convergence, with acquisition curves reflecting changing predictions
+across repeated passes through the same training data. To isolate
+developmental change, we trained a separate set of GPT-2 models each to
+convergence on increasingly larger subsamples of the same CHILDES data,
+allowing us to estimate surprisal as a function of actual amount of
+input data -- a more direct developmental analogue.
 
-Evanson, Lakretz, and King (2023) investigated
-
-We end by providing a quantitative comparison between within-child human
-learning and LLM scaling laws, showing that children's early language
-learning is strikingly different from LLM scaling: it shows both steeper
-scaling and greater variance in growth rate.
+The results across all of these were clear
+(Figure~\ref{fig-llm-acceleration}): \(\kappa\) for all models was
+clustered near 1, the unit accumulator posited by McMurray (2007). In
+contrast, \(\kappa\) estimates for children for our large longitudinal
+samples were much higher (EN: VALUE NOT SPECIFIED and NO: VALUE NOT
+SPECIFIED) and highly variable across children (EN SD: VALUE NOT
+SPECIFIED and NO SD: VALUE NOT SPECIFIED). In sum, language models --
+but not children -- behave like Model 1 (an accumulator). In contrast,
+children are best described by Model 4 -- they are variable,
+accelerating accumulators.
 
 \section{Discussion}\label{discussion}
 
@@ -833,10 +841,16 @@ in word recognition or processing (Fernald et al. 1998; Frank et al.
 learning {[}Smith et al. (2002);Markman and Wachtel (1988);etc{]}, or
 other sources.
 
+ENGLISH for the key model - BUT also buttressed by model fits across
+several languages - sparsity of cross-linguistic longitudinal data but
+still
+
 Mitchell and McMurray (2009) prove that acceleration does not result
 from simply leverage of vocabulary --
 
 Role of input: Coffey 2026 variance decomposition
+
+Evanson, Lakretz, and King (2023) investigated
 
 Furthermore, how does the accumulation process relate to the rapid
 growth of vocabulary? On some models, accumulation by itself can produce
@@ -1043,6 +1057,15 @@ Stages?''} In \emph{Findings of the Association for Computational
 Linguistics: ACL 2023}, 12205--18. Toronto, Canada: Association for
 Computational Linguistics.
 \url{https://doi.org/10.18653/v1/2023.findings-acl.773}.
+
+\bibitem[\citeproctext]{ref-feng2024}
+Feng, Steven Y., Noah D. Goodman, and Michael C. Frank. 2024. {``Is
+Child-Directed Speech Effective Training Data for Language Models?''} In
+\emph{Proceedings of the 2024 Conference on Empirical Methods in Natural
+Language Processing}, edited by Yaser Al-Onaizan, Mohit Bansal, and
+Yun-Nung Chen, 22055--71. Miami, Florida, USA: Association for
+Computational Linguistics.
+\url{https://doi.org/10.18653/v1/2024.emnlp-main.1231}.
 
 \bibitem[\citeproctext]{ref-fenson2007}
 Fenson, Larry et al. 2007. \emph{MacArthur-Bates Communicative
@@ -1742,6 +1765,9 @@ Analysis}{\textbackslash sigma\_r Sensitivity Analysis}}\label{sigma_r-sensitivi
 \NormalTok{roughly half a day of compute per pin value.}
 \end{Highlighting}
 \end{Shaded}
+
+\section{Computing Acceleration in
+LLMs}\label{computing-acceleration-in-llms}
 
 \begin{Shaded}
 \begin{Highlighting}[]

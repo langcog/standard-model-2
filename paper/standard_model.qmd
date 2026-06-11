@@ -489,6 +489,8 @@ Longitudinal growth models efficiency and acceleration. Two different paramters.
 
 Where does acceleration come from? Could come from a variety of sources, including general maturation of memory and attention, specific changes in word recognition or processing [@fernald1998;@frank2026], the increasing sophistication of inferential strategies for word learning [@smith2002;@markman1988;etc], or other sources. 
 
+ENGLISH for the key model - BUT also buttressed by model fits across several languages - sparsity of cross-linguistic longitudinal data but still 
+
 @mitchell2009 prove that acceleration does not result from simply leverage of vocabulary -- 
 
 Role of input: Coffey 2026 variance decomposition
