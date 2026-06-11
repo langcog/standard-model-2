@@ -25,11 +25,11 @@ per-claim provenance in [`/studies/README.md`](../studies/README.md).
 | analysis | datasets | input | where | status |
 |---|---|---|---|---|
 | **glmer ladder** (Fig 2, Table 2) | 10 units incl. by-study English (thal/smith/marchman) + NO + JP | — | Sherlock | done (by-study fits 2026-06-07) |
-| **io-imputed D** (`long_no_freq_slopes[_norwegian]`) | EN, NO longitudinal | imputed (σ_r pinned) | local | done, KEEP (intercept share π_α; rhat≈1.09 on σ_α) |
+| **io-imputed D** (`long_no_freq_slopes[_norwegian]`) | EN, NO longitudinal | imputed (σ_r pinned) | local | done, KEEP (intercept share π_α; rhat≈1.09 on σ_α). NO refit collected 2026-06-11 (entry 34): π_α 0.961, input share 3.9% |
 | ~~**io-imputed D′**~~ DROPPED 2026-06-09 | EN, NO | — | — | confounded slope (entry 32); GCP stopped |
 | **io-pooled** (`io_pooled_widedelta` + γ) | 4: AM2018, BabyView, FMW2013, SEEDLingS | observed (LENA/head-cam) | local | done (refit 2026-06-02); intercept share ~2.8%; slope γ + |
 | **proc D′0–D′3** (`proc_dp`, Fig 3E) | 3: AM2018, FM2012, FMW2013 | observed (AM2018,FMW2013) + imputed (FM2012) | Sherlock | done (entry 33); selected D′1, processing→efficiency |
-| **cross-sectional demographics** (Fig demog.) | 31 Wordbank languages | — | local | uncapped refit running (entry 31) |
+| **cross-sectional demographics** (Fig demog.) | 31 Wordbank languages | — | local | done; uncapped refit landed 2026-06-11 (entry 31): true archive Ns, CIs tighter, signs unchanged |
 | **LLM** (Fig 5) | GPT-2 / CHILDES | — | Sherlock/Marlowe | see [`experiments_llm.md`](experiments_llm.md) |
 
 ---
@@ -1831,7 +1831,7 @@ future users.
 
 ---
 
-## 🟡 31. Cross-sectional demographic decomposition: sex & maternal ed across many languages (2026-06-09, in progress)
+## 🟢 31. Cross-sectional demographic decomposition: sex & maternal ed across many languages (2026-06-09)
 
 **Motivation.** The longitudinal demographic analysis (paper §"Efficiency
 and acceleration relate to separate demographic predictors") only has
@@ -1919,6 +1919,25 @@ frames). Refit running (`logs/xsec_uncapped.log`); on completion: rebuild
 `table1_datasets.csv`, re-render Fig 2 composite + Table 1, compare meta estimates
 capped vs uncapped (expect tighter CIs, same signs, k unchanged 31/17).
 
+**Update 2026-06-11 — refit complete (`logs/xsec_uncapped.log` EXIT=0, 48 fits,
+58,467 kids in `scatter.rds`).** Prediction held: same signs, k unchanged (31 sex /
+17 matEd), CIs tighter. Total cross-sectional N 42,971 → 95,781; per-language Ns now
+match the archive (EN 8,685, NO 7,358, Danish 6,112, …). Meta capped → uncapped:
+
+| predictor × component | β capped | β uncapped | CI width capped | CI width uncapped |
+|---|--:|--:|--:|--:|
+| sex × efficiency | 0.52 | 0.51 | 0.16 | 0.14 |
+| sex × acceleration | 0.25 | 0.33 | 0.29 | 0.21 |
+| matEd × efficiency | 0.10 | 0.10 | 0.13 | 0.11 |
+| matEd × acceleration | 0.28 | 0.31 | 0.43 | 0.36 |
+
+(The two acceleration estimates move up modestly — the noisier, inflated channel
+per the §31 validation — but the qualitative story is unchanged: **sex → efficiency,
+matEd → acceleration**.) `cache/fits.rds` + `cache/scatter.rds` regenerated;
+`paper/cache/table1_datasets.csv` rebuilt off the uncapped frames. Remaining
+reorg/paper-integration (move `cross_sectional_demographics/` → `studies/`, fix the
+2 paper paths, drop the "≤1,200" caption clause) goes via PR — see entry 35.
+
 ---
 
 ## 🟢 32. Input on the acceleration channel: the D′ confound → use observed IO (2026-06-09)
@@ -1995,6 +2014,9 @@ Fix: guard now checks `delta_j` vs the data's per-item production rate. Rebuilt
 `fig4_exposure.rds` (book ≈13k exposures @16mo, country ≈683 @36mo). No re-fit; GCP stayed off.
 Lesson: validate `delta_j` against production, not frequency.
 
+(NB: this is the *second* entry numbered 34; the inventory and entry 35 refer to the
+io-imputed NO refit below, not this fig-efficiency note.)
+
 **Update 2026-06-10 — committed the guard fix + caught a stale-psi bug.** The guard fix above
 was never committed (lost across sessions); re-applied. The actual trigger of the section-5
 error was a **stale psi**: `long_no_freq_slopes_psi.csv` on disk was the **May pre-dedup**
@@ -2007,6 +2029,37 @@ the params were from the recent GCP run.) Correct fix: re-pulled the recent **68
 but `recover_from_csvs.R` had written the psi), keeping the 682 bundle. Verified:
 `cor(delta_j, production) = −0.974`; 606 items after the freq floor; book 13.1k exp @16.1mo,
 country 683 @35.8mo; `if`/`would` learned ~35mo despite 35–47k exposures — freq⊥difficulty made vivid.
+
+---
+
+## 🟢 35. NO io-imputed D refit collected from GCP (2026-06-11)
+
+**Context.** The other session left a Norwegian io-imputed D refit
+(`long_no_freq_slopes_norwegian`) finished on GCP `sm2-fit-02` but not fully pulled:
+the **summary** had been scp'd down (matches remote, π_α 0.961) but the local **draws**
+were the stale May-23 file (didn't correspond to the summary). Started the node, pulled
+the fresh draws (Jun 9 15:04, 4 chains × 1000), verified `mean(pi_alpha)` from draws ==
+summary (0.9612), backed up the stale draws as `.draws.rds.may23bak`, stopped the node.
+
+**Headline posteriors (fresh fit).** δ 12.39, σ_α 2.66, σ_ξ 2.71, σ_ζ 8.35, ρ(ξ,ζ) −0.38,
+**π_α 0.961 [0.958, 0.964] → input share 1−π_α = 3.9%** (the provisional panel-E NO value).
+Note this differs from the May nested-family NO fit logged in entry 15 (σ_ζ 3.74, π_α 0.94):
+the dedup'd refit pushes far more variance onto the per-child acceleration term
+(σ_ζ 3.74 → 8.35) and raises π_α (input share 6% → 3.9%).
+
+**Mixing — known and accepted (inventory flags rhat≈1.09).** rhat 1.09 and ess_bulk ≈ 38
+on σ_α / σ_ξ / π_α (they're deterministically linked given pinned σ_r, so share diagnostics);
+δ and σ_ζ mix fine (ess 947 / 170). Crucially the four chains **agree on location**
+(per-chain π_α 0.961–0.962, σ_α 2.65–2.67) — this is slow within-chain mixing on the σ_α
+scale, not multimodality, so the point estimate is trustworthy. The CI is likely a hair
+optimistic from autocorrelation; a longer run would clean up ess if the paper reports it.
+There is **no `_psi.csv`** for this fit and it uses a single pooled δ (not per-word ψ), so
+the stale-psi 736-vs-673 concern from the handoff does **not** apply here.
+
+**Artifacts.** `fits/summaries/long_no_freq_slopes_norwegian.{summary,draws}.rds` (consistent),
+`.draws.rds.may23bak` (stale backup). Feeds the io-partition section (paper §"Population
+input-related variation") and Fig 3 panel-E NO point (entry 35-adjacent: orphaned commit
+`ee03396` on branch `fig3-channel-partition`).
 
 ---
 
