@@ -270,6 +270,42 @@ age-divergence.
 agg |> group_by(words) |> summarise(between_seed_sd = round(sd(m),3), .groups="drop")
 ```
 
+**Two different "variabilities" live here — and they are firmed up by different
+runs.** This is the figure to look at when deciding on a new run:
+
+```{r L4-variability-fig}
+#| fig-width: 9
+#| fig-height: 3.6
+#| fig-cap: "Two variabilities, often conflated. LEFT — between-INDIVIDUAL: the 5 seeds' per-word κ medians (the paper's σ_κ analog). Tightly clustered (σ_κ ≈ 0.08); the per-seed median is robust at 11 budgets, so MORE SEEDS only tightens its CI. RIGHT — between-WORD within a model (C&B's per-word κ distribution). Jagged because each word's κ is a 4-PL sigmoid fit to only 11 budget points; a FINER LADDER cleans this. The proposed new run targets the right panel. Children sit off-scale (κ ≈ 10, σ_κ ≈ 3.5)."
+library(patchwork)
+pA <- ggplot(kpseed, aes(1, kappa_med)) +
+  geom_hline(yintercept = mean(kpseed$kappa_med), linetype = "dashed", color = "grey50") +
+  geom_jitter(width = .04, height = 0, size = 3, color = "#2c7fb8") +
+  annotate("text", x = 1.18, y = mean(kpseed$kappa_med),
+           label = sprintf("σ_κ = %.3f\nCV %.0f%%", sd(kpseed$kappa_med),
+                           100*sd(kpseed$kappa_med)/mean(kpseed$kappa_med)), hjust = 0, size = 3.1) +
+  coord_cartesian(xlim = c(.85, 1.7), ylim = c(0, 2)) +
+  labs(title = "between-INDIVIDUAL (5 seeds)", subtitle = "paper's σ_κ analog — robust",
+       x = NULL, y = "per-seed median κ") +
+  theme_minimal(base_size = 10.5) + theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
+pB <- ggplot(pw, aes(kappa, color = factor(seed))) +
+  geom_vline(xintercept = 1, linetype = "dotted") +
+  geom_density() + coord_cartesian(xlim = c(0, 3)) +
+  labs(title = "between-WORD (within a model)", subtitle = "C&B per-word distribution — noisy at 11 budgets",
+       x = "per-word κ", y = "density", color = "seed") +
+  theme_minimal(base_size = 10.5) + theme(legend.position = c(.82, .7))
+pA | pB
+```
+
+- **Left = between-individual** (different seeds = different "children"): this is
+  the σ_κ that maps to the paper. It is **already robust** — five seed medians at
+  1.05–1.24, σ_κ ≈ 0.08. A finer ladder won't move it; only more seeds tightens
+  its confidence interval, and it's already far below children's 3.5.
+- **Right = between-word** (different words within one model): C&B's per-word κ
+  distribution. The **median** is the acceleration headline (κ ≈ 1.17, robust);
+  the **jagged tails are fitting noise** from 11 budget points, *not* real
+  between-word structure. This is the only thing a finer ladder fixes.
+
 ## 5. L5 — Disjoint-halves control (convergence isn't an overlap artifact)
 
 The L4 nested design has two seeds sharing ≈ B/24.5M of their data (~98% at 24M),
