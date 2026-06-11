@@ -8,7 +8,8 @@
 ##     ages are the UNION of the two subsamples
 ##   * Wordbank cross-sectional — the 31 languages in the fig-demographics
 ##     cross-sectional arm (cross_sectional_demographics/00_build.R; one
-##     admin per child, subsampled to <=1200 children per language)
+##     admin per child, full archive N per language as of the 2026-06-11
+##     uncapped refit — no per-language subsample cap)
 ##
 ## Stats are computed from the analysis bundles/frames, so the table shows
 ## the data the models actually saw (post-QC), not raw archive sizes.
