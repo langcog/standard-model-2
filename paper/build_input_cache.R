@@ -12,7 +12,7 @@
 ## OLD pre-dedup summary as a placeholder until the salvage lands. Rebuild
 ## when new NO D + the D' fits arrive.
 
-suppressPackageStartupMessages({ library(dplyr); library(here); library(tibble) })
+suppressPackageStartupMessages({ library(dplyr); library(here); library(tibble); library(posterior) })
 CACHE <- here("paper", "cache"); dir.create(CACHE, showWarnings = FALSE, recursive = TRUE)
 
 ## ---- model scalars from the slim summaries ----
@@ -46,15 +46,42 @@ MODELS <- list(`English (D)` = en, `Norwegian (D)` = no,
                `Input-observed` = io)
 MODEL_LEVELS <- names(MODELS)
 
-## ---- Panel A: input share vs age (intercept channel) ----
-## Var(theta_i(t)) = sigma_xi^2 + 2 rho sigma_xi sigma_zeta L + sigma_zeta^2 L^2
-## input variance (intercept channel) = sigma_r^2.  share = sigma_r^2 / Var.
-a0 <- 18; ages <- seq(8, 30, by = 0.5); L <- log(ages / a0)
-panelA <- bind_rows(lapply(names(MODELS), function(nm) {
-  p <- MODELS[[nm]]
-  vtheta <- p$sigma_xi^2 + 2 * p$rho * p$sigma_xi * p$sigma_zeta * L + p$sigma_zeta^2 * L^2
-  tibble(model = nm, age = ages, input_share = p$sigma_r^2 / vtheta)
-})) |> mutate(model = factor(model, levels = MODEL_LEVELS))
+a0 <- 18   # anchor age (kept for the saveRDS payload / fan helpers)
+
+## ---- Panel A (headline): factor x channel variance partition ----
+## The share of between-child variance in EFFICIENCY (xi) and ACCELERATION
+## (kappa) attributable to INPUT and to PROCESSING, with everything from
+## observed-input fits (no imputation):
+##   xi_i    = mu_r + sigma_r z_r + beta_xi rt0 + log_alpha
+##   kappa_i = (1+delta) + gamma sigma_r z_r + beta_k0 rt0 + beta_k1 rt1 + zeta
+## INPUT channel  -> io_pooled_gamma_widedelta_add (4 datasets, gamma on slope).
+## PROC channel   -> proc_dp3 (all betas free, so the acceleration share is
+##                   ESTIMATED, not assumed 0; the selected rung D'1 agrees on xi).
+## sigma_r differs between the two fits (io 0.37, proc-pinned 0.53) -- each
+## factor is taken from the model best suited to it; noted in the caption.
+qfac3 <- function(x) c(med = median(x), lo = quantile(x, .05, names = FALSE),
+                       hi = quantile(x, .95, names = FALSE))
+io_g <- as_draws_df(readRDS(here("fits", "io_pooled_gamma_widedelta_add.rds"))$draws(
+          c("sigma_r", "sigma_alpha", "sigma_zeta", "gamma")))
+in_eff <- io_g$sigma_r^2 / (io_g$sigma_alpha^2 + io_g$sigma_r^2)
+in_acc <- (io_g$gamma^2 * io_g$sigma_r^2) / (io_g$gamma^2 * io_g$sigma_r^2 + io_g$sigma_zeta^2)
+pd  <- as.data.frame(readRDS(here("fits", "summaries", "proc_dp3_all.draws.rds")))
+srP <- readRDS(here("fits", "proc_dp_all_subset_data.rds"))$stan_data$sigma_r
+rho <- if ("rho_rt" %in% names(pd)) pd$rho_rt else 0
+Vxi  <- srP^2 + pd$beta_xi^2 * pd$sigma_rt0^2 + pd$sigma_alpha^2
+Vkap <- pd$gamma_in^2 * srP^2 +
+        (pd$beta_k0^2 * pd$sigma_rt0^2 + pd$beta_k1^2 * pd$sigma_rt1^2 +
+         2 * pd$beta_k0 * pd$beta_k1 * rho * pd$sigma_rt0 * pd$sigma_rt1) + pd$sigma_zeta^2
+pr_eff <- pd$beta_xi^2 * pd$sigma_rt0^2 / Vxi
+pr_acc <- (pd$beta_k0^2 * pd$sigma_rt0^2 + pd$beta_k1^2 * pd$sigma_rt1^2 +
+           2 * pd$beta_k0 * pd$beta_k1 * rho * pd$sigma_rt0 * pd$sigma_rt1) / Vkap
+panel_partition <- bind_rows(
+  tibble(factor = "Input",      channel = "Efficiency",   !!!qfac3(in_eff)),
+  tibble(factor = "Input",      channel = "Acceleration", !!!qfac3(in_acc)),
+  tibble(factor = "Processing", channel = "Efficiency",   !!!qfac3(pr_eff)),
+  tibble(factor = "Processing", channel = "Acceleration", !!!qfac3(pr_acc))
+) |> mutate(factor  = factor(factor,  levels = c("Input", "Processing")),
+            channel = factor(channel, levels = c("Efficiency", "Acceleration")))
 
 ## ---- Panel B: analytic sensitivity (EN, NO) + refit anchors ----
 ## Holding sigma_xi^2 at its fitted (data-determined) value, the input
@@ -76,17 +103,9 @@ panelB_anchors <- bind_rows(
   anch("long_no_freq_slopes", en$sigma_r, "English (D)", "post-dedup (on pin)"),
   anch("long_no_freq_slopes_sigmaR_0p80", 0.80, "English (D)", "pre-dedup refit"))
 
-## ---- Panel C: input share per model + meta band ----
-panelC <- bind_rows(lapply(names(MODELS), function(nm) {
-  p <- MODELS[[nm]]
-  tibble(source = nm, kind = "model",
-         input_share = 1 - p$pi_alpha, lo = 1 - p$pi_hi, hi = 1 - p$pi_lo)
-}))
 ## Meta-analytic input-quantity share of vocabulary variance, Coffey 2026:
-## 4-7%. (Anderson 2021 give a "modest proportion" -- MCF to fill the number.)
-meta <- tibble(source = "Coffey 2026 (meta)", kind = "meta",
-               input_share = 0.055, lo = 0.04, hi = 0.07)
-panelC <- bind_rows(panelC, meta)
+## 4-7% (reference band for the INPUT shares in the partition panel).
+meta <- tibble(source = "Coffey 2026 (meta)", lo = 0.04, hi = 0.07, mid = 0.055)
 
 ## ---- Panels D/E: input & processing fans (model curves + per-child spaghetti) ----
 ## D = io_pooled input fan; E = proc_dp RT fan. Children are split into quartiles
@@ -137,6 +156,41 @@ panelD_spag <- iob$df |> group_by(ii, age) |> summarise(vocab = mean(produces), 
 cat(sprintf("Fans: proc beta_xi=%.2f; io beta_c=%.2f. proc RT quartiles n=%s\n",
             pbx, ibc, paste(as.integer(table(prt$q)), collapse = "/")))
 
+## ---- (top row, "io-imputed") EN/NO model-IMPLIED input fans ----
+## Input is imputed for EN/NO (no LENA), so we do NOT split kids by it (that
+## redraws the efficiency gradient). Instead: quartile curves at
+## xi = mu_r + sigma_r * z_q (normal quartile midpoints) over grey per-child
+## trajectories -- the model-implied input slice. Narrative: io-imputed -> io -> proc.
+zq <- qnorm(c(.125, .375, .625, .875))
+mi_fan <- function(bundle, summ, psi_csv, draws, n_spag = 150, seed = 1) {
+  b  <- readRDS(here("fits", bundle)); sd <- b$stan_data
+  s  <- as.data.frame(readRDS(here("fits", "summaries", summ)))
+  gv <- function(v) s$median[s$variable == v]
+  sigma_r <- sqrt(max(gv("sigma_xi")^2 - gv("sigma_alpha")^2, 1e-6))
+  kappa   <- 1 + median(as.data.frame(readRDS(here("fits", "summaries", draws)))$delta)
+  psi <- read.csv(here("fits", "summaries", psi_csv))
+  wi  <- b$word_info[order(b$word_info$jj), ]
+  dj  <- psi$delta_j_median[match(wi$jj, psi$jj)]; dj <- dj[!is.na(dj)]
+  ages <- seq(8, 30, by = 0.5)
+  curves <- bind_rows(lapply(seq_along(zq), function(i) {
+    xi <- sd$mu_r + sigma_r * zq[i]
+    tibble(q = factor(PCT_LEVS[i], levels = PCT_LEVS), age = ages,
+           vocab = vapply(ages, function(t) mean(plogis(xi + sd$log_H + kappa * log(t / sd$a0) - dj)),
+                          numeric(1))) }))
+  set.seed(seed)
+  kids <- sample(unique(b$df$child_id), min(n_spag, n_distinct(b$df$child_id)))
+  spag <- b$df |> filter(child_id %in% kids) |> group_by(child_id, age) |>
+    summarise(vocab = mean(produces), .groups = "drop")
+  list(curves = curves, spag = spag, sigma_r = sigma_r)
+}
+en_mi <- mi_fan("long_subset_data.rds", "long_no_freq_slopes.summary.rds",
+                "long_no_freq_slopes_psi.csv", "long_no_freq_slopes.draws.rds")
+no_mi <- mi_fan("long_subset_data_nor.rds", "long_no_freq_slopes_norwegian.summary.rds",
+                "long_no_freq_slopes_norwegian_psi.csv", "long_no_freq_slopes_norwegian.draws.rds")
+panelEN_curves <- en_mi$curves; panelEN_spag <- en_mi$spag
+panelNO_curves <- no_mi$curves; panelNO_spag <- no_mi$spag
+cat(sprintf("EN/NO model-implied input fans: sigma_r EN=%.2f NO=%.2f\n", en_mi$sigma_r, no_mi$sigma_r))
+
 ## ---- Supplement: empirical proc splits (median RT / median input), per dataset ----
 ## Cached here (rather than read live in the supplement) so the supplement chunk
 ## needs no fit bundle. Median split on the predictor; spaghetti coloured by dataset.
@@ -151,18 +205,17 @@ sinp_grp <- pb$lena |> group_by(ii) |> summarise(z = mean(z_lena), .groups = "dr
 panelSupp_rt    <- svoc |> inner_join(srt_grp, by = "ii")
 panelSupp_input <- svoc |> inner_join(sinp_grp |> select(ii, grp), by = "ii")
 
-saveRDS(list(panelA = panelA, panelB_curve = panelB_curve,
-             panelB_anchors = panelB_anchors, panelC = panelC,
+saveRDS(list(panel_partition = panel_partition, meta = meta,
+             panelB_curve = panelB_curve, panelB_anchors = panelB_anchors,
              panelD_curves = panelD_curves, panelD_spag = panelD_spag,
              panelE_curves = panelE_curves, panelE_spag = panelE_spag,
+             panelEN_curves = panelEN_curves, panelEN_spag = panelEN_spag,
+             panelNO_curves = panelNO_curves, panelNO_spag = panelNO_spag,
              panelSupp_rt = panelSupp_rt, panelSupp_input = panelSupp_input,
              sr_main = 0.53, sr_range = c(0.40, 0.70),  # plausible band: MCF to set
              a0 = a0, intercept_only = TRUE,
              no_is_placeholder = TRUE),
         file.path(CACHE, "fig3_input.rds"))
 cat("Wrote paper/cache/fig3_input.rds\n\n")
-cat("Panel C (input share 1 - pi_alpha):\n"); print(as.data.frame(panelC))
-cat(sprintf("\nPanel A input share at a0 (age 18): EN=%.3f NO=%.3f IO=%.3f\n",
-            panelA$input_share[panelA$model=="English (D)" & panelA$age==18],
-            panelA$input_share[panelA$model=="Norwegian (D)" & panelA$age==18],
-            panelA$input_share[panelA$model=="Input-observed" & panelA$age==18]))
+cat("Headline partition (share of between-child variance):\n")
+print(as.data.frame(panel_partition |> mutate(across(c(med, lo, hi), ~ sprintf("%.1f%%", 100*.x)))))
