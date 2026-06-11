@@ -1,16 +1,3 @@
----
-title: "Supplemental Information"
-format:
-  pdf:
-    documentclass: article
-    geometry: margin=1in
-    fontsize: 11pt
-    linestretch: 1.05
-    colorlinks: true
-    keep-tex: true
----
-
-
 ```{r si-setup, include=FALSE}
 suppressPackageStartupMessages({
   library(here); library(dplyr); library(tidyr); library(ggplot2)

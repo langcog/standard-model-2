@@ -66,6 +66,46 @@
 \fi
 \makeatother
 
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{241,243,245}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.40,0.45,0.13}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\BuiltInTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\ExtensionTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.28,0.35,0.67}{#1}}
+\newcommand{\ImportTok}[1]{\textcolor[rgb]{0.00,0.46,0.62}{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.07,0.07,0.07}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
 
 \usepackage{longtable,booktabs,array}
 \usepackage{calc} % for calculating minipage widths
@@ -434,20 +474,25 @@ accumulation than the last.
 
 Neither of these models has any way to capture variation across children
 beyond variation in input rate. Thus, we augment the basic accelerating
-accumulator, rewriting it as the sum of either one or two individually
-variable quantities:
+accumulator, rewriting it as the sum of an individually variable
+efficiency term:
 
 \[\text{M3: }\theta_i(t) = \xi_i + \kappa ~ \log(t/a_0)\]
 
+The intercept term \(\xi_i = \log(r_i) + \log(\alpha_i)\) can then be
+used to break down individual variation into both input rate-related and
+other variation in children's efficiency.
+
+Our final model includes individually variable efficiency and
+acceleration terms:
+
 \[\text{M4: }\theta_i(t) = \xi_i + \kappa_i ~ \log(t/a_0)\]
 
-The intercept term in both models \(\xi_i = \log(r_i) + \log(\alpha_i)\)
-can then decompose individual variation into both input rate-related and
-other variation in children's efficiency. Similarly, in M4, the slope
-term \(\kappa_i = \kappa + \gamma \log r_i + \zeta_i\) adds
-\emph{individual variation in acceleration}, decomposing acceleration
-into a population term, input-related acceleration, and a child‑specific
-residual acceleration \(\zeta_i\) (the part not explained by input). The
+In this model, the slope term
+\(\kappa_i = \kappa + \gamma \log r_i + \zeta_i\) adds \emph{individual
+variation in acceleration}, decomposing acceleration into a population
+term, input-related acceleration, and a child‑specific residual
+acceleration \(\zeta_i\) (the part not explained by input). The
 coefficient \(\gamma\) then captures the strength of the relationship
 between input and acceleration.
 
@@ -664,7 +709,7 @@ Figure~\ref{fig-io-partition} (panel C) shows a small separation of
 trajectories by input quartile, but the key question of interest is how
 this variation partitions across efficiency and acceleration.
 
-Results for \(\pi_alpha\) and \(\pi_zeta\) are shown in
+Results for \(\pi_\alpha\) and \(\pi_\zeta\) are shown in
 Figure~\ref{fig-io-partition}. Overall, we observe small but highly
 reliable effects of language input on both efficiency and acceleration.
 These effects are also in the range of the meta-analyses, but they
@@ -862,13 +907,18 @@ Inference
 
 We trained XYZ
 
+\section{Acknowledgements}\label{acknowledgements}
+
+Some of the computing for this project was performed on the Sherlock and
+Marlowe clusters. We would like to thank Stanford University and
+Stanford Research Computing for providing computational resources and
+support that contributed to these research results. Funds for
+computational experiments were also provided by a gift from Meta to
+support research on children's home language environment. Claude Code
+was used for literature review, code generation, visualization, and
+simulation infrastructure.
+
 \section{References}\label{references}
-
-Claude Code was used for literature review, code generation,
-visualization, and simulation infrastructure. All writing is original to
-the author.
-
-{{< supplemental.qmd >}}
 
 \phantomsection\label{refs}
 \begin{CSLReferences}{1}{0}
@@ -1302,6 +1352,529 @@ Eye-Tracking Data of Children's Word Recognition.''} \emph{Behavior
 Research Methods} 55 (5): 2485--2500.
 
 \end{CSLReferences}
+
+\newpage
+\begin{center}
+{\LARGE\bfseries Supplemental Information}
+\end{center}
+
+\section{Comparison with Prior
+Models}\label{comparison-with-prior-models}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{\#\# Relation to prior accumulator models  [draft for promotion — MCF to review]}
+
+\NormalTok{Our model is one member of a family of accumulator models of early}
+\NormalTok{vocabulary, and the family is easiest to compare in a single set of}
+\NormalTok{coordinates. Writing the latent ability of child $i$ on word $j$ at}
+\NormalTok{age $t$ as}
+
+\NormalTok{$$\textbackslash{}eta\_\{ij\}(t) = \textbackslash{}log r\_i + \textbackslash{}log \textbackslash{}alpha\_i + \textbackslash{}kappa\_i \textbackslash{}log t {-} \textbackslash{}delta\_j,$$}
+
+\NormalTok{every prior model in this tradition is a special case that fixes one or}
+\NormalTok{more of three quantities: the between{-}child variance in efficiency}
+\NormalTok{($\textbackslash{}sigma\_\textbackslash{}alpha$), the population scaling exponent ($\textbackslash{}kappa\_\{\textbackslash{}text\{pop\}\}$),}
+\NormalTok{and — critically — the between{-}child variance in that exponent}
+\NormalTok{($\textbackslash{}sigma\_\textbackslash{}kappa$). Mapping each prior model into these coordinates makes}
+\NormalTok{the comparison structural rather than notational.}
+
+\NormalTok{**McMurray [{-}@mcmurray2007]** is a pure accumulator: every word fills at a}
+\NormalTok{single unit rate ($\textbackslash{}kappa = 1$) and children do not differ}
+\NormalTok{($\textbackslash{}sigma\_\textbackslash{}alpha = \textbackslash{}sigma\_\textbackslash{}kappa = 0$). Its central insight is that the}
+\NormalTok{*vocabulary* curve accelerates even when the underlying rate does not,}
+\NormalTok{because ability sweeps through a distribution of word difficulties — the}
+\NormalTok{construction reproduced in panel (A) of our schematic. Acceleration here}
+\NormalTok{is a population{-}level property of the difficulty distribution, not a}
+\NormalTok{change in the child. This corresponds to our M1.}
+
+\NormalTok{**Mitchell \& McMurray [{-}@mitchell2009]** add a leverage term: already{-}known}
+\NormalTok{words speed the acquisition of new ones. They prove that this feedback}
+\NormalTok{shifts *when* words are acquired but cannot manufacture acceleration that}
+\NormalTok{is not already present in the difficulty distribution. In our coordinates}
+\NormalTok{it moves the timing of acquisition without changing $\textbackslash{}kappa$, and — being}
+\NormalTok{non{-}linear in accumulated vocabulary — it is the one prior model that does}
+\NormalTok{not embed cleanly in the linear predictor above.}
+
+\NormalTok{**Hidaka [{-}@hidaka2013]** introduces a rate{-}change process in which ability}
+\NormalTok{grows as $t\^{}\{D+1\}$; his exponent $D$ is exactly $\textbackslash{}kappa\_\{\textbackslash{}text\{pop\}\} {-} 1$}
+\NormalTok{in our notation, so $D \textgreater{} 0$ is population{-}level acceleration}
+\NormalTok{($\textbackslash{}kappa\_\{\textbackslash{}text\{pop\}\} \textgreater{} 1$). This is our M2. The acceleration is shared}
+\NormalTok{across children ($\textbackslash{}sigma\_\textbackslash{}kappa = 0$). Hidaka relates $D$ to word}
+\NormalTok{imageability — i.e. a *per{-}word* scaling exponent — which is an}
+\NormalTok{interesting direction we do not pursue here.}
+
+\NormalTok{**Mollica \& Piantadosi [{-}@mollica2017]** model each word as a Gamma}
+\NormalTok{waiting{-}time process in which acquisition occurs after roughly ten}
+\NormalTok{"effective learning instances." In our coordinates this is again a pure}
+\NormalTok{accumulator ($\textbackslash{}kappa = 1$); the per{-}word variation they capture lives in}
+\NormalTok{the Gamma shape parameter, which corresponds to a per{-}word discrimination}
+\NormalTok{(a 2PL extension) rather than to per{-}child structure.}
+
+\NormalTok{**Kachergis et al. [{-}@kachergis2022]** are the first to free}
+\NormalTok{$\textbackslash{}sigma\_\textbackslash{}alpha$: they cast vocabulary as a Rasch model in which each child}
+\NormalTok{has their own latent ability, unifying the accumulator and item{-}response}
+\NormalTok{traditions. This is our M3. But the scaling exponent remains shared across}
+\NormalTok{children ($\textbackslash{}sigma\_\textbackslash{}kappa = 0$), and the model is proposed as a framework}
+\NormalTok{rather than fit to longitudinal individual data.}
+
+\NormalTok{Reading down this list, the literature progressively frees parameters —}
+\NormalTok{McMurray fixes all three, Hidaka frees $\textbackslash{}kappa\_\{\textbackslash{}text\{pop\}\}$, Kachergis}
+\NormalTok{frees $\textbackslash{}sigma\_\textbackslash{}alpha$ — but every model holds $\textbackslash{}sigma\_\textbackslash{}kappa = 0$.}
+
+\PreprocessorTok{|}\NormalTok{ Model }\PreprocessorTok{|}\NormalTok{ $\textbackslash{}sigma\_\textbackslash{}alpha$ }\PreprocessorTok{|}\NormalTok{ $\textbackslash{}kappa\_\{\textbackslash{}text\{pop\}\}$ }\PreprocessorTok{|}\NormalTok{ $\textbackslash{}sigma\_\textbackslash{}kappa$ }\PreprocessorTok{|}\NormalTok{ per{-}word $\textbackslash{}delta\_j$ }\PreprocessorTok{|}
+\PreprocessorTok{|{-}{-}{-}|}\NormalTok{:{-}{-}:}\PreprocessorTok{|}\NormalTok{:{-}{-}:}\PreprocessorTok{|}\NormalTok{:{-}{-}:}\PreprocessorTok{|}\NormalTok{:{-}{-}:}\PreprocessorTok{|}
+\PreprocessorTok{|}\NormalTok{ McMurray (2007)            }\PreprocessorTok{|}\NormalTok{ 0 }\PreprocessorTok{|}\NormalTok{ 1     }\PreprocessorTok{|}\NormalTok{ 0 }\PreprocessorTok{|}\NormalTok{ free }\PreprocessorTok{|}
+\PreprocessorTok{|}\NormalTok{ Mitchell \& McMurray (2009) }\PreprocessorTok{|}\NormalTok{ 0 }\PreprocessorTok{|}\NormalTok{ 1     }\PreprocessorTok{|}\NormalTok{ 0 }\PreprocessorTok{|}\NormalTok{ free + leverage }\PreprocessorTok{|}
+\PreprocessorTok{|}\NormalTok{ Hidaka (2013), rate{-}change }\PreprocessorTok{|}\NormalTok{ 0 }\PreprocessorTok{|}\NormalTok{ $D+1$ }\PreprocessorTok{|}\NormalTok{ 0 }\PreprocessorTok{|}\NormalTok{ free }\PreprocessorTok{|}
+\PreprocessorTok{|}\NormalTok{ Mollica \& Piantadosi (2017)}\PreprocessorTok{|}\NormalTok{ 0 }\PreprocessorTok{|}\NormalTok{ 1     }\PreprocessorTok{|}\NormalTok{ 0 }\PreprocessorTok{|}\NormalTok{ free }\PreprocessorTok{|}
+\PreprocessorTok{|}\NormalTok{ Kachergis et al. (2022)    }\PreprocessorTok{|}\NormalTok{ free }\PreprocessorTok{|}\NormalTok{ free }\PreprocessorTok{|}\NormalTok{ 0 }\PreprocessorTok{|}\NormalTok{ free }\PreprocessorTok{|}
+\PreprocessorTok{|}\NormalTok{ **This work (M4)**         | **free** | **free** | **free** | **free** }\PreprocessorTok{|}
+
+\NormalTok{Our contribution is to free $\textbackslash{}sigma\_\textbackslash{}kappa$: children differ not only in}
+\NormalTok{how efficient they are but in how steeply their learning accelerates. This}
+\NormalTok{is the load{-}bearing addition — it is what lets the model fit the widening}
+\NormalTok{fan of trajectories with age (M4 vs M3 in the main text). It is also a}
+\NormalTok{falsifiable claim rather than a parameter convenience: if $\textbackslash{}sigma\_\textbackslash{}kappa$}
+\NormalTok{were near zero the model would collapse onto Kachergis et al., but the}
+\NormalTok{estimated per{-}child slope variance is well above zero and large relative}
+\NormalTok{to the efficiency variance $\textbackslash{}sigma\_\textbackslash{}alpha$ (main text, Figure 2 and}
+\NormalTok{Results).}
+\end{Highlighting}
+\end{Shaded}
+
+\section{Nonidentifiability in Cross-Sectional
+Data}\label{nonidentifiability-in-cross-sectional-data}
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{standard_model_files/figure-pdf/fig-cross-sectional-confound-1.pdf}
+
+}
+
+\caption{\label{fig-cross-sectional-confound}Non-identifiability of
+growth models in cross-sectional data. Panels show the same simulated
+data, reflecting the possibility of stable between-child intercept
+differences (A) vs.~varying growth slopes (B).}
+
+\end{figure}%
+
+\section{Datasets Used}\label{datasets-used}
+
+\begin{landscape}\begingroup\fontsize{8}{10}\selectfont
+
+\begin{longtable}[t]{llrrrrrclrr}
+
+\caption{\label{tbl-datasets}Characteristics of all datasets used in the
+paper. N and ages reflect the analysis samples (post-exclusion).
+Cross-sectional rows pool all contributed Wordbank datasets for a
+language. For AM2018 and FMW2013, which enter both the input and
+processing analyses with slightly different inclusion criteria, N is the
+union of the two subsamples.}
+
+\tabularnewline
+
+\toprule
+\multicolumn{4}{c}{ } & \multicolumn{3}{c}{Age (months)} & \multicolumn{4}{c}{ } \\
+\cmidrule(l{3pt}r{3pt}){5-7}
+Citation & Language & N & Admins & Mean & Min & Max & Long. & Input & Recordings & LWL sessions\\
+\midrule
+\endfirsthead
+\multicolumn{11}{@{}l}{\textit{(continued)}}\\
+\toprule
+\multicolumn{4}{c}{ } & \multicolumn{3}{c}{Age (months)} & \multicolumn{4}{c}{ } \\
+\cmidrule(l{3pt}r{3pt}){5-7}
+Citation & Language & N & Admins & Mean & Min & Max & Long. & Input & Recordings & LWL sessions\\
+\midrule
+\endhead
+
+\endfoot
+\bottomrule
+\endlastfoot
+\addlinespace[0.3em]
+\multicolumn{11}{l}{\textbf{Wordbank longitudinal}}\\
+\hspace{1em}Thal et al. (20XX) & English (American) & 653 & 1,947 & 19.1 & 12 & 29 & yes &  &  & \\
+\hspace{1em}Smith et al. (20XX) & English (American) & 314 & 878 & 21.9 & 16 & 30 & yes &  &  & \\
+\hspace{1em}Marchman et al. (20XX) & English (American) & 314 & 714 & 22.6 & 16 & 30 & yes &  &  & \\
+\hspace{1em}Simonsen et al. (2014) & Norwegian & 1,676 & 6,347 & 25.1 & 8 & 36 & yes &  &  & \\
+\hspace{1em}Hagihara et al. (2023) & Japanese & 178 & 425 & 17.4 & 8 & 34 & yes &  &  & \\
+\addlinespace[0.3em]
+\multicolumn{11}{l}{\textbf{Input / processing}}\\
+\hspace{1em}Long et al. (2024) & English (American) & 22 & 103 & 18.6 & 9 & 32 & yes & headcam & 5,739 & \\
+\hspace{1em}Egan-Dailey \& Bergelson (2025) & English (American) & 44 & 514 & 12.2 & 6 & 18 & yes & LENA & 525 & \\
+\hspace{1em}Adams et al. (2018) & English (American) & 67 & 167 & 20.1 & 13 & 27 & yes & LENA & 126 & 440\\
+\hspace{1em}Fernald et al. (2013) & English (American) & 60 & 142 & 23.2 & 18 & 30 & yes & LENA & 51 & 93\\
+\hspace{1em}Fernald \& Marchman (2012) & English (American) & 119 & 393 & 22.9 & 14 & 30 & yes &  &  & 419\\
+\addlinespace[0.3em]
+\multicolumn{11}{l}{\textbf{Wordbank cross-sectional}}\\
+\hspace{1em}Frank et al. (2017) & Arabic (Saudi) & 258 & 258 & 11.9 & 8 & 16 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Cantonese & 1,208 & 1,208 & 23.4 & 16 & 30 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Catalan & 1,436 & 1,436 & 19.7 & 8 & 30 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Croatian & 627 & 627 & 19.0 & 8 & 30 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Czech & 493 & 493 & 23.0 & 16 & 30 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Danish & 6,112 & 6,112 & 20.8 & 8 & 36 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Dutch & 446 & 446 & 15.6 & 8 & 31 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & English (American) & 8,685 & 8,685 & 19.2 & 8 & 30 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & English (Australian) & 1,493 & 1,493 & 20.6 & 12 & 30 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Estonian & 1,235 & 1,235 & 23.3 & 16 & 30 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Finnish & 234 & 234 & 16.5 & 9 & 24 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & French (French) & 1,290 & 1,290 & 21.6 & 8 & 30 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & German & 1,181 & 1,181 & 24.1 & 18 & 30 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Hebrew & 534 & 534 & 27.4 & 11 & 35 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Hungarian & 369 & 369 & 23.1 & 16 & 30 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Italian & 1,400 & 1,400 & 20.4 & 7 & 36 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Japanese & 846 & 846 & 20.4 & 8 & 36 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Kigiriama & 205 & 205 & 16.1 & 8 & 30 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Korean & 2,229 & 2,229 & 22.9 & 8 & 36 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Latvian & 683 & 683 & 22.3 & 8 & 36 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Mandarin (Beijing) & 1,056 & 1,056 & 23.0 & 16 & 30 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Mandarin (Taiwanese) & 2,654 & 2,654 & 22.0 & 8 & 36 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Norwegian & 7,358 & 7,358 & 23.3 & 8 & 36 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Portuguese (European) & 4,322 & 4,322 & 19.7 & 8 & 30 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Russian & 1,803 & 1,803 & 21.4 & 8 & 36 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Slovak & 1,712 & 1,712 & 20.0 & 8 & 36 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Spanish (Argentinian) & 783 & 783 & 23.3 & 16 & 33 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Spanish (European) & 1,005 & 1,005 & 18.4 & 8 & 30 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Spanish (Mexican) & 1,915 & 1,915 & 19.1 & 8 & 30 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Swedish & 1,358 & 1,358 & 19.0 & 8 & 28 &  &  &  & \\
+\hspace{1em}Frank et al. (2017) & Turkish & 3,537 & 3,537 & 21.4 & 8 & 36 &  &  &  & \\*
+
+\end{longtable}
+
+\endgroup{}
+\end{landscape}
+
+\section{AIC and BIC for Longitudinal
+Models}\label{aic-and-bic-for-longitudinal-models}
+
+\begingroup\fontsize{8}{10}\selectfont
+
+\begin{longtable}[t]{llrrrrr}
+
+\caption{\label{tbl-aic}}
+
+\tabularnewline
+
+\toprule
+\multicolumn{2}{c}{ } & \multicolumn{5}{c}{$\Delta$AIC} \\
+\cmidrule(l{3pt}r{3pt}){3-7}
+Model & Age & Thal & Smith & Marchman & Norwegian & Japanese\\
+\midrule
+M1. accumulator & — & 703,220 & 273,732 & 251,211 & 2,281,606 & 94,503\\
+M2. + acceleration & linear & 206,553 & 179,872 & 134,596 & 1,377,615 & 41,169\\
+M2. + acceleration & log & 204,930 & 178,471 & 133,877 & 1,348,013 & 39,054\\
+M3. + efficiency var. & linear & 35,856 & 17,418 & 13,752 & 130,625 & 3,850\\
+M3. + efficiency var. & log & 34,219 & 15,356 & 13,135 & 115,116 & 3,227\\
+\addlinespace
+M4. + acceleration var. & linear & 1,134 & 553 & 0 & 4,301 & 169\\
+M4. + acceleration var. & log & 0 & 0 & 30 & 0 & 0\\
+\bottomrule
+
+\end{longtable}
+
+\endgroup{}
+
+\begingroup\fontsize{8}{10}\selectfont
+
+\begin{longtable}[t]{llrrrrr}
+
+\caption{\label{tbl-bic}}
+
+\tabularnewline
+
+\toprule
+\multicolumn{2}{c}{ } & \multicolumn{5}{c}{$\Delta$BIC} \\
+\cmidrule(l{3pt}r{3pt}){3-7}
+Model & Age & Thal & Smith & Marchman & Norwegian & Japanese\\
+\midrule
+M1. accumulator & — & 703,172 & 273,687 & 251,166 & 2,281,553 & 94,461\\
+M2. + acceleration & linear & 206,517 & 179,838 & 134,563 & 1,377,575 & 41,138\\
+M2. + acceleration & log & 204,895 & 178,437 & 133,843 & 1,347,973 & 39,023\\
+M3. + efficiency var. & linear & 35,832 & 17,396 & 13,729 & 130,599 & 3,829\\
+M3. + efficiency var. & log & 34,195 & 15,333 & 13,113 & 115,089 & 3,206\\
+\addlinespace
+M4. + acceleration var. & linear & 1,134 & 553 & 0 & 4,301 & 169\\
+M4. + acceleration var. & log & 0 & 0 & 30 & 0 & 0\\
+\bottomrule
+
+\end{longtable}
+
+\endgroup{}
+
+\section{Full Cross-Linguistic Model
+Ladder}\label{full-cross-linguistic-model-ladder}
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{standard_model_files/figure-pdf/fig-glmer-ladder-full-1.pdf}
+
+}
+
+\caption{\label{fig-glmer-ladder-full}}
+
+\end{figure}%
+
+\section{Population Input Range
+Estimation}\label{population-input-range-estimation}
+
+\begingroup\fontsize{8}{10}\selectfont
+
+\begin{longtable}[t]{lllrrrrrr}
+
+\caption{\label{tbl-input-rates}}
+
+\tabularnewline
+
+\toprule
+Source & Sample & Channel & n & tok/hr & \$\textbackslash{}pm\$1 SD & tok/mo & \$\textbackslash{}sigma\_r\$ & 1-SD\\
+\midrule
+Hart \textbackslash{}\& Risley & all kids pooled & mother CDS & 42 & 1,148 & 546--2,410 & 419K & 0.74 & 2.10\$\textbackslash{}times\$\\
+Hart \textbackslash{}\& Risley & within-stratum pooled & mother CDS & 42 & 1,148 & 631--2,086 & 419K & 0.60 & 1.82\$\textbackslash{}times\$\\
+Soderstrom \textbackslash{}\& Wittebolle & all kids pooled & all speech & 12 & 967 & 622--1,502 & 353K & 0.44 & 1.55\$\textbackslash{}times\$\\
+Sperry & all kids pooled & adult-to-child & 42 & 1,537 & 901--2,622 & 561K & 0.53 & 1.71\$\textbackslash{}times\$\\
+Sperry & within-stratum pooled & adult-to-child & 42 & 1,537 & 974--2,425 & 561K & 0.46 & 1.58\$\textbackslash{}times\$\\
+\addlinespace
+Weisleder \textbackslash{}\& Fernald & all kids pooled & mother CDS & 29 & 458 & 197--1,065 & 167K & 0.84 & 2.33\$\textbackslash{}times\$\\
+Bergelson 2018 (SEEDLingS, LENA) & US daylong, 6--7 mo & all adult (AWC) & 44 & 1,101 & 767--1,580 & 402K & 0.36 & 1.43\$\textbackslash{}times\$\\
+Casillas 2020 (Tseltal Mayan) & Chiapas daylong & child-directed & 10 & 720 & — & 263K & — & —\\
+Coffey et al. 2024 (plausible envelope) & cross-cultural bounds & CDS to all-input & — & — & 4--7,232 & — & — & —\\
+\bottomrule
+
+\end{longtable}
+
+\endgroup{}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{\#\# Estimating the input{-}rate prior: units and conversions  [draft for promotion — MCF to review]}
+
+\NormalTok{The model represents each child\textquotesingle{}s input as a log rate,}
+\NormalTok{$\textbackslash{}log r\_i \textbackslash{}sim \textbackslash{}mathcal\{N\}(\textbackslash{}mu\_r, \textbackslash{}sigma\_r\^{}2)$, measured in **adult tokens}
+\NormalTok{per waking hour**. @tbl{-}input{-}rates collects published estimates of this}
+\NormalTok{rate, expressed in shared units so they can be compared and so that the}
+\NormalTok{implied between{-}child spread $\textbackslash{}sigma\_r$ is visible on one scale.}
+
+\NormalTok{Conventions used throughout:}
+
+\SpecialStringTok{{-} }\NormalTok{**Tokens/hour to tokens/month.** We multiply by $H = 365$ waking hours}
+\NormalTok{  per month ($12\textbackslash{}text\{ hr/day\} \textbackslash{}times 30.44\textbackslash{}text\{ days/mo\}$), the model\textquotesingle{}s}
+\NormalTok{  constant.}
+\SpecialStringTok{{-} }\NormalTok{**$\textbackslash{}sigma\_r$ is on the log scale** — the SD of $\textbackslash{}log(\textbackslash{}text\{tokens/hr\})$}
+\NormalTok{  across children within a sample. Its exponential $e\^{}\{\textbackslash{}sigma\_r\}$ is the}
+\NormalTok{  multiplicative factor for a one{-}SD shift in input (e.g.}
+\NormalTok{  $\textbackslash{}sigma\_r = 0.53 \textbackslash{}Rightarrow 1.7\textbackslash{}times$), and the 16th–84th percentile}
+\NormalTok{  spread is $e\^{}\{2\textbackslash{}sigma\_r\}$.}
+\SpecialStringTok{{-} }\NormalTok{**Channel.** Studies count different speaker sets; we take the channel}
+\NormalTok{  closest to "tokens reaching the child" — adult{-}to{-}child for Sperry,}
+\NormalTok{  all{-}adult LENA word counts for SEEDLingS, and maternal CDS for Hart \&}
+\NormalTok{  Risley and Weisleder \& Fernald.}
+\SpecialStringTok{{-} }\NormalTok{**Pooled vs. within{-}stratum.** For Hart \& Risley and Sperry we report}
+\NormalTok{  $\textbackslash{}sigma\_r$ both across all children (which mixes in SES and site}
+\NormalTok{  gradients) and within stratum (subtracting each band\textquotesingle{}s mean first); the}
+\NormalTok{  latter is the cleaner within{-}population estimate.}
+\SpecialStringTok{{-} }\NormalTok{**Minutes to tokens.** Where a source reports minutes of speech per hour}
+\NormalTok{  rather than token counts (Casillas; the Coffey bounds), we convert at}
+\NormalTok{  $\textbackslash{}approx 200$ words/min ($0.3$ s/word, the Brent{-}corpus CDS rate used by}
+\NormalTok{  @coffey2024); those rows are accurate to roughly $\textbackslash{}pm 20\textbackslash{}\%$.}
+
+\NormalTok{Rows marked *computed* are recomputed here from per{-}dyad data; *literature*}
+\NormalTok{rows are taken from the curated validation set in }\InformationTok{\textasciigrave{}input\_estimation/\textasciigrave{}}\NormalTok{.}
+\end{Highlighting}
+\end{Shaded}
+
+\section{\texorpdfstring{\(\sigma_r\) Sensitivity
+Analysis}{\textbackslash sigma\_r Sensitivity Analysis}}\label{sigma_r-sensitivity-analysis}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{\#\# Analytic input{-}rate ($\textbackslash{}sigma\_r$) sensitivity  [draft for promotion — MCF to review]}
+
+\NormalTok{The input/efficiency variance split is identified only by the external pin on}
+\NormalTok{the population SD of log input rate, $\textbackslash{}sigma\_r$ — we do not observe input in the}
+\NormalTok{longitudinal data. Because every reported input share therefore rests on a}
+\NormalTok{quantity we assume rather than estimate, we map how the conclusion moves as}
+\NormalTok{$\textbackslash{}sigma\_r$ ranges over its plausible values (panel B of @fig{-}io{-}partition).}
+
+\NormalTok{The data identify the *total* between{-}child intercept variance,}
+\NormalTok{$\textbackslash{}sigma\_\textbackslash{}xi\^{}2 = \textbackslash{}sigma\_\textbackslash{}alpha\^{}2 + \textbackslash{}sigma\_r\^{}2$ (the spread of children\textquotesingle{}s ability}
+\NormalTok{at the reference age $a\_0$), very precisely; the pin only decides how that fixed}
+\NormalTok{total is *split* into an efficiency part $\textbackslash{}sigma\_\textbackslash{}alpha\^{}2$ and an input part}
+\NormalTok{$\textbackslash{}sigma\_r\^{}2$. Holding $\textbackslash{}sigma\_\textbackslash{}xi\^{}2$ at its fitted value, the input share is then}
+\NormalTok{a closed form,}
+
+\NormalTok{$$1{-}\textbackslash{}pi\_\textbackslash{}alpha(\textbackslash{}sigma\_r) = \textbackslash{}frac\{\textbackslash{}sigma\_r\^{}2\}\{\textbackslash{}sigma\_\textbackslash{}xi\^{}2\},$$}
+
+\NormalTok{which we evaluate across the plausible $\textbackslash{}sigma\_r$ range *without refitting* — the}
+\NormalTok{analytic sensitivity curve.}
+
+\NormalTok{This is first{-}order: it treats $\textbackslash{}sigma\_\textbackslash{}xi\^{}2$ as itself invariant to the pin.}
+\NormalTok{Refits at off{-}pin values reveal a small second{-}order feedback — pinning a larger}
+\NormalTok{$\textbackslash{}sigma\_r$ slightly *shrinks* the estimated total variance (for English,}
+\NormalTok{$\textbackslash{}sigma\_\textbackslash{}xi\^{}2$ falls from 3.57 at $\textbackslash{}sigma\_r=0.53$ to 3.22 at $\textbackslash{}sigma\_r=0.80$). The}
+\NormalTok{analytic curve therefore slightly *understates* the input share at large}
+\NormalTok{$\textbackslash{}sigma\_r$ (≈18\% analytic vs. ≈20\% by refit at $\textbackslash{}sigma\_r=0.80$), an error of about}
+\NormalTok{two points of $\textbackslash{}pi\_\textbackslash{}alpha$ in the conservative direction for the size of the}
+\NormalTok{input effect. The open points in panel B are these refit anchors; the gap}
+\NormalTok{between point and curve is the second{-}order term.}
+
+\NormalTok{We use the analytic curve, anchored by the few refits we have, rather than a}
+\NormalTok{dense refit sweep: the qualitative conclusion — input accounts for a modest share}
+\NormalTok{even at the top of the plausible $\textbackslash{}sigma\_r$ range — is unaffected by the}
+\NormalTok{\textasciitilde{}2{-}point correction, whereas a full sweep of the Norwegian model alone would cost}
+\NormalTok{roughly half a day of compute per pin value.}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{\#\# Comparing children and language models on one slope axis  [draft for promotion — MCF to review]}
+
+\NormalTok{The comparison to language models in Figure 6 places children and models}
+\NormalTok{on a single, literally shared axis: the slope of the acquisition sigmoid}
+\NormalTok{in log{-}experience. Both populations have sigmoidal per{-}word acquisition}
+\NormalTok{curves, and the slope of that sigmoid is directly comparable.}
+
+\NormalTok{On the child side, our linear predictor makes this slope exact.}
+\NormalTok{Differentiating $\textbackslash{}eta\_\{ij\}(t)$ with respect to $\textbackslash{}log t$ gives $\textbackslash{}kappa\_i$:}
+\NormalTok{the logit{-}probability that a child produces a word rises linearly in}
+\NormalTok{log{-}age with slope equal to that child\textquotesingle{}s scaling exponent. The per{-}child}
+\NormalTok{sigmoid slope *is* $\textbackslash{}kappa\_i$, by construction.}
+
+\NormalTok{On the model side, @chang2022 fit a four{-}parameter logistic to each}
+\NormalTok{(model, word) pair, describing how the model\textquotesingle{}s surprisal for a word falls}
+\NormalTok{over training. Re{-}expressed as the fraction of a word\textquotesingle{}s surprisal}
+\NormalTok{reduction achieved so far, their fit is a sigmoid in}
+\NormalTok{$\textbackslash{}log\_\{10\}(\textbackslash{}text\{training steps\})$ with slope $1/\textbackslash{}text\{scale\}\_w$.}
+\NormalTok{Dividing by $\textbackslash{}ln 10$ converts this to natural{-}log units — the same units}
+\NormalTok{as $\textbackslash{}kappa\_i$ — so the two slopes can be read off the same axis.}
+
+\NormalTok{The result is a striking separation (Figure 6). Language models cluster}
+\NormalTok{near a slope of one — the unit{-}accumulator boundary, where each log{-}unit}
+\NormalTok{of additional experience yields a fixed increment of learning. Children}
+\NormalTok{sit in a broad distribution roughly an order of magnitude higher. On the}
+\NormalTok{shared axis, children\textquotesingle{}s word learning accelerates with experience in a way}
+\NormalTok{that these models\textquotesingle{} does not.}
+
+\NormalTok{Three caveats bound this comparison. First, the variability is asymmetric:}
+\NormalTok{children\textquotesingle{}s slopes vary across *children*, whereas a single model is a}
+\NormalTok{deterministic learner, so model slopes vary across *words* within a run}
+\NormalTok{rather than across replicate learners. Second, the steep child slope is}
+\NormalTok{the *per{-}child* quantity; a researcher fitting a single sigmoid to}
+\NormalTok{cross{-}sectional Wordbank data per word would recover a shallower slope,}
+\NormalTok{because marginalizing over the population attenuates it. Third, the models}
+\NormalTok{in @chang2022 were trained on adult written text rather than}
+\NormalTok{child{-}directed speech, so part of the gap could reflect the input}
+\NormalTok{distribution rather than the learner. Models trained directly on CHILDES}
+\NormalTok{(Feng et al., forthcoming) provide the matched{-}input test: if the gap}
+\NormalTok{largely persists, it is structural; if it shrinks substantially, the input}
+\NormalTok{distribution is doing more of the work than we currently attribute to it.}
+
+\CommentTok{\textless{}!{-}{-} [BIB NEEDED] Feng et al. (CHILDES{-}trained GPT) — no verified entry yet;}
+\CommentTok{     named in text only. Daunizeau (2017) logistic{-}Gaussian approximation is}
+\CommentTok{     used in the derivation note but not needed for this prose. {-}{-}\textgreater{}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{\#\# Connection to neural scaling laws  [draft for promotion — MCF to review; most speculative of the three]}
+
+\NormalTok{The per{-}word picture above connects to a more familiar aggregate}
+\NormalTok{phenomenon: neural scaling laws. A model\textquotesingle{}s loss falls as a smooth power}
+\NormalTok{law in the amount of training data, and this descent is remarkably}
+\NormalTok{regular — different runs, and different model sizes, trace nearly the same}
+\NormalTok{curve (Kaplan et al., 2020; Hoffmann et al., 2022). Our per{-}word analysis}
+\NormalTok{is the micro{-}level counterpart of that regularity. Each word is acquired}
+\NormalTok{along a sigmoid whose slope sits near the unit{-}accumulator value, and the}
+\NormalTok{spread of those slopes — across words and across runs — is small. The}
+\NormalTok{aggregate smoothness of scaling laws and the per{-}word $\textbackslash{}kappa \textbackslash{}approx 1$}
+\NormalTok{we recover are two views of the same property: language models convert}
+\NormalTok{experience into knowledge as near{-}pure accumulators, with little}
+\NormalTok{instance{-}to{-}instance variation.}
+
+\NormalTok{Children depart from this picture on both axes at once. Their per{-}instance}
+\NormalTok{scaling is far steeper ($\textbackslash{}kappa \textbackslash{}approx 10$), and they vary substantially}
+\NormalTok{from one another in that exponent ($\textbackslash{}sigma\_\textbackslash{}kappa$ well above zero). The}
+\NormalTok{"data gap" between children and language models }\CommentTok{[}\OtherTok{@frank2023; @warstadt2023}\CommentTok{]}
+\NormalTok{is therefore not only that children reach adult competence from orders of}
+\NormalTok{magnitude less input. It is that children convert experience into knowledge}
+\NormalTok{through a different scaling relationship — steeper, and far more variable}
+\NormalTok{across individuals — than the one that scaling laws describe for models.}
+
+\NormalTok{This connection is analogical rather than formal: scaling laws characterize}
+\NormalTok{aggregate loss, whereas our $\textbackslash{}kappa$ characterizes per{-}item acquisition,}
+\NormalTok{and the two need not move together. We offer it as a framing for why the}
+\NormalTok{data gap may be harder to close than raw data counts suggest.}
+
+\CommentTok{\textless{}!{-}{-} [BIB NEEDED] Kaplan et al. (2020) and Hoffmann et al. (2022) are named}
+\CommentTok{     in text but have NO verified bib entries yet — do not promote with live}
+\CommentTok{     @ markers until added. {-}{-}\textgreater{}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{standard_model_files/figure-pdf/fig-schematic-theta-1.pdf}
+
+}
+
+\caption{\label{fig-schematic-theta}}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{standard_model_files/figure-pdf/fig-proc-splits-1.pdf}
+
+}
+
+\caption{\label{fig-proc-splits}}
+
+\end{figure}%
+
+\begingroup\fontsize{9}{11}\selectfont
+
+\begin{longtable}[t]{lrrr}
+
+\caption{\label{tbl-blup-dip}}
+
+\tabularnewline
+
+\toprule
+Dataset & N & Efficiency (\$\textbackslash{}xi\$) & Acceleration (\$\textbackslash{}zeta\$)\\
+\midrule
+English (Thal) & 651 & 0.96 & >0.99\\
+English (Smith) & 312 & 0.30 & 0.99\\
+English (Marchman) & 313 & 0.99 & 0.99\\
+Norwegian & 1667 & >0.99 & 0.86\\
+Japanese & 176 & 0.85 & 0.99\\
+\addlinespace
+Pooled & 3119 & 0.98 & 0.96\\
+\bottomrule
+
+\end{longtable}
+
+\endgroup{}
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{standard_model_files/figure-pdf/fig-blup-hist-1.pdf}
+
+}
+
+\caption{\label{fig-blup-hist}}
+
+\end{figure}%
 
 
 

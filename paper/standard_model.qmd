@@ -213,13 +213,17 @@ We compare this model to an *accelerating accumulator* model (Model 2), in which
 $$\text{M2: }\theta_i(t)  = \log(r_i) + \kappa ~ \log(t/a_0)$$
 \noindent When $\kappa>1$, each successive month yields more accumulation than the last.
 
-Neither of these models has any way to capture variation across children beyond variation in input rate. Thus, we augment the basic accelerating accumulator, rewriting it as the sum of either one or two individually variable quantities:
+Neither of these models has any way to capture variation across children beyond variation in input rate. Thus, we augment the basic accelerating accumulator, rewriting it as the sum of an individually variable efficiency term:
 
 $$\text{M3: }\theta_i(t) = \xi_i + \kappa ~ \log(t/a_0)$$
 
+The intercept term $\xi_i = \log(r_i) + \log(\alpha_i)$ can then be used to break down individual variation into both input rate-related and other variation in children's efficiency.
+
+Our final model includes individually variable efficiency and acceleration terms:
+
 $$\text{M4: }\theta_i(t) = \xi_i + \kappa_i ~ \log(t/a_0)$$
 
-The intercept term in both models $\xi_i = \log(r_i) + \log(\alpha_i)$ can then decompose individual variation into both input rate-related and other variation in children's efficiency. Similarly, in M4, the slope term $\kappa_i = \kappa + \gamma \log r_i + \zeta_i$ adds *individual variation in acceleration*, decomposing acceleration into a population term, input-related acceleration, and a child‑specific residual acceleration $\zeta_i$ (the part not explained by input). The coefficient $\gamma$ then captures the strength of the relationship between input and acceleration. 
+In this model, the slope term $\kappa_i = \kappa + \gamma \log r_i + \zeta_i$ adds *individual variation in acceleration*, decomposing acceleration into a population term, input-related acceleration, and a child‑specific residual acceleration $\zeta_i$ (the part not explained by input). The coefficient $\gamma$ then captures the strength of the relationship between input and acceleration. 
 
 Model 4 instantiates the idea that children vary in their base rate of efficiency and their acceleration, creating variant of a standard longitudinal growth model in which children vary on their slope and intercept [@grimm2016]. Note that, while we define the relationship of $\xi_i$ and $\kappa_i$ to a child's input $r_i$, we can nevertheless fit the simplest form of the model by just allowing these parameters to vary as random child-level slopes and intercepts. 
 
@@ -285,7 +289,7 @@ Estimating children's input range is notoriously tricky, since the rate of langu
 @fig-io-partition shows the results of this analysis for both English and Norwegian longitudinal data (combined N=`r io_part$n_total`). $\pi_\alpha$ was `r sprintf("%.3f", io_part$en_pi)` (CI: `r sprintf("[%.3f, %.3f]", io_part$en_lo, io_part$en_hi)`) for English and `r sprintf("%.3f", io_part$no_pi)` (CI: `r sprintf("[%.3f, %.3f]", io_part$no_lo, io_part$no_hi)`) for Norwegian, both largely consistent with the previous meta-analyses. Sensitivity analysis showed that only implausibly large input variation would produce substantially higher values. 
 
 
-## Observed input predicts both efficiency and acceleration
+## Input predicts both efficiency and acceleration, while processing speed relates only to efficiency
 
 
 ```{r fig-io-partition, fig.width=11, fig.height=8}
@@ -367,18 +371,15 @@ bot <- (pPart | pSens)
 top / bot + plot_layout(heights = c(1, 1.05))
 ```
 
-While the population estimates of input-sensitivity given above match our expectations from meta-analyses, they do not offer a direct estimate of input couplings within individual children, and they do not allow us to estimate the separate contributions of language input to efficiency and acceleration. For this, we turn to a set of four longitudinal datasets that include dense home recordings. Three include day-long audio recordings using LENA (Language Environment Analysis) recorders, which offer an automated adult word count estimate that has been validated by transcription studies [@cristia2021]. The last includes short video recordings of egocentric video recorded in children's homes, with word counts estimated from automated transcripts [@long2024]. Each of these metrics provides a noisy proxy for total home input, but nevertheless allows us to estimate models that include individual input.
-We thus fit the same model linking input estimates to variation in efficiency and acceleration, but this time with observations of $r_i$ for each child, allowing us to fit the full version of Model 4 described above, in which language input could contribute to both efficiency and acceleration. @fig-io-partition (panel C) shows a small separation of trajectories by input quartile, but the key question of interest is how this variation partitions across efficiency and acceleration.
+While the population estimates of input-sensitivity given above match our expectations from meta-analyses, they do not offer a direct estimate of input couplings within individual children, and they do not allow us to estimate the separate contributions of language input and language processing to efficiency and acceleration. 
 
-Results for $\pi_alpha$ and $\pi_zeta$ are shown in @fig-io-partition. Overall, we observe small but highly reliable effects of language input on both efficiency and acceleration. These effects are also in the range of the meta-analyses, but they suggest that input-related differences -- though small -- could compound through their effect on acceleration. 
+For this, we turn to a set of five longitudinal datasets that include either dense home recordings, longitudinal LWL processing data, or both. Three include recordings from day-long audio recordings using LENA (Language Environment Analysis) recorders, which offer an automated adult word count estimate that has been validated by transcription studies [@cristia2021]. One includes short video recordings of egocentric video recorded in children's homes, with word counts estimated from automated transcripts [@long2024]. Each of these metrics provides a noisy proxy for total home input, but nevertheless allows us to estimate models that include individual input. And four of the five include multiple LWL sessions per individual.
 
-## Processing speed is strongly associated with efficiency 
+We thus fit the same model linking input estimates to variation in efficiency and acceleration, but this time with observations of $r_i$,  for each child, allowing us to fit the full version of Model 4 described above, in which language input could contribute to both efficiency and acceleration. We additionally a
 
-Two of the datasets we included also include longitudinal reaction time data from the looking-while-listening paradigm (LWL), archived in the Peekbank repository [@zettersten2023].
+@fig-io-partition (panel C) shows a small separation of trajectories by input quartile, but the key question of interest is how this variation partitions across efficiency and acceleration.
 
-We fit a modification of our model to this subset of the data (N=XYZ). Efficiency and acceleration terms included *both* input and LWL reaction time as predictors. 
-
-
+Results for $\pi_\alpha$ and $\pi_\zeta$ are shown in @fig-io-partition. Overall, we observe small but highly reliable effects of language input on both efficiency and acceleration. These effects are also in the range of the meta-analyses, but they suggest that input-related differences -- though small -- could compound through their effect on acceleration. 
 
 ## Growth in ability leads to rapid changes in learning times for individual words
 
@@ -533,15 +534,26 @@ Inference
 
 We trained XYZ
 
+# Acknowledgements
+
+Some of the computing for this project was performed on the Sherlock and Marlowe clusters. We would like to thank Stanford University and Stanford Research Computing for providing computational resources and support that contributed to these research results. Funds for computational experiments were also provided by a gift from Meta to support research on children's home language environment. Claude Code was used for literature review, code generation, visualization, and simulation infrastructure. 
+
 # References
 
-:::{.acknowledgement}
-Claude Code was used for literature review, code generation, visualization, and simulation infrastructure. All writing is original to the author. 
+::: {#refs}
 :::
+
 
 <!-- :::{.suppinfo} -->
 
 
 <!-- ::: -->
 
-{{< supplemental.qmd >}}
+```{=latex}
+\newpage
+\begin{center}
+{\LARGE\bfseries Supplemental Information}
+\end{center}
+```
+
+{{< include supplemental.qmd >}}
