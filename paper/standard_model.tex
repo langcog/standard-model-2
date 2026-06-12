@@ -254,20 +254,20 @@ accumulation of evidence over time. Here we show that the process is
 best characterized as \emph{accelerating} accumulation, with children
 varying in both their overall learning efficiency (intercept) and their
 acceleration rate (slope). This model provides a lever for understanding
-different loci of variation. Applied to data from 24 languages, it
-suggests that the female advantage in early vocabulary results from
-differences in overall learning efficiency, while socioeconomic
-differences may compound through effects on acceleration rate. Using
-dense observations of children's early language environment and word
-recognition speed, the model also suggests that differences in
-processing speed load on efficiency and do not compound, while
-differences in home language show some compounding effects on
-acceleration. In contrast to children, large language models -- even
-those trained on child-directed speech -- are not well-described by this
-model: they show standard accumulator dynamics with no acceleration and
-very limited variability. In sum, our model provides a quantitative
-characterization of key signatures of early vocabulary growth, providing
-a target for future mechanistic learning models.
+different loci of variation. Applied to cross-linguistic data, it
+suggests that the female advantage in early vocabulary results primarily
+from differences in overall learning efficiency, while socioeconomic
+differences appear in both terms and may compound through effects on
+acceleration rate. Using dense observations of children's early language
+environment, the model shows compounding effects on acceleration. In
+contrast, the effects of processing speed load primarily on efficiency
+and do not appear to compound. In contrast to children, large language
+models -- even those trained on child-directed speech -- are not
+well-described by this model: they show standard accumulator dynamics
+with no acceleration and very limited variability. In sum, our model
+provides a quantitative characterization of key signatures of early
+vocabulary growth, providing a target for future mechanistic learning
+models.
 \end{abstract}
 
 
@@ -299,20 +299,26 @@ concreteness and syntactic category (Hidaka 2013; Kachergis, Marchman,
 and Frank 2022). They also provide a graded explanation for the
 widely-observed ``vocabulary spurt'' phenomenon -- in which children's
 rate of vocabulary learning appears to increase dramatically (Frank et
-al. 2021; Ganger and Brent 2004; Gómez Díaz et al. 2024).
+al. 2021; Ganger and Brent 2004; Gómez Díaz et al. 2024). While there
+are many other computational models of early word learning, in practice
+they have ben more difficult to connect quantitatively with large-scale
+patterns of vocabulary growth (Frank, Goodman, and Tenenbaum 2009;
+McMurray, Horst, and Samuelson 2012; \textbf{trueswell2014?}; Kachergis,
+Yu, and Shiffrin 2012; Jones and Rowland 2017).
 
-The accumulator view connects with a viewpoint in which the quantity of
-language that children hear plays a strong causal role in the speed of
-their learning (Fernald and Marchman 2012). Indeed, there is systematic
-evidence that variation in children's input -- both its \emph{quantity}
-and its \emph{quality} -- is related to variation in vocabulary (Hart
-and Risley 1995; Fernald and Marchman 2012; Weisleder and Fernald 2013;
-Anderson et al. 2021; Rowe 2012; Hirsh-Pasek et al. 2015; Coffey and
-Snedeker 2026). While input quantity is relatively easy to measure,
-measuring what makes input high quality has been challenging. One
-influential framework suggests that high quality input is
-interactionally rich, linguistically appropriate for the level of the
-child, and conceptually complex (Rowe and Snow 2020).
+The accumulator view has been especially influential because it connects
+with a viewpoint in which the quantity of language that children hear
+plays a strong causal role in the speed of their learning (Fernald and
+Marchman 2012). Indeed, there is systematic evidence that variation in
+children's input -- both its \emph{quantity} and its \emph{quality} --
+is related to variation in vocabulary (Hart and Risley 1995; Fernald and
+Marchman 2012; Weisleder and Fernald 2013; Anderson et al. 2021; Rowe
+2012; Hirsh-Pasek et al. 2015; Coffey and Snedeker 2026). While input
+quantity is relatively easy to measure, measuring what makes input high
+quality has been challenging. One influential framework suggests that
+high quality input is interactionally rich, linguistically appropriate
+for the level of the child, and conceptually complex (Rowe and Snow
+2020).
 
 A naïve interpretation of the accumulator view would suggest that
 substantial variance in vocabulary growth should be related to input --
@@ -370,7 +376,7 @@ differ is in what this growth means for the underlying learning process.
 Following previous work, we start with the idea that children's
 \emph{internal learning ability} (not just their observed supra-linear
 vocabulary growth) accelerates across development (Hidaka 2013; Mayor
-and Plunkett 2010). We tehn extend a prior psychometric accumulator
+and Plunkett 2010). We then extend a prior psychometric accumulator
 model (Kachergis, Marchman, and Frank 2022): our key addition is to
 describe variation between individual children by modeling both their
 individual learning efficiency and the acceleration of their learning --
@@ -893,6 +899,12 @@ quality, they are still challenging to compute at scale from audio and
 video recordings. Extracting these and connecting them to growth over
 time is an exciting prospect for future work.
 
+Finally, our study is a computational analysis of observational data; it
+provides at best hypotheses about causal structure. Our hope is that by
+providing signatures of longitudinal variation, we can inspire further
+work using both dense measurement and intervntion that can gain causal
+traction on the mechanisms of vocabulary growth.
+
 Two often, psychology and cognitive science focus either only on
 universal mechanisms or variability between individuals. Word learning
 is a unique case study in cognitive science because it describes a basic
@@ -1249,6 +1261,12 @@ Huebner, Philip A., Elior Sulem, Cynthia Fisher, and Dan Roth. 2021.
 Language.''} In \emph{Proceedings of the 25th Conference on
 Computational Natural Language Learning (CoNLL)}, 624--46.
 \url{https://doi.org/10.18653/v1/2021.conll-1.49}.
+
+\bibitem[\citeproctext]{ref-jones2017}
+Jones, Gary, and Caroline F Rowland. 2017. {``Diversity Not Quantity in
+Caregiver Speech: Using Computational Modeling to Isolate the Effects of
+the Quantity and the Diversity of the Input on Vocabulary Growth.''}
+\emph{Cognitive Psychology} 98: 1--21.
 
 \bibitem[\citeproctext]{ref-kachergis2022b}
 Kachergis, George, Virginia A Marchman, Philip S Dale, Jessica
@@ -1701,6 +1719,58 @@ Ladder}\label{full-cross-linguistic-model-ladder}
 
 \end{figure}%
 
+\section{Generating the Model-Ladder Quantile
+Fans}\label{generating-the-model-ladder-quantile-fans}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{\#\# How the model{-}ladder quantile bands are generated  [draft for promotion — MCF to review]}
+
+\NormalTok{The percentile bands ("fans") overlaid on the empirical trajectories in the}
+\NormalTok{model{-}ladder figures are not closed{-}form quantiles of a fitted distribution. For}
+\NormalTok{each (dataset, model) fit we generate them by Monte{-}Carlo simulation: we build a}
+\NormalTok{synthetic population of children and read off vocabulary percentiles at each age.}
+
+\NormalTok{**Bootstrapping children from the fitted random effects.** For the models with a}
+\NormalTok{per{-}child random effect (the C and D variants in both age bases) we draw}
+\NormalTok{$N = 500$ synthetic children by resampling *with replacement* from the fit\textquotesingle{}s}
+\NormalTok{per{-}child BLUPs — the shrunken empirical{-}Bayes estimates of each observed child\textquotesingle{}s}
+\NormalTok{random intercept and, for the D models, random slope. The resampling uses a fixed}
+\NormalTok{seed, so the bands are reproducible. The models with no per{-}child random effect}
+\NormalTok{(the Rasch{-}style model A and the population{-}slope B models) have no child}
+\NormalTok{distribution to resample and so collapse to a single median curve rather than a}
+\NormalTok{fan.}
+
+\NormalTok{We bootstrap the realised BLUPs rather than sampling parametrically from}
+\NormalTok{$\textbackslash{}mathcal\{N\}(0, \textbackslash{}hat\textbackslash{}Sigma)$. The two agree in expectation, but parametric}
+\NormalTok{sampling assumes the *unshrunken* population covariance and routinely generates}
+\NormalTok{extreme intercept–slope pairs that no real child exhibited; at ages where the}
+\NormalTok{data are thin this inflates the upper percentiles. Resampling the BLUPs keeps the}
+\NormalTok{simulated population conditional on the children we actually observed.}
+
+\NormalTok{**Each child\textquotesingle{}s expected vocabulary curve.** Ages run on a per{-}dataset integer}
+\NormalTok{grid spanning the 5th–95th percentile of that dataset\textquotesingle{}s observed ages, so the}
+\NormalTok{bands are never extrapolated beyond the data window. For a bootstrapped child $i$}
+\NormalTok{with random intercept $u\^{}\{0\}\_i$ and slope $u\^{}\{1\}\_i$, the linear predictor for item}
+\NormalTok{$j$ at age $t$ is}
+\NormalTok{$$\textbackslash{}eta\_\{ij\}(t) = \textbackslash{}beta\_0 + (\textbackslash{}beta\_\{\textbackslash{}text\{age\}\} + u\^{}\{1\}\_i)\textbackslash{}, g(t) + u\^{}\{0\}\_i + b\_j,$$}
+\NormalTok{where $\textbackslash{}beta\_0$ and $\textbackslash{}beta\_\{\textbackslash{}text\{age\}\}$ are the fixed effects, $b\_j$ is item $j$\textquotesingle{}s}
+\NormalTok{fitted random effect, and $g(t) = \textbackslash{}log(t / a\_0)$ for the log{-}age models (and for}
+\NormalTok{model A, whose offset pins $\textbackslash{}beta\_\{\textbackslash{}text\{age\}\} \textbackslash{}equiv 1$) or $g(t) = t {-} a\_0$ for}
+\NormalTok{the linear{-}age models. The child\textquotesingle{}s expected productive vocabulary is the sum of}
+\NormalTok{per{-}item production probabilities over the dataset\textquotesingle{}s $J$ items,}
+\NormalTok{$$V\_i(t) = \textbackslash{}sum\_\{j=1\}\^{}\{J\} \textbackslash{}operatorname\{logit\}\^{}\{{-}1\}}\SpecialCharTok{\textbackslash{}!}\NormalTok{\textbackslash{}big(\textbackslash{}eta\_\{ij\}(t)\textbackslash{}big),$$}
+\NormalTok{clamped to $}\CommentTok{[}\OtherTok{0, J}\CommentTok{]}\NormalTok{$. Item random effects are held at their fitted values — only}
+\NormalTok{children are resampled — and $V\_i(t)$ is an *expected* count, so each simulated}
+\NormalTok{child\textquotesingle{}s curve is smooth and the width of the fan reflects between{-}child variation}
+\NormalTok{alone.}
+
+\NormalTok{**Quantiles.** At each (dataset, model, age) the plotted bands are the 10th,}
+\NormalTok{25th, 50th, 75th, and 90th percentiles of $}\SpecialCharTok{\textbackslash{}\{}\NormalTok{V\_i(t)}\SpecialCharTok{\textbackslash{}\}}\NormalTok{\_\{i=1\}\^{}\{500\}$. The simulation}
+\NormalTok{is implemented in }\InformationTok{\textasciigrave{}studies/glmer\_ladder/04a\_simulate.R\textasciigrave{}}\NormalTok{.}
+\end{Highlighting}
+\end{Shaded}
+
 \section{Population Input Range
 Estimation}\label{population-input-range-estimation}
 
@@ -1923,6 +1993,18 @@ LMs}\label{computing-acceleration-in-lms}
 }
 
 \caption{\label{fig-proc-splits}}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{standard_model_files/figure-pdf/fig-io-fans-1.pdf}
+
+}
+
+\caption{\label{fig-io-fans}}
 
 \end{figure}%
 
