@@ -25,10 +25,11 @@ per-claim provenance in [`/studies/README.md`](../studies/README.md).
 | analysis | datasets | input | where | status |
 |---|---|---|---|---|
 | **glmer ladder** (Fig 2, Table 2) | 10 units incl. by-study English (thal/smith/marchman) + NO + JP | — | Sherlock | done (by-study fits 2026-06-07) |
-| **io-imputed D** (`long_no_freq_slopes[_norwegian]`) | EN, NO longitudinal | imputed (σ_r pinned) | local | done, KEEP (intercept share π_α; rhat≈1.09 on σ_α). NO refit collected 2026-06-11 (entry 34): π_α 0.961, input share 3.9% |
+| **io-imputed D** (`long_no_freq_slopes[_norwegian]`) | EN, NO longitudinal | imputed (σ_r pinned) | local | done; σ_r re-anchored to apples-to-apples **0.44** (entry 36): input share EN 5%, NO 2.6%; validated by GCP pins @0.44/0.58 (all on the analytic curve). Fig 3 panel A |
 | ~~**io-imputed D′**~~ DROPPED 2026-06-09 | EN, NO | — | — | confounded slope (entry 32); GCP stopped |
 | **io-pooled** (`io_pooled_widedelta` + γ) | 4: AM2018, BabyView, FMW2013, SEEDLingS | observed (LENA/head-cam) | local | done (refit 2026-06-02); intercept share ~2.8%; slope γ + |
-| **proc D′0–D′3** (`proc_dp`, Fig 3E) | 3: AM2018, FM2012, FMW2013 | observed (AM2018,FMW2013) + imputed (FM2012) | Sherlock | done (entry 33); selected D′1, processing→efficiency |
+| **proc D′0–D′3** (`proc_dp`) | 3: AM2018, FM2012, FMW2013 | observed (AM2018,FMW2013) + imputed (FM2012) | Sherlock | done (entry 33); superseded for Fig 3 by the joint model below |
+| **joint io+proc** (`joint_io_proc`, Fig 3B) | 5: + BabyView, SEEDLingS (input-only) | observed input + LWL RT | Sherlock | done (entry 37); **D′3** (all channels free): ξ input 6.5% / proc 3.1%; κ both small+uncertain |
 | **cross-sectional demographics** (Fig demog.) | 31 Wordbank languages | — | local | done; uncapped refit landed 2026-06-11 (entry 31): true archive Ns, CIs tighter, signs unchanged |
 | **LLM** (Fig 5) | GPT-2 / CHILDES | — | Sherlock/Marlowe | see [`experiments_llm.md`](experiments_llm.md) |
 
@@ -2060,6 +2061,143 @@ the stale-psi 736-vs-673 concern from the handoff does **not** apply here.
 `.draws.rds.may23bak` (stale backup). Feeds the io-partition section (paper §"Population
 input-related variation") and Fig 3 panel-E NO point (entry 35-adjacent: orphaned commit
 `ee03396` on branch `fig3-channel-partition`).
+
+---
+
+## 🟢 36. σ_r apples-to-apples anchoring + GCP validation pins (2026-06-11/12)
+
+**Problem.** Fig 3 panel E juxtaposed two different inferences on one axis — the
+σ_r-anchored **imputed** EN/NO population estimates (which looked *falsely
+precise*: they pin σ_r and propagate only the tiny large-N σ_α uncertainty, so the
+EN/NO gap is just the σ_α² ratio) and the noisy **observed** io/proc points. And
+the σ_r pin itself (0.53, Sperry) was the **child-directed-speech channel pooled
+across sites** — the wrong analogue.
+
+**Apples-to-apples σ_r.** Rebuilt the σ_r evidence to be channel- and
+sample-matched (MCF's push):
+- **all-adult / AWC channel** (matches the LENA/headcam counts the io model uses),
+  not CDS — Sperry's all-adult pooled is 0.43, not the 0.53 CDS value;
+- **one σ_r per sample**, not a Sperry-dominated resample of 17 site×channel rows
+  (those are within-site SDs from n=3–15 kids, not comparable to a whole-study SD);
+- **US/Western English analogue only**, excluding Weisleder (Latino low-SES
+  *Spanish*) and Hart & Risley KC (the questioned outlier — also the cross-SES
+  extremes that drove a runaway right tail).
+Two independent routes converge: **our own io per-child data** (within-study σ_r =
+**0.442**; per-sample AM2018 .45 / BabyView .36 / FMW2013 .37 / SEEDLingS .58) and
+**channel-matched literature** (median 0.43). → **σ_r ≈ 0.44, range [0.36, 0.58]**,
+vs the old 0.53. Marginalized input-efficiency share at 0.44: EN ≈ 5%, NO ≈ 2.5%.
+Lesson: the input share is `σ_r²/σ_xi²` *arithmetic* (σ_r pinned, σ_xi data-fixed),
+so even the "observed io" share rides on the σ_r pin — only the SHAPE (who is
+high/low input) is data-driven, not the SCALE.
+
+**Validation pins (GCP).** Worried the analytic σ_r-sensitivity curve assumed σ_xi²
+invariant to the pin (the one pre-dedup anchor at σ_r=0.80 drifted +2.6 pt). Refit
+EN + NO at σ_r ∈ {0.44, 0.58} on the dedup bundles (`STAN_SIGMA_R_OVERRIDE`).
+**All four land on the analytic curve:**
+
+| | σ_r=0.44 | σ_r=0.58 |
+|---|---|---|
+| EN | 5.25% (analytic 5.24) | 9.04% (9.11) |
+| NO | 2.62% (2.63) | 4.60% (4.58) |
+
+σ_ξ² drift < 1% in-range → the analytic σ_r²/σ_xi² relation is empirically
+confirmed for both languages; no refit campaign needed beyond these pins. NO mixing
+is the usual rhat ≈ 1.15–1.19 (point estimates stable).
+
+**Compute lessons (cost real time).**
+- **NO fits (N=4.37M) OOM in `fit_longitudinal.R`'s post-sampling step** (>128 GB) —
+  chains finish, then the in-memory summary/diagnostics step is killed, leaving the
+  CSVs orphaned and no `.summary.rds`. Recover offline with
+  `sherlock/recover_from_csvs.R` (streams scalar cols with `cut`, low-mem) — but
+  give it **no timeout** (a 1200 s cap died mid-scan of the 209 GB; the full pass
+  is ~30–40 min). EN (N=2.23M) fits under the RAM ceiling.
+- **`cluster/gcp/run_fit_noloo.sh`** (new): fit + recover-from-CSVs, NO LOO
+  extraction (`extract_loo_thinned`'s `as_cmdstan_fit` OOMs on big CSVs). EN pins
+  used it; the LOO step isn't needed for the variance decomposition.
+- **Threading**: `run_fit.sh` defaults to **8** threads/chain (4×8=32 = half the 64
+  cores); pass `STAN_THREADS_PER_CHAIN=16`.
+- **cmdstan on sm2-fit-01**: `.bashrc` exports `CMDSTAN=/opt/cmdstan/cmdstan-2.36.0`
+  which **doesn't exist** (only 2.38.0/2.39.0 installed) — a *bad* CMDSTAN path
+  breaks cmdstanr. Export 2.38.0 explicitly in detached launches (non-login
+  `bash -c` doesn't source `.bashrc` anyway).
+- **Disk**: each NO fit writes ~209 GB of log_lik CSV; resize `sm2-fit-02` to
+  500 GB and reclaim a finished fit's CSVs (after recover) before the next pin.
+- **`pkill -f`** a fit process drops the SSH session (exit 255) when it walks the
+  session's tree — harmless, the kill runs; reconnect to verify + relaunch.
+
+**Artifacts.** `fits/summaries/long_no_freq_slopes[_norwegian]_sigmaR_0p{44,58}.summary.rds`.
+Both GCP nodes stopped after.
+
+---
+
+## 🟢 37. Joint input + processing model (`joint_io_proc`) + Fig 3 two-panel revision (2026-06-12)
+
+**Goal.** Replace Fig 3's two *separate, noisy* observed points (io input on 4
+datasets; proc RT on 3) with **one joint model** fit on **all** candidate datasets —
+for a maximal-precision partition AND the input-vs-processing **separation** (does
+input act on efficiency *directly* or *via* processing? — the Weisleder
+"rich-get-richer" question the separate models can't answer because input and
+processing are correlated).
+
+**Bundle** (`model/scripts/prepare_joint_io_proc_bundle.R` → `joint_io_proc_subset_data.rds`).
+The `proc_dp` Stan model already supports **ragged channels** (`lwl_to_child`,
+`rec_to_child`), so input-only / RT-only kids are native — no masking change. Built
+by extending the validated proc_dp bundle (AM2018, FM2012, FMW2013) with the two
+input-only datasets **BabyView + SEEDLingS** (CDI + observed input from
+`io_pooled`, NO RT). They're disjoint from proc_dp's datasets → children simply
+appended, no ID reconciliation; items restricted to proc_dp's chosen J. Result:
+**I=292, S=5, V=163 input (97 both-channel, the separation identifiers), 226 RT**;
+σ_r pinned **0.44**; per-study `sigma_lena` (headcam ≠ LENA: BabyView 0.15,
+SEEDLingS 0.31, LENA 0.39). One Stan change: `sigma_lena` scalar → `vector[S]`,
+indexed by `study_of_child[rec_to_child]` (`log_irt_long_proc_dp_joint.stan`).
+
+**D′1 → D′3 (MCF's catch — important).** First fit D′1 (the proc_dp-selected rung:
+rt0→ξ free, rt→κ pinned). But **D′1 *pins* β_k0 = β_k1 = 0 — it ASSUMES
+processing→acceleration = 0, doesn't estimate it.** Reporting "processing→accel ≈ 0"
+from D′1 is circular (var_proc_k ≈ 0 by construction). And the proc_dp ladder
+ΔELPDs were ~1 — the rungs are statistically indistinguishable, so we can't reject
+the fuller model. **Fix: fit D′3 (all four coefficients free) and report the
+posteriors** — no rung selection, no LOO.
+
+**D′3 partition** (0 divergences, max rhat 1.06):
+
+| channel | Input | Processing |
+|---|--:|--:|
+| Efficiency (ξ) | 6.5% [5.7, 7.5] | 3.1% [0.3, 8.0] |
+| Acceleration (κ) | 1.3% [0.03, 6.1] | 0.4% [0.03, 2.8] |
+
+β_xi (rt0→ξ) = **−1.96 [−3.29, −0.65]** (processing→efficiency real, CI excludes 0,
+replicates proc_dp's −1.88); β_k0/β_k1 (rt→κ) CIs span 0 (processing→acceleration
+**small & genuinely uncertain, not a forced zero**); γ_in (input→κ) = 0.96 [−0.10,
+2.10] (barely includes 0 once the κ-processing channels are free).
+
+**Two diagnostics (MCF asked).**
+1. *Does adding processing distort input?* No — input share is **rung-invariant**
+   (D′1 6.57% vs D′3 6.54%): it's σ_r²/σ_ξ² with σ_r pinned, so processing carves
+   variance out of the **residual**, never the input slab. A pure-io fit lands on
+   the same 6.5% by construction.
+2. *Is the small processing share an architecture artifact?* No — it matches
+   standalone proc_dp (3.1%), and decomposes as β_xi²·σ_rt0²/σ_ξ²: β_xi is **strong**
+   (−1.96) but σ_rt0 (true between-child RT SD) is **small (0.142)** and RT is
+   **sparsely measured** (median 4 LWL trials/kid → per-child-mean reliability 0.66;
+   raw between-child SD 0.203, correctly noise-corrected to 0.142). Strong effect ×
+   small, noisy between-child variance = small variance share. Honest paper reading:
+   processing has a real, sizeable *effect* on efficiency but a *small variance
+   share* because between-child processing differences are modest and noisily measured.
+
+**Fig 3 → two panels** (`paper/build_fig_io_cache.R` → `fig_io_imputed_proc.rds`):
+- **(A) io-imputed**: implied input share vs pinned σ_r for EN/NO D fits, with the
+  real refit anchors + 95% CI (EN ×3, NO ×3 from entry 36); vertical band =
+  apples-to-apples σ_r [0.36, 0.58], dashed at 0.44; horizontal band = Coffey 4–7%.
+- **(B) io-proc**: the D′3 partition above.
+- The old A–D per-child **fans → Supplement** (`fig-io-fans`).
+PRs: **#50** (figure + fans→SI, *merged*), **#51** (NO 0.44/0.58 anchors that landed
+after the #50 merge + fill the io-imputed `r XYZ` inline values: EN 5.3%, NO 2.6%).
+
+**Compute.** Sherlock (`sherlock/joint_io_proc_fit.slurm <rung>`); small (N≈186k),
+but ~5 h/chain — the 66 input-only kids have unconstrained rt0 latents (ξ splits
+between processing and residual with no RT → a mild ridge), so give it the **16 h**
+slurm limit (a 6 h cap timed out mid-sample). LOO skipped throughout.
 
 ---
 
