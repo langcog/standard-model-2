@@ -372,11 +372,11 @@ childes_dev <- ladder |>
 # our two CHILDES axes kept separate (training vs development).
 slopes <- bind_rows(
   kid_slopes    |> mutate(label = as.character(label), group = label),
-  lm_slopes     |> mutate(label = as.character(label), group = "LMs: BookCorpus (C&B)"),
+  lm_slopes     |> mutate(label = as.character(label), group = "LMs: C&B 2022 (4 architectures)"),
   childes_train |> mutate(group = "LMs: CHILDES (training)"),
   childes_dev   |> mutate(group = "LMs: CHILDES (development)")) |>
   mutate(group = factor(group, levels = c(
-           "Children (English)", "Children (Norwegian)", "LMs: BookCorpus (C&B)",
+           "Children (English)", "Children (Norwegian)", "LMs: C&B 2022 (4 architectures)",
            "LMs: CHILDES (training)", "LMs: CHILDES (development)")),
          category = factor(category, levels = c("Children (this work)",
                             "LLMs (Chang & Bergen 2022)", "LLMs (this work)")))

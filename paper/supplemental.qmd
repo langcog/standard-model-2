@@ -462,7 +462,7 @@ even at the top of the plausible $\sigma_r$ range — is unaffected by the
 roughly half a day of compute per pin value.
 ```
 
-# Computing Acceleration in LLMs
+# Computing Acceleration in LMs
 
 ```md
 ## Comparing children and language models on one slope axis  [draft for promotion — MCF to review]

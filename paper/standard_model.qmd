@@ -414,7 +414,8 @@ Across different word classes (e.g., nouns, verbs, closed class words), efficien
 
 ```{r fig-llm-acceleration, fig.width=7, fig.height=4}
 #| label: fig-llm-acceleration
-#| fig-cap: "The density of acceleration slopes for language modfels (by word) and children (by child), extracted from English and Norwegian models."
+#| fig-cap: "The density of acceleration slopes for language models (by word) and children (by child), extracted from English and Norwegian models."
+
 # Children's per-child kappa_i vs. LLM per-word sigmoid slopes (Chang &
 # Bergen 2022), placed on a common "logit per natural-log experience"
 # axis. Data cached by paper/build_cache.R section 6 (fig6_llm_slopes.rds):
@@ -424,15 +425,16 @@ sl <- llm_slopes$slopes
 sm <- llm_slopes$summary
 
 # Children: by-child kappa_i (the acceleration signature). LMs: by-word
-# sigmoid slope, three populations -- BookCorpus (C&B, training axis), our
-# CHILDES GPT-2 on the training axis, and our CHILDES ladder on the
+# sigmoid slope, three populations -- Chang & Bergen (2022): 4 architectures
+# (LSTM, BiLSTM, GPT-2, BERT) on a BookCorpus+WikiText-103 corpus, training
+# axis; our CHILDES GPT-2 on the training axis; and our CHILDES ladder on the
 # DISTINCT-INPUT (development) axis. All three cluster at the kappa = 1
 # unit-accumulator boundary; children sit ~10x higher.
-slope_pal <- c("Children (English)"         = "#c41e37",
-               "Children (Norwegian)"       = "#fb9a99",
-               "LMs: BookCorpus (C&B)"      = "#8856a7",
-               "LMs: CHILDES (training)"    = "#2c7fb8",
-               "LMs: CHILDES (development)" = "#41ab5d")
+slope_pal <- c("Children (English)"              = "#c41e37",
+               "Children (Norwegian)"            = "#fb9a99",
+               "LMs: C&B 2022 (4 architectures)" = "#8856a7",
+               "LMs: CHILDES (training)"         = "#2c7fb8",
+               "LMs: CHILDES (development)"      = "#41ab5d")
 
 ggplot(sl, aes(slope_natural, fill = group, colour = group)) +
   geom_density(alpha = 0.32, linewidth = 0.5) +
@@ -455,12 +457,14 @@ ggplot(sl, aes(slope_natural, fill = group, colour = group)) +
         legend.background = element_rect(fill = "white", colour = NA))
 ```
 
-Small-scale language models trained on developmentally-realistic corpora have become a useful tool for understanding early language development [@huebner2021;@futrell2025;@frank2025]. For our final experiments, we were interested in whether large language models show the same patterns of developmental change in efficiency or acceleration. We made use of work by @chang2022, who extracted per-word acquisition curves from language models. They computed logistic fits to the surprisal (negative log probability) of individual words across training, estimating a curve for each word. Critically for our purposes, the slope of these logistic curves provides a direct analogue to our $\kappa$ parameter capturing acceleration in the accumulation process (see SI: Computing acceleration in LLMs). 
+Small-scale language models trained on developmentally-realistic corpora have become a useful tool for understanding early language development [@huebner2021;@futrell2025;@frank2025]. One major disanalogy between humans and language models, however, is the massive scale of training data necessary for language models to achieve high levels of performance [@warstadt2023;@frank2023]. 
+
+For our final experiments, we were interested in whether language models show the same patterns of developmental change in efficiency or acceleration. We make use of work by @chang2022, who extracted per-word acquisition curves from language models. They computed logistic fits to the surprisal (negative log probability) of individual words across training, estimating a logistic curve for each word, just as our Rasch model does. Critically for our purposes, the slope of these logistic curves provides a direct analogue to our $\kappa$ parameter capturing acceleration in the accumulation process (see SI: Computing Acceleration in LMs). 
 
 We compared the word-by-word acceleration of small-scale LLMs to children across several experiments. First, we extracted slopes from fits provided by @chang2022, in which four different language model architectures (LSTM, BiLSTM, GPT-2, and BERT) were fit to standard corpora (BookCorpus and WikiText-103). This training setup was disanalogous with our studies of children in at least two ways, however.
-First, models were not trained on child directed speech, so we retrained new GPT-2 (small) models on 24.5M words from CHILDES, following the protocol in @feng2024. Second, both these models and those trained by @chang2022 were trained to convergence, with acquisition curves reflecting changing predictions across repeated passes through the same training data. To isolate developmental change, we trained a separate set of GPT-2 models each to convergence on increasingly larger subsamples of the same CHILDES data, allowing us to estimate surprisal as a function of actual amount of input data -- a more direct developmental analogue. 
+First, models were not trained on child directed speech, so we retrained new GPT-2 (small) models on 24.5M words from CHILDES, following the protocol in @feng2024. Second, unlike children, both our first set of models and those trained by @chang2022 were trained to convergence, with acquisition curves reflecting changing predictions across repeated passes through the same training data. To isolate developmental change, we trained a separate set of GPT-2 models each to convergence on increasingly larger subsamples of the same CHILDES data, allowing us to estimate surprisal as a function of actual amount of input data -- a more direct developmental analogue. 
 
-The results across all of these were clear (@fig-llm-acceleration): $\kappa$ for all models was clustered near 1, the unit accumulator posited by @mcmurray2007. In contrast, $\kappa$ estimates for children for our large longitudinal samples were much higher (EN: `r XYZ` and NO: `r XYZ`) and highly variable across children (EN SD: `r XYZ` and NO SD: `r XYZ`). In sum, language models -- but not children -- behave like Model 1 (an accumulator). In contrast, children are best described by Model 4 -- they are variable, accelerating accumulators. 
+The results across all three sets of models were clear (@fig-llm-acceleration): $\kappa$ for all models was clustered near 1, the unit accumulator posited by @mcmurray2007. In contrast, $\kappa$ estimates for children for our large longitudinal samples were much higher (EN: `r XYZ` and NO: `r XYZ`) and highly variable across children (EN SD: `r XYZ` and NO SD: `r XYZ`). In sum, language models -- but not children -- behave like Model 1 (an accumulator). In contrast, children are best described by Model 4 -- they are variable, accelerating accumulators. 
 
 # Discussion
 

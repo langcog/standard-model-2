@@ -249,6 +249,42 @@ affirmative leg is the BabyLM register-mix control (backlog).
 
 ---
 
+## 🟢 L6. ccn2 A40s — finer ladder + more seeds (10 seeds × 18 budgets) (2026-06-11)
+
+**Goal.** Firm up two CIs: per-word κ_w (between-WORD — L4's 11-point sigmoids were
+fit-noisy) and σ_κ (between-SEED — 5 seeds is a thin SD). Cheap given the proven pipeline.
+
+**Design.** Extended L4's grid to **18 distinct-input budgets** (0.5M…24M; 7 rungs
+inserted — 0.75/1.25/1.75/2.5/3.5/5/7M) and **10 seeds** (added 1–5 alongside the
+original 0/7/42/99/123). Per seed: nested best-val competence at each budget, same
+early-stopping pipeline. New work beyond L4's 55 runs: 5 new seeds × 18 + 5 original
+× 7 inserts = **125 runs**; 180 (seed,budget) cells total. Dispatcher
+[`cluster/ccn2/run_finer_ladder_ccn2.sh`](../cluster/ccn2/run_finer_ladder_ccn2.sh);
+best-val extraction — max-step per word = the converged / `load_best_model_at_end`
+checkpoint, **verified to reproduce L4's `ladder_bestval.csv` byte-for-byte** —
+[`studies/llm/extract_ladder_bestval.py`](../studies/llm/extract_ladder_bestval.py).
+
+**Result — L4 confirmed, CIs tightened.**
+- **Per-word dev-axis κ**: median **1.19** (10 seeds, n≈5.8k word-fits; L4 5-seed: 1.17).
+  This is the development-axis density (green) in the paper's `fig-llm-acceleration`.
+- **Between-seed**: κ_pop **1.19**, **σ_κ 0.10**, **CV 8.4%** (L4 5-seed: 1.17 / 0.082 / 7%).
+  σ_κ nudged *up* with more seeds — 5 underestimated it — but still ~4× tighter than
+  children (σ_κ ~3.5, CV ~35%). Per-seed κ_med range 1.05–1.38, all near 1.
+- No qualitative change: rate ≈1.2, variability CV ~8%, decelerating/converging — the
+  three-leg disanalogy holds, now with firmer numbers.
+
+**Paper port.** Canonical data behind `fig-llm-acceleration` (PR #47):
+`paper/build_cache.R` §6 refits per-word κ from `fits/llm/ladder_bestval_finer.csv`
+into `fig6_llm_slopes.rds`. Re-render after any future fits = overwrite that CSV +
+re-run `build_cache.R`.
+
+**Artifacts.** `fits/llm/ladder_bestval_finer.csv` (10×18, 109.6k rows),
+`studies/llm/ladder_analysis_final.R` (now reads the finer file),
+`fits/llm/ladder_kappa_summary.csv`, `figs/llm/ladder_development_final.png`
+(regenerates from the script).
+
+---
+
 ## Infrastructure & environment
 
 - **Data provenance.** All self-contained in the public `styfeng/TinyDialogues`
@@ -272,9 +308,8 @@ affirmative leg is the BabyLM register-mix control (backlog).
 
 ## Open questions / backlog (⚪)
 
-- **Finer ladder.** L4's per-word sigmoids fit on 11 points are serviceable but
-  coarse (fit-noise inflates the κ IQRs). 15–20 budgets would sharpen κ_w — trivially
-  cheap now that the A40 pipeline is proven.
+- ~~**Finer ladder.**~~ ✅ Done — **L6** (18 budgets × 10 seeds): κ_w median 1.19,
+  σ_κ 0.10 (CV 8.4%). Confirmed L4, tightened CIs.
 - **BabyLM-100M disjoint control (Option 3, the affirmative leg for L5).** 4 disjoint
   ~24M subsets of the BabyLM mix (heterogeneous register: web + spoken), 2 seeds each.
   Genuinely *compositionally* different disjoint data — if individuals still converge,
