@@ -414,7 +414,7 @@ Across different word classes (e.g., nouns, verbs, closed class words), efficien
 
 ```{r fig-llm-acceleration, fig.width=7, fig.height=4}
 #| label: fig-llm-acceleration
-#| fig-cap: "Acceleration slopes (kappa = slope of competence on log experience). Children's by-child kappa_i (English, Norwegian) sit ~10x above the kappa = 1 unit-accumulator boundary. Language models' by-word slopes cluster at kappa ~= 1 across three populations: BookCorpus models from Chang & Bergen (2022, training axis), and our CHILDES-trained GPT-2 on both the training axis and the distinct-input development axis (converged-model ladder)."
+#| fig-cap: "The density of acceleration slopes for language modfels (by word) and children (by child), extracted from English and Norwegian models."
 # Children's per-child kappa_i vs. LLM per-word sigmoid slopes (Chang &
 # Bergen 2022), placed on a common "logit per natural-log experience"
 # axis. Data cached by paper/build_cache.R section 6 (fig6_llm_slopes.rds):
