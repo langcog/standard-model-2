@@ -434,7 +434,7 @@ Across different word classes (e.g., nouns, verbs, closed class words), efficien
 
 ```{r fig-llm-acceleration, fig.width=7, fig.height=4}
 #| label: fig-llm-acceleration
-#| fig-cap: "Acceleration slopes (kappa = slope of competence on log experience). Children's by-child kappa_i (English, Norwegian) sit ~10x above the kappa = 1 unit-accumulator boundary. Language models' by-word slopes cluster at kappa ~= 1 across three populations: BookCorpus models from Chang & Bergen (2022, training axis), and our CHILDES-trained GPT-2 on both the training axis and the distinct-input development axis (converged-model ladder)."
+#| fig-cap: "Acceleration slopes (kappa = slope of competence on log experience). Children's by-child kappa_i (English, Norwegian) sit ~10x above the kappa = 1 unit-accumulator boundary. Language models' by-word slopes cluster at kappa ~= 1 across three populations: the four architectures of Chang & Bergen (2022) -- LSTM, BiLSTM, GPT-2, BERT, trained on a combined BookCorpus + WikiText-103 corpus (training axis) -- and our CHILDES-trained GPT-2 on both the training axis and the distinct-input development axis (converged-model ladder)."
 # Children's per-child kappa_i vs. LLM per-word sigmoid slopes (Chang &
 # Bergen 2022), placed on a common "logit per natural-log experience"
 # axis. Data cached by paper/build_cache.R section 6 (fig6_llm_slopes.rds):
@@ -444,15 +444,16 @@ sl <- llm_slopes$slopes
 sm <- llm_slopes$summary
 
 # Children: by-child kappa_i (the acceleration signature). LMs: by-word
-# sigmoid slope, three populations -- BookCorpus (C&B, training axis), our
-# CHILDES GPT-2 on the training axis, and our CHILDES ladder on the
+# sigmoid slope, three populations -- Chang & Bergen (2022): 4 architectures
+# (LSTM, BiLSTM, GPT-2, BERT) on a BookCorpus+WikiText-103 corpus, training
+# axis; our CHILDES GPT-2 on the training axis; and our CHILDES ladder on the
 # DISTINCT-INPUT (development) axis. All three cluster at the kappa = 1
 # unit-accumulator boundary; children sit ~10x higher.
-slope_pal <- c("Children (English)"         = "#c41e37",
-               "Children (Norwegian)"       = "#fb9a99",
-               "LMs: BookCorpus (C&B)"      = "#8856a7",
-               "LMs: CHILDES (training)"    = "#2c7fb8",
-               "LMs: CHILDES (development)" = "#41ab5d")
+slope_pal <- c("Children (English)"              = "#c41e37",
+               "Children (Norwegian)"            = "#fb9a99",
+               "LMs: C&B 2022 (4 architectures)" = "#8856a7",
+               "LMs: CHILDES (training)"         = "#2c7fb8",
+               "LMs: CHILDES (development)"      = "#41ab5d")
 
 ggplot(sl, aes(slope_natural, fill = group, colour = group)) +
   geom_density(alpha = 0.32, linewidth = 0.5) +
