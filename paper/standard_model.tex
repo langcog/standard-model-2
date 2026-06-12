@@ -180,20 +180,6 @@
  
 
 
-\usepackage{booktabs}
-\usepackage{longtable}
-\usepackage{array}
-\usepackage{multirow}
-\usepackage{wrapfig}
-\usepackage{float}
-\usepackage{colortbl}
-\usepackage{pdflscape}
-\usepackage{tabu}
-\usepackage{threeparttable}
-\usepackage{threeparttablex}
-\usepackage[normalem]{ulem}
-\usepackage{makecell}
-\usepackage{xcolor}
 \usepackage{pdflscape}
 \makeatletter
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
@@ -590,7 +576,11 @@ classified as ``late talkers''; Fernald and Marchman (2012); Rescorla
   linear-time models, but found that they were dispreferred
   statistically in all but one case, though differences were relatively
   small within the restricted age range for which we have data (See SI:
-  Full Cross-linguistic Model Ladder).}
+  Full Cross-linguistic Model Ladder).} Notably, variation in both
+efficiency and acceleration was unimodal across all samples (see SI:
+Characterizing Variation in Efficiency and Acceleration), providing no
+evidence of discrete clusters corresponding to language impairment
+(Pinstock and Schramm 2026; Singletary et al. 2025).
 
 \subsection{Efficiency and acceleration relate to separate demographic
 predictors}\label{efficiency-and-acceleration-relate-to-separate-demographic-predictors}
@@ -799,15 +789,20 @@ English and Norwegian models.}
 Small-scale language models trained on developmentally-realistic corpora
 have become a useful tool for understanding early language development
 (Huebner et al. 2021; Futrell and Mahowald 2025; Frank and Goodman
-2025). For our final experiments, we were interested in whether large
-language models show the same patterns of developmental change in
-efficiency or acceleration. We made use of work by Chang and Bergen
-(2022), who extracted per-word acquisition curves from language models.
-They computed logistic fits to the surprisal (negative log probability)
-of individual words across training, estimating a curve for each word.
-Critically for our purposes, the slope of these logistic curves provides
-a direct analogue to our \(\kappa\) parameter capturing acceleration in
-the accumulation process (see SI: Computing acceleration in LLMs).
+2025). One major disanalogy between humans and language models, however,
+is the massive scale of training data necessary for language models to
+achieve high levels of performance (Warstadt et al. 2023; Frank 2023).
+
+For our final experiments, we were interested in whether language models
+show the same patterns of developmental change in efficiency or
+acceleration. We make use of work by Chang and Bergen (2022), who
+extracted per-word acquisition curves from language models. They
+computed logistic fits to the surprisal (negative log probability) of
+individual words across training, estimating a logistic curve for each
+word, just as our Rasch model does. Critically for our purposes, the
+slope of these logistic curves provides a direct analogue to our
+\(\kappa\) parameter capturing acceleration in the accumulation process
+(see SI: Computing Acceleration in LMs).
 
 We compared the word-by-word acceleration of small-scale LLMs to
 children across several experiments. First, we extracted slopes from
@@ -817,16 +812,16 @@ standard corpora (BookCorpus and WikiText-103). This training setup was
 disanalogous with our studies of children in at least two ways, however.
 First, models were not trained on child directed speech, so we retrained
 new GPT-2 (small) models on 24.5M words from CHILDES, following the
-protocol in Feng, Goodman, and Frank (2024). Second, both these models
-and those trained by Chang and Bergen (2022) were trained to
-convergence, with acquisition curves reflecting changing predictions
-across repeated passes through the same training data. To isolate
-developmental change, we trained a separate set of GPT-2 models each to
-convergence on increasingly larger subsamples of the same CHILDES data,
-allowing us to estimate surprisal as a function of actual amount of
-input data -- a more direct developmental analogue.
+protocol in Feng, Goodman, and Frank (2024). Second, unlike children,
+both our first set of models and those trained by Chang and Bergen
+(2022) were trained to convergence, with acquisition curves reflecting
+changing predictions across repeated passes through the same training
+data. To isolate developmental change, we trained a separate set of
+GPT-2 models each to convergence on increasingly larger subsamples of
+the same CHILDES data, allowing us to estimate surprisal as a function
+of actual amount of input data -- a more direct developmental analogue.
 
-The results across all of these were clear
+The results across all three sets of models were clear
 (Figure~\ref{fig-llm-acceleration}): \(\kappa\) for all models was
 clustered near 1, the unit accumulator posited by McMurray (2007). In
 contrast, \(\kappa\) estimates for children for our large longitudinal
@@ -839,58 +834,89 @@ accelerating accumulators.
 
 \section{Discussion}\label{discussion}
 
-What we did
+How does children's vocabulary grow over early childhood? We proposed
+that this process is characterized as accelerating accumulation, in
+which variation between children is produced by differences in both the
+efficiency of the accumulation process and the rate of acceleration.
+This cognitive process leads to a simple two parameter longitudinal
+growth model that provides a good description of cross-linguistic data.
 
-Longitudinal growth models efficiency and acceleration. Two different
-paramters.
+These two parameters provide a set of measures with which to distinguish
+a number of important factors that are related to overall vocabulary
+size in prior work. Factors that load on efficiency alone relate to
+children's overall learning trajectory, creating a constant offset in
+language ability. In contrast, those that load on acceleration create an
+increasing fan, such that older children are more different from one
+another than younger ones. On the side of demographics, we found
+evidence that while sex differences manifest as differences in
+efficiency, socioeconomic differences show up in acceleration as well.
+Evidence about language input paints a similar picture: while language
+processing measures such as LWL index differences in efficiency,
+language input variation appears to affect acceleration as well. Thus,
+our model identifies a channel by which experience might compound across
+development.
 
-Where does acceleration come from? Could come from a variety of sources,
-including general maturation of memory and attention, specific changes
-in word recognition or processing (Fernald et al. 1998; Frank et al.
-2026), the increasing sophistication of inferential strategies for word
-learning {[}Smith et al. (2002);Markman and Wachtel (1988);etc{]}, or
-other sources.
+Where does the acceleration in children's learning come from? One
+possibility is that it is driven by developmental maturation of general
+abilities such as learning, memory, and attention -- such changes could
+mean that children's ``buckets'' require fewer drops to fill them.
+Another possibility is that children's increasingly sophisticated
+inferential abilities allow them to extract progressively more
+information from the linguistic signal {[}Smith et al. (2002);Markman
+and Wachtel (1988);Bohn and Frank (2019);meylan2022{]}; Mitchell and
+McMurray (2009) study how these sorts of ``leverage'' mechanisms can
+change the slope of acceleration in accumulator models. Network growth
+models provide one promising avenue for understanding how leverage might
+play out in specific patterns of vocabulary growth at the level of word
+content (Hills et al. 2009; Fourtassi, Bian, and Frank 2020).
 
-ENGLISH for the key model - BUT also buttressed by model fits across
-several languages - sparsity of cross-linguistic longitudinal data but
-still
+Our work here has a number of limitations that suggest avenues for new
+work. First, while we analyzed a range of cross-linguistic data where it
+was available, most of the open data on children's input and processing
+are available only in English, and for convenience samples. Thus, the
+specific numerical estimates that we were able to derive are at best
+approximations and do not represent estimates for broader populations of
+interest. Systematic representative sampling would be required for
+generalization. Further, the studies we included here focused
+exclusively on monolingual, typically-developing children. Though we
+have reason to expect that these mechanisms would apply in multilingual
+acquisition, significant work will be necessary to adapt and test our
+proposal in multilingual datasets (Gómez Díaz et al. 2024; Tan,
+Marchman, and Frank 2024).
 
-Mitchell and McMurray (2009) prove that acceleration does not result
-from simply leverage of vocabulary --
+In addition, we focused on the role of input quantity as a key
+first-order factor influencing the accumulation of language. However, a
+rich tradition describes quantity-related variation as well (e.g.,
+Anderson et al. 2021; Rowe 2012; Hirsh-Pasek et al. 2015). While
+individual studies have identified a wide variety of indicators of
+quality, they are still challenging to compute at scale from audio and
+video recordings. Extracting these and connecting them to growth over
+time is an exciting prospect for future work.
 
-Role of input: Coffey 2026 variance decomposition
+Two often, psychology and cognitive science focus either only on
+universal mechanisms or variability between individuals. Word learning
+is a unique case study in cognitive science because it describes a basic
+process of knowledge acquisition that also captures large, meaningful
+individual variation. As such, it becomes possible to link mechanistic
+models of learning (such as accumulators) to the signatures that form
+the locus of variation in human learners.
 
-Evanson, Lakretz, and King (2023) investigated
+The accumulator idea that forms the basis of our model is extremely
+simple, but it is potentially compatible with a wide range of more
+elaborated computational models of early language learning (Frank,
+Goodman, and Tenenbaum 2009; McMurray, Horst, and Samuelson 2012;
+\textbf{trueswell2014?}; Kachergis, Yu, and Shiffrin 2012). One
+important direction for future work is to survey and analyze models from
+the literature to understand which of these show learning dynamics
+congruent with the statistical signatures we have identified in actual
+children's vocabulary growth. We have shown that one class of models
+does not show these signatures, however.
 
-Furthermore, how does the accumulation process relate to the rapid
-growth of vocabulary? On some models, accumulation by itself can produce
-an exponential ``vocabulary explosion'' while the child's own learning
-abilities remain constant. On other accounts, however, the child's own
-abilities change over development. These changes could be due to the
-accumulation of language allowing bootstrapping (e.g., via mutual
-excusivity or the shape bias), they could be through faster processing
-(Fernald rich get richer), or they could be via general maturation
-(e.g., better memory, faster processing). Or all of these.
-
-Thus, modeling human learning requires positing other sources of
-variability and acceleration. Sources of variability could include from
-variation in interactional input quality, genetic variation between
-children, environmental richness not captured by input, etc. Sources of
-acceleration could include increases in processing efficiency,
-learning-to-learn including mutual exclusivity, shape bias, syntactic
-bootstrapping, as well as domain general changes in perception,
-processing speed, memory, attention or other aspects of cognition. The
-key to understanding children's data efficiency may thus lie in better
-understanding when and how children's learning accelerates with
-maturation and experience.
-
-Quantity vs quality!!
-
-Continuous variation or clusters? (Pinstock and Schramm 2026; Singletary
-et al. 2025) We think it's just continuous variation (Supplement)
-
-Network models and their predictions e.g. (Steyvers and Tenenbaum 2005;
-Hills et al. 2009; Fourtassi, Bian, and Frank 2020)
+Modern language models (both transformer-based and recurrent) failed to
+manifest the acceleration that we found pervasively in our data. This
+lack of ``leverage'' in such models is one potential clue to why they
+require such massive amounts of data to learn, relative to human
+children.
 
 \section{Methods}\label{methods}
 
@@ -937,9 +963,9 @@ log age.
 
 Bayesian models were fit using Stan (Carpenter et al. 2017).
 
-Priors
+\subsubsection{Priors}\label{priors}
 
-Inference
+\subsubsection{Inference}\label{inference}
 
 \subsubsection{Input and processing
 models}\label{input-and-processing-models}
@@ -991,6 +1017,11 @@ Perspectives} 14 (3): 142--49.
 \bibitem[\citeproctext]{ref-bloom2002}
 Bloom, Paul. 2002. \emph{How Children Learn the Meanings of Words}. MIT
 press.
+
+\bibitem[\citeproctext]{ref-bohn2019}
+Bohn, Manuel, and Michael C Frank. 2019. {``The Pervasive Role of
+Pragmatics in Early Language.''} \emph{Annual Review of Developmental
+Psychology} 1 (1): 223--49.
 
 \bibitem[\citeproctext]{ref-bond2013}
 Bond, Trevor G, and Christine M Fox. 2013. \emph{Applying the Rasch
@@ -1064,14 +1095,6 @@ Gayraud, Melita Kovacevic, and Carlos Gallego. 2012. {``Differences
 Between Girls and Boys in Emerging Language Skills: Evidence from 10
 Language Communities.''} \emph{British Journal of Developmental
 Psychology} 30 (2): 326--43.
-
-\bibitem[\citeproctext]{ref-evanson2023}
-Evanson, Linnea, Yair Lakretz, and Jean-Rémi King. 2023. {``Language
-Acquisition: Do Children and Language Models Follow Similar Learning
-Stages?''} In \emph{Findings of the Association for Computational
-Linguistics: ACL 2023}, 12205--18. Toronto, Canada: Association for
-Computational Linguistics.
-\url{https://doi.org/10.18653/v1/2023.findings-acl.773}.
 
 \bibitem[\citeproctext]{ref-feng2024}
 Feng, Steven Y., Noah D. Goodman, and Michael C. Frank. 2024. {``Is
@@ -1148,6 +1171,11 @@ Vocabulary Data.''} \emph{Journal of Child Language} 44 (3): 677--94.
 \bibitem[\citeproctext]{ref-frank2025}
 Frank, Michael C, and Noah D Goodman. 2025. {``Cognitive Modeling Using
 Artificial Intelligence.''} \emph{Annual Review of Psychology} 77.
+
+\bibitem[\citeproctext]{ref-frank2009}
+Frank, Michael C, Noah D Goodman, and Joshua B Tenenbaum. 2009. {``Using
+Speakers' Referential Intentions to Model Early Cross-Situational Word
+Learning.''} \emph{Psychological Science} 20 (5): 578--85.
 
 \bibitem[\citeproctext]{ref-frank2026}
 Frank, Michael C, Virginia A Marchman, Claire Augusta Bergey, Veronica
@@ -1234,6 +1262,11 @@ Kachergis, George, Virginia A Marchman, and Michael C Frank. 2022.
 {``Toward a {`Standard Model'} of Early Language Learning.''}
 \emph{Current Directions in Psychological Science} 31 (1): 20--27.
 
+\bibitem[\citeproctext]{ref-kachergis2012}
+Kachergis, George, Chen Yu, and Richard M Shiffrin. 2012. {``An
+Associative Model of Adaptive Inference for Learning Word--Referent
+Mappings.''} \emph{Psychonomic Bulletin \& Review} 19 (2): 317--24.
+
 \bibitem[\citeproctext]{ref-long2024}
 Long, Bria, Robert Z Sparks, Violet Xiang, Stefan Stojanov, Zi Yin,
 Grace E Keene, Alvin WM Tan, et al. 2024. {``The BabyView Dataset:
@@ -1273,6 +1306,11 @@ the Cognitive Science Society}. Vol. 32.
 \bibitem[\citeproctext]{ref-mcmurray2007}
 McMurray, Bob. 2007. {``Defusing the Childhood Vocabulary Explosion.''}
 \emph{Science} 317 (5838): 631--31.
+
+\bibitem[\citeproctext]{ref-mcmurray2012}
+McMurray, Bob, Jessica S Horst, and Larissa K Samuelson. 2012. {``Word
+Learning Emerges from the Interaction of Online Referent Selection and
+Slow Associative Learning.''} \emph{Psychological Review} 119 (4): 831.
 
 \bibitem[\citeproctext]{ref-mitchell2009}
 Mitchell, C., and B. McMurray. 2009. {``On Leveraged Learning in Lexical
@@ -1354,11 +1392,10 @@ and Larissa Samuelson. 2002. {``Object Name Learning Provides on-the-Job
 Training for Attention.''} \emph{Psychological Science} 13 (1): 13--19.
 \url{https://doi.org/10.1111/1467-9280.00403}.
 
-\bibitem[\citeproctext]{ref-steyvers2005}
-Steyvers, Mark, and Joshua B. Tenenbaum. 2005. {``The Large-Scale
-Structure of Semantic Networks: Statistical Analyses and a Model of
-Semantic Growth.''} \emph{Cognitive Science} 29 (1): 41--78.
-\url{https://doi.org/10.1207/s15516709cog2901_3}.
+\bibitem[\citeproctext]{ref-tan2024}
+Tan, Alvin WM, Virginia A Marchman, and Michael C Frank. 2024. {``The
+Role of Translation Equivalents in Bilingual Word Learning.''}
+\emph{Developmental Science} 27 (4): e13476.
 
 \bibitem[\citeproctext]{ref-thal2013}
 Thal, Donna J., Virginia A. Marchman, and J. Bruce Tomblin. 2013.
@@ -1776,7 +1813,7 @@ Analysis}{\textbackslash sigma\_r Sensitivity Analysis}}\label{sigma_r-sensitivi
 \end{Shaded}
 
 \section{Computing Acceleration in
-LLMs}\label{computing-acceleration-in-llms}
+LMs}\label{computing-acceleration-in-lms}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1888,6 +1925,9 @@ LLMs}\label{computing-acceleration-in-llms}
 \caption{\label{fig-proc-splits}}
 
 \end{figure}%
+
+\section{Characterizing Variation in Efficiency and
+Acceleration}\label{characterizing-variation-in-efficiency-and-acceleration}
 
 \begingroup\fontsize{9}{11}\selectfont
 

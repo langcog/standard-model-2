@@ -635,6 +635,7 @@ ggplot(sim, aes(age, theta, color = qprob_f, group = qprob_f)) +
   patchwork::plot_layout(guides = "collect")
 ```
 
+# Characterizing Variation in Efficiency and Acceleration
 
 ```{r blup-prep, include=FALSE}
 # Per-child BLUP distributions (efficiency xi, acceleration zeta) from the
