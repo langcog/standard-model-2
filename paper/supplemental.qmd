@@ -685,6 +685,33 @@ ggplot(sim, aes(age, theta, color = qprob_f, group = qprob_f)) +
   patchwork::plot_layout(guides = "collect")
 ```
 
+```{r fig-io-fans, fig.width=11, fig.height=4}
+#| label: fig-io-fans
+#| fig-cap: ""
+# [MCF: needs an SI header + caption.] Per-child model-implied fans, moved here
+# from the old main-text Fig 3 (panels A-D): (A) English + (B) Norwegian
+# model-implied input (input is imputed -> these are the sigma_r quantile slice,
+# NOT a data split), (C) observed io input, (D) processing (RT). Per-child
+# trajectories (grey) + model-predicted quantile curves. Data: fig3_input.rds.
+.fan_in <- readRDS(here("paper", "cache", "fig3_input.rds"))
+.pctf   <- scales::percent_format(accuracy = 1)
+.fan <- function(curves, spag, title, gcol = "ii") ggplot() +
+  geom_line(data = spag, aes(age, vocab, group = .data[[gcol]]), color = "grey75",
+            alpha = 0.30, linewidth = 0.22) +
+  geom_line(data = curves, aes(age, vocab, color = q), linewidth = 1.05) +
+  scale_color_viridis_d(end = 0.9, name = "input / processing percentile") +
+  scale_y_continuous(limits = c(0, 1), labels = .pctf) +
+  labs(x = "age (months)", y = "proportion produced", title = title) +
+  theme_minimal(base_size = 9) +
+  theme(legend.position = "bottom", panel.grid.minor = element_blank(),
+        plot.title = element_text(face = "bold", size = 9))
+((.fan(.fan_in$panelEN_curves, .fan_in$panelEN_spag, "(A) English — model-implied input", "child_id") |
+  .fan(.fan_in$panelNO_curves, .fan_in$panelNO_spag, "(B) Norwegian — model-implied input", "child_id") |
+  .fan(.fan_in$panelD_curves,  .fan_in$panelD_spag,  "(C) Observed input") |
+  .fan(.fan_in$panelE_curves,  .fan_in$panelE_spag,  "(D) Processing speed")) +
+  patchwork::plot_layout(guides = "collect")) & theme(legend.position = "bottom")
+```
+
 # Characterizing Variation in Efficiency and Acceleration
 
 ```{r blup-prep, include=FALSE}
