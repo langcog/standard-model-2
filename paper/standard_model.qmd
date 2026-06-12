@@ -58,6 +58,13 @@ llm_slopes <- readRDS(file.path(CACHE, "fig6_llm_slopes.rds"))
 io_part    <- readRDS(file.path(CACHE, "io_partition.rds"))
 io_fig     <- readRDS(file.path(CACHE, "fig_io_imputed_proc.rds"))
 
+# implied input-efficiency share for a language at a pinned sigma_r, read off
+# the Fig-3A refit anchors (e.g. the apples-to-apples sigma_r = 0.44).
+io_share <- function(model, sr = 0.44) {
+  a <- io_fig$panelA$anchors
+  sprintf("%.1f%%", 100 * a$share[a$model == model & abs(a$sigma_r - sr) < 1e-6][1])
+}
+
 # Inline range: how much worse the best (D) model becomes when age enters
 # linearly rather than as log-age, across the four languages (dAIC of
 # D_lin relative to the best model, D_log).
@@ -270,7 +277,7 @@ Fitting this model requires a guess about the range of input variation present i
 
 <!-- In our main simulations we set $\sigma_r=.53$, a value drawn from @sperry2019, who estimated a mean of 419k tokens per month (\pm1 SD: 329k -- 957k). We provide sensitivity analysis for alternative values based on an analytic computation of the relationship between $\sigma_r$ and $\pi_\alpha$ (see SI: $\sigma_r$ Sensitivity Analysis). -->
 
-@fig-io-partition (panel F) shows the results models fit with three values for each language, interpolated with an analytic estimate of the relationship between $\sigma_r$ and the total proportion of variance in efficiency that could be attributed to input. Within the range of plausible input values from the literature, we observed a strong congruence between the model estimates of input variance (EN: `r XYZ`, NO: `r XYZ`) and the meta-analytic range reported by @coffey2026 (4--7%). This consistency both supports the overall plausibility of the model and provides a second route for estimating the significant but modest contribution of input quantity to variation in children's outcomes. 
+@fig-io-partition (panel F) shows the results models fit with three values for each language, interpolated with an analytic estimate of the relationship between $\sigma_r$ and the total proportion of variance in efficiency that could be attributed to input. Within the range of plausible input values from the literature, we observed a strong congruence between the model estimates of input variance (EN: `r io_share("English (D)", 0.44)`, NO: `r io_share("Norwegian (D)", 0.44)`) and the meta-analytic range reported by @coffey2026 (4--7%). This consistency both supports the overall plausibility of the model and provides a second route for estimating the significant but modest contribution of input quantity to variation in children's outcomes. 
 
 
 ## Input predicts both efficiency and acceleration, while processing speed relates only to efficiency
