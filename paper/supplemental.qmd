@@ -352,6 +352,56 @@ ggplot() +
 ```
 
 
+# Generating the Model-Ladder Quantile Fans
+
+```md
+## How the model-ladder quantile bands are generated  [draft for promotion — MCF to review]
+
+The percentile bands ("fans") overlaid on the empirical trajectories in the
+model-ladder figures are not closed-form quantiles of a fitted distribution. For
+each (dataset, model) fit we generate them by Monte-Carlo simulation: we build a
+synthetic population of children and read off vocabulary percentiles at each age.
+
+**Bootstrapping children from the fitted random effects.** For the models with a
+per-child random effect (the C and D variants in both age bases) we draw
+$N = 500$ synthetic children by resampling *with replacement* from the fit's
+per-child BLUPs — the shrunken empirical-Bayes estimates of each observed child's
+random intercept and, for the D models, random slope. The resampling uses a fixed
+seed, so the bands are reproducible. The models with no per-child random effect
+(the Rasch-style model A and the population-slope B models) have no child
+distribution to resample and so collapse to a single median curve rather than a
+fan.
+
+We bootstrap the realised BLUPs rather than sampling parametrically from
+$\mathcal{N}(0, \hat\Sigma)$. The two agree in expectation, but parametric
+sampling assumes the *unshrunken* population covariance and routinely generates
+extreme intercept–slope pairs that no real child exhibited; at ages where the
+data are thin this inflates the upper percentiles. Resampling the BLUPs keeps the
+simulated population conditional on the children we actually observed.
+
+**Each child's expected vocabulary curve.** Ages run on a per-dataset integer
+grid spanning the 5th–95th percentile of that dataset's observed ages, so the
+bands are never extrapolated beyond the data window. For a bootstrapped child $i$
+with random intercept $u^{0}_i$ and slope $u^{1}_i$, the linear predictor for item
+$j$ at age $t$ is
+$$\eta_{ij}(t) = \beta_0 + (\beta_{\text{age}} + u^{1}_i)\, g(t) + u^{0}_i + b_j,$$
+where $\beta_0$ and $\beta_{\text{age}}$ are the fixed effects, $b_j$ is item $j$'s
+fitted random effect, and $g(t) = \log(t / a_0)$ for the log-age models (and for
+model A, whose offset pins $\beta_{\text{age}} \equiv 1$) or $g(t) = t - a_0$ for
+the linear-age models. The child's expected productive vocabulary is the sum of
+per-item production probabilities over the dataset's $J$ items,
+$$V_i(t) = \sum_{j=1}^{J} \operatorname{logit}^{-1}\!\big(\eta_{ij}(t)\big),$$
+clamped to $[0, J]$. Item random effects are held at their fitted values — only
+children are resampled — and $V_i(t)$ is an *expected* count, so each simulated
+child's curve is smooth and the width of the fan reflects between-child variation
+alone.
+
+**Quantiles.** At each (dataset, model, age) the plotted bands are the 10th,
+25th, 50th, 75th, and 90th percentiles of $\{V_i(t)\}_{i=1}^{500}$. The simulation
+is implemented in `studies/glmer_ladder/04a_simulate.R`.
+```
+
+
 # Population Input Range Estimation
 
 ```{r tbl-input-rates}
