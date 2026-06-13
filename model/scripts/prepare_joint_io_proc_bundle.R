@@ -35,7 +35,7 @@ io_cdi <- iob$df %>%
   ## drop io_pooled's own indices (ii/aa/jj/cc/s) to avoid join collisions
   select(study, ckey, age, item, produces) %>%
   mutate(cid       = paste(study, ckey, sep = "::"),
-         study_idx = ifelse(study == "BabyView", 4L, 5L),
+         study_idx = ifelse(study == "BabyView", length(DS3) + 1L, length(DS3) + 2L),
          jj        = unname(item2jj[item]))
 cids <- io_cdi %>% distinct(cid, study, study_idx)
 cids$ii <- I3 + seq_len(nrow(cids))
@@ -59,7 +59,7 @@ admin_age      <- c(sdp$admin_age,      adm_child_new$age)
 
 ## study_of_child for all I = I3 + new
 study_of_child <- c(sdp$study_of_child, cids$study_idx[order(cids$ii)])
-I <- I3 + nrow(cids); A <- A3 + nrow(adm_new); S <- 5L
+I <- I3 + nrow(cids); A <- A3 + nrow(adm_new); S <- length(DS3) + 2L
 
 ## ---- 4. BabyView + SEEDLingS observed input (one standardized z per child) ---- ##
 ## recover per-recording log input from io_pooled stan_data, map io-ii -> ckey
@@ -86,11 +86,14 @@ add_in <- perchild %>% group_by(study) %>%
 
 ## per-study sigma_lena vector (study order 1..5)
 sigma_lena_vec <- numeric(S)
-sigma_lena_vec[1] <- sdp$sigma_lena                 # AM2018 (LENA, proc_dp pooled)
-sigma_lena_vec[2] <- 1.0                            # FM2012: no observed input (placeholder, unused)
-sigma_lena_vec[3] <- sdp$sigma_lena                 # FMW2013 (LENA, proc_dp pooled)
-sigma_lena_vec[4] <- add_in$sigma_lena[add_in$study == "BabyView"][1]
-sigma_lena_vec[5] <- add_in$sigma_lena[add_in$study == "SEEDLingS"][1]
+## proc_dp studies (1..length(DS3)): the pooled LENA sd for the input-having
+## ones (those represented among proc_dp's input children, lena3), placeholder
+## for the RT-only ones (FM2012, fernald_totlot -- no observed input).
+pd_input_studies <- unique(child3$study[match(lena3$ii, child3$ii)])
+for (s in seq_len(length(DS3)))
+  sigma_lena_vec[s] <- if (s %in% pd_input_studies) sdp$sigma_lena else 1.0
+sigma_lena_vec[length(DS3) + 1] <- add_in$sigma_lena[add_in$study == "BabyView"][1]
+sigma_lena_vec[length(DS3) + 2] <- add_in$sigma_lena[add_in$study == "SEEDLingS"][1]
 
 ## combined input arrays: proc_dp input children (z_lena3) + new
 rec_to_child <- c(lena3$ii, add_in$ii)
@@ -129,7 +132,7 @@ saveRDS(bundle, out)
 
 cat(sprintf("\n== joint bundle ==\n  I=%d A=%d J=%d C=%d S=%d N=%d N_lwl=%d V=%d a0=%d\n",
             I, A, J, C, S, length(y_all), sdp$N_lwl, V, a0))
-cat(sprintf("  RT children: %d (studies 1-3) ; input children: %d ; both: %d\n",
-            length(unique(sdp$lwl_to_child)), V,
+cat(sprintf("  RT children: %d (studies 1-%d) ; input children: %d ; both: %d\n",
+            length(unique(sdp$lwl_to_child)), length(DS3), V,
             length(intersect(unique(sdp$lwl_to_child), rec_to_child))))
 cat(sprintf("Saved %s\n", out))
