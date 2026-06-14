@@ -29,13 +29,24 @@ chosen_items <- wi$item
 cat(sprintf("proc_dp base: I=%d A=%d J=%d S=%d (datasets: %s)\n",
             I3, A3, J, length(DS3), paste(DS3, collapse=", ")))
 
-## ---- 2. BabyView + SEEDLingS CDI from io_pooled, restricted to chosen items ---- ##
+## ---- 2. Input-only CDI from io_pooled, restricted to chosen items ---- ##
+## BabyView + SEEDLingS = new studies (5,6). PLUS the FMW2013 input-only SALVAGE:
+## TLO has 51 LENA kids but proc_dp keeps only the ~31 with RT; the other 20 have
+## CDI+input but no RT. io_pooled keeps all 51 (CDI+input). Recover the 20 not in
+## proc_dp's fmw_2013 set as input-only kids of the EXISTING study 3 (fmw_2013).
+proc_fmw_subj <- as.character(child3$lab_subject_id[child3$dataset_name == "fmw_2013"])
+salv_ckeys <- iob$child_info %>%
+  filter(s == which(iob$studies$study == "FMW2013"), !subject_id %in% proc_fmw_subj) %>% pull(ckey)
+FMW_IDX <- match("fmw_2013", DS3)                       # existing study index (3)
 io_cdi <- iob$df %>%
-  filter(study %in% c("BabyView", "SEEDLingS"), item %in% chosen_items) %>%
+  filter((study %in% c("BabyView", "SEEDLingS")) | (study == "FMW2013" & ckey %in% salv_ckeys),
+         item %in% chosen_items) %>%
   ## drop io_pooled's own indices (ii/aa/jj/cc/s) to avoid join collisions
   select(study, ckey, age, item, produces) %>%
   mutate(cid       = paste(study, ckey, sep = "::"),
-         study_idx = ifelse(study == "BabyView", length(DS3) + 1L, length(DS3) + 2L),
+         study_idx = case_when(study == "BabyView"  ~ length(DS3) + 1L,
+                               study == "SEEDLingS" ~ length(DS3) + 2L,
+                               study == "FMW2013"   ~ FMW_IDX),   # salvage -> existing study 3
          jj        = unname(item2jj[item]))
 cids <- io_cdi %>% distinct(cid, ckey, study, study_idx)
 cids$ii <- I3 + seq_len(nrow(cids))
@@ -46,8 +57,8 @@ io_cdi <- io_cdi %>%
   mutate(admin_key = paste(cid, age, sep = "_"))
 adm_new <- io_cdi %>% distinct(admin_key) %>% mutate(aa = A3 + row_number())
 io_cdi <- io_cdi %>% left_join(adm_new, by = "admin_key")
-cat(sprintf("added CDI: BabyView+SEEDLingS kids=%d admins=%d rows=%d (items kept=%d/%d chosen)\n",
-            nrow(cids), nrow(adm_new), nrow(io_cdi), n_distinct(io_cdi$item), length(chosen_items)))
+cat(sprintf("added CDI (BabyView+SEEDLingS new + FMW2013 input-only salvage): kids=%d (incl %d salvage) admins=%d rows=%d (items kept=%d/%d chosen)\n",
+            nrow(cids), length(salv_ckeys), nrow(adm_new), nrow(io_cdi), n_distinct(io_cdi$item), length(chosen_items)))
 
 ## ---- 3. Combined CDI long frame (proc_dp rows + new rows) ---- ##
 y_all  <- c(sdp$y, io_cdi$produces)
@@ -97,12 +108,24 @@ for (s in seq_len(length(DS3)))
 sigma_lena_vec[length(DS3) + 1] <- add_in$sigma_lena[add_in$study == "BabyView"][1]
 sigma_lena_vec[length(DS3) + 2] <- add_in$sigma_lena[add_in$study == "SEEDLingS"][1]
 
-## combined input arrays: proc_dp input children (z_lena3) + new
-rec_to_child <- c(lena3$ii, add_in$ii)
-z_lena       <- c(lena3$z_lena, add_in$z_lena)
+## FMW2013 salvage input: standardize on proc_dp's FMW2013 scale (same mean/sd as
+## the 31 RT kids) so all 51 fmw_2013 input kids share one within-study scale.
+fmw_proc  <- lena3 %>% inner_join(child3 %>% filter(dataset_name == "fmw_2013") %>% select(ii), by = "ii")
+mean_fmw  <- mean(fmw_proc$lmean); sdtrue_fmw <- fmw_proc$sd_true[1]
+salv_in <- tibble::tibble(logr = iob$stan_data$log_r_obs, io_ii = iob$stan_data$recording_to_child) %>%
+  left_join(ii2ckey, by = c("io_ii" = "ii")) %>%
+  filter(study == "FMW2013", ckey %in% salv_ckeys) %>%
+  group_by(ckey) %>% summarise(lmean = mean(logr), .groups = "drop") %>%
+  mutate(cid = paste("FMW2013", ckey, sep = "::"),
+         z_lena = (lmean - mean_fmw) / sdtrue_fmw) %>%
+  left_join(cids %>% select(cid, ii), by = "cid")
+
+## combined input arrays: proc_dp input children (z_lena3) + BV/SE + FMW2013 salvage
+rec_to_child <- c(lena3$ii, add_in$ii, salv_in$ii)
+z_lena       <- c(lena3$z_lena, add_in$z_lena, salv_in$z_lena)
 V <- length(z_lena)
-cat(sprintf("input channel: V=%d (proc_dp %d + BV/SE %d). sigma_lena per study: %s\n",
-            V, nrow(lena3), nrow(add_in), paste(sprintf("%.3f", sigma_lena_vec), collapse=", ")))
+cat(sprintf("input channel: V=%d (proc_dp %d + BV/SE %d + FMW2013-salvage %d). sigma_lena per study: %s\n",
+            V, nrow(lena3), nrow(add_in), nrow(salv_in), paste(sprintf("%.3f", sigma_lena_vec), collapse=", ")))
 
 ## ---- 4b. SEEDLingS LWL-RT channel (Zhu et al., derived) -> processing study 6 ---- ##
 ## Per-trial RT from model/scripts/prepare_seedlings_lwl_rt.R, joined by the REAL
