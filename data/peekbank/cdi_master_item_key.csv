@@ -1,0 +1,753 @@
+"item","short","lexical_category","prob","in_model_200","n_datasets","AM2018","FM2012","FMW2013","fernald_totlot","BabyView","SEEDLingS"
+"it","it","function_words",0.0195574723180713,TRUE,6,1,1,1,1,1,1
+"I","i","function_words",0.0181027929310106,TRUE,5,1,1,1,1,0,1
+"what","what","function_words",0.0165498808841915,TRUE,6,1,1,1,1,1,1
+"is","is","function_words",0.0124848369297208,TRUE,5,1,1,1,1,1,0
+"on","on","function_words",0.0084999118112233,TRUE,6,1,1,1,1,1,1
+"of","of","function_words",0.00657311186319604,TRUE,5,1,1,1,1,1,0
+"are","are","function_words",0.00639464425320943,TRUE,5,1,1,1,1,1,0
+"here","here","function_words",0.00616264797165233,TRUE,5,1,1,1,1,1,0
+"there","there","function_words",0.00615184934593421,TRUE,6,1,1,1,1,1,1
+"me","me","function_words",0.00544726804639043,TRUE,6,1,1,1,1,1,1
+"with","withprep","function_words",0.00498060485541047,TRUE,5,1,1,1,1,1,0
+"for","for","function_words",0.00457246324896743,TRUE,5,1,1,1,1,1,0
+"at","atprep","function_words",0.00409047297632303,TRUE,5,1,1,1,1,1,0
+"all","allquant","function_words",0.00360093527710144,TRUE,6,1,1,1,1,1,1
+"how","how","function_words",0.00321183640848391,TRUE,6,1,1,1,1,1,1
+"them","them","function_words",0.0029438447078664,TRUE,5,1,1,1,1,1,0
+"my","my","function_words",0.00283980633535631,TRUE,6,1,1,1,1,1,1
+"out","out","function_words",0.00277838189444355,TRUE,6,1,1,1,1,1,1
+"about","about","function_words",0.00275701687151737,TRUE,5,1,1,1,1,1,0
+"more","more","function_words",0.00248635454303409,TRUE,6,1,1,1,1,1,1
+"her","her","function_words",0.00244025718378576,TRUE,6,1,1,1,1,1,1
+"if","ifconn","function_words",0.00239984942303407,TRUE,5,1,1,1,1,1,0
+"were","were","function_words",0.00237465262969179,TRUE,5,1,1,1,1,1,0
+"down","down","function_words",0.00230962864687298,TRUE,6,1,1,1,1,1,1
+"too","too","function_words",0.00216286022851053,TRUE,5,1,1,1,1,1,0
+"when","when","function_words",0.00208935990507427,TRUE,6,1,1,1,1,1,1
+"because","because","function_words",0.00198346370448365,TRUE,5,1,1,1,1,1,0
+"back","back","function_words",0.00193910805906082,TRUE,6,1,1,1,1,1,1
+"other","other","function_words",0.00124230641460429,TRUE,6,1,1,1,1,1,1
+"could","could","function_words",0.00117681797476535,TRUE,5,1,1,1,1,1,0
+"will","will","function_words",0.00100148544966464,TRUE,5,1,1,1,1,1,0
+"another","another","function_words",0.000933558610469999,TRUE,6,1,1,1,1,1,1
+"around","around","function_words",0.000806065158443126,TRUE,5,1,1,1,1,1,0
+"away","away","function_words",0.000731287578201499,TRUE,6,1,1,1,1,1,1
+"which","which","function_words",0.000649543142657858,TRUE,5,1,1,1,1,1,0
+"into","into","function_words",0.000615637780188052,TRUE,5,1,1,1,1,1,0
+"by","byprep","function_words",0.00057894567559744,TRUE,5,1,1,1,1,1,0
+"their","their","function_words",0.000542834142281996,TRUE,5,1,1,1,1,1,0
+"am","am","function_words",0.00029887809245644,TRUE,5,1,1,1,1,1,0
+"every","every","function_words",0.000169294583838963,TRUE,5,1,1,1,1,1,0
+"inside/in","inside","function_words",0.000150600188778556,TRUE,4,1,1,1,1,0,0
+"gotta/got to","gotta","function_words",0.000150600188778556,TRUE,4,1,1,1,1,0,0
+"need/need to","need","function_words",0.000150600188778556,TRUE,4,1,1,1,1,0,0
+"try/try to","try","function_words",0.000150600188778556,TRUE,4,1,1,1,1,0,0
+"each","each","function_words",0.000109727971006735,TRUE,5,1,1,1,1,1,0
+"myself","myself","function_words",6.14244409127649e-05,TRUE,5,1,1,1,1,1,0
+"none","none","function_words",4.2497817342291e-05,TRUE,6,1,1,1,1,1,1
+"hers","hers","function_words",2.78674212080597e-05,TRUE,5,1,1,1,1,1,0
+"beside","beside","function_words",1.95071948456418e-05,TRUE,5,1,1,1,1,1,0
+"next to","nextto","function_words",1.04502829530224e-06,TRUE,4,1,1,1,1,0,0
+"head","head","nouns",0.000503935866845746,TRUE,6,1,1,1,1,1,1
+"hair","hair","nouns",0.000466082619704798,TRUE,6,1,1,1,1,1,1
+"nose","nose","nouns",0.000394556238604112,TRUE,6,1,1,1,1,1,1
+"door","door","nouns",0.000389911668402768,TRUE,6,1,1,1,1,1,1
+"paper","paper","nouns",0.000338589167677925,TRUE,6,1,1,1,1,1,1
+"train","train","nouns",0.0002804159259061,TRUE,6,1,1,1,1,1,1
+"light","light","nouns",0.000250110105342336,TRUE,6,1,1,1,1,1,1
+"plate","plate","nouns",0.000213766343516824,TRUE,6,1,1,1,1,1,1
+"chocolate","chocolat","nouns",0.000199832632912795,TRUE,5,1,1,1,1,1,0
+"zoo","zoo","nouns",0.000182996065932925,TRUE,6,1,1,1,1,1,1
+"animal","animal","nouns",0.000173706925530239,TRUE,6,1,1,1,1,1,1
+"mouse","mouse","nouns",0.000162676071302048,TRUE,6,1,1,1,1,1,1
+"boat","boat","nouns",0.000154780301959765,TRUE,5,1,1,1,1,1,0
+"finger","finger","nouns",0.000152109674093992,TRUE,6,1,1,1,1,1,1
+"fish (animal)","fish1","nouns",0.000150600188778556,TRUE,4,1,1,1,1,0,0
+"drink (beverage)","drink1","nouns",0.000150600188778556,TRUE,4,1,1,1,1,0,0
+"french fries","frnchfrs","nouns",0.000150600188778556,TRUE,4,1,1,1,1,0,0
+"green beans","greenbns","nouns",0.000150600188778556,TRUE,4,1,1,1,1,0,0
+"watch (object)","watch1","nouns",0.000150600188778556,TRUE,4,1,1,1,1,0,0
+"water (not beverage)","water2","nouns",0.000150600188778556,TRUE,4,1,1,1,1,0,0
+"bathroom","bathroom","nouns",0.000118900997154388,TRUE,6,1,1,1,1,1,1
+"blanket","blanket","nouns",0.000101948315919485,TRUE,6,1,1,1,1,1,1
+"flower","flower","nouns",9.73037457181417e-05,TRUE,6,1,1,1,1,1,1
+"bubbles","bubbles","nouns",9.50975748725036e-05,TRUE,6,1,1,1,1,1,1
+"rain","rain","nouns",9.06852331812275e-05,TRUE,6,1,1,1,1,1,1
+"toast","toast","nouns",9.03368904161268e-05,TRUE,6,1,1,1,1,1,1
+"stairs","stairs","nouns",7.60548370469962e-05,TRUE,6,1,1,1,1,1,1
+"tummy","tummy","nouns",7.40808947114253e-05,TRUE,6,1,1,1,1,1,1
+"potty","potty","nouns",7.16424953557201e-05,TRUE,6,1,1,1,1,1,1
+"crayon","crayon","nouns",6.93202102550484e-05,TRUE,5,1,1,1,1,1,0
+"giraffe","giraffe","nouns",6.78107249396119e-05,TRUE,6,1,1,1,1,1,1
+"pillow","pillow","nouns",6.66495823892761e-05,TRUE,6,1,1,1,1,1,1
+"cracker","cracker","nouns",6.56045540939738e-05,TRUE,6,1,1,1,1,1,1
+"lamb","lamb","nouns",6.03794126174626e-05,TRUE,6,1,1,1,1,1,1
+"potato","potato","nouns",5.22514147651119e-05,TRUE,5,1,1,1,1,1,0
+"oven","oven","nouns",4.99291296644403e-05,TRUE,6,1,1,1,1,1,1
+"bedroom","bedroom","nouns",4.76068445637686e-05,TRUE,6,1,1,1,1,1,1
+"squirrel","squirrel","nouns",4.01755322416194e-05,TRUE,6,1,1,1,1,1,1
+"pickle","pickle","nouns",3.889827543625e-05,TRUE,5,1,1,1,1,1,0
+"tooth","tooth","nouns",3.83177041610821e-05,TRUE,6,1,1,1,1,1,1
+"drawer","drawer","nouns",3.62276475704776e-05,TRUE,6,1,1,1,1,1,1
+"lollipop","lollipop","nouns",3.56470762953097e-05,TRUE,5,1,1,1,1,1,0
+"pony","pony","nouns",3.16991916241679e-05,TRUE,6,1,1,1,1,1,1
+"chin","chin","nouns",2.98413635436306e-05,TRUE,5,1,1,1,1,1,0
+"vacuum","vacuum","nouns",2.29906224966492e-05,TRUE,6,1,1,1,1,1,1
+"noodles","noodles","nouns",2.28745082416157e-05,TRUE,6,1,1,1,1,1,1
+"slipper","slipper","nouns",1.63721099597351e-05,TRUE,5,1,1,1,1,1,0
+"flag","flag","nouns",1.35853678389291e-05,TRUE,5,1,1,1,1,1,0
+"tricycle","tricycle","nouns",1.2772568053694e-05,TRUE,5,1,1,1,1,1,0
+"cloud","cloud","nouns",1.24242252885933e-05,TRUE,5,1,1,1,1,1,0
+"sled","sled","nouns",1.19597682684589e-05,TRUE,5,1,1,1,1,1,0
+"vagina*","vagina","nouns",1.39337106040298e-06,TRUE,4,1,1,1,1,0,0
+"no","no","other",0.00713974942775992,TRUE,6,1,1,1,1,1,1
+"time","time","other",0.00128039189025531,TRUE,5,1,1,1,1,1,0
+"hi","hi","other",0.000836138750496824,TRUE,6,1,1,1,1,1,1
+"wait","wait","other",0.000777849394469966,TRUE,6,1,1,1,1,1,1
+"today","today","other",0.000754858771973317,TRUE,6,1,1,1,1,1,1
+"please","please","other",0.000710503126550488,TRUE,6,1,1,1,1,1,1
+"day","day","other",0.000581848531973279,TRUE,6,1,1,1,1,1,1
+"people","people","other",0.00057894567559744,TRUE,6,1,1,1,1,1,1
+"hello","hello","other",0.000521004662335682,TRUE,6,1,1,1,1,1,1
+"before","before","other",0.000468521019060503,TRUE,5,1,1,1,1,1,0
+"morning","morning","other",0.000347646079570544,TRUE,6,1,1,1,1,1,1
+"bye","bye","other",0.000304916033718186,TRUE,6,1,1,1,1,1,1
+"later","later","other",0.000256031932349048,TRUE,6,1,1,1,1,1,1
+"dinner","dinner","other",0.00023176405304703,TRUE,6,1,1,1,1,1,1
+"lunch","lunch","other",0.000212837429476556,TRUE,6,1,1,1,1,1,1
+"breakfast","breakfst","other",0.000203316060563802,TRUE,6,1,1,1,1,1,1
+"yesterday","yesterdy","other",0.000203083832053735,TRUE,5,1,1,1,1,1,0
+"moo","moo","other",0.000152922473879227,TRUE,6,1,1,1,1,1,1
+"teddy bear","teddyber","other",0.000150600188778556,TRUE,4,1,1,1,1,0,0
+"fire truck","firetrck","other",0.000150600188778556,TRUE,4,1,1,1,1,0,0
+"potato chips","potatchp","other",0.000150600188778556,TRUE,4,1,1,1,1,0,0
+"call (on phone)","callnphn","other",0.000150600188778556,TRUE,4,1,1,1,1,0,0
+"gimme five","givemefv","other",0.000150600188778556,TRUE,4,1,1,1,1,0,0
+"gonna get you","gonnagty","other",0.000150600188778556,TRUE,4,1,1,1,1,0,0
+"shh/shush/hush","shh","other",0.000150600188778556,TRUE,4,1,1,1,1,0,0
+"turn around","turnarnd","other",0.000150600188778556,TRUE,4,1,1,1,1,0,0
+"grandma*","grandma","other",0.000150484074523522,TRUE,5,1,1,1,1,0,1
+"bath","bath","other",0.000147581218147683,TRUE,6,1,1,1,1,1,1
+"farm","farm","other",0.000141311048375869,TRUE,5,1,1,1,1,1,0
+"brother","brother","other",0.000138524306255063,TRUE,6,1,1,1,1,1,1
+"doctor","doctor","other",0.00013678259242956,TRUE,5,1,1,1,1,1,0
+"person","person","other",0.000132834707758418,TRUE,6,1,1,1,1,1,1
+"meow","meow","other",0.000106941228885929,TRUE,6,1,1,1,1,1,1
+"snack","snack","other",7.68676368322313e-05,TRUE,5,1,1,1,1,1,0
+"uncle","uncle","other",6.9436324510082e-05,TRUE,6,1,1,1,1,1,1
+"grandpa*","grandpa","other",6.66495823892761e-05,TRUE,5,1,1,1,1,0,1
+"choo choo","choochoo","other",4.66779305235e-05,TRUE,5,1,1,1,1,0,1
+"night night","nghtnght","other",4.65618162684664e-05,TRUE,5,1,1,1,1,0,1
+"pancakes","pancake","other",3.80854756510149e-05,TRUE,4,1,1,1,1,0,0
+"cowboy","cowboy","other",3.56470762953097e-05,TRUE,5,1,1,1,1,1,0
+"fireman","fireman","other",2.79835354630933e-05,TRUE,5,1,1,1,1,1,0
+"woods","woods","other",2.25261654765149e-05,TRUE,5,1,1,1,1,1,0
+"camping","camping","other",1.82299380402724e-05,TRUE,5,1,1,1,1,1,0
+"woof woof","woofwoof","other",8.12799785235074e-06,TRUE,5,1,1,1,1,0,1
+"baa baa","baabaa","other",4.64457020134328e-06,TRUE,5,1,1,1,1,0,1
+"patty cake","patycak","other",3.83177041610821e-06,TRUE,4,1,1,1,1,0,0
+"grrr","grr","other",1.04502829530224e-06,TRUE,6,1,1,1,1,1,1
+"cock-a-doodle-doo","cockddld","other",1.04502829530224e-06,TRUE,5,1,1,1,1,0,1
+"have","have","predicates",0.00566881404499451,TRUE,5,1,1,1,1,1,0
+"help","help","predicates",0.00081233532821494,TRUE,6,1,1,1,1,1,1
+"pretty","pretty","predicates",0.000770998653422984,TRUE,6,1,1,1,1,1,1
+"find","find","predicates",0.000722579009073981,TRUE,5,1,1,1,1,1,0
+"first","first","predicates",0.000696104958926324,TRUE,5,1,1,1,1,1,0
+"show","show","predicates",0.000619817893369261,TRUE,6,1,1,1,1,1,1
+"hold","hold","predicates",0.00058707367344979,TRUE,5,1,1,1,1,1,0
+"open","open","predicates",0.000584170817073951,TRUE,6,1,1,1,1,1,1
+"green","green","predicates",0.000521004662335682,TRUE,5,1,1,1,1,1,0
+"stop","stop","predicates",0.000482919186684667,TRUE,6,1,1,1,1,1,1
+"last","last","predicates",0.000481177472859164,TRUE,5,1,1,1,1,1,0
+"new","new","predicates",0.00047618455989272,TRUE,5,1,1,1,1,1,0
+"pick","pick","predicates",0.000438563541261839,TRUE,5,1,1,1,1,1,0
+"throw","throw","predicates",0.000377487443114175,TRUE,6,1,1,1,1,1,1
+"bad","bad","predicates",0.000339169738953093,TRUE,6,1,1,1,1,1,1
+"write","write","predicates",0.000309444489664496,TRUE,6,1,1,1,1,1,1
+"fall","fall","predicates",0.000293885179489996,TRUE,6,1,1,1,1,1,1
+"happy","happy","predicates",0.000285292724617511,TRUE,6,1,1,1,1,1,1
+"touch","touch","predicates",0.000273565184859119,TRUE,6,1,1,1,1,1,1
+"finish","finish","predicates",0.000266249986792004,TRUE,6,1,1,1,1,1,1
+"bite","bite","predicates",0.000241749878979918,TRUE,6,1,1,1,1,1,1
+"sing","sing","predicates",0.000239775936644347,TRUE,6,1,1,1,1,1,1
+"stand","stand","predicates",0.000238034222818843,TRUE,5,1,1,1,1,1,0
+"ride","ride","predicates",0.000234783023677903,TRUE,6,1,1,1,1,1,1
+"jump","jump","predicates",0.000204012746094004,TRUE,6,1,1,1,1,1,1
+"dirty","dirty","predicates",0.000192749663355746,TRUE,6,1,1,1,1,1,1
+"run","run","predicates",0.000191007949530242,TRUE,6,1,1,1,1,1,1
+"brown","brown","predicates",0.000190775721020175,TRUE,5,1,1,1,1,1,0
+"fast","fast","predicates",0.000166159498953056,TRUE,6,1,1,1,1,1,1
+"cook","cook","predicates",0.000164185556617485,TRUE,5,1,1,1,1,1,0
+"wet","wet","predicates",0.000158960415140974,TRUE,6,1,1,1,1,1,1
+"drink (action)","drink2","predicates",0.000150600188778556,TRUE,4,1,1,1,1,0,0
+"dry (action)","dry1","predicates",0.000150600188778556,TRUE,4,1,1,1,1,0,0
+"slide (action)","slide2","predicates",0.000150600188778556,TRUE,4,1,1,1,1,0,0
+"work (action)","work2","predicates",0.000150600188778556,TRUE,4,1,1,1,1,0,0
+"dry (description)","dry2","predicates",0.000150600188778556,TRUE,4,1,1,1,1,0,0
+"drive","drive","predicates",0.000139917677315466,TRUE,6,1,1,1,1,1,1
+"dance","dance","predicates",0.000117623740349019,TRUE,6,1,1,1,1,1,1
+"loud","loud","predicates",9.39364323221678e-05,TRUE,5,1,1,1,1,1,0
+"hide","hide","predicates",8.98724333959925e-05,TRUE,5,1,1,1,1,1,0
+"cry","cry","predicates",8.58084344698171e-05,TRUE,6,1,1,1,1,1,1
+"carry","carry","predicates",8.24411210738432e-05,TRUE,5,1,1,1,1,1,0
+"climb","climb","predicates",7.80287793825671e-05,TRUE,5,1,1,1,1,1,0
+"gentle","gentle","predicates",7.41970089664589e-05,TRUE,6,1,1,1,1,1,1
+"sticky","sticky","predicates",6.32822689933022e-05,TRUE,5,1,1,1,1,1,0
+"splash","splash","predicates",4.90002156241716e-05,TRUE,6,1,1,1,1,1,1
+"smile","smile","predicates",3.65759903355783e-05,TRUE,6,1,1,1,1,1,1
+"tear","tear","predicates",3.30925626845709e-05,TRUE,5,1,1,1,1,1,0
+"naughty","naughty","predicates",2.06683373959776e-05,TRUE,6,1,1,1,1,1,1
+"sweep","sweep","predicates",1.55593101745e-05,TRUE,5,1,1,1,1,1,0
+"you","you","function_words",0.0437818087744524,FALSE,6,1,1,1,1,1,1
+"the","the","function_words",0.0327891561361681,FALSE,5,1,1,1,1,1,0
+"a","a","function_words",0.0229017950915485,FALSE,5,1,1,1,1,1,0
+"i",NA,"function_words",0.0181027929310106,FALSE,1,0,0,0,0,1,0
+"and","andconn","function_words",0.0163419202534263,FALSE,5,1,1,1,1,1,0
+"that","that","function_words",0.0162355595958156,FALSE,6,1,1,1,1,1,1
+"to","toprep","function_words",0.0138600941663385,FALSE,5,1,1,1,1,1,0
+"do","do","function_words",0.011365147168432,FALSE,5,1,1,1,1,1,0
+"this","this","function_words",0.0100787173369149,FALSE,6,1,1,1,1,1,1
+"in",NA,"function_words",0.00984602436982762,FALSE,5,1,1,1,0,1,1
+"your","your","function_words",0.00752060418427007,FALSE,6,1,1,1,1,1,1
+"he","he","function_words",0.00714056222754516,FALSE,5,1,1,1,1,1,0
+"we","we","function_words",0.00688325303839074,FALSE,5,1,1,1,1,1,0
+"up","upprep","function_words",0.00429007338072575,FALSE,6,1,1,1,1,1,1
+"she","she","function_words",0.0042324807102291,FALSE,5,1,1,1,1,1,0
+"not","notquant","function_words",0.00415630975892707,FALSE,6,1,1,1,1,1,1
+"so","soconn","function_words",0.00415282633127606,FALSE,5,1,1,1,1,1,0
+"they","they","function_words",0.00400768351248408,FALSE,5,1,1,1,1,1,0
+"was","was","function_words",0.00395728992579951,FALSE,5,1,1,1,1,1,0
+"be","be","function_words",0.00323831045863157,FALSE,5,1,1,1,1,1,0
+"some","some","function_words",0.00321857103527586,FALSE,6,1,1,1,1,1,1
+"but","but","function_words",0.0031309047727255,FALSE,5,1,1,1,1,1,0
+"where","where","function_words",0.00263683861755761,FALSE,6,1,1,1,1,1,1
+"does","does","function_words",0.00222161404155752,FALSE,5,1,1,1,1,1,0
+"then","thenconn","function_words",0.00213661840687294,FALSE,5,1,1,1,1,1,0
+"his","his","function_words",0.00212512309562462,FALSE,6,1,1,1,1,1,1
+"him","him","function_words",0.00206857545342326,FALSE,5,1,1,1,1,1,0
+"over","over","function_words",0.00199913912891318,FALSE,5,1,1,1,1,1,0
+"who","who","function_words",0.00195664131157089,FALSE,6,1,1,1,1,1,1
+"why","why","function_words",0.00193295400354404,FALSE,6,1,1,1,1,1,1
+"would","would","function_words",0.00173811428359769,FALSE,5,1,1,1,1,1,0
+"these","these","function_words",0.00160075111989296,FALSE,5,1,1,1,1,1,0
+"those","those","function_words",0.00156545238636275,FALSE,5,1,1,1,1,1,0
+"off","off","function_words",0.0014179872824701,FALSE,6,1,1,1,1,1,1
+"an","an","function_words",0.00108415879924855,FALSE,5,1,1,1,1,1,0
+"any","any","function_words",0.000998002022013637,FALSE,5,1,1,1,1,1,0
+"much","much","function_words",0.000853788117261928,FALSE,5,1,1,1,1,1,0
+"our","our","function_words",0.000586493102174623,FALSE,5,1,1,1,1,1,0
+"us","us","function_words",0.000516360092134339,FALSE,5,1,1,1,1,1,0
+"under","underprep","function_words",0.00033615076832222,FALSE,6,1,1,1,1,1,1
+"inside",NA,"function_words",0.000323145971758459,FALSE,2,0,0,0,0,1,1
+"same","same","function_words",0.000323029857503425,FALSE,6,1,1,1,1,1,1
+"mine","mine","function_words",0.000251735704912806,FALSE,6,1,1,1,1,1,1
+"yourself","yourself","function_words",0.000248368391516832,FALSE,5,1,1,1,1,1,0
+"behind","behind","function_words",0.000214463029047026,FALSE,5,1,1,1,1,1,0
+"on_top_of",NA,"function_words",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"can.auxiliary",NA,"function_words",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"on top of","ontopof","function_words",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"can (auxiliary)","can2","function_words",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"did/did ya","did","function_words",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"gonna/going to","gonna","function_words",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"hafta/have to","hafta","function_words",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"lemme/let me","lemme","function_words",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"a_lot",NA,"function_words",4.92324441342388e-05,FALSE,1,0,0,0,0,1,0
+"a lot","alot","function_words",4.92324441342388e-05,FALSE,4,1,1,1,1,0,0
+"above","above","function_words",3.46020480000074e-05,FALSE,5,1,1,1,1,1,0
+"next_to",NA,"function_words",1.04502829530224e-06,FALSE,1,0,0,0,0,1,0
+"book","book","nouns",0.00145328601600031,FALSE,6,1,1,1,1,1,1
+"house","house","nouns",0.00090569118926194,FALSE,6,1,1,1,1,1,1
+"home","home","nouns",0.000850885260886089,FALSE,6,1,1,1,1,1,1
+"car","car","nouns",0.000848562975785417,FALSE,6,1,1,1,1,1,1
+"ball","ball","nouns",0.000708064727194783,FALSE,6,1,1,1,1,1,1
+"food","food","nouns",0.000667308623677996,FALSE,6,1,1,1,1,1,1
+"bear","bear","nouns",0.000616798922738388,FALSE,6,1,1,1,1,1,1
+"school","school","nouns",0.000597059499382679,FALSE,6,1,1,1,1,1,1
+"dog","dog","nouns",0.000545040313127634,FALSE,6,1,1,1,1,1,1
+"mouth","mouth","nouns",0.000529132660188033,FALSE,6,1,1,1,1,1,1
+"juice","juice","nouns",0.000523443061691388,FALSE,6,1,1,1,1,1,1
+"milk","milk","nouns",0.000505329237906149,FALSE,6,1,1,1,1,1,1
+"cat","cat","nouns",0.000492788898362522,FALSE,6,1,1,1,1,1,1
+"box","box","nouns",0.000489653813476615,FALSE,6,1,1,1,1,1,1
+"hand","hand","nouns",0.000475023417342384,FALSE,6,1,1,1,1,1,1
+"picture","picture","nouns",0.000474675074577283,FALSE,6,1,1,1,1,1,1
+"bed","bed","nouns",0.000472933360751779,FALSE,6,1,1,1,1,1,1
+"chair","chair","nouns",0.000467475990765201,FALSE,6,1,1,1,1,1,1
+"story","story","nouns",0.000465734276939697,FALSE,5,1,1,1,1,1,0
+"room","room","nouns",0.000459464107167884,FALSE,5,1,1,1,1,1,0
+"hat","hat","nouns",0.000421610860026936,FALSE,6,1,1,1,1,1,1
+"table","table","nouns",0.000417779089610828,FALSE,6,1,1,1,1,1,1
+"truck","truck","nouns",0.000389679439892701,FALSE,6,1,1,1,1,1,1
+"kitty","kitty","nouns",0.000386660469261828,FALSE,6,1,1,1,1,1,1
+"cheese","cheese","nouns",0.000371913958872563,FALSE,6,1,1,1,1,1,1
+"cookie","cookie","nouns",0.000353684020832291,FALSE,6,1,1,1,1,1,1
+"cup","cup","nouns",0.000352638992536988,FALSE,6,1,1,1,1,1,1
+"spoon","spoon","nouns",0.000343001509369201,FALSE,6,1,1,1,1,1,1
+"outside","outside","nouns",0.000332086769396044,FALSE,6,1,1,1,1,1,1
+"bird","bird","nouns",0.000320010886872552,FALSE,6,1,1,1,1,1,1
+"face","face","nouns",0.000318153058792015,FALSE,6,1,1,1,1,1,1
+"tape","tape","nouns",0.00030050369202691,FALSE,5,1,1,1,1,1,0
+"duck","duck","nouns",0.000297833064161138,FALSE,6,1,1,1,1,1,1
+"bunny","bunny","nouns",0.000293885179489996,FALSE,6,1,1,1,1,1,1
+"pizza","pizza","nouns",0.000290169523328921,FALSE,6,1,1,1,1,1,1
+"cow","cow","nouns",0.000284479924832276,FALSE,6,1,1,1,1,1,1
+"foot","feet","nouns",0.000284131582067175,FALSE,6,1,1,1,1,1,1
+"tree","tree","nouns",0.000275190784429589,FALSE,6,1,1,1,1,1,1
+"bottle","bottle","nouns",0.000268920614657776,FALSE,6,1,1,1,1,1,1
+"apple","apple","nouns",0.000268107814872541,FALSE,6,1,1,1,1,1,1
+"horse","horse","nouns",0.000263579358926231,FALSE,6,1,1,1,1,1,1
+"bus","bus","nouns",0.000248020048751731,FALSE,6,1,1,1,1,1,1
+"ice","ice","nouns",0.000245581649396026,FALSE,5,1,1,1,1,1,0
+"cake","cake","nouns",0.000243143250040321,FALSE,6,1,1,1,1,1,1
+"bread","bread","nouns",0.000242678793020186,FALSE,6,1,1,1,1,1,1
+"moon","moon","nouns",0.000238150337073877,FALSE,6,1,1,1,1,1,1
+"egg","egg","nouns",0.000233737995382601,FALSE,6,1,1,1,1,1,1
+"money","money","nouns",0.000232344624322198,FALSE,6,1,1,1,1,1,1
+"peas","peas","nouns",0.000228512853906089,FALSE,6,1,1,1,1,1,1
+"shirt","shirt","nouns",0.000228048396885955,FALSE,6,1,1,1,1,1,1
+"store","store","nouns",0.000223287712429578,FALSE,6,1,1,1,1,1,1
+"game","game","nouns",0.000221894341369175,FALSE,5,1,1,1,1,1,0
+"elephant","elephant","nouns",0.000215856400107429,FALSE,6,1,1,1,1,1,1
+"pig","pig","nouns",0.000211327944161119,FALSE,6,1,1,1,1,1,1
+"coffee","coffee","nouns",0.000204593317369171,FALSE,6,1,1,1,1,1,1
+"doll","doll","nouns",0.000203199946308768,FALSE,6,1,1,1,1,1,1
+"stick","stick","nouns",0.000193098006120847,FALSE,5,1,1,1,1,1,0
+"kitchen","kitchen","nouns",0.00018543446528863,FALSE,6,1,1,1,1,1,1
+"balloon","balloon","nouns",0.000184041094228227,FALSE,6,1,1,1,1,1,1
+"frog","frog","nouns",0.000183576637208093,FALSE,6,1,1,1,1,1,1
+"shoe","shoe","nouns",0.00017765481020138,FALSE,6,1,1,1,1,1,1
+"pants","pants","nouns",0.000170107383624198,FALSE,6,1,1,1,1,1,1
+"puppy","puppy","nouns",0.000169294583838963,FALSE,6,1,1,1,1,1,1
+"bowl","bowl","nouns",0.000166972298738291,FALSE,6,1,1,1,1,1,1
+"party","party","nouns",0.000164882242147686,FALSE,6,1,1,1,1,1,1
+"butter","butter","nouns",0.000162327728536948,FALSE,6,1,1,1,1,1,1
+"sheep","sheep","nouns",0.000159889329181242,FALSE,6,1,1,1,1,1,1
+"brush","brush","nouns",0.000155128644724866,FALSE,6,1,1,1,1,1,1
+"sun","sun","nouns",0.000153038588134261,FALSE,6,1,1,1,1,1,1
+"chicken.animal",NA,"nouns",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"fish.animal",NA,"nouns",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"play_dough",NA,"nouns",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"chicken.food",NA,"nouns",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"drink.beverage",NA,"nouns",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"fish.food",NA,"nouns",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"french_fries",NA,"nouns",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"green_beans",NA,"nouns",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"ice_cream",NA,"nouns",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"orange.food",NA,"nouns",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"peanut_butter",NA,"nouns",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"potato_chip",NA,"nouns",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"water.beverage",NA,"nouns",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"belly_button",NA,"nouns",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"can.object",NA,"nouns",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"watch.object",NA,"nouns",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"high_chair",NA,"nouns",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"living_room",NA,"nouns",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"play_pen",NA,"nouns",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"rocking_chair",NA,"nouns",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"washing_machine",NA,"nouns",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"lawn_mower",NA,"nouns",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"slide.object",NA,"nouns",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"swing.object",NA,"nouns",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"water.not_beverage",NA,"nouns",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"work.place",NA,"nouns",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"chicken (animal)","chicken1","nouns",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"play dough","playdogh","nouns",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"toy (object)","toy","nouns",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"chicken (food)","chicken2","nouns",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"fish (food)","fish2","nouns",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"ice cream","icecream","nouns",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"orange (food)","orange1","nouns",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"peanut butter","pentbttr","nouns",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"soda/pop","soda","nouns",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"water (beverage)","water1","nouns",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"dress (object)","dress","nouns",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"belly button","bllybttn","nouns",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"buttocks/bottom*","buttocks","nouns",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"owie/boo boo","owie","nouns",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"can (object)","can1","nouns",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"tissue/kleenex","tissue","nouns",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"high chair","highchar","nouns",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"living room","livingrm","nouns",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"play pen","playpen","nouns",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"rocking chair","rockingchair","nouns",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"washing machine","washingmachine","nouns",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"lawn mower","lawnmowr","nouns",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"slide (object)","slide1","nouns",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"swing (object)","swing1","nouns",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"work (place)","work1","nouns",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"window","window","nouns",0.000148510132187951,FALSE,6,1,1,1,1,1,1
+"spaghetti","spaghett","nouns",0.000148277903677884,FALSE,6,1,1,1,1,1,1
+"lion","lion","nouns",0.000147697332402716,FALSE,6,1,1,1,1,1,1
+"puzzle","puzzle","nouns",0.00014653618985238,FALSE,5,1,1,1,1,1,0
+"snow","snow","nouns",0.000145607275812112,FALSE,6,1,1,1,1,1,1
+"airplane","airplane","nouns",0.000143633333476541,FALSE,6,1,1,1,1,1,1
+"keys","keys","nouns",0.000143401104966474,FALSE,6,1,1,1,1,1,1
+"eye","eye","nouns",0.000143168876456407,FALSE,6,1,1,1,1,1,1
+"corn","corn","nouns",0.000139917677315466,FALSE,5,1,1,1,1,1,0
+"button","button","nouns",0.000139801563060433,FALSE,6,1,1,1,1,1,1
+"soup","soup","nouns",0.000136434249664459,FALSE,5,1,1,1,1,1,0
+"monkey","monkey","nouns",0.000134692535838955,FALSE,6,1,1,1,1,1,1
+"owl","owl","nouns",0.000133183050523519,FALSE,6,1,1,1,1,1,1
+"clock","clock","nouns",0.000132834707758418,FALSE,6,1,1,1,1,1,1
+"diaper","diaper","nouns",0.000131441336698015,FALSE,6,1,1,1,1,1,1
+"banana","banana","nouns",0.000127493452026873,FALSE,6,1,1,1,1,1,1
+"cereal","cereal","nouns",0.00012610008096647,FALSE,6,1,1,1,1,1,1
+"bee","bee","nouns",0.000124938938416134,FALSE,6,1,1,1,1,1,1
+"tv",NA,"nouns",0.000124590595651033,FALSE,1,0,0,0,0,1,0
+"TV","tv","nouns",0.000124590595651033,FALSE,5,1,1,1,1,0,1
+"street","street","nouns",0.000124010024375866,FALSE,5,1,1,1,1,1,0
+"meat","meat","nouns",0.000122616653315463,FALSE,6,1,1,1,1,1,1
+"sandwich","sandwich","nouns",0.000122616653315463,FALSE,5,1,1,1,1,1,0
+"butterfly","buttrfly","nouns",0.00011832042587922,FALSE,6,1,1,1,1,1,1
+"block","block","nouns",0.000115998140778548,FALSE,6,1,1,1,1,1,1
+"arm","arm","nouns",0.000114953112483246,FALSE,6,1,1,1,1,1,1
+"turtle","turtle","nouns",0.000108682942711433,FALSE,6,1,1,1,1,1,1
+"telephone","telephon","nouns",0.000108566828456399,FALSE,6,1,1,1,1,1,1
+"leg","leg","nouns",0.000106941228885929,FALSE,6,1,1,1,1,1,1
+"park","park","nouns",0.000105431743570492,FALSE,6,1,1,1,1,1,1
+"glass","glass","nouns",0.000104851172295325,FALSE,6,1,1,1,1,1,1
+"basket","basket","nouns",0.000102877229959754,FALSE,5,1,1,1,1,1,0
+"rock","rock","nouns",0.000100787173369149,FALSE,6,1,1,1,1,1,1
+"camera","camera","nouns",0.000100322716349015,FALSE,5,1,1,1,1,1,0
+"beach","beach","nouns",9.78843169933096e-05,FALSE,6,1,1,1,1,1,1
+"zebra","zebra","nouns",9.66070601879402e-05,FALSE,5,1,1,1,1,1,0
+"pumpkin","pumpkin","nouns",9.6374831677873e-05,FALSE,5,1,1,1,1,1,0
+"pen","pen","nouns",9.40525465772014e-05,FALSE,6,1,1,1,1,1,1
+"beans","beans","nouns",9.34719753020335e-05,FALSE,5,1,1,1,1,1,0
+"present","present","nouns",9.20786042416305e-05,FALSE,5,1,1,1,1,1,0
+"ear","ear","nouns",9.20786042416305e-05,FALSE,6,1,1,1,1,1,1
+"star","star","nouns",9.11496902013619e-05,FALSE,6,1,1,1,1,1,1
+"grass","grass","nouns",8.89435193557238e-05,FALSE,5,1,1,1,1,1,0
+"pencil","pencil","nouns",8.7782376805388e-05,FALSE,5,1,1,1,1,1,0
+"candy","candy","nouns",8.67373485100857e-05,FALSE,6,1,1,1,1,1,1
+"bug","bug","nouns",8.41828348993469e-05,FALSE,6,1,1,1,1,1,1
+"sky","sky","nouns",8.41828348993469e-05,FALSE,6,1,1,1,1,1,1
+"glasses","glasses","nouns",8.31378066040447e-05,FALSE,6,1,1,1,1,1,1
+"tiger","tiger","nouns",8.09316357584066e-05,FALSE,6,1,1,1,1,1,1
+"coat","coat","nouns",8.09316357584066e-05,FALSE,6,1,1,1,1,1,1
+"carrots","carrots","nouns",7.90738076778693e-05,FALSE,6,1,1,1,1,1,1
+"garbage","garbage","nouns",7.7215979597332e-05,FALSE,5,1,1,1,1,1,0
+"towel","towel","nouns",7.51259230067276e-05,FALSE,6,1,1,1,1,1,1
+"boots","boots","nouns",7.39647804563917e-05,FALSE,6,1,1,1,1,1,1
+"strawberry","strwbrry","nouns",7.10619240805522e-05,FALSE,5,1,1,1,1,1,0
+"yogurt","yogurt","nouns",7.09458098255186e-05,FALSE,5,1,1,1,1,1,0
+"donkey","donkey","nouns",6.95524387651156e-05,FALSE,6,1,1,1,1,1,1
+"tongue","tongue","nouns",6.95524387651156e-05,FALSE,6,1,1,1,1,1,1
+"garden","garden","nouns",6.9436324510082e-05,FALSE,6,1,1,1,1,1,1
+"refrigerator","refrigerator","nouns",6.90879817449813e-05,FALSE,6,1,1,1,1,1,1
+"pool","pool","nouns",6.87396389798805e-05,FALSE,6,1,1,1,1,1,1
+"hammer","hammer","nouns",6.82751819597462e-05,FALSE,6,1,1,1,1,1,1
+"couch","couch","nouns",6.78107249396119e-05,FALSE,6,1,1,1,1,1,1
+"fork","fork","nouns",6.76946106845783e-05,FALSE,6,1,1,1,1,1,1
+"stove","stove","nouns",6.69979251543768e-05,FALSE,6,1,1,1,1,1,1
+"comb","comb","nouns",6.50239828188059e-05,FALSE,6,1,1,1,1,1,1
+"wind","wind","nouns",6.50239828188059e-05,FALSE,5,1,1,1,1,1,0
+"tractor","tractor","nouns",6.46756400537052e-05,FALSE,5,1,1,1,1,1,0
+"salt","salt","nouns",6.33983832483358e-05,FALSE,5,1,1,1,1,1,0
+"turkey","turkey","nouns",6.28178119731679e-05,FALSE,6,1,1,1,1,1,1
+"hamburger","hamburgr","nouns",6.10760981476641e-05,FALSE,5,1,1,1,1,1,0
+"garage","garage","nouns",6.0843869637597e-05,FALSE,6,1,1,1,1,1,1
+"sock","sock","nouns",6.00310698523619e-05,FALSE,6,1,1,1,1,1,1
+"popcorn","popcorn","nouns",5.95666128322276e-05,FALSE,5,1,1,1,1,1,0
+"medicine","medicine","nouns",5.91021558120932e-05,FALSE,6,1,1,1,1,1,1
+"trash","trash","nouns",5.88699273020261e-05,FALSE,6,1,1,1,1,1,1
+"knife","knife","nouns",5.74765562416231e-05,FALSE,5,1,1,1,1,1,0
+"jacket","jacket","nouns",5.73604419865895e-05,FALSE,6,1,1,1,1,1,1
+"napkin","napkin","nouns",5.55026139060522e-05,FALSE,5,1,1,1,1,1,0
+"pajamas","pajamas","nouns",5.3877014335582e-05,FALSE,6,1,1,1,1,1,1
+"sweater","sweater","nouns",5.35286715704813e-05,FALSE,6,1,1,1,1,1,1
+"soap","soap","nouns",5.31803288053805e-05,FALSE,6,1,1,1,1,1,1
+"toe","toe","nouns",5.27158717852462e-05,FALSE,6,1,1,1,1,1,1
+"closet","closet","nouns",5.09741579597425e-05,FALSE,5,1,1,1,1,1,0
+"sauce","sauce","nouns",5.08580437047089e-05,FALSE,5,1,1,1,1,1,0
+"rooster","rooster","nouns",5.03935866845746e-05,FALSE,5,1,1,1,1,1,0
+"bathtub","bathtub","nouns",4.98130154094067e-05,FALSE,6,1,1,1,1,1,1
+"alligator","alligatr","nouns",4.90002156241716e-05,FALSE,5,1,1,1,1,1,0
+"bat","bat","nouns",4.83035300939701e-05,FALSE,5,1,1,1,1,1,0
+"goose","goose","nouns",4.80713015839029e-05,FALSE,6,1,1,1,1,1,1
+"sink","sink","nouns",4.79551873288694e-05,FALSE,6,1,1,1,1,1,1
+"plant","plant","nouns",4.76068445637686e-05,FALSE,6,1,1,1,1,1,1
+"motorcycle","motrcycl","nouns",4.66779305235e-05,FALSE,6,1,1,1,1,1,1
+"bucket","bucket","nouns",4.55167879731641e-05,FALSE,5,1,1,1,1,1,0
+"bicycle","bicycle","nouns",4.50523309530298e-05,FALSE,6,1,1,1,1,1,1
+"ladder","ladder","nouns",4.47039881879291e-05,FALSE,5,1,1,1,1,1,0
+"church",NA,"nouns",4.44717596778619e-05,FALSE,1,0,0,0,0,1,0
+"church*","church","nouns",4.44717596778619e-05,FALSE,5,1,1,1,1,0,1
+"snowman","snowman","nouns",4.29622743624253e-05,FALSE,5,1,1,1,1,1,0
+"roof","roof","nouns",4.22655888322238e-05,FALSE,5,1,1,1,1,1,0
+"gum","gum","nouns",4.14527890469888e-05,FALSE,5,1,1,1,1,1,0
+"jelly","jelly","nouns",4.04077607516865e-05,FALSE,5,1,1,1,1,1,0
+"grapes","grapes","nouns",3.9711075221485e-05,FALSE,5,1,1,1,1,1,0
+"knee","knee","nouns",3.95949609664515e-05,FALSE,6,1,1,1,1,1,1
+"scissors","scissors","nouns",3.93627324563843e-05,FALSE,6,1,1,1,1,1,1
+"muffin","muffin","nouns",3.92466182013507e-05,FALSE,5,1,1,1,1,1,0
+"bib","bib","nouns",3.90143896912835e-05,FALSE,6,1,1,1,1,1,1
+"penguin","penguin","nouns",3.889827543625e-05,FALSE,6,1,1,1,1,1,1
+"dish","dish","nouns",3.82015899060485e-05,FALSE,6,1,1,1,1,1,1
+"shower","shower","nouns",3.80854756510149e-05,FALSE,5,1,1,1,1,1,0
+"wolf","wolf","nouns",3.68082188456455e-05,FALSE,5,1,1,1,1,1,0
+"tray","tray","nouns",3.6111533315444e-05,FALSE,5,1,1,1,1,1,0
+"deer","deer","nouns",3.56470762953097e-05,FALSE,6,1,1,1,1,1,1
+"crib","crib","nouns",3.50665050201418e-05,FALSE,6,1,1,1,1,1,1
+"purse","purse","nouns",3.48342765100746e-05,FALSE,6,1,1,1,1,1,1
+"cheerios","cheerios","nouns",3.44859337449739e-05,FALSE,6,1,1,1,1,1,1
+"beads","beads","nouns",3.41375909798731e-05,FALSE,6,1,1,1,1,1,1
+"glue","glue","nouns",3.35570197047052e-05,FALSE,5,1,1,1,1,1,0
+"broom","broom","nouns",3.35570197047052e-05,FALSE,6,1,1,1,1,1,1
+"penny","penny","nouns",3.35570197047052e-05,FALSE,6,1,1,1,1,1,1
+"radio","radio","nouns",3.23958771543694e-05,FALSE,6,1,1,1,1,1,1
+"belt","belt","nouns",3.20475343892686e-05,FALSE,5,1,1,1,1,1,0
+"zipper","zipper","nouns",3.16991916241679e-05,FALSE,6,1,1,1,1,1,1
+"nuts","nuts","nouns",3.12347346040336e-05,FALSE,5,1,1,1,1,1,0
+"necklace","necklace","nouns",2.98413635436306e-05,FALSE,6,1,1,1,1,1,1
+"shovel","shovel","nouns",2.9725249288597e-05,FALSE,6,1,1,1,1,1,1
+"applesauce",NA,"nouns",2.93769065234962e-05,FALSE,1,0,0,0,0,1,0
+"nail","nail","nouns",2.86802209932947e-05,FALSE,5,1,1,1,1,1,0
+"mittens","mittens","nouns",2.82157639731604e-05,FALSE,5,1,1,1,1,1,0
+"jar","jar","nouns",2.78674212080597e-05,FALSE,5,1,1,1,1,1,0
+"hen","hen","nouns",2.74029641879253e-05,FALSE,5,1,1,1,1,1,0
+"vanilla","vanilla","nouns",2.71707356778582e-05,FALSE,5,1,1,1,1,1,0
+"pretzel","pretzel","nouns",2.70546214228246e-05,FALSE,5,1,1,1,1,1,0
+"stroller","stroller","nouns",2.68223929127574e-05,FALSE,6,1,1,1,1,1,1
+"helicopter","helicptr","nouns",2.64740501476567e-05,FALSE,5,1,1,1,1,1,0
+"toothbrush","tothbrsh","nouns",2.54290218523545e-05,FALSE,6,1,1,1,1,1,1
+"hose","hose","nouns",2.36873080268507e-05,FALSE,5,1,1,1,1,1,0
+"ant","ant","nouns",2.333896526175e-05,FALSE,5,1,1,1,1,1,0
+"gloves","gloves","nouns",2.31067367516828e-05,FALSE,5,1,1,1,1,1,0
+"bench","bench","nouns",2.25261654765149e-05,FALSE,5,1,1,1,1,1,0
+"moose","moose","nouns",2.21778227114142e-05,FALSE,5,1,1,1,1,1,0
+"tuna","tuna","nouns",2.15972514362463e-05,FALSE,5,1,1,1,1,1,0
+"lips","lips","nouns",2.15972514362463e-05,FALSE,5,1,1,1,1,1,0
+"chalk","chalk","nouns",2.13650229261791e-05,FALSE,5,1,1,1,1,1,0
+"pancake",NA,"nouns",2.09005659060448e-05,FALSE,1,0,0,0,0,1,0
+"shorts","shorts","nouns",2.04361088859104e-05,FALSE,6,1,1,1,1,1,1
+"stone","stone","nouns",1.99716518657761e-05,FALSE,5,1,1,1,1,1,0
+"raisin","raisin","nouns",1.98555376107425e-05,FALSE,6,1,1,1,1,1,1
+"sandbox","sandbox","nouns",1.96233091006754e-05,FALSE,5,1,1,1,1,1,0
+"backyard","backyard","nouns",1.93910805906082e-05,FALSE,6,1,1,1,1,1,1
+"popsicle","popsicle","nouns",1.76493667651045e-05,FALSE,5,1,1,1,1,1,0
+"shoulder","shoulder","nouns",1.75332525100709e-05,FALSE,5,1,1,1,1,1,0
+"basement","basement","nouns",1.74171382550373e-05,FALSE,5,1,1,1,1,1,0
+"jello","jello","nouns",1.67204527248358e-05,FALSE,5,1,1,1,1,1,0
+"pudding","pudding","nouns",1.57915386845671e-05,FALSE,5,1,1,1,1,1,0
+"sidewalk","sidewalk","nouns",1.57915386845671e-05,FALSE,5,1,1,1,1,1,0
+"firetruck",NA,"nouns",1.48626246442985e-05,FALSE,1,0,0,0,0,1,0
+"scarf","scarf","nouns",1.47465103892649e-05,FALSE,5,1,1,1,1,1,0
+"cheek","cheek","nouns",1.43981676241642e-05,FALSE,6,1,1,1,1,1,1
+"coke","coke","nouns",1.39337106040298e-05,FALSE,5,1,1,1,1,1,0
+"lamp","lamp","nouns",1.39337106040298e-05,FALSE,6,1,1,1,1,1,1
+"mop","mop","nouns",1.33531393288619e-05,FALSE,5,1,1,1,1,1,0
+"porch","porch","nouns",1.31209108187948e-05,FALSE,5,1,1,1,1,1,0
+"teddybear",NA,"nouns",1.24242252885933e-05,FALSE,1,0,0,0,0,1,0
+"vitamins","vitamins","nouns",1.09147399731567e-05,FALSE,5,1,1,1,1,1,0
+"dryer","dryer","nouns",9.86971167785447e-06,FALSE,5,1,1,1,1,1,0
+"sofa","sofa","nouns",9.86971167785447e-06,FALSE,5,1,1,1,1,1,0
+"underpants","undrpnts","nouns",9.75359742282089e-06,FALSE,5,1,1,1,1,1,0
+"jeans","jeans","nouns",9.52136891275372e-06,FALSE,6,1,1,1,1,1,1
+"donut","donut","nouns",9.28914040268656e-06,FALSE,5,1,1,1,1,1,0
+"walker","walker","nouns",7.77965508724999e-06,FALSE,5,1,1,1,1,1,0
+"sprinkler","sprinklr","nouns",6.15405551677985e-06,FALSE,5,1,1,1,1,1,0
+"penis",NA,"nouns",5.8057127516791e-06,FALSE,1,0,0,0,0,1,0
+"penis*","penis","nouns",5.8057127516791e-06,FALSE,4,1,1,1,1,0,0
+"tights","tights","nouns",5.10902722147761e-06,FALSE,5,1,1,1,1,1,0
+"melon","melon","nouns",4.64457020134328e-06,FALSE,5,1,1,1,1,1,0
+"ankle","ankle","nouns",4.5284559463097e-06,FALSE,5,1,1,1,1,1,0
+"sneaker","sneaker","nouns",3.01897063087313e-06,FALSE,5,1,1,1,1,1,0
+"snowsuit","snowsuit","nouns",1.62559957047015e-06,FALSE,5,1,1,1,1,1,0
+"vagina",NA,"nouns",1.39337106040298e-06,FALSE,1,0,0,0,0,1,0
+"dont",NA,"other",0.00675366952977326,FALSE,1,0,0,0,0,1,0
+"don't","dont","other",0.00675366952977326,FALSE,5,1,1,1,1,0,1
+"now","now","other",0.00347913142357122,FALSE,6,1,1,1,1,1,1
+"yes","yes","other",0.00228733470990653,FALSE,6,1,1,1,1,1,1
+"baby","baby","other",0.00219107599248369,FALSE,6,1,1,1,1,1,1
+"mommy",NA,"other",0.00176551724778561,FALSE,1,0,0,0,0,1,0
+"mommy*","mommy","other",0.00176551724778561,FALSE,5,1,1,1,1,0,1
+"boy","boy","other",0.000977217570362626,FALSE,6,1,1,1,1,1,1
+"daddy",NA,"other",0.000976753113342492,FALSE,1,0,0,0,0,1,0
+"daddy*","daddy","other",0.000976753113342492,FALSE,5,1,1,1,1,0,1
+"girl","girl","other",0.000638860631194768,FALSE,6,1,1,1,1,1,1
+"thank_you",NA,"other",0.000516824549154473,FALSE,1,0,0,0,0,1,0
+"thank you","thankyou","other",0.000516824549154473,FALSE,5,1,1,1,1,0,1
+"after","after","other",0.000455051765476608,FALSE,5,1,1,1,1,1,0
+"night","night","other",0.000422539774067205,FALSE,6,1,1,1,1,1,1
+"man","man","other",0.000404542064537,FALSE,6,1,1,1,1,1,1
+"peekaboo","peekaboo","other",0.00028656998142288,FALSE,6,1,1,1,1,1,1
+"friend","friend","other",0.000204128860349037,FALSE,5,1,1,1,1,1,0
+"tomorrow","tomorrow","other",0.000197278119302056,FALSE,6,1,1,1,1,1,1
+"lady","lady","other",0.000184853894013463,FALSE,6,1,1,1,1,1,1
+"uh_oh",NA,"other",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"gas_station",NA,"other",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"give_me_five",NA,"other",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"gonna_get_you",NA,"other",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"go_potty",NA,"other",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"so_big",NA,"other",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"turn_around",NA,"other",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"child","child","other",0.000150600188778556,FALSE,6,1,1,1,1,1,1
+"uh oh","uhoh","other",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"apple sauce","applesac","other",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"gas station","gasstation","other",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"babysitter's name","babysittername","other",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"child's own name","childname","other",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"pet's name","petname","other",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"go potty","gopotty","other",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"so big","sobig","other",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"wanna/want to","wanna","other",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"grandma",NA,"other",0.000150484074523522,FALSE,1,0,0,0,0,1,0
+"sister","sister","other",0.000141194934120836,FALSE,6,1,1,1,1,1,1
+"tonight","tonight","other",0.000139337106040298,FALSE,6,1,1,1,1,1,1
+"movie","movie","other",0.000130280194147679,FALSE,5,1,1,1,1,1,0
+"teacher","teacher","other",0.000115533683758414,FALSE,6,1,1,1,1,1,1
+"nap","nap","other",0.000112630827382575,FALSE,6,1,1,1,1,1,1
+"clown","clown","other",8.25572353288768e-05,FALSE,5,1,1,1,1,1,0
+"grandpa",NA,"other",6.66495823892761e-05,FALSE,1,0,0,0,0,1,0
+"picnic","picnic","other",6.47917543087387e-05,FALSE,5,1,1,1,1,1,0
+"ouch","ouch","other",5.97988413422947e-05,FALSE,6,1,1,1,1,1,1
+"police","police","other",5.48059283758507e-05,FALSE,5,1,1,1,1,1,0
+"circus","circus","other",5.14386149798768e-05,FALSE,5,1,1,1,1,1,0
+"shopping","shopping","other",5.14386149798768e-05,FALSE,5,1,1,1,1,1,0
+"vroom","vroom","other",5.05097009396082e-05,FALSE,6,1,1,1,1,1,1
+"aunt","aunt","other",4.83035300939701e-05,FALSE,6,1,1,1,1,1,1
+"choo_choo",NA,"other",4.66779305235e-05,FALSE,1,0,0,0,0,1,0
+"nurse","nurse","other",4.59812449932985e-05,FALSE,5,1,1,1,1,1,0
+"yard","yard","other",4.45878739328955e-05,FALSE,5,1,1,1,1,1,0
+"country","country","other",3.40214767248395e-05,FALSE,4,1,1,1,1,0,0
+"pattycake",NA,"other",3.27442199194701e-05,FALSE,1,0,0,0,0,1,0
+"playground","playgrnd","other",2.9725249288597e-05,FALSE,5,1,1,1,1,1,0
+"mailman","mailman","other",1.56754244295336e-05,FALSE,5,1,1,1,1,1,0
+"babysitter","babysttr","other",1.02180544429552e-05,FALSE,6,1,1,1,1,1,1
+"quack_quack",NA,"other",8.70856912751865e-06,FALSE,1,0,0,0,0,1,0
+"quack quack","quackqck","other",8.70856912751865e-06,FALSE,5,1,1,1,1,0,1
+"woof_woof",NA,"other",8.12799785235074e-06,FALSE,1,0,0,0,0,1,0
+"downtown","downtown","other",6.50239828188059e-06,FALSE,5,1,1,1,1,1,0
+"yum_yum",NA,"other",5.92182700671268e-06,FALSE,1,0,0,0,0,1,0
+"yum yum","yumyum","other",5.92182700671268e-06,FALSE,5,1,1,1,1,0,1
+"baa_baa",NA,"other",4.64457020134328e-06,FALSE,1,0,0,0,0,1,0
+"cockadoodledoo",NA,"other",1.04502829530224e-06,FALSE,1,0,0,0,0,1,0
+"this_little_piggy",NA,"other",1.16114255033582e-07,FALSE,1,0,0,0,0,1,0
+"this little piggy","thslttlp","other",1.16114255033582e-07,FALSE,4,1,1,1,1,0,0
+"like","like","predicates",0.00727235190700827,FALSE,5,1,1,1,1,1,0
+"see","see","predicates",0.00603027772091405,FALSE,6,1,1,1,1,1,1
+"go","go","predicates",0.00598301921911538,FALSE,6,1,1,1,1,1,1
+"look","look","predicates",0.00442476591656471,FALSE,6,1,1,1,1,1,1
+"put","put","predicates",0.00437518512966537,FALSE,6,1,1,1,1,1,1
+"get","get","predicates",0.00437019221669893,FALSE,6,1,1,1,1,1,1
+"think","think","predicates",0.00423445465256467,FALSE,5,1,1,1,1,1,0
+"good","good","predicates",0.00362183584300749,FALSE,6,1,1,1,1,1,1
+"say","say","predicates",0.00248554174324886,FALSE,6,1,1,1,1,1,1
+"play","play","predicates",0.00201829798099372,FALSE,6,1,1,1,1,1,1
+"eat","eat","predicates",0.00187350350496685,FALSE,6,1,1,1,1,1,1
+"make","make","predicates",0.0018536479673561,FALSE,5,1,1,1,1,1,0
+"big","big","predicates",0.00175216410845675,FALSE,6,1,1,1,1,1,1
+"take","take","predicates",0.00170235109304735,FALSE,6,1,1,1,1,1,1
+"give","give","predicates",0.00110111148048346,FALSE,6,1,1,1,1,1,1
+"nice","nice","predicates",0.00105652360655056,FALSE,6,1,1,1,1,1,1
+"sit","sit","predicates",0.00103690029744989,FALSE,5,1,1,1,1,1,0
+"read","read","predicates",0.000955388090416313,FALSE,6,1,1,1,1,1,1
+"better","better","predicates",0.000649543142657858,FALSE,5,1,1,1,1,1,0
+"red","red","predicates",0.000644782458201481,FALSE,6,1,1,1,1,1,1
+"talk","talk","predicates",0.000535867286979981,FALSE,5,1,1,1,1,1,0
+"hear","hear","predicates",0.000532848316349108,FALSE,5,1,1,1,1,1,0
+"blue","blue","predicates",0.000515315063839037,FALSE,6,1,1,1,1,1,1
+"long","long","predicates",0.000443672568483317,FALSE,5,1,1,1,1,1,0
+"bring","bring","predicates",0.000428926058094052,FALSE,6,1,1,1,1,1,1
+"love","love","predicates",0.000414644004724921,FALSE,6,1,1,1,1,1,1
+"push","push","predicates",0.000413831204939686,FALSE,6,1,1,1,1,1,1
+"hungry","hungry","predicates",0.000397459094979951,FALSE,6,1,1,1,1,1,1
+"yellow","yellow","predicates",0.000394672352859145,FALSE,5,1,1,1,1,1,0
+"hard","hard","predicates",0.000394091781583977,FALSE,6,1,1,1,1,1,1
+"old","old","predicates",0.000386776583516862,FALSE,6,1,1,1,1,1,1
+"stay","stay","predicates",0.000370752816322227,FALSE,5,1,1,1,1,1,0
+"hot","hot","predicates",0.000359373619328936,FALSE,6,1,1,1,1,1,1
+"close","close","predicates",0.000325584371114164,FALSE,6,1,1,1,1,1,1
+"pull","pull","predicates",0.000321172029422888,FALSE,6,1,1,1,1,1,1
+"careful","careful","predicates",0.00031768860177188,FALSE,6,1,1,1,1,1,1
+"hurt","hurt","predicates",0.000307006090308791,FALSE,6,1,1,1,1,1,1
+"pretend","pretend","predicates",0.00030503214797322,FALSE,5,1,1,1,1,1,0
+"sleep","sleep","predicates",0.000282622096751739,FALSE,6,1,1,1,1,1,1
+"fix","fix","predicates",0.000281344839946369,FALSE,5,1,1,1,1,1,0
+"cold","cold","predicates",0.000277280841020194,FALSE,6,1,1,1,1,1,1
+"cut","cut","predicates",0.000275887469959791,FALSE,5,1,1,1,1,1,0
+"white","white","predicates",0.000270894556993347,FALSE,5,1,1,1,1,1,0
+"walk","walk","predicates",0.000267295015087306,FALSE,6,1,1,1,1,1,1
+"draw","draw","predicates",0.000248600620026899,FALSE,6,1,1,1,1,1,1
+"buy","buy","predicates",0.000241285421959783,FALSE,5,1,1,1,1,1,0
+"kiss","kiss","predicates",0.000234783023677903,FALSE,6,1,1,1,1,1,1
+"fit","fit","predicates",0.000229093425181257,FALSE,5,1,1,1,1,1,0
+"wash","wash","predicates",0.000219920399033604,FALSE,6,1,1,1,1,1,1
+"listen","listen","predicates",0.000217365885422865,FALSE,5,1,1,1,1,1,0
+"hit","hit","predicates",0.000216436971382597,FALSE,6,1,1,1,1,1,1
+"shake","shake","predicates",0.000213998572026892,FALSE,5,1,1,1,1,1,0
+"black","black","predicates",0.000212140743946354,FALSE,5,1,1,1,1,1,0
+"catch","catch","predicates",0.000198787604617492,FALSE,5,1,1,1,1,1,0
+"cute","cute","predicates",0.000198323147597358,FALSE,6,1,1,1,1,1,1
+"build","build","predicates",0.000192401320590645,FALSE,5,1,1,1,1,1,0
+"tired","tired","predicates",0.000192401320590645,FALSE,6,1,1,1,1,1,1
+"break","break","predicates",0.000183112180187959,FALSE,6,1,1,1,1,1,1
+"stuck","stuck","predicates",0.000181718809127556,FALSE,5,1,1,1,1,1,0
+"fine","fine","predicates",0.000179628752536951,FALSE,6,1,1,1,1,1,1
+"feed","feed","predicates",0.000177422581691313,FALSE,6,1,1,1,1,1,1
+"tickle","tickle","predicates",0.000169178469583929,FALSE,6,1,1,1,1,1,1
+"taste","taste","predicates",0.000160586014711444,FALSE,5,1,1,1,1,1,0
+"clean.action",NA,"predicates",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"drink.action",NA,"predicates",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"dry.action",NA,"predicates",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"slide.action",NA,"predicates",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"swing.action",NA,"predicates",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"watch.action",NA,"predicates",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"work.action",NA,"predicates",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"clean.description",NA,"predicates",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"dry.description",NA,"predicates",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"orange.description",NA,"predicates",0.000152109674093992,FALSE,1,0,0,0,0,1,0
+"knock","knock","predicates",0.000151761331328892,FALSE,5,1,1,1,1,1,0
+"clean (action)","clean1","predicates",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"swing (action)","swing2","predicates",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"watch (action)","watch2","predicates",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"clean (description)","clean2","predicates",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"little (description)","little","predicates",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"orange (description)","orange2","predicates",0.000150600188778556,FALSE,4,1,1,1,1,0,0
+"blow","blow","predicates",0.000150019617503388,FALSE,6,1,1,1,1,1,1
+"high","high","predicates",0.000147000646872515,FALSE,5,1,1,1,1,1,0
+"broken","broken","predicates",0.000140730477100701,FALSE,6,1,1,1,1,1,1
+"soft","soft","predicates",0.000140266020080567,FALSE,6,1,1,1,1,1,1
+"full","full","predicates",0.000135737564134257,FALSE,5,1,1,1,1,1,0
+"tiny","tiny","predicates",0.000130280194147679,FALSE,5,1,1,1,1,1,0
+"scared","scared","predicates",0.000119713796939623,FALSE,6,1,1,1,1,1,1
+"poor","poor","predicates",0.000116114255033582,FALSE,5,1,1,1,1,1,0
+"hug","hug","predicates",0.000111005227812104,FALSE,6,1,1,1,1,1,1
+"quiet","quiet","predicates",0.000110656885047004,FALSE,5,1,1,1,1,1,0
+"sick","sick","predicates",0.000109379628241634,FALSE,6,1,1,1,1,1,1
+"clap","clap","predicates",0.000108682942711433,FALSE,5,1,1,1,1,1,0
+"sad","sad","predicates",0.00010728957165103,FALSE,5,1,1,1,1,1,0
+"sleepy","sleepy","predicates",0.000107173457395996,FALSE,6,1,1,1,1,1,1
+"paint","paint","predicates",0.000107057343140963,FALSE,5,1,1,1,1,1,0
+"wipe","wipe","predicates",0.000105780086335593,FALSE,6,1,1,1,1,1,1
+"heavy","heavy","predicates",0.000100438830604048,FALSE,5,1,1,1,1,1,0
+"pour","pour","predicates",9.99743735839141e-05,FALSE,5,1,1,1,1,1,0
+"mad","mad","predicates",9.19624899865969e-05,FALSE,5,1,1,1,1,1,0
+"dark","dark","predicates",9.0569118926194e-05,FALSE,6,1,1,1,1,1,1
+"swim","swim","predicates",8.9988547651026e-05,FALSE,6,1,1,1,1,1,1
+"cover","cover","predicates",8.89435193557238e-05,FALSE,5,1,1,1,1,1,0
+"share","share","predicates",8.51117489396156e-05,FALSE,5,1,1,1,1,1,0
+"bump","bump","predicates",8.45311776644477e-05,FALSE,6,1,1,1,1,1,1
+"all gone","allgone","predicates",8.11638642684738e-05,FALSE,5,1,1,1,1,0,1
+"hurry","hurry","predicates",8.01188359731716e-05,FALSE,6,1,1,1,1,1,1
+"dump","dump","predicates",7.89576934228357e-05,FALSE,5,1,1,1,1,1,0
+"wake","wake","predicates",7.32680949261902e-05,FALSE,5,1,1,1,1,1,0
+"drop","drop","predicates",7.03652385503507e-05,FALSE,5,1,1,1,1,1,0
+"spill","spill","predicates",6.63012396241753e-05,FALSE,5,1,1,1,1,1,0
+"thirsty","thirsty","predicates",6.63012396241753e-05,FALSE,6,1,1,1,1,1,1
+"kick","kick","predicates",6.57206683490074e-05,FALSE,6,1,1,1,1,1,1
+"slow","slow","predicates",6.54884398389402e-05,FALSE,5,1,1,1,1,1,0
+"yucky","yucky","predicates",6.52562113288731e-05,FALSE,6,1,1,1,1,1,1
+"wish","wish","predicates",6.51400970738395e-05,FALSE,5,1,1,1,1,1,0
+"empty","empty","predicates",6.20050121879328e-05,FALSE,6,1,1,1,1,1,1
+"asleep","asleep","predicates",5.96827270872611e-05,FALSE,6,1,1,1,1,1,1
+"hate","hate","predicates",4.2497817342291e-05,FALSE,5,1,1,1,1,1,0
+"noisy","noisy","predicates",3.10025060939664e-05,FALSE,5,1,1,1,1,1,0
+"lick","lick","predicates",3.07702775838992e-05,FALSE,5,1,1,1,1,1,0
+"rip","rip","predicates",3.00735920536977e-05,FALSE,5,1,1,1,1,1,0
+"chase","chase","predicates",2.35711937718171e-05,FALSE,5,1,1,1,1,1,0
+"awake","awake","predicates",2.17133656912798e-05,FALSE,5,1,1,1,1,1,0
+"windy","windy","predicates",1.21919967785261e-05,FALSE,5,1,1,1,1,1,0
+"skate","skate","predicates",6.85074104698134e-06,FALSE,5,1,1,1,1,1,0
