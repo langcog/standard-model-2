@@ -46,17 +46,27 @@ Structural parallel:
 
 **Input `sigma_r`** — informative from the input-rate literature (entry 36, channel-matched US English): center ≈ **0.44**, e.g. `sigma_r ~ normal(0.44, 0.10)` truncated >0 (or lognormal matching the [0.36, 0.58] spread). Data can move it; prior keeps it identified given measurement noise.
 
-**RT — frank_etal_2026 priors** (re-fit `log_rt ~ log_age + (1+log_age|child)` on the full Peekbank RT data, 327 kids / 281 longitudinal, age-centered 18 mo):
+**RT — frank_etal_2026 priors.** Computed from the **full Fig-2 (right) Peekbank
+RT data** (`paper_r1.Rmd`'s `d_sub`: 3,243 RT obs / ~1,756 subjects / 25 datasets,
+ages 6–60), **centered at our model's t₀ = a₀ = 21 mo** (σ_rt0 is age-dependent —
+variability falls with age — so the centering matters). The full data is mostly
+cross-sectional, so per-subject random *slopes* aren't identifiable there; σ_rt1
+comes from the longitudinal subset.
 
-| param | frank2026 value | current joint D′3 | prior to set |
+| param | frank2026 (full data, t₀=21) | current joint D′3 | prior to set |
 |---|---|---|---|
-| pop. log-RT @18mo (`tau`) | 6.90 (≈991 ms) | — | `normal(6.9, 0.3)` |
-| pop. slope `psi` (dlogRT/dlogAge) | **−0.53** | — | `normal(−0.53, 0.15)` |
-| between-child level **`sigma_rt0`** | **0.174** | 0.142 (shrunk) | `normal(0.174, 0.05)` |
-| between-child slope `sigma_rt1` | 0.261 | — | `normal(0.26, 0.08)` |
-| residual `sigma_lwl` | 0.202 | 0.203 ✓ | `normal(0.20, 0.05)` |
+| pop. log-RT @21mo (`tau`) | 6.84 (≈930 ms) | — | `normal(6.84, 0.2)` |
+| pop. slope `psi` (dlogRT/dlogAge) | **−0.33** (full); −0.37 (≤32mo) | — | `normal(−0.35, 0.1)` |
+| between-child level **`sigma_rt0`** @t₀ | **0.143** (longit. x-check 0.154) | 0.142 ✓ | `normal(0.143, 0.04)` |
+| between-child slope `sigma_rt1` | ~0.26 (longit. subset only) | — | `normal(0.26, 0.08)` |
+| residual `sigma_lwl` | 0.243 | 0.203 | `normal(0.24, 0.05)` |
 
-(σ_lwl already matches → the measurement layer is consistent; the gain is constraining σ_rt0 up from the shrunk 0.142, which **raises and tightens the processing share**.)
+**Correction (2026-06-13):** an earlier pass computed these on the wrong subset —
+the 327 CDI-linkable kids only (a silent inner-join cut), giving σ_rt0 = 0.174 and
+slope −0.53. On the **full** Fig-2 data, σ_rt0 = **0.143**, which *matches* the joint
+model's 0.142 — so the model was **not** under-estimating between-child RT variance.
+The prior will **confirm and tighten** σ_rt0, not raise it (processing share won't
+jump; it'll just narrow).
 
 ## Bundle changes
 
@@ -72,7 +82,10 @@ Structural parallel:
 ## Predicted effect
 
 - **Input share → data-driven.** σ_r estimated from ~190 kids' observed between-child input variance (noise-corrected), prior-anchored. Point ≈ unchanged (we chose 0.44 well), but the **CI replaces the literature band with a data+prior posterior — likely tighter**, and the *interpretation* flips to "estimated from observed home recordings."
-- **Processing share → up + tighter.** frank2026 σ_rt0 prior (0.174) corrects the shrunk 0.142 → processing share rises from ~3.1% toward ~4–5% and narrows.
+- **Processing share → tighter (not higher).** The frank2026 σ_rt0 prior (0.143)
+  *matches* the joint's 0.142, so the point share (~3.1%) holds; the prior narrows
+  its CI by pinning σ_rt0 and σ_lwl. (Earlier draft wrongly predicted a rise, from
+  the bad 0.174 subset.)
 - **Separation (β_xi, γ_in) → ~unchanged** — still bounded by the 97 both-channel kids (the lit review / TotLot kids are the only lever there).
 
 ## Implementation steps (when greenlit)
