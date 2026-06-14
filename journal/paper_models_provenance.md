@@ -22,19 +22,20 @@ only (no cluster access needed).
 
 ## ⚠️ Currency flags (open as of 2026-06-13)
 
-1. **Fig 3 (`fig-io-partition`) is built from `proc_dp`, not the joint model.**
-   `paper/build_input_cache.R` reads `proc_dp1_all` / `proc_dp3_all` (the 3-dataset
-   processing+input ladder, entry 33). The joint io+proc model (entry 37) is meant to
-   **supersede proc_dp for Fig 3B** but is not yet wired in. Two steps needed once the
-   joint fit is final: (a) repoint `build_input_cache.R` lines ~68/134 at
-   `joint_io_proc_d*` summaries; (b) rebuild `fig3_input.rds`.
-2. **The joint io+proc fit is mid-re-fit.** `joint_io_proc_d3.summary.rds` is dated
-   **06-12**, but the bundle `joint_io_proc_subset_data.rds` was rebuilt **06-13** —
-   so the existing summary is stale relative to the current bundle; a new run is
-   pending/in progress. Do not wire Fig 3 to the 06-12 summary.
-3. **`fig3_input.rds` (06-10) predates the joint work entirely** — it is current with
-   respect to `proc_dp` but not the joint model. Consistent with flag 1.
-4. **`io-imputed D` inventory label says "local," but sampling was on GCP**
+1. **RESOLVED 2026-06-13 (partition): Fig 3 variance partition now sourced from the
+   joint model.** `build_input_cache.R` reads `joint_io_proc_d3.draws.rds` for the
+   `panel_partition` shares (in-model `share_input_xi`/`share_proc_xi` and `var_*_k`),
+   replacing the old io-pooled + proc_dp stitch. `fig3_input.rds` rebuilt. **Still
+   open:** the observed-input *fan* (panel C, `panelD`) and processing fan (panel D,
+   `panelE`) still read `io_pooled_widedelta` / `proc_dp1_all` — swap to the joint
+   model if full panel consistency is wanted.
+2. **The wired joint fit is the DONE 5-study run; a 6-study version may be coming.**
+   `joint_io_proc_d3.draws.rds` (06-12) is a 5-study / 292-kid fit (`tau_s[1..5]`).
+   The on-disk bundle `joint_io_proc_subset_data.rds` has since grown to **S=6 / I=348**
+   — so a 6-study fit is in progress/queued. The partition shares are self-contained in
+   the draws, so the wired numbers are valid 5-study estimates; repoint when/if the
+   6-study fit should drive Fig 3.
+3. **`io-imputed D` inventory label says "local," but sampling was on GCP**
    (sm2-fit-01 EN / sm2-fit-02 NO; entries 32/34/35). "Local" refers to where the
    summaries/partition are extracted, not where MCMC ran.
 
@@ -48,7 +49,7 @@ only (no cluster access needed).
 | **2** | **io-imputed D** (Bayesian M_best, σ_r-pinned, *no* per-child input) — population share of efficiency variance attributable to input (π_α). Fig 3A + inline `io_partition`. | GCP family runner (`cluster/gcp/run_family.sh`, `wait_then_no_mbest.sh`), variant `long_no_freq_slopes[_norwegian]`. Stan `model/stan/log_irt_long.stan` (no-freq toggle). Entries 14, 24/25, 35. | GCP sm2-fit-01 (EN) / sm2-fit-02 (NO) | EN draws **06-09**; NO post-dedup refit collected **06-11** (entry 35) | `fits/summaries/long_no_freq_slopes[_norwegian].{draws,summary}.rds`, `_psi.csv`; bundles `long_subset_data[_nor].rds` |
 | **3** | **io-pooled** (Bayesian, *observed* LENA/head-cam input, 4 datasets; wide-delta + γ slope channel) — observed input share of efficiency ≈ 2.8%. Fig 3 io panels + `fig5_io_summary`. | `model/scripts/fit_io_pooled_widedelta.R`; Stan `model/stan/log_irt_io_pooled.stan` (+ `_gamma_add`). Entry 30. | local | **2026-06-02/03** | `fits/io_pooled_widedelta.rds`, `io_pooled_gamma_widedelta_add.rds`, bundle `io_pooled_subset_data.rds` |
 | **4** | **proc_dp D′0–D′3** (Bayesian processing+input regression ladder, 3 LWL datasets: AM2018/FM2012/FMW2013) — processing→efficiency; selected D′1. **Currently feeds Fig 3.** | `model/scripts/fit_proc_dp.R`; Stan `model/stan/log_irt_long_proc_dp.stan`. Entry 33. | Sherlock | **2026-06-09/10** | `fits/summaries/proc_dp{0,1,2,3}_all.{draws,summary,loo}.rds`, `proc_dp1_all_psi.csv`; bundle `proc_dp_all_subset_data.rds` |
-| **5** | **joint io+proc D′0–D′3** (proc_dp + BabyView/SEEDLingS input-only; per-study σ_lena; σ_r = 0.44; 5 datasets / 292 kids) — **intended Fig 3B replacement.** | `model/scripts/fit_joint_io_proc.R`; Stan `model/stan/log_irt_long_proc_dp_joint.stan`; bundle `model/scripts/prepare_joint_io_proc_bundle.R`; `cluster/sherlock/joint_io_proc_fit.slurm`. Entry 37. | Sherlock | d3 summary **06-12**; **bundle rebuilt 06-13 → re-fit pending** | `fits/summaries/joint_io_proc_d<rung>.{draws,summary}.rds`; bundle `joint_io_proc_subset_data.rds` |
+| **5** | **joint io+proc D′0–D′3** (proc_dp + BabyView/SEEDLingS input-only; per-study σ_lena; σ_r = 0.44; 5 datasets / 292 kids) — **now drives the Fig 3 variance partition** (replaced the io-pooled + proc_dp stitch, 2026-06-13). | `model/scripts/fit_joint_io_proc.R`; Stan `model/stan/log_irt_long_proc_dp_joint.stan`; bundle `model/scripts/prepare_joint_io_proc_bundle.R`; `cluster/sherlock/joint_io_proc_fit.slurm`. Entry 37. | Sherlock | d3 (wired) **06-12**, 5-study; bundle since grown to 6-study (06-13, fit pending) | `fits/summaries/joint_io_proc_d<rung>.{draws,summary}.rds`; bundle `joint_io_proc_subset_data.rds` |
 | **6** | **LLM acceleration** — GPT-2 (small) retrained on 24.5M-word CHILDES (training axis + distinct-input/development axis) + Chang & Bergen 2022 4-architecture fits; per-word sigmoid slopes vs children's κ. Fig `fig-llm-acceleration`. | `studies/llm/` (feng2024 protocol); see `journal/experiments_llm.md`. Children's κ from fit #2 draws. | Sherlock / Marlowe (GPU) | surprisal + sigmoids **06-10**; finer ladder **06-11** | `fits/llm/sigmoids/`, `fits/llm/ladder_bestval_finer.csv`, `fits/llm/surprisal_*.csv`, `data/chang_bergen_2022/` |
 | **7** | **cross-sectional demographics** — per-language `glmer(produces ~ la*p + (1\|item) + (1\|child_id))` on 31 Wordbank languages; sex & maternal-ed → efficiency/acceleration. Fig `fig-demographics` (with the #1 longitudinal BLUPs as the longitudinal arm). | `studies/cross_sectional_demographics/00_build.R` (+ `composite_figure.R`). `lme4::glmer`, `nAGQ=0`. Entry 31. | local | uncapped refit **2026-06-11** | `studies/cross_sectional_demographics/cache/{fits,scatter}.rds` |
 
@@ -66,7 +67,7 @@ only (no cluster access needed).
 | `fig6_llm_slopes.rds` (`llm_slopes`) | `build_cache.R` §6 | #6 LLM sigmoids/ladder + #2 EN/NO draws | `fig-llm-acceleration` |
 | `io_partition.rds` (`io_part`) | `build_cache.R` §8 | #2 EN/NO summaries | inline "Population input-related variation" |
 | `input_rate_table.rds` | `build_cache.R` §7 | CSVs (Sperry/HR + validation set) — *not a model fit* | SI `tbl-input-rates` |
-| `fig3_input.rds` (`input3`) | `build_input_cache.R` | #3 io-pooled + #4 **proc_dp** + #2 EN/NO summaries | `fig-io-partition` ⚠️ see flag 1 |
+| `fig3_input.rds` (`input3`) | `build_input_cache.R` | **partition: #5 joint** (06-13); fans: #3 io-pooled (panel C) + #4 proc_dp (panel D); #2 EN/NO (imputed rows + panels A/B) | `fig-io-partition` |
 | `fig_io_imputed_proc.rds` | `build_input_cache.R` | #2 + #4 | SI panel (not in main setup load) |
 
 ---
