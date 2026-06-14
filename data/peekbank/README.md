@@ -1,65 +1,75 @@
-# Peekbank raw data
+# Peekbank / Stanford-Marchman raw data
 
-Two distinct sets of inputs live here:
+Source data for the io-proc (input + processing) model: item-level CDI, LWL
+reaction time, and daylong LENA input for the four Stanford-Marchman LWL cohorts,
+plus the peekbank-development LWL summaries they were drawn from.
 
-1. **Per-admin LWL summaries** lifted from the peekbank-development
-   working repo for the developmental-relationships paper.
-2. **Stanford TotLot CDI source files** (Marchman lab) for use as
-   item-level CDI inputs to our longitudinal IRT pipeline. These are
-   the same children whose looking-while-listening data appears in
-   `adams_marchman_2018`, `fmw_2013`, `fernald_marchman_2012`, and
-   `fernald_totlot` Peekbank datasets.
+## ⭐ Label correspondence (read this first)
+
+The lab's internal cohort labels (`TL`, `TL2`, `TL3`, `TLO`) are opaque and were a
+recurring source of confusion. The authoritative key — verified against the data
+2026-06-14 (channel counts below are kids with that channel):
+
+| lab label | model `dataset_name` | publication | CDI | RT (LWL) | **input (LENA)** |
+|---|---|---|:--:|:--:|:--:|
+| `TL`  / "TotLot" (orig.) | **`fernald_totlot`** | Fernald, Perfors & Marchman 2006 | ✓ | ✓ 63 | **✗ none** |
+| `TL2` / "TotLot 2"       | **`fernald_marchman_2012`** | Fernald & Marchman 2012 | ✓ | ✓ 122 | **✗ none** |
+| `TL3` / "TotLot 3"       | **`adams_marchman_2018`** | Adams, Marchman et al. 2018 | ✓ | ✓ 69 | **✓ 66** |
+| `TLO` / "TotLot Outreach"| **`fmw_2013`** | Fernald, Marchman & Weisleder 2013 | ✓ | ✓ 80 | **✓ 51** |
+
+**Notes / caveats (don't skip):**
+- **Only TL3 and TLO have daylong LENA input.** TL2 (`fernald_marchman_2012`) and
+  TL (`fernald_totlot`) are **CDI + RT only — no input** anywhere in the repo. If
+  `fernald_marchman_2012` ever collected daylong audio, it is **missing** and must
+  be sourced; do not assume it has an input channel.
+- The single file `lena_am2018_fmw2013.csv` (formerly `TL3TLO_LENA.csv`) carries
+  **both** TL3 and TLO input, split by its internal `Study` column (`TL3`/`TLO`).
+- **TLO input is under-used.** All 51 TLO LENA kids load, but the proc/joint bundle
+  gates input on RT+CDI, so only the ~31 TLO kids who also have RT enter. The ~20
+  TLO kids with input+CDI but **no RT** could contribute as input-only kids (as
+  BabyView/SEEDLingS do) but currently don't — an open salvage lever, not a bug.
+
+## Directory layout
+
+```
+data/peekbank/
+  adams_marchman_2018/      TL3_compiled_WS.csv, TL3_compiled_WG.xlsx     (raw CDI)
+  fernald_marchman_2012/    TL2_WG_compiled.xlsx, TL2_WS_compiled.xlsx    (raw CDI)
+  fmw_2013/                 TLO_18m_WG.xlsx, TLO_24_WS.xlsx, TLO_30m_WS.xlsx (raw CDI)
+  fernald_totlot/           TL_18m_WS.xlsx, TL_21m_WS.xlsx, TL_25m_WS.xlsx (raw CDI)
+  lena_am2018_fmw2013.csv   daylong LENA (AWC/CTC/CVC @16+18mo) for TL3 + TLO
+  1_d_sub.Rds               per-admin LWL summary (RT + accuracy) — peekbank 2026.1
+  0_cdi_subjects.Rds        admin-level CDI scores (peekbank-development)
+  stanford_cdi_items_long.csv   long CDI, TL2/TL3/TLO   (built by parse_stanford_cdi.R)
+  totlot_cdi_items_long.csv     long CDI, TL             (built by parse_totlot_cdi.R)
+  cdi_short_code_map_{ws,wg}.csv  short-code -> Wordbank item_definition
+  cdi_master_item_key.csv   human-checkable item merge key (build_cdi_master_key.R)
+```
+
+## Which script reads what
+
+- `parse_stanford_cdi.R` → reads `adams_marchman_2018/`, `fernald_marchman_2012/`,
+  `fmw_2013/` raw CDI → writes `stanford_cdi_items_long.csv` (+ short-code maps).
+- `parse_totlot_cdi.R` → reads `fernald_totlot/` raw CDI → `totlot_cdi_items_long.csv`.
+- `prepare_proc_dp_bundle.R` → reads `lena_am2018_fmw2013.csv` for the input channel
+  (maps internal `Study` TL3→`adams_marchman_2018`, TLO→`fmw_2013`); RT from `1_d_sub.Rds`.
+- Downstream bundle builders read the long intermediate CSVs, **not** the raw files,
+  so the per-study raw dirs only matter when re-parsing.
 
 ## Provenance
 
-### Per-admin LWL summaries
-- `1_d_sub.Rds`, `0_cdi_subjects.Rds`
-- Source: <https://github.com/peekbank/peekbank-development>
-  (working repo for Frank et al., 2026, *eLife*).
-- Database version: peekbank `2026.1`.
-- These are exact copies of `cached_intermediates/1_d_sub.Rds` and
-  `cached_intermediates/0_cdi_subjects.Rds` from that repo. We do
-  not modify the source repo; refresh by re-running the
-  peekbank-development `0_get_data.qmd` and `1_tidy_data.qmd`
-  notebooks and copying the resulting Rds files here.
-
-### Stanford TotLot CDI source files
-- `TL2_WG_compiled.xlsx`, `TL2_WS_compiled.xlsx`, `TL3_compiled_WS.csv`
-- Source: provided directly by the Stanford Marchman lab (Mike Frank
-  has copies). These are wide-format CDI exports compiled from
-  paper forms collected over the lifetime of the TotLot 2 and
-  TotLot 3 longitudinal cohorts.
-- Lab subject IDs (`11xxx`, `20xxx`) line up with the
-  `lab_subject_id` field exposed by `peekbankr::get_subjects()` for
-  `adams_marchman_2018` and `fmw_2013`. The TotLot 2 study covers
-  WG admins at ~16 mo and WS admins from ~18-30 mo.
-
-## Files
-
-| file | rows | what it contains |
-|---|---|---|
-| `1_d_sub.Rds` | 4 124 admins × 25 cols | per-(subject, admin) LWL summary: RT, accuracy, CDI totals (`prod`, `comp` as proportion of form length) |
-| `0_cdi_subjects.Rds` | one row per CDI admin in the LWL set | admin-level CDI scores normalized to instrument length |
-| `TL3_compiled_WS.csv` | 185 rows × 821 cols | TotLot 3 (Adams 2018 cohort): WS form, ages 20-32 mo, 65 kids |
-| `TL2_WS_compiled.xlsx` | 347 rows × 822 cols | TotLot 2: WS form, ages 18-30 mo, 119 kids |
-| `TL2_WG_compiled.xlsx` | 120 rows × 522 cols | TotLot 2: WG form, ages 15-19 mo, 97 kids |
-
-## Derived files (built by `model/scripts/parse_stanford_cdi.R`)
-
-- `cdi_short_code_map_ws.csv`, `cdi_short_code_map_wg.csv` — short-code
-  → Wordbank `item_definition` mapping. All 1 076 entries (680 WS,
-  396 WG) resolve via `auto_exact` (fingerprint match) or
-  `manual_disambig` (deterministic Marchman-lab conventions). Hand
-  review of the manual_disambig rows is logged as a loose end in
-  `outputs/experiments.md`.
-- `stanford_cdi_items_long.csv` — long format, one row per
-  (lab_subject_id, age, form, item, produces). 183 subjects × 511
-  admins × 681 items ≈ 321K rows. Placeholder rows (no parent
-  return) are filtered out.
+- **LWL summaries** (`1_d_sub.Rds`, `0_cdi_subjects.Rds`): exact copies of
+  `cached_intermediates/` from <https://github.com/peekbank/peekbank-development>
+  (Frank et al. 2026, *eLife*), peekbank DB version `2026.1`. Refresh by re-running
+  that repo's `0_get_data.qmd` + `1_tidy_data.qmd`.
+- **Raw CDI** (`TL*`/`TLO*` files): provided directly by the Stanford Marchman lab
+  (wide-format exports from paper forms). Lab subject IDs (`11xxx`, `20xxx`) line up
+  with `peekbankr::get_subjects()` `lab_subject_id` for the matching datasets.
+- **LENA** (`lena_am2018_fmw2013.csv`): Marchman-lab daylong recordings, AWC/CTC/CVC
+  per hour at 16 and 18 mo (two replicate reads/child; 63 have 16M, 114 have 18M).
 
 ## What's NOT here
-
-- Item-level Peekbank CDI responses — Peekbank only stores totals.
-- Raw frame-level (`0_d_aoi.Rds`) and trial-level (`1_d_trial.Rds`)
-  data from peekbank-development — too large to commit. Re-derive
-  from Peekbank if needed.
+- Item-level Peekbank CDI responses (Peekbank stores only totals — hence the raw
+  lab files above).
+- Frame/trial-level LWL (`0_d_aoi.Rds`, `1_d_trial.Rds`) — too large; re-derive from
+  peekbank-development if needed.

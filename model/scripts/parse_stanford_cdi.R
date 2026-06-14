@@ -10,11 +10,11 @@
 ##   tlo     = TLO = FMW2013   (IDs 20xxx; WG@18 + WS@24,30)
 ##   totlot2 = TL2 = FM2012    (WG 15-19 + WS 14-32; processing-only, no LENA)
 ##
-## Inputs (data/peekbank/):
-##   TL3_compiled_WS.csv, TL3_compiled_WG.xlsx          (AM2018)
-##   TLO_18m_WG.xlsx, TLO_24_WS.xlsx, TLO_30m_WS.xlsx   (FMW2013; age in filename,
-##                                                       'misc' rows dropped)
-##   totlot2/TL2_WG_compiled.xlsx, totlot2/TL2_WS_compiled.xlsx  (FM2012)
+## Inputs (data/peekbank/<dataset_name>/ — see README label correspondence):
+##   adams_marchman_2018/TL3_compiled_WS.csv, TL3_compiled_WG.xlsx       (AM2018)
+##   fmw_2013/TLO_18m_WG.xlsx, TLO_24_WS.xlsx, TLO_30m_WS.xlsx           (FMW2013;
+##                                          age in filename, 'misc' rows dropped)
+##   fernald_marchman_2012/TL2_WG_compiled.xlsx, TL2_WS_compiled.xlsx    (FM2012)
 ##
 ## Outputs:
 ##   data/peekbank/cdi_short_code_map_{ws,wg}.csv
@@ -348,19 +348,19 @@ report <- function(tag, d) cat(sprintf("  %-12s %5d rows (subjects: %d, admins: 
             n_distinct(paste(d$id, d$age)),
             paste(range(suppressWarnings(as.integer(d$age)), na.rm = TRUE),
                   collapse = "-")))
-# FM2012 (TL2 / totlot2): WG + WS
-tl2_wg <- read_one(file.path(OUT_DIR, "totlot2/TL2_WG_compiled.xlsx"), "WG"); report("TL2 WG", tl2_wg)
-tl2_ws <- read_one(file.path(OUT_DIR, "totlot2/TL2_WS_compiled.xlsx"), "WS"); report("TL2 WS", tl2_ws)
-# AM2018 (TL3 / totlot3): WS (existing csv) + WG (newly added)
-tl3_ws <- read_one(file.path(OUT_DIR, "TL3_compiled_WS.csv"),  "WS"); report("TL3 WS", tl3_ws)
-tl3_wg <- read_one(file.path(OUT_DIR, "TL3_compiled_WG.xlsx"), "WG"); report("TL3 WG", tl3_wg)
-# FMW2013 (TLO): WG@18, WS@24, WS@30 — age comes from the filename.
+# FM2012 (TL2 / totlot2): WG + WS  [raw dir renamed -> fernald_marchman_2012/]
+tl2_wg <- read_one(file.path(OUT_DIR, "fernald_marchman_2012/TL2_WG_compiled.xlsx"), "WG"); report("TL2 WG", tl2_wg)
+tl2_ws <- read_one(file.path(OUT_DIR, "fernald_marchman_2012/TL2_WS_compiled.xlsx"), "WS"); report("TL2 WS", tl2_ws)
+# AM2018 (TL3 / totlot3): WS (existing csv) + WG  [raw dir -> adams_marchman_2018/]
+tl3_ws <- read_one(file.path(OUT_DIR, "adams_marchman_2018/TL3_compiled_WS.csv"),  "WS"); report("TL3 WS", tl3_ws)
+tl3_wg <- read_one(file.path(OUT_DIR, "adams_marchman_2018/TL3_compiled_WG.xlsx"), "WG"); report("TL3 WG", tl3_wg)
+# FMW2013 (TLO): WG@18, WS@24, WS@30 — age comes from the filename.  [raw dir -> fmw_2013/]
 # force_study="tlo": every row in these sheets is an FMW2013 child
 # (the "misc" label is a within-study annotation, not a different
 # study), so keep them all.
-tlo_wg18 <- read_one(file.path(OUT_DIR, "TLO_18m_WG.xlsx"), "WG", age_override = 18, force_study = "tlo"); report("TLO WG18", tlo_wg18)
-tlo_ws24 <- read_one(file.path(OUT_DIR, "TLO_24_WS.xlsx"),  "WS", age_override = 24, force_study = "tlo"); report("TLO WS24", tlo_ws24)
-tlo_ws30 <- read_one(file.path(OUT_DIR, "TLO_30m_WS.xlsx"), "WS", age_override = 30, force_study = "tlo"); report("TLO WS30", tlo_ws30)
+tlo_wg18 <- read_one(file.path(OUT_DIR, "fmw_2013/TLO_18m_WG.xlsx"), "WG", age_override = 18, force_study = "tlo"); report("TLO WG18", tlo_wg18)
+tlo_ws24 <- read_one(file.path(OUT_DIR, "fmw_2013/TLO_24_WS.xlsx"),  "WS", age_override = 24, force_study = "tlo"); report("TLO WS24", tlo_ws24)
+tlo_ws30 <- read_one(file.path(OUT_DIR, "fmw_2013/TLO_30m_WS.xlsx"), "WS", age_override = 30, force_study = "tlo"); report("TLO WS30", tlo_ws30)
 
 # -------------------------------------------------------------------- #
 # 5.  Build mappings (one per form), apply, and emit outputs.          #

@@ -1,5 +1,5 @@
 ## Parse the fernald_totlot ("totlot"/TotLot original) item-level WS CDI from the
-## three age-band Excel files (data/peekbank/totlot/TL_{18,21,25}m_WS.xlsx) into
+## three age-band Excel files (data/peekbank/fernald_totlot/TL_{18,21,25}m_WS.xlsx) into
 ## the long format used by data/peekbank/stanford_cdi_items_long.csv, so it can
 ## join the proc_dp / joint bundle. These 58 kids have longitudinal LWL RT in
 ## Peekbank (dataset fernald_totlot, lab_subject_id == TL `id`) but were dropped
@@ -8,7 +8,7 @@
 ## RUN LOCALLY. Output: data/peekbank/totlot_cdi_items_long.csv
 suppressPackageStartupMessages({ library(readxl); library(dplyr); library(tidyr) })
 
-TL_DIR <- "data/peekbank/totlot"
+TL_DIR <- "data/peekbank/fernald_totlot"   # per-study raw dir (was data/peekbank/totlot)
 FILES  <- c(`18` = "TL_18m_WS.xlsx", `21` = "TL_21m_WS.xlsx", `25` = "TL_25m_WS.xlsx")
 ws_map <- read.csv("data/peekbank/cdi_short_code_map_ws.csv")   # short -> item_definition
 strip  <- function(x) sub("\\.\\.\\.[0-9]+$", "", x)            # undo name_repair="unique" suffix

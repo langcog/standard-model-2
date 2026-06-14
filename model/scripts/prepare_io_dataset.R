@@ -1,5 +1,5 @@
 ## Prepare an IO (input-observed) bundle for the Marchman/Fernald-lab
-## cohorts that share the TL3TLO_LENA.csv input file + the parsed
+## cohorts that share the lena_am2018_fmw2013.csv input file + the parsed
 ## stanford_cdi_items_long.csv CDI file.
 ##
 ## RUN LOCALLY ONLY (needs no wordbankr; reads only repo files).
@@ -54,8 +54,9 @@ cat(sprintf("  CDI: %d rows, %d kids, forms %s, ages %d-%d\n",
             min(cdi$age), max(cdi$age)))
 
 ## ---- 2. LENA input -> per-recording log_r_obs ---------------------
-## TL3TLO_LENA.csv is wide: SubjectID1, Study, AWCHr16M, AWCHr18M, ...
-lena_wide <- read_csv(file.path(PK_DIR, "TL3TLO_LENA.csv"),
+## lena_am2018_fmw2013.csv (was TL3TLO_LENA.csv) is wide: SubjectID1, Study,
+## AWCHr16M, AWCHr18M, ...  -- internal Study col still uses TL3 / TLO codes.
+lena_wide <- read_csv(file.path(PK_DIR, "lena_am2018_fmw2013.csv"),
                       show_col_types = FALSE) |>
   filter(Study == spec$lena_study) |>
   mutate(subject_id = as.character(SubjectID1))

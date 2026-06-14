@@ -4,7 +4,7 @@
 ## RUN LOCALLY. Combines, for AM2018 + FM2012 + FMW2013:
 ##   - item-level CDI (stanford_cdi_items_long.csv; WG+WS, <=30mo)
 ##   - LWL RT (d_sub joined to 2026.1 lab ids; <=30mo, n_trials_rt>=5, winsorized)
-##   - observed LENA input (TL3TLO_LENA.csv; AM2018 + FMW2013), standardized,
+##   - observed LENA input (lena_am2018_fmw2013.csv; AM2018 + FMW2013), standardized,
 ##     with sigma_lena pinned empirically from the 16/18mo replicates.
 ##
 ## Usage: Rscript model/scripts/prepare_proc_dp_bundle.R [n_items] [datasets]
@@ -129,7 +129,7 @@ cat(sprintf("Bundle: I=%d A=%d J=%d C=%d S=%d N=%d N_lwl=%d a0=%d\n",
 
 # ---- 6. Observed LENA input + empirical sigma_lena ---- #
 LENA_STUDY <- c(TL3 = "adams_marchman_2018", TLO = "fmw_2013")
-lena_raw <- read_csv(file.path(PB_DIR, "TL3TLO_LENA.csv"), show_col_types = FALSE, progress = FALSE) %>%
+lena_raw <- read_csv(file.path(PB_DIR, "lena_am2018_fmw2013.csv"), show_col_types = FALSE, progress = FALSE) %>%  # was TL3TLO_LENA.csv (Study col still TL3/TLO)
   mutate(lab_subject_id = as.character(SubjectID1), dataset_name = LENA_STUDY[Study]) %>%
   filter(dataset_name %in% DATASETS, lab_subject_id %in% kids)
 # log AWC at 16 + 18 mo (replicates)
