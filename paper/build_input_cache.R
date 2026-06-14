@@ -54,27 +54,24 @@ a0 <- 18   # anchor age (kept for the saveRDS payload / fan helpers)
 ## observed-input fits (no imputation):
 ##   xi_i    = mu_r + sigma_r z_r + beta_xi rt0 + log_alpha
 ##   kappa_i = (1+delta) + gamma sigma_r z_r + beta_k0 rt0 + beta_k1 rt1 + zeta
-## INPUT channel  -> io_pooled_gamma_widedelta_add (4 datasets, gamma on slope).
-## PROC channel   -> proc_dp3 (all betas free, so the acceleration share is
-##                   ESTIMATED, not assumed 0; the selected rung D'1 agrees on xi).
-## sigma_r differs between the two fits (io 0.37, proc-pinned 0.53) -- each
-## factor is taken from the model best suited to it; noted in the caption.
+## INPUT + PROCESSING now come from the SINGLE joint io+proc fit
+## (joint_io_proc_d3: 5 datasets, sigma_r = 0.44, per-study sigma_lena),
+## replacing the earlier stitch of io_pooled_gamma (input) + proc_dp3
+## (processing) that mixed two models with inconsistent sigma_r (0.37 vs 0.53).
+## Efficiency-channel shares are generated in-model (share_input_xi /
+## share_proc_xi); acceleration-channel shares are the variance components
+## var_*_k normalized by sigma_kappa^2 = var_input_k + var_proc_k + var_resid_k.
+## All four are taken per-draw, then summarized (median, 5/95%).
+## NOTE (2026-06-13): this d3 draws file is the DONE 5-study fit; the on-disk
+## bundle has since grown to 6 studies -- repoint here if Fig 3 should track that.
 qfac3 <- function(x) c(med = median(x), lo = quantile(x, .05, names = FALSE),
                        hi = quantile(x, .95, names = FALSE))
-io_g <- as_draws_df(readRDS(here("fits", "io_pooled_gamma_widedelta_add.rds"))$draws(
-          c("sigma_r", "sigma_alpha", "sigma_zeta", "gamma")))
-in_eff <- io_g$sigma_r^2 / (io_g$sigma_alpha^2 + io_g$sigma_r^2)
-in_acc <- (io_g$gamma^2 * io_g$sigma_r^2) / (io_g$gamma^2 * io_g$sigma_r^2 + io_g$sigma_zeta^2)
-pd  <- as.data.frame(readRDS(here("fits", "summaries", "proc_dp3_all.draws.rds")))
-srP <- readRDS(here("fits", "proc_dp_all_subset_data.rds"))$stan_data$sigma_r
-rho <- if ("rho_rt" %in% names(pd)) pd$rho_rt else 0
-Vxi  <- srP^2 + pd$beta_xi^2 * pd$sigma_rt0^2 + pd$sigma_alpha^2
-Vkap <- pd$gamma_in^2 * srP^2 +
-        (pd$beta_k0^2 * pd$sigma_rt0^2 + pd$beta_k1^2 * pd$sigma_rt1^2 +
-         2 * pd$beta_k0 * pd$beta_k1 * rho * pd$sigma_rt0 * pd$sigma_rt1) + pd$sigma_zeta^2
-pr_eff <- pd$beta_xi^2 * pd$sigma_rt0^2 / Vxi
-pr_acc <- (pd$beta_k0^2 * pd$sigma_rt0^2 + pd$beta_k1^2 * pd$sigma_rt1^2 +
-           2 * pd$beta_k0 * pd$beta_k1 * rho * pd$sigma_rt0 * pd$sigma_rt1) / Vkap
+jd <- as.data.frame(readRDS(here("fits", "summaries", "joint_io_proc_d3.draws.rds")))
+in_eff <- jd$share_input_xi
+pr_eff <- jd$share_proc_xi
+Vk     <- jd$var_input_k + jd$var_proc_k + jd$var_resid_k     # = sigma_kappa^2
+in_acc <- jd$var_input_k / Vk
+pr_acc <- jd$var_proc_k  / Vk
 ## Imputed-input efficiency shares (1 - pi_alpha) from the EN/NO D fits, to
 ## show alongside the observed io estimate: input->efficiency is ~3-8% whether
 ## input is observed or imputed. (No imputed pi_zeta: the D' slope fits were
@@ -84,17 +81,17 @@ pp <- function(factor, channel, source, kind, m, lo, hi)
          med = m, lo = lo, hi = hi)
 qq <- function(x) c(median(x), quantile(x, .05, names = FALSE), quantile(x, .95, names = FALSE))
 panel_partition <- bind_rows(
-  do.call(pp, c(list("Input","Efficiency","Observed (io)","observed"), as.list(qq(in_eff)))),
-  do.call(pp, c(list("Input","Acceleration","Observed (io)","observed"), as.list(qq(in_acc)))),
-  do.call(pp, c(list("Processing","Efficiency","Processing","observed"), as.list(qq(pr_eff)))),
-  do.call(pp, c(list("Processing","Acceleration","Processing","observed"), as.list(qq(pr_acc)))),
+  do.call(pp, c(list("Input","Efficiency","Joint (5 ds)","observed"), as.list(qq(in_eff)))),
+  do.call(pp, c(list("Input","Acceleration","Joint (5 ds)","observed"), as.list(qq(in_acc)))),
+  do.call(pp, c(list("Processing","Efficiency","Joint (5 ds)","observed"), as.list(qq(pr_eff)))),
+  do.call(pp, c(list("Processing","Acceleration","Joint (5 ds)","observed"), as.list(qq(pr_acc)))),
   pp("Input","Efficiency","English (imputed)",  "imputed", 1 - en$pi_alpha, 1 - en$pi_hi, 1 - en$pi_lo),
   pp("Input","Efficiency","Norwegian (imputed)","imputed", 1 - no$pi_alpha, 1 - no$pi_hi, 1 - no$pi_lo)
 ) |> mutate(factor  = factor(factor,  levels = c("Input", "Processing")),
             channel = factor(channel, levels = c("Efficiency", "Acceleration")),
             kind    = factor(kind, levels = c("observed", "imputed")),
-            source  = factor(source, levels = c("Observed (io)", "English (imputed)",
-                                                "Norwegian (imputed)", "Processing")))
+            source  = factor(source, levels = c("Joint (5 ds)", "English (imputed)",
+                                                "Norwegian (imputed)")))
 
 ## ---- Panel B: analytic sensitivity (EN, NO) + refit anchors ----
 ## Holding sigma_xi^2 at its fitted (data-determined) value, the input
