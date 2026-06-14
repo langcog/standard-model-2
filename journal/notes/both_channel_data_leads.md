@@ -47,6 +47,30 @@ view-only link / a manual download into `data/`).
   and exactly the quantity the model currently imputes. Worth grabbing regardless
   of the LWL question; feeds a future word-level input channel.
 
+### UPDATE 2026-06-14 — RAW EYETRACKING IN HAND (`data/seedlings/raw_eyetracking_data/`)
+Friction 1 is **largely resolved**: RT is derivable from data we now have, no lab
+coordination needed.
+- **HaT/** = the hand-tailored Study 1 (our cohort). EyeLink Data Viewer exports
+  (tab-delim, `.xls`): `fix_rep_eighttoeighteenmonth` (163,797 fixation rows, 235
+  cols) + `mes_rep_eighttoeighteenmonth` (trial timing). NOT in peekbank d_sub
+  (it's kid-specific-words, un-standardizable) → must derive ourselves.
+- **Session label = the crosswalk**: `RECORDING_SESSION_LABEL` is literally
+  `subj_age` (`01_08`…`44_18`), subj 01–44 = our LENA/CDI ids. 264 sessions ≈
+  44 kids × 6 ages (8/10/12/14/16/18 mo), ~27k fixations/age.
+- **RT is computable, standard pipeline**: `mes_rep.IP_START_TIME` = target word
+  onset; `fix_rep` has CURRENT_FIX_START + CURRENT_FIX_INTEREST_AREA_LABEL +
+  TargetSide/TargetImage. Fernald RT = first target-AOI fixation start − onset,
+  distractor-initial trials, 300–1800 ms window. (Same computation peekbank runs.)
+- **In-window coverage**: ages **14/16/18 mo overlap our 13–30 RT window** → ~44
+  kids × 3 sessions ≈ **132 kid-sessions in window** (8/10/12 below; could extend
+  the window down). Moving these to both-channel: bottleneck **97 → ~141 (+45%)**.
+- **DiSCo/** = `dsc_{fix,mes}rep_001_380.Rds` (405+170 MB, already R-processed) —
+  almost certainly the Study-2 cross-sectional controls (not our cohort, no home
+  recordings) → lower priority; heavy, don't load casually.
+- **Revised verdict:** no longer a "stretch" — **feasible and high-value**, gated
+  on (a) building+QC'ing the RT extractor and (b) the age overlap (half the
+  sessions below window). De-risk with a 1–2-session proof-of-concept first.
+
 ### Decision this forces for the measurement-model redesign (#16)
 Let the processing channel accept **accuracy (target-looking) alongside log-RT**
 (heterogeneous-processing measurement model) → SEEDLings plugs in WITHOUT deriving
