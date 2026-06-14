@@ -1,0 +1,87 @@
+# Paper model-fit provenance
+
+**Purpose.** One place to answer "are the fits in the manuscript current?" For every
+model fit whose output reaches `paper/standard_model.qmd` (via `paper/cache/*.rds`),
+this records: what the model is, where the fit code lives, which cluster trained it,
+when, and where its outputs are stored.
+
+**Last audited:** 2026-06-13 (dates below are file mtimes + the cited
+`journal/experiments.md` entries; treat them as "as of this audit").
+
+**The dependency chain.** manuscript chunk → `paper/cache/<x>.rds` → a build script
+(`paper/build_cache.R` or `paper/build_input_cache.R`) → one or more **fit outputs**
+in `fits/` → trained by a **fit driver** on a **cluster**. A fit is "stale" when a
+fit output is older than its inputs, or when a build script points at a fit that has
+been superseded.
+
+**To refresh after new fits land:** re-run `Rscript paper/build_cache.R` and
+`Rscript paper/build_input_cache.R`, then re-render. Both read committed fit outputs
+only (no cluster access needed).
+
+---
+
+## ⚠️ Currency flags (open as of 2026-06-13)
+
+1. **Fig 3 (`fig-io-partition`) is built from `proc_dp`, not the joint model.**
+   `paper/build_input_cache.R` reads `proc_dp1_all` / `proc_dp3_all` (the 3-dataset
+   processing+input ladder, entry 33). The joint io+proc model (entry 37) is meant to
+   **supersede proc_dp for Fig 3B** but is not yet wired in. Two steps needed once the
+   joint fit is final: (a) repoint `build_input_cache.R` lines ~68/134 at
+   `joint_io_proc_d*` summaries; (b) rebuild `fig3_input.rds`.
+2. **The joint io+proc fit is mid-re-fit.** `joint_io_proc_d3.summary.rds` is dated
+   **06-12**, but the bundle `joint_io_proc_subset_data.rds` was rebuilt **06-13** —
+   so the existing summary is stale relative to the current bundle; a new run is
+   pending/in progress. Do not wire Fig 3 to the 06-12 summary.
+3. **`fig3_input.rds` (06-10) predates the joint work entirely** — it is current with
+   respect to `proc_dp` but not the joint model. Consistent with flag 1.
+4. **`io-imputed D` inventory label says "local," but sampling was on GCP**
+   (sm2-fit-01 EN / sm2-fit-02 NO; entries 32/34/35). "Local" refers to where the
+   summaries/partition are extracted, not where MCMC ran.
+
+---
+
+## Table A — model fits behind the paper
+
+| # | Model (conceptual) | Fit code + Stan/formula | Cluster | Trained | Raw fit outputs |
+|---|---|---|---|---|---|
+| **1** | **glmer ladder** — 7 nested mixed-effects accumulator models per dataset (A; B/C/D × linear/log age). Paper's M1–M4 = A/B/C/D_log; **M_best = D_log** (`(1+log_age \| child)`). Source of Fig 1B fits, AIC/BIC tables, and the longitudinal-arm BLUPs for demographics. | `studies/glmer_ladder/02_fit_one.R` (fit), `04a_simulate.R` (quantile fans → `sim_cache.rds`). `lme4::glmer`, `produces ~ 1 + log_age + (1+log_age\|child) + (1\|item)`. | Sherlock | 5 paper datasets (thal/smith/marchman/NO/JP) **2026-06-07**; `sim_cache` **06-10** | `fits/glmer_ladder/fit_<lang>_<model>.rds`, `summary_<lang>_<model>.csv`, `sim_cache.rds` |
+| **2** | **io-imputed D** (Bayesian M_best, σ_r-pinned, *no* per-child input) — population share of efficiency variance attributable to input (π_α). Fig 3A + inline `io_partition`. | GCP family runner (`cluster/gcp/run_family.sh`, `wait_then_no_mbest.sh`), variant `long_no_freq_slopes[_norwegian]`. Stan `model/stan/log_irt_long.stan` (no-freq toggle). Entries 14, 24/25, 35. | GCP sm2-fit-01 (EN) / sm2-fit-02 (NO) | EN draws **06-09**; NO post-dedup refit collected **06-11** (entry 35) | `fits/summaries/long_no_freq_slopes[_norwegian].{draws,summary}.rds`, `_psi.csv`; bundles `long_subset_data[_nor].rds` |
+| **3** | **io-pooled** (Bayesian, *observed* LENA/head-cam input, 4 datasets; wide-delta + γ slope channel) — observed input share of efficiency ≈ 2.8%. Fig 3 io panels + `fig5_io_summary`. | `model/scripts/fit_io_pooled_widedelta.R`; Stan `model/stan/log_irt_io_pooled.stan` (+ `_gamma_add`). Entry 30. | local | **2026-06-02/03** | `fits/io_pooled_widedelta.rds`, `io_pooled_gamma_widedelta_add.rds`, bundle `io_pooled_subset_data.rds` |
+| **4** | **proc_dp D′0–D′3** (Bayesian processing+input regression ladder, 3 LWL datasets: AM2018/FM2012/FMW2013) — processing→efficiency; selected D′1. **Currently feeds Fig 3.** | `model/scripts/fit_proc_dp.R`; Stan `model/stan/log_irt_long_proc_dp.stan`. Entry 33. | Sherlock | **2026-06-09/10** | `fits/summaries/proc_dp{0,1,2,3}_all.{draws,summary,loo}.rds`, `proc_dp1_all_psi.csv`; bundle `proc_dp_all_subset_data.rds` |
+| **5** | **joint io+proc D′0–D′3** (proc_dp + BabyView/SEEDLingS input-only; per-study σ_lena; σ_r = 0.44; 5 datasets / 292 kids) — **intended Fig 3B replacement.** | `model/scripts/fit_joint_io_proc.R`; Stan `model/stan/log_irt_long_proc_dp_joint.stan`; bundle `model/scripts/prepare_joint_io_proc_bundle.R`; `cluster/sherlock/joint_io_proc_fit.slurm`. Entry 37. | Sherlock | d3 summary **06-12**; **bundle rebuilt 06-13 → re-fit pending** | `fits/summaries/joint_io_proc_d<rung>.{draws,summary}.rds`; bundle `joint_io_proc_subset_data.rds` |
+| **6** | **LLM acceleration** — GPT-2 (small) retrained on 24.5M-word CHILDES (training axis + distinct-input/development axis) + Chang & Bergen 2022 4-architecture fits; per-word sigmoid slopes vs children's κ. Fig `fig-llm-acceleration`. | `studies/llm/` (feng2024 protocol); see `journal/experiments_llm.md`. Children's κ from fit #2 draws. | Sherlock / Marlowe (GPU) | surprisal + sigmoids **06-10**; finer ladder **06-11** | `fits/llm/sigmoids/`, `fits/llm/ladder_bestval_finer.csv`, `fits/llm/surprisal_*.csv`, `data/chang_bergen_2022/` |
+| **7** | **cross-sectional demographics** — per-language `glmer(produces ~ la*p + (1\|item) + (1\|child_id))` on 31 Wordbank languages; sex & maternal-ed → efficiency/acceleration. Fig `fig-demographics` (with the #1 longitudinal BLUPs as the longitudinal arm). | `studies/cross_sectional_demographics/00_build.R` (+ `composite_figure.R`). `lme4::glmer`, `nAGQ=0`. Entry 31. | local | uncapped refit **2026-06-11** | `studies/cross_sectional_demographics/cache/{fits,scatter}.rds` |
+
+---
+
+## Table B — cache layer (`paper/cache/` ← build script ← fit outputs → manuscript)
+
+| `paper/cache/` file (setup var) | Built by | Reads (Table A #) | Manuscript consumer |
+|---|---|---|---|
+| `fig2_glmer_ladder.rds` (`ladder`) | `build_cache.R` §1 | #1 `sim_cache.rds` | `fig-schematic` panel B |
+| `aic_summary.rds` (`aic`) | `build_cache.R` §1b | #1 `sim_cache.rds` | SI `tbl-aic`/`tbl-bic`; inline `aic_loglin_range` |
+| `blups_demographics.rds` (`demo_blups`) | `build_cache.R` §3 | #1 `fit_*_D_log.rds` + Wordbank demographics | feeds #7 (longitudinal arm of `fig-demographics`) |
+| `fig5_io_summary.rds` (`io_summary`) | `build_cache.R` §4 | #3 io-pooled wide-delta + γ | io-pooled headline (setup-loaded; verify live use) |
+| `fig4_exposure.rds` (`exposure`) | `build_cache.R` §5 | #2 EN draws + psi + `long_subset_data.rds` | `fig-efficiency` |
+| `fig6_llm_slopes.rds` (`llm_slopes`) | `build_cache.R` §6 | #6 LLM sigmoids/ladder + #2 EN/NO draws | `fig-llm-acceleration` |
+| `io_partition.rds` (`io_part`) | `build_cache.R` §8 | #2 EN/NO summaries | inline "Population input-related variation" |
+| `input_rate_table.rds` | `build_cache.R` §7 | CSVs (Sperry/HR + validation set) — *not a model fit* | SI `tbl-input-rates` |
+| `fig3_input.rds` (`input3`) | `build_input_cache.R` | #3 io-pooled + #4 **proc_dp** + #2 EN/NO summaries | `fig-io-partition` ⚠️ see flag 1 |
+| `fig_io_imputed_proc.rds` | `build_input_cache.R` | #2 + #4 | SI panel (not in main setup load) |
+
+---
+
+## Notes / conventions
+
+- **Bundles vs fits.** `*_subset_data.rds` files are *input bundles* (assembled CDI/RT/input
+  data for Stan), not fits. A bundle newer than its fit summary ⇒ a re-fit is pending
+  (see flag 2).
+- **Sherlock fits** are sampled on the cluster, then summarized to `fits/summaries/<tag>.{draws,summary,loo}.rds`
+  via `cluster/sherlock/extract_*.R`; the large per-chain CSVs are not committed (gc'd).
+- **GCP fits** (#2) likewise land as extracted summaries; raw CSVs were garbage-collected
+  on the VMs (entry 34).
+- **The 5 "paper" glmer-ladder datasets** are thal/smith/marchman (English by-study) + NO + JP.
+  Other `fit_*_D_log.rds` in `fits/glmer_ladder/` (english_american, finnish, french_*, spanish_mexican,
+  dated 05-27) are extra languages **not** in the main ladder.
+- **Authoritative narrative:** `journal/experiments.md` (numbered entries cited above) and its
+  top "Analysis inventory" table; LLM detail in `journal/experiments_llm.md`.
