@@ -26,8 +26,18 @@ recurring source of confusion. The authoritative key — verified against the da
   **both** TL3 and TLO input, split by its internal `Study` column (`TL3`/`TLO`).
 - **TLO input is under-used.** All 51 TLO LENA kids load, but the proc/joint bundle
   gates input on RT+CDI, so only the ~31 TLO kids who also have RT enter. The ~20
-  TLO kids with input+CDI but **no RT** could contribute as input-only kids (as
-  BabyView/SEEDLingS do) but currently don't — an open salvage lever, not a bug.
+  TLO kids with input+CDI but **no RT** are recovered as input-only kids (salvage, 2026-06-14).
+- **⚠ FMW2013 (TLO) is INCOMPLETE — two batches, we have only one (V. Marchman,
+  2026-06-14).** FMW2013 has **Batch 1 (Stanford, 4-digit ids ~4856–6613)** and
+  **Batch 2 (Outreach, `20xxx`)**. Our files have **only Batch 2**: CDI (79 kids,
+  18/24/30mo) + LENA (51 kids). Peekbank `d_sub` RT is in 4-digit Peekbank ids
+  (bridged via `_pb2026_admins` to lab ids); only 40 bridge to our Batch-2 CDI, so
+  the bundle keeps 40 RT kids. **Missing: all of Batch 1 (CDI+LENA), and the 24-mo
+  LENA** — `lena_am2018_fmw2013.csv` has TLO data only in the `AWCHr18M` column
+  (`16M` empty, no `24M`); the `AGE*` cols are blank so the reading's true age is
+  unconfirmed. Marchman says LENAs exist at **18 and 24 mo** and offers them →
+  recovering 24-mo LENA adds a 2nd within-child input read/kid (sharpens σ_meas/σ_r);
+  Batch 1 needs its CDI to be usable (its RT is already in Peekbank).
 
 ## Directory layout
 
