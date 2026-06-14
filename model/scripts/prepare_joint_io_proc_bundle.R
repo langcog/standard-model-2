@@ -37,8 +37,10 @@ io_cdi <- iob$df %>%
   mutate(cid       = paste(study, ckey, sep = "::"),
          study_idx = ifelse(study == "BabyView", length(DS3) + 1L, length(DS3) + 2L),
          jj        = unname(item2jj[item]))
-cids <- io_cdi %>% distinct(cid, study, study_idx)
+cids <- io_cdi %>% distinct(cid, ckey, study, study_idx)
 cids$ii <- I3 + seq_len(nrow(cids))
+## carry the real subject_id (retained in io_pooled child_info) for robust joins
+cids <- cids %>% left_join(iob$child_info %>% distinct(ckey, subject_id), by = "ckey")
 io_cdi <- io_cdi %>%
   left_join(cids %>% select(cid, ii), by = "cid") %>%
   mutate(admin_key = paste(cid, age, sep = "_"))
@@ -102,6 +104,22 @@ V <- length(z_lena)
 cat(sprintf("input channel: V=%d (proc_dp %d + BV/SE %d). sigma_lena per study: %s\n",
             V, nrow(lena3), nrow(add_in), paste(sprintf("%.3f", sigma_lena_vec), collapse=", ")))
 
+## ---- 4b. SEEDLingS LWL-RT channel (Zhu et al., derived) -> processing study 6 ---- ##
+## Per-trial RT from model/scripts/prepare_seedlings_lwl_rt.R, joined by the REAL
+## subject_id (NOT the dense io ii). The model reads RT-study via
+## study_of_child[lwl_to_child], so these obs auto-route to tau_s[6]/psi_s[6];
+## no Stan change. Moves SEEDLingS kids input-only -> both-channel.
+se_rt  <- readr::read_csv("data/seedlings/seedlings_lwl_rt.csv", show_col_types = FALSE)
+se_map <- cids %>% filter(study == "SEEDLingS") %>% select(subject_id, ii)
+se_lwl <- se_rt %>% inner_join(se_map, by = c("lab_subject_id" = "subject_id")) %>%
+  transmute(ii, lwl_age, lwl_log_rt)
+lwl_to_child_all <- c(sdp$lwl_to_child, se_lwl$ii)
+lwl_log_age_all  <- c(sdp$lwl_log_age,  log(se_lwl$lwl_age / a0))
+lwl_log_rt_all   <- c(sdp$lwl_log_rt,   se_lwl$lwl_log_rt)
+n_se_unmatched <- nrow(se_rt) - nrow(se_lwl)
+cat(sprintf("SEEDLingS RT: joined %d obs / %d kids by subject_id (%d RT rows unmatched); N_lwl %d -> %d\n",
+            nrow(se_lwl), n_distinct(se_lwl$ii), n_se_unmatched, sdp$N_lwl, length(lwl_log_rt_all)))
+
 ## ---- 5. stan_data (same shape as proc_dp; sigma_lena now vector[S]) ---- ##
 ## Pin sigma_r to the apples-to-apples value (channel-matched US English
 ## between-child log-input SD; validated by the GCP sigma_r pins). The input
@@ -115,24 +133,30 @@ stan_data <- modifyList(sdp, list(
   study_of_child = study_of_child,
   sigma_r = SIGMA_R_PIN,
   V = V, rec_to_child = rec_to_child, z_lena = z_lena,
-  sigma_lena = sigma_lena_vec
+  sigma_lena = sigma_lena_vec,
+  ## RT channel now includes SEEDLingS (study 6) alongside proc_dp studies 1-4
+  N_lwl = length(lwl_log_rt_all), lwl_to_child = lwl_to_child_all,
+  lwl_log_age = lwl_log_age_all, lwl_log_rt = lwl_log_rt_all
 ))
 
-## child_info for all I
-child_new <- cids %>% transmute(ii, lab_subject_id = cid,
+## child_info for all I (carry subject_id for SEEDLingS/BabyView)
+child_new <- cids %>% transmute(ii, lab_subject_id = cid, subject_id,
                                 dataset_name = study, study = study_idx)
 child_info <- bind_rows(child3, child_new[order(child_new$ii), ]) %>% arrange(ii)
 
+## bundle lwl frame: proc_dp RT + SEEDLingS RT (for inspection/plots)
+lwl_all <- bind_rows(lwl, se_lwl %>% mutate(dataset_name = "seedlings_zhu"))
+
 bundle <- list(stan_data = stan_data, word_info = wi, child_info = child_info,
-               lwl = lwl, datasets = c(DS3, "babyview", "seedlings"),
+               lwl = lwl_all, datasets = c(DS3, "babyview", "seedlings"),
                sigma_lena_by_study = sigma_lena_vec,
-               language = "English (joint io+proc: AM2018, FM2012, FMW2013, BabyView, SEEDLingS)")
+               language = "English (joint io+proc: AM2018, FM2012, FMW2013, BabyView, SEEDLingS +RT)")
 out <- file.path(PATHS$fits_dir, "joint_io_proc_subset_data.rds")
 saveRDS(bundle, out)
 
 cat(sprintf("\n== joint bundle ==\n  I=%d A=%d J=%d C=%d S=%d N=%d N_lwl=%d V=%d a0=%d\n",
-            I, A, J, C, S, length(y_all), sdp$N_lwl, V, a0))
-cat(sprintf("  RT children: %d (studies 1-%d) ; input children: %d ; both: %d\n",
-            length(unique(sdp$lwl_to_child)), length(DS3), V,
-            length(intersect(unique(sdp$lwl_to_child), rec_to_child))))
+            I, A, J, C, S, length(y_all), length(lwl_log_rt_all), V, a0))
+cat(sprintf("  RT children: %d (studies 1-4 + SEEDLingS) ; input children: %d ; both-channel: %d\n",
+            length(unique(lwl_to_child_all)), V,
+            length(intersect(unique(lwl_to_child_all), rec_to_child))))
 cat(sprintf("Saved %s\n", out))

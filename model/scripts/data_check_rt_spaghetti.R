@@ -4,20 +4,23 @@
 suppressPackageStartupMessages({ library(here); library(dplyr); library(ggplot2) })
 b  <- readRDS(here("fits", "joint_io_proc_subset_data.rds"))
 nm <- c("AM2018", "FM2012", "FMW2013", "fernald_totlot", "BabyView", "SEEDLingS")
+## single source: the joint bundle's lwl now includes SEEDLingS RT (study 6),
+## newly derived from the Zhu et al. raw EyeLink reports
 lwl <- b$lwl %>%
   left_join(b$child_info %>% transmute(ii, ds = nm[study]), by = "ii") %>%
   filter(!is.na(ds)) %>%
   transmute(ds, lwl_age, lwl_log_rt, gid = paste0(ds, "::", ii))
+FACETS <- c("AM2018", "FM2012", "FMW2013", "fernald_totlot", "SEEDLingS")
 
-## SEEDLings derived RT (Zhu et al., the new channel) -- from the extractor output
-se <- readr::read_csv(here("data/seedlings/seedlings_lwl_rt.csv"), show_col_types = FALSE) %>%
-  transmute(ds = "SEEDLingS-LWL", lwl_age, lwl_log_rt, gid = paste0(ds, "::", lab_subject_id))
-lwl <- bind_rows(lwl, se)
-FACETS <- c("AM2018", "FM2012", "FMW2013", "fernald_totlot", "SEEDLingS-LWL")
+## the bundle stores RT per TRIAL (many per child-age); collapse to per-(child,age)
+## mean log-RT so the spaghetti shows one point per child per age (a real
+## trajectory) instead of connecting every trial floor-to-ceiling.
+lwl <- lwl %>% group_by(ds, gid, lwl_age) %>%
+  summarise(lwl_log_rt = mean(lwl_log_rt), .groups = "drop")
 
 p <- ggplot(lwl %>% filter(ds %in% FACETS), aes(lwl_age, lwl_log_rt)) +
   geom_line(aes(group = gid), color = "grey70", alpha = 0.4, linewidth = 0.3) +
-  geom_point(color = "grey55", alpha = 0.4, size = 0.5) +
+  geom_point(color = "grey55", alpha = 0.4, size = 0.6) +
   geom_smooth(method = "loess", se = FALSE, color = "#c41e37", linewidth = 0.9, span = 1) +
   facet_wrap(~ factor(ds, levels = FACETS), nrow = 1) +
   scale_y_continuous(sec.axis = sec_axis(~ exp(.), name = "RT (ms)", breaks = c(500, 1000, 2000))) +

@@ -80,8 +80,22 @@ plot. **Onset marker = `EL_BUTTON_CRIT_WORD` (experimenter button), not
 `IP_START_TIME`** (which is just trial start) — corrects the line above.
 **⚠ The "trivial `01`–`44`" crosswalk below is WRONG**: subjects are `01..46` with
 gaps (05, 24), io_pooled uses a dense factor rank → naive `::N=0N` misaligns 40/44
-kids. Bundle wiring is gated on a verified subject_id crosswalk (recommend
-retaining `subject_id` through prepare_seedlings → io_pooled). See the QC note.
+kids. See the QC note.
+
+### WIRED 2026-06-14 — SEEDLingS RT now in the joint io-proc bundle
+- **subject_id retention** added through `prepare_io_pooled.R` (carries `subject_id`
+  into `child_info` per study where the source bundle has it) → joint prep joins RT
+  by **subject_id**, never the dense ii. Verified the trap was real: io `ii=5`→subj
+  `06`, `ii=23`→subj `25`.
+- **`prepare_joint_io_proc_bundle.R`** reads `seedlings_lwl_rt.csv`, joins 1,697 RT
+  obs / 44 kids (0 unmatched) → appends to the RT channel as **study 6**. NO Stan
+  change: `tau_s`/`psi_s` are `vector[S=6]`; model routes RT via
+  `study_of_child[lwl_to_child]`.
+- **Result:** N_lwl 1,077→2,774; RT children 282→326; **both-channel 97 → 141
+  (+44 SEEDLingS, +45%)**. All 44 SEEDLingS kids are now input+RT both-channel.
+  Bundle validated (array lengths, index bounds, study-6 routing, RT ages 8–18).
+- Next: fit the joint model (GCP — all-items J=681 ~17h) and read the io-proc
+  partition; the separation bottleneck just widened 45%.
 
 ### Decision this forces for the measurement-model redesign (#16)
 Let the processing channel accept **accuracy (target-looking) alongside log-RT**

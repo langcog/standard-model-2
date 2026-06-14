@@ -47,7 +47,7 @@ STUDIES <- tibble::tribble(
 )
 
 ## ---- 1. Pull CDI long + per-recording input from each bundle -------
-cdi_all <- list(); rec_all <- list()
+cdi_all <- list(); rec_all <- list(); subj_all <- list()
 for (i in seq_len(nrow(STUDIES))) {
   st <- STUDIES[i, ]
   b  <- readRDS(file.path(PATHS$fits_dir, st$bundle))
@@ -57,6 +57,13 @@ for (i in seq_len(nrow(STUDIES))) {
   # df uses numeric ids while its videos use "S00..." strings, so a
   # subject_id join silently drops all of BabyView.
   df$ckey <- paste(st$study, df$ii, sep = "::")
+  # Retain the original subject_id per ckey where the source bundle carries
+  # one (SEEDLingS does -> "01".."46" with gaps). Needed for robust joins to
+  # external per-child data (e.g. the SEEDLings LWL-RT channel), which must NOT
+  # assume ckey "::N" == subject_id "0N" (io ii is a dense factor rank).
+  if ("subject_id" %in% names(df))
+    subj_all[[st$study]] <- df |> distinct(ckey, subject_id) |>
+      mutate(subject_id = as.character(subject_id))
   cdi_all[[st$study]] <- df |>
     transmute(study = st$study, s = st$s, ckey,
               age, form, item, produces,
@@ -89,7 +96,8 @@ cdi <- cdi |>
          jj = as.integer(factor(item_norm)),
          cc = as.integer(factor(lexical_category)))
 
-child_info <- cdi |> distinct(ii, ckey, s) |> arrange(ii)
+child_info <- cdi |> distinct(ii, ckey, s) |> arrange(ii) |>
+  left_join(bind_rows(subj_all), by = "ckey")     # subject_id; NA where source lacks it
 admin_info <- cdi |> distinct(aa, ii, age, admin_key) |> arrange(aa)
 word_info  <- cdi |> group_by(jj) |>
   summarise(item = first(item), item_norm = first(item_norm),
