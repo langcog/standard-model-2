@@ -15,20 +15,28 @@ model, and a single human-checkable master key. (2026-06-13, task #14.)
 **So there is no accidental item loss** — the merges are clean. The only
 reduction is the *intentional* 200-item subsample.
 
-## But two things worth acting on
+## RESOLVED 2026-06-13 — dropped the subsample, now use ALL items
 
-1. **The subsample leaves 552 items on the table.** 752 CHILDES-prob items exist;
-   the model uses 200. More items → better-estimated per-child efficiency (ξ).
-   The subsample was a tractability choice; the joint fit is ~5 h, so **raising it
-   (400, or all 752) is feasible** and is the cleanest way to recover signal
-   ("losing items hurts us"). → candidate robustness/precision lever.
-2. **Cross-dataset coverage is uneven.** The 200 chosen items are fully present in
-   the four WS/Stanford RT datasets (200/200), but **BabyView 165/200** and
-   **SEEDLingS 107/200** (SEEDLingS is the younger WG form). So SEEDLings kids'
-   ξ is estimated on only ~107 items. Choosing the subsample to also cover the
-   WG/SEEDLings vocabulary (or just enlarging it) would sharpen the input-only
-   datasets' efficiency estimates. 341 items are in **all 6** datasets — a natural
-   shared core.
+MCF: "aren't we using the full Words & Sentences 680 items? We certainly should
+be, not subsampling." Correct. The 200-item subsample is gone:
+- `prepare_proc_dp_bundle.R` now defaults to `n_items="all"` (Inf → no subsample;
+  pass a number for a quick test fit). proc_dp: **J=681**, N=504,656.
+- Joint bundle regenerated: **J=681** (was 200), **N=738,695** (was 217,796, 3.4×),
+  I=348, both-channel still 97. SEEDLings now contributes its full WG set (≈360),
+  BabyView 604/681 — vs the old 107/165.
+- **Compute:** N×3.4 ⇒ the joint fit is ~12–17 h (was ~5 h). Over Sherlock's 16 h
+  limit → run on **GCP (uncapped)**, recover posterior offline from CSVs (the
+  post-sampling step OOMs at this N, as before).
+
+### On the "752" universe (MCF asked: are these really words?)
+752 = **WS(680) ∪ WG-extra(~72)** — a union across forms, all real CDI vocabulary
+categories (nouns 352, predicates 175, function_words 107, **other 118**). NOT
+grammar/complexity items. The "other" 118 are the CDI's sound-effects
+(`vroom`, `grrr`, `cockadoodledoo`), games/routines (`patty cake`,
+`this little piggy`), and misc words (`friend`, `please`) — all on the checklist.
+**Two debatable items to consider excluding:** `child's own name` (always
+produced → uninformative Rasch item) and the multi-word routines. Left in for now
+(matches CDI scoring); trivial to drop if we want.
 
 ## Artifact
 

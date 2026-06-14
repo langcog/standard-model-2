@@ -17,7 +17,10 @@ source("model/R/helpers.R")
 suppressPackageStartupMessages({ library(dplyr); library(tidyr); library(readr) })
 
 args      <- commandArgs(trailingOnly = TRUE)
-n_items   <- as.integer(if (length(args) >= 1) args[1] else 200)
+## n_items: "all" (default) uses every CHILDES-matched item per form; a number
+## triggers the stratified class x difficulty subsample (for quick test fits).
+n_items_arg <- if (length(args) >= 1) args[1] else "all"
+n_items     <- if (identical(tolower(n_items_arg), "all")) Inf else as.integer(n_items_arg)
 DATASETS  <- if (length(args) >= 2) {
   strsplit(args[2], ",")[[1]]
 } else {
@@ -65,22 +68,25 @@ cdi <- cdi %>%
   filter(!is.na(prob), !is.na(lexical_category))
 cat(sprintf("After CHILDES match: %d rows, %d items\n", nrow(cdi), n_distinct(cdi$item)))
 
-# ---- 3. Stratified item subsample (class x difficulty) ---- #
-set.seed(SEED)
-item_summary <- cdi %>% distinct(item, lexical_category, prob) %>%
-  mutate(log_p = log(prob)) %>%
-  group_by(lexical_category) %>% mutate(diff_bin = ntile(log_p, N_DIFF_BINS)) %>% ungroup()
-n_classes <- n_distinct(item_summary$lexical_category)
-per_cell  <- max(1, floor(n_items / (n_classes * N_DIFF_BINS)))
-chosen <- item_summary %>% group_by(lexical_category, diff_bin) %>%
-  slice_sample(n = per_cell) %>% ungroup() %>% pull(item)
-if (length(chosen) > n_items) chosen <- sample(chosen, n_items)
-if (length(chosen) < n_items) {
-  extras <- setdiff(item_summary$item, chosen)
-  chosen <- c(chosen, sample(extras, min(n_items - length(chosen), length(extras))))
+# ---- 3. Item set: all items (default) or stratified class x difficulty subsample ---- #
+if (is.finite(n_items)) {
+  set.seed(SEED)
+  item_summary <- cdi %>% distinct(item, lexical_category, prob) %>%
+    mutate(log_p = log(prob)) %>%
+    group_by(lexical_category) %>% mutate(diff_bin = ntile(log_p, N_DIFF_BINS)) %>% ungroup()
+  n_classes <- n_distinct(item_summary$lexical_category)
+  per_cell  <- max(1, floor(n_items / (n_classes * N_DIFF_BINS)))
+  chosen <- item_summary %>% group_by(lexical_category, diff_bin) %>%
+    slice_sample(n = per_cell) %>% ungroup() %>% pull(item)
+  if (length(chosen) > n_items) chosen <- sample(chosen, n_items)
+  if (length(chosen) < n_items) {
+    extras <- setdiff(item_summary$item, chosen)
+    chosen <- c(chosen, sample(extras, min(n_items - length(chosen), length(extras))))
+  }
+  cdi <- cdi %>% filter(item %in% chosen)
 }
-cdi <- cdi %>% filter(item %in% chosen)
-cat(sprintf("Items kept: %d\n", n_distinct(cdi$item)))
+cat(sprintf("Items kept: %d (%s)\n", n_distinct(cdi$item),
+            if (is.finite(n_items)) sprintf("subsampled to %d", n_items) else "ALL items"))
 
 # ---- 4. LWL RT: d_sub joined to 2026.1 lab ids, QC'd ---- #
 dsub <- readRDS(file.path(PB_DIR, "1_d_sub.Rds")) %>% ungroup()
