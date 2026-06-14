@@ -18,7 +18,7 @@ growing that, from two background lit/data reviews (2026-06-13).
 ## Lead 2 — SEEDLings LWL (Bergelson) — PAPER IN HAND (2026-06-14)
 **Zhu, Amatuni, Egan-Dailey, Garrison, Kalenkovich, Koorathota, Righter, Tor,
 Bergelson — "Experience Shapes Early Noun Comprehension from 8–18 Months"**
-(submitted; PDF `paper/zhu_etal_submitted.pdf`, 93pp w/ SI). Data+code+stimuli:
+(submitted; PDF `papers/zhu_etal_submitted.pdf`, 93pp w/ SI). Data+code+stimuli:
 **osf.io/m2kdz** (API auth-gated while under review — need MCF's login / a
 view-only link / a manual download into `data/`).
 - **Study 1 (n=44) = our SEEDLings cohort** (already in the io-proc model as
@@ -70,6 +70,18 @@ coordination needed.
 - **Revised verdict:** no longer a "stretch" — **feasible and high-value**, gated
   on (a) building+QC'ing the RT extractor and (b) the age overlap (half the
   sessions below window). De-risk with a 1–2-session proof-of-concept first.
+
+### BUILT + QC'd 2026-06-14 — `model/scripts/prepare_seedlings_lwl_rt.R`
+Extractor done; QC report card vs paper targets in
+[`seedlings_lwl_qc_targets.md`](seedlings_lwl_qc_targets.md). Output
+`data/seedlings/seedlings_lwl_rt.csv` (1,697 RTs, 44 kids, median 710 ms,
+774→642 ms over 8→18 mo; 1,097 in our 14–18 mo window). Added to the RT spaghetti
+plot. **Onset marker = `EL_BUTTON_CRIT_WORD` (experimenter button), not
+`IP_START_TIME`** (which is just trial start) — corrects the line above.
+**⚠ The "trivial `01`–`44`" crosswalk below is WRONG**: subjects are `01..46` with
+gaps (05, 24), io_pooled uses a dense factor rank → naive `::N=0N` misaligns 40/44
+kids. Bundle wiring is gated on a verified subject_id crosswalk (recommend
+retaining `subject_id` through prepare_seedlings → io_pooled). See the QC note.
 
 ### Decision this forces for the measurement-model redesign (#16)
 Let the processing channel accept **accuracy (target-looking) alongside log-RT**
