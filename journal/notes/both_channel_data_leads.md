@@ -97,6 +97,15 @@ kids. See the QC note.
 - Next: fit the joint model (GCP — all-items J=681 ~17h) and read the io-proc
   partition; the separation bottleneck just widened 45%.
 
+### FMW2013 input salvage 2026-06-14
+TLO has 51 LENA kids but proc_dp kept only the 31 with RT. Recovered the other
+**20 (CDI+input, no RT)** as input-only children of the existing study 3
+(`fmw_2013`) in `prepare_joint_io_proc_bundle.R`, matched by the retained
+subject_id, standardized on proc_dp's FMW2013 scale (all 51 share one scale,
+z_lena mean −0.05 sd 0.94). **Input channel V 163→183; fmw_2013 input 31→51; I
+348→368.** Both-channel stays 141 (salvage has no RT). Open: `fernald_marchman_2012`
+(TL2) input — no LENA file in repo; MCF following up on whether it exists.
+
 ### Decision this forces for the measurement-model redesign (#16)
 Let the processing channel accept **accuracy (target-looking) alongside log-RT**
 (heterogeneous-processing measurement model) → SEEDLings plugs in WITHOUT deriving
