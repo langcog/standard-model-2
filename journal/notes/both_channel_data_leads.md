@@ -15,22 +15,48 @@ growing that, from two background lit/data reviews (2026-06-13).
   item-level CDI** (needs a sumscore-vocab bridge); data formally "belong to
   UW-Madison" (permission needed to publish). Tristan Mahr is responsive.
 
-## Lead 2 — SEEDLings LWL (Bergelson) — PROMISING, MCF following up
-- The SEEDLings home cohort (our n=44, LENA + monthly CDI) WAS run in
-  looking-while-listening: **Bergelson & Aslin 2017 (PNAS 114:12916)**, repo
-  `ebergelson/sixmonth_seedlings_paper` (companion: Bergelson & Swingley 2018,
-  Child Dev 89:1567).
-- **IDs crosswalk one-to-one**: the eye-tracking `subj` field is literally
-  `"01"`–`"44"` — the same SEEDLings child-id scheme as our LENA/CDI data. Linkage
-  is trivial (drop the `_06` month suffix; `ns01–ns12` are lab-only kids to drop).
-- **The catch:** the published processing measure is **proportion-target-looking
-  (accuracy), not Fernald RT/latency** — our model's processing channel is log-RT.
-  Public data is mostly **6 mo** (too young for our window). Raw EyeLink output
-  reportedly carries a latency column → RT *could* be derived at 12/18 mo, but
-  that needs the lab.
-- **Access:** processed looking data open on GitHub; raw audio = HomeBank
-  password; home video/lab = Databrary authorized-investigator. Contact:
-  elika.bergelson@harvard.edu. **MCF is following up with Bergelson.**
+## Lead 2 — SEEDLings LWL (Bergelson) — PAPER IN HAND (2026-06-14)
+**Zhu, Amatuni, Egan-Dailey, Garrison, Kalenkovich, Koorathota, Righter, Tor,
+Bergelson — "Experience Shapes Early Noun Comprehension from 8–18 Months"**
+(submitted; PDF `paper/zhu_etal_submitted.pdf`, 93pp w/ SI). Data+code+stimuli:
+**osf.io/m2kdz** (API auth-gated while under review — need MCF's login / a
+view-only link / a manual download into `data/`).
+- **Study 1 (n=44) = our SEEDLings cohort** (already in the io-proc model as
+  *input-only*: LENA + monthly WG-CDI). Hand-tailored LWL every 2 mo, **8–18 mo**
+  (≤6 sessions × 16 words/session). They ALSO computed **per-child per-word
+  frequency from each child's own home recordings** (the "audio-nouns" were
+  hand-picked from that child's prior 2 mo of daylong audio).
+- **Study 2 (n=247)** = cross-sectional controls on Study-1 kids' tailored
+  stimuli; NOT our cohort, no home recordings → no input channel → not useful here.
+
+### Verdict for io-proc
+- **Friction 1 — measure:** infant outcome is *increase in target looking*
+  (accuracy), NOT Fernald RT (our channel is log-RT). RT computed for **adults
+  only** (Figs E1/E2). They explicitly punt RT to future work and invite reuse
+  ("reaction time and target-looking accuracy are of course closely linked").
+  → RT is *derivable* from the raw OSF timecourse, their adult-RT code a head
+  start, but it is pipeline work (± lab coordination for raw frames).
+- **Friction 2 — age:** SEEDLings LWL 8–18 mo vs our Fernald RT channel **13–30 mo**
+  (AM2018 13–30, FMW2013 17–26, FM2012 18–30, totlot 15–25). Overlap only
+  **13–18 mo** (14/16/18-mo sessions); 8–12 mo is below window + near floor.
+- **Upside:** the 44 kids → both-channel would grow the separation bottleneck
+  **97 → ~141 (+45%)** — but most new processing data is below window. Treat
+  LWL-as-processing as a **stretch / robustness add, not a core dependency**.
+- **The real prize = the per-child per-word frequency** — observed child-specific
+  *word-level* input, far richer than our LENA total-rate, no measure mismatch,
+  and exactly the quantity the model currently imputes. Worth grabbing regardless
+  of the LWL question; feeds a future word-level input channel.
+
+### Decision this forces for the measurement-model redesign (#16)
+Let the processing channel accept **accuracy (target-looking) alongside log-RT**
+(heterogeneous-processing measurement model) → SEEDLings plugs in WITHOUT deriving
+RT (cost: a 2nd efficiency→accuracy link + the young-age floor). Same lever also
+unlocks Mahr&Edwards-style data later.
+
+- **Access paths:** processed looking + per-child freq → OSF m2kdz (auth-gated);
+  ID crosswalk to our LENA/CDI is trivial (`subj` = `"01"`–`"44"`, drop `_06`
+  suffix, drop `ns01–ns12` lab-only). raw audio = HomeBank pw; home video/raw
+  EyeLink = Databrary authorized-investigator. Contact: elika.bergelson@harvard.edu.
 
 ## Takeaway for the model
 Both leads have a **format mismatch** with the current model: M&E vocab is
