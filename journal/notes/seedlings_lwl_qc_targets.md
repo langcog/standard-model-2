@@ -55,6 +55,24 @@ coherence, not a paper figure:
 POC (2026-06-14, `model/scripts/seedlings_lwl_rt_poc.R`): median 714 ms, 755→636 ms
 across 8→18 mo, 1,918 valid RTs / 45 kids, ~1,202 in our 14–18 mo window. ✓ Tier 3.
 
+### Onset is a button press — RTs are ~280 ms shorter than Fernald, but reconcile (2026-06-14)
+SEEDLings RT looks **shorter than the Fernald/peekbank datasets at the same age**
+(e.g. 678 ms @16mo vs AM2018's 998 ms) — opposite of the expected younger=slower.
+Cause: the SEEDLings target word is spoken **live by the parent** and marked by an
+**experimenter button** (`EL_BUTTON_CRIT_WORD`), which lags the true word onset by
+the experimenter's reaction time. Peekbank/Fernald uses **audio-aligned** onset, so
+SEEDLings' stopwatch starts ~280 ms late. Confirmed reaction-timed: the button sits
+a mean **2795 ms after the fixed audio start with SD = 521 ms** (a programmed marker
+would have ~0 SD). Adding the latency back, SEEDLings ≈ Fernald (678 + ~280 ≈ 960 ≈
+998). **Implications:**
+- **Absorbed by the per-study `tau_s[6]`** (SEEDLings' own RT level); the within-study
+  `rt0_i` deviations that feed ξ/κ are unchanged by a constant onset shift → no
+  partition bias. SEEDLings just gets its own RT intercept, as intended.
+- **Floor stays 300 ms** (not raised to 367): because the onset is ~280 ms late, a
+  *button* RT of 300 ms = a *true* RT of ~580 ms (not anticipatory). Truly
+  anticipatory shifts would be button RT < ~20 ms, already excluded. Raising the
+  floor would over-exclude valid shifts. No calibration of the unknown latency.
+
 ## RESULTS — pipeline `model/scripts/prepare_seedlings_lwl_rt.R` (2026-06-14)
 
 | QC check | target | recovered | verdict |
