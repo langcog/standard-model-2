@@ -125,3 +125,6 @@ paper/standard_model_files/
 # Stray default R plot dumps
 Rplots.pdf
 **/Rplots.pdf
+
+# SEEDLings raw EyeLink reports (816MB; RT derived by prepare_seedlings_lwl_rt.R)
+data/seedlings/raw_eyetracking_data/
