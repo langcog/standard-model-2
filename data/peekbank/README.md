@@ -38,6 +38,18 @@ recurring source of confusion. The authoritative key — verified against the da
   unconfirmed. Marchman says LENAs exist at **18 and 24 mo** and offers them →
   recovering 24-mo LENA adds a 2nd within-child input read/kid (sharpens σ_meas/σ_r);
   Batch 1 needs its CDI to be usable (its RT is already in Peekbank).
+- **UPDATE 2026-06-14 — new data received (`fmw_2013/`):**
+  - `TLOELENA_LENA_1824.csv` (cleaned, AM2018-pipeline): TLO + ELENA LENA at **18+24mo**.
+    **TLO integrated** → io_fmw2013 51→**61 kids, 108 recordings (47 kids w/ 2 reads)**.
+  - `FernaldCDIstoWordbank.txt` = ELENA (Batch 1) CDI @24mo (parsed by
+    `parse_elena_cdi.R` → `elena_cdi_items_long.csv`, position-mapped cols 13–692).
+  - **⚠ ELENA BLOCKED on id mismatch:** ELENA CDI "KID ID" (`6143,6331,…`) does NOT
+    match the ELENA RT/LENA `SubjectID1` (`4943,6117,…`) — zero overlap, no matching
+    column. RT and LENA agree with each other; only the CDI is on a different scheme.
+    So ELENA CDI joins nothing and its kids drop out. **Need Virginia to confirm the
+    crosswalk** between the CDI KID ID and the LENA/RT SubjectID1. Prep hooks
+    (proc_dp STUDY_MAP `elena`→fmw_2013; io_dataset cdi_files) are in place and will
+    auto-activate once the ids reconcile.
 
 ## Directory layout
 

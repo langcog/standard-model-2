@@ -36,7 +36,8 @@ AGE_CAP <- 30
 # lab study <-> peekbank dataset, and study index
 STUDY_MAP <- c(totlot3 = "adams_marchman_2018",
                totlot2 = "fernald_marchman_2012",
-               tlo     = "fmw_2013",
+               tlo     = "fmw_2013",           # FMW2013 Batch 2 (Outreach, 20xxx)
+               elena   = "fmw_2013",           # FMW2013 Batch 1 (ELENA/Stanford, 4-digit, ~24mo)
                totlot  = "fernald_totlot")     # original TotLot: RT + CDI, no LENA input
 DS_LEVELS <- c("adams_marchman_2018", "fernald_marchman_2012", "fmw_2013", "fernald_totlot")
 DS_LEVELS <- DS_LEVELS[DS_LEVELS %in% DATASETS]
@@ -47,7 +48,8 @@ DS_LEVELS <- DS_LEVELS[DS_LEVELS %in% DATASETS]
   transmute(lab_subject_id = as.character(lab_subject_id), study = as.character(study),
             age = as.integer(age), form = as.character(form), item = as.character(item),
             produces = as.integer(produces))
-cdi <- bind_rows(.read_cdi("stanford_cdi_items_long.csv"), .read_cdi("totlot_cdi_items_long.csv")) %>%
+cdi <- bind_rows(.read_cdi("stanford_cdi_items_long.csv"), .read_cdi("totlot_cdi_items_long.csv"),
+                 .read_cdi("elena_cdi_items_long.csv")) %>%
   mutate(dataset_name = STUDY_MAP[study]) %>%
   filter(dataset_name %in% DATASETS, age <= AGE_CAP, !is.na(produces))
 cat(sprintf("CDI rows: %d (kids %d, admins %d) across %s\n",
