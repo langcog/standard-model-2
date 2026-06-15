@@ -107,7 +107,9 @@ To address questions about the relationship between language input, language pro
 
 Overall, our analysis supports a view in which children’s vocabulary growth is not a pure process of accumulation but rather one that accelerates rapidly over time. We end by comparing the fit of our models on human data to their fit on large-language models. Making use of GPT-2 models trained on human developmental data, we show that -- in contrast to children -- these models *do* appear to function as pure accumulators. This analysis exposes a critical disanalogy between LLMs and human learners and suggests a potential route for understanding the vast "data gap" between children and large language models [@frank2023;@warstadt2023]. 
 
-# Model 
+# An accelerating accumulator model
+
+## Model
 
 
 ```{r fig-schematic, fig.width=8, fig.height=6}
@@ -212,27 +214,15 @@ We compare this model to an *accelerating accumulator* model (Model 2), in which
 $$\text{M2: }\theta_i(t)  = \log(r_i) + \kappa ~ \log(t/a_0)$$
 \noindent When $\kappa>1$, each successive month yields more accumulation than the last.
 
-Neither of these models has any way to capture variation across children beyond variation in input rate. Thus, we augment the basic accelerating accumulator, rewriting it as the sum of an individually variable efficiency term:
-
-$$\text{M3: }\theta_i(t) = \xi_i + \kappa ~ \log(t/a_0)$$
-
-The intercept term $\xi_i = \log(r_i) + \log(\alpha_i)$ can then be used to break down individual variation into both input rate-related and other variation in children's efficiency.
-
-Our final model includes individually variable efficiency and acceleration terms:
-
-$$\text{M4: }\theta_i(t) = \xi_i + \kappa_i ~ \log(t/a_0)$$
-
-In this model, the slope term $\kappa_i = \kappa + \gamma \log r_i + \zeta_i$ adds *individual variation in acceleration*, decomposing acceleration into a population term, input-related acceleration, and a child‑specific residual acceleration $\zeta_i$ (the part not explained by input). The coefficient $\gamma$ then captures the strength of the relationship between input and acceleration. 
-
-Model 4 instantiates the idea that children vary in their base rate of efficiency and their acceleration, creating variant of a standard longitudinal growth model in which children vary on their slope and intercept [@grimm2016]. Note that, while we define the relationship of $\xi_i$ and $\kappa_i$ to a child's input $r_i$, we can nevertheless fit the simplest form of the model by just allowing these parameters to vary as random child-level slopes and intercepts. 
+Model 4 instantiates the idea that children vary in their base rate of efficiency and their acceleration, creating variant of a standard longitudinal growth model in which children vary on their slope and intercept [@grimm2016]. 
 
 As we will show, Model 4 provides a good description of variation in children's longitudinal growth trajectories. @fig-schematic (top) shows schematic predictions from a pure accumulator model (M1), an accelerating accumulator (M2) in comparison to models including child-level variation in efficiency (M3) and both efficiency and acceleration (M4). Each model's predictions are represented as ability scores ($\theta$) across age and then also projected into proportion correct scores on a discrete set of vocabulary items, representing an observed accuracy score that is subject to compression at floor and ceiling.
 
 Our analysis generally depends on the availability of longitudinal data at the item level. The different models described above are not distinguishable from the cross-sectional, aggregate data that are typically considered in many analyses of early vocabulary. First, aggregate data do not allow for the estimation of individual word difficulties, thus the distribution of difficulties remains latent and different difficulty distributions can be posited to explain the accelerating shape of vocabulary growth [@mcmurray2007; @mitchell2009]. Second, cross-sectional data do not allow for identification of whether individual children's variation is due to differences in efficiency (intercept) or acceleration (slope) (see SI: Nonidentifiability in Cross-Sectional Data). 
 
-# Results
+## Results
 
-## Children's longitudinal growth reflects differences in both efficiency and acceleration
+### Children's longitudinal growth reflects differences in both efficiency and acceleration
 
 We first retrieved longitudinal data on monolingual, typically-developing children's vocabulary from Wordbank [@frank2017], an open archive of data from the MacArthur-Bates Communicative Development Inventory and its international adaptations. SI: Datasets shows the datasets used in each study in the paper; in this first analyses, we made use of five longitudinal datasets from Wordbank (three from American English and one each from Norwegian and Japanese, $N_{total} = 3135$).  
 
@@ -241,7 +231,7 @@ Taking advantage of the equivalence of Rasch models to generalized linear mixed 
 Model 4, which incorporated variation in acceleration and efficiency, was the best fitting model across all datasets with differences in AIC $>1000$ in all cases (see SI: AIC and BIC for Longitudinal Models). @fig-schematic (bottom) shows the fit of the four model variants; the increasing spread of children's trajectories with age is especially noticeable for low-vocabulary older children [who may be classified as "late talkers"; @fernald2012; @rescorla2011].^[Following the literature, we primarily investigate linear accumulator models, which show power-law growth of ability over time because $\theta$ is a function of $\log(t)$. However, it is also possible that ability grows linearly in time, which would lead to exponential increases in the probability of word production. We fit linear-time models, but found that they were dispreferred statistically in all but one case, though differences were relatively small within the restricted age range for which we have data (See SI: Full Cross-linguistic Model Ladder).] Notably, variation in both efficiency and acceleration was unimodal across all samples (see SI: Characterizing Variation in Efficiency and Acceleration), providing no evidence of discrete clusters corresponding to language impairment [@pinstock2026;@singletary2025].
 
 
-## Efficiency and acceleration relate to separate demographic predictors
+### Efficiency and acceleration relate to separate demographic predictors
 
 
 ```{r fig-demographics, fig.width=7.5, fig.height=13}
@@ -276,7 +266,73 @@ Our model offers a summary of children's growth in terms of both their efficienc
 
 @fig-demographics shows the per-language coefficients from this analysis, along with a cross-language meta-analytic estimate for both the cross-sectional and longitudinal data (which largely agree). Examining the cross-sectional data since this analysis includes more datasets, the female advantage is apparent across all datasets, but this effect manifests itself more substantially efficiency  ($\beta = `r round(meta_summary$estimate[2],2)`$, $p = `r papaja::apa_p(meta_summary$p)[2]`$) than acceleration ($\beta = `r round(meta_summary$estimate[4],2)`$, $p = `r papaja::apa_p(meta_summary$p)[4]`$). In contrast, maternal education effects were present in both measures, but stronger in acceleration ( efficiency: $\beta = `r round(meta_summary$estimate[1],2)`$, $p = `r papaja::apa_p(meta_summary$p)[1]`$; acceleration: $\beta = `r round(meta_summary$estimate[3],2)`$, $p = `r papaja::apa_p(meta_summary$p)[3]`$). One interpretation of these findings is that sex effects reflect a small constant offset in average ability. In contrast, socioeconomic differences -- as reflected in maternal education -- might continue to compound across development [@fernald2013;@hart2003].
 
-## Population input-related variation corresponds to meta-analytic estimates
+### Growth in ability leads to rapid changes in learning times for individual words
+
+```{r fig-efficiency, fig.width=7, fig.height=4}
+#| label: fig-efficiency
+#| fig-cap: ""
+# Per-word "exposures to 50% production" for a typical English child,
+# from the M_best fit + CHILDES frequencies (data in fig4_exposure.rds;
+# see paper/build_cache.R section 5 and model/scripts/exposure_to_learn.R).
+# Each point is a word; x = predicted age at 50% production, y = cumulative
+# exposures of that word by that age (log scale). Lines: per-class lm fits.
+items <- exposure$items
+meta  <- exposure$meta
+
+# label the extreme word per class on log-exposure (balanced across classes)
+n_to_label <- 3
+  
+labels_df <- items |>
+  mutate(log_N = log10(N_word)) |>
+  group_by(lexical_class) |>
+  arrange(log_N) |>
+  slice(c(1:n_to_label, (n() - n_to_label):n())) |>
+  ungroup()
+
+ggplot(items, aes(t_50, N_word, colour = lexical_class)) +
+  geom_point(alpha = 0.55, size = 1.1) +
+  geom_smooth(method = "lm", se = FALSE, linewidth = 0.7, formula = y ~ x) +
+  geom_label_repel(data = labels_df, aes(label = item),
+                   size = 2.8, alpha = 0.95, show.legend = FALSE,
+                   box.padding = 0.4, max.overlaps = Inf,
+                   min.segment.length = 0) +
+  scale_y_log10(labels = scales::label_number(big.mark = ","),
+                breaks = c(100,1000,10000,100000), 
+                limits = c(100, 1000000)) +
+  scale_x_continuous(limits = c(10, 40)) +
+  scale_colour_brewer(palette = "Dark2", name = "Class") +
+  labs(x = "Age (months) when 50% of children produce word",
+       y = "Cumulative exposures at AoA") +
+  theme_minimal(base_size = 11) +
+  theme(plot.title = element_text(face = "bold"),
+        plot.subtitle = element_text(size = 9, colour = "grey25"),
+        legend.position = "bottom")
+```
+
+As an illustration of the changes in efficiency and acceleration that we observe in our data, we computed the average proportion of exposures necessary for a child to learn a word across ages. @fig-efficiency shows a model-derived estimate of the average number of times a word is heard before more than 50% of children produce it (See SI: Changes in Word Efficiency), using frequency estimates from the CHILDES Corpus [@macwhinney2000;@sanchez2019]. 
+
+Across different word classes (e.g., nouns, verbs, closed class words), efficiency increases exponentially, such that early-learned words such as "book" may be heard tens of thousands of times before they are produced, while later learned words such as "vitamin" might only be heard hundreds times before being produced. Indeed, this analysis likely understates the degree of change in efficiency as it assumes that each exposure to a word is equally meaningful. In fact, individual exposures vary widely in how much information they give. Sometimes words are overheard rather than directed to the child, or lack physical context to allow for clear inference [@cartmill2013;@trueswell2013;@mollica2017]. Thus, in line with both intuition and experiments, the total number of exposures required on average to learn a word might indeed be only a small handful by age three [@markson1997;@bloom2002].
+
+# Using the accelerating accumulator to study the effects of home input 
+
+# Model 
+
+Neither of these models has any way to capture variation across children beyond variation in input rate. Thus, we augment the basic accelerating accumulator, rewriting it as the sum of an individually variable efficiency term:
+
+$$\text{M3: }\theta_i(t) = \xi_i + \kappa ~ \log(t/a_0)$$
+
+The intercept term $\xi_i = \log(r_i) + \log(\alpha_i)$ can then be used to break down individual variation into both input rate-related and other variation in children's efficiency.
+
+Our final model includes individually variable efficiency and acceleration terms:
+
+$$\text{M4: }\theta_i(t) = \xi_i + \kappa_i ~ \log(t/a_0)$$
+
+In this model, the slope term $\kappa_i = \kappa + \gamma \log r_i + \zeta_i$ adds *individual variation in acceleration*, decomposing acceleration into a population term, input-related acceleration, and a child‑specific residual acceleration $\zeta_i$ (the part not explained by input). The coefficient $\gamma$ then captures the strength of the relationship between input and acceleration. 
+
+
+## Results
+
+### Population input-related variation corresponds to meta-analytic estimates
 
 In our prior model fits, we fit population variation in efficiency and acceleration without considering the connection to language input. We next consider whether this relationship can be estimated at a population level. We use markov chain monte carlo to fit a version of model 4 with a linkage between efficiency and input rate such that $\xi_i = \log(r_i) + \log(\alpha_i)$, where $r_i$ is not known but we assume that there is a population variation in language input rate: $\sigma_r$. This model -- which does not include individual child-level input data -- can not distinguish whether input contributes to efficiency or instead to acceleration. Instead, because the accumulator model makes predictions about links between the actual amount of input children receive and what they learn, this model can ask what proportion of observed variation between children is plausibly due to input-related variation. 
 
@@ -287,7 +343,7 @@ Fitting this model requires a guess about the range of input variation present i
 @fig-io-partition (panel F) shows the results models fit with three values for each language, interpolated with an analytic estimate of the relationship between $\sigma_r$ and the total proportion of variance in efficiency that could be attributed to input. Within the range of plausible input values from the literature, we observed a strong congruence between the model estimates of input variance (EN: `r io_share("English (D)")`, NO: `r io_share("Norwegian (D)")`) and the meta-analytic range reported by @coffey2026 (4--7%). This consistency both supports the overall plausibility of the model and provides a second route for estimating the significant but modest contribution of input quantity to variation in children's outcomes. 
 
 
-## Input predicts both efficiency and acceleration, while processing speed relates only to efficiency
+### Input predicts both efficiency and acceleration, while processing speed relates only to efficiency
 
 
 ```{r fig-io-partition, fig.width=11, fig.height=4.6}
@@ -351,54 +407,9 @@ a version of Model 4 to this dataset, with modifications to allow input and acce
 
 @fig-io-partition (B) shows small but highly reliable effects of language input on both efficiency and acceleration. These effects are also in the range of the meta-analyses, but they suggest that input-related differences -- though small -- could compound through their effect on acceleration. In contrast, processing predicted *only* efficiency and not acceleration.  
 
-## Growth in ability leads to rapid changes in learning times for individual words
 
-```{r fig-efficiency, fig.width=7, fig.height=4}
-#| label: fig-efficiency
-#| fig-cap: ""
-# Per-word "exposures to 50% production" for a typical English child,
-# from the M_best fit + CHILDES frequencies (data in fig4_exposure.rds;
-# see paper/build_cache.R section 5 and model/scripts/exposure_to_learn.R).
-# Each point is a word; x = predicted age at 50% production, y = cumulative
-# exposures of that word by that age (log scale). Lines: per-class lm fits.
-items <- exposure$items
-meta  <- exposure$meta
 
-# label the extreme word per class on log-exposure (balanced across classes)
-n_to_label <- 3
-  
-labels_df <- items |>
-  mutate(log_N = log10(N_word)) |>
-  group_by(lexical_class) |>
-  arrange(log_N) |>
-  slice(c(1:n_to_label, (n() - n_to_label):n())) |>
-  ungroup()
-
-ggplot(items, aes(t_50, N_word, colour = lexical_class)) +
-  geom_point(alpha = 0.55, size = 1.1) +
-  geom_smooth(method = "lm", se = FALSE, linewidth = 0.7, formula = y ~ x) +
-  geom_label_repel(data = labels_df, aes(label = item),
-                   size = 2.8, alpha = 0.95, show.legend = FALSE,
-                   box.padding = 0.4, max.overlaps = Inf,
-                   min.segment.length = 0) +
-  scale_y_log10(labels = scales::label_number(big.mark = ","),
-                breaks = c(100,1000,10000,100000), 
-                limits = c(100, 1000000)) +
-  scale_x_continuous(limits = c(10, 40)) +
-  scale_colour_brewer(palette = "Dark2", name = "Class") +
-  labs(x = "Age (months) when 50% of children produce word",
-       y = "Cumulative exposures at AoA") +
-  theme_minimal(base_size = 11) +
-  theme(plot.title = element_text(face = "bold"),
-        plot.subtitle = element_text(size = 9, colour = "grey25"),
-        legend.position = "bottom")
-```
-
-As an illustration of the changes in efficiency and acceleration that we observe in our data, we computed the average proportion of exposures necessary for a child to learn a word across ages. @fig-efficiency shows a model-derived estimate of the average number of times a word is heard before more than 50% of children produce it (See SI: Changes in Word Efficiency), using frequency estimates from the CHILDES Corpus [@macwhinney2000;@sanchez2019]. 
-
-Across different word classes (e.g., nouns, verbs, closed class words), efficiency increases exponentially, such that early-learned words such as "book" may be heard tens of thousands of times before they are produced, while later learned words such as "vitamin" might only be heard hundreds times before being produced. Indeed, this analysis likely understates the degree of change in efficiency as it assumes that each exposure to a word is equally meaningful. In fact, individual exposures vary widely in how much information they give. Sometimes words are overheard rather than directed to the child, or lack physical context to allow for clear inference [@cartmill2013;@trueswell2013;@mollica2017]. Thus, in line with both intuition and experiments, the total number of exposures required on average to learn a word might indeed be only a small handful by age three [@markson1997;@bloom2002].
-
-## Large language models show no acceleration in their vocabulary growth
+# Coda: Large language models show no acceleration in their vocabulary growth
 
 
 ```{r fig-llm-acceleration, fig.width=7, fig.height=4}
