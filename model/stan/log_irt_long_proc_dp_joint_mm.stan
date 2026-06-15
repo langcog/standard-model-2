@@ -26,9 +26,28 @@
 // Ladder via prior SDs (tiny -> pinned at 0):
 //   D'0 = {gamma_in on, betas off};  D'1 +beta_xi;  D'2 +beta_k0;  D'3 +beta_k1.
 
+functions {
+  // Parallelized CDI log-likelihood (reduce_sum). Per-obs work is intentionally
+  // minimal -- the heavy per-admin (admin_base) and per-item (item_offset) terms
+  // are precomputed in transformed parameters -- so this scales near-linearly
+  // with threads_per_chain.
+  real partial_sum_lpmf(array[] int y_slice, int start, int end,
+                        array[] int aa, array[] int jj,
+                        vector admin_base, vector item_offset, vector lambda) {
+    int ns = end - start + 1;
+    vector[ns] eta;
+    for (i in 1:ns) {
+      int o = start + i - 1;
+      eta[i] = lambda[jj[o]] * (admin_base[aa[o]] + item_offset[jj[o]]);
+    }
+    return bernoulli_logit_lpmf(y_slice | eta);
+  }
+}
+
 data {
   // ---- CDI / vocab side ---- //
   int<lower=1> N;
+  int<lower=1> grainsize;                       // reduce_sum chunk hint (TBB tunes)
   int<lower=1> A;
   int<lower=1> I;
   int<lower=1> J;
@@ -181,6 +200,18 @@ transformed parameters {
   for (j in 1:J) delta_j[j] = mu_c[cc[j]] + tau_c[cc[j]] * delta_j_raw[j];
   vector[J] log_lambda = sigma_lambda * log_lambda_raw;
   vector[J] lambda = exp(log_lambda);
+
+  // Precompute per-admin and per-item terms so the N-obs CDI likelihood does
+  // minimal per-obs work: eta[n] = lambda[j] * (admin_base[a] + item_offset[j]).
+  // This collapses the autodiff graph from O(N) heavy nodes to O(A+J), and is
+  // what reduce_sum then parallelizes. (A=admins, J=items, both << N.)
+  vector[A] admin_base;
+  for (a in 1:A) {
+    int ch = admin_to_child[a];
+    admin_base[a] = xi[ch] + log_H + kappa[ch] * log(fmax(admin_age[a] - s, 0.01) / a0);
+  }
+  vector[J] item_offset;
+  for (j in 1:J) item_offset[j] = beta_c[cc[j]] * log_p[j] - delta_j[j];
 }
 
 model {
@@ -224,25 +255,9 @@ model {
   beta_k0  ~ normal(0, beta_k0_prior_sd);
   beta_k1  ~ normal(0, beta_k1_prior_sd);
 
-  // ---- CDI likelihood ---- //
-  vector[N] eta;
-  {
-    vector[N] ae;
-    for (n in 1:N) ae[n] = fmax(admin_age[aa[n]] - s, 0.01);
-    vector[N] log_age = log(ae / a0);
-    vector[N] xi_per_obs;
-    vector[N] kappa_per_obs;
-    for (n in 1:N) {
-      int ch = admin_to_child[aa[n]];
-      xi_per_obs[n]    = xi[ch];
-      kappa_per_obs[n] = kappa[ch];
-    }
-    vector[N] beta_per_obs = beta_c[cc[jj]];
-    vector[N] base = xi_per_obs + beta_per_obs .* log_p[jj] + log_H
-                   + kappa_per_obs .* log_age - delta_j[jj];
-    eta = lambda[jj] .* base;
-  }
-  y ~ bernoulli_logit(eta);
+  // ---- CDI likelihood (parallelized across cores via reduce_sum) ---- //
+  target += reduce_sum(partial_sum_lpmf, y, grainsize,
+                       aa, jj, admin_base, item_offset, lambda);
 
   // ---- LWL measurement likelihood ---- //
   if (N_lwl > 0) {
@@ -290,16 +305,6 @@ generated quantities {
   matrix[2, 2] Rt_corr = multiply_lower_tri_self_transpose(L_rt);
   real rho_rt = Rt_corr[2, 1];
 
-  // Pointwise CDI log-likelihood for LOO/WAIC across the ladder (the rungs
-  // differ in how well xi/kappa -- hence vocab -- are explained).
-  vector[N] log_lik;
-  {
-    for (n in 1:N) {
-      int ch = admin_to_child[aa[n]];
-      real ae = fmax(admin_age[aa[n]] - s, 0.01);
-      real base = xi[ch] + beta_c[cc[jj[n]]] * log_p[jj[n]] + log_H
-                + kappa[ch] * log(ae / a0) - delta_j[jj[n]];
-      log_lik[n] = bernoulli_logit_lpmf(y[n] | lambda[jj[n]] * base);
-    }
-  }
+  // (Per-obs log_lik for LOO removed -- LOO is skipped for these big fits, and
+  //  the N-vector cost it added to every saved draw was pure waste.)
 }

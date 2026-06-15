@@ -142,6 +142,7 @@ stan_data <- modifyList(sdp, list(
   mu_r_s_prior_mean = mu_r_s_prior_mean, mu_r_s_prior_sd = 1.0,  # weak; data identifies
   sigma_meas_prior_sd = 1.0,
   ## RT channel: SEEDLingS (study 6) appended to proc_dp studies 1-4
+  grainsize = 1L,
   N_lwl = length(lwl_log_rt_all), lwl_to_child = lwl_to_child_all,
   lwl_log_age = lwl_log_age_all, lwl_log_rt = lwl_log_rt_all,
   ## frank_etal_2026 informative RT priors (full Fig-2 d_sub, centered @ a0=21mo)
