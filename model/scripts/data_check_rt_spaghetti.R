@@ -18,13 +18,13 @@ FACETS <- c("AM2018", "FM2012", "FMW2013", "fernald_totlot", "SEEDLingS")
 lwl <- lwl %>% group_by(ds, gid, lwl_age) %>%
   summarise(lwl_log_rt = mean(lwl_log_rt), .groups = "drop")
 
-p <- ggplot(lwl %>% filter(ds %in% FACETS), aes(lwl_age, lwl_log_rt)) +
+p <- ggplot(lwl %>% filter(ds %in% FACETS), aes(lwl_age, exp(lwl_log_rt))) +
   geom_line(aes(group = gid), color = "grey70", alpha = 0.4, linewidth = 0.3) +
   geom_point(color = "grey55", alpha = 0.4, size = 0.6) +
   geom_smooth(method = "loess", se = FALSE, color = "#c41e37", linewidth = 0.9, span = 1) +
   facet_wrap(~ factor(ds, levels = FACETS), nrow = 1) +
-  scale_y_continuous(sec.axis = sec_axis(~ exp(.), name = "RT (ms)", breaks = c(500, 1000, 2000))) +
-  labs(x = "age (months)", y = "log RT",
+  scale_y_log10(breaks = c(400, 500, 700, 1000, 1500, 2000)) +   # log axis, linear (ms) labels
+  labs(x = "age (months)", y = "RT (ms, log scale)",
        title = "LWL reaction time by age, per child (SEEDLingS-LWL = newly derived from Zhu et al. raw)") +
   theme_bw(base_size = 10) +
   theme(panel.grid.minor = element_blank(), plot.title = element_text(face = "bold", size = 9))

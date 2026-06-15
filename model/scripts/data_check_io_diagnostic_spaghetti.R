@@ -29,17 +29,16 @@ print(adm %>% distinct(ds, form, n_items) %>% arrange(ds) %>% as.data.frame(), r
 DSORD <- c("BabyView", "SEEDLingS", "AM2018", "FM2012", "FMW2013", "fernald_totlot")
 adm <- adm %>% mutate(ds = factor(ds, levels = DSORD))
 FPAL <- c("WG" = "#1f78b4", "WS" = "#e31a1c")
-spag <- function(yvar, ylab) ggplot(adm, aes(age, .data[[yvar]], color = form)) +
+## raw vocab count only; common (shared) x-axis across facets for comparison
+p <- ggplot(adm, aes(age, vocab, color = form)) +
   geom_line(aes(group = id), color = "grey70", alpha = 0.4, linewidth = 0.25) +
   geom_point(alpha = 0.6, size = 0.7) +
-  facet_wrap(~ ds, nrow = 1, scales = "free_x") +
+  facet_wrap(~ ds, nrow = 1, scales = "free_y") +          # shared x; free y (WG/WS denominators differ)
+  scale_x_continuous(limits = range(adm$age, na.rm = TRUE)) +
   scale_color_manual(values = FPAL, name = "Form") +
-  labs(x = "age (months)", y = ylab) +
+  labs(x = "age (months)", y = "vocabulary count (raw)",
+       title = "IO diagnostic: per-kid vocabulary by form (lines connect a child's admins across age)") +
   theme_bw(base_size = 9) + theme(legend.position = "top", panel.grid.minor = element_blank())
-
-p <- (spag("vocab", "vocabulary count (raw)") / spag("prop", "proportion of form's items produced")) +
-  plot_annotation(title = "IO diagnostic: per-kid spaghetti by form",
-                  subtitle = "Lines connect a child's admins across age. Raw count: WG/WS differ in item denominator (see proportion row).")
 dir.create(here("figs", "data_checks"), recursive = TRUE, showWarnings = FALSE)
-ggsave(here("figs", "data_checks", "io_diagnostic_spaghetti.png"), p, width = 14, height = 7, dpi = 130)
+ggsave(here("figs", "data_checks", "io_diagnostic_spaghetti.png"), p, width = 14, height = 3.6, dpi = 130)
 cat("wrote figs/data_checks/io_diagnostic_spaghetti.png\n")
