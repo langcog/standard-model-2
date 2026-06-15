@@ -3,7 +3,9 @@
 ## v1 = glmer specs only; v2 = + Bayesian SM2 D'3 overlay (input channel, approx
 ## theta~logit scale). Reads results/glmer_ladder_coefs.csv. RUN LOCALLY.
 suppressPackageStartupMessages({library(dplyr); library(ggplot2); library(here); library(readr)})
-co <- read_csv(here("studies/io_proc_glmer/results/glmer_ladder_coefs.csv"), show_col_types = FALSE)
+co  <- read_csv(here("studies/io_proc_glmer/results/glmer_ladder_coefs.csv"), show_col_types = FALSE)
+sm2 <- read_csv(here("studies/io_proc_glmer/results/sm2_overlay.csv"), show_col_types = FALSE)  # static SM2 D'3 overlay
+co  <- dplyr::bind_rows(co, sm2)
 
 lab <- c(input_full="input · full (193)", input_common="input · common (142)",
          both_common="both (adjusted) · common (142)",

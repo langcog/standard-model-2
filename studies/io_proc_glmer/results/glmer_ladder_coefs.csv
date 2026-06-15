@@ -11,5 +11,3 @@
 "input_full",193,"input","acceleration",0.903,0.306626585458633,1.49937341454137,0.003,"glmer"
 "proc_full",326,"processing","level",0.58,0.393926391527738,0.766073608472262,1e-12,"glmer"
 "proc_full",326,"processing","acceleration",0.182,-0.247290058988713,0.611290058988713,0.406,"glmer"
-"SM2_bayes",193,"input","level",0.358,0.321,0.399,NA,"Bayesian (SM2 D3)"
-"SM2_bayes",193,"input","acceleration",0.250958,-0.175062,0.676978,NA,"Bayesian (SM2 D3)"
