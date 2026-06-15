@@ -208,6 +208,29 @@ table1 |>
   kableExtra::landscape()
 ```
 
+## Datasets entering the joint input--processing model
+
+The joint input--processing model is fit to the children summarized in
+@tbl-io-datasets. Each child can contribute up to three channels: vocabulary
+(item-level CDI), processing speed (looking-while-listening reaction time), and
+observed home language input (LENA daylong recordings or head-camera clips).
+
+```{r tbl-io-datasets}
+#| label: tbl-io-datasets
+#| tbl-cap: "Data entering the joint input--processing model, by dataset. Counts are post-exclusion analysis samples. \\emph{Input kids} are the children with observed home input; the remainder contribute vocabulary (and, where available, processing) with input imputed from the population distribution. SEEDLingS RT is newly derived from the raw looking-while-listening recordings of Zhu et al. (submitted). [MCF: caption first pass; add the Zhu et al. citation when available; the table is generated from the fitted joint io-proc bundle by paper/build_si_io_data_table.R -> cache/si_io_data_table.csv, so it stays in sync with the analysis sample.]"
+io_tab <- read.csv(here("paper", "cache", "si_io_data_table.csv"))
+io_tab |>
+  mutate(across(c(kids, cdi_admins, rt_obs, input_kids),
+                ~ format(.x, big.mark = ","))) |>
+  select(dataset, publication, kids, cdi_admins, rt_obs, input_kids, ages) |>
+  knitr::kable(
+    col.names = c("Dataset", "Source", "Kids", "CDI admins", "RT obs",
+                  "Input kids", "Ages (mo)"),
+    align = "llrrrrr", escape = FALSE) |>
+  kableExtra::row_spec(nrow(io_tab) - 1, hline_after = TRUE) |>
+  kableExtra::kable_styling(font_size = 9, latex_options = "HOLD_position")
+```
+
 # AIC and BIC for Longitudinal Models
 
 
