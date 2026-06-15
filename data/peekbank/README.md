@@ -38,6 +38,21 @@ recurring source of confusion. The authoritative key — verified against the da
   unconfirmed. Marchman says LENAs exist at **18 and 24 mo** and offers them →
   recovering 24-mo LENA adds a 2nd within-child input read/kid (sharpens σ_meas/σ_r);
   Batch 1 needs its CDI to be usable (its RT is already in Peekbank).
+- **⚠ FM2012 (TL2) — 11 corrupted 24-mo WS admins dropped (2026-06-14).**
+  In `fernald_marchman_2012/TL2_WS_compiled.xlsx`, 11 children's **24-mo WS**
+  rows have biologically impossible production profiles: **~0% of the 100
+  easiest words** marked, yet **27–36 of the 40 hardest items** (function
+  words, rare nouns, late grammar/complexity sections) marked — and most sit
+  between a 500+ word 21-mo and a 600+ word 30-mo on the same form (e.g. kid
+  `10032`: 554 @21 → 17 @24 → 679 @30). The source cells genuinely contain only
+  these sparse hard-item marks; this is **not** a column-shift or parser bug (a
+  shift would preserve the ~550 mark count, not collapse it to 17–276), and
+  there is no alternate FM2012 source, so the true 24-mo vocab is
+  **unrecoverable**. `parse_stanford_cdi.R` therefore **drops these 11
+  `(totlot2, age 24, WS)` admins** by a hardcoded id list rather than emit fake
+  mid-trajectory dips. Affected ids: `10006, 10008, 10013, 10016, 10024,
+  10025, 10031, 10032, 10040, 10043, 10053`. Other TL2 ages/kids parse
+  correctly and are untouched; the 24-mo WS cohort goes 70 → 59 admins.
 - **UPDATE 2026-06-14 — new data received (`fmw_2013/`):**
   - `TLOELENA_LENA_1824.csv` (cleaned, AM2018-pipeline): TLO + ELENA LENA at **18+24mo**.
     **TLO integrated** → io_fmw2013 51→**61 kids, 108 recordings (47 kids w/ 2 reads)**.

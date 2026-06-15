@@ -407,6 +407,29 @@ cdi_long <- bind_rows(
   select(lab_subject_id, study, age, form, sex, item, produces,
          short, mapping_status = status, source_file)
 
+# -------------------------------------------------------------------- #
+# 5b. Drop corrupted FM2012 (totlot2) 24mo WS admins.                  #
+#     In TL2_WS_compiled.xlsx these 11 admins have biologically        #
+#     impossible production profiles: ~0% of the 100 easiest words     #
+#     marked, yet 27-36 of the 40 hardest items (function words, rare  #
+#     nouns, late grammar/complexity) marked — and most sit between a  #
+#     500+ word 21mo and a 600+ word 30mo on the same form. The source #
+#     cells genuinely contain only these sparse hard-item marks (no    #
+#     column shift — a shift would preserve the ~550 mark count, not   #
+#     collapse it to 17-276 — and there is no alternate source file),  #
+#     so the true 24mo vocab is unrecoverable. We drop these admins    #
+#     rather than emit fake mid-trajectory dips. Localized to 24mo WS; #
+#     other totlot2 ages/kids parse correctly.                         #
+fm2012_bad_ws24 <- c("10006", "10008", "10013", "10016", "10024", "10025",
+                     "10031", "10032", "10040", "10043", "10053")
+n_before <- n_distinct(paste(cdi_long$lab_subject_id, cdi_long$age, cdi_long$form))
+cdi_long <- cdi_long %>%
+  filter(!(study == "totlot2" & age == 24L & form == "WS" &
+           lab_subject_id %in% fm2012_bad_ws24))
+n_after <- n_distinct(paste(cdi_long$lab_subject_id, cdi_long$age, cdi_long$form))
+cat(sprintf("Dropped %d corrupted FM2012 24mo WS admins (misaligned source data).\n",
+            n_before - n_after))
+
 cat(sprintf("\nLong-format CDI: %d rows (%d subjects x %d admins x %d items)\n",
             nrow(cdi_long), n_distinct(cdi_long$lab_subject_id),
             n_distinct(paste(cdi_long$lab_subject_id, cdi_long$age, cdi_long$form)),
