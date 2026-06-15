@@ -4,7 +4,7 @@
 ## RUN LOCALLY.
 suppressPackageStartupMessages({ library(dplyr); library(here) })
 
-b  <- readRDS(here("fits", "joint_io_proc_subset_data.rds")); sd <- b$stan_data
+b  <- readRDS(here("fits", "joint_io_proc_mm_subset_data.rds")); sd <- b$stan_data
 ci <- b$child_info
 adm <- tibble(ii = sd$admin_to_child, age = sd$admin_age)
 rt_ii  <- unique(sd$lwl_to_child)

@@ -2,7 +2,7 @@
 ## RT datasets in the joint io+proc bundle. Companion to the CDI spaghetti.
 ## RUN LOCALLY.  Output: figs/data_checks/rt_spaghetti.png
 suppressPackageStartupMessages({ library(here); library(dplyr); library(ggplot2) })
-b  <- readRDS(here("fits", "joint_io_proc_subset_data.rds"))
+b  <- readRDS(here("fits", "joint_io_proc_mm_subset_data.rds"))
 nm <- c("AM2018", "FM2012", "FMW2013", "fernald_totlot", "BabyView", "SEEDLingS")
 ## single source: the joint bundle's lwl now includes SEEDLingS RT (study 6),
 ## newly derived from the Zhu et al. raw EyeLink reports

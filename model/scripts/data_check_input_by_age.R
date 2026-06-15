@@ -9,11 +9,18 @@ suppressPackageStartupMessages({ library(here); library(dplyr); library(tidyr); 
 
 ## ---- gather per-recording (study, child, age_mo, log_input) from each source ----
 lena <- read_csv(here("data/peekbank/lena_am2018_fmw2013.csv"), show_col_types = FALSE) %>%
-  transmute(study = recode(Study, TL3 = "adams_marchman_2018", TLO = "fmw_2013"),
-            child = as.character(SubjectID1),
+  filter(Study == "TL3") %>%                           # AM2018 (TL3) only from old file
+  transmute(study = "adams_marchman_2018", child = as.character(SubjectID1),
             a16 = AGE16M, r16 = AWCHr16M, a18 = AGE18M, r18 = AWCHr18M) %>%
   pivot_longer(c(a16, r16, a18, r18), names_to = c(".value", "tp"),
                names_pattern = "([ar])(16|18)") %>%
+  transmute(study, child, age_mo = a, log_input = log(r)) %>% filter(is.finite(log_input), age_mo > 0)
+## FMW2013 input now from the cleaned 2-timepoint file (TLO+ELENA, 18+24mo)
+fmw <- read_csv(here("data/peekbank/fmw_2013/TLOELENA_LENA_1824.csv"), show_col_types = FALSE) %>%
+  transmute(study = "fmw_2013", child = as.character(SubjectID1),
+            a18 = AGE18M, r18 = AWCHr18M, a24 = AGE24M, r24 = AWCHr24M) %>%
+  pivot_longer(c(a18, r18, a24, r24), names_to = c(".value", "tp"),
+               names_pattern = "([ar])(18|24)") %>%
   transmute(study, child, age_mo = a, log_input = log(r)) %>% filter(is.finite(log_input), age_mo > 0)
 
 seed <- read_csv(here("data/seedlings/lena_data.csv"), show_col_types = FALSE) %>%
@@ -24,7 +31,7 @@ bv <- readRDS(here("fits/babyview_subset_data.rds"))$videos %>%
   transmute(study = "BabyView", child = as.character(subject_id), age_mo, log_input = log_r_obs) %>%
   filter(is.finite(log_input))
 
-dat <- bind_rows(lena, seed, bv) %>%
+dat <- bind_rows(lena, fmw, seed, bv) %>%
   mutate(study = factor(study, levels = c("adams_marchman_2018","fmw_2013","SEEDLingS","BabyView")))
 
 ## ---- within-child age slope (child-demeaned) per study ----
