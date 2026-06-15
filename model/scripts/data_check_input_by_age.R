@@ -54,7 +54,7 @@ p <- ggplot(dat, aes(age_mo, log_input)) +
   geom_point(alpha = 0.35, size = 0.6, color = "grey40") +
   geom_smooth(method = "lm", se = TRUE, color = "#1f78b4", linewidth = 0.9) +
   geom_text(data = labpos, aes(x, y, label = lab), hjust = 0, vjust = 1, size = 2.6, color = "#1f78b4") +
-  facet_wrap(~ study, scales = "free", nrow = 1) +
+  facet_wrap(~ study, scales = "fixed", nrow = 1) +   # shared x AND y limits for comparison
   labs(x = "age (months)", y = "log input rate (study-specific units)",
        title = "Observed input by age, per child (blue = pooled lm; text = within-child slope)",
        subtitle = "Flat within-child slope => replicate spread is ~pure noise => estimate sigma_meas freely; sloped => input model needs an age term") +
