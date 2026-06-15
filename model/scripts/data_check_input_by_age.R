@@ -25,7 +25,8 @@ fmw <- read_csv(here("data/peekbank/fmw_2013/TLOELENA_LENA_1824.csv"), show_col_
 
 seed <- read_csv(here("data/seedlings/lena_data.csv"), show_col_types = FALSE) %>%
   transmute(study = "SEEDLingS", child = as.character(subj), age_mo = month,
-            log_input = log(awc_perhr)) %>% filter(is.finite(log_input))
+            log_input = log(awc_perhr)) %>%
+  filter(is.finite(log_input), age_mo <= 30)   # drop the 4;6 (54mo) follow-up; model uses 6-17mo
 
 bv <- readRDS(here("fits/babyview_subset_data.rds"))$videos %>%
   transmute(study = "BabyView", child = as.character(subject_id), age_mo, log_input = log_r_obs) %>%
