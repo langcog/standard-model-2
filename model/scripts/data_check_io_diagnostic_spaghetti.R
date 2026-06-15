@@ -13,7 +13,7 @@ totlot <- read_csv(here("data/peekbank/totlot_cdi_items_long.csv"), show_col_typ
   transmute(ds = "fernald_totlot", id = as.character(lab_subject_id), age, form = "WS", item, produces)
 iop <- readRDS(here("fits/io_pooled_subset_data.rds"))$df %>%
   filter(study %in% c("BabyView", "SEEDLingS")) %>%
-  transmute(ds = study, id = as.character(ckey), age, form = ifelse(study == "SEEDLingS", "WG", "WS"), item, produces)
+  transmute(ds = study, id = as.character(ckey), age, form = form, item, produces)
 
 ## dedup to one row per (child, age, form, item) -- collapse same-age duplicate
 ## admins / duplicate item rows (produced-if-produced-in-any), matching the
