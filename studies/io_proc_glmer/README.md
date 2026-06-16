@@ -60,3 +60,12 @@ Rscript studies/io_proc_glmer/fit_ladder.R    # fits 5 models -> cache/ + result
 Rscript studies/io_proc_glmer/plot_ladder.R   # -> figs/io_proc_glmer_coefs{,_vs_sm2}.png
 ```
 `cache/` (fitted glmer objects) and `results/fit_log.txt` are gitignored.
+
+## Figures
+- `figs/io_proc_glmer_coefs.png` — glmer specs, level | acceleration facets.
+- `figs/io_proc_glmer_coefs_vs_sm2.png` — + SM2 D′3 overlay (N(0,1) filled, N(0,5) open triangles).
+- `figs/io_proc_glmer_coefs_rescaled.png` — **ONE axis**: acceleration coefs rescaled to
+  level-equivalent θ units (× log(t_ref/a0), t_ref=30, a0=21 ⇒ ×0.357), so input→acceleration and
+  processing→level are directly comparable as "contribution to log-odds of production by 30 mo."
+  (θ≈logit since λ̄=1.) The controlled rows (both-adjusted, SM2) are the clean comparisons; input
+  rows' level effect is inflated by processing leakage when proc isn't in the model.

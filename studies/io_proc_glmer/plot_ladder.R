@@ -61,4 +61,35 @@ ggsave(here("studies/io_proc_glmer/figs/io_proc_glmer_coefs.png"), p1, width = 1
 p2 <- make_fig(prep(co),
                "SM2 input->accel under N(0,1) prior (filled tri) is shrunk to 0.25; widening to N(0,5) (open tri) recovers 0.60 ~ glmer; lambda_bar=1")
 ggsave(here("studies/io_proc_glmer/figs/io_proc_glmer_coefs_vs_sm2.png"), p2, width = 10, height = 3.8, dpi = 150)
-cat("wrote figs/io_proc_glmer_coefs.png and figs/io_proc_glmer_coefs_vs_sm2.png\n")
+
+### ONE-AXIS view: acceleration rescaled to level-equivalent theta units.
+### A slope coef b_accel contributes b_accel*log(t_ref/a0) to theta by age t_ref,
+### so x log(30/21)=0.357 puts acceleration in the same units as the efficiency (level)
+### effect -> both channels' effects on ONE comparable axis (theta ~ log-odds, lambda_bar=1).
+A0 <- 21; T_REF <- 30; KACC <- log(T_REF / A0)
+co_rs <- co %>% mutate(
+  acc      = term == "acceleration",
+  est2 = ifelse(acc, est * KACC, est),
+  lo2  = ifelse(acc, lo  * KACC, lo),
+  hi2  = ifelse(acc, hi  * KACC, hi),
+  spec_lab = factor(lab[spec], levels = ord),
+  channel  = factor(channel, levels = c("input", "processing")),
+  term2    = factor(term, levels = c("level","acceleration"),
+                    labels = c("efficiency (level)", paste0("acceleration (by ", T_REF, "mo)"))))
+dodge2 <- position_dodge(width = 0.7)
+p3 <- ggplot(co_rs, aes(est2, spec_lab, color = channel, shape = term2,
+                        group = interaction(channel, term2))) +
+  geom_vline(xintercept = 0, linetype = 2, color = "grey55") +
+  geom_linerange(aes(xmin = lo2, xmax = hi2), position = dodge2, linewidth = 0.6) +
+  geom_point(position = dodge2, size = 2.6) +
+  scale_color_manual(values = c(input = "#1f78b4", processing = "#e6701b")) +
+  scale_shape_manual(values = setNames(c(16, 17), levels(co_rs$term2))) +
+  labs(x = sprintf("contribution to log-odds of production at %d mo (theta units)", T_REF),
+       y = NULL, color = NULL, shape = NULL,
+       title = "Input vs processing on ONE axis (acceleration rescaled to level-equivalent units)",
+       subtitle = sprintf("acceleration coef x log(%d/%d)=%.2f; input loads on acceleration, processing on the level", T_REF, A0, KACC)) +
+  theme_bw(base_size = 10) +
+  theme(legend.position = "top", panel.grid.minor = element_blank(),
+        plot.title = element_text(face = "bold", size = 10))
+ggsave(here("studies/io_proc_glmer/figs/io_proc_glmer_coefs_rescaled.png"), p3, width = 10, height = 4.0, dpi = 150)
+cat("wrote figs/io_proc_glmer_coefs{,_vs_sm2,_rescaled}.png\n")
