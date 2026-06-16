@@ -79,3 +79,28 @@ Driver now also saves **sigma_lambda** -> lambda_bar = exp(sigma_lambda^2/2) for
 - lambda_bar: SM2 input->accel on logit scale ~ gamma_in*sigma_r*lambda_bar; check vs glmer 0.85.
   NOTE variance SHARES (SM2 0.8% vs glmer ~4%) are scale-free and already disagree, so a real gap
   is expected regardless of lambda_bar.
+
+### RESULTS (job 29719815, retrieved 2026-06-16)
+| param | N(0,1) canonical | N(0,5) wide |
+|---|---|---|
+| gamma_in | 0.701 [-0.49, 1.89] | **1.688 [-0.33, 3.77]** (rhat 1.06) |
+| input->accel (logit, lambda_bar=1) | 0.25 | **0.60** |
+| input->accel SHARE | 0.8% | **3.0%** (glmer ~4%) |
+| sigma_r | 0.358 | 0.355 |
+| sigma_zeta | 4.302 | 4.277 |
+| sigma_lambda | (not saved) | **0.046 -> lambda_bar=1.001** |
+
+**Resolution:** (1) **lambda_bar=1.00** -> theta~logit, overlay scale is correct, no artifact.
+(2) The **N(0,1) prior on gamma_in was the main culprit**: widening to N(0,5), gamma_in jumps
+0.70->1.69 and the input->accel share 0.8%->3.0%, ~reconciling with the glmer benchmark (~4%).
+So the "input barely touches acceleration" result was **mostly prior shrinkage, not a structural
+failure** of the io model. No re-spec needed (G0-G3 already exonerated the coeff-1 efficiency term).
+**Caveat:** gamma_in is weakly identified (CI [-0.33,3.77], rhat 1.06) because sigma_zeta~4.3
+dominates the slope variance -- which is exactly why it's so prior-sensitive.
+
+**Broader (MCF's sigma_zeta question):** sigma_zeta's prior is NOT the lever -- prior is
+half-normal(0,1) but posterior is 4.30, data-dominated (robust). BUT all THREE slope-channel
+coefs are weakly identified / prior-sensitive, not just gamma_in:
+gamma_in [-0.49,1.89], beta_k0 [-1.78,1.47], beta_k1 [-1.98,1.30]. So prior sensitivity is a
+property of the whole SLOPE channel (sigma_zeta soaks the variance). -> systematic sensitivity
+sweep should target the slope-coef priors (+ sigma_r's lit prior). See [[glmer_ladder_benchmark]].

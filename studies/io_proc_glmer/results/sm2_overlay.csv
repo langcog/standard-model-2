@@ -1,3 +1,5 @@
-"spec","n_kids","channel","term","est","lo","hi","p","model_type"
-"SM2_bayes",193,"input","level",0.358,0.321,0.399,NA,"Bayesian (SM2 D3)"
-"SM2_bayes",193,"input","acceleration",0.250958,-0.175062,0.676978,NA,"Bayesian (SM2 D3)"
+spec,n_kids,channel,term,est,lo,hi,p,model_type
+SM2_n01,193,input,level,0.358,0.321,0.399,NA,Bayesian N(0;1)
+SM2_n01,193,input,acceleration,0.251,-0.175,0.677,NA,Bayesian N(0;1)
+SM2_n05,193,input,level,0.355,0.317,0.394,NA,Bayesian N(0;5)
+SM2_n05,193,input,acceleration,0.599,-0.116,1.339,NA,Bayesian N(0;5)

@@ -31,19 +31,28 @@ comparison, plus **standalone** anchors on each channel's full sample.
 - **Input → ACCELERATION** (slope 0.85–0.92; level ~0 once adjusted).
 - **Processing → LEVEL** (intercept ~0.6; slope n.s.).
 
-## Benchmark vs the Bayesian model
-SM2 D′3 (approx θ≈logit scale, λ̄=1, input only): input→level ≈ 0.36 (forced by the
-io identity `ξ = μ_r + 1·d_i`), input→accel ≈ 0.25 (γ_in·σ_r, wide CI). So the
-Bayesian model **under-credits input→acceleration** (0.25 vs 0.85) and **over-credits
-input→level** (0.36 vs the adjusted 0.13). See `figs/io_proc_glmer_coefs_vs_sm2.png`.
-This is *not* mixing (r̂ 1.03) and *not* processing competition (γ_in flat across the
-D′0–D′3 ladder) — it's the shared-latent / coeff-1-on-ξ structure. See
+## Benchmark vs the Bayesian model — RESOLVED (the cause is the γ_in prior)
+The SM2 D′3 (canonical) looked like it **under-credited input→acceleration** (0.25 vs the
+glmer's 0.85; share 0.8% vs ~4%). We traced the cause through three eliminations:
+- **Not mixing** (r̂ 1.03). **Not processing competition** (γ_in flat ~0.7 across the D′0–D′3
+  ladder). **Not the coeff-1-on-ξ efficiency identity** — the G0–G3 glmer morph showed pinning
+  efficiency to 0.358 does *not* suppress acceleration (0.845→0.964), and latent-vs-observed is
+  moot (cor 0.997). (So the io identity is **fine**; no re-spec needed.)
+- **It's the N(0,1) prior on γ_in.** Widening to N(0,5) (Sherlock job 29719815): γ_in 0.70→1.69,
+  input→accel 0.25→0.60, share 0.8%→3.0% — ~reconciling with the glmer (~4%). Also λ̄=1.001, so
+  θ≈logit and the overlay scale is exact. The N(0,1) prior was unintentionally shrinking a
+  **weakly-identified** parameter toward 0.
+
+**Why weakly identified:** σ_ζ ≈ 4.3 dominates the slope variance, so *all three* slope-channel
+coefs are barely pinned (γ_in [-0.49,1.89], β_k0 [-1.78,1.47], β_k1 [-1.98,1.30]) and prior-sensitive
+— not just input. σ_ζ's own prior is innocent (half-normal(0,1), posterior 4.3, data-dominated).
+Figure `figs/io_proc_glmer_coefs_vs_sm2.png` shows both priors (filled vs open triangles); notes in
 `../../journal/notes/glmer_ladder_benchmark.md` and `mm_run_state.md`.
 
-**Modeling implication:** the data want input on the *slope* (a compounding /
-Matthew-effect accumulator: input sets the growth exponent κ) and the *level* belongs
-to processing — not the simple "input = constant rate multiplier ⇒ input in the level"
-that coeff-1-on-ξ encodes.
+**Takeaway:** the double dissociation (input→acceleration, processing→level) **is recoverable inside
+the existing io model** with an honest weakly-informative prior on the slope coefficients. The fix is
+the prior, not the architecture. Pending: a systematic prior-sensitivity sweep on the slope-channel
+coefs (+ σ_r's literature prior).
 
 ## Reproduce
 ```r

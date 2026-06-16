@@ -48,3 +48,19 @@ For **input** it does the opposite of what the data want:
 is the assumption the data push back on. Input looks like an **acceleration** term, not a
 level term. The Bayesian model should be re-specified to let input load on the slope
 (and not be forced onto the level at coeff 1), so it reproduces this benchmark.
+
+---
+## RESOLUTION (2026-06-16) — it was the γ_in PRIOR, not the architecture
+The "Modeling implication" above (move input to κ / free efficiency) is **superseded**. Two
+experiments killed the structural hypotheses and found the real cause:
+- **G0–G3 glmer morph:** pinning efficiency to the strict-accumulator value 0.358 (processing
+  controlled, free=0.13) did NOT suppress input→accel (0.845→0.964). Latent-vs-observed moot
+  (cor 0.997). So the **coeff-1-on-ξ identity is fine** — not the cause.
+- **γ_in prior widening (Sherlock 29719815):** N(0,1)→N(0,5) moves γ_in 0.70→1.69, input→accel
+  share 0.8%→3.0% (~glmer 4%). λ̄=1.001 (θ≈logit, overlay exact). The N(0,1) prior was shrinking a
+  weakly-identified γ_in.
+- **Why weakly identified:** σ_ζ≈4.3 dominates slope variance; all 3 slope coefs (γ_in, β_k0, β_k1)
+  are barely pinned & prior-sensitive. σ_ζ prior itself innocent (data-dominated at 4.3).
+
+**Bottom line:** double dissociation is recoverable in the existing io model with an honest
+weakly-informative slope-coef prior. Next: systematic prior-sensitivity sweep (slope coefs + σ_r).
