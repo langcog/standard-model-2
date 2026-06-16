@@ -59,3 +59,23 @@ Rscript -e 'for(r in 0:3){s<-readRDS(sprintf("fits/summaries/joint_io_proc_mm_d%
 **Expectation test:** if γ_in (or γ_in·σ_r) jumps at D'0 vs D'3 → processing competition
 confirmed. If γ_in stays ~0.7 at D'0 too → the residual slope (σ_ζ) is the absorber,
 or the latent-vs-observed input gap is the issue (MCF's worry: processing isn't the culprit).
+
+---
+## gamma_in prior-shrinkage test + lambda_bar (2026-06-15) — job 29719815
+**Why:** the G0-G3 glmer morph FALSIFIED the "pinned efficiency suppresses acceleration"
+hypothesis. Pinning input-efficiency to 0.358 (vs free 0.13, processing controlled)
+did NOT drag input->accel (0.845 -> 0.964 if anything UP). So neither (A) latent-vs-observed
+(cor 0.997, moot) nor (B) efficiency-pinning explains the SM2's low gamma_in. The cause is
+Bayesian-specific: candidates = N(0,1) prior on gamma_in, and/or latent-kappa + large sigma_zeta
+partitioning. See [[glmer_ladder_benchmark]].
+
+**Submitted:** `sbatch --export=ALL,STAN_GAMMA_IN_PRIOR_SD=5 cluster/sherlock/joint_io_proc_mm_fit.slurm 3`
+-> job **29719815** -> `fits/summaries/joint_io_proc_mm_d3_gp5.{summary,draws}.rds`.
+Driver now also saves **sigma_lambda** -> lambda_bar = exp(sigma_lambda^2/2) for the theta->logit bridge.
+
+**Read when done:**
+- gamma_in (wide prior 5) vs the canonical 0.70 [N(0,1)]: if ~1.1 -> prior shrinkage was a factor;
+  if ~0.7 -> structural (latent-kappa/sigma_zeta). Decomposition predicted likelihood center ~1.1.
+- lambda_bar: SM2 input->accel on logit scale ~ gamma_in*sigma_r*lambda_bar; check vs glmer 0.85.
+  NOTE variance SHARES (SM2 0.8% vs glmer ~4%) are scale-free and already disagree, so a real gap
+  is expected regardless of lambda_bar.
