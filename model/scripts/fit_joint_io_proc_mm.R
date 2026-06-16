@@ -19,12 +19,15 @@ bundle <- readRDS(file.path(FITS_DIR, "joint_io_proc_mm_subset_data.rds"))
 sd <- bundle$stan_data
 
 WIDE <- 1; PIN <- 0.001
-sd$gamma_in_prior_sd <- WIDE
+## gamma_in prior SD overridable (STAN_GAMMA_IN_PRIOR_SD) to test prior-shrinkage of gamma_in
+GAMMA_IN_PRIOR_SD <- as.numeric(Sys.getenv("STAN_GAMMA_IN_PRIOR_SD", unset = WIDE))
+sd$gamma_in_prior_sd <- GAMMA_IN_PRIOR_SD
 sd$beta_xi_prior_sd  <- if (rung >= 1) WIDE else PIN
 sd$beta_k0_prior_sd  <- if (rung >= 2) WIDE else PIN
 sd$beta_k1_prior_sd  <- if (rung >= 3) WIDE else PIN
 
-TAG <- sprintf("joint_io_proc_mm_d%d", rung)
+gp_sfx <- if (GAMMA_IN_PRIOR_SD != WIDE) sprintf("_gp%g", GAMMA_IN_PRIOR_SD) else ""
+TAG <- sprintf("joint_io_proc_mm_d%d%s", rung, gp_sfx)
 cat(sprintf("===== %s =====\n  I=%d A=%d J=%d S=%d N=%d N_lwl=%d V_obs=%d n_instr=%d\n",
             TAG, sd$I, sd$A, sd$J, sd$S, sd$N, sd$N_lwl, sd$V_obs, sd$n_instr))
 cat(sprintf("  input MM: sigma_r~N(%.2f,%.2f) [ESTIMATED]; mu_r_s_prior=%s\n",
@@ -68,7 +71,7 @@ dg <- fit$diagnostic_summary()
 cat(sprintf("divergences=%d  treedepth=%d\n", sum(dg$num_divergent), sum(dg$num_max_treedepth)))
 
 SCALARS <- c("beta_xi","beta_k0","beta_k1","gamma_in","delta","s",
-             "sigma_r","sigma_alpha","sigma_zeta","sigma_rt0","sigma_rt1","rho_rt","sigma_lwl",
+             "sigma_r","sigma_alpha","sigma_zeta","sigma_rt0","sigma_rt1","rho_rt","sigma_lwl","sigma_lambda",
              "sigma_xi","sigma_kappa",
              "share_input_xi","share_proc_xi","share_resid_xi",
              "var_input_k","var_proc_k","var_resid_k",
