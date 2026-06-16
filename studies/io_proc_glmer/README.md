@@ -64,6 +64,11 @@ Rscript studies/io_proc_glmer/plot_ladder.R   # -> figs/io_proc_glmer_coefs{,_vs
 ## Figures
 - `figs/io_proc_glmer_coefs.png` — glmer specs, level | acceleration facets.
 - `figs/io_proc_glmer_coefs_vs_sm2.png` — + SM2 D′3 overlay (N(0,1) filled, N(0,5) open triangles).
+  **SM2 rows are input-only on purpose:** `proc_z` reliability ≈ **0.16** (per-child RT mean over
+  ~8 trials is ~84% noise; child-RE RT model σ_child=0.069 vs σ_resid=0.385), so the SM2↔glmer
+  processing scale-bridge is unstable (disattenuation implies implausible ~18/log-RT effects). The
+  glmer processing rows stand on their own; we just don't overlay SM2 processing. (This low
+  reliability also explains the wide processing→acceleration CIs.)
 - `figs/io_proc_glmer_coefs_rescaled.png` — **ONE axis**: acceleration coefs rescaled to
   level-equivalent θ units (× log(t_ref/a0), t_ref=30, a0=21 ⇒ ×0.357), so input→acceleration and
   processing→level are directly comparable as "contribution to log-odds of production by 30 mo."

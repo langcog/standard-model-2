@@ -10,10 +10,10 @@ co  <- dplyr::bind_rows(co, sm2)
 lab <- c(input_full="input · full (193)", input_common="input · common (142)",
          both_common="both (adjusted) · common (142)",
          proc_common="proc · common (142)", proc_full="proc · full (326)",
-         SM2_n01="SM2 D'3 · prior N(0,1)", SM2_n05="SM2 D'3 · prior N(0,5)")
+         SM2_n01="SM2 D'3 input · N(0,1)", SM2_n05="SM2 D'3 input · N(0,5)")
 ord <- rev(c("input · full (193)","input · common (142)","both (adjusted) · common (142)",
              "proc · common (142)","proc · full (326)",
-             "SM2 D'3 · prior N(0,1)","SM2 D'3 · prior N(0,5)"))
+             "SM2 D'3 input · N(0,1)","SM2 D'3 input · N(0,5)"))
 prep <- function(d) d %>% mutate(
   spec_lab = factor(lab[spec], levels = ord),
   term = factor(term, levels = c("level","acceleration"),
@@ -59,7 +59,7 @@ p1 <- make_fig(prep(filter(co, model_type == "glmer")),
 ggsave(here("studies/io_proc_glmer/figs/io_proc_glmer_coefs.png"), p1, width = 10, height = 3.4, dpi = 150)
 
 p2 <- make_fig(prep(co),
-               "SM2 input->accel under N(0,1) prior (filled tri) is shrunk to 0.25; widening to N(0,5) (open tri) recovers 0.60 ~ glmer; lambda_bar=1")
+               "SM2 rows INPUT-ONLY (proc omitted: proc_z reliability~0.16 makes the SM2-glmer scale bridge unstable). N(0,1)->N(0,5) recovers input->accel 0.25->0.60; lambda_bar=1")
 ggsave(here("studies/io_proc_glmer/figs/io_proc_glmer_coefs_vs_sm2.png"), p2, width = 10, height = 3.8, dpi = 150)
 
 ### ONE-AXIS view: acceleration rescaled to level-equivalent theta units.
@@ -87,7 +87,7 @@ p3 <- ggplot(co_rs, aes(est2, spec_lab, color = channel, shape = term2,
   labs(x = sprintf("contribution to log-odds of production at %d mo (theta units)", T_REF),
        y = NULL, color = NULL, shape = NULL,
        title = "Input vs processing on ONE axis (acceleration rescaled to level-equivalent units)",
-       subtitle = sprintf("acceleration coef x log(%d/%d)=%.2f; input loads on acceleration, processing on the level", T_REF, A0, KACC)) +
+       subtitle = sprintf("accel coef x log(%d/%d)=%.2f; input loads on acceleration, processing on the level. SM2 rows input-only (proc_z reliability~0.16)", T_REF, A0, KACC)) +
   theme_bw(base_size = 10) +
   theme(legend.position = "top", panel.grid.minor = element_blank(),
         plot.title = element_text(face = "bold", size = 10))
