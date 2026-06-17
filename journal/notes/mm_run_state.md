@@ -217,3 +217,27 @@ This = the glmer detrend `log(rt)~log(age)+(1|dataset)` done JOINTLY (keeps rt0 
 propagation, which the two-stage glmer lacks). Parsimony win + tight benchmark alignment.
 Stan edits: z_rt 2->1 dim (rt0 only), drop L_rt/sigma_rt1, psi_s -> scalar psi, drop a_k1.
 Gate: confirm via D'2 that sigma_rt1/rt1 latents are ~dead weight (expected).
+
+### D'2 sweep RESULTS (jobs 29982987-90) — a_k0 null (dissociation holds) but REPARAM FUNNEL persists
+| tau | a_in | a_k0 | b_xi | maxrhat |
+|---|---|---|---|---|
+| 0.5 | 0.37 | -0.09 | -0.61 | 1.33 |
+| 1 | 0.49 | -0.24 | -0.39 | 1.34 |
+| 2 | 0.48 | -0.20 | -0.77 | 1.11 |
+| 4 | 0.57 | -0.22 | -0.72 | 1.11 |
+- **a_k0 (proc->accel) ~null** across tau -> dissociation holds on the processing side. GOOD.
+- **a_in** un-collapsed (0.25->~0.49) but still prior-sensitive + below glmer 0.85, AND riding a
+  poorly-mixed fit -> not trustworthy.
+- **Convergence STILL bad** (rhat 1.1-1.34) despite a_k1 pinned. Worst params: **b_xi & sigma_rt0**
+  (rhat 1.34, ess~10). sigma_rt0 drifts to 0 (q5=6e-4); then rt0/sigma_rt0 (the standardized RT
+  level the reparam feeds vocab) is unconstrained by RT, so b_xi floats & fits noise. A FUNNEL the
+  per-SD reparam created by dividing by an ESTIMATED scale in the likelihood -- same class as a_k1,
+  now on the LEVEL channel.
+- sigma_rt1=0.176, flat, unused -> dropping rt1 (agreed) removes ONE funnel but NOT b_xi/sigma_rt0.
+
+**Implication:** the per-SD reparam IMPLEMENTATION (divide latent by its estimated SD) is
+pathological. Need to decouple the prior-scaling from the estimated SD. Options to discuss w/ MCF:
+(a) prior on raw coef but scaled by a FIXED reference SD (e.g. sigma_rt0 prior mean 0.14), keeping
+    raw coefs in the likelihood (no funnel); (b) anchor sigma_rt0 away from 0 (tighter prior/lower
+    bound); (c) revert to raw-coef priors set wide+thoughtfully. Combine with the simplified RT
+    model (drop rt1, global psi). DISCUSS before next fit.
