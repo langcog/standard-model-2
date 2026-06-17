@@ -15,7 +15,9 @@ rung <- as.integer(if (length(args) >= 1) args[1] else 1)
 stopifnot(rung %in% 0:3)
 
 FITS_DIR <- Sys.getenv("STANDARD_MODEL_FITS_DIR", unset = PATHS$fits_dir)
-bundle <- readRDS(file.path(FITS_DIR, "joint_io_proc_mm_subset_data.rds"))
+## STAN_MM_BUNDLE overridable to test a re-prepped bundle (e.g. run-level LWL aggregation)
+BUNDLE <- Sys.getenv("STAN_MM_BUNDLE", unset = "joint_io_proc_mm_subset_data.rds")
+bundle <- readRDS(file.path(FITS_DIR, BUNDLE))
 sd <- bundle$stan_data
 
 WIDE <- 1; PIN <- 0.001
@@ -27,7 +29,8 @@ sd$beta_k0_prior_sd  <- if (rung >= 2) WIDE else PIN
 sd$beta_k1_prior_sd  <- if (rung >= 3) WIDE else PIN
 
 gp_sfx <- if (GAMMA_IN_PRIOR_SD != WIDE) sprintf("_gp%g", GAMMA_IN_PRIOR_SD) else ""
-TAG <- sprintf("joint_io_proc_mm_d%d%s", rung, gp_sfx)
+b_sfx  <- if (grepl("runlvl", BUNDLE)) "_runlvl" else ""
+TAG <- sprintf("joint_io_proc_mm_d%d%s%s", rung, b_sfx, gp_sfx)
 cat(sprintf("===== %s =====\n  I=%d A=%d J=%d S=%d N=%d N_lwl=%d V_obs=%d n_instr=%d\n",
             TAG, sd$I, sd$A, sd$J, sd$S, sd$N, sd$N_lwl, sd$V_obs, sd$n_instr))
 cat(sprintf("  input MM: sigma_r~N(%.2f,%.2f) [ESTIMATED]; mu_r_s_prior=%s\n",
