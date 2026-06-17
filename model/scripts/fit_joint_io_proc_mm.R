@@ -20,17 +20,20 @@ BUNDLE <- Sys.getenv("STAN_MM_BUNDLE", unset = "joint_io_proc_mm_subset_data.rds
 bundle <- readRDS(file.path(FITS_DIR, BUNDLE))
 sd <- bundle$stan_data
 
-WIDE <- 1; PIN <- 0.001
-## gamma_in prior SD overridable (STAN_GAMMA_IN_PRIOR_SD) to test prior-shrinkage of gamma_in
-GAMMA_IN_PRIOR_SD <- as.numeric(Sys.getenv("STAN_GAMMA_IN_PRIOR_SD", unset = WIDE))
-sd$gamma_in_prior_sd <- GAMMA_IN_PRIOR_SD
-sd$beta_xi_prior_sd  <- if (rung >= 1) WIDE else PIN
-sd$beta_k0_prior_sd  <- if (rung >= 2) WIDE else PIN
-sd$beta_k1_prior_sd  <- if (rung >= 3) WIDE else PIN
+PIN <- 0.001
+## Reparam: priors are on PER-SD effects (a common scale across channels).
+## tau_slope = common prior SD for the slope-channel effects (a_in, a_k0, a_k1);
+## tau_level = prior SD for b_xi (rt0 -> xi). STAN_TAU_SLOPE is the SWEEP variable.
+TAU_SLOPE <- as.numeric(Sys.getenv("STAN_TAU_SLOPE", unset = "1"))
+TAU_LEVEL <- as.numeric(Sys.getenv("STAN_TAU_LEVEL", unset = "1"))
+sd$a_in_prior_sd <- TAU_SLOPE
+sd$b_xi_prior_sd <- if (rung >= 1) TAU_LEVEL else PIN
+sd$a_k0_prior_sd <- if (rung >= 2) TAU_SLOPE else PIN
+sd$a_k1_prior_sd <- if (rung >= 3) TAU_SLOPE else PIN
 
-gp_sfx <- if (GAMMA_IN_PRIOR_SD != WIDE) sprintf("_gp%g", GAMMA_IN_PRIOR_SD) else ""
-b_sfx  <- if (grepl("runlvl", BUNDLE)) "_runlvl" else ""
-TAG <- sprintf("joint_io_proc_mm_d%d%s%s", rung, b_sfx, gp_sfx)
+tau_sfx <- if (TAU_SLOPE != 1) sprintf("_tau%g", TAU_SLOPE) else ""
+b_sfx   <- if (grepl("runlvl", BUNDLE)) "_runlvl" else ""
+TAG <- sprintf("joint_io_proc_mm_d%d%s%s", rung, b_sfx, tau_sfx)
 cat(sprintf("===== %s =====\n  I=%d A=%d J=%d S=%d N=%d N_lwl=%d V_obs=%d n_instr=%d\n",
             TAG, sd$I, sd$A, sd$J, sd$S, sd$N, sd$N_lwl, sd$V_obs, sd$n_instr))
 cat(sprintf("  input MM: sigma_r~N(%.2f,%.2f) [ESTIMATED]; mu_r_s_prior=%s\n",
@@ -38,8 +41,8 @@ cat(sprintf("  input MM: sigma_r~N(%.2f,%.2f) [ESTIMATED]; mu_r_s_prior=%s\n",
 cat(sprintf("  RT priors: tau~N(%.2f,%.2f) psi~N(%.2f,%.2f) srt0~N(%.3f,%.2f)\n",
             sd$mu_rt_prior_mean, sd$mu_rt_prior_sd, sd$psi_prior_mean, sd$mu_rtslope_prior_sd,
             sd$sigma_rt0_prior_mean, sd$sigma_rt0_prior_sd))
-cat(sprintf("  ladder: gamma_in=%.3f beta_xi=%.3f beta_k0=%.3f beta_k1=%.3f\n",
-            sd$gamma_in_prior_sd, sd$beta_xi_prior_sd, sd$beta_k0_prior_sd, sd$beta_k1_prior_sd))
+cat(sprintf("  ladder (per-SD effect prior SDs): a_in=%.3f b_xi=%.3f a_k0=%.3f a_k1=%.3f  [tau_slope=%.2f tau_level=%.2f]\n",
+            sd$a_in_prior_sd, sd$b_xi_prior_sd, sd$a_k0_prior_sd, sd$a_k1_prior_sd, TAU_SLOPE, TAU_LEVEL))
 
 chains  <- as.integer(Sys.getenv("STAN_CHAINS",        unset = "4"))
 warmup  <- as.integer(Sys.getenv("STAN_WARMUP",        unset = "750"))
@@ -57,7 +60,7 @@ init_fun <- function() list(
   delta = 7, s = 0.01,
   sigma_alpha = 1, sigma_zeta = 1, sigma_rt = c(0.143, 0.26), sigma_lwl = 0.24,
   mu_c = rep(8, sd$C), tau_c = rep(1, sd$C), sigma_lambda = 0.001,
-  gamma_in = 0, beta_xi = 0, beta_k0 = 0, beta_k1 = 0,
+  a_in = 0, b_xi = 0, a_k0 = 0, a_k1 = 0,
   # input measurement model
   sigma_r = 0.44, mu_r_s = sd$mu_r_s_prior_mean, sigma_meas = rep(0.3, sd$n_instr)
 )
@@ -73,7 +76,7 @@ cat("\n=== diagnostics ===\n")
 dg <- fit$diagnostic_summary()
 cat(sprintf("divergences=%d  treedepth=%d\n", sum(dg$num_divergent), sum(dg$num_max_treedepth)))
 
-SCALARS <- c("beta_xi","beta_k0","beta_k1","gamma_in","delta","s",
+SCALARS <- c("a_in","b_xi","a_k0","a_k1","delta","s",
              "sigma_r","sigma_alpha","sigma_zeta","sigma_rt0","sigma_rt1","rho_rt","sigma_lwl","sigma_lambda",
              "sigma_xi","sigma_kappa",
              "share_input_xi","share_proc_xi","share_resid_xi",

@@ -13,15 +13,17 @@
 //       level. d_i is centered WITHIN study (between-study/instrument level
 //       lives in mu_r_s, not in d), so xi's input component is within-study only.
 //
-//   xi_i    = mu_r + d_i + beta_xi*rt0_i + log_alpha_i,   d_i = sigma_r*z_r_i
-//   kappa_i = (1+delta) + gamma_in*d_i + beta_k0*rt0_i + beta_k1*rt1_i + zeta_i
+//   Regression coefs are PER-SD EFFECTS on standardized predictors (z_r_c = d_i/sigma_r;
+//   rt0/sigma_rt0; rt1/sigma_rt1), so priors are on a common scale across channels.
+//   xi_i    = mu_r + d_i + b_xi*(rt0_i/sigma_rt0) + log_alpha_i,   d_i = sigma_r*z_r_c_i
+//   kappa_i = (1+delta) + a_in*z_r_c_i + a_k0*(rt0_i/sigma_rt0) + a_k1*(rt1_i/sigma_rt1) + zeta_i
 //   theta_i(t) = xi_i + kappa_i*log((t-s)/a0) + item terms
 //   lwl_log_rt[n]    ~ N(tau_s + rt0_i + (psi_s + rt1_i)*lz_n, sigma_lwl)
 //   log_input_obs[v] ~ N(mu_r_s[study_i] + d_i, sigma_meas[instr_v])  # estimated
 //
-// Residuals (log_alpha, zeta) are INDEPENDENT of input and of RT, so
-// Var(xi) = sigma_r^2 (input) + beta_xi^2 sigma_rt0^2 (processing)
-//           + sigma_alpha^2 (residual) is a clean orthogonal partition.
+// Residuals (log_alpha, zeta) are INDEPENDENT of input and of RT, and predictors
+// are standardized, so each per-SD effect IS its SD contribution:
+// Var(xi) = sigma_r^2 (input) + b_xi^2 (processing) + sigma_alpha^2 (residual).
 //
 // Ladder via prior SDs (tiny -> pinned at 0):
 //   D'0 = {gamma_in on, betas off};  D'1 +beta_xi;  D'2 +beta_k0;  D'3 +beta_k1.
@@ -111,11 +113,15 @@ data {
   real<lower=0> mu_r_s_prior_sd;
   real<lower=0> sigma_meas_prior_sd;            // per-instrument input-noise prior scale
 
-  // ---- Ladder regression coefficients (prior sds toggle rungs) ---- //
-  real<lower=0> gamma_in_prior_sd;              // D'0 input-on-slope
-  real<lower=0> beta_xi_prior_sd;               // D'1 rt0 -> xi
-  real<lower=0> beta_k0_prior_sd;               // D'2 rt0 -> kappa
-  real<lower=0> beta_k1_prior_sd;               // D'3 rt1 -> kappa
+  // ---- Ladder regression coefficients: PER-SD EFFECTS (standardized predictors).
+  //      Priors are on each channel's contribution to xi/kappa per 1 SD of the
+  //      channel -- a COMMON scale across channels, so input and processing are
+  //      treated symmetrically. (The old raw-coef N(0,1) implied a ~3x larger
+  //      plausible input effect than processing, because sigma_r > sigma_rt0.) ---- //
+  real<lower=0> a_in_prior_sd;                  // D'0 input -> kappa (per SD)
+  real<lower=0> b_xi_prior_sd;                  // D'1 rt0   -> xi    (per SD)
+  real<lower=0> a_k0_prior_sd;                  // D'2 rt0   -> kappa (per SD)
+  real<lower=0> a_k1_prior_sd;                  // D'3 rt1   -> kappa (per SD)
 }
 
 parameters {
@@ -154,11 +160,11 @@ parameters {
   real delta;
   real<lower=0> sigma_lwl;
 
-  // Regression coefficients (ladder)
-  real gamma_in;
-  real beta_xi;
-  real beta_k0;
-  real beta_k1;
+  // Regression coefficients (ladder) -- per-SD effects on standardized predictors
+  real a_in;   // input -> kappa, per 1 SD of input
+  real b_xi;   // rt0   -> xi,    per 1 SD of RT level
+  real a_k0;   // rt0   -> kappa, per 1 SD of RT level
+  real a_k1;   // rt1   -> kappa, per 1 SD of RT slope
 }
 
 transformed parameters {
@@ -191,10 +197,13 @@ transformed parameters {
   }
   vector[I] log_r_dev = sigma_r * z_r_c;        // d_i
 
-  // Ability intercept and slope per child
-  vector[I] xi    = mu_r + log_r_dev + beta_xi * rt0 + log_alpha;
-  vector[I] kappa = 1 + delta + gamma_in * log_r_dev
-                    + beta_k0 * rt0 + beta_k1 * rt1 + zeta;
+  // Ability intercept and slope per child. Regression terms use STANDARDIZED
+  // predictors (z_r_c; rt0/sigma_rt0; rt1/sigma_rt1) so a_*/b_xi are per-SD effects
+  // on a common scale. Input enters xi at coeff 1 (the io identity xi = log r +
+  // log alpha) -- NOT a free per-SD coef there; only its slope effect a_in is free.
+  vector[I] xi    = mu_r + log_r_dev + b_xi * (rt0 / sigma_rt0) + log_alpha;
+  vector[I] kappa = 1 + delta + a_in * z_r_c
+                    + a_k0 * (rt0 / sigma_rt0) + a_k1 * (rt1 / sigma_rt1) + zeta;
 
   vector[J] delta_j;
   for (j in 1:J) delta_j[j] = mu_c[cc[j]] + tau_c[cc[j]] * delta_j_raw[j];
@@ -249,11 +258,11 @@ model {
   delta ~ normal(delta_prior_mean, delta_prior_sd);
   sigma_lwl ~ normal(sigma_lwl_prior_mean, sigma_lwl_prior_sd);  // <lower=0> => truncated
 
-  // Regression coefficients (tiny prior sd -> pinned at 0)
-  gamma_in ~ normal(0, gamma_in_prior_sd);
-  beta_xi  ~ normal(0, beta_xi_prior_sd);
-  beta_k0  ~ normal(0, beta_k0_prior_sd);
-  beta_k1  ~ normal(0, beta_k1_prior_sd);
+  // Per-SD effect priors (common scale; tiny sd -> pinned at 0 for ladder rungs)
+  a_in ~ normal(0, a_in_prior_sd);
+  b_xi ~ normal(0, b_xi_prior_sd);
+  a_k0 ~ normal(0, a_k0_prior_sd);
+  a_k1 ~ normal(0, a_k1_prior_sd);
 
   // ---- CDI likelihood (parallelized across cores via reduce_sum) ---- //
   target += reduce_sum(partial_sum_lpmf, y, grainsize,
@@ -285,9 +294,10 @@ model {
 }
 
 generated quantities {
-  // Intercept-side variance partition (the payoff)
+  // Intercept-side variance partition (the payoff). Predictors are standardized,
+  // so each per-SD effect IS directly its SD contribution: var = effect^2.
   real var_input_xi = square(sigma_r);
-  real var_proc_xi  = square(beta_xi) * square(sigma_rt0);
+  real var_proc_xi  = square(b_xi);
   real var_resid_xi = square(sigma_alpha);
   real sigma_xi = sqrt(var_input_xi + var_proc_xi + var_resid_xi);
   real share_input_xi = var_input_xi / square(sigma_xi);
@@ -295,9 +305,8 @@ generated quantities {
   real share_resid_xi = var_resid_xi / square(sigma_xi);
 
   // Slope-side variance partition
-  real var_input_k = square(gamma_in) * square(sigma_r);
-  real var_proc_k  = square(beta_k0) * square(sigma_rt0)
-                   + square(beta_k1) * square(sigma_rt1);
+  real var_input_k = square(a_in);
+  real var_proc_k  = square(a_k0) + square(a_k1);
   real var_resid_k = square(sigma_zeta);
   real sigma_kappa = sqrt(var_input_k + var_proc_k + var_resid_k);
 
