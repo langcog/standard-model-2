@@ -104,3 +104,29 @@ coefs are weakly identified / prior-sensitive, not just gamma_in:
 gamma_in [-0.49,1.89], beta_k0 [-1.78,1.47], beta_k1 [-1.98,1.30]. So prior sensitivity is a
 property of the whole SLOPE channel (sigma_zeta soaks the variance). -> systematic sensitivity
 sweep should target the slope-coef priors (+ sigma_r's lit prior). See [[glmer_ladder_benchmark]].
+
+---
+## RT measurement-model fix: mixed grain (SEEDLings trials vs Peekbank admins) — job 29864855
+**Finding (MCF caught it):** the LWL RT channel mixes grains. 4 Peekbank `d_sub` datasets are
+per-ADMIN (~1 row/run, within-run SD ~0.12-0.19); **SEEDLings (my Zhu derivation) is per-TRIAL**
+(6.6 rows/run, within-run SD 0.43) and is 61% of all 2774 RT rows. So the SM2's single global
+sigma_lwl was inflated by SEEDLings trial noise and mis-applied to Peekbank admins (under-IDing
+their rt0), and SEEDLings kids got ~38 "independent" RT rows vs ~3-7 for Peekbank (effective-N
+imbalance). This also broke my reliability calc (sub-obs treated as independent -> rho=0.16).
+
+**Fix:** collapse SEEDLings trials -> per-(child,age) session means; keep Peekbank rows as-is.
+2774 -> 1333 rows. Per-child proc reliability **0.16 -> 0.53**; sigma_child 0.063 -> 0.127.
+Bundle: `fits/joint_io_proc_mm_runlvl_subset_data.rds` (built by /tmp/build_runlevel.R, post-proc).
+Driver now takes `STAN_MM_BUNDLE` override; TAG gets `_runlvl` suffix.
+
+**Submitted:** `sbatch --export=ALL,STAN_MM_BUNDLE=joint_io_proc_mm_runlvl_subset_data.rds
+cluster/sherlock/joint_io_proc_mm_fit.slurm 3` -> job **29864855** ->
+`joint_io_proc_mm_d3_runlvl.{summary,draws}.rds` (same N(0,1) priors as canonical D'3).
+
+**Read when done:** compare run-level vs canonical D'3 -- does the processing channel sharpen?
+beta_xi (proc->level), beta_k0/beta_k1 (proc->accel), sigma_rt0/sigma_rt1, and gamma_in.
+Expect sigma_rt0 up (~0.13 vs 0.09), beta_xi better-identified. If so, the trial-noise
+mis-spec was attenuating processing (compounding the N(0,1) prior shrinkage).
+
+**FOLLOW-UP (circle back):** fix at source -- `prepare_seedlings_lwl_rt.R` should emit per-session
+mean RT, not trials, so the canonical bundle is run-level. (Post-processed bundle is the test.)
