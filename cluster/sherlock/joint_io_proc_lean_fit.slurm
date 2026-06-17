@@ -10,7 +10,7 @@
 # Joint io+proc MEASUREMENT-MODEL ladder (log_irt_long_proc_dp_joint_mm.stan,
 # reduce_sum). Usage:
 #   sbatch sherlock/joint_io_proc_lean_fit.slurm <rung>          (single rung 0-3)
-#   sbatch --array=0-3 sherlock/joint_io_proc_lean_fit.slurm     (whole ladder)
+#   sbatch --array=0-2 sherlock/joint_io_proc_lean_fit.slurm     (whole ladder: D0-D2)
 # Needs fits/joint_io_proc_lean_subset_data.rds present (scp'd; gitignored).
 set -euo pipefail
 RUNG="${SLURM_ARRAY_TASK_ID:-${1:-0}}"

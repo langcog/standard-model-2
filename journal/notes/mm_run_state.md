@@ -241,3 +241,22 @@ pathological. Need to decouple the prior-scaling from the estimated SD. Options 
     raw coefs in the likelihood (no funnel); (b) anchor sigma_rt0 away from 0 (tighter prior/lower
     bound); (c) revert to raw-coef priors set wide+thoughtfully. Combine with the simplified RT
     model (drop rt1, global psi). DISCUSS before next fit.
+
+---
+## io-proc-LEAN model (commit ee079b2) — revert reparam + simplify RT; launched ladder+sweep
+**Model** `log_irt_long_proc_dp_joint_lean.stan` (driver fit_joint_io_proc_lean.R):
+- RT measurement model LEVEL-ONLY: per-child rt0 + per-study tau_s + ONE global psi (dropped
+  per-child rt1 + per-study psi_s). = glmer detrend log(rt)~log(age)+(1|dataset), done jointly.
+- RAW coefs gamma_in/beta_xi/beta_k0; common per-SD-scale priors via FIXED reference SDs in the
+  driver (gamma_in_prior_sd = tau/sigma_r_ref etc.) -> no divide-by-estimated-SD funnel.
+- Ladder D'0 (gamma_in) -> D'1 (+beta_xi) -> D'2 (+beta_k0). NO D'3 (no rt1).
+- GQ exposes eff_input_k = gamma_in*sigma_r (per-SD input->accel, DIRECTLY ~ glmer a_in 0.85),
+  eff_proc_xi, eff_proc_k.
+
+**Launched (bundle I=403):** ladder D0/D1/D2 @ tau=1 (jobs 30046765-67) + D2 tau-sweep
+{0.5,2,4} (30046768-70) -> `joint_io_proc_lean_d{0,1,2}{,_tau0.5,_tau2,_tau4}.summary.rds`.
+
+**Read when done:** eff_input_k (input->accel; glmer 0.85) + eff_proc_k (proc->accel; glmer ~0,
+n.s.) + eff_proc_xi (proc->level) across tau; input-accel share; **maxrhat MUST be clean now**
+(no funnel). If clean + eff_input_k recovers toward 0.85 + eff_proc_k ~null -> the dissociation
+is reproduced in the Bayesian model with the honest prior, on the glmer-aligned measurement model.
