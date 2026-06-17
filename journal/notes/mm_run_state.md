@@ -203,3 +203,17 @@ identifiable), NOT a_k1 (rt1/slope -> kappa, unidentifiable, broke the D'3 sweep
 component (de-noises rt0 for multi-session SEEDLings kids) but not a predictor.
 -> `joint_io_proc_mm_d2{,_tau0.5,_tau2,_tau4}.summary.rds`. Read: a_in vs glmer 0.85; a_k0 vs glmer
 proc->accel ~0 (n.s.); b_xi vs glmer proc->level; rhat should be clean (a_k1 pinned).
+
+### NEXT MODEL (agreed w/ MCF): simplify RT measurement model to align with the glmer
+After the D'2 sweep, implement the glmer-aligned RT measurement model:
+`lwl_log_rt ~ N(tau_s + rt0_i + psi*log_age, sigma_lwl)`
+- **tau_s** per-study intercept (paradigm-level RT differences) — KEEP.
+- **psi** ONE global age slope (universal developmental RT-age decline; MCF: log(rt)~log(age) is
+  extremely linear per the peekbank paper, so single global slope justified) — was per-study psi_s.
+- **rt0_i** per-child level (age-adjusted processing trait) — KEEP.
+- **DROP rt1_i** (per-child slope: too noisy, 1-3 sessions/kid) and **a_k1** (rt1->kappa,
+  unidentifiable, broke the D'3 sweep). Slope channel becomes a_in + a_k0 only.
+This = the glmer detrend `log(rt)~log(age)+(1|dataset)` done JOINTLY (keeps rt0 uncertainty
+propagation, which the two-stage glmer lacks). Parsimony win + tight benchmark alignment.
+Stan edits: z_rt 2->1 dim (rt0 only), drop L_rt/sigma_rt1, psi_s -> scalar psi, drop a_k1.
+Gate: confirm via D'2 that sigma_rt1/rt1 latents are ~dead weight (expected).
