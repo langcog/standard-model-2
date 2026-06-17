@@ -195,3 +195,11 @@ the sampler. a_in (0.47 @ tau=1) is contaminated, not trustworthy.
 Keeps a_in (input->slope) + b_xi (proc->level, the real processing finding); processing->slope
 pinned off. tau in {0.5,1,2,4} -> `joint_io_proc_mm_d1{,_tau0.5,_tau2,_tau4}.summary.rds`.
 Read: a_in across tau vs glmer 0.85; b_xi should firm up (reparam unshrinks it too, ~disatt glmer 0.8).
+
+### D'2 sweep (jobs 29982987-90) -- KEEP processing->accel via rt0 (a_k0), pin only a_k1 (rt1, unidentifiable)
+The processing->accel question lives in a_k0 (rt0/level -> kappa = the glmer's proc_z x log_age,
+identifiable), NOT a_k1 (rt1/slope -> kappa, unidentifiable, broke the D'3 sweep). D'2 keeps a_k0
++ a_in (both swept), b_xi (proc->level, tau_level=1), pins a_k1. rt1 stays as a MEASUREMENT
+component (de-noises rt0 for multi-session SEEDLings kids) but not a predictor.
+-> `joint_io_proc_mm_d2{,_tau0.5,_tau2,_tau4}.summary.rds`. Read: a_in vs glmer 0.85; a_k0 vs glmer
+proc->accel ~0 (n.s.); b_xi vs glmer proc->level; rhat should be clean (a_k1 pinned).
