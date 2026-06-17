@@ -148,3 +148,33 @@ SLOPE channel (gamma_in/beta_k0/beta_k1/sigma_zeta) -- that's the separate N(0,1
 sigma_zeta-domination problem. Two cleanly separated fixes: (1) measurement grain [DONE], (2)
 standardized-per-SD slope-coef prior [TODO]. Residual proc->level gap (0.32 vs ~0.80) = beta_xi
 still N(0,1)-shrunk.
+
+---
+## τ-SWEEP LAUNCHED (2026-06-16 night, YOLO) — reparam + new data
+**Done this session:**
+1. **Reparam** (commit 890f060): slope/level coefs are per-SD effects (a_in, b_xi, a_k0, a_k1)
+   on standardized predictors; common-scale priors. STAN_TAU_SLOPE = sweep var. Compiles on Sherlock.
+2. **SEEDLings RT grain fix** (caf9ab7): per-session means, not trials (prepare_seedlings_lwl_rt.R).
+3. **BabyView refresh** (496ebfd): data_june_2026 -> 22 input kids, 116 admins (was 103).
+4. **ELENA integrated** (5861ba9): ids reconciled (4943.. = LENA); parse_elena_cdi.R reads the WG
+   xlsx; 26 kids, 16-18mo, median 44 words/kid, all 395 items match universe.
+5. **Bundle rebuilt**: I=377->**403**, input 193->**219**, proc 326->**350**, both 142->**166**,
+   N_lwl 1333->**1374**, J=681. Data-check figures refreshed (figs/data_checks/): input flat
+   within-child (trait assumption holds); SEEDLings RT now session-level.
+
+**Sweep:** `sbatch --export=ALL,STAN_TAU_SLOPE=<tau> joint_io_proc_mm_fit.slurm 3` for tau in
+{0.5,1,2,4} -> jobs **29922069-72** -> `joint_io_proc_mm_d3{,_tau0.5,_tau2,_tau4}.summary.rds`
+(tau=1 has NO suffix = canonical). All D'3, reparam, new bundle, N(0,1) priors superseded.
+
+**Read when done (retrieve + compare a_in across tau vs glmer benchmark 0.85):**
+```
+scp sherlock:'$SCRATCH/standard_model_2/fits/summaries/joint_io_proc_mm_d3*.summary.rds' fits/summaries/
+Rscript -e 'for(t in c("_tau0.5","","_tau2","_tau4")){f<-sprintf("fits/summaries/joint_io_proc_mm_d3%s.summary.rds",t)
+  if(file.exists(f)){s<-readRDS(f); g<-function(v)s$mean[s$variable==v]
+  cat(sprintf("tau%s: a_in=%.2f  a_k0=%.2f  a_k1=%.2f  b_xi=%.2f  share_in_k=%.1f%%\n", ifelse(t=="","1",t),
+    g("a_in"),g("a_k0"),g("a_k1"),g("b_xi"), 100*g("var_input_k")/(g("var_input_k")+g("var_proc_k")+g("var_resid_k"))))}}'
+```
+**Expectation:** at tau=1 (weakly informative), a_in should land near the glmer's 0.85 -- i.e. the
+honest common-scale prior ALONE recovers input->acceleration (old N(0,1) raw = N(0,0.36) per-SD
+shrank it to 0.25). Sweep shows robustness. b_xi (proc->level) should hold ~its run-level value.
+**Glmers NOT refit** (per MCF: data may change once more with next BabyView).
