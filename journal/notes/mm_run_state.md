@@ -130,3 +130,21 @@ mis-spec was attenuating processing (compounding the N(0,1) prior shrinkage).
 
 **FOLLOW-UP (circle back):** fix at source -- `prepare_seedlings_lwl_rt.R` should emit per-session
 mean RT, not trials, so the canonical bundle is run-level. (Post-processed bundle is the test.)
+
+### RESULTS (job 29864855, run-level D'3, retrieved 2026-06-16) — IT WORKED (level channel)
+| param | canonical (trial LWL) | run-level LWL |
+|---|---|---|
+| sigma_lwl | 0.380 | **0.216** (trial noise removed) |
+| sigma_rt0 | 0.090 | **0.133** (signal recovered; =glmer sigma_child 0.127) |
+| beta_xi (proc->level) | -1.67 [-3.32, 0.09] | **-2.41 [-3.66, -1.11]** (CI now excludes 0) |
+| beta_k0,beta_k1 (proc->accel) | -0.16,-0.33 | -0.09,-0.34 (unchanged) |
+| gamma_in | 0.70 | 0.75 (unchanged) |
+| sigma_zeta | 4.30 | 4.30 (unchanged) |
+| proc->level per-SD | 0.15 | **0.32** (doubled, toward glmer ~0.58 / disatt ~0.80) |
+
+**Verdict:** the SEEDLings trial-noise mis-spec was attenuating the LEVEL channel. Fixing the grain
+recovers sigma_rt0 and sharpens beta_xi to a confident, ~2x larger effect. It does NOT touch the
+SLOPE channel (gamma_in/beta_k0/beta_k1/sigma_zeta) -- that's the separate N(0,1)-prior +
+sigma_zeta-domination problem. Two cleanly separated fixes: (1) measurement grain [DONE], (2)
+standardized-per-SD slope-coef prior [TODO]. Residual proc->level gap (0.32 vs ~0.80) = beta_xi
+still N(0,1)-shrunk.
