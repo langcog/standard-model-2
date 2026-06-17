@@ -178,3 +178,20 @@ Rscript -e 'for(t in c("_tau0.5","","_tau2","_tau4")){f<-sprintf("fits/summaries
 honest common-scale prior ALONE recovers input->acceleration (old N(0,1) raw = N(0,0.36) per-SD
 shrank it to 0.25). Sweep shows robustness. b_xi (proc->level) should hold ~its run-level value.
 **Glmers NOT refit** (per MCF: data may change once more with next BabyView).
+
+### τ-sweep D'3 RESULTS (jobs 29922069-72) — BROKE on a_k1 non-identifiability
+| tau | a_in [q5,q95] | a_k1 | sigma_zeta | maxrhat | verdict |
+|---|---|---|---|---|---|
+| 0.5 | 0.39 [-0.13,0.92] | -0.76 | - | 1.42 | not converged |
+| 1   | 0.47 [-0.15,1.07] | -2.21 | 3.64 | 1.07 | borderline (a_k1 contaminated) |
+| 2   | 0.51 | -2.07 | - | 1.54 | not converged |
+| 4   | 0.58 | -4.59 | 1.25 | 1.59 | GARBAGE (ess~7) |
+**Diagnosis:** `a_k1` (rt1->accel) runs away and trades off with sigma_zeta -- per-child RT
+SLOPES (rt1) are barely measured, so a_k1*z_rt1 is non-identifiable vs residual slope. The old
+N(0,1)-on-raw-coef = N(0,0.16) per-SD MASKED this; the reparam's free prior exposed it & broke
+the sampler. a_in (0.47 @ tau=1) is contaminated, not trustworthy.
+
+### FIX: D'1 sweep (jobs 29980831-34) -- drop processing-SLOPE (a_k0,a_k1), null per glmer & unidentifiable
+Keeps a_in (input->slope) + b_xi (proc->level, the real processing finding); processing->slope
+pinned off. tau in {0.5,1,2,4} -> `joint_io_proc_mm_d1{,_tau0.5,_tau2,_tau4}.summary.rds`.
+Read: a_in across tau vs glmer 0.85; b_xi should firm up (reparam unshrinks it too, ~disatt glmer 0.8).
