@@ -33,7 +33,8 @@ sd$beta_xi_prior_sd  <- if (rung >= 1) TAU_LEVEL / SIGMA_RT0_REF else PIN
 sd$beta_k0_prior_sd  <- if (rung >= 2) TAU_SLOPE / SIGMA_RT0_REF else PIN
 
 tau_sfx <- if (TAU_SLOPE != 1) sprintf("_tau%g", TAU_SLOPE) else ""
-TAG <- sprintf("joint_io_proc_lean_d%d%s", rung, tau_sfx)
+b_sfx   <- if (grepl("inputmulti", BUNDLE)) "_imulti" else ""
+TAG <- sprintf("joint_io_proc_lean_d%d%s%s", rung, b_sfx, tau_sfx)
 cat(sprintf("===== %s =====\n  I=%d A=%d J=%d S=%d N=%d N_lwl=%d V_obs=%d\n",
             TAG, sd$I, sd$A, sd$J, sd$S, sd$N, sd$N_lwl, sd$V_obs))
 cat(sprintf("  refs: sigma_r_ref=%.3f sigma_rt0_ref=%.3f -> raw prior SDs: gamma_in=%.2f beta_xi=%.2f beta_k0=%.2f  [tau_slope=%.2f tau_level=%.2f]\n",
