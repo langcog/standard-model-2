@@ -165,6 +165,73 @@ mk(parallel, "(A) stable between-child differences (intercepts vary)") +
 mk(fanning,  "(B) diverging trajectories (slopes vary)")
 ```
 
+# Input and Processing Channels
+
+The input and processing channels enter a child's ability with different geometry,
+which @fig-io-proc-schematic makes concrete for hypothetical children. *[Draft prose
+— MCF to review/expand.]*
+
+```{r fig-io-proc-schematic, fig.width=11, fig.height=4.7}
+#| label: fig-io-proc-schematic
+#| fig-cap: "How a one-standard-deviation change in input versus processing moves a child's vocabulary trajectory, shown for a lower-ability (green) and a higher-ability (purple) child. Input loads on both the efficiency intercept and the acceleration, so its perturbations (dashed) fan out with age; processing loads on the intercept alone, so its perturbations (dotted) slide the trajectory in parallel. Left panel: latent ability theta. Right panel: expected words produced (a logistic transform of theta). Effects are drawn at plus/minus two standard deviations for legibility; parameters are taken from the io-proc-lean fit."
+# Schematic of the input/processing dissociation in the io-proc model.
+# Parameters from the io-proc-lean fit (filtered, tau=1):
+#   kappa_pop = 1 + delta = 11.15;  sigma_xi (between-child) = 2.06;  a0 = 21
+#   per-SD channel effects:
+#     INPUT            -> xi += 0.36 (= sigma_r; coeff-1) AND kappa += 0.58 (= gamma_in*sigma_r)
+#     PROCESSING(fast) -> xi += 0.77 (= |beta_xi|*sigma_rt0) AND kappa += 0.05 (~ null)
+# Effects drawn at +/- 2 SD for legibility.
+a0 <- 21; logH <- 5.90; mu_r <- 7.34; kpop <- 11.15; sig_xi <- 2.06
+SEP <- 1.35; SD <- 2
+d_in_xi <- 0.36 * SD; d_in_k <- 0.58 * SD     # input: level AND slope
+d_pr_xi <- 0.77 * SD; d_pr_k <- 0.05 * SD     # processing (faster): level only
+mu_d <- 15; sc <- 2.5; Nitems <- 680
+A_of  <- function(xi, k, age) xi + logH + k * log(age / a0)
+vocab <- function(A) Nitems * plogis((A - mu_d) / sc)
+ages  <- seq(12, 36, length.out = 120)
+QL <- c("latent ability (θ)", "words produced")
+kids  <- tibble(kid = c("lower-ability child", "higher-ability child"),
+                xi0 = c(mu_r - SEP * sig_xi, mu_r + SEP * sig_xi))
+conds <- tibble(
+  cond = c("base", "input +2SD", "input -2SD", "processing +2SD", "processing -2SD"),
+  chan = c("base", "input", "input", "processing", "processing"),
+  dxi  = c(0, d_in_xi, -d_in_xi, d_pr_xi, -d_pr_xi),
+  dk   = c(0, d_in_k,  -d_in_k,  d_pr_k,  -d_pr_k))
+df <- tidyr::expand_grid(kids, conds) |> rowwise() |>
+  mutate(d = list(tibble(age = ages,
+                         th = A_of(xi0 + dxi, kpop + dk, ages),
+                         wd = vocab(A_of(xi0 + dxi, kpop + dk, ages))))) |>
+  ungroup() |> tidyr::unnest(d) |>
+  tidyr::pivot_longer(c(th, wd), names_to = "quantity", values_to = "value") |>
+  mutate(chan = factor(chan, levels = c("base", "input", "processing")),
+         quantity = factor(ifelse(quantity == "th", QL[1], QL[2]), levels = QL))
+ann <- tibble(quantity = factor(QL[1], levels = QL),
+              age = c(27.5, 17.5), value = c(23.2, 19.6),
+              label = c("INPUT: fans out\n(level + acceleration)",
+                        "PROCESSING: parallel slide\n(level only)"))
+arr <- tibble(quantity = factor(QL[1], levels = QL),
+              x = c(29.5, 19.5), y = c(22.7, 18.9), xe = c(34, 24),
+              ye = c(A_of(mu_r + SEP * sig_xi + d_in_xi, kpop + d_in_k, 34),
+                     A_of(mu_r + SEP * sig_xi + d_pr_xi, kpop + d_pr_k, 24)))
+ggplot(df, aes(age, value, color = kid, linetype = chan,
+               group = interaction(kid, cond, quantity))) +
+  geom_line(linewidth = 0.75) +
+  geom_curve(data = arr, aes(x = x, y = y, xend = xe, yend = ye), inherit.aes = FALSE,
+             curvature = -0.25, arrow = arrow(length = unit(0.018, "npc")),
+             linewidth = 0.4, color = "grey25") +
+  geom_text(data = ann, aes(age, value, label = label), inherit.aes = FALSE,
+            size = 3.1, fontface = "bold", lineheight = 0.9, color = "grey15") +
+  facet_wrap(~ quantity, scales = "free_y") +
+  scale_linetype_manual(values = c(base = "solid", input = "dashed", processing = "dotted"),
+                        labels = c("base", "±2 SD input", "±2 SD processing"), name = NULL) +
+  scale_color_manual(values = c("lower-ability child" = "#1b9e77",
+                                "higher-ability child" = "#7570b3"), name = NULL) +
+  labs(x = "age (months)", y = NULL) +
+  theme_bw(base_size = 11) +
+  theme(legend.position = "right", panel.grid.minor = element_blank(),
+        strip.text = element_text(face = "bold"))
+```
+
 # Datasets Used
 
 
