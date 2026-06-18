@@ -282,3 +282,14 @@ is reproduced in the Bayesian model with the honest prior, on the glmer-aligned 
 asymmetric EVIDENCE: processing->level firmly ID'd; input->acceleration real-leaning but data-limited,
 carried by the glmer benchmark. Next: longer iters for clean rhat; refit glmers on final data (after
 next BabyView) to compare input->accel on matched data.
+
+### Input-multi-timepoint test (jobs 30081570-73) — does dropping the 49 one-timepoint input kids raise gamma_in?
+Question: why does lean input->accel (0.40 @tau1, 0.62 @tau4) sit below glmer 0.85? ETA candidates:
+prior (sweep-confirmed) + WHO is in the input set. 49/219 (22%) input kids are 1-timepoint (ELENA-heavy,
+38 in fmw_2013) -> measured input but no slope info. Filtered bundle
+`joint_io_proc_mm_inputmulti_subset_data.rds` drops THEIR input recordings (V_obs 6547->6441, input
+kids 219->170 all multi-tp; I unchanged, they stay as CDI kids). Re-fit lean D'2 tau-sweep ->
+`joint_io_proc_lean_d2_imulti{,_tau0.5,_tau2,_tau4}.summary.rds`.
+**Read:** eff_input_k filtered vs unfiltered (unfilt: 0.21/0.40/0.54/0.62 @ tau 0.5/1/2/4). If filtered
+JUMPS toward 0.85 -> the one-timepoint kids were the drag (DATA, candidate A). If ~same -> it's the
+prior + the latent-kappa machinery (candidate B). Isolates data vs model w/o the deferred glmer refit.
