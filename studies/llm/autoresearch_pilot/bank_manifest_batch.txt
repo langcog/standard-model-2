@@ -1,0 +1,4 @@
+batch_2e16 : patch_const.py : CDI_CONST=TOTAL_BATCH_SIZE=2**16
+batch_2e17 : patch_const.py : CDI_CONST=TOTAL_BATCH_SIZE=2**17
+batch_2e18 : patch_const.py : CDI_CONST=TOTAL_BATCH_SIZE=2**18
+batch_2e20 : patch_const.py : CDI_CONST=TOTAL_BATCH_SIZE=2**20

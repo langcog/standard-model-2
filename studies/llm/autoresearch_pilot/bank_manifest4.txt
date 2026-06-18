@@ -1,0 +1,4 @@
+# Complete the decay x repetition grid (decay at the depths bank3 didn't cover).
+rep2_decay : patch_rep_decay.py : CDI_PASSES=2 CDI_SP_STEPS=1160
+rep3_decay : patch_rep_decay.py : CDI_PASSES=3 CDI_SP_STEPS=1740
+rep6_decay : patch_rep_decay.py : CDI_PASSES=6 CDI_SP_STEPS=3480

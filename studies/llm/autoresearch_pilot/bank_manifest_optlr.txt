@@ -1,0 +1,4 @@
+matlr_0p01 : patch_const.py : CDI_CONST=MATRIX_LR=0.01
+matlr_0p08 : patch_const.py : CDI_CONST=MATRIX_LR=0.08
+betas_high : patch_const.py : CDI_CONST=ADAM_BETAS=(0.95,0.99)
+window_full : patch_const.py : CDI_CONST=WINDOW_PATTERN="LLLL"

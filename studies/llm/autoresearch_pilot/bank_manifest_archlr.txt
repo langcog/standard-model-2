@@ -1,0 +1,9 @@
+# Architecture (size via DEPTH) + learning-rate magnitude sweeps. Base decay/1-pass.
+arch_d2 : patch_arch.py : CDI_DEPTH=2
+arch_d4 : patch_arch.py : CDI_DEPTH=4
+arch_d12 : patch_arch.py : CDI_DEPTH=12
+arch_d16 : patch_arch.py : CDI_DEPTH=16
+lr_0p25 : patch_lr.py : CDI_LR_MULT=0.25
+lr_0p5 : patch_lr.py : CDI_LR_MULT=0.5
+lr_2 : patch_lr.py : CDI_LR_MULT=2.0
+lr_4 : patch_lr.py : CDI_LR_MULT=4.0

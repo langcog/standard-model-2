@@ -1,0 +1,2 @@
+language,lang_slug,model,formula,a0,n_kids,n_items,n_obs,logLik,AIC,BIC,df,fixed_intercept,fixed_age_slope,sd_item,sd_child_intercept,sd_child_slope,cor_child_int_slope,fit_minutes,fit_timestamp
+French (Quebecois),french_quebecois,C_lin,produces ~ 1 + age_c + (1 | child) + (1 | item),20,178,697,216208,-48968.904951091055,97945.80990218211,97986.94588692722,4,-3.5393058016011185,0.366426461225867,1.7610186976045932,1.7650729484591692,NA,NA,0.880319341023763,2026-05-27 08:32:21

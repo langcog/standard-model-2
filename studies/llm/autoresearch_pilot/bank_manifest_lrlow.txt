@@ -1,0 +1,7 @@
+# Follow-up on the REAL HIT: low flat LR -> increasing returns at baseline competence.
+# Map the low-LR frontier (does J keep rising / does competence eventually break?) + combine with genuine levers.
+lr_0p1 : patch_lr.py : CDI_LR_MULT=0.1
+lr_0p15 : patch_lr.py : CDI_LR_MULT=0.15
+lr_0p35 : patch_lr.py : CDI_LR_MULT=0.35
+lr_0p25_init0p3 : patch_lr.py,patch_initscale.py : CDI_LR_MULT=0.25 CDI_INIT_SCALE=0.3
+lr_0p25_gf5 : patch_lr.py,patch_grokfast.py : CDI_LR_MULT=0.25 CDI_GF_LAMB=5

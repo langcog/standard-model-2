@@ -1,0 +1,6 @@
+init_0p1 : patch_initscale.py : CDI_INIT_SCALE=0.1
+init_0p3 : patch_initscale.py : CDI_INIT_SCALE=0.3
+init_3 : patch_initscale.py : CDI_INIT_SCALE=3.0
+wsd : patch_const.py : CDI_CONST=WARMUP_RATIO=0.05;WARMDOWN_RATIO=0.1
+deep_narrow : patch_arch.py,patch_const.py : CDI_DEPTH=16 CDI_CONST=ASPECT_RATIO=32
+composite : patch_arch.py,patch_initscale.py,patch_const.py : CDI_DEPTH=16 CDI_INIT_SCALE=0.3 CDI_CONST=ASPECT_RATIO=32;WARMUP_RATIO=0.05;WARMDOWN_RATIO=0.1

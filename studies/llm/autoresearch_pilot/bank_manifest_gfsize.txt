@@ -1,0 +1,4 @@
+gf5_d4 : patch_grokfast.py,patch_arch.py : CDI_DEPTH=4 CDI_GF_LAMB=5
+gf5_d12 : patch_grokfast.py,patch_arch.py : CDI_DEPTH=12 CDI_GF_LAMB=5
+gf5_lr2 : patch_grokfast.py,patch_lr.py : CDI_LR_MULT=2.0 CDI_GF_LAMB=5
+gf5_lr0p5 : patch_grokfast.py,patch_lr.py : CDI_LR_MULT=0.5 CDI_GF_LAMB=5

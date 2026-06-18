@@ -1,0 +1,5 @@
+# Schedule x repetition: decay-schedule versions of two repetition depths, on the
+# last 2 idle GPUs. Compare J vs the flat-LR rep4/rep8 from bank 2.
+# CDI_SP_STEPS ~= passes * 580 so the decay spans the run.
+rep4_decay : patch_rep_decay.py : CDI_PASSES=4 CDI_SP_STEPS=2320
+rep8_decay : patch_rep_decay.py : CDI_PASSES=8 CDI_SP_STEPS=4640

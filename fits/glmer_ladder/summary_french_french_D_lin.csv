@@ -1,0 +1,2 @@
+language,lang_slug,model,formula,a0,n_kids,n_items,n_obs,logLik,AIC,BIC,df,fixed_intercept,fixed_age_slope,sd_item,sd_child_intercept,sd_child_slope,cor_child_int_slope,fit_minutes,fit_timestamp
+French (French),french_french,D_lin,produces ~ 1 + age_c + (1 + age_c | child) + (1 | item),13,111,687,155170,-12748.649746608371,25509.299493216742,25569.013152631207,6,-7.680900003015077,0.5621790227004413,1.8120162096451753,2.2458769457265597,0.32362283501910327,-0.43175042625587384,4.2207281192143755,2026-05-27 08:48:11

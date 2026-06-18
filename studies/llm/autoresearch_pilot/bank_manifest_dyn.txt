@@ -1,0 +1,6 @@
+# Learning-dynamics interventions (base config: decay, 1 pass; comparable to baseline).
+gf_lamb2 : patch_grokfast.py : CDI_GF_LAMB=2.0
+gf_lamb5 : patch_grokfast.py : CDI_GF_LAMB=5.0
+wd_mult0 : patch_wd.py : CDI_WD_MULT=0
+wd_mult3 : patch_wd.py : CDI_WD_MULT=3
+wd_mult10 : patch_wd.py : CDI_WD_MULT=10

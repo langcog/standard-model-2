@@ -1,0 +1,11 @@
+# Overnight: grokfast parameter sweep + grokfast x other levers (multi-patch).
+gf_lamb1 : patch_grokfast.py : CDI_GF_LAMB=1.0
+gf_lamb10 : patch_grokfast.py : CDI_GF_LAMB=10.0
+gf_lamb20 : patch_grokfast.py : CDI_GF_LAMB=20.0
+gf_alpha90 : patch_grokfast.py : CDI_GF_ALPHA=0.90
+gf_alpha99 : patch_grokfast.py : CDI_GF_ALPHA=0.99
+gf_flat : patch_grokfast.py,patch_constlr.py
+gf_nowd : patch_grokfast.py,patch_wd.py : CDI_WD_MULT=0
+gf_flat_nowd : patch_grokfast.py,patch_constlr.py,patch_wd.py : CDI_WD_MULT=0
+gf_rep2 : patch_grokfast.py,patch_rep_constlr.py : CDI_PASSES=2
+gf_rep4 : patch_grokfast.py,patch_rep_constlr.py : CDI_PASSES=4

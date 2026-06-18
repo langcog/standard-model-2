@@ -1,0 +1,9 @@
+# Follow-up: grokfast crossed J=0 at high lamb. Map the high end + best combos at strong lamb.
+gf_lamb15 : patch_grokfast.py : CDI_GF_LAMB=15
+gf_lamb40 : patch_grokfast.py : CDI_GF_LAMB=40
+gf_lamb80 : patch_grokfast.py : CDI_GF_LAMB=80
+gf_flat_l10 : patch_grokfast.py,patch_constlr.py : CDI_GF_LAMB=10
+gf_flat_l20 : patch_grokfast.py,patch_constlr.py : CDI_GF_LAMB=20
+gf_nowd_l20 : patch_grokfast.py,patch_wd.py : CDI_WD_MULT=0 CDI_GF_LAMB=20
+gf_rep4_l10 : patch_grokfast.py,patch_rep_constlr.py : CDI_PASSES=4 CDI_GF_LAMB=10
+gf_rep8_l10 : patch_grokfast.py,patch_rep_constlr.py : CDI_PASSES=8 CDI_GF_LAMB=10

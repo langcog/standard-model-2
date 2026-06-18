@@ -1,0 +1,4 @@
+warmup_0p2 : patch_const.py : CDI_CONST=WARMUP_RATIO=0.2
+warmdown_0 : patch_const.py : CDI_CONST=WARMDOWN_RATIO=0.0
+warmdown_1 : patch_const.py : CDI_CONST=WARMDOWN_RATIO=1.0
+finallr_0p3 : patch_const.py : CDI_CONST=FINAL_LR_FRAC=0.3

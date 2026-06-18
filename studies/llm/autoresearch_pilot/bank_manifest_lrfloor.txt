@@ -1,0 +1,5 @@
+# Final follow-up: find the competence floor below LR x0.1 (does J keep rising or does the model undertrain?) + stacking at the frontier.
+lr_0p03 : patch_lr.py : CDI_LR_MULT=0.03
+lr_0p05 : patch_lr.py : CDI_LR_MULT=0.05
+lr_0p07 : patch_lr.py : CDI_LR_MULT=0.07
+lr_0p1_init0p3 : patch_lr.py,patch_initscale.py : CDI_LR_MULT=0.1 CDI_INIT_SCALE=0.3

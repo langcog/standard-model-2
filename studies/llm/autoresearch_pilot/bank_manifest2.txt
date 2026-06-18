@@ -1,0 +1,8 @@
+# Expansion bank: repetition-depth sweep at constant LR (uses the freed GPUs).
+# Combined with bank 1 (constlr=1 pass, rep2_constlr=2 passes) this maps the
+# const-LR repetition axis {1,2,3,4,6,8} -> returns objective J.
+# label : patch : per-variant env
+rep3_constlr : patch_rep_constlr.py : CDI_PASSES=3
+rep4_constlr : patch_rep_constlr.py : CDI_PASSES=4
+rep6_constlr : patch_rep_constlr.py : CDI_PASSES=6
+rep8_constlr : patch_rep_constlr.py : CDI_PASSES=8

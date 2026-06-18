@@ -128,3 +128,23 @@ Rplots.pdf
 
 # SEEDLings raw EyeLink reports (816MB; RT derived by prepare_seedlings_lwl_rt.R)
 data/seedlings/raw_eyetracking_data/
+
+# --- Repo-hygiene: regenerable build artifacts / raw archives ---
+# Raw BabyView CDI download archive (the extracted data_june_2026/ dir is tracked)
+data/babyview/data_june_2026-*.zip
+# Local run logs
+logs/
+# Rendered Quarto/doc outputs (sources tracked; deliverable PDFs tracked explicitly)
+paper/standard_model.html
+paper/standard_model_cache/
+paper/supplemental.html
+paper/supplemental.pdf
+paper/supplemental.tex
+paper/supplemental.rmarkdown
+paper/supplemental_files/
+studies/llm/llm_experiments.html
+studies/llm/llm_experiments_files/
+# cmdstan per-chain draw CSVs (regenerable Stan sampler output)
+fits/csvs_*/
+# Stray dated .rds backups
+*.rds.*bak

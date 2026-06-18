@@ -1,0 +1,6 @@
+# First acceleration bank. Objective = returns-to-experience J (returns_score.R).
+# Baseline (decaying schedule, 1 pass) is scored from the existing single-pass run
+# (trajectory_singlepass.csv), so only the two new variants run here.
+# Format:  label : patch_script   (patch relative to repo dir)
+constlr : patch_constlr.py
+rep2_constlr : patch_rep2_constlr.py

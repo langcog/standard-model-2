@@ -1,0 +1,4 @@
+# Mechanism 2x2 missing cell: DECAY schedule x LOW GLOBAL magnitude (all 4 LRs scaled, warmdown stays 0.5).
+# Predict: diminishing (J<0) if FLAT schedule is necessary; increasing if low-global-magnitude alone suffices.
+decaylow_0p25 : patch_const.py : CDI_CONST=EMBEDDING_LR=0.15;UNEMBEDDING_LR=0.001;MATRIX_LR=0.01;SCALAR_LR=0.125
+decaylow_0p1 : patch_const.py : CDI_CONST=EMBEDDING_LR=0.06;UNEMBEDDING_LR=0.0004;MATRIX_LR=0.004;SCALAR_LR=0.05

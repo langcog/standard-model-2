@@ -1,0 +1,5 @@
+# 4x budget (60 epochs): the "never-finished catches up" test. standard vs flat-low only.
+std_s42_4x|chunks/ladder_seed42/CHILDES_ladder_seed42_24M.txt|1e-4|linear|60|42
+flat1e5_s42_4x|chunks/ladder_seed42/CHILDES_ladder_seed42_24M.txt|1e-5|constant|60|42
+std_s1_4x|chunks/ladder_seed1/CHILDES_ladder_seed1_24M.txt|1e-4|linear|60|1
+flat1e5_s1_4x|chunks/ladder_seed1/CHILDES_ladder_seed1_24M.txt|1e-5|constant|60|1

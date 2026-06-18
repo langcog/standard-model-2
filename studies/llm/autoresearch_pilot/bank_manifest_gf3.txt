@@ -1,0 +1,5 @@
+# Confirmation: is there a sweet spot (J~0 at good competence)? where does r_early collapse?
+gf_lamb30 : patch_grokfast.py : CDI_GF_LAMB=30
+gf_flat_l5 : patch_grokfast.py,patch_constlr.py : CDI_GF_LAMB=5
+gf_flat_l8 : patch_grokfast.py,patch_constlr.py : CDI_GF_LAMB=8
+gf_flat_l40 : patch_grokfast.py,patch_constlr.py : CDI_GF_LAMB=40

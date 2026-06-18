@@ -1,0 +1,2 @@
+language,lang_slug,model,formula,a0,n_kids,n_items,n_obs,logLik,AIC,BIC,df,fixed_intercept,fixed_age_slope,sd_item,sd_child_intercept,sd_child_slope,cor_child_int_slope,fit_minutes,fit_timestamp
+Japanese,japanese,C_lin,produces ~ 1 + age_c + (1 | child) + (1 | item),18,178,758,230740,-41312.45138824493,82632.90277648986,82674.29896374779,4,-4.587743471409632,0.5338492228918832,1.9200422999742721,1.8723319393722881,NA,NA,0.9328134218851726,2026-06-07 14:28:59

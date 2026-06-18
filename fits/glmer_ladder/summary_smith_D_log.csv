@@ -1,0 +1,2 @@
+language,lang_slug,model,formula,a0,n_kids,n_items,n_obs,logLik,AIC,BIC,df,fixed_intercept,fixed_age_slope,sd_item,sd_child_intercept,sd_child_slope,cor_child_int_slope,fit_minutes,fit_timestamp
+English (American),smith,D_log,produces ~ 1 + log_age + (1 + log_age | child) + (1 | item),22,314,680,597040,-171409.20016492475,342830.4003298495,342898.19876620034,6,-1.6447464132206633,12.496996948047634,2.0016675559001604,2.245815494623231,6.6964677596341025,0.16505592889760776,45.96776340007782,2026-06-07 15:08:37

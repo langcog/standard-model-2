@@ -1,0 +1,7 @@
+# Seed-1 replication of the flat-LR repetition sweep (error bars on J vs depth).
+s1_rep1_constlr : patch_rep_constlr.py : CDI_PASSES=1 CDI_SEED=1
+s1_rep2_constlr : patch_rep_constlr.py : CDI_PASSES=2 CDI_SEED=1
+s1_rep3_constlr : patch_rep_constlr.py : CDI_PASSES=3 CDI_SEED=1
+s1_rep4_constlr : patch_rep_constlr.py : CDI_PASSES=4 CDI_SEED=1
+s1_rep6_constlr : patch_rep_constlr.py : CDI_PASSES=6 CDI_SEED=1
+s1_rep8_constlr : patch_rep_constlr.py : CDI_PASSES=8 CDI_SEED=1
