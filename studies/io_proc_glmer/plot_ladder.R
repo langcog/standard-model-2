@@ -10,10 +10,10 @@ co  <- dplyr::bind_rows(co, sm2)
 lab <- c(input_full="input · full (193)", input_common="input · common (142)",
          both_common="both (adjusted) · common (142)",
          proc_common="proc · common (142)", proc_full="proc · full (326)",
-         SM2_n01="SM2 D'3 input · N(0,1)", SM2_n05="SM2 D'3 input · N(0,5)")
+         lean_t1="io-proc-lean · τ=1", lean_t4="io-proc-lean · τ=4")
 ord <- rev(c("input · full (193)","input · common (142)","both (adjusted) · common (142)",
              "proc · common (142)","proc · full (326)",
-             "SM2 D'3 input · N(0,1)","SM2 D'3 input · N(0,5)"))
+             "io-proc-lean · τ=1","io-proc-lean · τ=4"))
 prep <- function(d) d %>% mutate(
   spec_lab = factor(lab[spec], levels = ord),
   term = factor(term, levels = c("level","acceleration"),
@@ -27,7 +27,7 @@ make_fig <- function(d, subtitle) ggplot(d, aes(est, spec_lab, color = channel, 
   geom_point(position = dodge, size = 2.7) +
   facet_wrap(~ term, scales = "free_x") +
   scale_color_manual(values = c(input = "#1f78b4", processing = "#e6701b")) +
-  scale_shape_manual(values = c(glmer = 16, `Bayesian N(0;1)` = 17, `Bayesian N(0;5)` = 2)) +
+  scale_shape_manual(values = c(glmer = 16, `io-proc-lean (tau=1)` = 17, `io-proc-lean (tau=4)` = 2)) +
   labs(x = "coefficient (log-odds per 1 SD of channel)", y = NULL, color = NULL, shape = NULL,
        title = "Input vs processing: level & acceleration coefficients", subtitle = subtitle) +
   theme_bw(base_size = 10) +
@@ -59,7 +59,7 @@ p1 <- make_fig(prep(filter(co, model_type == "glmer")),
 ggsave(here("studies/io_proc_glmer/figs/io_proc_glmer_coefs.png"), p1, width = 10, height = 3.4, dpi = 150)
 
 p2 <- make_fig(prep(co),
-               "SM2 rows INPUT-ONLY (proc omitted: proc_z reliability~0.16 makes the SM2-glmer scale bridge unstable). N(0,1)->N(0,5) recovers input->accel 0.25->0.60; lambda_bar=1")
+               "io-proc-lean (triangles, t=1 filled / t=4 open) vs glmer: proc->level recovered; input->accel data-limited (0.4-0.6 < glmer 0.85)")
 ggsave(here("studies/io_proc_glmer/figs/io_proc_glmer_coefs_vs_sm2.png"), p2, width = 10, height = 3.8, dpi = 150)
 
 ### ONE-AXIS view: acceleration rescaled to level-equivalent theta units.
@@ -87,7 +87,7 @@ p3 <- ggplot(co_rs, aes(est2, spec_lab, color = channel, shape = term2,
   labs(x = sprintf("contribution to log-odds of production at %d mo (theta units)", T_REF),
        y = NULL, color = NULL, shape = NULL,
        title = "Input vs processing on ONE axis (acceleration rescaled to level-equivalent units)",
-       subtitle = sprintf("accel coef x log(%d/%d)=%.2f; input loads on acceleration, processing on the level. SM2 rows input-only (proc_z reliability~0.16)", T_REF, A0, KACC)) +
+       subtitle = sprintf("accel coef x log(%d/%d)=%.2f; input loads on acceleration, processing on the level. Triangles = io-proc-lean (Bayesian)", T_REF, A0, KACC)) +
   theme_bw(base_size = 10) +
   theme(legend.position = "top", panel.grid.minor = element_blank(),
         plot.title = element_text(face = "bold", size = 10))

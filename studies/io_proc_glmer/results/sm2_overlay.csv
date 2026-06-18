@@ -1,5 +1,9 @@
 spec,n_kids,channel,term,est,lo,hi,p,model_type
-SM2_n01,193,input,level,0.358,0.321,0.399,NA,Bayesian N(0;1)
-SM2_n01,193,input,acceleration,0.251,-0.175,0.677,NA,Bayesian N(0;1)
-SM2_n05,193,input,level,0.355,0.317,0.394,NA,Bayesian N(0;5)
-SM2_n05,193,input,acceleration,0.599,-0.116,1.339,NA,Bayesian N(0;5)
+lean_t1,403,input,level,0.35,0.32,0.39,NA,io-proc-lean (tau=1)
+lean_t1,403,input,acceleration,0.40,-0.28,1.05,NA,io-proc-lean (tau=1)
+lean_t1,403,processing,level,0.74,0.50,0.97,NA,io-proc-lean (tau=1)
+lean_t1,403,processing,acceleration,0.12,-0.47,0.69,NA,io-proc-lean (tau=1)
+lean_t4,403,input,level,0.35,0.31,0.38,NA,io-proc-lean (tau=4)
+lean_t4,403,input,acceleration,0.62,-0.04,1.25,NA,io-proc-lean (tau=4)
+lean_t4,403,processing,level,0.77,0.54,1.01,NA,io-proc-lean (tau=4)
+lean_t4,403,processing,acceleration,0.10,-0.50,0.71,NA,io-proc-lean (tau=4)
