@@ -232,6 +232,22 @@ ggplot(df, aes(age, value, color = kid, linetype = chan,
         strip.text = element_text(face = "bold"))
 ```
 
+## Observed data in each channel
+
+@fig-io-data-panels shows the raw measurements entering the three channels of the
+analysis, with one colour per dataset (held constant across panels). *[Draft prose —
+MCF to review/expand.]*
+
+```{r fig-io-data-panels, fig.width=14, fig.height=5}
+#| label: fig-io-data-panels
+#| fig-cap: "Observed data entering the io-proc analysis, one colour per dataset (constant across panels). (A) CDI vocabulary: each line is a child's words-produced count across administrations (no points), with a per-dataset loess trend. (B) Looking-while-listening reaction time (log scale): per-child session-mean RT with a per-dataset trend; RT declines with age in every dataset. (C) Observed input rate (log; study-specific units, so absolute levels are not comparable across datasets — only the age trends): per-child trajectories with a per-dataset trend, with BabyView head-cam recordings averaged to monthly means so they do not swamp the sparser LENA datasets. *[Draft caption — MCF to review.]*"
+# Reproducible standalone script; defines io_panels_fig() (reads the analysis bundle +
+# raw CDI/RT/input sources) and returns the 3-panel patchwork. Run directly to also
+# write figs/data_checks/io_panels.png.
+source(here("model", "scripts", "data_check_io_panels.R"))
+io_panels_fig()
+```
+
 # Datasets Used
 
 
