@@ -260,3 +260,25 @@ pathological. Need to decouple the prior-scaling from the estimated SD. Options 
 n.s.) + eff_proc_xi (proc->level) across tau; input-accel share; **maxrhat MUST be clean now**
 (no funnel). If clean + eff_input_k recovers toward 0.85 + eff_proc_k ~null -> the dissociation
 is reproduced in the Bayesian model with the honest prior, on the glmer-aligned measurement model.
+
+### io-proc-LEAN RESULTS (jobs 30046765-70) — FUNNEL FIXED; proc dissociation clean; input data-limited
+| | eff_input_k(->acc) | eff_proc_k(->acc) | eff_proc_xi(->lvl) | maxrhat |
+|---|---|---|---|---|
+| D0 | 0.49 [-0.15,1.06] | (pin) | (pin) | 1.08 |
+| D1 | 0.46 | (pin) | -0.76 [-0.99,-0.52] | 1.09 |
+| D2 tau1 | 0.40 [-0.28,1.05] | -0.12 [-0.69,0.47] | -0.74 [-0.97,-0.50] | 1.05 |
+| D2 tau0.5/2/4 | 0.21/0.54/0.62 | ~-0.1 | -0.75 stable | 1.03-1.14 |
+
+- **Funnel GONE**: rhat 1.3-1.6 (reparam) -> 1.03-1.14 (lean). Fixed-ref priors + level-only RT did it.
+  (residual ~1.05-1.1 = weakly-ID'd input coef mixing slowly; firm up w/ more iters for final.)
+- **Processing dissociation CLEAN + identified**: proc->level = -0.75 (CI excludes 0, stable across
+  tau) = faster processors -> more vocab, matches glmer; proc->accel ~null. Nailed in the Bayesian.
+- **Input->accel data-limited**: 0.40 @ tau1, prior-sensitive (0.21-0.62), CI includes 0 AND glmer 0.85;
+  input ~1.6% of slope var. Bayesian agrees DIRECTIONALLY (positive) but can't confirm !=0 alone.
+  glmer 0.85 (model-indep, OLDER data) anchors the magnitude. ELENA's 26 one-timepoint kids add
+  input but no slope info -> likely dilute input->slope here.
+
+**Bottom line:** lean model works (clean, glmer-aligned, no funnel). Double dissociation holds with
+asymmetric EVIDENCE: processing->level firmly ID'd; input->acceleration real-leaning but data-limited,
+carried by the glmer benchmark. Next: longer iters for clean rhat; refit glmers on final data (after
+next BabyView) to compare input->accel on matched data.
