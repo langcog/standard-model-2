@@ -293,3 +293,24 @@ kids 219->170 all multi-tp; I unchanged, they stay as CDI kids). Re-fit lean D'2
 **Read:** eff_input_k filtered vs unfiltered (unfilt: 0.21/0.40/0.54/0.62 @ tau 0.5/1/2/4). If filtered
 JUMPS toward 0.85 -> the one-timepoint kids were the drag (DATA, candidate A). If ~same -> it's the
 prior + the latent-kappa machinery (candidate B). Isolates data vs model w/o the deferred glmer refit.
+
+### Input-multi-timepoint RESULTS (jobs 30081570-73) — YES, the one-timepoint kids drag gamma_in down
+| tau | unfilt (219) | FILTERED (170 multi-tp) | delta |
+|---|---|---|---|
+| 0.5 | 0.21 | 0.34 | +0.13 |
+| 1 | 0.40 | **0.58 [0.00,1.16]** | +0.18 |
+| 2 | 0.54 | 0.58 | +0.04 |
+| 4 | 0.62 | 0.67 [0.02,1.36] | +0.05 |
+Proc channel unchanged (eff_proc_xi -0.77, eff_proc_k -0.05), sigma_r 0.36, rhat 1.03-1.08. CLEAN.
+
+**Mechanism:** the 49 one-timepoint input kids (ELENA-heavy, 16-18mo) have input~vocab at ONE young
+age -> io identity absorbs that as a LEVEL effect (coeff-1 on xi); no 2nd timepoint -> no fan-out ->
+they "vote" gamma_in~0 (input=level). Multi-tp kids vote gamma_in>0 (fan-out). Mixing compromises down.
+
+**Gap 0.40->0.85 decomposes ~thirds:** one-timepoint kids (data) ~+0.18 (0.40->0.58); prior ~+0.09
+(filt 0.58->0.67 as tau widens); residual 0.67-vs-0.85 ~+0.18 = latent-kappa joint machinery and/or
+new-vs-old data mismatch (only the deferred MATCHED-data glmer cleanly attributes this).
+
+**Modeling implication for paper:** including 1-tp input kids strengthens input->LEVEL but dilutes
+input->ACCEL (votes level). Choice to flag: input channel for the accel question may want multi-tp
+kids only. Proc channel robust either way.
