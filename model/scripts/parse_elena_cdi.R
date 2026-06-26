@@ -20,7 +20,9 @@ long <- e %>%
   pivot_longer(all_of(itemcols), names_to = "short", values_to = "raw") %>%
   transmute(lab_subject_id = as.character(id), study = "elena",
             age = as.integer(CDIAge), form = "WG", item = unname(map[short]),
-            produces = as.integer(!is.na(raw) & suppressWarnings(as.numeric(raw)) == 2))
+            produces = as.integer(!is.na(raw) & suppressWarnings(as.numeric(raw)) == 2),
+            # WG: 1 = understands, 2 = understands+says -> comprehension is either.
+            comprehends = as.integer(!is.na(raw) & suppressWarnings(as.numeric(raw)) %in% c(1, 2)))
 
 pk <- long %>% group_by(lab_subject_id) %>% summarise(n_prod = sum(produces), .groups = "drop")
 cat(sprintf("ELENA WG CDI: %d kids, ages %s, %d items, %d rows\n",

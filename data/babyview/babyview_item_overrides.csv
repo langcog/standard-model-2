@@ -1,0 +1,15 @@
+item_key,canonical_item,note
+applesauce,apple sauce,webCDI one-word vs Wordbank two-word
+firetruck,fire truck,webCDI one-word vs Wordbank two-word
+teddybear,teddy bear,webCDI one-word vs Wordbank two-word
+pancake,pancakes,Wordbank uses plural
+potato_chip,potato chips,Wordbank uses plural
+cockadoodledoo,cock-a-doodle-doo,spelling/hyphenation
+so_big,so big,strip trailing punctuation
+pattycake,patty cake,webCDI one-word vs Wordbank two-word
+gonna_get_you,gonna get you,strip trailing punctuation
+give_me_five,give me five,strip trailing punctuation
+dress,dress (object),homonym -> clothing/object sense
+toy,toy (object),homonym -> object sense
+telephone,telephone,webCDI definition had /cellphone* suffix
+foot,foot,webCDI definition was plural 'feet'

@@ -1,0 +1,684 @@
+item,form,AM2018,FM2012,FMW2013,FPM2006,SEEDLingS,babyview,n_datasets,flag
+all,WG/WS,allquant,allquant,allquant,allquant,Talk_all,all,6,manual_disambig
+another,WG/WS,another,another,another,another,Talk_another,another,6,manual_disambig
+baa baa,WG/WS,baabaa,baabaa,baabaa,baabaa,Talk_baabaa,baa_baa,6,manual_disambig
+babysitter,WG/WS,babysttr,babysttr,babysttr,babysttr,Talk_babysitter,babysitter,6,manual_disambig
+babysitter's name,WG/WS,babysittername,babysittername,babysittername,babysittername,Talk_babysittername,babysitter_name,6,manual_disambig
+belly button,WG/WS,bllybttn,bllybttn,bllybttn,bllybttn,Talk_bellybutton,belly_button,6,manual_disambig
+bicycle,WG/WS,bicycle,bicycle,bicycle,bicycle,Talk_bicycle,bicycle,6,manual_disambig
+breakfast,WG/WS,breakfst,breakfst,breakfst,breakfst,Talk_breakfast,breakfast,6,manual_disambig
+butterfly,WG/WS,buttrfly,buttrfly,buttrfly,buttrfly,Talk_butterfly,butterfly,6,manual_disambig
+chicken (animal),WG/WS,chicken1,chicken1,chicken1,chicken1,Talk_chicken_animal,chicken.animal,6,manual_disambig
+chicken (food),WG/WS,chicken2,chicken2,chicken2,chicken2,Talk_chicken_food,chicken.food,6,manual_disambig
+child's own name,WG/WS,childname,childname,childname,childname,Talk_childname,child_own_name,6,manual_disambig
+choo choo,WG/WS,choochoo,choochoo,choochoo,choochoo,Talk_choochoo,choo_choo,6,manual_disambig
+church*,WG/WS,church,church,church,church,Talk_church,church,6,manual_disambig
+clean (action),WG/WS,clean1,clean1,clean1,clean1,Talk_clean_action,clean.action,6,manual_disambig
+clean (description),WG/WS,clean2,clean2,clean2,clean2,Talk_clean_descriptor,clean.description,6,manual_disambig
+cock-a-doodle-doo,WG/WS,cockddld,cockddld,cockddld,cockddld,Talk_cockadoodledoo,cockadoodledoo,6,manual_disambig
+comb,WG/WS,comb,comb,comb,comb,Talk_comb,comb,6,manual_disambig
+daddy*,WG/WS,daddy,daddy,daddy,daddy,Talk_daddy,daddy,6,manual_disambig
+don't,WG/WS,dont,dont,dont,dont,Talk_dont,dont,6,manual_disambig
+dress (object),WG/WS,dress,dress,dress,dress,Talk_dress,dress,6,manual_disambig
+drink (action),WG/WS,drink2,drink2,drink2,drink2,Talk_drink_action,drink.action,6,manual_disambig
+drink (beverage),WG/WS,drink1,drink1,drink1,drink1,Talk_drink_beverage,drink.beverage,6,manual_disambig
+dry (description),WG/WS,dry2,dry2,dry2,dry2,Talk_dry,dry;dry.description,6,manual_disambig
+finish,WG/WS,finish,finish,finish,finish,Talk_finish,finish,6,manual_disambig
+fire truck,WG/WS,firetrck,firetrck,firetrck,firetrck,Talk_firetruck,firetruck,6,manual_disambig
+fish (animal),WG/WS,fish1,fish1,fish1,fish1,Talk_fish_animal,fish.animal,6,manual_disambig
+fish (food),WG/WS,fish2,fish2,fish2,fish2,Talk_fish_food,fish.food,6,manual_disambig
+foot,WG/WS,feet;foot,feet;foot,feet;foot,feet,Talk_foot,foot,6,manual_disambig
+glasses,WG/WS,glasses,glasses,glasses,glasses,Talk_glasses,glasses,6,manual_disambig
+grandma*,WG/WS,grandma,grandma,grandma,grandma,Talk_grandma,grandma,6,manual_disambig
+grandpa*,WG/WS,grandpa,grandpa,grandpa,grandpa,Talk_grandpa,grandpa,6,manual_disambig
+grrr,WG/WS,grr,grr,grr,grr,Talk_grr,grrr,6,manual_disambig
+hammer,WG/WS,hammer,hammer,hammer,hammer,Talk_hammer,hammer,6,manual_disambig
+high chair,WG/WS,highchar,highchar,highchar,highchar,Talk_highchair,high_chair,6,manual_disambig
+ice cream,WG/WS,icecream,icecream,icecream,icecream,Talk_icecream,ice_cream,6,manual_disambig
+kiss,WG/WS,kiss,kiss,kiss,kiss,Talk_kiss,kiss,6,manual_disambig
+little (description),WG/WS,little,little,little,little,Talk_little,little,6,manual_disambig
+living room,WG/WS,livingrm,livingrm,livingrm,livingrm,Talk_livingroom,living_room,6,manual_disambig
+mommy*,WG/WS,mommy,mommy,mommy,mommy,Talk_mommy,mommy,6,manual_disambig
+morning,WG/WS,morning,morning,morning,morning,Talk_morning,morning,6,manual_disambig
+motorcycle,WG/WS,motrcycl,motrcycl,motrcycl,motrcycl,Talk_motorcycle,motorcycle,6,manual_disambig
+necklace,WG/WS,necklace,necklace,necklace,necklace,Talk_necklace,necklace,6,manual_disambig
+night night,WG/WS,nghtnght,nghtnght,nghtnght,nghtnght,Talk_nightnight,nightnight,6,manual_disambig
+not,WG/WS,notquant,notquant,notquant,notquant,Talk_not,not,6,manual_disambig
+orange (food),WG/WS,orange1,orange1,orange1,orange1,Talk_orange,orange;orange.food,6,manual_disambig
+outside,WG/WS,outside,outside,outside,outside,Talk_outside,outside,6,manual_disambig
+owie/boo boo,WG/WS,owie,owie,owie,owie,Talk_booboo,owie,6,manual_disambig
+pajamas,WG/WS,pajamas,pajamas,pajamas,pajamas,Talk_pajamas,pajamas,6,manual_disambig
+patty cake,WG/WS,patycak,patycak,patycak,patycak,Talk_pattycake,pattycake,6,manual_disambig
+peekaboo,WG/WS,peekaboo,peekaboo,peekaboo,peekaboo,Talk_peekaboo,peekaboo,6,manual_disambig
+picture,WG/WS,picture,picture,picture,picture,Talk_picture,picture,6,manual_disambig
+pillow,WG/WS,pillow,pillow,pillow,pillow,Talk_pillow,pillow,6,manual_disambig
+quack quack,WG/WS,quackqck,quackqck,quackqck,quackqck,Talk_quackquack,quack_quack,6,manual_disambig
+raisin,WG/WS,raisin,raisin,raisin,raisin,Talk_raisin,raisin,6,manual_disambig
+refrigerator,WG/WS,refrigerator,refrigerator,refrigerator,refrigerator,Talk_refrigerator,refrigerator,6,manual_disambig
+rocking chair,WG/WS,rockingchair,rockingchair,rockingchair,rockingchair,Talk_rockingchair,rocking_chair,6,manual_disambig
+scared,WG/WS,scared,scared,scared,scared,Talk_scared,scared,6,manual_disambig
+scissors,WG/WS,scissors,scissors,scissors,scissors,Talk_scissors,scissors,6,manual_disambig
+shh/shush/hush,WG/WS,shh,shh,shh,shh,Talk_shh,shh,6,manual_disambig
+slide (object),WG/WS,slide1,slide1,slide1,slide1,Talk_slide,slide;slide.object,6,manual_disambig
+spaghetti,WG/WS,spaghett,spaghett,spaghett,spaghett,Talk_spaghetti,spaghetti,6,manual_disambig
+squirrel,WG/WS,squirrel,squirrel,squirrel,squirrel,Talk_squirrel,squirrel,6,manual_disambig
+swing (action),WG/WS,swing2,swing2,swing2,swing2,Talk_swing_action,swing.action,6,manual_disambig
+swing (object),WG/WS,swing1,swing1,swing1,swing1,Talk_swing_outside,swing.object,6,manual_disambig
+teddy bear,WG/WS,teddyber,teddyber,teddyber,teddyber,Talk_teddybear,teddybear,6,manual_disambig
+telephone,WG/WS,telephon;telephone,telephon;telephone,telephon;telephone,telephon,Talk_telephone,telephone,6,manual_disambig
+thank you,WG/WS,thankyou,thankyou,thankyou,thankyou,Talk_thankyou,thank_you,6,manual_disambig
+thirsty,WG/WS,thirsty,thirsty,thirsty,thirsty,Talk_thirsty,thirsty,6,manual_disambig
+tomorrow,WG/WS,tomorrow,tomorrow,tomorrow,tomorrow,Talk_tomorrow,tomorrow,6,manual_disambig
+tonight,WG/WS,tonight,tonight,tonight,tonight,Talk_tonight,tonight,6,manual_disambig
+toothbrush,WG/WS,toothbrush;tothbrsh,toothbrush;tothbrsh,toothbrush;tothbrsh,tothbrsh,Talk_toothbrush,toothbrush,6,manual_disambig
+toy (object),WG/WS,toy,toy,toy,toy,Talk_toy,toy,6,manual_disambig
+uh oh,WG/WS,uhoh,uhoh,uhoh,uhoh,Talk_uhoh,uh_oh,6,manual_disambig
+under,WG/WS,underprep,underprep,underprep,underprep,Talk_under,under,6,manual_disambig
+up,WG/WS,upprep,upprep,upprep,upprep,Talk_up,up,6,manual_disambig
+wanna/want to,WG/WS,wanna,wanna,wanna,wanna,Talk_wanna,wanna,6,manual_disambig
+watch (action),WG/WS,watch2,watch2,watch2,watch2,Talk_watch_action,watch.action,6,manual_disambig
+watch (object),WG/WS,watch1,watch1,watch1,watch1,Talk_watch_object,watch.object,6,manual_disambig
+water (beverage),WG/WS,water1,water1,water1,water1,Talk_water_food,water.beverage,6,manual_disambig
+water (not beverage),WG/WS,water2,water2,water2,water2,Talk_water_outside,water.not_beverage,6,manual_disambig
+woof woof,WG/WS,woofwoof,woofwoof,woofwoof,woofwoof,Talk_woofwoof,woof_woof,6,manual_disambig
+work (place),WG/WS,work1,work1,work1,work1,Talk_work,work;work.place,6,manual_disambig
+yucky,WG/WS,yucky,yucky,yucky,yucky,Talk_yucky,yucky,6,manual_disambig
+yum yum,WG/WS,yumyum,yumyum,yumyum,yumyum,Talk_yumyum,yum_yum,6,manual_disambig
+alligator,WS,alligatr,alligatr,alligatr,alligatr,NA,alligator,5,manual_disambig
+and,WS,andconn,andconn,andconn,andconn,NA,and,5,manual_disambig
+apple sauce,WS,applesac,applesac,applesac,applesac,NA,applesauce,5,manual_disambig
+at,WS,atprep,atprep,atprep,atprep,NA,at,5,manual_disambig
+buttocks/bottom*,WS,buttocks,buttocks,buttocks,buttocks,NA,buttocks,5,manual_disambig
+by,WS,byprep,byprep,byprep,byprep,NA,by,5,manual_disambig
+call (on phone),WS,callnphn,callnphn,callnphn,callnphn,NA,call,5,manual_disambig
+camping,WS,camping,camping,camping,camping,NA,camping,5,manual_disambig
+can (auxiliary),WS,can2,can2,can2,can2,NA,can.auxiliary,5,manual_disambig
+can (object),WS,can1,can1,can1,can1,NA,can.object,5,manual_disambig
+chocolate,WS,chocolat,chocolat,chocolat,chocolat,NA,chocolate,5,manual_disambig
+did/did ya,WS,did,did,did,did,NA,did,5,manual_disambig
+downtown,WS,downtown,downtown,downtown,downtown,NA,downtown,5,manual_disambig
+dry (action),WS,dry1,dry1,dry1,dry1,NA,dry.action,5,manual_disambig
+french fries,WS,frnchfrs,frnchfrs,frnchfrs,frnchfrs,NA,french_fries,5,manual_disambig
+garbage,WS,garbage,garbage,garbage,garbage,NA,garbage,5,manual_disambig
+gas station,WS,gasstation,gasstation,gasstation,gasstation,NA,gas_station,5,manual_disambig
+go potty,WS,gopotty,gopotty,gopotty,gopotty,NA,go_potty,5,manual_disambig
+gonna get you,WS,gonnagty,gonnagty,gonnagty,gonnagty,NA,gonna_get_you,5,manual_disambig
+gonna/going to,WS,gonna,gonna,gonna,gonna,NA,gonna,5,manual_disambig
+gotta/got to,WS,gotta,gotta,gotta,gotta,NA,gotta,5,manual_disambig
+green beans,WS,greenbns,greenbns,greenbns,greenbns,NA,green_beans,5,manual_disambig
+hafta/have to,WS,hafta,hafta,hafta,hafta,NA,hafta,5,manual_disambig
+hamburger,WS,hamburgr,hamburgr,hamburgr,hamburgr,NA,hamburger,5,manual_disambig
+hate,WS,hate,hate,hate,hate,NA,hate,5,manual_disambig
+helicopter,WS,helicptr,helicptr,helicptr,helicptr,NA,helicopter,5,manual_disambig
+if,WS,ifconn,ifconn,ifconn,ifconn,NA,if,5,manual_disambig
+in,WG,in,in,in,NA,Talk_in,in,5,manual_disambig
+inside/in,WG/WS,inside,inside,inside,inside,NA,inside,5,manual_disambig
+lawn mower,WS,lawnmowr,lawnmowr,lawnmowr,lawnmowr,NA,lawn_mower,5,manual_disambig
+lemme/let me,WS,lemme,lemme,lemme,lemme,NA,lemme,5,manual_disambig
+mittens,WS,mittens,mittens,mittens,mittens,NA,mittens,5,manual_disambig
+myself,WS,myself,myself,myself,myself,NA,myself,5,manual_disambig
+napkin,WS,napkin,napkin,napkin,napkin,NA,napkin,5,manual_disambig
+need/need to,WS,need,need,need,need,NA,need,5,manual_disambig
+next to,WS,nextto,nextto,nextto,nextto,NA,next_to,5,manual_disambig
+on top of,WS,ontopof,ontopof,ontopof,ontopof,NA,on_top_of,5,manual_disambig
+orange (description),WS,orange2,orange2,orange2,orange2,NA,orange.description,5,manual_disambig
+pancakes,WS,pancake,pancake,pancake,pancake,NA,pancake,5,manual_disambig
+peanut butter,WS,pentbttr,pentbttr,pentbttr,pentbttr,NA,peanut_butter,5,manual_disambig
+penis*,WS,penis,penis,penis,penis,NA,penis,5,manual_disambig
+pet's name,WS,petname,petname,petname,petname,NA,pet_name,5,manual_disambig
+picnic,WS,picnic,picnic,picnic,picnic,NA,picnic,5,manual_disambig
+play dough,WS,playdogh,playdogh,playdogh,playdogh,NA,play_dough,5,manual_disambig
+playground,WS,playgrnd,playgrnd,playgrnd,playgrnd,NA,playground,5,manual_disambig
+popcorn,WS,popcorn,popcorn,popcorn,popcorn,NA,popcorn,5,manual_disambig
+popsicle,WS,popsicle,popsicle,popsicle,popsicle,NA,popsicle,5,manual_disambig
+potato chips,WS,potatchp,potatchp,potatchp,potatchp,NA,potato_chip,5,manual_disambig
+pretend,WS,pretend,pretend,pretend,pretend,NA,pretend,5,manual_disambig
+pretzel,WS,pretzel,pretzel,pretzel,pretzel,NA,pretzel,5,manual_disambig
+pumpkin,WS,pumpkin,pumpkin,pumpkin,pumpkin,NA,pumpkin,5,manual_disambig
+sandwich,WS,sandwich,sandwich,sandwich,sandwich,NA,sandwich,5,manual_disambig
+shopping,WS,shopping,shopping,shopping,shopping,NA,shopping,5,manual_disambig
+sidewalk,WS,sidewalk,sidewalk,sidewalk,sidewalk,NA,sidewalk,5,manual_disambig
+slide (action),WS,slide2,slide2,slide2,slide2,NA,slide.action,5,manual_disambig
+slipper,WS,slipper,slipper,slipper,slipper,NA,slipper,5,manual_disambig
+sneaker,WS,sneaker,sneaker,sneaker,sneaker,NA,sneaker,5,manual_disambig
+snowsuit,WS,snowsuit,snowsuit,snowsuit,snowsuit,NA,snowsuit,5,manual_disambig
+so,WS,soconn,soconn,soconn,soconn,NA,so,5,manual_disambig
+so big,WS,sobig,sobig,sobig,sobig,NA,so_big,5,manual_disambig
+soda/pop,WS,soda,soda,soda,soda,NA,soda,5,manual_disambig
+sprinkler,WS,sprinklr,sprinklr,sprinklr,sprinklr,NA,sprinkler,5,manual_disambig
+strawberry,WS,strwbrry,strwbrry,strwbrry,strwbrry,NA,strawberry,5,manual_disambig
+then,WS,thenconn,thenconn,thenconn,thenconn,NA,then,5,manual_disambig
+this little piggy,WS,thslttlp,thslttlp,thslttlp,thslttlp,NA,this_little_piggy,5,manual_disambig
+tissue/kleenex,WS,tissue,tissue,tissue,tissue,NA,tissue,5,manual_disambig
+to,WS,toprep,toprep,toprep,toprep,NA,to,5,manual_disambig
+try/try to,WS,try,try,try,try,NA,try,5,manual_disambig
+turn around,WS,turnarnd,turnarnd,turnarnd,turnarnd,NA,turn_around,5,manual_disambig
+underpants,WS,undrpnts,undrpnts,undrpnts,undrpnts,NA,underpants,5,manual_disambig
+vagina*,WS,vagina,vagina,vagina,vagina,NA,vagina,5,manual_disambig
+vitamins,WS,vitamins,vitamins,vitamins,vitamins,NA,vitamins,5,manual_disambig
+walker,WS,walker,walker,walker,walker,NA,walker,5,manual_disambig
+washing machine,WS,washingmachine,washingmachine,washingmachine,washingmachine,NA,washing_machine,5,manual_disambig
+windy,WS,windy,windy,windy,windy,NA,windy,5,manual_disambig
+with,WS,withprep,withprep,withprep,withprep,NA,with,5,manual_disambig
+work (action),WS,work2,work2,work2,work2,NA,work.action,5,manual_disambig
+yellow,WS,yellow,yellow,yellow,yellow,NA,yellow,5,manual_disambig
+yesterday,WS,yesterdy,yesterdy,yesterdy,yesterdy,NA,yesterday,5,manual_disambig
+yourself,WS,yourself,yourself,yourself,yourself,NA,yourself,5,manual_disambig
+gimme five,WS,givemefv,givemefv,givemefv,givemefv,NA,NA,4,manual_disambig
+inside,WG,NA,NA,NA,NA,Talk_inside,inside,2,manual_disambig
+give me five,WS,NA,NA,NA,NA,NA,give_me_five,1,babyview_only
+I,WG/WS,i,i,i,i,Talk_i,i,6,
+TV,WG/WS,tv,tv,tv,tv,Talk_tv,tv,6,
+airplane,WG/WS,airplane,airplane,airplane,airplane,Talk_airplane,airplane,6,
+all gone,WG/WS,allgone,allgone,allgone,allgone,Talk_allgone,allgone,6,
+animal,WG/WS,animal,animal,animal,animal,Talk_animal,animal,6,
+apple,WG/WS,apple,apple,apple,apple,Talk_apple,apple,6,
+arm,WG/WS,arm,arm,arm,arm,Talk_arm,arm,6,
+asleep,WG/WS,asleep,asleep,asleep,asleep,Talk_asleep,asleep,6,
+aunt,WG/WS,aunt,aunt,aunt,aunt,Talk_aunt,aunt,6,
+away,WG/WS,away,away,away,away,Talk_away,away,6,
+baby,WG/WS,baby,baby,baby,baby,Talk_baby,baby,6,
+back,WG/WS,back,back,back,back,Talk_back,back,6,
+backyard,WG/WS,backyard,backyard,backyard,backyard,Talk_backyard,backyard,6,
+bad,WG/WS,bad,bad,bad,bad,Talk_bad,bad,6,
+ball,WG/WS,ball,ball,ball,ball,Talk_ball,ball,6,
+balloon,WG/WS,balloon,balloon,balloon,balloon,Talk_balloon,balloon,6,
+banana,WG/WS,banana,banana,banana,banana,Talk_banana,banana,6,
+bath,WG/WS,bath,bath,bath,bath,Talk_bath,bath,6,
+bathroom,WG/WS,bathroom,bathroom,bathroom,bathroom,Talk_bathroom,bathroom,6,
+bathtub,WG/WS,bathtub,bathtub,bathtub,bathtub,Talk_bathtub,bathtub,6,
+beach,WG/WS,beach,beach,beach,beach,Talk_beach,beach,6,
+beads,WG/WS,beads,beads,beads,beads,Talk_beads,beads,6,
+bear,WG/WS,bear,bear,bear,bear,Talk_bear,bear,6,
+bed,WG/WS,bed,bed,bed,bed,Talk_bed,bed,6,
+bedroom,WG/WS,bedroom,bedroom,bedroom,bedroom,Talk_bedroom,bedroom,6,
+bee,WG/WS,bee,bee,bee,bee,Talk_bee,bee,6,
+bib,WG/WS,bib,bib,bib,bib,Talk_bib,bib,6,
+big,WG/WS,big,big,big,big,Talk_big,big,6,
+bird,WG/WS,bird,bird,bird,bird,Talk_bird,bird,6,
+bite,WG/WS,bite,bite,bite,bite,Talk_bite,bite,6,
+blanket,WG/WS,blanket,blanket,blanket,blanket,Talk_blanket,blanket,6,
+block,WG/WS,block,block,block,block,Talk_block,block,6,
+blow,WG/WS,blow,blow,blow,blow,Talk_blow,blow,6,
+blue,WG/WS,blue,blue,blue,blue,Talk_blue,blue,6,
+book,WG/WS,book,book,book,book,Talk_book,book,6,
+boots,WG/WS,boots,boots,boots,boots,Talk_boots,boots,6,
+bottle,WG/WS,bottle,bottle,bottle,bottle,Talk_bottle,bottle,6,
+bowl,WG/WS,bowl,bowl,bowl,bowl,Talk_bowl,bowl,6,
+box,WG/WS,box,box,box,box,Talk_box,box,6,
+boy,WG/WS,boy,boy,boy,boy,Talk_boy,boy,6,
+bread,WG/WS,bread,bread,bread,bread,Talk_bread,bread,6,
+break,WG/WS,break,break,break,break,Talk_break,break,6,
+bring,WG/WS,bring,bring,bring,bring,Talk_bring,bring,6,
+broken,WG/WS,broken,broken,broken,broken,Talk_broken,broken,6,
+broom,WG/WS,broom,broom,broom,broom,Talk_broom,broom,6,
+brother,WG/WS,brother,brother,brother,brother,Talk_brother,brother,6,
+brush,WG/WS,brush,brush,brush,brush,Talk_brush,brush,6,
+bubbles,WG/WS,bubbles,bubbles,bubbles,bubbles,Talk_bubbles,bubbles,6,
+bug,WG/WS,bug,bug,bug,bug,Talk_bug,bug,6,
+bump,WG/WS,bump,bump,bump,bump,Talk_bump,bump,6,
+bunny,WG/WS,bunny,bunny,bunny,bunny,Talk_bunny,bunny,6,
+bus,WG/WS,bus,bus,bus,bus,Talk_bus,bus,6,
+butter,WG/WS,butter,butter,butter,butter,Talk_butter,butter,6,
+button,WG/WS,button,button,button,button,Talk_button,button,6,
+bye,WG/WS,bye,bye,bye,bye,Talk_bye,bye,6,
+cake,WG/WS,cake,cake,cake,cake,Talk_cake,cake,6,
+candy,WG/WS,candy,candy,candy,candy,Talk_candy,candy,6,
+car,WG/WS,car,car,car,car,Talk_car,car,6,
+careful,WG/WS,careful,careful,careful,careful,Talk_careful,careful,6,
+carrots,WG/WS,carrots,carrots,carrots,carrots,Talk_carrots,carrots,6,
+cat,WG/WS,cat,cat,cat,cat,Talk_cat,cat,6,
+cereal,WG/WS,cereal,cereal,cereal,cereal,Talk_cereal,cereal,6,
+chair,WG/WS,chair,chair,chair,chair,Talk_chair,chair,6,
+cheek,WG/WS,cheek,cheek,cheek,cheek,Talk_cheek,cheek,6,
+cheerios,WG/WS,cheerios,cheerios,cheerios,cheerios,Talk_cheerios,cheerios,6,
+cheese,WG/WS,cheese,cheese,cheese,cheese,Talk_cheese,cheese,6,
+child,WG/WS,child,child,child,child,Talk_child,child,6,
+clock,WG/WS,clock,clock,clock,clock,Talk_clock,clock,6,
+close,WG/WS,close,close,close,close,Talk_close,close,6,
+coat,WG/WS,coat,coat,coat,coat,Talk_coat,coat,6,
+coffee,WG/WS,coffee,coffee,coffee,coffee,Talk_coffee,coffee,6,
+cold,WG/WS,cold,cold,cold,cold,Talk_cold,cold,6,
+cookie,WG/WS,cookie,cookie,cookie,cookie,Talk_cookie,cookie,6,
+couch,WG/WS,couch,couch,couch,couch,Talk_couch,couch,6,
+cow,WG/WS,cow,cow,cow,cow,Talk_cow,cow,6,
+cracker,WG/WS,cracker,cracker,cracker,cracker,Talk_cracker,cracker,6,
+crib,WG/WS,crib,crib,crib,crib,Talk_crib,crib,6,
+cry,WG/WS,cry,cry,cry,cry,Talk_cry,cry,6,
+cup,WG/WS,cup,cup,cup,cup,Talk_cup,cup,6,
+cute,WG/WS,cute,cute,cute,cute,Talk_cute,cute,6,
+dance,WG/WS,dance,dance,dance,dance,Talk_dance,dance,6,
+dark,WG/WS,dark,dark,dark,dark,Talk_dark,dark,6,
+day,WG/WS,day,day,day,day,Talk_day,day,6,
+deer,WG/WS,deer,deer,deer,deer,Talk_deer,deer,6,
+diaper,WG/WS,diaper,diaper,diaper,diaper,Talk_diaper,diaper,6,
+dinner,WG/WS,dinner,dinner,dinner,dinner,Talk_dinner,dinner,6,
+dirty,WG/WS,dirty,dirty,dirty,dirty,Talk_dirty,dirty,6,
+dish,WG/WS,dish,dish,dish,dish,Talk_dish,dish,6,
+dog,WG/WS,dog,dog,dog,dog,Talk_dog,dog,6,
+doll,WG/WS,doll,doll,doll,doll,Talk_doll,doll,6,
+donkey,WG/WS,donkey,donkey,donkey,donkey,Talk_donkey,donkey,6,
+door,WG/WS,door,door,door,door,Talk_door,door,6,
+down,WG/WS,down,down,down,down,Talk_down,down,6,
+draw,WG/WS,draw,draw,draw,draw,Talk_draw,draw,6,
+drawer,WG/WS,drawer,drawer,drawer,drawer,Talk_drawer,drawer,6,
+drive,WG/WS,drive,drive,drive,drive,Talk_drive,drive,6,
+duck,WG/WS,duck,duck,duck,duck,Talk_duck,duck,6,
+ear,WG/WS,ear,ear,ear,ear,Talk_ear,ear,6,
+eat,WG/WS,eat,eat,eat,eat,Talk_eat,eat,6,
+egg,WG/WS,egg,egg,egg,egg,Talk_egg,egg,6,
+elephant,WG/WS,elephant,elephant,elephant,elephant,Talk_elephant,elephant,6,
+empty,WG/WS,empty,empty,empty,empty,Talk_empty,empty,6,
+eye,WG/WS,eye,eye,eye,eye,Talk_eye,eye,6,
+face,WG/WS,face,face,face,face,Talk_face,face,6,
+fall,WG/WS,fall,fall,fall,fall,Talk_fall,fall,6,
+fast,WG/WS,fast,fast,fast,fast,Talk_fast,fast,6,
+feed,WG/WS,feed,feed,feed,feed,Talk_feed,feed,6,
+fine,WG/WS,fine,fine,fine,fine,Talk_fine,fine,6,
+finger,WG/WS,finger,finger,finger,finger,Talk_finger,finger,6,
+flower,WG/WS,flower,flower,flower,flower,Talk_flower,flower,6,
+food,WG/WS,food,food,food,food,Talk_food,food,6,
+fork,WG/WS,fork,fork,fork,fork,Talk_fork,fork,6,
+frog,WG/WS,frog,frog,frog,frog,Talk_frog,frog,6,
+garage,WG/WS,garage,garage,garage,garage,Talk_garage,garage,6,
+garden,WG/WS,garden,garden,garden,garden,Talk_garden,garden,6,
+gentle,WG/WS,gentle,gentle,gentle,gentle,Talk_gentle,gentle,6,
+get,WG/WS,get,get,get,get,Talk_get,get,6,
+giraffe,WG/WS,giraffe,giraffe,giraffe,giraffe,Talk_giraffe,giraffe,6,
+girl,WG/WS,girl,girl,girl,girl,Talk_girl,girl,6,
+give,WG/WS,give,give,give,give,Talk_give,give,6,
+glass,WG/WS,glass,glass,glass,glass,Talk_glass,glass,6,
+go,WG/WS,go,go,go,go,Talk_go,go,6,
+good,WG/WS,good,good,good,good,Talk_good,good,6,
+goose,WG/WS,goose,goose,goose,goose,Talk_goose,goose,6,
+hair,WG/WS,hair,hair,hair,hair,Talk_hair,hair,6,
+hand,WG/WS,hand,hand,hand,hand,Talk_hand,hand,6,
+happy,WG/WS,happy,happy,happy,happy,Talk_happy,happy,6,
+hard,WG/WS,hard,hard,hard,hard,Talk_hard,hard,6,
+hat,WG/WS,hat,hat,hat,hat,Talk_hat,hat,6,
+head,WG/WS,head,head,head,head,Talk_head,head,6,
+hello,WG/WS,hello,hello,hello,hello,Talk_hello,hello,6,
+help,WG/WS,help,help,help,help,Talk_help,help,6,
+her,WG/WS,her,her,her,her,Talk_her,her,6,
+hi,WG/WS,hi,hi,hi,hi,Talk_hi,hi,6,
+his,WG/WS,his,his,his,his,Talk_his,his,6,
+hit,WG/WS,hit,hit,hit,hit,Talk_hit,hit,6,
+home,WG/WS,home,home,home,home,Talk_home,home,6,
+horse,WG/WS,horse,horse,horse,horse,Talk_horse,horse,6,
+hot,WG/WS,hot,hot,hot,hot,Talk_hot,hot,6,
+house,WG/WS,house,house,house,house,Talk_house,house,6,
+how,WG/WS,how,how,how,how,Talk_how,how,6,
+hug,WG/WS,hug,hug,hug,hug,Talk_hug,hug,6,
+hungry,WG/WS,hungry,hungry,hungry,hungry,Talk_hungry,hungry,6,
+hurry,WG/WS,hurry,hurry,hurry,hurry,Talk_hurry,hurry,6,
+hurt,WG/WS,hurt,hurt,hurt,hurt,Talk_hurt,hurt,6,
+it,WG/WS,it,it,it,it,Talk_it,it,6,
+jacket,WG/WS,jacket,jacket,jacket,jacket,Talk_jacket,jacket,6,
+jeans,WG/WS,jeans,jeans,jeans,jeans,Talk_jeans,jeans,6,
+juice,WG/WS,juice,juice,juice,juice,Talk_juice,juice,6,
+jump,WG/WS,jump,jump,jump,jump,Talk_jump,jump,6,
+keys,WG/WS,keys,keys,keys,keys,Talk_keys,keys,6,
+kick,WG/WS,kick,kick,kick,kick,Talk_kick,kick,6,
+kitchen,WG/WS,kitchen,kitchen,kitchen,kitchen,Talk_kitchen,kitchen,6,
+kitty,WG/WS,kitty,kitty,kitty,kitty,Talk_kitty,kitty,6,
+knee,WG/WS,knee,knee,knee,knee,Talk_knee,knee,6,
+lady,WG/WS,lady,lady,lady,lady,Talk_lady,lady,6,
+lamb,WG/WS,lamb,lamb,lamb,lamb,Talk_lamb,lamb,6,
+lamp,WG/WS,lamp,lamp,lamp,lamp,Talk_lamp,lamp,6,
+later,WG/WS,later,later,later,later,Talk_later,later,6,
+leg,WG/WS,leg,leg,leg,leg,Talk_leg,leg,6,
+light,WG/WS,light,light,light,light,Talk_light,light,6,
+lion,WG/WS,lion,lion,lion,lion,Talk_lion,lion,6,
+look,WG/WS,look,look,look,look,Talk_look,look,6,
+love,WG/WS,love,love,love,love,Talk_love,love,6,
+lunch,WG/WS,lunch,lunch,lunch,lunch,Talk_lunch,lunch,6,
+man,WG/WS,man,man,man,man,Talk_man,man,6,
+me,WG/WS,me,me,me,me,Talk_me,me,6,
+meat,WG/WS,meat,meat,meat,meat,Talk_meat,meat,6,
+medicine,WG/WS,medicine,medicine,medicine,medicine,Talk_medicine,medicine,6,
+meow,WG/WS,meow,meow,meow,meow,Talk_meow,meow,6,
+milk,WG/WS,milk,milk,milk,milk,Talk_milk,milk,6,
+mine,WG/WS,mine,mine,mine,mine,Talk_mine,mine,6,
+money,WG/WS,money,money,money,money,Talk_money,money,6,
+monkey,WG/WS,monkey,monkey,monkey,monkey,Talk_monkey,monkey,6,
+moo,WG/WS,moo,moo,moo,moo,Talk_moo,moo,6,
+moon,WG/WS,moon,moon,moon,moon,Talk_moon,moon,6,
+more,WG/WS,more,more,more,more,Talk_more,more,6,
+mouse,WG/WS,mouse,mouse,mouse,mouse,Talk_mouse,mouse,6,
+mouth,WG/WS,mouth,mouth,mouth,mouth,Talk_mouth,mouth,6,
+my,WG/WS,my,my,my,my,Talk_my,my,6,
+nap,WG/WS,nap,nap,nap,nap,Talk_nap,nap,6,
+naughty,WG/WS,naughty,naughty,naughty,naughty,Talk_naughty,naughty,6,
+nice,WG/WS,nice,nice,nice,nice,Talk_nice,nice,6,
+night,WG/WS,night,night,night,night,Talk_night,night,6,
+no,WG/WS,no,no,no,no,Talk_no,no,6,
+none,WG/WS,none,none,none,none,Talk_none,none,6,
+noodles,WG/WS,noodles,noodles,noodles,noodles,Talk_noodles,noodles,6,
+nose,WG/WS,nose,nose,nose,nose,Talk_nose,nose,6,
+now,WG/WS,now,now,now,now,Talk_now,now,6,
+off,WG/WS,off,off,off,off,Talk_off,off,6,
+old,WG/WS,old,old,old,old,Talk_old,old,6,
+on,WG/WS,on,on,on,on,Talk_on,on,6,
+open,WG/WS,open,open,open,open,Talk_open,open,6,
+other,WG/WS,other,other,other,other,Talk_other,other,6,
+ouch,WG/WS,ouch,ouch,ouch,ouch,Talk_ouch,ouch,6,
+out,WG/WS,out,out,out,out,Talk_out,out,6,
+oven,WG/WS,oven,oven,oven,oven,Talk_oven,oven,6,
+owl,WG/WS,owl,owl,owl,owl,Talk_owl,owl,6,
+pants,WG/WS,pants,pants,pants,pants,Talk_pants,pants,6,
+paper,WG/WS,paper,paper,paper,paper,Talk_paper,paper,6,
+park,WG/WS,park,park,park,park,Talk_park,park,6,
+party,WG/WS,party,party,party,party,Talk_party,party,6,
+peas,WG/WS,peas,peas,peas,peas,Talk_peas,peas,6,
+pen,WG/WS,pen,pen,pen,pen,Talk_pen,pen,6,
+penguin,WG/WS,penguin,penguin,penguin,penguin,Talk_penguin,penguin,6,
+penny,WG/WS,penny,penny,penny,penny,Talk_penny,penny,6,
+people,WG/WS,people,people,people,people,Talk_people,people,6,
+person,WG/WS,person,person,person,person,Talk_person,person,6,
+pig,WG/WS,pig,pig,pig,pig,Talk_pig,pig,6,
+pizza,WG/WS,pizza,pizza,pizza,pizza,Talk_pizza,pizza,6,
+plant,WG/WS,plant,plant,plant,plant,Talk_plant,plant,6,
+plate,WG/WS,plate,plate,plate,plate,Talk_plate,plate,6,
+play,WG/WS,play,play,play,play,Talk_play,play,6,
+play pen,WG/WS,playpen,playpen,playpen,playpen,Talk_playpen,play_pen,6,
+please,WG/WS,please,please,please,please,Talk_please,please,6,
+pony,WG/WS,pony,pony,pony,pony,Talk_pony,pony,6,
+pool,WG/WS,pool,pool,pool,pool,Talk_pool,pool,6,
+potty,WG/WS,potty,potty,potty,potty,Talk_potty,potty,6,
+pretty,WG/WS,pretty,pretty,pretty,pretty,Talk_pretty,pretty,6,
+pull,WG/WS,pull,pull,pull,pull,Talk_pull,pull,6,
+puppy,WG/WS,puppy,puppy,puppy,puppy,Talk_puppy,puppy,6,
+purse,WG/WS,purse,purse,purse,purse,Talk_purse,purse,6,
+push,WG/WS,push,push,push,push,Talk_push,push,6,
+put,WG/WS,put,put,put,put,Talk_put,put,6,
+radio,WG/WS,radio,radio,radio,radio,Talk_radio,radio,6,
+rain,WG/WS,rain,rain,rain,rain,Talk_rain,rain,6,
+read,WG/WS,read,read,read,read,Talk_read,read,6,
+red,WG/WS,red,red,red,red,Talk_red,red,6,
+ride,WG/WS,ride,ride,ride,ride,Talk_ride,ride,6,
+rock,WG/WS,rock,rock,rock,rock,Talk_rock,rock,6,
+run,WG/WS,run,run,run,run,Talk_run,run,6,
+same,WG/WS,same,same,same,same,Talk_same,same,6,
+say,WG/WS,say,say,say,say,Talk_say,say,6,
+school,WG/WS,school,school,school,school,Talk_school,school,6,
+see,WG/WS,see,see,see,see,Talk_see,see,6,
+sheep,WG/WS,sheep,sheep,sheep,sheep,Talk_sheep,sheep,6,
+shirt,WG/WS,shirt,shirt,shirt,shirt,Talk_shirt,shirt,6,
+shoe,WG/WS,shoe,shoe,shoe,shoe,Talk_shoe,shoe,6,
+shorts,WG/WS,shorts,shorts,shorts,shorts,Talk_shorts,shorts,6,
+shovel,WG/WS,shovel,shovel,shovel,shovel,Talk_shovel,shovel,6,
+show,WG/WS,show,show,show,show,Talk_show,show,6,
+sick,WG/WS,sick,sick,sick,sick,Talk_sick,sick,6,
+sing,WG/WS,sing,sing,sing,sing,Talk_sing,sing,6,
+sink,WG/WS,sink,sink,sink,sink,Talk_sink,sink,6,
+sister,WG/WS,sister,sister,sister,sister,Talk_sister,sister,6,
+sky,WG/WS,sky,sky,sky,sky,Talk_sky,sky,6,
+sleep,WG/WS,sleep,sleep,sleep,sleep,Talk_sleep,sleep,6,
+sleepy,WG/WS,sleepy,sleepy,sleepy,sleepy,Talk_sleepy,sleepy,6,
+smile,WG/WS,smile,smile,smile,smile,Talk_smile,smile,6,
+snow,WG/WS,snow,snow,snow,snow,Talk_snow,snow,6,
+soap,WG/WS,soap,soap,soap,soap,Talk_soap,soap,6,
+sock,WG/WS,sock,sock,sock,sock,Talk_sock,sock,6,
+soft,WG/WS,soft,soft,soft,soft,Talk_soft,soft,6,
+some,WG/WS,some,some,some,some,Talk_some,some,6,
+splash,WG/WS,splash,splash,splash,splash,Talk_splash,splash,6,
+spoon,WG/WS,spoon,spoon,spoon,spoon,Talk_spoon,spoon,6,
+stairs,WG/WS,stairs,stairs,stairs,stairs,Talk_stairs,stairs,6,
+star,WG/WS,star,star,star,star,Talk_star,star,6,
+stop,WG/WS,stop,stop,stop,stop,Talk_stop,stop,6,
+store,WG/WS,store,store,store,store,Talk_store,store,6,
+stove,WG/WS,stove,stove,stove,stove,Talk_stove,stove,6,
+stroller,WG/WS,stroller,stroller,stroller,stroller,Talk_stroller,stroller,6,
+sun,WG/WS,sun,sun,sun,sun,Talk_sun,sun,6,
+sweater,WG/WS,sweater,sweater,sweater,sweater,Talk_sweater,sweater,6,
+swim,WG/WS,swim,swim,swim,swim,Talk_swim,swim,6,
+table,WG/WS,table,table,table,table,Talk_table,table,6,
+take,WG/WS,take,take,take,take,Talk_take,take,6,
+teacher,WG/WS,teacher,teacher,teacher,teacher,Talk_teacher,teacher,6,
+that,WG/WS,that,that,that,that,Talk_that,that,6,
+there,WG/WS,there,there,there,there,Talk_there,there,6,
+this,WG/WS,this,this,this,this,Talk_this,this,6,
+throw,WG/WS,throw,throw,throw,throw,Talk_throw,throw,6,
+tickle,WG/WS,tickle,tickle,tickle,tickle,Talk_tickle,tickle,6,
+tiger,WG/WS,tiger,tiger,tiger,tiger,Talk_tiger,tiger,6,
+tired,WG/WS,tired,tired,tired,tired,Talk_tired,tired,6,
+toast,WG/WS,toast,toast,toast,toast,Talk_toast,toast,6,
+today,WG/WS,today,today,today,today,Talk_today,today,6,
+toe,WG/WS,toe,toe,toe,toe,Talk_toe,toe,6,
+tongue,WG/WS,tongue,tongue,tongue,tongue,Talk_tongue,tongue,6,
+tooth,WG/WS,tooth,tooth,tooth,tooth,Talk_tooth,tooth,6,
+touch,WG/WS,touch,touch,touch,touch,Talk_touch,touch,6,
+towel,WG/WS,towel,towel,towel,towel,Talk_towel,towel,6,
+train,WG/WS,train,train,train,train,Talk_train,train,6,
+trash,WG/WS,trash,trash,trash,trash,Talk_trash,trash,6,
+tree,WG/WS,tree,tree,tree,tree,Talk_tree,tree,6,
+truck,WG/WS,truck,truck,truck,truck,Talk_truck,truck,6,
+tummy,WG/WS,tummy,tummy,tummy,tummy,Talk_tummy,tummy,6,
+turkey,WG/WS,turkey,turkey,turkey,turkey,Talk_turkey,turkey,6,
+turtle,WG/WS,turtle,turtle,turtle,turtle,Talk_turtle,turtle,6,
+uncle,WG/WS,uncle,uncle,uncle,uncle,Talk_uncle,uncle,6,
+vacuum,WG/WS,vacuum,vacuum,vacuum,vacuum,Talk_vacuum,vacuum,6,
+vroom,WG/WS,vroom,vroom,vroom,vroom,Talk_vroom,vroom,6,
+wait,WG/WS,wait,wait,wait,wait,Talk_wait,wait,6,
+walk,WG/WS,walk,walk,walk,walk,Talk_walk,walk,6,
+wash,WG/WS,wash,wash,wash,wash,Talk_wash,wash,6,
+wet,WG/WS,wet,wet,wet,wet,Talk_wet,wet,6,
+what,WG/WS,what,what,what,what,Talk_what,what,6,
+when,WG/WS,when,when,when,when,Talk_when,when,6,
+where,WG/WS,where,where,where,where,Talk_where,where,6,
+who,WG/WS,who,who,who,who,Talk_who,who,6,
+why,WG/WS,why,why,why,why,Talk_why,why,6,
+window,WG/WS,window,window,window,window,Talk_window,window,6,
+wipe,WG/WS,wipe,wipe,wipe,wipe,Talk_wipe,wipe,6,
+write,WG/WS,write,write,write,write,Talk_write,write,6,
+yes,WG/WS,yes,yes,yes,yes,Talk_yes,yes,6,
+you,WG/WS,you,you,you,you,Talk_you,you,6,
+your,WG/WS,your,your,your,your,Talk_your,your,6,
+zipper,WG/WS,zipper,zipper,zipper,zipper,Talk_zipper,zipper,6,
+zoo,WG/WS,zoo,zoo,zoo,zoo,Talk_zoo,zoo,6,
+a,WS,a,a,a,a,NA,a,5,
+a lot,WS,alot,alot,alot,alot,NA,a_lot,5,
+about,WS,about,about,about,about,NA,about,5,
+above,WS,above,above,above,above,NA,above,5,
+after,WS,after,after,after,after,NA,after,5,
+am,WS,am,am,am,am,NA,am,5,
+an,WS,an,an,an,an,NA,an,5,
+ankle,WS,ankle,ankle,ankle,ankle,NA,ankle,5,
+ant,WS,ant,ant,ant,ant,NA,ant,5,
+any,WS,any,any,any,any,NA,any,5,
+are,WS,are,are,are,are,NA,are,5,
+around,WS,around,around,around,around,NA,around,5,
+awake,WS,awake,awake,awake,awake,NA,awake,5,
+basement,WS,basement,basement,basement,basement,NA,basement,5,
+basket,WS,basket,basket,basket,basket,NA,basket,5,
+bat,WS,bat,bat,bat,bat,NA,bat,5,
+be,WS,be,be,be,be,NA,be,5,
+beans,WS,beans,beans,beans,beans,NA,beans,5,
+because,WS,because,because,because,because,NA,because,5,
+before,WS,before,before,before,before,NA,before,5,
+behind,WS,behind,behind,behind,behind,NA,behind,5,
+belt,WS,belt,belt,belt,belt,NA,belt,5,
+bench,WS,bench,bench,bench,bench,NA,bench,5,
+beside,WS,beside,beside,beside,beside,NA,beside,5,
+better,WS,better,better,better,better,NA,better,5,
+black,WS,black,black,black,black,NA,black,5,
+boat,WS,boat,boat,boat,boat,NA,boat,5,
+brown,WS,brown,brown,brown,brown,NA,brown,5,
+bucket,WS,bucket,bucket,bucket,bucket,NA,bucket,5,
+build,WS,build,build,build,build,NA,build,5,
+but,WS,but,but,but,but,NA,but,5,
+buy,WS,buy,buy,buy,buy,NA,buy,5,
+camera,WS,camera,camera,camera,camera,NA,camera,5,
+carry,WS,carry,carry,carry,carry,NA,carry,5,
+catch,WS,catch,catch,catch,catch,NA,catch,5,
+chalk,WS,chalk,chalk,chalk,chalk,NA,chalk,5,
+chase,WS,chase,chase,chase,chase,NA,chase,5,
+chin,WS,chin,chin,chin,chin,NA,chin,5,
+circus,WS,circus,circus,circus,circus,NA,circus,5,
+clap,WS,clap,clap,clap,clap,NA,clap,5,
+climb,WS,climb,climb,climb,climb,NA,climb,5,
+closet,WS,closet,closet,closet,closet,NA,closet,5,
+cloud,WS,cloud,cloud,cloud,cloud,NA,cloud,5,
+clown,WS,clown,clown,clown,clown,NA,clown,5,
+coke,WS,coke,coke,coke,coke,NA,coke,5,
+cook,WS,cook,cook,cook,cook,NA,cook,5,
+corn,WS,corn,corn,corn,corn,NA,corn,5,
+could,WS,could,could,could,could,NA,could,5,
+country,WS,country,country,country,country,NA,country_word,5,
+cover,WS,cover,cover,cover,cover,NA,cover,5,
+cowboy,WS,cowboy,cowboy,cowboy,cowboy,NA,cowboy,5,
+crayon,WS,crayon,crayon,crayon,crayon,NA,crayon,5,
+cut,WS,cut,cut,cut,cut,NA,cut,5,
+do,WS,do,do,do,do,NA,do,5,
+doctor,WS,doctor,doctor,doctor,doctor,NA,doctor,5,
+does,WS,does,does,does,does,NA,does,5,
+donut,WS,donut,donut,donut,donut,NA,donut,5,
+drop,WS,drop,drop,drop,drop,NA,drop,5,
+dryer,WS,dryer,dryer,dryer,dryer,NA,dryer,5,
+dump,WS,dump,dump,dump,dump,NA,dump,5,
+each,WS,each,each,each,each,NA,each,5,
+every,WS,every,every,every,every,NA,every,5,
+farm,WS,farm,farm,farm,farm,NA,farm,5,
+find,WS,find,find,find,find,NA,find,5,
+fireman,WS,fireman,fireman,fireman,fireman,NA,fireman,5,
+first,WS,first,first,first,first,NA,first,5,
+fit,WS,fit,fit,fit,fit,NA,fit,5,
+fix,WS,fix,fix,fix,fix,NA,fix,5,
+flag,WS,flag,flag,flag,flag,NA,flag,5,
+for,WS,for,for,for,for,NA,for,5,
+friend,WS,friend,friend,friend,friend,NA,friend,5,
+full,WS,full,full,full,full,NA,full,5,
+game,WS,game,game,game,game,NA,game,5,
+gloves,WS,gloves,gloves,gloves,gloves,NA,gloves,5,
+glue,WS,glue,glue,glue,glue,NA,glue,5,
+grapes,WS,grapes,grapes,grapes,grapes,NA,grapes,5,
+grass,WS,grass,grass,grass,grass,NA,grass,5,
+green,WS,green,green,green,green,NA,green,5,
+gum,WS,gum,gum,gum,gum,NA,gum,5,
+have,WS,have,have,have,have,NA,have,5,
+he,WS,he,he,he,he,NA,he,5,
+hear,WS,hear,hear,hear,hear,NA,hear,5,
+heavy,WS,heavy,heavy,heavy,heavy,NA,heavy,5,
+hen,WS,hen,hen,hen,hen,NA,hen,5,
+here,WS,here,here,here,here,NA,here,5,
+hers,WS,hers,hers,hers,hers,NA,hers,5,
+hide,WS,hide,hide,hide,hide,NA,hide,5,
+high,WS,high,high,high,high,NA,high,5,
+him,WS,him,him,him,him,NA,him,5,
+hold,WS,hold,hold,hold,hold,NA,hold,5,
+hose,WS,hose,hose,hose,hose,NA,hose,5,
+ice,WS,ice,ice,ice,ice,NA,ice,5,
+into,WS,into,into,into,into,NA,into,5,
+is,WS,is,is,is,is,NA,is,5,
+jar,WS,jar,jar,jar,jar,NA,jar,5,
+jello,WS,jello,jello,jello,jello,NA,jello,5,
+jelly,WS,jelly,jelly,jelly,jelly,NA,jelly,5,
+knife,WS,knife,knife,knife,knife,NA,knife,5,
+knock,WS,knock,knock,knock,knock,NA,knock,5,
+ladder,WS,ladder,ladder,ladder,ladder,NA,ladder,5,
+last,WS,last,last,last,last,NA,last,5,
+lick,WS,lick,lick,lick,lick,NA,lick,5,
+like,WS,like,like,like,like,NA,like,5,
+lips,WS,lips,lips,lips,lips,NA,lips,5,
+listen,WS,listen,listen,listen,listen,NA,listen,5,
+lollipop,WS,lollipop,lollipop,lollipop,lollipop,NA,lollipop,5,
+long,WS,long,long,long,long,NA,long,5,
+loud,WS,loud,loud,loud,loud,NA,loud,5,
+mad,WS,mad,mad,mad,mad,NA,mad,5,
+mailman,WS,mailman,mailman,mailman,mailman,NA,mailman,5,
+make,WS,make,make,make,make,NA,make,5,
+melon,WS,melon,melon,melon,melon,NA,melon,5,
+moose,WS,moose,moose,moose,moose,NA,moose,5,
+mop,WS,mop,mop,mop,mop,NA,mop,5,
+movie,WS,movie,movie,movie,movie,NA,movie,5,
+much,WS,much,much,much,much,NA,much,5,
+muffin,WS,muffin,muffin,muffin,muffin,NA,muffin,5,
+nail,WS,nail,nail,nail,nail,NA,nail,5,
+new,WS,new,new,new,new,NA,new,5,
+noisy,WS,noisy,noisy,noisy,noisy,NA,noisy,5,
+nurse,WS,nurse,nurse,nurse,nurse,NA,nurse,5,
+nuts,WS,nuts,nuts,nuts,nuts,NA,nuts,5,
+of,WS,of,of,of,of,NA,of,5,
+our,WS,our,our,our,our,NA,our,5,
+over,WS,over,over,over,over,NA,over,5,
+paint,WS,paint,paint,paint,paint,NA,paint,5,
+pencil,WS,pencil,pencil,pencil,pencil,NA,pencil,5,
+pick,WS,pick,pick,pick,pick,NA,pick,5,
+pickle,WS,pickle,pickle,pickle,pickle,NA,pickle,5,
+police,WS,police,police,police,police,NA,police,5,
+poor,WS,poor,poor,poor,poor,NA,poor,5,
+porch,WS,porch,porch,porch,porch,NA,porch,5,
+potato,WS,potato,potato,potato,potato,NA,potato,5,
+pour,WS,pour,pour,pour,pour,NA,pour,5,
+present,WS,present,present,present,present,NA,present,5,
+pudding,WS,pudding,pudding,pudding,pudding,NA,pudding,5,
+puzzle,WS,puzzle,puzzle,puzzle,puzzle,NA,puzzle,5,
+quiet,WS,quiet,quiet,quiet,quiet,NA,quiet,5,
+rip,WS,rip,rip,rip,rip,NA,rip,5,
+roof,WS,roof,roof,roof,roof,NA,roof,5,
+room,WS,room,room,room,room,NA,room,5,
+rooster,WS,rooster,rooster,rooster,rooster,NA,rooster,5,
+sad,WS,sad,sad,sad,sad,NA,sad,5,
+salt,WS,salt,salt,salt,salt,NA,salt,5,
+sandbox,WS,sandbox,sandbox,sandbox,sandbox,NA,sandbox,5,
+sauce,WS,sauce,sauce,sauce,sauce,NA,sauce,5,
+scarf,WS,scarf,scarf,scarf,scarf,NA,scarf,5,
+shake,WS,shake,shake,shake,shake,NA,shake,5,
+share,WS,share,share,share,share,NA,share,5,
+she,WS,she,she,she,she,NA,she,5,
+shoulder,WS,shoulder,shoulder,shoulder,shoulder,NA,shoulder,5,
+shower,WS,shower,shower,shower,shower,NA,shower,5,
+sit,WS,sit,sit,sit,sit,NA,sit,5,
+skate,WS,skate,skate,skate,skate,NA,skate,5,
+sled,WS,sled,sled,sled,sled,NA,sled,5,
+slow,WS,slow,slow,slow,slow,NA,slow,5,
+snack,WS,snack,snack,snack,snack,NA,snack,5,
+snowman,WS,snowman,snowman,snowman,snowman,NA,snowman,5,
+sofa,WS,sofa,sofa,sofa,sofa,NA,sofa,5,
+soup,WS,soup,soup,soup,soup,NA,soup,5,
+spill,WS,spill,spill,spill,spill,NA,spill,5,
+stand,WS,stand,stand,stand,stand,NA,stand,5,
+stay,WS,stay,stay,stay,stay,NA,stay,5,
+stick,WS,stick,stick,stick,stick,NA,stick,5,
+sticky,WS,sticky,sticky,sticky,sticky,NA,sticky,5,
+stone,WS,stone,stone,stone,stone,NA,stone,5,
+story,WS,story,story,story,story,NA,story,5,
+street,WS,street,street,street,street,NA,street,5,
+stuck,WS,stuck,stuck,stuck,stuck,NA,stuck,5,
+sweep,WS,sweep,sweep,sweep,sweep,NA,sweep,5,
+talk,WS,talk,talk,talk,talk,NA,talk,5,
+tape,WS,tape,tape,tape,tape,NA,tape,5,
+taste,WS,taste,taste,taste,taste,NA,taste,5,
+tear,WS,tear,tear,tear,tear,NA,tear,5,
+the,WS,the,the,the,the,NA,the,5,
+their,WS,their,their,their,their,NA,their,5,
+them,WS,them,them,them,them,NA,them,5,
+these,WS,these,these,these,these,NA,these,5,
+they,WS,they,they,they,they,NA,they,5,
+think,WS,think,think,think,think,NA,think,5,
+those,WS,those,those,those,those,NA,those,5,
+tights,WS,tights,tights,tights,tights,NA,tights,5,
+time,WS,time,time,time,time,NA,time,5,
+tiny,WS,tiny,tiny,tiny,tiny,NA,tiny,5,
+too,WS,too,too,too,too,NA,too,5,
+tractor,WS,tractor,tractor,tractor,tractor,NA,tractor,5,
+tray,WS,tray,tray,tray,tray,NA,tray,5,
+tricycle,WS,tricycle,tricycle,tricycle,tricycle,NA,tricycle,5,
+tuna,WS,tuna,tuna,tuna,tuna,NA,tuna,5,
+us,WS,us,us,us,us,NA,us,5,
+vanilla,WS,vanilla,vanilla,vanilla,vanilla,NA,vanilla,5,
+wake,WS,wake,wake,wake,wake,NA,wake,5,
+was,WS,was,was,was,was,NA,was,5,
+we,WS,we,we,we,we,NA,we,5,
+were,WS,were,were,were,were,NA,were,5,
+which,WS,which,which,which,which,NA,which,5,
+white,WS,white,white,white,white,NA,white,5,
+will,WS,will,will,will,will,NA,will,5,
+wind,WS,wind,wind,wind,wind,NA,wind,5,
+wish,WS,wish,wish,wish,wish,NA,wish,5,
+wolf,WS,wolf,wolf,wolf,wolf,NA,wolf,5,
+woods,WS,woods,woods,woods,woods,NA,woods,5,
+would,WS,would,would,would,would,NA,would,5,
+yard,WS,yard,yard,yard,yard,NA,yard,5,
+yogurt,WS,yogurt,yogurt,yogurt,yogurt,NA,yogurt,5,
+zebra,WS,zebra,zebra,zebra,zebra,NA,zebra,5,

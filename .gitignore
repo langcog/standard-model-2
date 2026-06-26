@@ -148,3 +148,7 @@ studies/llm/llm_experiments_files/
 fits/csvs_*/
 # Stray dated .rds backups
 *.rds.*bak
+
+# Harmonized CDI union (47MB; regenerable via model/scripts/build_harmonized_cdi.R;
+# duplicates the tracked per-study *_cdi_items_long.csv). Small harmonized artifacts ARE tracked.
+data/harmonized/cdi_item_level.csv

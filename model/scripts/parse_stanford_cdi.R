@@ -334,10 +334,13 @@ read_one <- function(path, form_label, age_override = NA_real_,
   d_long <- bind_cols(d_meta, d_vocab) %>%
     pivot_longer(-c(id, study, form, age, sex),
                  names_to = "short", values_to = "raw") %>%
-    mutate(produces = if_else(
-      !is.na(raw) &
-        tolower(trimws(as.character(raw))) %in% prod_codes, 1L, 0L)) %>%
-    select(-raw)
+    mutate(rawn = tolower(trimws(as.character(raw))),
+           produces = if_else(!is.na(raw) & rawn %in% prod_codes, 1L, 0L),
+           # WG also records comprehension (1 = understands, 2 = understands+says);
+           # WS is production-only, so comprehension is undefined (NA).
+           comprehends = if (form_label == "WG")
+             if_else(!is.na(raw) & rawn %in% c("1", "2"), 1L, 0L) else NA_integer_) %>%
+    select(-raw, -rawn)
   attr(d_long, "form_label") <- form_label
   d_long
 }
@@ -404,7 +407,7 @@ cdi_long <- bind_rows(
   rename(lab_subject_id = id, item = item_definition) %>%
   mutate(age = suppressWarnings(as.integer(age))) %>%
   filter(!is.na(age), !is.na(lab_subject_id), nzchar(lab_subject_id)) %>%
-  select(lab_subject_id, study, age, form, sex, item, produces,
+  select(lab_subject_id, study, age, form, sex, item, produces, comprehends,
          short, mapping_status = status, source_file)
 
 # -------------------------------------------------------------------- #

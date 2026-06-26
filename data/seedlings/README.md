@@ -1,10 +1,12 @@
 # SEEDLingS raw data
 
-Two source streams:
+Three source streams:
 1. **Per-recording LENA + per-child CDI totals** from the Egan-Dailey
    & Bergelson (2025) paper.
 2. **Item-level CDI** from a separate Bergelson lab repository
    (Dong & Bergelson 2026 working materials).
+3. **Looking-while-listening (LWL) eyetracking** from Zhu et al. (2026) —
+   the source of the processing (reaction-time) channel.
 
 ## Provenance
 
@@ -27,10 +29,27 @@ Two source streams:
   `CDIcomp`, `CDIprod`, `Date_Completed`, and a
   `SeedlingsFinalSample` flag. Longitudinal: rows for every monthly
   admin from ~6 to ~18 mo per child.
-- **Caveat (still being verified):** the `subj` column appears to
-  use sequential integer IDs that should match the "01".."44"
-  convention in `seedlings_data.csv`. Mike is confirming this
-  alignment before we trust the linkage.
+- `model/scripts/parse_seedlings_cdi.R` pivots this into the long
+  item-level `cdi_items_long.csv` (mapping the integer `subj` to the
+  `01`..`44` convention used in `seedlings_data.csv`).
+
+### Looking-while-listening (LWL) eyetracking — the processing channel
+- `raw_eyetracking_data/HaT/{fix_rep,mes_rep}_eighttoeighteenmonth_7-26-2016.xls`
+  — hand-tailored ("HaT") EyeLink fixation + message reports, 8-18 mo.
+- Publication: **Zhu, L. Z., Amatuni, A., Egan-Dailey, S., Garrison, H.,
+  Kalenkovich, E., Koorathota, S., Righter, L., Tor, S., & Bergelson, E.
+  (2026). Experience Shapes Early Noun Comprehension from 8-18 Months: The
+  Roles of Word Frequency and Referent Familiarity.** PsyArXiv preprint.
+  <https://osf.io/preprints/psyarxiv/zchbj_v2>
+- Study 1 (n=44, the SEEDLingS cohort) ran hand-tailored LWL eyetracking
+  every two months from 8-18 mo. `model/scripts/prepare_seedlings_lwl_rt.R`
+  derives a per-session Fernald-style reaction time from these reports
+  (QC'd against the paper's trial-funnel + accuracy targets, see
+  `journal/notes/seedlings_lwl_qc_targets.md`) → `seedlings_lwl_rt.csv`
+  (`dataset_name = seedlings_zhu`), which enters the io-proc model as the
+  child-level RT (processing) channel.
+- `raw_eyetracking_data/DiSCo/` holds reports from a second eyetracking
+  paradigm in the same study; not currently used.
 
 ## Files
 
@@ -40,6 +59,10 @@ Two source streams:
 | `seedlings_data.csv` | per-child summary used in Egan-Dailey 2025: aggregated input measures + CDI totals + later assessments |
 | `all_vocab.csv` | per-child CDI totals at 8/12/18 months + later language scores |
 | `cdi_ht_raw_temp.csv` | wide-format CDI item-level data, longitudinal (Dong & Bergelson 2026 working file) |
+| `cdi_items_long.csv` | long item-level CDI — output of `parse_seedlings_cdi.R` |
+| `raw_eyetracking_data/HaT/*.xls` | hand-tailored LWL EyeLink fixation + message reports (Zhu et al. 2026, Study 1) |
+| `raw_eyetracking_data/DiSCo/*.Rds` | second-paradigm eyetracking reports (not used) |
+| `seedlings_lwl_rt.csv` | per-session Fernald RT derived from the HaT reports — output of `prepare_seedlings_lwl_rt.R` |
 
 ## What's NOT here
 
@@ -52,7 +75,10 @@ Two source streams:
 
 ## Pipeline
 
-`model/scripts/prepare_seedlings.R` consumes `lena_data.csv` for
-per-recording `log_r_obs` and (once subject-ID alignment is verified)
-will pivot `cdi_ht_raw_temp.csv` into the long item-level format
-`cdi_items_long.csv` expected by the io-model bundle builder.
+- `model/scripts/parse_seedlings_cdi.R` → `cdi_items_long.csv`
+  (+ `cdi_seedlings_short_code_map.csv` audit).
+- `model/scripts/prepare_seedlings_lwl_rt.R` → `seedlings_lwl_rt.csv`
+  (the RT/processing channel).
+- `model/scripts/prepare_seedlings.R` consumes `lena_data.csv` for
+  per-recording `log_r_obs` and `cdi_items_long.csv` for the item-level
+  vocabulary, building the SEEDLingS bundle for the io-model.
