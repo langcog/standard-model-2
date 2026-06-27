@@ -10,23 +10,23 @@ suppressPackageStartupMessages({library(here); library(dplyr); library(tidyr); l
 collapse_codes <- function(x) paste(sort(unique(x[!is.na(x)])), collapse = ";")
 
 ## stanford cohorts (AM2018/FM2012/FMW2013): item -> raw short, + manual-disambig flag
-st <- read_csv(here("data/peekbank/stanford_cdi_items_long.csv"), show_col_types = FALSE) %>%
+st <- read_csv(here("data/intermediates/stanford_cdi_items_long.csv"), show_col_types = FALSE) %>%
   mutate(ds = recode(study, totlot3 = "AM2018", totlot2 = "FM2012", tlo = "FMW2013")) %>%
   group_by(ds, item) %>%
   summarise(code = collapse_codes(short), manual = any(mapping_status == "manual_disambig"), .groups = "drop")
 
 ## totlot (FPM2006)
-tl <- read_csv(here("data/peekbank/totlot_cdi_items_long.csv"), show_col_types = FALSE) %>%
+tl <- read_csv(here("data/intermediates/totlot_cdi_items_long.csv"), show_col_types = FALSE) %>%
   group_by(item) %>%
   summarise(code = collapse_codes(short), manual = any(mapping_status == "manual_disambig"), .groups = "drop") %>%
   mutate(ds = "FPM2006")
 
 ## seedlings: Talk_ short per canonical item (from the seedlings short-code map)
-se <- read_csv(here("data/seedlings/cdi_seedlings_short_code_map.csv"), show_col_types = FALSE) %>%
+se <- read_csv(here("data/raw/seedlings/cdi_seedlings_short_code_map.csv"), show_col_types = FALSE) %>%
   transmute(ds = "SEEDLingS", item = item_definition, code = short, manual = status == "manual_disambig")
 
 ## babyview: webCDI item-key per canonical production-vocab item (+ homonym flag)
-bv <- read_csv(here("data/babyview/cdi_items_long.csv"), show_col_types = FALSE) %>%
+bv <- read_csv(here("data/raw/babyview/cdi_items_long.csv"), show_col_types = FALSE) %>%
   filter(is_production_vocab) %>%
   group_by(item) %>%
   summarise(code = collapse_codes(item_key), homonym = !any(item_canonical), .groups = "drop") %>%

@@ -12,20 +12,20 @@ PC <- c(adams_marchman_2018 = "AM2018", fernald_marchman_2012 = "FM2012", fmw_20
 
 ## ---------- INPUT ----------
 ## AM2018 (TL3): LENA AWC/hr at 16 + 18 mo
-am <- read_csv(here("data/peekbank/lena_am2018_fmw2013.csv"), show_col_types = FALSE) %>%
+am <- read_csv(here("data/raw/AM2018/lena_am2018_fmw2013.csv"), show_col_types = FALSE) %>%
   filter(Study == "TL3") %>%
   transmute(child_id = as.character(SubjectID1), a16 = AGE16M, r16 = AWCHr16M, a18 = AGE18M, r18 = AWCHr18M) %>%
   pivot_longer(-child_id, names_to = c(".value", "tp"), names_pattern = "([ar])(16|18)") %>%
   transmute(paper_code = "AM2018", cohort = "totlot3", child_id, age = a, input_rate = r)
 ## FMW2013 (TLO + ELENA): LENA AWC/hr at 18 + 24 mo
-fmw <- read_csv(here("data/peekbank/fmw_2013/TLOELENA_LENA_1824.csv"), show_col_types = FALSE) %>%
+fmw <- read_csv(here("data/raw/FMW2013/TLOELENA_LENA_1824.csv"), show_col_types = FALSE) %>%
   filter(Study %in% c("TLO", "ELENA")) %>%
   transmute(cohort = ifelse(Study == "ELENA", "elena", "tlo"), child_id = as.character(SubjectID1),
             a18 = AGE18M, r18 = AWCHr18M, a24 = AGE24M, r24 = AWCHr24M) %>%
   pivot_longer(c(a18, r18, a24, r24), names_to = c(".value", "tp"), names_pattern = "([ar])(18|24)") %>%
   transmute(paper_code = "FMW2013", cohort, child_id, age = a, input_rate = r)
 ## SEEDLingS: monthly LENA AWC/hr
-seed <- read_csv(here("data/seedlings/lena_data.csv"), show_col_types = FALSE) %>%
+seed <- read_csv(here("data/raw/seedlings/lena_data.csv"), show_col_types = FALSE) %>%
   transmute(paper_code = "SEEDLingS", cohort = "seedlings", child_id = as.character(subj),
             age = month, input_rate = awc_perhr)
 lena <- bind_rows(am, fmw, seed) %>% filter(!is.na(input_rate), input_rate > 0, !is.na(age)) %>%
@@ -45,13 +45,13 @@ write_csv(input, here("data/harmonized/input_level.csv"))
 
 ## ---------- LWL (session level) ----------
 OURS <- c("adams_marchman_2018", "fernald_marchman_2012", "fmw_2013", "fernald_totlot")
-admins <- readRDS(here("data/peekbank/_pb2026_admins.rds")) %>%
+admins <- readRDS(here("data/raw/peekbank/_pb2026_admins.rds")) %>%
   distinct(dataset_name, subject_id, administration_id, lab_subject_id)
-pk <- readRDS(here("data/peekbank/1_d_sub.Rds")) %>% filter(dataset_name %in% OURS) %>%
+pk <- readRDS(here("data/raw/peekbank/1_d_sub.Rds")) %>% filter(dataset_name %in% OURS) %>%
   left_join(admins, by = c("dataset_name", "subject_id", "administration_id")) %>%
   transmute(dataset = dataset_name, child_id = as.character(lab_subject_id), age,
             log_rt, rt_ms = rt, accuracy = long_window_accuracy, n_trials_rt)
-sd <- read_csv(here("data/seedlings/seedlings_lwl_rt.csv"), show_col_types = FALSE) %>%
+sd <- read_csv(here("data/raw/seedlings/seedlings_lwl_rt.csv"), show_col_types = FALSE) %>%
   transmute(dataset = "seedlings", child_id = as.character(lab_subject_id), age = lwl_age,
             log_rt = lwl_log_rt, rt_ms = exp(lwl_log_rt), accuracy = NA_real_, n_trials_rt = NA_integer_)
 lwl <- bind_rows(pk, sd) %>%

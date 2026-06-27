@@ -132,7 +132,7 @@ cat(sprintf("input channel: V=%d (proc_dp %d + BV/SE %d + FMW2013-salvage %d). s
 ## subject_id (NOT the dense io ii). The model reads RT-study via
 ## study_of_child[lwl_to_child], so these obs auto-route to tau_s[6]/psi_s[6];
 ## no Stan change. Moves SEEDLingS kids input-only -> both-channel.
-se_rt  <- readr::read_csv("data/seedlings/seedlings_lwl_rt.csv", show_col_types = FALSE)
+se_rt  <- readr::read_csv("data/raw/seedlings/seedlings_lwl_rt.csv", show_col_types = FALSE)
 se_map <- cids %>% filter(study == "SEEDLingS") %>% select(subject_id, ii)
 se_lwl <- se_rt %>% inner_join(se_map, by = c("lab_subject_id" = "subject_id")) %>%
   transmute(ii, lwl_age, lwl_log_rt)

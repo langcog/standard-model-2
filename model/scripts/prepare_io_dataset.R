@@ -32,24 +32,25 @@ args <- commandArgs(trailingOnly = TRUE)
 DATASET <- if (length(args) >= 1) tolower(args[1]) else "am2018"
 spec <- switch(DATASET,
   am2018  = list(cdi_studies = "totlot3", cdi_files = "stanford_cdi_items_long.csv",
-                 lena_file = "lena_am2018_fmw2013.csv", lena_study = "TL3", lena_ages = c(16, 18),
+                 lena_file = "AM2018/lena_am2018_fmw2013.csv", lena_study = "TL3", lena_ages = c(16, 18),
                  language = "English (AM2018)"),
   # FMW2013 = both batches: TLO (Outreach, stanford CDI 18/24/30) + ELENA (Stanford,
   # new 4-digit CDI ~24mo). LENA from the cleaned 2-timepoint file (18+24mo, both batches).
   fmw2013 = list(cdi_studies = c("tlo", "elena"),
                  cdi_files = c("stanford_cdi_items_long.csv", "elena_cdi_items_long.csv"),
-                 lena_file = "fmw_2013/TLOELENA_LENA_1824.csv", lena_study = c("TLO", "ELENA"),
+                 lena_file = "FMW2013/TLOELENA_LENA_1824.csv", lena_study = c("TLO", "ELENA"),
                  lena_ages = c(18, 24), language = "English (FMW2013)"),
   stop("dataset must be am2018 or fmw2013")
 )
 cat(sprintf("=== Preparing IO bundle: %s (CDI=%s, LENA=%s) ===\n",
             DATASET, paste(spec$cdi_studies, collapse="+"), paste(spec$lena_study, collapse="+")))
 
-PK_DIR  <- file.path(PROJECT_ROOT, "data/peekbank")
+INT_DIR <- file.path(PROJECT_ROOT, "data/intermediates")
+RAW_DIR <- file.path(PROJECT_ROOT, "data/raw")
 OUT_RDS <- file.path(PATHS$fits_dir, sprintf("io_%s_subset_data.rds", DATASET))
 
 ## ---- 1. CDI (WG+WS) for this study --------------------------------
-.rd_cdi <- function(f) read_csv(file.path(PK_DIR, f), show_col_types = FALSE) |>
+.rd_cdi <- function(f) read_csv(file.path(INT_DIR, f), show_col_types = FALSE) |>
   transmute(lab_subject_id = as.character(lab_subject_id), study = as.character(study),
             age = as.integer(age), form = as.character(form), item = as.character(item),
             produces = as.integer(produces))
@@ -64,7 +65,7 @@ cat(sprintf("  CDI: %d rows, %d kids, forms %s, ages %d-%d\n",
 ## ---- 2. LENA input -> per-recording log_r_obs ---------------------
 ## Wide LENA: SubjectID1, Study, AWCHr<age>M, ...  (AM2018=16/18mo TL3;
 ## FMW2013=18/24mo TLO+ELENA from the cleaned 2-timepoint file).
-lena_wide <- read_csv(file.path(PK_DIR, spec$lena_file),
+lena_wide <- read_csv(file.path(RAW_DIR, spec$lena_file),
                       show_col_types = FALSE) |>
   filter(Study %in% spec$lena_study) |>
   mutate(subject_id = as.character(SubjectID1))

@@ -10,8 +10,8 @@
 ##          on top of the CDI-matching requirement)
 ##
 ## Inputs:
-##   data/peekbank/1_d_sub.Rds       per-(subj, admin) summary
-##   data/peekbank/0_cdi_subjects.Rds CDI-to-admin fuzzy join
+##   data/raw/peekbank/1_d_sub.Rds       per-(subj, admin) summary
+##   data/raw/peekbank/0_cdi_subjects.Rds CDI-to-admin fuzzy join
 ##                                             (already left-joined into
 ##                                             d_sub; kept around for
 ##                                             provenance)
@@ -30,7 +30,7 @@ suppressPackageStartupMessages({
 args <- commandArgs(trailingOnly = TRUE)
 MIN_ADMINS <- as.integer(if (length(args) >= 1) args[1] else 2)
 
-PB_DIR <- file.path(PROJECT_ROOT, "data/peekbank")
+PB_DIR <- file.path(PROJECT_ROOT, "data/raw/peekbank")
 
 message(sprintf("Preparing Peekbank bundle (min_admins=%d)", MIN_ADMINS))
 

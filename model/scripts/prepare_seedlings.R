@@ -9,12 +9,12 @@
 ## Default: n_items = 200 (stratified by class x difficulty quartile)
 ##
 ## Public inputs (already in repo):
-##   data/seedlings/lena_data.csv      Per-recording LENA AWC
+##   data/raw/seedlings/lena_data.csv      Per-recording LENA AWC
 ##                                              (44 kids x 13 monthly recordings)
-##   data/seedlings/seedlings_data.csv Per-child summary (used for QA)
+##   data/raw/seedlings/seedlings_data.csv Per-child summary (used for QA)
 ##
 ## NOT YET PUBLIC, must be obtained from Bergelson lab:
-##   data/seedlings/cdi_items_long.csv Item-level CDI WG responses at
+##   data/raw/seedlings/cdi_items_long.csv Item-level CDI WG responses at
 ##                                              1;0 and 1;6 for the 44 SEEDLingS
 ##                                              subjects. See README in the same
 ##                                              folder for the expected schema.
@@ -36,7 +36,7 @@ n_items <- as.integer(if (length(args) >= 1) args[1] else 200)
 # ---- Constants ----
 N_DIFF_BINS <- 4
 SEED        <- 20260429
-SD_DIR      <- file.path(PROJECT_ROOT, "data/seedlings")
+SD_DIR      <- file.path(PROJECT_ROOT, "data/raw/seedlings")
 CDI_LONG    <- file.path(SD_DIR, "cdi_items_long.csv")
 
 message(sprintf("Preparing Seedlings bundle (n_items=%d)", n_items))
@@ -64,7 +64,7 @@ if (!file.exists(CDI_LONG)) {
     "We have only CDI totals from the public Egan-Dailey github. ",
     "Item-level CDI for SEEDLingS lives in the private cdi_spreadsheet ",
     "repo at BergelsonLab. Once you have a wordlevel-format export, ",
-    "drop it at the path above (see data/seedlings/README.md ",
+    "drop it at the path above (see data/raw/seedlings/README.md ",
     "for expected schema) and rerun."), CDI_LONG))
 }
 
@@ -193,7 +193,7 @@ V <- nrow(recordings)
 # standardized-score SDs per log_alpha unit. Bundle always emits
 # N_std + arrays; the comp Stan file uses them iff N_std > 0 AND the
 # variant unlocks gamma_std (otherwise the prior pins gamma_std=0). ----
-std_path <- file.path(PROJECT_ROOT, "data/seedlings/all_vocab.csv")
+std_path <- file.path(PROJECT_ROOT, "data/raw/seedlings/all_vocab.csv")
 if (file.exists(std_path)) {
   std_raw <- readr::read_csv(std_path, show_col_types = FALSE) %>%
     transmute(subject_id = sprintf("%02d", as.integer(subj)),

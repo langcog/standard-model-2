@@ -28,7 +28,8 @@ DATASETS  <- if (length(args) >= 2) {
 }
 TAG       <- if (length(DATASETS) == 4) "all" else paste(gsub("_.*","",DATASETS), collapse="_")
 
-PB_DIR <- file.path(PROJECT_ROOT, "data/peekbank")
+INT_DIR <- file.path(PROJECT_ROOT, "data/intermediates")
+RAW_DIR <- file.path(PROJECT_ROOT, "data/raw")
 SEED   <- 20260609
 N_DIFF_BINS <- 4
 AGE_CAP <- 30
@@ -44,7 +45,7 @@ DS_LEVELS <- DS_LEVELS[DS_LEVELS %in% DATASETS]
 
 # ---- 1. Item-level CDI (studies x WG/WS, <=30mo). fernald_totlot CDI comes
 #         from the separately-parsed TL_{18,21,25}m_WS.xlsx (parse_totlot_cdi.R). ---- #
-.read_cdi <- function(f) read_csv(file.path(PB_DIR, f), show_col_types = FALSE, progress = FALSE) %>%
+.read_cdi <- function(f) read_csv(file.path(INT_DIR, f), show_col_types = FALSE, progress = FALSE) %>%
   transmute(lab_subject_id = as.character(lab_subject_id), study = as.character(study),
             age = as.integer(age), form = as.character(form), item = as.character(item),
             produces = as.integer(produces))
@@ -91,8 +92,8 @@ cat(sprintf("Items kept: %d (%s)\n", n_distinct(cdi$item),
             if (is.finite(n_items)) sprintf("subsampled to %d", n_items) else "ALL items"))
 
 # ---- 4. LWL RT: d_sub joined to 2026.1 lab ids, QC'd ---- #
-dsub <- readRDS(file.path(PB_DIR, "1_d_sub.Rds")) %>% ungroup()
-amp  <- readRDS(file.path(PB_DIR, "_pb2026_admins.rds")) %>%
+dsub <- readRDS(file.path(RAW_DIR, "peekbank/1_d_sub.Rds")) %>% ungroup()
+amp  <- readRDS(file.path(RAW_DIR, "peekbank/_pb2026_admins.rds")) %>%
   mutate(lab_subject_id = as.character(lab_subject_id))
 lwl <- dsub %>% filter(dataset_name %in% DATASETS, !is.na(log_rt)) %>%
   inner_join(amp %>% select(administration_id, lab_subject_id), by = "administration_id") %>%
@@ -131,7 +132,7 @@ cat(sprintf("Bundle: I=%d A=%d J=%d C=%d S=%d N=%d N_lwl=%d a0=%d\n",
 
 # ---- 6. Observed LENA input + empirical sigma_lena ---- #
 LENA_STUDY <- c(TL3 = "adams_marchman_2018", TLO = "fmw_2013")
-lena_raw <- read_csv(file.path(PB_DIR, "lena_am2018_fmw2013.csv"), show_col_types = FALSE, progress = FALSE) %>%  # was TL3TLO_LENA.csv (Study col still TL3/TLO)
+lena_raw <- read_csv(file.path(RAW_DIR, "AM2018/lena_am2018_fmw2013.csv"), show_col_types = FALSE, progress = FALSE) %>%  # was TL3TLO_LENA.csv (Study col still TL3/TLO)
   mutate(lab_subject_id = as.character(SubjectID1), dataset_name = LENA_STUDY[Study]) %>%
   filter(dataset_name %in% DATASETS, lab_subject_id %in% kids)
 # log AWC at 16 + 18 mo (replicates)

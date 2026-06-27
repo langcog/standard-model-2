@@ -1,15 +1,15 @@
 ## Parse BabyView wide CDI exports -> long item-level CSV (CDI-only; fast, no transcripts).
 ## BabyView is collected via webCDI, so the wide columns are webCDI item-KEYS (e.g. "becarefl",
 ## "bshteeth"), NOT Wordbank definitions. We map them through the webCDI item dictionary
-## (data/babyview/webcdi_items_{WG,WS}.csv, pulled from langcog/web-cdi) to get the canonical
+## (data/raw/babyview/webcdi_items_{WG,WS}.csv, pulled from langcog/web-cdi) to get the canonical
 ## definition + a production-vocab classifier (choices contains "produces"), then match the
 ## definition to the Wordbank item list for the shared canonical `item` name.
 ## Mirrors the wide->long item-column logic in prepare_babyview.R (~lines 86-137).
-## Output: data/babyview/cdi_items_long.csv
+## Output: data/raw/babyview/cdi_items_long.csv
 ##   subject_id, age, form, item_key, item, definition, produces, is_production_vocab, item_canonical
 ## RUN LOCALLY.
 suppressPackageStartupMessages({library(here); library(dplyr); library(tidyr); library(readr)})
-CDI_DIR <- here("data/babyview/data_june_2026")
+CDI_DIR <- here("data/raw/babyview/data_june_2026")
 
 META_COLS <- c("opt_out","study_name","subject_id","local_lab_id","repeat_num",
   "administration_id","link","completed","completedBackgroundInfo","due_date",
@@ -56,8 +56,8 @@ norm <- function(x) x %>% tolower() %>% gsub("[\\.\\(\\)]","_",.,perl=TRUE) %>% 
 ## word_forms_/word_endings_ morphology sections (irregular pasts/plurals: ate, blew, children,
 ## feet), which are "produces"-type but not part of the production-vocabulary checklist.
 dict <- bind_rows(
-  read_csv(here("data/babyview/webcdi_items_WG.csv"), show_col_types = FALSE) %>% mutate(form = "WG"),
-  read_csv(here("data/babyview/webcdi_items_WS.csv"), show_col_types = FALSE) %>% mutate(form = "WS")) %>%
+  read_csv(here("data/raw/babyview/webcdi_items_WG.csv"), show_col_types = FALSE) %>% mutate(form = "WG"),
+  read_csv(here("data/raw/babyview/webcdi_items_WS.csv"), show_col_types = FALSE) %>% mutate(form = "WS")) %>%
   transmute(form, item_key = item, definition, category,
             is_production_vocab = grepl("produces", coalesce(choices, "")) &
                                   !grepl("^word_(forms|endings)", coalesce(category, ""))) %>%
@@ -80,14 +80,14 @@ cdi <- bind_rows(to_long(ws, "WS"), to_long(wg, "WG")) %>% filter(!is.na(produce
 
 ## hand-checked overrides for the ~14 items where webCDI labels diverge from the Wordbank
 ## canonical strings used by the stanford cohorts (spelling/plural/homonym). See
-## data/babyview/babyview_item_overrides.csv (MCF-reviewable). Applied by webCDI item_key.
-ov <- read_csv(here("data/babyview/babyview_item_overrides.csv"), show_col_types = FALSE)
+## data/raw/babyview/babyview_item_overrides.csv (MCF-reviewable). Applied by webCDI item_key.
+ov <- read_csv(here("data/raw/babyview/babyview_item_overrides.csv"), show_col_types = FALSE)
 cdi <- cdi %>% left_join(ov, by = "item_key") %>%
   mutate(item = coalesce(canonical_item, item),
          item_canonical = item_canonical | !is.na(canonical_item)) %>%
   select(subject_id, age, form, item_key, item, definition, category, produces, comprehends, is_production_vocab, item_canonical)
 
-out <- here("data/babyview/cdi_items_long.csv")
+out <- here("data/raw/babyview/cdi_items_long.csv")
 write_csv(cdi, out)
 v <- cdi %>% filter(is_production_vocab)
 cat(sprintf("wrote %s\n  rows=%d  admins=%d  kids=%d\n", out, nrow(cdi),

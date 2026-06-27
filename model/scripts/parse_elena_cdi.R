@@ -1,5 +1,5 @@
 ## Parse ELENA (FMW2013 Batch 1, Stanford) WG CDI from the CORRECTED wide export
-## (data/peekbank/elena/ELENA_WG_items.xlsx). One WG administration per kid at
+## (data/raw/FMW2013/elena/ELENA_WG_items.xlsx). One WG administration per kid at
 ## 16-18mo. The ids (4943,6117,...) now reconcile with the ELENA LENA SubjectID1
 ## (all 26 overlap), unblocking the study. Vocabulary items are short-coded columns
 ## matching cdi_short_code_map_wg.csv; WG production = value 2 ("understands and
@@ -7,11 +7,11 @@
 ## prepare_io_dataset.R's fmw2013 hook (study == "elena").
 ## NOTE: supersedes the earlier txt-based WS parse, whose ids (6143..) did NOT
 ## reconcile with the RT/LENA -- that export was on a different id scheme.
-## RUN LOCALLY.  Output: data/peekbank/elena_cdi_items_long.csv
+## RUN LOCALLY.  Output: data/intermediates/elena_cdi_items_long.csv
 suppressPackageStartupMessages({ library(dplyr); library(tidyr); library(readr); library(readxl) })
 
-e  <- read_excel("data/peekbank/elena/ELENA_WG_items.xlsx")
-wg <- read_csv("data/peekbank/cdi_short_code_map_wg.csv", show_col_types = FALSE)
+e  <- read_excel("data/raw/FMW2013/elena/ELENA_WG_items.xlsx")
+wg <- read_csv("data/intermediates/cdi_short_code_map_wg.csv", show_col_types = FALSE)
 itemcols <- intersect(names(e), wg$short)                  # vocab short-codes (395)
 map <- setNames(wg$item_definition, wg$short)
 
@@ -30,5 +30,5 @@ cat(sprintf("ELENA WG CDI: %d kids, ages %s, %d items, %d rows\n",
             n_distinct(long$item), nrow(long)))
 cat(sprintf("  words produced / kid: median=%.0f  range=%d-%d  (16-18mo WG)\n",
             median(pk$n_prod), min(pk$n_prod), max(pk$n_prod)))
-write_csv(long, "data/peekbank/elena_cdi_items_long.csv")
-cat("wrote data/peekbank/elena_cdi_items_long.csv\n")
+write_csv(long, "data/intermediates/elena_cdi_items_long.csv")
+cat("wrote data/intermediates/elena_cdi_items_long.csv\n")

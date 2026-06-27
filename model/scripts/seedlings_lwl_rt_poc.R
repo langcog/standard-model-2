@@ -5,7 +5,7 @@
 ## with our Fernald RT window. RUN LOCALLY.
 ## Out: figs/data_checks/seedlings_lwl_rt_poc.png + console summary
 suppressPackageStartupMessages({ library(here); library(data.table); library(ggplot2) })
-DIR <- here("data/seedlings/raw_eyetracking_data/HaT")
+DIR <- here("data/raw/seedlings/raw_eyetracking_data/HaT")
 RT_LO <- 300; RT_HI <- 1800
 
 trim <- function(x) sub("\\s+$", "", x)

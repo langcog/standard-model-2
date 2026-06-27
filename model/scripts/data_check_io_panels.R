@@ -17,10 +17,10 @@ io_panels_fig <- function() {
   fct <- function(x) factor(x, levels = DSORD)
 
   ## (1) CDI: per-child vocabulary count vs age (no points) + per-dataset smoother
-  stanford <- read_csv(here("data/peekbank/stanford_cdi_items_long.csv"), show_col_types = FALSE) %>%
+  stanford <- read_csv(here("data/intermediates/stanford_cdi_items_long.csv"), show_col_types = FALSE) %>%
     transmute(ds = recode(study, totlot2 = "FM2012", totlot3 = "AM2018", tlo = "FMW2013"),
               id = as.character(lab_subject_id), age, form, item, produces)
-  totlot <- read_csv(here("data/peekbank/totlot_cdi_items_long.csv"), show_col_types = FALSE) %>%
+  totlot <- read_csv(here("data/intermediates/totlot_cdi_items_long.csv"), show_col_types = FALSE) %>%
     transmute(ds = "fernald_totlot", id = as.character(lab_subject_id), age, form = "WS", item, produces)
   iop <- readRDS(here("fits/io_pooled_subset_data.rds"))$df %>% filter(study %in% c("BabyView","SEEDLingS")) %>%
     transmute(ds = study, id = as.character(ckey), age, form, item, produces)
@@ -50,15 +50,15 @@ io_panels_fig <- function() {
     theme_bw(base_size = 10) + theme(panel.grid.minor = element_blank())
 
   ## (3) Observed input (BabyView averaged to monthly means)
-  lena <- read_csv(here("data/peekbank/lena_am2018_fmw2013.csv"), show_col_types = FALSE) %>% filter(Study == "TL3") %>%
+  lena <- read_csv(here("data/raw/AM2018/lena_am2018_fmw2013.csv"), show_col_types = FALSE) %>% filter(Study == "TL3") %>%
     transmute(ds = "AM2018", child = as.character(SubjectID1), a16 = AGE16M, r16 = AWCHr16M, a18 = AGE18M, r18 = AWCHr18M) %>%
     pivot_longer(c(a16, r16, a18, r18), names_to = c(".value","tp"), names_pattern = "([ar])(16|18)") %>%
     transmute(ds, child, age_mo = a, log_input = log(r))
-  fmw <- read_csv(here("data/peekbank/fmw_2013/TLOELENA_LENA_1824.csv"), show_col_types = FALSE) %>%
+  fmw <- read_csv(here("data/raw/FMW2013/TLOELENA_LENA_1824.csv"), show_col_types = FALSE) %>%
     transmute(ds = "FMW2013", child = as.character(SubjectID1), a18 = AGE18M, r18 = AWCHr18M, a24 = AGE24M, r24 = AWCHr24M) %>%
     pivot_longer(c(a18, r18, a24, r24), names_to = c(".value","tp"), names_pattern = "([ar])(18|24)") %>%
     transmute(ds, child, age_mo = a, log_input = log(r))
-  seed <- read_csv(here("data/seedlings/lena_data.csv"), show_col_types = FALSE) %>%
+  seed <- read_csv(here("data/raw/seedlings/lena_data.csv"), show_col_types = FALSE) %>%
     transmute(ds = "SEEDLingS", child = as.character(subj), age_mo = month, log_input = log(awc_perhr)) %>% filter(age_mo <= 30)
   bv <- readRDS(here("fits/babyview_subset_data.rds"))$videos %>%
     transmute(child = as.character(subject_id), age_mo, rate = exp(log_r_obs)) %>%

@@ -1,16 +1,16 @@
 ## Parse the fernald_totlot ("totlot"/TotLot original) item-level WS CDI from the
-## three age-band Excel files (data/peekbank/fernald_totlot/TL_{18,21,25}m_WS.xlsx) into
-## the long format used by data/peekbank/stanford_cdi_items_long.csv, so it can
+## three age-band Excel files (data/raw/FPM2006/TL_{18,21,25}m_WS.xlsx) into
+## the long format used by data/intermediates/stanford_cdi_items_long.csv, so it can
 ## join the proc_dp / joint bundle. These 58 kids have longitudinal LWL RT in
 ## Peekbank (dataset fernald_totlot, lab_subject_id == TL `id`) but were dropped
 ## before for lack of item-level CDI -- now recovered.
 ##
-## RUN LOCALLY. Output: data/peekbank/totlot_cdi_items_long.csv
+## RUN LOCALLY. Output: data/intermediates/totlot_cdi_items_long.csv
 suppressPackageStartupMessages({ library(readxl); library(dplyr); library(tidyr) })
 
-TL_DIR <- "data/peekbank/fernald_totlot"   # per-study raw dir (was data/peekbank/totlot)
+TL_DIR <- "data/raw/FPM2006"   # per-study raw dir (was data/peekbank/totlot)
 FILES  <- c(`18` = "TL_18m_WS.xlsx", `21` = "TL_21m_WS.xlsx", `25` = "TL_25m_WS.xlsx")
-ws_map <- read.csv("data/peekbank/cdi_short_code_map_ws.csv")   # short -> item_definition
+ws_map <- read.csv("data/intermediates/cdi_short_code_map_ws.csv")   # short -> item_definition
 strip  <- function(x) sub("\\.\\.\\.[0-9]+$", "", x)            # undo name_repair="unique" suffix
 
 long <- bind_rows(lapply(names(FILES), function(band) {
@@ -33,7 +33,7 @@ long <- long %>%
   mutate(study = "totlot", form = "WS", source_file = "TL_{18,21,25}m_WS.xlsx") %>%
   select(lab_subject_id, study, age, form, item, produces, short, mapping_status, source_file)
 
-out <- "data/peekbank/totlot_cdi_items_long.csv"
+out <- "data/intermediates/totlot_cdi_items_long.csv"
 write.csv(long, out, row.names = FALSE)
 cat(sprintf("Wrote %s\n  %d rows | %d kids | %d items | ages %s | admins(kid x age) %d | mean produces %.2f\n",
             out, nrow(long), n_distinct(long$lab_subject_id), n_distinct(long$item),

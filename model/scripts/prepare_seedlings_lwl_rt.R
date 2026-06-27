@@ -8,9 +8,9 @@
 ## emit was a mistake: SEEDLings is the only trial-level source, so it inflated the
 ## single global sigma_lwl with SEEDLings trial noise and mis-applied it to the
 ## per-admin Peekbank datasets -- see journal/notes/mm_run_state.md.) RUN LOCALLY.
-## Out: data/seedlings/seedlings_lwl_rt.csv  +  console QC report card
+## Out: data/raw/seedlings/seedlings_lwl_rt.csv  +  console QC report card
 suppressPackageStartupMessages({ library(here); library(data.table) })
-DIR <- here("data/seedlings/raw_eyetracking_data/HaT")
+DIR <- here("data/raw/seedlings/raw_eyetracking_data/HaT")
 W_LO <- 367; W_HI <- 3500; W_LEN <- W_HI - W_LO            # accuracy window
 RT_LO <- 300; RT_HI <- 1800                                # Fernald RT window
 trim <- function(x) sub("\\s+$", "", x)
@@ -94,6 +94,6 @@ print(v[, .(n=.N, med=round(median(rt))), by=age][order(age)])
 sess <- v[, .(rt = mean(rt), n_trials = .N), by = .(subj, age)]
 out <- sess[, .(dataset_name="seedlings_zhu", lab_subject_id=subj, lwl_age=age,
                 lwl_log_rt=log(rt))]
-fwrite(out, here("data/seedlings/seedlings_lwl_rt.csv"))
-cat(sprintf("\nwrote data/seedlings/seedlings_lwl_rt.csv: %d SESSION rows (%.1f trials/session avg), %d kids, ages %d-%d\n",
+fwrite(out, here("data/raw/seedlings/seedlings_lwl_rt.csv"))
+cat(sprintf("\nwrote data/raw/seedlings/seedlings_lwl_rt.csv: %d SESSION rows (%.1f trials/session avg), %d kids, ages %d-%d\n",
             nrow(out), mean(sess$n_trials), uniqueN(out$lab_subject_id), min(out$lwl_age), max(out$lwl_age)))

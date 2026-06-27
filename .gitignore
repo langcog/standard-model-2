@@ -82,7 +82,7 @@ model/log_irt_v2.stan
 /tmp_*
 
 # --- Raw data (huge CSVs, kept locally only) ---
-data/babyview/merged_transcripts_parsed.csv
+data/raw/babyview/merged_transcripts_parsed.csv
 # Smaller files (video metadata, CDI items) are tracked.
 
 # --- Local-only credentials and config
@@ -127,11 +127,11 @@ Rplots.pdf
 **/Rplots.pdf
 
 # SEEDLings raw EyeLink reports (816MB; RT derived by prepare_seedlings_lwl_rt.R)
-data/seedlings/raw_eyetracking_data/
+data/raw/seedlings/raw_eyetracking_data/
 
 # --- Repo-hygiene: regenerable build artifacts / raw archives ---
 # Raw BabyView CDI download archive (the extracted data_june_2026/ dir is tracked)
-data/babyview/data_june_2026-*.zip
+data/raw/babyview/data_june_2026-*.zip
 # Local run logs
 logs/
 # Rendered Quarto/doc outputs (sources tracked; deliverable PDFs tracked explicitly)

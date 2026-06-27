@@ -79,7 +79,7 @@ sperry_long <- sperry_raw %>%
 # Adult Word Count, an automated count of all adult words near the
 # child's microphone (CDS + ODS lumped). We follow the same filter as
 # prepare_seedlings.R: month >= 6 & <= 17, !awc_outlier.
-lena <- read_csv(file.path(ROOT, "data/seedlings/lena_data.csv"),
+lena <- read_csv(file.path(ROOT, "data/raw/seedlings/lena_data.csv"),
                  show_col_types = FALSE, progress = FALSE)
 
 seedlings_rec <- lena %>%
@@ -121,7 +121,7 @@ babyview_rec <- bv$videos %>%
 # Long et al. 2025 isn't in the input_estimation/ folder (it's the
 # BabyView dataset paper, not really an input-estimation paper). Cite
 # it via the data README. Set a clearer pointer:
-babyview_rec$citation_path <- "data/babyview/README.md"
+babyview_rec$citation_path <- "data/raw/babyview/README.md"
 
 # ------------------------------------------------------------
 # 4. Concatenate per-recording table

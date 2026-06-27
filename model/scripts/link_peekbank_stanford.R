@@ -5,21 +5,22 @@
 ## model/scripts/pull_peekbank_lwl.R for how that file is built.
 ##
 ## Inputs:
-##   data/peekbank/peekbank_2022_lwl_summary.csv  (per LWL admin
+##   data/raw/peekbank/peekbank_2022_lwl_summary.csv  (per LWL admin
 ##     with lab_subject_id, age, RT, accuracy)
-##   data/peekbank/stanford_cdi_items_long.csv     (TL2/TL3 items)
+##   data/intermediates/stanford_cdi_items_long.csv     (TL2/TL3 items)
 ##
 ## Outputs:
-##   data/peekbank/peekbank_stanford_linked.csv     (per LWL
+##   data/raw/peekbank/peekbank_stanford_linked.csv     (per LWL
 ##     admin: processing measures + nearest-age CDI summary)
-##   data/peekbank/peekbank_stanford_admin_match.csv (diagnostic)
+##   data/raw/peekbank/peekbank_stanford_admin_match.csv (diagnostic)
 
 source("model/R/config.R")
 suppressPackageStartupMessages({
   library(dplyr); library(tidyr); library(readr)
 })
 
-OUT_DIR <- file.path(PROJECT_ROOT, "data/peekbank")
+OUT_DIR <- file.path(PROJECT_ROOT, "data/raw/peekbank")
+INT_DIR <- file.path(PROJECT_ROOT, "data/intermediates")
 
 # ---- 1. LWL admins with lab_subject_id + processing measures ---- #
 lwl <- read_csv(file.path(OUT_DIR, "peekbank_2022_lwl_summary.csv"),
@@ -40,7 +41,7 @@ cat(sprintf("LWL admins: %d (kids: %d)\n",
             nrow(lwl), n_distinct(lwl$lab_subject_id)))
 
 # ---- 2. CDI admins (TL3 maps to adams_marchman_2018 via lab IDs) ---- #
-cdi_admins <- read_csv(file.path(OUT_DIR, "stanford_cdi_items_long.csv"),
+cdi_admins <- read_csv(file.path(INT_DIR, "stanford_cdi_items_long.csv"),
                        show_col_types = FALSE, progress = FALSE) %>%
   mutate(lab_subject_id = as.character(lab_subject_id)) %>%
   group_by(lab_subject_id, age, form) %>%

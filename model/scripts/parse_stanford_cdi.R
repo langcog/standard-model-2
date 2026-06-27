@@ -21,7 +21,7 @@
 ##       Mapping from internal short codes to Wordbank item_definitions.
 ##       Columns: short, item_definition, status. LOOSE END is hand
 ##       review of rows where status != "auto_exact"/"manual_disambig".
-##   data/peekbank/stanford_cdi_items_long.csv
+##   data/intermediates/stanford_cdi_items_long.csv
 ##       Long format, one row per (lab_subject_id, study, age, form,
 ##       item, produces). Items are Wordbank item_definitions.
 
@@ -31,7 +31,8 @@ suppressPackageStartupMessages({
   library(stringr); library(wordbankr)
 })
 
-OUT_DIR <- file.path(PROJECT_ROOT, "data/peekbank")
+RAW_DIR <- file.path(PROJECT_ROOT, "data/raw")
+INT_DIR <- file.path(PROJECT_ROOT, "data/intermediates")
 
 # -------------------------------------------------------------------- #
 # 1.  Manual disambiguator overrides (Marchman-lab CDI conventions).   #
@@ -352,18 +353,18 @@ report <- function(tag, d) cat(sprintf("  %-12s %5d rows (subjects: %d, admins: 
             paste(range(suppressWarnings(as.integer(d$age)), na.rm = TRUE),
                   collapse = "-")))
 # FM2012 (TL2 / totlot2): WG + WS  [raw dir renamed -> fernald_marchman_2012/]
-tl2_wg <- read_one(file.path(OUT_DIR, "fernald_marchman_2012/TL2_WG_compiled.xlsx"), "WG"); report("TL2 WG", tl2_wg)
-tl2_ws <- read_one(file.path(OUT_DIR, "fernald_marchman_2012/TL2_WS_compiled.xlsx"), "WS"); report("TL2 WS", tl2_ws)
+tl2_wg <- read_one(file.path(RAW_DIR, "FM2012/TL2_WG_compiled.xlsx"), "WG"); report("TL2 WG", tl2_wg)
+tl2_ws <- read_one(file.path(RAW_DIR, "FM2012/TL2_WS_compiled.xlsx"), "WS"); report("TL2 WS", tl2_ws)
 # AM2018 (TL3 / totlot3): WS (existing csv) + WG  [raw dir -> adams_marchman_2018/]
-tl3_ws <- read_one(file.path(OUT_DIR, "adams_marchman_2018/TL3_compiled_WS.csv"),  "WS"); report("TL3 WS", tl3_ws)
-tl3_wg <- read_one(file.path(OUT_DIR, "adams_marchman_2018/TL3_compiled_WG.xlsx"), "WG"); report("TL3 WG", tl3_wg)
+tl3_ws <- read_one(file.path(RAW_DIR, "AM2018/TL3_compiled_WS.csv"),  "WS"); report("TL3 WS", tl3_ws)
+tl3_wg <- read_one(file.path(RAW_DIR, "AM2018/TL3_compiled_WG.xlsx"), "WG"); report("TL3 WG", tl3_wg)
 # FMW2013 (TLO): WG@18, WS@24, WS@30 — age comes from the filename.  [raw dir -> fmw_2013/]
 # force_study="tlo": every row in these sheets is an FMW2013 child
 # (the "misc" label is a within-study annotation, not a different
 # study), so keep them all.
-tlo_wg18 <- read_one(file.path(OUT_DIR, "fmw_2013/TLO_18m_WG.xlsx"), "WG", age_override = 18, force_study = "tlo"); report("TLO WG18", tlo_wg18)
-tlo_ws24 <- read_one(file.path(OUT_DIR, "fmw_2013/TLO_24_WS.xlsx"),  "WS", age_override = 24, force_study = "tlo"); report("TLO WS24", tlo_ws24)
-tlo_ws30 <- read_one(file.path(OUT_DIR, "fmw_2013/TLO_30m_WS.xlsx"), "WS", age_override = 30, force_study = "tlo"); report("TLO WS30", tlo_ws30)
+tlo_wg18 <- read_one(file.path(RAW_DIR, "FMW2013/TLO_18m_WG.xlsx"), "WG", age_override = 18, force_study = "tlo"); report("TLO WG18", tlo_wg18)
+tlo_ws24 <- read_one(file.path(RAW_DIR, "FMW2013/TLO_24_WS.xlsx"),  "WS", age_override = 24, force_study = "tlo"); report("TLO WS24", tlo_ws24)
+tlo_ws30 <- read_one(file.path(RAW_DIR, "FMW2013/TLO_30m_WS.xlsx"), "WS", age_override = 30, force_study = "tlo"); report("TLO WS30", tlo_ws30)
 
 # -------------------------------------------------------------------- #
 # 5.  Build mappings (one per form), apply, and emit outputs.          #
@@ -382,8 +383,8 @@ map_wg <- build_mapping(wg_short, wb_wg)
 cat("\nWS mapping status:\n"); print(table(sub(":.*", ":<...>", map_ws$status)))
 cat("WG mapping status:\n");   print(table(sub(":.*", ":<...>", map_wg$status)))
 
-write_csv(map_ws, file.path(OUT_DIR, "cdi_short_code_map_ws.csv"))
-write_csv(map_wg, file.path(OUT_DIR, "cdi_short_code_map_wg.csv"))
+write_csv(map_ws, file.path(INT_DIR, "cdi_short_code_map_ws.csv"))
+write_csv(map_wg, file.path(INT_DIR, "cdi_short_code_map_wg.csv"))
 cat(sprintf("\nWrote cdi_short_code_map_ws.csv (%d rows) + _wg.csv (%d rows)\n",
             nrow(map_ws), nrow(map_wg)))
 
@@ -438,5 +439,5 @@ cat(sprintf("\nLong-format CDI: %d rows (%d subjects x %d admins x %d items)\n",
             n_distinct(paste(cdi_long$lab_subject_id, cdi_long$age, cdi_long$form)),
             n_distinct(cdi_long$item)))
 
-write_csv(cdi_long, file.path(OUT_DIR, "stanford_cdi_items_long.csv"))
+write_csv(cdi_long, file.path(INT_DIR, "stanford_cdi_items_long.csv"))
 cat(sprintf("Wrote stanford_cdi_items_long.csv\n"))

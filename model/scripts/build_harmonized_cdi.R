@@ -1,11 +1,11 @@
 ## Build the harmonized item-level CDI table: union every dataset's long CDI into one
 ## clearly-formatted CSV (for hand-checking + eventual return to Wordbank/Peekbank).
 ## Inputs (per-dataset long CSVs, each produced by a parse_*_cdi.R):
-##   data/peekbank/stanford_cdi_items_long.csv   (studies tlo/totlot2/totlot3)
-##   data/peekbank/totlot_cdi_items_long.csv     (totlot)
-##   data/peekbank/elena_cdi_items_long.csv      (elena)
-##   data/seedlings/cdi_items_long.csv           (seedlings; has comprehends)
-##   data/babyview/cdi_items_long.csv            (babyview; raw labels -> canonicalized here)
+##   data/intermediates/stanford_cdi_items_long.csv   (studies tlo/totlot2/totlot3)
+##   data/intermediates/totlot_cdi_items_long.csv     (totlot)
+##   data/intermediates/elena_cdi_items_long.csv      (elena)
+##   data/raw/seedlings/cdi_items_long.csv           (seedlings; has comprehends)
+##   data/raw/babyview/cdi_items_long.csv            (babyview; raw labels -> canonicalized here)
 ## Output: data/harmonized/cdi_item_level.csv
 ##   schema: dataset, paper_code, cohort, child_id, age, form, item, produces, comprehends
 ## SLENA / WF2013 (Spanish) is pending its parser; not yet included.
@@ -25,24 +25,24 @@ MAP <- tribble(
 add_meta <- function(d) left_join(d, MAP, by = "cohort")
 
 ## --- peekbank Stanford cohorts (item already canonical Wordbank name) ---
-stanford <- read_csv(here("data/peekbank/stanford_cdi_items_long.csv"), show_col_types = FALSE) %>%
+stanford <- read_csv(here("data/intermediates/stanford_cdi_items_long.csv"), show_col_types = FALSE) %>%
   transmute(cohort = study, child_id = as.character(lab_subject_id), age, form, item,
             produces = as.integer(produces), comprehends = as.integer(comprehends), item_canonical = TRUE)
-totlot <- read_csv(here("data/peekbank/totlot_cdi_items_long.csv"), show_col_types = FALSE) %>%
+totlot <- read_csv(here("data/intermediates/totlot_cdi_items_long.csv"), show_col_types = FALSE) %>%
   transmute(cohort = "totlot", child_id = as.character(lab_subject_id), age, form, item,
             produces = as.integer(produces), comprehends = NA_integer_, item_canonical = TRUE)
-elena <- read_csv(here("data/peekbank/elena_cdi_items_long.csv"), show_col_types = FALSE) %>%
+elena <- read_csv(here("data/intermediates/elena_cdi_items_long.csv"), show_col_types = FALSE) %>%
   transmute(cohort = "elena", child_id = as.character(lab_subject_id), age, form, item,
             produces = as.integer(produces), comprehends = as.integer(comprehends), item_canonical = TRUE)
 
 ## --- seedlings (item canonical; carries comprehends) ---
-seed <- read_csv(here("data/seedlings/cdi_items_long.csv"), show_col_types = FALSE) %>%
+seed <- read_csv(here("data/raw/seedlings/cdi_items_long.csv"), show_col_types = FALSE) %>%
   transmute(cohort = "seedlings", child_id = as.character(subject_id), age, form, item,
             produces = as.integer(produces), comprehends = as.integer(comprehends), item_canonical = TRUE)
 
 ## --- babyview (webCDI item-keys already mapped to canonical item in parse_babyview_cdi.R) ---
 ## Keep production-vocab items only, matching the other cohorts (which are vocab by construction).
-bv <- read_csv(here("data/babyview/cdi_items_long.csv"), show_col_types = FALSE) %>%
+bv <- read_csv(here("data/raw/babyview/cdi_items_long.csv"), show_col_types = FALSE) %>%
   filter(is_production_vocab) %>%
   transmute(cohort = "babyview", child_id = as.character(subject_id), age, form, item,
             produces = as.integer(produces), comprehends = as.integer(comprehends), item_canonical)

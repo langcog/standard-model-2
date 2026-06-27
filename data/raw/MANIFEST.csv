@@ -1,0 +1,10 @@
+paper_code,dataset_name,dir,lab_code,language,channels,citation,source,notes
+AM2018,adams_marchman_2018,data/raw/AM2018,TL3,English,cdi;lwl;input,"Adams, Marchman et al. (2018)",Stanford Language Learning Lab + Peekbank,LENA input at 16+18mo (lena_am2018_fmw2013.csv); LWL via Peekbank shared
+FM2012,fernald_marchman_2012,data/raw/FM2012,TL2,English,cdi;lwl,"Fernald & Marchman (2012)",Stanford Language Learning Lab + Peekbank,no input (processing-only)
+FMW2013,fmw_2013,data/raw/FMW2013,TLO,English,cdi;lwl;input,"Fernald, Marchman & Weisleder (2013)",Stanford Language Learning Lab + Peekbank,"two CDI batches: TLO (20xxx ids) + elena/ (4-digit ids, id-reconciled); LENA in TLOELENA_LENA_1824.csv"
+FPM2006,fernald_totlot,data/raw/FPM2006,TotLot,English,cdi;lwl,"Fernald, Perfors & Marchman (2006)",Stanford Language Learning Lab + Peekbank,no input (processing-only); WS only
+WF2013,weisleder_stl,data/raw/WF2013,SLENA,Spanish,cdi;lwl;input,"Weisleder & Fernald (2013)",Stanford Language Learning Lab + Peekbank (weisleder_stl),"29 kids; CDI item-level (SLENA WG+WS), LWL+LENA in SLENA_LWL_LENA_n29.csv; ParticipantId == peekbank lab_subject_id"
+Bang2025,habla,data/raw/Bang2025,HABLA,Spanish,cdi;lwl;input,"Bang et al. (2025)",Stanford Language Learning Lab,3-channel but SUMSCORE-level CDI (Habla1.0_LENALWLCDISumScores.csv)
+babyview,babyview,data/raw/babyview,,English,cdi;input,"Long et al. (2024)",BabyView,head-cam transcript input; CDI via webCDI (item-keys mapped through webcdi_items_{WG,WS}.csv)
+seedlings,seedlings,data/raw/seedlings,,English,cdi;lwl;input,"Egan-Dailey & Bergelson (2025); LWL: Zhu et al. (2026)",Bergelson Lab (SEEDLingS),daylong LENA input; LWL RT from HaT eyetracking (Zhu et al. 2026)
+peekbank,_shared,data/raw/peekbank,,,infra,,Peekbank,"cross-dataset peekbank infrastructure: 1_d_sub.Rds (per-admin LWL summary), _pb2026_admins.rds (admin->lab_subject_id bridge), peekbank_stanford_* linkage"

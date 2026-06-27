@@ -11,9 +11,9 @@
 ## Default: n_items = 200 (stratified by class x difficulty quartile)
 ##
 ## Inputs:
-##   data/babyview/video_metadata_processed.csv
-##   data/babyview/merged_transcripts_parsed.csv
-##   data/babyview/data_june_2026/babyview-english-{ws,wg}_items.csv
+##   data/raw/babyview/video_metadata_processed.csv
+##   data/raw/babyview/merged_transcripts_parsed.csv
+##   data/raw/babyview/data_june_2026/babyview-english-{ws,wg}_items.csv
 ##   fits/long_items.rds  (for English CHILDES p_j; reused)
 ##
 ## Output:  fits/babyview_subset_data.rds
@@ -37,7 +37,7 @@ MIN_ADMINS        <- as.integer(if (length(args) >= 2) args[2] else 2)
 N_DIFF_BINS       <- 4
 SEED              <- 20260428
 
-BV_DIR <- file.path(PROJECT_ROOT, "data/babyview")
+BV_DIR <- file.path(PROJECT_ROOT, "data/raw/babyview")
 CDI_DIR <- file.path(BV_DIR, "data_june_2026")
 
 message(sprintf("Preparing BabyView bundle (n_items=%d)", n_items))
