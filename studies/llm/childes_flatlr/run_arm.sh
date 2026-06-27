@@ -12,6 +12,7 @@ RD=$ROOT/flatlr_grammar/runs/$TAG
 mkdir -p "$RD"
 cd $ROOT || exit 1
 env HF_HOME=$ROOT/hf_cache CUDA_VISIBLE_DEVICES=$GPU PYTHONDONTWRITEBYTECODE=1 \
+    HF_DATASETS_OFFLINE=1 HF_HUB_OFFLINE=1 \
     PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
   $PY -B $FENG/train_gpt2_childes_flatlr.py \
     --train_file "$TF" --val_file $ROOT/TinyDialogues/data/CHILDES_val_ordered.txt \
