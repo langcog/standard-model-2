@@ -1,0 +1,5 @@
+# continuation from the 4x checkpoints (extends competence/J range; std_4x = overfit, low-J discriminator)
+cont_std_s42_4x|std_s42_4x
+cont_std_s1_4x|std_s1_4x
+cont_flat1e5_s42_4x|flat1e5_s42_4x
+cont_flat1e5_s1_4x|flat1e5_s1_4x

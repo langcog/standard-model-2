@@ -1,0 +1,9 @@
+# continuation from each 1x checkpoint (matched 20-epoch experience). TAG|INIT_CHECKPOINT
+cont_std_s42|std_s42_1x
+cont_std_s1|std_s1_1x
+cont_flat1e4_s42|flat1e4_s42_1x
+cont_flat1e4_s1|flat1e4_s1_1x
+cont_flat3e5_s42|flat3e5_s42_1x
+cont_flat3e5_s1|flat3e5_s1_1x
+cont_flat1e5_s42|flat1e5_s42_1x
+cont_flat1e5_s1|flat1e5_s1_1x
