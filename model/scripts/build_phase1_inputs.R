@@ -19,8 +19,19 @@ for (frm in c("WG", "WS")) {
   es_sizes[[frm]] <- nrow(wb)
   m <- sl %>% filter(form == frm) %>% mutate(fp = fp(item)) %>%
     left_join(wb, by = "fp") %>%
-    transmute(short = item, item_definition, status = ifelse(!is.na(item_definition), "auto_exact", "needs_review")) %>%
-    arrange(status, short)
+    mutate(status = ifelse(!is.na(item_definition), "auto_exact", "needs_review"),
+           fuzzy_candidate = NA_character_, fuzzy_dist = NA_integer_)
+  ## fuzzy candidate: nearest Wordbank-Spanish item by Levenshtein on the accent-stripped
+  ## fingerprint, for the needs_review rows (so review = confirm/correct, not type from scratch).
+  nr <- which(m$status == "needs_review")
+  if (length(nr) > 0) {
+    D  <- adist(m$fp[nr], wb$fp)                       # needs_review x wordbank distances
+    bi <- max.col(-D, ties.method = "first")          # nearest per row
+    m$fuzzy_candidate[nr] <- wb$item_definition[bi]
+    m$fuzzy_dist[nr]      <- D[cbind(seq_along(nr), bi)]
+  }
+  m <- m %>% transmute(short = item, item_definition, status, fuzzy_candidate, fuzzy_dist) %>%
+    arrange(status, fuzzy_dist, short)                # easiest (lowest-distance) needs_review first
   out <- here(sprintf("data/intermediates/cdi_short_code_map_es_%s.csv", tolower(frm)))
   write_csv(m, out)
   cat(sprintf("(1) %s: %d codes -> auto_exact %d, needs_review %d  [%s]\n",
