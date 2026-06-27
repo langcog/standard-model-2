@@ -6,36 +6,38 @@
 ##     one row per (child, age, form) with k = words produced, n = form size. The count likelihood
 ##     (Poisson-binomial over the form's items) attaches these to the latent theta.
 ##     -> data/intermediates/sumscore_count_admins.csv
-## RUN LOCALLY (needs wordbankr).
-suppressPackageStartupMessages({library(here); library(dplyr); library(readr); library(readxl); library(wordbankr)})
+## RUN LOCALLY.
+suppressPackageStartupMessages({library(here); library(dplyr); library(readr); library(readxl)})
 fp <- function(x) gsub("[^a-z0-9]", "", tolower(iconv(trimws(x), to = "ASCII//TRANSLIT")))   # accent-stripped fingerprint
 
-## ---------- (1) Spanish short-code map draft ----------
+## ---------- (1) Spanish short-code map: SLENA codes -> Wordbank-Spanish definitions ----------
+## The Wordbank raw instrument CSVs (data/raw/WF2013/wordbank_spanish_{WG,WS}.csv) are the
+## authoritative dictionary: their `item` column IS the SLENA lab short-code, `definition` the
+## canonical item. So this maps the codes directly -- the residual `needs_review` rows are mostly
+## the non-vocab word-form/complexity codes (leave item_definition blank to exclude).
 sl <- read_csv(here("data/intermediates/slena_cdi_items_long.csv"), show_col_types = FALSE) %>% distinct(form, item)
-es_sizes <- list()
+dict_of <- function(frm) read_csv(here(sprintf("data/raw/WF2013/wordbank_spanish_%s.csv", frm)), show_col_types = FALSE) %>%
+  filter(type == "word") %>% transmute(key = tolower(item), item_definition = definition)
+DWG <- dict_of("WG"); DWS <- dict_of("WS")
+DALL <- bind_rows(DWG, DWS) %>% distinct(key, .keep_all = TRUE)         # union -> cross-form coverage
+es_sizes <- list(WG = nrow(DWG), WS = nrow(DWS))
 for (frm in c("WG", "WS")) {
-  wb <- get_item_data(language = "Spanish (Mexican)", form = frm) %>% filter(item_kind == "word") %>%
-    distinct(item_definition) %>% mutate(fp = fp(item_definition)) %>% group_by(fp) %>% slice(1) %>% ungroup()
-  es_sizes[[frm]] <- nrow(wb)
-  m <- sl %>% filter(form == frm) %>% mutate(fp = fp(item)) %>%
-    left_join(wb, by = "fp") %>%
-    mutate(status = ifelse(!is.na(item_definition), "auto_exact", "needs_review"),
+  m <- sl %>% filter(form == frm) %>% mutate(key = tolower(item)) %>%
+    left_join(DALL, by = "key") %>%
+    mutate(status = ifelse(!is.na(item_definition), "wordbank", "needs_review"),
            fuzzy_candidate = NA_character_, fuzzy_dist = NA_integer_)
-  ## fuzzy candidate: nearest Wordbank-Spanish item by Levenshtein on the accent-stripped
-  ## fingerprint, for the needs_review rows (so review = confirm/correct, not type from scratch).
-  nr <- which(m$status == "needs_review")
+  nr <- which(m$status == "needs_review")               # residual: nearest dict code by Levenshtein
   if (length(nr) > 0) {
-    D  <- adist(m$fp[nr], wb$fp)                       # needs_review x wordbank distances
-    bi <- max.col(-D, ties.method = "first")          # nearest per row
-    m$fuzzy_candidate[nr] <- wb$item_definition[bi]
+    D  <- adist(m$key[nr], DALL$key); bi <- max.col(-D, ties.method = "first")
+    m$fuzzy_candidate[nr] <- DALL$item_definition[bi]
     m$fuzzy_dist[nr]      <- D[cbind(seq_along(nr), bi)]
   }
   m <- m %>% transmute(short = item, item_definition, status, fuzzy_candidate, fuzzy_dist) %>%
-    arrange(status, fuzzy_dist, short)                # easiest (lowest-distance) needs_review first
+    arrange(status, fuzzy_dist, short)
   out <- here(sprintf("data/intermediates/cdi_short_code_map_es_%s.csv", tolower(frm)))
   write_csv(m, out)
-  cat(sprintf("(1) %s: %d codes -> auto_exact %d, needs_review %d  [%s]\n",
-              frm, nrow(m), sum(m$status == "auto_exact"), sum(m$status == "needs_review"), basename(out)))
+  cat(sprintf("(1) %s: %d codes -> wordbank %d, needs_review %d  [%s]\n",
+              frm, nrow(m), sum(m$status == "wordbank"), sum(m$status == "needs_review"), basename(out)))
 }
 N_ES_WG <- es_sizes[["WG"]]; N_ES_WS <- es_sizes[["WS"]]; N_EN_WS <- 680
 
