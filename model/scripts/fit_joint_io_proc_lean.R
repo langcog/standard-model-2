@@ -42,7 +42,7 @@ tau_sfx <- if (TAU_SLOPE != 1) sprintf("_tau%g", TAU_SLOPE) else ""
 b_sfx   <- if (grepl("inputmulti", BUNDLE)) "_imulti" else ""
 STAN_MODEL <- Sys.getenv("STAN_MODEL", unset = "model/stan/log_irt_long_proc_dp_joint_lean.stan")
 m_sfx   <- if (grepl("rasch", STAN_MODEL)) "_rasch" else ""
-sub_sfx <- if (grepl("sub[0-9]", BUNDLE)) paste0("_", sub(".*(sub[0-9]+x[0-9]+).*", "\\1", BUNDLE)) else ""
+sub_sfx <- if (grepl("sub[0-9]", BUNDLE)) paste0("_", sub(".*(sub[0-9][^.]*)\\.rds$", "\\1", BUNDLE)) else ""
 TAG <- sprintf("joint_io_proc_lean%s_d%d%s%s%s", m_sfx, rung, b_sfx, tau_sfx, sub_sfx)
 cat(sprintf("===== %s =====\n  I=%d A=%d J=%d S=%d N=%d N_lwl=%d V_obs=%d\n",
             TAG, sd$I, sd$A, sd$J, sd$S, sd$N, sd$N_lwl, sd$V_obs))

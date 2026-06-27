@@ -62,3 +62,19 @@ Output: a lean, paper-faithful Rasch-accumulator io-proc model.
 - **Data:** HABLA item-level (digitize?), more BabyView kids.
 - **Anchoring:** decided empirically in Phase 3.
 - So lock the *architecture* now; re-fit for the paper once data + anchoring settle.
+
+---
+
+## Phase 0 RESULT — verified + adopted (2026-06-26)
+50x50 channel-balanced subsample; simplified model reproduces the prior `_mm` lean:
+- **Rasch** (rip lambda, delete s, rip log_p): **21/21** key scalars match (max |z|=0.15).
+- **C=4 -> C=1** collapse: **18/18** match; well-identified science (delta, gamma_in,
+  eff_input_k, partition, sigmas) identical. beta_xi/beta_k0 swing but are prior-dominated
+  on 50 kids (subsample noise; item-class hierarchy is structurally independent of the RT
+  regressions). Verified-equivalent but **NOT adopted** — keep C from the bundle; revisit on
+  full data.
+
+**ADOPTED:** the simplified Rasch content IS now the lean model
+(`model/stan/log_irt_long_proc_dp_joint_lean.stan`); temp `log_irt_long_proc_rasch.stan`
+removed. delta prior widened to N(0,10) in the driver. Production full-data ladder D'0-D'2
+launched (Sherlock array 31622975). Next: Phase 1 (Spanish + sumscore data prep).
