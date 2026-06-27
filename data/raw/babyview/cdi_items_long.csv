@@ -379,7 +379,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 720001,21,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 720001,21,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 720001,21,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-720001,21,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+720001,21,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 720001,21,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 720001,21,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 720001,21,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -1179,7 +1179,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 820001,25,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 820001,25,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 820001,25,WS,dinner,dinner,dinner,games_routines,1,NA,TRUE,TRUE
-820001,25,WS,give_me_five,give me five,give me five!,games_routines,1,NA,TRUE,TRUE
+820001,25,WS,give_me_five,gimme five,give me five!,games_routines,1,NA,TRUE,TRUE
 820001,25,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,1,NA,TRUE,TRUE
 820001,25,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 820001,25,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -1979,7 +1979,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 820001,27,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 820001,27,WS,call,call (on phone),call (on phone),games_routines,1,NA,TRUE,TRUE
 820001,27,WS,dinner,dinner,dinner,games_routines,1,NA,TRUE,TRUE
-820001,27,WS,give_me_five,give me five,give me five!,games_routines,1,NA,TRUE,TRUE
+820001,27,WS,give_me_five,gimme five,give me five!,games_routines,1,NA,TRUE,TRUE
 820001,27,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 820001,27,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 820001,27,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -2779,7 +2779,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 430001,18,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 430001,18,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 430001,18,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-430001,18,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+430001,18,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 430001,18,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 430001,18,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 430001,18,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -3579,7 +3579,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 720001,25,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 720001,25,WS,call,call (on phone),call (on phone),games_routines,1,NA,TRUE,TRUE
 720001,25,WS,dinner,dinner,dinner,games_routines,1,NA,TRUE,TRUE
-720001,25,WS,give_me_five,give me five,give me five!,games_routines,1,NA,TRUE,TRUE
+720001,25,WS,give_me_five,gimme five,give me five!,games_routines,1,NA,TRUE,TRUE
 720001,25,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,1,NA,TRUE,TRUE
 720001,25,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 720001,25,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -4379,7 +4379,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 400001,18,WS,bye,bye,bye,games_routines,0,NA,TRUE,TRUE
 400001,18,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 400001,18,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-400001,18,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+400001,18,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 400001,18,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 400001,18,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 400001,18,WS,hello,hello,hello,games_routines,0,NA,TRUE,TRUE
@@ -5179,7 +5179,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 430001,21,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 430001,21,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 430001,21,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-430001,21,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+430001,21,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 430001,21,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 430001,21,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 430001,21,WS,hello,hello,hello,games_routines,0,NA,TRUE,TRUE
@@ -5979,7 +5979,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 400001,21,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 400001,21,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 400001,21,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-400001,21,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+400001,21,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 400001,21,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 400001,21,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 400001,21,WS,hello,hello,hello,games_routines,0,NA,TRUE,TRUE
@@ -6779,7 +6779,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 820001,32,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 820001,32,WS,call,call (on phone),call (on phone),games_routines,1,NA,TRUE,TRUE
 820001,32,WS,dinner,dinner,dinner,games_routines,1,NA,TRUE,TRUE
-820001,32,WS,give_me_five,give me five,give me five!,games_routines,1,NA,TRUE,TRUE
+820001,32,WS,give_me_five,gimme five,give me five!,games_routines,1,NA,TRUE,TRUE
 820001,32,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,1,NA,TRUE,TRUE
 820001,32,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 820001,32,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -7579,7 +7579,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 400002,18,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 400002,18,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 400002,18,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-400002,18,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+400002,18,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 400002,18,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 400002,18,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 400002,18,WS,hello,hello,hello,games_routines,0,NA,TRUE,TRUE
@@ -8379,7 +8379,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 490001,18,WS,bye,bye,bye,games_routines,0,NA,TRUE,TRUE
 490001,18,WS,call,call (on phone),call (on phone),games_routines,1,NA,TRUE,TRUE
 490001,18,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-490001,18,WS,give_me_five,give me five,give me five!,games_routines,1,NA,TRUE,TRUE
+490001,18,WS,give_me_five,gimme five,give me five!,games_routines,1,NA,TRUE,TRUE
 490001,18,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 490001,18,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 490001,18,WS,hello,hello,hello,games_routines,0,NA,TRUE,TRUE
@@ -9179,7 +9179,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 430001,23,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 430001,23,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 430001,23,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-430001,23,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+430001,23,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 430001,23,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 430001,23,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 430001,23,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -9979,7 +9979,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 400003,19,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 400003,19,WS,call,call (on phone),call (on phone),games_routines,1,NA,TRUE,TRUE
 400003,19,WS,dinner,dinner,dinner,games_routines,1,NA,TRUE,TRUE
-400003,19,WS,give_me_five,give me five,give me five!,games_routines,1,NA,TRUE,TRUE
+400003,19,WS,give_me_five,gimme five,give me five!,games_routines,1,NA,TRUE,TRUE
 400003,19,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,1,NA,TRUE,TRUE
 400003,19,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 400003,19,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -10779,7 +10779,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 400002,21,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 400002,21,WS,call,call (on phone),call (on phone),games_routines,1,NA,TRUE,TRUE
 400002,21,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-400002,21,WS,give_me_five,give me five,give me five!,games_routines,1,NA,TRUE,TRUE
+400002,21,WS,give_me_five,gimme five,give me five!,games_routines,1,NA,TRUE,TRUE
 400002,21,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,1,NA,TRUE,TRUE
 400002,21,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 400002,21,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -11579,7 +11579,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 320001,19,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 320001,19,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 320001,19,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-320001,19,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+320001,19,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 320001,19,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 320001,19,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 320001,19,WS,hello,hello,hello,games_routines,0,NA,TRUE,TRUE
@@ -12379,7 +12379,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 400001,24,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 400001,24,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 400001,24,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-400001,24,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+400001,24,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 400001,24,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 400001,24,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 400001,24,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -13179,7 +13179,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 370001,18,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 370001,18,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 370001,18,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-370001,18,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+370001,18,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 370001,18,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 370001,18,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 370001,18,WS,hello,hello,hello,games_routines,0,NA,TRUE,TRUE
@@ -13979,7 +13979,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 510001,18,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 510001,18,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 510001,18,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-510001,18,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+510001,18,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 510001,18,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 510001,18,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 510001,18,WS,hello,hello,hello,games_routines,0,NA,TRUE,TRUE
@@ -14779,7 +14779,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 240001,18,WS,bye,bye,bye,games_routines,0,NA,TRUE,TRUE
 240001,18,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 240001,18,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-240001,18,WS,give_me_five,give me five,give me five!,games_routines,1,NA,TRUE,TRUE
+240001,18,WS,give_me_five,gimme five,give me five!,games_routines,1,NA,TRUE,TRUE
 240001,18,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 240001,18,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 240001,18,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -15579,7 +15579,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 400001,27,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 400001,27,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 400001,27,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-400001,27,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+400001,27,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 400001,27,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 400001,27,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 400001,27,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -16379,7 +16379,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 430001,27,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 430001,27,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 430001,27,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-430001,27,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+430001,27,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 430001,27,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 430001,27,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 430001,27,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -17179,7 +17179,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 400003,22,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 400003,22,WS,call,call (on phone),call (on phone),games_routines,1,NA,TRUE,TRUE
 400003,22,WS,dinner,dinner,dinner,games_routines,1,NA,TRUE,TRUE
-400003,22,WS,give_me_five,give me five,give me five!,games_routines,1,NA,TRUE,TRUE
+400003,22,WS,give_me_five,gimme five,give me five!,games_routines,1,NA,TRUE,TRUE
 400003,22,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,1,NA,TRUE,TRUE
 400003,22,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 400003,22,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -17979,7 +17979,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 400002,25,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 400002,25,WS,call,call (on phone),call (on phone),games_routines,1,NA,TRUE,TRUE
 400002,25,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-400002,25,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+400002,25,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 400002,25,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 400002,25,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 400002,25,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -18779,7 +18779,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 510002,18,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 510002,18,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 510002,18,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-510002,18,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+510002,18,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 510002,18,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 510002,18,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 510002,18,WS,hello,hello,hello,games_routines,0,NA,TRUE,TRUE
@@ -19579,7 +19579,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 320001,23,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 320001,23,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 320001,23,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-320001,23,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+320001,23,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 320001,23,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 320001,23,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 320001,23,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -20379,7 +20379,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 320002,18,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 320002,18,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 320002,18,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-320002,18,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+320002,18,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 320002,18,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 320002,18,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 320002,18,WS,hello,hello,hello,games_routines,0,NA,TRUE,TRUE
@@ -21179,7 +21179,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 370001,21,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 370001,21,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 370001,21,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-370001,21,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+370001,21,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 370001,21,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 370001,21,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 370001,21,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -21979,7 +21979,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 510001,21,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 510001,21,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 510001,21,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-510001,21,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+510001,21,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 510001,21,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,1,NA,TRUE,TRUE
 510001,21,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 510001,21,WS,hello,hello,hello,games_routines,0,NA,TRUE,TRUE
@@ -22779,7 +22779,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 320003,18,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 320003,18,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 320003,18,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-320003,18,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+320003,18,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 320003,18,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 320003,18,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 320003,18,WS,hello,hello,hello,games_routines,0,NA,TRUE,TRUE
@@ -23579,7 +23579,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 230001,19,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 230001,19,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 230001,19,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-230001,19,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+230001,19,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 230001,19,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 230001,19,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 230001,19,WS,hello,hello,hello,games_routines,0,NA,TRUE,TRUE
@@ -24379,7 +24379,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 420001,20,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 420001,20,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 420001,20,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-420001,20,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+420001,20,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 420001,20,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 420001,20,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 420001,20,WS,hello,hello,hello,games_routines,0,NA,TRUE,TRUE
@@ -25179,7 +25179,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 240001,21,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 240001,21,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 240001,21,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-240001,21,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+240001,21,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 240001,21,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 240001,21,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 240001,21,WS,hello,hello,hello,games_routines,0,NA,TRUE,TRUE
@@ -25979,7 +25979,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 430001,30,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 430001,30,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 430001,30,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-430001,30,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+430001,30,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 430001,30,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 430001,30,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 430001,30,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -26779,7 +26779,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 400002,27,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 400002,27,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 400002,27,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-400002,27,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+400002,27,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 400002,27,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 400002,27,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 400002,27,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -27579,7 +27579,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 220001,18,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 220001,18,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 220001,18,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-220001,18,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+220001,18,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 220001,18,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 220001,18,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 220001,18,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -28379,7 +28379,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 400001,30,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 400001,30,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 400001,30,WS,dinner,dinner,dinner,games_routines,1,NA,TRUE,TRUE
-400001,30,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+400001,30,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 400001,30,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,1,NA,TRUE,TRUE
 400001,30,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 400001,30,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -29179,7 +29179,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 510002,21,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 510002,21,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 510002,21,WS,dinner,dinner,dinner,games_routines,1,NA,TRUE,TRUE
-510002,21,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+510002,21,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 510002,21,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 510002,21,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 510002,21,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -29979,7 +29979,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 320001,25,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 320001,25,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 320001,25,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-320001,25,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+320001,25,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 320001,25,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,1,NA,TRUE,TRUE
 320001,25,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 320001,25,WS,hello,hello,hello,games_routines,0,NA,TRUE,TRUE
@@ -30779,7 +30779,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 320003,21,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 320003,21,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 320003,21,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-320003,21,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+320003,21,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 320003,21,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 320003,21,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 320003,21,WS,hello,hello,hello,games_routines,0,NA,TRUE,TRUE
@@ -31579,7 +31579,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 320002,21,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 320002,21,WS,call,call (on phone),call (on phone),games_routines,1,NA,TRUE,TRUE
 320002,21,WS,dinner,dinner,dinner,games_routines,1,NA,TRUE,TRUE
-320002,21,WS,give_me_five,give me five,give me five!,games_routines,1,NA,TRUE,TRUE
+320002,21,WS,give_me_five,gimme five,give me five!,games_routines,1,NA,TRUE,TRUE
 320002,21,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,1,NA,TRUE,TRUE
 320002,21,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 320002,21,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -32379,7 +32379,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 420001,23,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 420001,23,WS,call,call (on phone),call (on phone),games_routines,1,NA,TRUE,TRUE
 420001,23,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-420001,23,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+420001,23,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 420001,23,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 420001,23,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 420001,23,WS,hello,hello,hello,games_routines,0,NA,TRUE,TRUE
@@ -33179,7 +33179,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 510001,24,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 510001,24,WS,call,call (on phone),call (on phone),games_routines,1,NA,TRUE,TRUE
 510001,24,WS,dinner,dinner,dinner,games_routines,1,NA,TRUE,TRUE
-510001,24,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+510001,24,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 510001,24,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,1,NA,TRUE,TRUE
 510001,24,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 510001,24,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -33979,7 +33979,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 400002,30,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 400002,30,WS,call,call (on phone),call (on phone),games_routines,1,NA,TRUE,TRUE
 400002,30,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-400002,30,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+400002,30,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 400002,30,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 400002,30,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 400002,30,WS,hello,hello,hello,games_routines,0,NA,TRUE,TRUE
@@ -34779,7 +34779,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 510002,24,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 510002,24,WS,call,call (on phone),call (on phone),games_routines,1,NA,TRUE,TRUE
 510002,24,WS,dinner,dinner,dinner,games_routines,1,NA,TRUE,TRUE
-510002,24,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+510002,24,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 510002,24,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 510002,24,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 510002,24,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -35579,7 +35579,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 320001,28,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 320001,28,WS,call,call (on phone),call (on phone),games_routines,1,NA,TRUE,TRUE
 320001,28,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-320001,28,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+320001,28,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 320001,28,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,1,NA,TRUE,TRUE
 320001,28,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 320001,28,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -36379,7 +36379,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 360001,18,WS,bye,bye,bye,games_routines,0,NA,TRUE,TRUE
 360001,18,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 360001,18,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-360001,18,WS,give_me_five,give me five,give me five!,games_routines,1,NA,TRUE,TRUE
+360001,18,WS,give_me_five,gimme five,give me five!,games_routines,1,NA,TRUE,TRUE
 360001,18,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 360001,18,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 360001,18,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -37179,7 +37179,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 220001,21,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 220001,21,WS,call,call (on phone),call (on phone),games_routines,1,NA,TRUE,TRUE
 220001,21,WS,dinner,dinner,dinner,games_routines,1,NA,TRUE,TRUE
-220001,21,WS,give_me_five,give me five,give me five!,games_routines,1,NA,TRUE,TRUE
+220001,21,WS,give_me_five,gimme five,give me five!,games_routines,1,NA,TRUE,TRUE
 220001,21,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,1,NA,TRUE,TRUE
 220001,21,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 220001,21,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -37979,7 +37979,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 420001,25,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 420001,25,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 420001,25,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-420001,25,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+420001,25,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 420001,25,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 420001,25,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 420001,25,WS,hello,hello,hello,games_routines,0,NA,TRUE,TRUE
@@ -38779,7 +38779,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 510001,27,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 510001,27,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 510001,27,WS,dinner,dinner,dinner,games_routines,1,NA,TRUE,TRUE
-510001,27,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+510001,27,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 510001,27,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,1,NA,TRUE,TRUE
 510001,27,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 510001,27,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -39579,7 +39579,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 320003,24,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 320003,24,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 320003,24,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-320003,24,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+320003,24,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 320003,24,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 320003,24,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 320003,24,WS,hello,hello,hello,games_routines,0,NA,TRUE,TRUE
@@ -40379,7 +40379,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 240001,27,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 240001,27,WS,call,call (on phone),call (on phone),games_routines,1,NA,TRUE,TRUE
 240001,27,WS,dinner,dinner,dinner,games_routines,1,NA,TRUE,TRUE
-240001,27,WS,give_me_five,give me five,give me five!,games_routines,1,NA,TRUE,TRUE
+240001,27,WS,give_me_five,gimme five,give me five!,games_routines,1,NA,TRUE,TRUE
 240001,27,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 240001,27,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 240001,27,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -41179,7 +41179,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 320002,25,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 320002,25,WS,call,call (on phone),call (on phone),games_routines,1,NA,TRUE,TRUE
 320002,25,WS,dinner,dinner,dinner,games_routines,1,NA,TRUE,TRUE
-320002,25,WS,give_me_five,give me five,give me five!,games_routines,1,NA,TRUE,TRUE
+320002,25,WS,give_me_five,gimme five,give me five!,games_routines,1,NA,TRUE,TRUE
 320002,25,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,1,NA,TRUE,TRUE
 320002,25,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 320002,25,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -41979,7 +41979,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 380001,18,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 380001,18,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 380001,18,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-380001,18,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+380001,18,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 380001,18,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 380001,18,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 380001,18,WS,hello,hello,hello,games_routines,0,NA,TRUE,TRUE
@@ -42779,7 +42779,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 220001,23,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 220001,23,WS,call,call (on phone),call (on phone),games_routines,1,NA,TRUE,TRUE
 220001,23,WS,dinner,dinner,dinner,games_routines,1,NA,TRUE,TRUE
-220001,23,WS,give_me_five,give me five,give me five!,games_routines,1,NA,TRUE,TRUE
+220001,23,WS,give_me_five,gimme five,give me five!,games_routines,1,NA,TRUE,TRUE
 220001,23,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,1,NA,TRUE,TRUE
 220001,23,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 220001,23,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -43579,7 +43579,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 360001,21,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 360001,21,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 360001,21,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-360001,21,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+360001,21,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 360001,21,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 360001,21,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 360001,21,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -44379,7 +44379,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 320001,31,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 320001,31,WS,call,call (on phone),call (on phone),games_routines,1,NA,TRUE,TRUE
 320001,31,WS,dinner,dinner,dinner,games_routines,1,NA,TRUE,TRUE
-320001,31,WS,give_me_five,give me five,give me five!,games_routines,1,NA,TRUE,TRUE
+320001,31,WS,give_me_five,gimme five,give me five!,games_routines,1,NA,TRUE,TRUE
 320001,31,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,1,NA,TRUE,TRUE
 320001,31,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 320001,31,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -45179,7 +45179,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 510002,27,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 510002,27,WS,call,call (on phone),call (on phone),games_routines,1,NA,TRUE,TRUE
 510002,27,WS,dinner,dinner,dinner,games_routines,1,NA,TRUE,TRUE
-510002,27,WS,give_me_five,give me five,give me five!,games_routines,1,NA,TRUE,TRUE
+510002,27,WS,give_me_five,gimme five,give me five!,games_routines,1,NA,TRUE,TRUE
 510002,27,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,1,NA,TRUE,TRUE
 510002,27,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 510002,27,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -45979,7 +45979,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 510001,30,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 510001,30,WS,call,call (on phone),call (on phone),games_routines,1,NA,TRUE,TRUE
 510001,30,WS,dinner,dinner,dinner,games_routines,1,NA,TRUE,TRUE
-510001,30,WS,give_me_five,give me five,give me five!,games_routines,1,NA,TRUE,TRUE
+510001,30,WS,give_me_five,gimme five,give me five!,games_routines,1,NA,TRUE,TRUE
 510001,30,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,1,NA,TRUE,TRUE
 510001,30,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 510001,30,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -46779,7 +46779,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 320003,27,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 320003,27,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 320003,27,WS,dinner,dinner,dinner,games_routines,1,NA,TRUE,TRUE
-320003,27,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+320003,27,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 320003,27,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 320003,27,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 320003,27,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -47579,7 +47579,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 320002,27,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 320002,27,WS,call,call (on phone),call (on phone),games_routines,1,NA,TRUE,TRUE
 320002,27,WS,dinner,dinner,dinner,games_routines,1,NA,TRUE,TRUE
-320002,27,WS,give_me_five,give me five,give me five!,games_routines,1,NA,TRUE,TRUE
+320002,27,WS,give_me_five,gimme five,give me five!,games_routines,1,NA,TRUE,TRUE
 320002,27,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,1,NA,TRUE,TRUE
 320002,27,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 320002,27,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -48379,7 +48379,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 240001,30,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 240001,30,WS,call,call (on phone),call (on phone),games_routines,1,NA,TRUE,TRUE
 240001,30,WS,dinner,dinner,dinner,games_routines,1,NA,TRUE,TRUE
-240001,30,WS,give_me_five,give me five,give me five!,games_routines,1,NA,TRUE,TRUE
+240001,30,WS,give_me_five,gimme five,give me five!,games_routines,1,NA,TRUE,TRUE
 240001,30,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 240001,30,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 240001,30,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -49179,7 +49179,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 380001,21,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 380001,21,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 380001,21,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-380001,21,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+380001,21,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 380001,21,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 380001,21,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 380001,21,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -49979,7 +49979,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 220001,27,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 220001,27,WS,call,call (on phone),call (on phone),games_routines,1,NA,TRUE,TRUE
 220001,27,WS,dinner,dinner,dinner,games_routines,1,NA,TRUE,TRUE
-220001,27,WS,give_me_five,give me five,give me five!,games_routines,1,NA,TRUE,TRUE
+220001,27,WS,give_me_five,gimme five,give me five!,games_routines,1,NA,TRUE,TRUE
 220001,27,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,1,NA,TRUE,TRUE
 220001,27,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 220001,27,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -50779,7 +50779,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 300001,18,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 300001,18,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 300001,18,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-300001,18,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+300001,18,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 300001,18,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 300001,18,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 300001,18,WS,hello,hello,hello,games_routines,0,NA,TRUE,TRUE
@@ -51579,7 +51579,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 510002,30,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 510002,30,WS,call,call (on phone),call (on phone),games_routines,1,NA,TRUE,TRUE
 510002,30,WS,dinner,dinner,dinner,games_routines,1,NA,TRUE,TRUE
-510002,30,WS,give_me_five,give me five,give me five!,games_routines,1,NA,TRUE,TRUE
+510002,30,WS,give_me_five,gimme five,give me five!,games_routines,1,NA,TRUE,TRUE
 510002,30,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,1,NA,TRUE,TRUE
 510002,30,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 510002,30,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -52379,7 +52379,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 270002,18,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 270002,18,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 270002,18,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-270002,18,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+270002,18,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 270002,18,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 270002,18,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 270002,18,WS,hello,hello,hello,games_routines,0,NA,TRUE,TRUE
@@ -53179,7 +53179,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 420001,31,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 420001,31,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 420001,31,WS,dinner,dinner,dinner,games_routines,1,NA,TRUE,TRUE
-420001,31,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+420001,31,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 420001,31,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 420001,31,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 420001,31,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -53979,7 +53979,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 320003,30,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 320003,30,WS,call,call (on phone),call (on phone),games_routines,1,NA,TRUE,TRUE
 320003,30,WS,dinner,dinner,dinner,games_routines,1,NA,TRUE,TRUE
-320003,30,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+320003,30,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 320003,30,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 320003,30,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 320003,30,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -54779,7 +54779,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 320002,30,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 320002,30,WS,call,call (on phone),call (on phone),games_routines,1,NA,TRUE,TRUE
 320002,30,WS,dinner,dinner,dinner,games_routines,1,NA,TRUE,TRUE
-320002,30,WS,give_me_five,give me five,give me five!,games_routines,1,NA,TRUE,TRUE
+320002,30,WS,give_me_five,gimme five,give me five!,games_routines,1,NA,TRUE,TRUE
 320002,30,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,1,NA,TRUE,TRUE
 320002,30,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 320002,30,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -55579,7 +55579,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 380001,24,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 380001,24,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 380001,24,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-380001,24,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+380001,24,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 380001,24,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 380001,24,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 380001,24,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -56379,7 +56379,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 640001,18,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 640001,18,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 640001,18,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-640001,18,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+640001,18,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 640001,18,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 640001,18,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 640001,18,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -57179,7 +57179,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 510003,18,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 510003,18,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 510003,18,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-510003,18,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+510003,18,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 510003,18,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 510003,18,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 510003,18,WS,hello,hello,hello,games_routines,0,NA,TRUE,TRUE
@@ -57979,7 +57979,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 530001,18,WS,bye,bye,bye,games_routines,0,NA,TRUE,TRUE
 530001,18,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 530001,18,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-530001,18,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+530001,18,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 530001,18,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 530001,18,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 530001,18,WS,hello,hello,hello,games_routines,0,NA,TRUE,TRUE
@@ -58779,7 +58779,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 220001,30,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 220001,30,WS,call,call (on phone),call (on phone),games_routines,1,NA,TRUE,TRUE
 220001,30,WS,dinner,dinner,dinner,games_routines,1,NA,TRUE,TRUE
-220001,30,WS,give_me_five,give me five,give me five!,games_routines,1,NA,TRUE,TRUE
+220001,30,WS,give_me_five,gimme five,give me five!,games_routines,1,NA,TRUE,TRUE
 220001,30,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,1,NA,TRUE,TRUE
 220001,30,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 220001,30,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -59579,7 +59579,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 300001,21,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 300001,21,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 300001,21,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-300001,21,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+300001,21,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 300001,21,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 300001,21,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 300001,21,WS,hello,hello,hello,games_routines,0,NA,TRUE,TRUE
@@ -60379,7 +60379,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 270002,21,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 270002,21,WS,call,call (on phone),call (on phone),games_routines,1,NA,TRUE,TRUE
 270002,21,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-270002,21,WS,give_me_five,give me five,give me five!,games_routines,1,NA,TRUE,TRUE
+270002,21,WS,give_me_five,gimme five,give me five!,games_routines,1,NA,TRUE,TRUE
 270002,21,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 270002,21,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 270002,21,WS,hello,hello,hello,games_routines,0,NA,TRUE,TRUE
@@ -61179,7 +61179,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 430003,17,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 430003,17,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 430003,17,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-430003,17,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+430003,17,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 430003,17,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 430003,17,WS,go_potty,go potty,go potty,games_routines,1,NA,TRUE,TRUE
 430003,17,WS,hello,hello,hello,games_routines,0,NA,TRUE,TRUE
@@ -61979,7 +61979,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 430004,18,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 430004,18,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 430004,18,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-430004,18,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+430004,18,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 430004,18,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 430004,18,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 430004,18,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE
@@ -62779,7 +62779,7 @@ subject_id,age,form,item_key,item,definition,category,produces,comprehends,is_pr
 570001,18,WS,bye,bye,bye,games_routines,1,NA,TRUE,TRUE
 570001,18,WS,call,call (on phone),call (on phone),games_routines,0,NA,TRUE,TRUE
 570001,18,WS,dinner,dinner,dinner,games_routines,0,NA,TRUE,TRUE
-570001,18,WS,give_me_five,give me five,give me five!,games_routines,0,NA,TRUE,TRUE
+570001,18,WS,give_me_five,gimme five,give me five!,games_routines,0,NA,TRUE,TRUE
 570001,18,WS,gonna_get_you,gonna get you,gonna get you!,games_routines,0,NA,TRUE,TRUE
 570001,18,WS,go_potty,go potty,go potty,games_routines,0,NA,TRUE,TRUE
 570001,18,WS,hello,hello,hello,games_routines,1,NA,TRUE,TRUE

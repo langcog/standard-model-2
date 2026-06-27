@@ -8,7 +8,7 @@ cockadoodledoo,cock-a-doodle-doo,spelling/hyphenation
 so_big,so big,strip trailing punctuation
 pattycake,patty cake,webCDI one-word vs Wordbank two-word
 gonna_get_you,gonna get you,strip trailing punctuation
-give_me_five,give me five,strip trailing punctuation
+give_me_five,gimme five,same item as Wordbank 'gimme five' (MCF crosswalk review)
 dress,dress (object),homonym -> clothing/object sense
 toy,toy (object),homonym -> object sense
 telephone,telephone,webCDI definition had /cellphone* suffix

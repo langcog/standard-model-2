@@ -228,20 +228,21 @@ model {
     log_input_obs ~ normal(in_mean, in_sd);
   }
 
-  // ---- Sumscore count likelihood: k ~ Normal-approx PoissonBinomial over the form's items ---- //
+  // ---- Sumscore count likelihood: k ~ Binomial(n, mean produced rate over the form's items) ---- //
+  // Binomial(n, sum_j p_j / n) has the right [0,n] support + small-count skew and pins theta via
+  // the mean (E[k] = sum_j p_j); avoids the Normal-approx's toxic theta-dependent variance, which
+  // biased acceleration for small counts (e.g. HABLA-WG ~9%). p_j = inv_logit(theta - delta_j), Rasch.
   if (n_sum > 0) {
     for (a in 1:n_sum) {
       int ch = sum_child[a];
+      int nf = form_len[sum_form[a]];
       real th = xi[ch] + log_H + kappa[ch] * sum_log_age[a];   // latent ability at this admin's age
       real mu_k = 0;
-      real var_k = 0;
-      for (m in 1:form_len[sum_form[a]]) {
+      for (m in 1:nf) {
         int j = form_item[form_start[sum_form[a]] + m - 1];
-        real p = inv_logit(th - delta_j[j]);                    // same item model as the CDI (Rasch)
-        mu_k += p;
-        var_k += p * (1 - p);
+        mu_k += inv_logit(th - delta_j[j]);
       }
-      sum_k[a] ~ normal(mu_k, sqrt(var_k));
+      sum_k[a] ~ binomial(nf, mu_k / nf);
     }
   }
 }

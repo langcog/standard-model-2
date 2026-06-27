@@ -101,6 +101,7 @@ dry (action),WS,dry1,dry1,dry1,dry1,NA,dry.action,5,manual_disambig
 french fries,WS,frnchfrs,frnchfrs,frnchfrs,frnchfrs,NA,french_fries,5,manual_disambig
 garbage,WS,garbage,garbage,garbage,garbage,NA,garbage,5,manual_disambig
 gas station,WS,gasstation,gasstation,gasstation,gasstation,NA,gas_station,5,manual_disambig
+gimme five,WS,givemefv,givemefv,givemefv,givemefv,NA,give_me_five,5,manual_disambig
 go potty,WS,gopotty,gopotty,gopotty,gopotty,NA,go_potty,5,manual_disambig
 gonna get you,WS,gonnagty,gonnagty,gonnagty,gonnagty,NA,gonna_get_you,5,manual_disambig
 gonna/going to,WS,gonna,gonna,gonna,gonna,NA,gonna,5,manual_disambig
@@ -164,9 +165,7 @@ work (action),WS,work2,work2,work2,work2,NA,work.action,5,manual_disambig
 yellow,WS,yellow,yellow,yellow,yellow,NA,yellow,5,manual_disambig
 yesterday,WS,yesterdy,yesterdy,yesterdy,yesterdy,NA,yesterday,5,manual_disambig
 yourself,WS,yourself,yourself,yourself,yourself,NA,yourself,5,manual_disambig
-gimme five,WS,givemefv,givemefv,givemefv,givemefv,NA,NA,4,manual_disambig
 inside,WG,NA,NA,NA,NA,Talk_inside,inside,2,manual_disambig
-give me five,WS,NA,NA,NA,NA,NA,give_me_five,1,babyview_only
 I,WG/WS,i,i,i,i,Talk_i,i,6,
 TV,WG/WS,tv,tv,tv,tv,Talk_tv,tv,6,
 airplane,WG/WS,airplane,airplane,airplane,airplane,Talk_airplane,airplane,6,
