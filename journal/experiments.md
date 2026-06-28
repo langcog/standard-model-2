@@ -2282,16 +2282,33 @@ Input→accel per source:
 
 **The refined conclusion: it's not "Spanish vs sumscore" — *no* new cohort individually
 identifies the channel.** Even clean Spanish item-level (29 kids, input at one age) is
-uninformative (CI [−6, 1.3] overlaps the English 0.85). Only the English both-channel 142
-has the configuration (dense item-level + multi-age input at scale) to pin input→accel. So
-the bilingual additions can only add noise + inflate σ_ζ — explaining both the attenuation
-and the destabilization without any "Spanish is different" story.
+uninformative (CI [−6, 1.3] overlaps the English 0.85). Only the English data has the
+configuration (dense item-level + multi-age input at scale) to pin input→accel.
 
-**Next.** (1) Re-fit at 2000/2000 + `adapt_delta` 0.97 to converge `gamma_in` (or
-accept it's weakly identified and report the partition with that caveat). (2) Richer
-extract (`mu_c[5]`, Spanish per-child ξ/κ) for the full scale check beyond the RT
-proxy. (3) Isolation fits to confirm the mechanism: EN+ELENA-count (no HABLA) vs
-EN+SLENA-item (no count) — predict the HABLA count-only cohort is the destabilizer.
+**Updated overlap (the "142" was stale) + a possible language signal**
+(`fit_input_accel_by_dataset.R` + `input_accel_by_dataset.png`). Current English overlap:
+**item+input = 219, item+input+RT = 166** (the historical glmer "both"=142 was input∩RT on
+an older bundle; SEEDLingS RT etc. added since). Fitting input→accel **per dataset** (input
+only needs item+input, not RT):
+
+| dataset | lang | n | input→accel | p |
+|---|---|--:|--:|--:|
+| AM2018 | EN | 66 | **+1.33** | .023 |
+| FMW2013 | EN | 87 | +0.71 | .12 |
+| babyview | EN | 22 | +1.06 | .21 |
+| seedlings | EN | 44 | +0.50 | .47 |
+| **SLENA** | **ES** | 29 | **−2.35** | .21 |
+
+**All four English cohorts point positive** (0.5–1.3, replicated, clustering near the pooled
+~0.85) — input→accel is a robust *English* phenomenon. **SLENA Spanish is the lone negative.**
+Its CI [−6, 1.3] is too wide to *prove* a language difference (overlaps the English range), but
+the sign flip flags that the destabilization may be partly a real EN/ES disagreement the
+*shared* `gamma_in` can't absorb — not only underpower. MCF's "language thing?" hypothesis.
+
+**Next.** (1) **Language-varying `gamma_in`** (`gamma_in_en`, `gamma_in_es`) — the clean test:
+let the data say whether Spanish's input→accel genuinely differs vs is just noisy. (2) Re-fit
+at 2000/2000 + `adapt_delta` 0.97 to converge the (shared) `gamma_in`. (3) Richer extract
+(`mu_c[5]`, Spanish per-child ξ/κ) for the full scale check beyond the RT proxy.
 
 ---
 
