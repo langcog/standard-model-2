@@ -2201,6 +2201,71 @@ slurm limit (a 6 h cap timed out mid-sample). LOO skipped throughout.
 
 ---
 
+## 🟢 38. Bilingual ("bi-lean") io-proc fit + the input→acceleration destabilization (2026-06-28)
+
+**Goal.** First fit of the bilingual extension: English item-level + **Spanish**
+item-level (SLENA / WF2013, canonicalized to Wordbank-ES) + the **sumscore count
+branch** (ELENA-WS English 2nd timepoints; HABLA Spanish count-only). Tests (a) does
+the input→accel / proc→efficiency double dissociation hold bilingually, (b) does
+Spanish land on-scale anchor-free (Phase-3).
+
+**Setup.** `prepare_bilingual_bundle.R` augments the full English io-proc MM bundle:
+Spanish items = a non-overlapping bank (705 items, one new class `cc=5`; shared
+`mu_mu_c` hyperprior softly ties scales), Spanish LWL/input on 2 new studies, count
+branch over 3 forms (EN-WS / ES-WG / ES-WS). **I=558 J=1386 C=5 S=8 N=907k n_sum=387.**
+Model `log_irt_long_proc_bilingual.stan` (Binomial count branch, held-out validated,
+entry-adjacent). Sherlock job 31699524, D'2, 1000/1000, ~4 h, 0 errors.
+
+**Result — mostly a success.**
+- **Converged core:** δ, all σ's, ψ, all 8 τ_s have r̂ ≤ 1.02.
+- **Spanish on-scale ✓** (Phase-3 worry didn't materialize): Spanish RT levels
+  `τ_s[7]=6.83` (WF2013), `τ_s[8]=6.62` (HABLA) sit inside English `τ_s[1–6]=6.47–6.95`;
+  shared **δ=9.15** in the English ~9–10 range. The soft scale-tie held anchor-free.
+- **proc→efficiency clean + strong:** `eff_proc_xi = −1.03` [−1.31, −0.75], r̂ 1.04.
+  proc→accel null (`eff_proc_k = −0.32`, CI ∋ 0) — correct.
+- **input→acceleration destabilized:** `eff_input_k = 0.37` [−0.11, 0.89], **r̂ 1.13,
+  ess 22** — `gamma_in` did not mix.
+
+**Why a "moderate" data add tipped it over — the channel was already fragile.**
+Direct EN-only vs bilingual comparison (same model, same rung):
+
+| estimate | kids | input→accel | r̂ / ess | source |
+|---|--:|--:|--:|---|
+| glmer "both" | 142 | **0.85** [0.14,1.55] | p=.018 | input **+ longitudinal item-level** only |
+| io-proc-lean EN | 403 | 0.40 [−0.28,1.05] | 1.03 / 134 | +one-timepoint / input-only kids |
+| **bilingual** | 558 | 0.37 [−0.11,0.89] | **1.13 / 22** | +count-only (HABLA) kids |
+
+Two distinct effects, both pointing at the same cause:
+1. **Attenuation (0.85→0.40) happened already in English.** `gamma_in` is identified
+   ONLY by kids with input AND enough longitudinal vocab to pin their individual κ.
+   glmer structurally restricts to those 142 → 0.85. The Bayesian model adds ~261
+   one-timepoint/input-only English kids whose κ partial-pools to ≈ population mean;
+   they carry input variance with ≈flat κ → null-signal points that flatten the
+   κ-vs-input slope. So even EN-only `gamma_in` was the worst-mixing parameter
+   (ess ~134 vs 1400–4400 for everything else) — sitting on a shallow ridge.
+2. **Destabilization (ess 134→22) from the count cohorts.** A count-only kid's κ is
+   set by the *structural* equation κ = 1+δ+`gamma_in`·input_dev+… and only weakly
+   checked by 1–2 sumscores. So `gamma_in` partly *predicts* κ for the very kids that
+   can't independently identify κ → a feedback that turns the shallow ridge into a
+   poorly-mixing one. The point estimate barely moved (0.40→0.37) but the sampling
+   geometry tipped. ~113 count/Spanish kids added right where the channel was thinnest.
+
+**δ also fell 10.09→9.15** (converged, ess 1242) — a real shift worth understanding
+(Spanish low-difficulty items + count information re-weighting the acceleration).
+
+**Diagnosis corroborated by the coefficient plot** (`studies/io_proc_glmer/`,
+`io_partition_proto`): glmer-both (clean 142) → lean (403) → bilingual (558) shows the
+input-acceleration estimate attenuating and its CI widening monotonically, while
+proc→efficiency is stable across all three.
+
+**Next.** (1) Re-fit at 2000/2000 + `adapt_delta` 0.97 to converge `gamma_in` (or
+accept it's weakly identified and report the partition with that caveat). (2) Richer
+extract (`mu_c[5]`, Spanish per-child ξ/κ) for the full scale check beyond the RT
+proxy. (3) Isolation fits to confirm the mechanism: EN+ELENA-count (no HABLA) vs
+EN+SLENA-item (no count) — predict the HABLA count-only cohort is the destabilizer.
+
+---
+
 ## Backlog (⚪)
 
 ### Data / robustness
