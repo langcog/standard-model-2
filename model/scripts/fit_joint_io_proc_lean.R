@@ -44,6 +44,7 @@ STAN_MODEL <- Sys.getenv("STAN_MODEL", unset = "model/stan/log_irt_long_proc_dp_
 m_sfx   <- if (grepl("rasch", STAN_MODEL)) "_rasch" else if (grepl("io_count", STAN_MODEL)) "_io" else ""
 sub_sfx <- if (grepl("sub[0-9]", BUNDLE)) paste0("_", sub(".*(sub[0-9][^.]*)\\.rds$", "\\1", BUNDLE)) else ""
 TAG <- sprintf("joint_io_proc_lean%s_d%d%s%s%s", m_sfx, rung, b_sfx, tau_sfx, sub_sfx)
+TAG <- paste0(TAG, Sys.getenv("STAN_TAG_SFX", ""))   # optional suffix (e.g. convergence refit)
 cat(sprintf("===== %s =====\n  I=%d A=%d J=%d S=%d N=%d N_lwl=%d V_obs=%d\n",
             TAG, sd$I, sd$A, sd$J, sd$S, sd$N, sd$N_lwl, sd$V_obs))
 cat(sprintf("  refs: sigma_r_ref=%.3f sigma_rt0_ref=%.3f -> raw prior SDs: gamma_in=%.2f beta_xi=%.2f beta_k0=%.2f  [tau_slope=%.2f tau_level=%.2f]\n",
