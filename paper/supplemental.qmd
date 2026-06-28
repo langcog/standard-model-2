@@ -230,6 +230,31 @@ table1 |>
   kableExtra::landscape()
 ```
 
+## Joint input-processing model
+
+<!-- % === Measurement model 2: looking-while-listening RT -> processing === -->
+$$\log \mathrm{RT}_{it} \sim \mathcal N\!\big(\alpha_{s(i)} + w_i + \psi\,\log(t/a_0),\; \sigma_{\mathrm{RT}}^2\big)$$
+<!-- % alpha_s = study RT intercept at a_0; psi = common age-detrend slope; -->
+<!-- % w_i = child's detrended RT-level deviation (the processing trait). -->
+
+<!-- % === Measurement model 3: home recordings -> input === -->
+$$\log r_{iv} \sim \mathcal N\!\big(\mu_{s(i)} + d_i,\; \sigma^2_{m(v)}\big)$$
+
+<!-- % mu_s = study mean log input; d_i = child's input deviation; -->
+<!-- % sigma_m = instrument-specific measurement SD (LENA vs head-cam). -->
+
+<!-- % --- Structural model (latent traits regressed on latent traits) --- -->
+$$\xi_i    = \mu_\xi + d_i + \beta_w\,w_i + \epsilon^\xi_i$$
+
+<!-- , \quad \epsilon^\xi_i\sim\mathcal N(0,\sigma_\alpha^2)$$ -->
+
+$$\kappa_i = \bar\kappa + \gamma\,d_i + \beta'_w\,w_i + \epsilon^\kappa_i$$
+
+<!-- , \quad \epsilon^\kappa_i\sim\mathcal N(0,\sigma_\zeta^2)$$ -->
+
+
+
+
 ## Datasets entering the joint input--processing model
 
 The joint input--processing model is fit to the children summarized in

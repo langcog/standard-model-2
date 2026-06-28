@@ -329,20 +329,33 @@ The accelerating accumulator model provides a quantitative description of a very
 
 ## Model 
 
-Up to this point, we have fit our models with efficiency and acceleration as free parameters derived from longitudinal growth. Now we ask whether we can estimate how these parameters relate to children's language input and processing efficiency. 
+Up to this point, we have fit our models with efficiency and acceleration as free parameters derived from longitudinal growth. Now we ask whether we can estimate the relationship of these parameters to children's language input and processing efficiency. In particular, we use Bayesian data analysis to link within-child longitudinal measures of both input and processing to children's efficiency and acceleration.
 
-In a naive version of an accumulator model, children's rate of accumulation $r_i$ is the key variable controlling individual variation. The direct coupling of 
+For both input and processing measures, we establish a measurement model in which multiple noisy observations are pooled to estimate an individual's deviation from the population (see SI: Joint Input-Processing Model). In the case of input, the words heard per hour is quite stable across development, so we estimate each child's deviation from the mean across families ($d_i$). In the case of processing speed, log reaction time declines linearly in the log of age [@frank2026], so we estimate each child's deviation from this linear trend ($w_i$). 
 
-We 
+We then estimate the relationship of each of these predictors to each child's efficiency ($\xi_i$) and acceleration ($\kappa_i$), respectively:
+
+$$\xi_i    = \mu_\xi + d_i + \beta_w\,w_i + \epsilon^\xi_i \\
+\kappa_i = \mu_\kappa + \beta_d\,d_i + \beta'_w\,w_i + \epsilon^\kappa_i$$
+
+\noindent where $\mu_\xi$ and $\mu_\kappa$ represent the population means respectively, the $\beta$ values act as regression coefficients estimating the strength of the coupling between an individual's input and processing and the parameters of their vocabulary growth.^[There is no coefficient on $d_i$ as this term enters the accumulator model directly as part of the overall rate of language accumulation.] 
+
+Taken together, this model essentially creates a set of linked measurement models that define a principled, parametric relationship between language input, measures of in-the-moment processing, and the growth of vocabulary over time. 
 
 
 
-Further, we expect from the literature 
+<!-- % --- Latent child-level traits (child i) --- -->
+<!-- % input level d_i, processing level w_i, efficiency xi_i, acceleration kappa_i -->
+<!-- $$d_i \sim \mathcal N(0,\sigma_r^2), \qquad w_i \sim \mathcal N(0,\sigma_w^2)$$ -->
+<!-- % (both centered within study; study-level location lives in the measurement intercepts) -->
 
+<!-- % --- Latent ability trajectory --- -->
+<!-- $$\theta_i(t) = \xi_i + \kappa_i \,\log(t/a_0)$$ -->
 
-As we will show below, this intercept term $\xi_i = \log(r_i) + \log(\alpha_i)$ can then be used to break down individual variation into both input rate-related and other variation in children's efficiency.
-In this model, the slope term $\kappa_i = \kappa + \gamma \log r_i + \zeta_i$ adds *individual variation in acceleration*, decomposing acceleration into a population term, input-related acceleration, and a child‑specific residual acceleration $\zeta_i$ (the part not explained by input). The coefficient $\gamma$ then captures the strength of the relationship between input and acceleration. 
-
+<!-- % === Measurement model 1: vocabulary (CDI items) -> ability === -->
+<!-- $$y_{ijt} \sim \mathrm{Bernoulli}\!\big(\sigma(\theta_i(t) + \log H - \delta_j)\big)$$ -->
+<!-- % Rasch: common discrimination, no frequency term. delta_j = item difficulty; -->
+<!-- % sigma = logistic; a_0, H fix the time/scale origin. -->
 
 
 ## Results
