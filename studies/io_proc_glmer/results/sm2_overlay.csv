@@ -15,3 +15,9 @@ en_d2,403,input,level,0.35,0.31,0.39,NA,io-proc-lean EN (current)
 en_d2,403,input,acceleration,0.62,0.08,1.11,NA,io-proc-lean EN (current)
 en_d2,403,processing,level,0.74,0.50,0.96,NA,io-proc-lean EN (current)
 en_d2,403,processing,acceleration,0.23,-0.29,0.75,NA,io-proc-lean EN (current)
+enct_proc,413,input,level,0.35,0.31,0.39,NA,EN+count +proc
+enct_proc,413,input,acceleration,0.70,0.05,1.36,NA,EN+count +proc
+enct_proc,413,processing,level,0.76,0.53,0.99,NA,EN+count +proc
+enct_proc,413,processing,acceleration,0.41,-0.10,0.98,NA,EN+count +proc
+enct_noproc,413,input,level,0.35,0.32,0.39,NA,EN+count no-proc
+enct_noproc,413,input,acceleration,0.76,0.08,1.41,NA,EN+count no-proc 

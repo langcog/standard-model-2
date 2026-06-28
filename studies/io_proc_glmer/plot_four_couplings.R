@@ -25,11 +25,14 @@ d <- bind_rows(
   row_of(filter(coh, grepl("HABLA", spec)),                 "glmer · HABLA (ES, 103)",    "glmer", "Spanish"),
   row_of(filter(coh, grepl("ELENA", spec)),                 "glmer · ELENA (EN, 24)",     "glmer", "English"),
   row_of(filter(sm2, spec == "en_d2"),                      "Bayes · io-proc-lean EN (403)","Bayesian","English"),
+  row_of(filter(sm2, spec == "enct_proc"),                  "Bayes · EN+count +proc (413)","Bayesian","English"),
+  row_of(filter(sm2, spec == "enct_noproc"),                "Bayes · EN+count no-proc (413)","Bayesian","English"),
   row_of(filter(sm2, spec == "bi_d2"),                      "Bayes · bi-lean (558)",      "Bayesian","Bilingual"))
 
 EST_ORDER <- rev(c("glmer · EN 1-channel", "glmer · EN both (142)", "glmer · ELENA (EN, 24)",
                    "glmer · HABLA (ES, 103)", "glmer · SLENA (ES, 29)",
-                   "Bayes · io-proc-lean EN (403)", "Bayes · bi-lean (558)"))
+                   "Bayes · io-proc-lean EN (403)", "Bayes · EN+count +proc (413)",
+                   "Bayes · EN+count no-proc (413)", "Bayes · bi-lean (558)"))
 d <- d %>% mutate(estimator = factor(estimator, EST_ORDER),
                   language  = factor(language, c("English","Spanish","Bilingual")),
                   method    = factor(method, c("glmer","Bayesian")),
@@ -45,7 +48,7 @@ p <- ggplot(d, aes(est, estimator, color=language, shape=method)) +
   scale_shape_manual(values=c(glmer=16, Bayesian=24), name=NULL) +
   labs(x="coefficient (per 1 SD input / faster processing; log-odds: intercept for efficiency, log-age slope for acceleration)",
        y=NULL, title="All four couplings: the full input × processing dissociation, glmer + Bayesian",
-       subtitle="efficiency: input ~σ_r, proc strong + agreed | acceleration: input English-only, proc null — Spanish (29) uninformative on every coupling") +
+       subtitle="input→accel credible + stable across ALL English fits (403/413, ±count, ±proc); only +Spanish (bi-lean) drops to 0.37. proc→efficiency strong everywhere") +
   theme_minimal(base_size=9.5) +
   theme(panel.grid.minor=element_blank(), legend.position="top",
         plot.title=element_text(face="bold", size=11), strip.text=element_text(face="bold", size=10),

@@ -2333,6 +2333,50 @@ with the bilingual fit's value caveated as English-driven + weakly identified. (
 
 ---
 
+## 🟢 39. English+count stability runs — destabilizer isolated to Spanish (2026-06-28)
+
+**Goal (MCF).** Two confirmatory runs to (A) verify English gives stable estimates *including*
+the no-item-level sumscore kids, and (B) that stability holds with **no processing** — and
+thereby separate the three causes the bilingual fit confounded: Spanish data vs the count
+mechanism vs processing competition.
+
+**Setup.** `prepare_english_count_bundle.R` → English mm bundle + the ELENA-WS English sumscore
+admins, **no Spanish** (I=413, n_sum=95, one English-WS form). Two fits:
+- **+proc:** bi-lean model (`log_irt_long_proc_bilingual.stan`), rung D'2 (job 31764181).
+- **no-proc:** new `log_irt_long_io_count.stan` — the bi-lean model with the LWL/`rt0`/`beta_xi`/
+  `beta_k0` processing channel stripped = the paper's **step-1 input+vocabulary model** (job 31764182).
+
+**Result — both goals met, and it pins the blame on Spanish.**
+
+| | EN (no count) | EN+count +proc | EN+count no-proc | BILINGUAL |
+|---|--:|--:|--:|--:|
+| input→accel | 0.62 [.08,1.11] | **0.70 [.05,1.36]** | **0.76 [.08,1.41]** | 0.37 [−.11,.89] |
+| ess (γ_in) | 134 | 63 | **88** | **22** |
+| max r̂ | 1.034 | 1.067 | **1.033** | 1.125 |
+| σ_ζ | 4.16 | 4.31 | 4.31 | **5.60** |
+| δ | 10.09 | 10.29 | 10.30 | 9.15 |
+| proc→eff | −0.74 | −0.76 | — | −1.03 |
+
+- **(A) English is stable + credible with the count kids.** Adding ELENA *raised* input→accel
+  (0.62→0.70), CI still clears 0, σ_ζ barely moved (4.16→4.31), δ steady ~10.3. The count
+  *mechanism* is benign — it adds longitudinal signal, doesn't destabilize.
+- **(B) No-processing is stable — the best-converged of all four** (0.76 [.08,1.41], ess 88,
+  max r̂ 1.033). The input+vocabulary base stands alone cleanly.
+- **The destabilizer is specifically the Spanish data.** Bilingual is the *only* fit that breaks
+  (ess 22, σ_ζ 5.60, CI ∋ 0). Same count machinery in English is fine → it's SLENA + HABLA
+  inflating σ_ζ and collapsing `gamma_in`, exactly as the per-cohort glmer predicted (underpower).
+- **Processing is innocent.** ±proc agree on input→accel (0.70 vs 0.76); proc→efficiency clean
+  either way (−0.76, ess 347). No processing-competition effect — and the two layers compose
+  cleanly, validating the step-1/step-2 paper structure. (`four_couplings_forest.png` updated:
+  the three English Bayesian fits cluster tight + credible on input→accel; only bi-lean drops.)
+
+**For the paper:** report the **English io / io-proc** as the main model (input→accel ~0.7
+credible, proc→efficiency ~−0.76, reproducing the glmer benchmark); the bilingual extension
+contributes Spanish-on-scale + a strengthened proc→efficiency + the validated count branch, with
+input→accel honestly caveated as Spanish-underpowered.
+
+---
+
 ## Backlog (⚪)
 
 ### Data / robustness
