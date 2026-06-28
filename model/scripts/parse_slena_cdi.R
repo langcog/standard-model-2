@@ -10,7 +10,11 @@
 suppressPackageStartupMessages({library(here); library(readxl); library(dplyr); library(tidyr)})
 WF <- here("data/raw/WF2013")
 item_cols <- function(nm) {
-  it <- setdiff(nm, nm[1:which(nm == "CDIDate")])
+  ## vocabulary items run from after CDIDate up to the VOCAB total; everything past VOCAB
+  ## (word-forms, how-use, sentence complexity) is non-vocab -> excluded (MCF).
+  start <- which(nm == "CDIDate") + 1
+  stop  <- if (any(nm == "VOCAB")) which(nm == "VOCAB")[1] - 1 else length(nm)
+  it <- nm[start:stop]
   it[!grepl("VOCAB|VOCPER|complex|combin|Total|gestos|frases", it, ignore.case = TRUE) & !startsWith(it, "...")]
 }
 b01 <- function(v) as.integer(!is.na(v) & suppressWarnings(as.numeric(v)) == 1)

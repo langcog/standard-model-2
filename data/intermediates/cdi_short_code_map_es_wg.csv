@@ -1,12 +1,12 @@
 short,item_definition,status,fuzzy_candidate,fuzzy_dist
-ALLAALLI,NA,needs_review,alla/allí,1
-CONTENTO,NA,needs_review,contento,1
-DONDESTA,NA,needs_review,dónde está,1
-HACERMEM,NA,needs_review,hacer la meme,1
-RODILLAS,NA,needs_review,rodilla,1
-SENTARSE,NA,needs_review,sentar(se),1
-TEMPRANO,NA,needs_review,temprano,1
-TRABAJAR,NA,needs_review,trabajar,1
+ALLAALLI,alla/allí,override,NA,NA
+CONTENTO,contento,override,NA,NA
+DONDESTA,dónde está,override,NA,NA
+HACERMEM,hacer la meme,override,NA,NA
+RODILLAS,rodilla,override,NA,NA
+SENTARSE,sentar(se),override,NA,NA
+TEMPRANO,temprano,override,NA,NA
+TRABAJAR,trabajar,override,NA,NA
 ABAJO,abajo,wordbank,NA,NA
 ABEJA,abeja,wordbank,NA,NA
 ABRIR,abrir,wordbank,NA,NA

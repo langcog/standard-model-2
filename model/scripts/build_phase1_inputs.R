@@ -20,12 +20,17 @@ dict_of <- function(frm) read_csv(here(sprintf("data/raw/WF2013/wordbank_spanish
   filter(type == "word") %>% transmute(key = tolower(item), item_definition = definition)
 DWG <- dict_of("WG"); DWS <- dict_of("WS")
 DALL <- bind_rows(DWG, DWS) %>% distinct(key, .keep_all = TRUE)         # union -> cross-form coverage
+OV <- read_csv(here("data/raw/WF2013/slena_item_overrides.csv"), show_col_types = FALSE) %>%
+  transmute(item = short, def_ov = item_definition)                    # hand-checked residual (MCF-confirmed)
 es_sizes <- list(WG = nrow(DWG), WS = nrow(DWS))
 for (frm in c("WG", "WS")) {
   m <- sl %>% filter(form == frm) %>% mutate(key = tolower(item)) %>%
-    left_join(DALL, by = "key") %>%
-    mutate(status = ifelse(!is.na(item_definition), "wordbank", "needs_review"),
-           fuzzy_candidate = NA_character_, fuzzy_dist = NA_integer_)
+    left_join(DALL, by = "key") %>% left_join(OV, by = "item") %>%
+    mutate(status = case_when(!is.na(item_definition) ~ "wordbank",
+                              !is.na(def_ov)          ~ "override",
+                              TRUE                     ~ "needs_review"),
+           item_definition = coalesce(item_definition, def_ov),
+           fuzzy_candidate = NA_character_, fuzzy_dist = NA_integer_) %>% select(-def_ov)
   nr <- which(m$status == "needs_review")               # residual: nearest dict code by Levenshtein
   if (length(nr) > 0) {
     D  <- adist(m$key[nr], DALL$key); bi <- max.col(-D, ties.method = "first")
@@ -36,8 +41,9 @@ for (frm in c("WG", "WS")) {
     arrange(status, fuzzy_dist, short)
   out <- here(sprintf("data/intermediates/cdi_short_code_map_es_%s.csv", tolower(frm)))
   write_csv(m, out)
-  cat(sprintf("(1) %s: %d codes -> wordbank %d, needs_review %d  [%s]\n",
-              frm, nrow(m), sum(m$status == "wordbank"), sum(m$status == "needs_review"), basename(out)))
+  cat(sprintf("(1) %s: %d codes -> wordbank %d, override %d, needs_review %d  [%s]\n",
+              frm, nrow(m), sum(m$status == "wordbank"), sum(m$status == "override"),
+              sum(m$status == "needs_review"), basename(out)))
 }
 N_ES_WG <- es_sizes[["WG"]]; N_ES_WS <- es_sizes[["WS"]]; N_EN_WS <- 680
 
