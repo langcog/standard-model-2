@@ -3,9 +3,10 @@
 ##     share for EN/NO D fits (analytic curve sigma_r^2/sigma_xi^2) + the real
 ##     refit anchors (EN/NO at pinned sigma_r) with 95% CIs; sigma_r band +
 ##     meta band.
-##   Panel B "io-proc": the joint input+processing variance partition (D'3,
-##     all channels free) -- share of efficiency (xi) and acceleration (kappa)
-##     variance carried by input vs processing, with 95% CIs.
+##   Panel B "io-proc": the joint input+processing variance partition (the
+##     EN+count +proc fit, joint_io_proc_lean_d2_enct -- all channels free) --
+##     share of efficiency (xi) and acceleration (kappa) variance carried by
+##     input vs processing, with 95% CIs.
 ##
 ## RUN LOCALLY (needs the gitignored fits/summaries). Writes the committed
 ## cache paper/cache/fig_io_imputed_proc.rds so the manuscript renders without
@@ -47,9 +48,9 @@ panelA <- list(curves = panelA_curves, anchors = panelA_anchors,
                sr_band = c(0.36, 0.58), sr_main = 0.44, meta = c(0.04, 0.07))
 
 ## ---- Panel B: joint io-proc partition (D'3) ----
-d3 <- as.data.frame(readRDS(file.path(SUMM, "joint_io_proc_d3.summary.rds")))
+d3 <- as.data.frame(readRDS(file.path(SUMM, "joint_io_proc_lean_d2_enct.summary.rds")))
 gv <- function(v) d3[d3$variable == v, ]
-dr <- as_draws_df(readRDS(file.path(SUMM, "joint_io_proc_d3.draws.rds")))
+dr <- as_draws_df(readRDS(file.path(SUMM, "joint_io_proc_lean_d2_enct.draws.rds")))
 vk <- dr$var_input_k + dr$var_proc_k + dr$var_resid_k          # total kappa variance/draw
 q3 <- function(x) c(med = median(x), lo = quantile(x, .05, names = FALSE),
                     hi = quantile(x, .95, names = FALSE))
@@ -67,4 +68,4 @@ saveRDS(list(panelA = panelA, panelB = panelB),
         file.path(CACHE, "fig_io_imputed_proc.rds"))
 cat(sprintf("Wrote fig_io_imputed_proc.rds\n  Panel A anchors: %d (%s)\n",
             nrow(panelA_anchors), paste(unique(panelA_anchors$model), collapse=", ")))
-cat("  Panel B (D'3) partition:\n"); print(as.data.frame(panelB), digits = 2, row.names = FALSE)
+cat("  Panel B (EN+count +proc) partition:\n"); print(as.data.frame(panelB), digits = 2, row.names = FALSE)
