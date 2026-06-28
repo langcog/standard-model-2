@@ -2304,8 +2304,12 @@ only needs item+input, not RT):
 (−2.35), which first looked like a possible EN/ES language difference.
 
 **The comprehensive forest settles it — underpower, not language** (`plot_all_estimates.R` →
-`all_estimates_forest.png`: ALL glmer + Bayesian estimates of both channels on common per-1-SD
-axes). Two facts kill the language-difference reading:
+`all_estimates_forest.png` for the two headline channels; `plot_four_couplings.R` →
+`four_couplings_forest.png` for the full 2×2 — input/proc × efficiency/acceleration, every
+estimate on shared axes). The 2×2 shows the whole dissociation at once: input→efficiency ~0.35
+(the σ_r identity), input→acceleration 0.6–0.9 English-only, proc→efficiency 0.58–1.03 (agreed
+everywhere), proc→acceleration null — and SLENA (ES, 29) noisy/null on ALL FOUR couplings
+(−0.38, −2.35, −0.20, −1.89). Two facts kill the language-difference reading:
 1. **SLENA is the lone negative in BOTH channels.** Its proc→efficiency is −0.20 [−1.07, 0.66]
    p=.64 — just as null/wrong-signed as its input→accel. If Spanish had a *channel-specific*
    input difference, proc→eff should still land ~+0.6 like English. It doesn't — 29 kids with
