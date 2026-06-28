@@ -2257,9 +2257,35 @@ model adds the one-timepoint/input-only kids and attenuates *modestly* (0.85→0
 (Spanish low-difficulty items + count information re-weighting the acceleration).
 
 **Diagnosis corroborated by the coefficient plot** (`studies/io_proc_glmer/`,
-`io_partition_proto`): glmer-both (clean 142) → lean (403) → bilingual (558) shows the
-input-acceleration estimate attenuating and its CI widening monotonically, while
-proc→efficiency is stable across all three.
+`io_partition_proto` + `bilingual_input_accel_attenuation`): glmer-both (clean 142) →
+en_d2 (403, credible) → bilingual (558) shows the input-acceleration estimate attenuating
+and its CI widening, while proc→efficiency is stable across all three.
+
+**The quantitative mechanism — σ_ζ inflation (the real culprit).** σ_ζ (per-child
+*acceleration* residual SD) rose **4.16 → 5.60** EN→bilingual. The glmer benchmark
+(`io_proc_glmer/README`) already established σ_ζ dominates the slope-channel variance, so
+ALL slope coefs (incl `gamma_in`) are barely pinned — it's *the* identifiability bottleneck.
+The count cohorts, whose κ is loosely constrained by 1–2 sumscores, push σ_ζ up 35%,
+drowning the input→accel signal further and collapsing `gamma_in`'s mixing.
+
+**Per-cohort glmer (model-independent, `fit_cohort_glmer.R` + `cohort_input_accel.png`).**
+Channel overlap: SLENA has **29 kids with item-level CDI + input** (fittable with the exact
+English glmer); HABLA is **103 kids input+RT but sumscore-only**; ELENA 24 sumscore+input.
+Input→accel per source:
+
+| source | kids | input→accel | p |
+|---|--:|--:|--:|
+| English "both" | 142 | **0.85** [0.14, 1.55] | **.018** |
+| SLENA-item (clean ES) | 29 | −2.35 [−6.0, 1.3] | .21 |
+| HABLA-sum (count ES) | 103 | 0.38 [−0.63, 1.38] | .46 |
+| ELENA-sum (count EN) | 24 | 1.55 [−0.64, 3.74] | .17 |
+
+**The refined conclusion: it's not "Spanish vs sumscore" — *no* new cohort individually
+identifies the channel.** Even clean Spanish item-level (29 kids, input at one age) is
+uninformative (CI [−6, 1.3] overlaps the English 0.85). Only the English both-channel 142
+has the configuration (dense item-level + multi-age input at scale) to pin input→accel. So
+the bilingual additions can only add noise + inflate σ_ζ — explaining both the attenuation
+and the destabilization without any "Spanish is different" story.
 
 **Next.** (1) Re-fit at 2000/2000 + `adapt_delta` 0.97 to converge `gamma_in` (or
 accept it's weakly identified and report the partition with that caveat). (2) Richer
