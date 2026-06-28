@@ -2232,23 +2232,26 @@ Direct EN-only vs bilingual comparison (same model, same rung):
 | estimate | kids | input→accel | r̂ / ess | source |
 |---|--:|--:|--:|---|
 | glmer "both" | 142 | **0.85** [0.14,1.55] | p=.018 | input **+ longitudinal item-level** only |
-| io-proc-lean EN | 403 | 0.40 [−0.28,1.05] | 1.03 / 134 | +one-timepoint / input-only kids |
-| **bilingual** | 558 | 0.37 [−0.11,0.89] | **1.13 / 22** | +count-only (HABLA) kids |
+| io-proc-lean EN (en_d2) | 403 | **0.62** [0.08,1.11] | 1.03 / 134 | **credible** (CI clears 0) |
+| **bilingual** | 558 | 0.37 [−0.11,0.89] | **1.13 / 22** | +count-only (HABLA) kids → **CI ∋ 0** |
 
-Two distinct effects, both pointing at the same cause:
-1. **Attenuation (0.85→0.40) happened already in English.** `gamma_in` is identified
-   ONLY by kids with input AND enough longitudinal vocab to pin their individual κ.
-   glmer structurally restricts to those 142 → 0.85. The Bayesian model adds ~261
-   one-timepoint/input-only English kids whose κ partial-pools to ≈ population mean;
-   they carry input variance with ≈flat κ → null-signal points that flatten the
-   κ-vs-input slope. So even EN-only `gamma_in` was the worst-mixing parameter
-   (ess ~134 vs 1400–4400 for everything else) — sitting on a shallow ridge.
-2. **Destabilization (ess 134→22) from the count cohorts.** A count-only kid's κ is
-   set by the *structural* equation κ = 1+δ+`gamma_in`·input_dev+… and only weakly
-   checked by 1–2 sumscores. So `gamma_in` partly *predicts* κ for the very kids that
-   can't independently identify κ → a feedback that turns the shallow ridge into a
-   poorly-mixing one. The point estimate barely moved (0.40→0.37) but the sampling
-   geometry tipped. ~113 count/Spanish kids added right where the channel was thinnest.
+(NB an earlier draft of this table mis-used the *pre-Rasch* `lean_t1`=0.40 as the EN
+baseline — MCF caught it. The apples-to-apples current English fit is `en_d2`=0.62,
+**credible**. So the whole degradation is the bilingual step, not pre-existing.)
+
+The channel is identified ONLY by kids with input AND enough longitudinal vocab to pin
+their individual κ. glmer structurally restricts to those 142 → 0.85. The current English
+model adds the one-timepoint/input-only kids and attenuates *modestly* (0.85→0.62) but
+**stays credible**. The bilingual step then does the damage — and in TWO ways at once:
+1. **Further attenuation + loss of credibility (0.62→0.37, CI now ∋ 0).** The count
+   cohorts' sumscores are a weak/noisy θ measure; they don't exhibit a strong input–κ
+   relationship, so they pull `gamma_in` toward the no-relationship value.
+2. **Destabilization (ess 134→22).** A count-only kid's κ is set by the *structural*
+   equation κ = 1+δ+`gamma_in`·input_dev+… and only weakly checked by 1–2 sumscores. So
+   `gamma_in` partly *predicts* κ for the very kids that can't independently identify κ —
+   a feedback that turns an already-shallow ridge (`gamma_in` was the worst-mixing param
+   even in EN, ess ~134 vs 1400–4400) into a poorly-mixing one. ~113 count/Spanish kids
+   added right where the channel was thinnest, and it tipped over.
 
 **δ also fell 10.09→9.15** (converged, ess 1242) — a real shift worth understanding
 (Spanish low-difficulty items + count information re-weighting the acceleration).

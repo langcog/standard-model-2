@@ -1,10 +1,11 @@
 ## Bilingual diagnostic: the input->acceleration coefficient across three estimators of the
 ## SAME quantity, ordered by how many weak-signal kids each includes:
 ##   glmer "both"      (142 kids: input AND longitudinal item-level CDI -- the clean identifiers)
-##   io-proc-lean EN   (403 kids: + one-timepoint / input-only kids, partial-pooled)
+##   io-proc-lean EN   (403 kids, CURRENT Rasch-lean + wide-delta production fit, en_d2)
 ##   bilingual bi-lean (558 kids: + count-only HABLA/ELENA kids via the sumscore branch)
-## Shows input->acceleration attenuating + widening while proc->efficiency stays put: the
-## channel is identified only by kids with input + enough longitudinal vocab to pin their kappa.
+## English input->accel is CREDIBLE (0.62, CI clears 0); the bilingual count cohorts both
+## halve it (0.62->0.37) and collapse convergence (ess 134->22) via the structural kappa
+## feedback. proc->efficiency stays put (the dense RT channel). Apples-to-apples = same model.
 ## RUN LOCALLY. -> figs/bilingual_input_accel_attenuation.png
 suppressPackageStartupMessages({library(dplyr); library(ggplot2); library(here); library(readr)})
 
@@ -14,7 +15,7 @@ KACC <- log(30 / 21)                                       # acceleration -> lev
 PAL  <- c(Input = "#009E73", Processing = "#CC79A7")
 
 d <- bind_rows(filter(co, spec == "both_common"),
-               filter(sm2, spec %in% c("lean_t1", "bi_d2"))) %>%
+               filter(sm2, spec %in% c("en_d2", "bi_d2"))) %>%
   mutate(acc  = term == "acceleration",
          est2 = ifelse(acc, est * KACC, est),
          lo2  = ifelse(acc, lo  * KACC, lo),
@@ -23,10 +24,10 @@ d <- bind_rows(filter(co, spec == "both_common"),
          term_x  = factor(term, levels = c("level", "acceleration"),
                           labels = c("efficiency (ξ)", "acceleration (κ, by 30mo)")),
          model = factor(recode(spec, both_common = "glmer\n(142: input+long.CDI)",
-                                     lean_t1     = "io-proc-lean\n(403: +1-timepoint)",
+                                     en_d2       = "io-proc-lean EN\n(403, credible)",
                                      bi_d2       = "bilingual\n(558: +count-only)"),
                         levels = c("glmer\n(142: input+long.CDI)",
-                                   "io-proc-lean\n(403: +1-timepoint)",
+                                   "io-proc-lean EN\n(403, credible)",
                                    "bilingual\n(558: +count-only)")))
 
 dg <- position_dodge(width = 0.55)
