@@ -2300,15 +2300,32 @@ only needs item+input, not RT):
 | **SLENA** | **ES** | 29 | **−2.35** | .21 |
 
 **All four English cohorts point positive** (0.5–1.3, replicated, clustering near the pooled
-~0.85) — input→accel is a robust *English* phenomenon. **SLENA Spanish is the lone negative.**
-Its CI [−6, 1.3] is too wide to *prove* a language difference (overlaps the English range), but
-the sign flip flags that the destabilization may be partly a real EN/ES disagreement the
-*shared* `gamma_in` can't absorb — not only underpower. MCF's "language thing?" hypothesis.
+~0.85) — input→accel is a robust *English* phenomenon. **SLENA Spanish is the lone negative**
+(−2.35), which first looked like a possible EN/ES language difference.
 
-**Next.** (1) **Language-varying `gamma_in`** (`gamma_in_en`, `gamma_in_es`) — the clean test:
-let the data say whether Spanish's input→accel genuinely differs vs is just noisy. (2) Re-fit
-at 2000/2000 + `adapt_delta` 0.97 to converge the (shared) `gamma_in`. (3) Richer extract
-(`mu_c[5]`, Spanish per-child ξ/κ) for the full scale check beyond the RT proxy.
+**The comprehensive forest settles it — underpower, not language** (`plot_all_estimates.R` →
+`all_estimates_forest.png`: ALL glmer + Bayesian estimates of both channels on common per-1-SD
+axes). Two facts kill the language-difference reading:
+1. **SLENA is the lone negative in BOTH channels.** Its proc→efficiency is −0.20 [−1.07, 0.66]
+   p=.64 — just as null/wrong-signed as its input→accel. If Spanish had a *channel-specific*
+   input difference, proc→eff should still land ~+0.6 like English. It doesn't — 29 kids with
+   input at one age + RT at two can't identify *anything*.
+2. **The bilingual model pools proc→efficiency FINE** (en_d2 −0.74 → bi-lean −1.03, tighter):
+   the dense, consistent Spanish RT (SLENA + HABLA) strengthens it. Only input→accel
+   destabilizes. So the asymmetry is **data density per channel**, not language: proc has dense
+   RT that pools cleanly; input→accel needs input×longitudinal-slope, which the sparse Spanish
+   input + slope-less count kids can't supply, so they only add noise.
+
+**Conclusion:** input→acceleration is carried by the English both-channel data; the bilingual
+additions can't speak to it (and shouldn't be expected to). No evidence for a real EN/ES
+difference — the SLENA sign-flip is small-sample noise. proc→efficiency, by contrast, is robust
+across every method and language.
+
+**Next.** (1) Report input→accel from the English estimate (glmer ~0.85 / Bayesian en_d2 0.62),
+with the bilingual fit's value caveated as English-driven + weakly identified. (2) Re-fit
+2000/2000 + `adapt_delta` 0.97 to converge the shared `gamma_in` (confirm weak-not-just-unmixed).
+(3) Richer extract (`mu_c[5]`, Spanish per-child ξ/κ) for the full scale check. A language-varying
+`gamma_in` would now just return `gamma_in_es` with a huge CI (underpower) — lower priority.
 
 ---
 
