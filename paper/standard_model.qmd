@@ -442,14 +442,23 @@ pA <- ggplot() +
         legend.background = element_rect(fill = alpha("white", 0.7), color = NA),
         panel.grid.minor = element_blank(), plot.title = element_text(face = "bold", size = 11))
 
-pB <- ggplot(io_fig$panelB, aes(channel, med, color = factor, group = factor)) +
-  geom_pointrange(aes(ymin = lo, ymax = hi), position = position_dodge(width = 0.5),
+# Panel B holds per-SD COEFFICIENTS (the same numbers the schematic draws). The acceleration
+# row is rescaled x log(30/21)=0.357 to level-equivalent theta units (effect by 30 mo), so the
+# two traits sit on one log-odds axis. (Variance-explained shares are reported in the text.)
+KACC <- log(30 / 21)
+pbd <- io_fig$panelB |>
+  mutate(acc  = channel == "Acceleration",
+         e = ifelse(acc, med * KACC, med), l = ifelse(acc, lo * KACC, lo), h = ifelse(acc, hi * KACC, hi),
+         term = factor(channel, levels = c("Efficiency", "Acceleration"),
+                       labels = c("efficiency (ξ)", "acceleration (κ,\nby 30 mo)")))
+pB <- ggplot(pbd, aes(term, e, color = factor, group = factor)) +
+  geom_hline(yintercept = 0, linewidth = 0.3, color = "grey70") +
+  geom_pointrange(aes(ymin = l, ymax = h), position = position_dodge(width = 0.55),
                   fatten = 3, linewidth = 0.9) +
   scale_color_manual(values = FACTOR_PAL, name = NULL) +
-  scale_y_continuous(labels = pct, limits = c(0, NA), expand = expansion(mult = c(0, 0.08))) +
-  labs(x = NULL, y = "share of between-child variance", title = "(B) io-proc (joint)") +
+  labs(x = NULL, y = "per-SD effect (θ units, log-odds)", title = "(B) io-proc coefficients") +
   theme_minimal(base_size = 11) +
-  theme(legend.position = c(0.98, 0.98), legend.justification = c(1, 1),
+  theme(legend.position = c(0.02, 0.98), legend.justification = c(0, 1),
         legend.background = element_rect(fill = alpha("white", 0.7), color = NA),
         panel.grid.minor = element_blank(), plot.title = element_text(face = "bold", size = 11))
 

@@ -3,10 +3,10 @@
 ##     share for EN/NO D fits (analytic curve sigma_r^2/sigma_xi^2) + the real
 ##     refit anchors (EN/NO at pinned sigma_r) with 95% CIs; sigma_r band +
 ##     meta band.
-##   Panel B "io-proc": the joint input+processing variance partition (the
-##     EN+count +proc fit, joint_io_proc_lean_d2_enct -- all channels free) --
-##     share of efficiency (xi) and acceleration (kappa) variance carried by
-##     input vs processing, with 95% CIs.
+##   Panel B "io-proc": the joint input+processing COEFFICIENTS (per-SD effects,
+##     the EN+count +proc fit joint_io_proc_lean_d2_enct -- all channels free) --
+##     input vs processing effect on efficiency (xi) and acceleration (kappa),
+##     with 90% CIs. (Variance-explained partition is reported in text instead.)
 ##
 ## RUN LOCALLY (needs the gitignored fits/summaries). Writes the committed
 ## cache paper/cache/fig_io_imputed_proc.rds so the manuscript renders without
@@ -47,20 +47,20 @@ panelA_anchors <- bind_rows(
 panelA <- list(curves = panelA_curves, anchors = panelA_anchors,
                sr_band = c(0.36, 0.58), sr_main = 0.44, meta = c(0.04, 0.07))
 
-## ---- Panel B: joint io-proc partition (D'3) ----
+## ---- Panel B: joint io-proc COEFFICIENTS (per-SD effects, EN+count +proc fit) ----
+## The four channel x trait per-SD effects (log-odds), same numbers the schematic draws:
+##   Efficiency:   Input = sigma_r,        Processing = |eff_proc_xi|  (faster -> higher xi)
+##   Acceleration: Input = eff_input_k,    Processing = |eff_proc_k|   (faster -> higher kappa)
+## Processing flipped to "faster processing -> +" (eff_proc_* are negative on rt0). The qmd
+## rescales the acceleration row x log(30/21) to level-equivalent theta units for display.
 d3 <- as.data.frame(readRDS(file.path(SUMM, "joint_io_proc_lean_d2_enct.summary.rds")))
 gv <- function(v) d3[d3$variable == v, ]
-dr <- as_draws_df(readRDS(file.path(SUMM, "joint_io_proc_lean_d2_enct.draws.rds")))
-vk <- dr$var_input_k + dr$var_proc_k + dr$var_resid_k          # total kappa variance/draw
-q3 <- function(x) c(med = median(x), lo = quantile(x, .05, names = FALSE),
-                    hi = quantile(x, .95, names = FALSE))
-si_k <- q3(dr$var_input_k / vk); sp_k <- q3(dr$var_proc_k / vk)
 panelB <- tibble::tribble(
-  ~channel,       ~factor,      ~med,                     ~lo,                    ~hi,
-  "Efficiency",   "Input",      gv("share_input_xi")$mean, gv("share_input_xi")$q5, gv("share_input_xi")$q95,
-  "Efficiency",   "Processing", gv("share_proc_xi")$mean,  gv("share_proc_xi")$q5,  gv("share_proc_xi")$q95,
-  "Acceleration", "Input",      si_k["med"],               si_k["lo"],              si_k["hi"],
-  "Acceleration", "Processing", sp_k["med"],               sp_k["lo"],              sp_k["hi"]) |>
+  ~channel,       ~factor,      ~med,                    ~lo,                     ~hi,
+  "Efficiency",   "Input",       gv("sigma_r")$mean,      gv("sigma_r")$q5,        gv("sigma_r")$q95,
+  "Efficiency",   "Processing", -gv("eff_proc_xi")$mean, -gv("eff_proc_xi")$q95,  -gv("eff_proc_xi")$q5,
+  "Acceleration", "Input",       gv("eff_input_k")$mean,  gv("eff_input_k")$q5,    gv("eff_input_k")$q95,
+  "Acceleration", "Processing", -gv("eff_proc_k")$mean,  -gv("eff_proc_k")$q95,   -gv("eff_proc_k")$q5) |>
   mutate(channel = factor(channel, levels = c("Efficiency", "Acceleration")),
          factor  = factor(factor,  levels = c("Input", "Processing")))
 
@@ -68,4 +68,4 @@ saveRDS(list(panelA = panelA, panelB = panelB),
         file.path(CACHE, "fig_io_imputed_proc.rds"))
 cat(sprintf("Wrote fig_io_imputed_proc.rds\n  Panel A anchors: %d (%s)\n",
             nrow(panelA_anchors), paste(unique(panelA_anchors$model), collapse=", ")))
-cat("  Panel B (EN+count +proc) partition:\n"); print(as.data.frame(panelB), digits = 2, row.names = FALSE)
+cat("  Panel B (EN+count +proc) coefficients:\n"); print(as.data.frame(panelB), digits = 2, row.names = FALSE)
