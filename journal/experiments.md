@@ -2375,6 +2375,15 @@ credible, proc→efficiency ~−0.76, reproducing the glmer benchmark); the bili
 contributes Spanish-on-scale + a strengthened proc→efficiency + the validated count branch, with
 input→accel honestly caveated as Spanish-underpowered.
 
+**Convergence refit (2026-06-28, Sherlock 31795544, tag `_2k`).** EN+count+proc re-fit at
+2000/2000 + `adapt_delta` 0.97 to settle whether `gamma_in` was weakly-identified vs merely
+unmixed. Verdict: **weak-but-real, not an artifact** — `gamma_in` ess 63→164, r̂ 1.07→1.03, and
+the estimate *held*: eff_input_k 0.70→0.72 [0.13, 1.32], CI still clears 0. Everything else stable
+(proc→eff −0.76, eff_proc_k −0.41→−0.38, δ 10.29, σ_ζ 4.30); overall max r̂ 1.033, min ess 163. So
+input→acceleration is credibly positive ~0.72 with intrinsically wide uncertainty (the σ_ζ-dominated
+channel) — promoted into `fig-io-partition` (both panel A schematic + panel B coefficients now read
+the fit from the cache).
+
 ---
 
 ## Backlog (⚪)
