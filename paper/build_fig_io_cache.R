@@ -53,7 +53,7 @@ panelA <- list(curves = panelA_curves, anchors = panelA_anchors,
 ##   Acceleration: Input = eff_input_k,    Processing = |eff_proc_k|   (faster -> higher kappa)
 ## Processing flipped to "faster processing -> +" (eff_proc_* are negative on rt0). The qmd
 ## rescales the acceleration row x log(30/21) to level-equivalent theta units for display.
-d3 <- as.data.frame(readRDS(file.path(SUMM, "joint_io_proc_lean_d2_enct.summary.rds")))
+d3 <- as.data.frame(readRDS(file.path(SUMM, "joint_io_proc_lean_d2_enct_2k.summary.rds")))
 gv <- function(v) d3[d3$variable == v, ]
 panelB <- tibble::tribble(
   ~channel,       ~factor,      ~med,                    ~lo,                     ~hi,
@@ -64,7 +64,19 @@ panelB <- tibble::tribble(
   mutate(channel = factor(channel, levels = c("Efficiency", "Acceleration")),
          factor  = factor(factor,  levels = c("Input", "Processing")))
 
-saveRDS(list(panelA = panelA, panelB = panelB),
+## ---- schematic params (panel A): the SAME EN+count +proc fit, so the trajectories are
+## drawn from the estimates rather than hand-set example values. a0/log_H/mu_r are data
+## constants from the bundle; everything else is read from the fit summary above.
+schem <- list(
+  a0 = 21, log_H = 5.90, mu_r = 7.34,
+  kpop     = 1 + gv("delta")$mean,        # population acceleration 1 + delta
+  sigma_xi = gv("sigma_xi")$mean,         # between-child efficiency SD (curve separation)
+  d_in_xi  = gv("sigma_r")$mean,          # input  -> efficiency  (coeff-1 identity = sigma_r)
+  d_in_k   = gv("eff_input_k")$mean,      # input  -> acceleration
+  d_pr_xi  = -gv("eff_proc_xi")$mean,     # processing(faster) -> efficiency
+  d_pr_k   = -gv("eff_proc_k")$mean)      # processing(faster) -> acceleration
+
+saveRDS(list(panelA = panelA, panelB = panelB, schem = schem),
         file.path(CACHE, "fig_io_imputed_proc.rds"))
 cat(sprintf("Wrote fig_io_imputed_proc.rds\n  Panel A anchors: %d (%s)\n",
             nrow(panelA_anchors), paste(unique(panelA_anchors$model), collapse=", ")))
