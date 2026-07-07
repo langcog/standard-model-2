@@ -53,8 +53,4 @@ model {
   tau_delta   ~ normal(0, tau_delta_prior_sd);
   target += reduce_sum(partial_sum_lpmf, y, grainsize, aa, jj, admin_base, item_offset);
 }
-
-generated quantities {
-  vector[N] log_lik;
-  for (n in 1:N) log_lik[n] = bernoulli_logit_lpmf(y[n] | admin_base[aa[n]] + item_offset[jj[n]]);
-}
+// LOO reconstructed in R from admin_base + item_offset (kept small; see 01_fit.R)

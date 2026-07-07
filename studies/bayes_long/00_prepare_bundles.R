@@ -52,7 +52,7 @@ pull_language <- function(language) {
                         administration_info=FALSE, item_info=TRUE) |>
       filter(item_kind=="word") |>
       transmute(data_id, item_definition, uni_lemma, form_type,
-                produces = as.integer(produces %in% TRUE | produces=="produces" | produces==1))
+                produces = as.integer(produces %in% c(TRUE, 1L, "produces")))  # NA -> 0
   }))
   # attach admin-level fields (incl. study_internal_id) by data_id
   it <- it |> inner_join(

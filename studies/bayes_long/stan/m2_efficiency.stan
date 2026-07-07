@@ -74,6 +74,4 @@ model {
 
 generated quantities {
   real kappa_pop = 1 + delta;
-  vector[N] log_lik;
-  for (n in 1:N) log_lik[n] = bernoulli_logit_lpmf(y[n] | admin_base[aa[n]] + item_offset[jj[n]]);
 }

@@ -86,6 +86,4 @@ generated quantities {
   real sigma_b   = sigma_child[2];
   real rho_ab    = multiply_lower_tri_self_transpose(L_child)[2, 1];
   real kappa_pop = 1 + delta;
-  vector[N] log_lik;
-  for (n in 1:N) log_lik[n] = bernoulli_logit_lpmf(y[n] | admin_base[aa[n]] + item_offset[jj[n]]);
 }
