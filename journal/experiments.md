@@ -2417,3 +2417,70 @@ the fit from the cache).
 - **Observable.js app** for interactive exploration of the fitted
   model once the posteriors stabilize. Sliders for σ_r, σ_α, σ_ζ, s,
   δ → live growth curves and distributions.
+
+## 🟢 40. Bayesian by-dataset longitudinal ladder (`bayes_long`) — acceleration confirmed; σ_b sparse-data inflation (2026-07-06/07)
+
+**Goal.** Replace the pooled EN+NO Bayesian longitudinal fits with a *by-dataset*
+ladder (matching the glmer by-study units), on corrected bundles — the paper's
+Bayesian model-comparison table + the Fig 1 fan. Code: `studies/bayes_long/`.
+
+**Ladder = 4 hard-structured models, one component per rung** (NOT prior-toggles —
+a near-zero variance component funnels HMC): **M0** pure accumulator (κ=1, no child
+variation — the falsifiable null / LLM analog); **M1** + free acceleration
+(κ=1+δ); **M2** + per-child efficiency (intercept); **M3** + per-child acceleration
+(slope, LKJ-correlated). Headline comparisons: **M0→M1** (acceleration exists) and
+**M2→M3** (acceleration varies). Stan `stan/m{0-3}_*.stan`; driver `01_fit.R`;
+reduce_sum threading; **LOO reconstructed in R** from `admin_base`+`item_offset`
+(per-obs `log_lik` would be ~36 GB for NO M3 — kept out of the CSVs).
+
+**Bundle fixes (`00_prepare_bundles.R`) — both material:**
+1. **Child key = `study_internal_id`, not wordbank `child_id`.** child_id fails to
+   link a child's WG and WS admins → silently splits cross-form kids into fake
+   single-form kids. Recovered ~178 NO cross-form kids AND **Marchman 314→2194 kids
+   + its full 8–30 mo WG arm** (child_id had shown Marchman as WS-only 16–30).
+2. **WG↔WS items cross-linked by unambiguous `uni_lemma`** (option a): a WG+WS item
+   pair sharing a uni_lemma that maps to ≤1 item per form = one latent item
+   (`in`/`inside`→`inside/in` merged); homonym senses kept distinct. Essential
+   because NO/JP have *disjoint* WG-only vs WS-only children — they only share an
+   ability scale through shared items.
+   Plus monolingual-TD filters, a0=18 (the "explosion" milestone), full NO.
+
+**Result — thesis confirmed, 4 datasets complete / 3 languages** (Sherlock, 4×1000;
+LOO obs-subsampled deterministically per dataset for comparable ELPD):
+
+| dataset | admins/kid | M0→M1 | M1→M2 | M2→M3 | κ | σ_b |
+|---|--:|--:|--:|--:|--:|--:|
+| Japanese  | 3 | +31 318  | +19 998 | +1 919  | 12.0 | 5.45 |
+| Thal      | 3 | +109 390 | +37 890 | +7 722  | 11.5 | 3.19 |
+| Smith     | 2 | +44 767  | +68 140 | +7 791  | 12.8 | 8.07 |
+| Marchman  | 2 | +52 308  | +51 157 | +21 099 | 9.9  | 8.24 |
+| Norwegian | 2 | +54 615  | +69 911 | *(m3 running)* | 12.0\* | — |
+
+**M0→M1 (acceleration exists) is the largest step in every dataset** (+31k to
++109k ELPD) — children decisively reject the pure-accumulator κ=1 null (= what an
+LLM instantiates). **M2→M3 (acceleration varies) positive everywhere it finished**
+(+1.9k to +21k). κ ≈ 10–13, ~11× the LLM κ=1.
+
+**Key finding — σ_b (acceleration variance) tracks longitudinal density, and it's
+likelihood-driven not prior-driven.** Median-2-admin datasets (Smith, Marchman) →
+σ_b ≈ 8; median-3 (Thal, Japanese) → 3–5. **Prior-sensitivity test: tightening
+σ_b ~ half-N(0,5)→half-N(0,3) barely moved it** (Japanese 5.45→5.40, Smith
+8.07→8.04) → the data, not the prior, wants σ_b ≈ 8 on sparse designs. Mechanism:
+with only ~2 time points per child, a log-linear per-child slope absorbs
+trajectory-shape/misfit as acceleration heterogeneity — the model *confidently*
+over-estimates σ_b. **Reverted to half-N(0,5)** (difference negligible). Implication
+for the paper: the *direction* (acceleration varies) is robust everywhere; report
+the σ_b *magnitude* with the sparse-design caveat and lean on the denser Thal
+(σ_b ≈ 3.2). The parametric fan (`03_fan.R`, population-posterior draw — the honest
+model-implied object, includes ρ) correspondingly over-disperses on the median-2
+datasets; that's a genuine posterior-predictive-check signal, not a rendering
+artifact (a BLUP-bootstrap fan would hide it by bounding to the observed children).
+
+**Compute lessons.** Sherlock `normal` QOS caps at **48 h** (the skill wrongly said
+"18h"); `--qos=long` → up to 7 d. M3 correlated-slopes on 2.5M/4.5M obs is very slow
+(NO M3 ~40 h at 16 cores → requeued 32 cores + `--qos=long`). The overnight 20-fit
+sweep depleted fairshare to ~0.0003 → long queue. **Be generous with `--time`** —
+short caps silently kill fits (lost several to 12 h); skill + memory updated.
+
+**Status.** 19/20 fits done; NO M3 finishing on Sherlock (32c). Full ladder table +
+5-panel fan rebuild when it lands.
