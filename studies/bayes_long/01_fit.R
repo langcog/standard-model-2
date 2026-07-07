@@ -5,8 +5,9 @@
 ## Output: fits/bayes_long/summaries/<slug>_<model>.{summary,draws,loo}.rds
 
 suppressPackageStartupMessages({
-  library(cmdstanr); library(posterior); library(loo); library(here)
+  library(cmdstanr); library(posterior); library(loo)
 })
+# paths relative to project root (slurm cd's here; run locally from repo root too)
 
 args  <- commandArgs(trailingOnly = TRUE)
 slug  <- args[1]; model <- args[2]
@@ -28,7 +29,7 @@ PRI <- list(mu_xi_prior_mean=-6, mu_xi_prior_sd=5,
 STAN_FILE <- c(m0="m0_accumulator", m1="m1_acceleration",
                m2="m2_efficiency",  m3="m3_full")[model]
 
-b   <- readRDS(here("fits","bayes_long", sprintf("bundle_%s.rds", slug)))
+b   <- readRDS(file.path("fits","bayes_long", sprintf("bundle_%s.rds", slug)))
 sd0 <- b$stan_data
 grainsize <- max(1L, sd0$N %/% (2L*THREADS))
 
@@ -45,7 +46,7 @@ if (model == "m3")                { dat$sigma_b_prior_sd<-PRI$sigma_b_prior_sd }
 cat(sprintf("=== %s / %s ===  N=%d A=%d I=%d J=%d  grainsize=%d  (%d chains x %d+%d, %d threads)\n",
             slug, model, sd0$N, sd0$A, sd0$I, sd0$J, grainsize, CHAINS, WARMUP, ITER, THREADS))
 
-mod <- cmdstan_model(here("studies","bayes_long","stan", paste0(STAN_FILE, ".stan")),
+mod <- cmdstan_model(file.path("studies","bayes_long","stan", paste0(STAN_FILE, ".stan")),
                      cpp_options=list(stan_threads=TRUE))
 fit <- mod$sample(data=dat, chains=CHAINS, parallel_chains=CHAINS, threads_per_chain=THREADS,
                   iter_warmup=WARMUP, iter_sampling=ITER, adapt_delta=ADELTA, refresh=200)
@@ -78,7 +79,7 @@ loo_res <- tryCatch({
   print(res); res
 }, error=function(e){ cat("LOO failed:", conditionMessage(e), "\n"); NULL })
 
-OUT <- here("fits","bayes_long","summaries"); dir.create(OUT, recursive=TRUE, showWarnings=FALSE)
+OUT <- file.path("fits","bayes_long","summaries"); dir.create(OUT, recursive=TRUE, showWarnings=FALSE)
 tag <- sprintf("%s_%s", slug, model)
 saveRDS(summ, file.path(OUT, paste0(tag,".summary.rds")))
 saveRDS(fit$draws(SCALARS, format="df"), file.path(OUT, paste0(tag,".draws.rds")))
