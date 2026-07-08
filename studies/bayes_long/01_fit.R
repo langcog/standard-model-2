@@ -11,7 +11,7 @@ suppressPackageStartupMessages({
 
 args  <- commandArgs(trailingOnly = TRUE)
 slug  <- args[1]; model <- args[2]
-stopifnot(model %in% c("m0","m1","m2","m3"))
+stopifnot(model %in% c("m0","m1","m2","m3","m3lin"))
 
 CHAINS  <- as.integer(Sys.getenv("STAN_CHAINS",      "4"))
 WARMUP  <- as.integer(Sys.getenv("STAN_WARMUP",      "1000"))
@@ -27,7 +27,7 @@ PRI <- list(mu_xi_prior_mean=-6, mu_xi_prior_sd=5,
             tau_delta_prior_sd=5)
 
 STAN_FILE <- c(m0="m0_accumulator", m1="m1_acceleration",
-               m2="m2_efficiency",  m3="m3_full")[model]
+               m2="m2_efficiency",  m3="m3_full", m3lin="m3_full_lin")[model]
 
 b   <- readRDS(file.path("fits","bayes_long", sprintf("bundle_%s.rds", slug)))
 sd0 <- b$stan_data
@@ -39,9 +39,9 @@ dat <- list(N=sd0$N, grainsize=grainsize, A=sd0$A, J=sd0$J,
             log_H=sd0$log_H, a0=sd0$a0,
             mu_xi_prior_mean=PRI$mu_xi_prior_mean, mu_xi_prior_sd=PRI$mu_xi_prior_sd,
             tau_delta_prior_sd=PRI$tau_delta_prior_sd)
-if (model %in% c("m1","m2","m3")) { dat$delta_prior_mean<-PRI$delta_prior_mean; dat$delta_prior_sd<-PRI$delta_prior_sd }
-if (model %in% c("m2","m3"))      { dat$I<-sd0$I; dat$admin_to_child<-sd0$admin_to_child; dat$sigma_a_prior_sd<-PRI$sigma_a_prior_sd }
-if (model == "m3")                { dat$sigma_b_prior_sd<-PRI$sigma_b_prior_sd }
+if (model %in% c("m1","m2","m3","m3lin")) { dat$delta_prior_mean<-PRI$delta_prior_mean; dat$delta_prior_sd<-PRI$delta_prior_sd }
+if (model %in% c("m2","m3","m3lin"))      { dat$I<-sd0$I; dat$admin_to_child<-sd0$admin_to_child; dat$sigma_a_prior_sd<-PRI$sigma_a_prior_sd }
+if (model %in% c("m3","m3lin"))           { dat$sigma_b_prior_sd<-PRI$sigma_b_prior_sd }
 
 cat(sprintf("=== %s / %s ===  N=%d A=%d I=%d J=%d  grainsize=%d  (%d chains x %d+%d, %d threads)\n",
             slug, model, sd0$N, sd0$A, sd0$I, sd0$J, grainsize, CHAINS, WARMUP, ITER, THREADS))
@@ -55,7 +55,7 @@ dg <- fit$diagnostic_summary()
 cat(sprintf("divergences: %d | max_treedepth hits: %d\n",
             sum(dg$num_divergent), sum(dg$num_max_treedepth)))
 
-SCALARS <- intersect(c("mu_xi","delta","kappa_pop","sigma_a","sigma_b","rho_ab","tau_delta"),
+SCALARS <- intersect(c("mu_xi","delta","kappa_pop","beta_pop","sigma_a","sigma_b","rho_ab","tau_delta"),
                      fit$metadata()$stan_variables)
 summ <- fit$summary(SCALARS); print(summ)
 
