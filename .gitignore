@@ -36,6 +36,13 @@ texput.log
 # Intermediate data (subsets) are reproducible from scripts.
 fits/**/*.rds
 figs/**/*.png
+# Compiled cmdstanr binaries (Mach-O/ELF sitting next to the .stan) — never commit:
+# a macOS binary rsynced to a Linux cluster silently crashes every chain.
+studies/**/stan/*
+!studies/**/stan/
+!studies/**/stan/*.stan
+# Regenerable study figures that live outside a figs/ dir
+studies/bayes_long/*.png
 # But keep the directories themselves so scripts don't have to mkdir
 !fits/.gitkeep
 !figs/.gitkeep

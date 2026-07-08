@@ -8,13 +8,14 @@
 ## bundle (empirical data + log_H/a0). Datasets without an m3 fit are skipped.
 suppressPackageStartupMessages({library(dplyr); library(ggplot2); library(here)})
 set.seed(1)
+SFX <- Sys.getenv("SLUG_SUFFIX","")   # e.g. "_a3" to use the 3+-admin bundles/fits
 N_SIM <- 500; N_SPAG <- 150; M_ITEM <- 500; QS <- c(.1,.25,.5,.75,.9)
 LANGS <- c(thal="English (Thal)", smith="English (Smith)", marchman="English (Marchman)",
            norwegian="Norwegian", japanese="Japanese")
 
 one <- function(slug, label) {
-  sf <- here("fits","bayes_long","summaries", paste0(slug,"_m3.summary.rds"))
-  bf <- here("fits","bayes_long", paste0("bundle_",slug,".rds"))
+  sf <- here("fits","bayes_long","summaries", paste0(slug,SFX,"_m3.summary.rds"))
+  bf <- here("fits","bayes_long", paste0("bundle_",slug,SFX,".rds"))
   if (!file.exists(sf)) { cat("skip", slug, "(no m3 yet)\n"); return(NULL) }
   s <- as.data.frame(readRDS(sf)); g <- function(v) s$median[s$variable==v]
   b <- readRDS(bf); sd <- b$stan_data
@@ -60,6 +61,6 @@ p <- ggplot() +
   theme_minimal(base_size=10) +
   theme(strip.text=element_text(face="bold"), legend.position="bottom",
         panel.grid.minor=element_blank(), plot.title=element_text(size=11, face="bold"))
-out <- here("studies","bayes_long","fan_m3.png")
+out <- here("studies","bayes_long",paste0("fan_m3",SFX,".png"))
 ggsave(out, p, width=3.1*length(res)+0.5, height=3.6, dpi=150)
 cat("wrote", out, "\n")
