@@ -46,9 +46,10 @@ if (model %in% c("m3","m3lin"))           { dat$sigma_b_prior_sd<-PRI$sigma_b_pr
 cat(sprintf("=== %s / %s ===  N=%d A=%d I=%d J=%d  grainsize=%d  (%d chains x %d+%d, %d threads)\n",
             slug, model, sd0$N, sd0$A, sd0$I, sd0$J, grainsize, CHAINS, WARMUP, ITER, THREADS))
 
+SEED <- as.integer(sum(utf8ToInt(paste0(slug,"_",model))) %% 2147483647L)  # reproducible per fit
 mod <- cmdstan_model(file.path("studies","bayes_long","stan", paste0(STAN_FILE, ".stan")),
                      cpp_options=list(stan_threads=TRUE))
-fit <- mod$sample(data=dat, chains=CHAINS, parallel_chains=CHAINS, threads_per_chain=THREADS,
+fit <- mod$sample(data=dat, seed=SEED, chains=CHAINS, parallel_chains=CHAINS, threads_per_chain=THREADS,
                   iter_warmup=WARMUP, iter_sampling=ITER, adapt_delta=ADELTA, refresh=200)
 
 dg <- fit$diagnostic_summary()
@@ -84,4 +85,46 @@ tag <- sprintf("%s_%s", slug, model)
 saveRDS(summ, file.path(OUT, paste0(tag,".summary.rds")))
 saveRDS(fit$draws(SCALARS, format="df"), file.path(OUT, paste0(tag,".draws.rds")))
 if (!is.null(loo_res)) saveRDS(loo_res, file.path(OUT, paste0(tag,".loo.rds")))
+
+## ---- per-item & per-child parameter exports (production: save generously) ----
+## Summarize an indexed vector param -> data.frame keyed by its integer index.
+vec_df <- function(var) {
+  if (!(var %in% fit$metadata()$stan_variables)) return(NULL)
+  s <- fit$summary(var)                       # default stats incl median, q5, q95, rhat, ess_bulk
+  idx <- as.integer(sub(".*\\[(\\d+)\\].*", "\\1", s$variable))
+  data.frame(idx=idx, median=s$median, q5=s$q5, q95=s$q95,
+             rhat=s$rhat, ess_bulk=s$ess_bulk)[order(idx), ]
+}
+
+## per-item difficulty psi: item -> median delta_j (+interval, convergence, empirical rate).
+## Needed to rebuild the efficiency figure (Fig 2) on these fits.
+dj <- vec_df("delta_j")
+if (!is.null(dj)) {
+  itm <- b$item_ix[order(b$item_ix$jj), ]
+  n_obs    <- tabulate(sd0$jj, nbins=sd0$J)
+  emp_prod <- as.numeric(tapply(sd0$y, factor(sd0$jj, levels=1:sd0$J), mean))  # NA if item unseen
+  psi <- data.frame(item=itm$item, jj=itm$jj,
+                    delta_j=dj$median, delta_j_q5=dj$q5, delta_j_q95=dj$q95,
+                    delta_j_rhat=dj$rhat, delta_j_ess=dj$ess_bulk,
+                    emp_prod=emp_prod[dj$idx], n_obs=n_obs[dj$idx])
+  write.csv(psi, file.path(OUT, paste0(tag,"_psi.csv")), row.names=FALSE)
+  cat(sprintf("saved %s_psi.csv (%d items)\n", tag, nrow(psi)))
+}
+
+## per-child efficiency (xi) and acceleration (kappa for m3 / slope for m3lin), with intervals.
+if ("xi" %in% fit$metadata()$stan_variables) {
+  ch <- b$child_ix[order(b$child_ix$ii), ]
+  child <- data.frame(ckey=ch$ckey, ii=ch$ii, n_admins=tabulate(sd0$admin_to_child, nbins=sd0$I))
+  xi <- vec_df("xi")
+  child$xi_median <- xi$median; child$xi_q5 <- xi$q5; child$xi_q95 <- xi$q95
+  accel_var <- if ("kappa" %in% fit$metadata()$stan_variables) "kappa" else "slope"
+  ac <- vec_df(accel_var)
+  if (!is.null(ac)) {
+    child[[paste0(accel_var,"_median")]] <- ac$median
+    child[[paste0(accel_var,"_q5")]]     <- ac$q5
+    child[[paste0(accel_var,"_q95")]]    <- ac$q95
+  }
+  write.csv(child, file.path(OUT, paste0(tag,"_child.csv")), row.names=FALSE)
+  cat(sprintf("saved %s_child.csv (%d children, accel=%s)\n", tag, nrow(child), accel_var))
+}
 cat("saved", tag, "\n")
