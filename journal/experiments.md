@@ -2577,6 +2577,17 @@ Marchman-specific, and irrelevant to κ/σ_b/ELPD. **Full sweep launched** at de
 settings for ladder consistency (M0–M2 ×5 + NO M3 on long QOS; Marchman M3 done;
 Thal/Smith/JP M3 kept). Optional later polish: bump M3 iters to tighten tau_delta.
 
+**Production exports added to `01_fit.R` (before the sweep started).** These are the
+paper's production fits, so save generously. Per fit now also writes:
+`<tag>_psi.csv` — per-item difficulty (item, jj, median `delta_j` + q5/q95, rhat/ess,
+empirical production rate, n_obs); **required to rebuild the efficiency figure
+(Fig 2)** on the new fits. `<tag>_child.csv` — per-child efficiency `xi` and
+acceleration (`kappa`; `slope` for m3lin) with intervals + n_admins. Plus a
+deterministic per-fit seed (`sum(utf8ToInt(slug_model))`) for reproducibility.
+Validated on a throwaway tiny fit: delta_j vs empirical production r = −0.92 (correct
+sign/scale). psi written for every model (all expose delta_j); child for m2/m3/m3lin.
+Marchman M3 re-queued to pick up the export (it had run under the old code).
+
 **File hygiene (two generations).** `fits/bayes_long/` now holds a superseded base
 (2+-admin, no suffix) generation and the current `_a3` generation. Stale artifacts
 moved to `fits/bayes_long/_superseded/` (see its README): all base 2+ bundles+fits,
