@@ -2484,3 +2484,46 @@ short caps silently kill fits (lost several to 12 h); skill + memory updated.
 
 **Status.** 19/20 fits done; NO M3 finishing on Sherlock (32c). Full ladder table +
 5-panel fan rebuild when it lands.
+
+### 40.1 The `_a3` (3+-admin) filter and the monotone-vocabulary QC — resolving σ_b and the Marchman pathology (2026-07-08)
+
+Two follow-on data decisions closed out the σ_b story from §40.
+
+**(a) 3+-admin filter (`MIN_ADMINS`, `_a3` bundles).** To test whether σ_b ≈ 8 was
+a 2-time-point artifact, `00_prepare_bundles.R` was parametrized on
+`MIN_ADMINS` (env), writing `bundle_<slug>_a3.rds` at ≥3 admins/kid. Effect:
+**Smith σ_b 8→5, Norwegian M3 converged** (funnel gone; the killed §40 NO M3 was a
+stuck-chain casualty of median-2 depth). But median-3 datasets were *unchanged*
+(Thal 3.2, Marchman still ≈8 at 3+) → σ_b tracks **age-range/shape**, not just
+count. And crucially the 3+ filter *exposed* (did not cause) a Marchman-specific
+pathology: with per-child slopes now identifiable, a cluster of impossible
+**declining** trajectories became visible.
+
+**(b) Marchman declining-trajectory diagnosis → monotone-vocabulary QC.** A subset
+of Marchman WG admins record impossible production: vocabulary **spikes** to 0.3–0.7
+at 8–18 mo then **collapses to ~0** (tent shape) — e.g. `Marchman::348` produces
+396/396 words at 14 mo then 23 at 22 mo. Not ID collisions (linkage verified in
+§40); most consistent with comprehension mis-keyed as production on a subset of WG
+forms. These extreme negative slopes were inflating σ_b and blowing out the fan.
+Fix = a **dataset-agnostic QC filter** in `00_prepare_bundles.R`: drop any child
+whose per-admin proportion-produced ever falls **>20% below an earlier wave** (a
+child cannot un-produce words). Threshold vetted visually across TOL 0.10–0.30 on
+the by-dataset spaghetti: **0.20 is surgical** — Marchman −21, Norwegian −13
+(genuine terminal plunges, not report noise), Thal/Smith/Japanese −0. 0.10
+over-flags Norwegian noise; 0.30 lets moderate Marchman declines through. Total
+cost 34/1977 kids (~1.7%). Committed `ab8b81c`.
+
+**(c) Full relaunch on cleaned `_a3` bundles.** Rebuilt all five 3+ bundles with QC,
+rsynced the two changed ones (Marchman, Norwegian) to Sherlock, and launched the
+complete **M0–M3 sweep** (17 jobs): Marchman M3 as the confirmation case, Norwegian
+M0–M3 (M3 on `--qos=long`, 3 d), Marchman M0–M2, and Thal/Smith/Japanese M0–M2.
+Thal/Smith/Japanese M3 are **not** re-run — QC dropped 0 there, so those bundles and
+their §40 M3 fits are unchanged and stand. Expectation: Marchman σ_b drops from
+~8.3 and the fan calibrates.
+
+**File hygiene (two generations).** `fits/bayes_long/` now holds a superseded base
+(2+-admin, no suffix) generation and the current `_a3` generation. Stale artifacts
+moved to `fits/bayes_long/_superseded/` (see its README): all base 2+ bundles+fits,
+plus the pre-QC `marchman_a3_m3`/`norwegian_a3_m3` (being overwritten by the
+reruns). Current-and-kept: `_a3` bundles + `{thal,smith,japanese}_a3_m3` +
+incoming reruns.
