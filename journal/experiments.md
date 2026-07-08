@@ -2538,6 +2538,35 @@ on the correlation block — rho_ab/tau_delta rhat ≈ 1.04–1.05, ess 77–177
 σ_b itself is clean, rhat 1.005 / ess 277; consider more iters or adapt_delta on the
 final M3s.)
 
+### 40.2 QC rule v2 — endpoint-relative crater (the absolute rule had a blind spot) (2026-07-08)
+
+MCF caught that the absolute ">20% below an earlier wave" rule (§40.1b) misses the
+worst junk: a **low-vocab** kid who peaks at 0.12 and craters to 0 loses only 0.12
+*absolute* (under threshold) but **100% of what they had**. An absolute rule
+protects high-vocab kids and lets low-vocab craters through — backwards.
+
+Iterated the rule on the by-dataset spaghetti (per-child vocab traces printed as
+`age:prop`, red-overlay vet plot):
+- **Pure relative** (final/any wave >25% below running peak): over-flags Norwegian
+  (84) — a 0.10→0.07 wiggle is a 30% relative drop but noise. → floors needed.
+- **Relative + floors, any-wave**: still over-flags Norwegian (23) because
+  `cummax` never forgives a **transient mid-trajectory dip** — it flagged kids like
+  NO ch384 (…30mo:0.57 33mo:0.60, *ends at its peak, still climbing*). Wrong.
+- **Endpoint-based (adopted):** drop a child iff **final vocab > QC_REL_TOL below
+  its running peak**, floors `peak>=0.10 & (peak−last)>=0.05`. A crater *ends* low;
+  a recoverer ends at its peak. This is the honest reading of "craters to 0 later."
+  Catches low-vocab craters (Marchman ch53 0.10→0.01) **and** high tent-spikes
+  (ch30 0.05→0.21→0.01) while sparing dip-then-recover kids. Committed `3780fc9`.
+
+**Drops (raw → filtered):** Marchman **35/194**, Norwegian **8/796**, Thal/Smith/
+Japanese **0**. (More Marchman than §40.1's 21 because the endpoint rule unions the
+high tents *and* the low craters; fewer Norwegian — 8 vs the absolute rule's 13 —
+because recoverers are now spared, so it *keeps* more good data.) Rebuilt all five
+`_a3` bundles, killed the absolute-rule sweep (barely started), relaunched **just
+Marchman M3** as the gate; full sweep to follow if σ_b/κ/fan look right. Honest
+prior: κ likely rises again (more negative-slope kids removed) but σ_b may stay ≈8
+(structural, per §40.1d) — the win is clean data regardless.
+
 **File hygiene (two generations).** `fits/bayes_long/` now holds a superseded base
 (2+-admin, no suffix) generation and the current `_a3` generation. Stale artifacts
 moved to `fits/bayes_long/_superseded/` (see its README): all base 2+ bundles+fits,
