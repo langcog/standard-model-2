@@ -1,6 +1,6 @@
 short,item_definition,status,fuzzy_candidate,fuzzy_dist
-VABUSCAR,NA,needs_review,buscar,2
 OTROVEZ,otro/otra vez,override,NA,NA
+VABUSCAR,va a buscar,override,NA,NA
 A,a,wordbank,NA,NA
 ABAJO,abajo,wordbank,NA,NA
 ABEJA,abeja,wordbank,NA,NA

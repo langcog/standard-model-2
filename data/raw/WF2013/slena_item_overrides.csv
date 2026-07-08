@@ -4,6 +4,7 @@ CONTENTO,contento,definition-coded SLENA short
 DONDESTA,dónde está,off-by-one vs dict code 'dondest'
 HACERMEM,hacer la meme,dict code 'hacerme' (sleep, Games & Routines) -- not 'hacer'
 OTROVEZ,otro/otra vez,off-by-one vs dict code 'otravez'
+VABUSCAR,va a buscar,"SLENA-specific phrase (""go look for it""); no Wordbank-ES item, distinct from BUSCAR (MCF)"
 RODILLAS,rodilla,SLENA plural vs dict singular code 'rodilla'
 SENTARSE,sentar(se),definition-coded SLENA short
 TEMPRANO,temprano,definition-coded SLENA short
