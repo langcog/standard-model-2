@@ -2567,6 +2567,16 @@ Marchman M3** as the gate; full sweep to follow if σ_b/κ/fan look right. Hones
 prior: κ likely rises again (more negative-slope kids removed) but σ_b may stay ≈8
 (structural, per §40.1d) — the win is clean data regardless.
 
+**Gate result (Marchman M3, end-rule): prediction confirmed.** κ **9.37→10.66→11.49**
+across raw→absolute→end-rule (now in line with Thal 11.5 / JP 11.6 / Smith 12.9);
+σ_b **8.39→8.00** (nudged, still structural). Empirical fan overlay now clean (no
+craters); 10th-pct still low-flat = honest σ_b≈8. Headline params clean (κ ess 2052,
+σ_b rhat 1.005); only nuisance `tau_delta`/`rho_ab` mix marginally (ess 42/88) — and
+that's *systematic* across all five M3s (Thal tau_delta ess 43, etc.), not
+Marchman-specific, and irrelevant to κ/σ_b/ELPD. **Full sweep launched** at default
+settings for ladder consistency (M0–M2 ×5 + NO M3 on long QOS; Marchman M3 done;
+Thal/Smith/JP M3 kept). Optional later polish: bump M3 iters to tighten tau_delta.
+
 **File hygiene (two generations).** `fits/bayes_long/` now holds a superseded base
 (2+-admin, no suffix) generation and the current `_a3` generation. Stale artifacts
 moved to `fits/bayes_long/_superseded/` (see its README): all base 2+ bundles+fits,
