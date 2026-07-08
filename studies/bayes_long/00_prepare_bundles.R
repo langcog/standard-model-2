@@ -33,6 +33,9 @@ A0        <- 18                                   # anchor age (explosion milest
 LOG_H     <- log(365)                             # ~waking hours/month; interpretive offset
 MIN_ITEM_OBS <- 100                               # per-unit item filter
 MIN_ADMINS   <- as.integer(Sys.getenv("MIN_ADMINS", "2"))  # min administrations per child
+QC_MONO_TOL  <- 0.20                              # drop kids whose vocab falls >20% below an
+                                                  # earlier wave (impossible: a child cannot
+                                                  # un-produce words; catches corrupted records)
 
 OUT_DIR <- here("fits","bayes_long"); dir.create(OUT_DIR, recursive=TRUE, showWarnings=FALSE)
 
@@ -91,6 +94,16 @@ build_bundle <- function(it_unit, slug, label) {
   it_keep <- df |> count(item) |> filter(n>=MIN_ITEM_OBS) |> pull(item)
   df <- df |> filter(item %in% it_keep)
 
+  ## QC: drop whole child if vocabulary ever falls >QC_MONO_TOL below an earlier
+  ## wave (per-admin proportion produced over the retained items). Impossible
+  ## under a monotone accumulator; catches the Marchman WG-production spikes that
+  ## collapse to ~0 and Norwegian terminal plunges. Dataset-agnostic.
+  prop <- df |> group_by(ckey, age) |> summarise(v = mean(produces), .groups="drop")
+  qc_bad <- prop |> arrange(ckey, age) |> group_by(ckey) |>
+    summarise(bad = any(cummax(v) - v > QC_MONO_TOL), .groups="drop") |>
+    filter(bad) |> pull(ckey)
+  df <- df |> filter(!(ckey %in% qc_bad))
+
   ## integer indices for Stan
   df <- df |> mutate(admin = paste(ckey, age, sep="@@"))
   child_ix <- tibble(ckey = unique(df$ckey)) |> mutate(ii = row_number())
@@ -113,10 +126,12 @@ build_bundle <- function(it_unit, slug, label) {
                n_kids=nrow(child_ix), n_admins=nrow(admin_ix), n_items=nrow(item_ix),
                n_obs=nrow(obs), age_range=range(admin_ix$age),
                med_admins_per_kid=median(ad_per_kid),
-               max_admins_per_kid=max(ad_per_kid))
-  cat(sprintf("  [%s] kids=%d admins=%d items=%d obs=%d | age %d-%d | admins/kid med=%d max=%d\n",
+               max_admins_per_kid=max(ad_per_kid),
+               n_qc_dropped=length(qc_bad), qc_mono_tol=QC_MONO_TOL)
+  cat(sprintf("  [%s] kids=%d admins=%d items=%d obs=%d | age %d-%d | admins/kid med=%d max=%d | QC-dropped=%d\n",
               out_slug, meta$n_kids, meta$n_admins, meta$n_items, meta$n_obs,
-              meta$age_range[1], meta$age_range[2], meta$med_admins_per_kid, meta$max_admins_per_kid))
+              meta$age_range[1], meta$age_range[2], meta$med_admins_per_kid, meta$max_admins_per_kid,
+              meta$n_qc_dropped))
 
   saveRDS(list(stan_data=stan_data, child_ix=child_ix, item_ix=item_ix,
                admin_ix=admin_ix, meta=meta),
