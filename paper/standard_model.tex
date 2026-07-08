@@ -180,6 +180,20 @@
  
 
 
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
 \usepackage{pdflscape}
 \makeatletter
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
@@ -227,7 +241,7 @@
 \urlstyle{same}
 \hypersetup{
   pdftitle={Children's early vocabulary growth is a process of accelerating accumulation},
-  pdfauthor={Michael C. Frank},
+  pdfauthor={Michael C. Frank; Virginia A. Marchman},
   pdfkeywords={Early word learning; Bayesian data analysis; Large
 language models},
   colorlinks=true,
@@ -240,51 +254,50 @@ language models},
 
 \title{Children's early vocabulary growth is a process of accelerating
 accumulation}
-\author{Michael C. Frank}
+\author{Michael C. Frank \and Virginia A. Marchman}
 \date{}
 \begin{document}
 \maketitle
 \begin{abstract}
 \noindent Children typically learn hundreds of words over the first few
 years of their life, in a process that begins slowly but quickly picks
-up speed. Yet children vary widely in their rate of word learning, and
-this variation has important practical and theoretical consequences.
-Prior models of word learning describe vocabulary growth as a process of
+up speed. Yet they vary widely in their rate of word learning, and this
+variation has important practical and theoretical consequences. Prior
+models of word learning describe vocabulary growth as a process of
 accumulation of evidence over time. Here we show that the process is
 best characterized as \emph{accelerating} accumulation, with children
 varying in both the overall efficiency with which they accumulate
-vocabulary and their acceleration. This model provides a lever for
+vocabulary and their acceleration rate. This model provides a lever for
 understanding different loci of variation. Applied to cross-linguistic
-data, it suggests that the female advantage in early vocabulary results
-primarily from differences in overall learning efficiency, while
-socioeconomic differences appear in both terms and may compound through
-effects on acceleration rate. Using dense observations of children's
-early language environment, the model shows compounding effects on
-acceleration. In contrast, the effects of processing speed load
-primarily on efficiency and do not appear to compound. In contrast to
-children, large language models -- even those trained on child-directed
-speech -- are not well-described by this model: they show standard
-accumulator dynamics with no acceleration and very limited variability.
-In sum, our model provides a quantitative characterization of key
-signatures of early vocabulary growth, providing a target for future
-mechanistic learning models.
+data, it suggests that the female advantage in early vocabulary
+manifests in overall learning efficiency, while socioeconomic
+differences may compound through effects on acceleration. Used to
+esimate effects children's early language environment, the model shows
+modest but compounding effects of language input quantity on
+acceleration. In contrast to children, large language models -- even
+those trained on child-directed speech -- are not well-described by this
+model: they show standard accumulator dynamics with no acceleration and
+very limited variability. In sum, our model gives a quantitative
+characterization of key signatures of early vocabulary growth, providing
+a target for future mechanistic learning models.
 \end{abstract}
 
 
 \setstretch{1.05}
-Children's early vocabulary grows very rapidly during early childhood,
-with large variation between children (Fenson et al. 1994, 2007; Frank
-et al. 2021). The growth has theoretical, practical, and methodological
-importance. From a theoretical perspective, growth mechanisms shed light
-on children's fundamental learning mechanisms and how they change across
-childhood (McMurray 2007; Bloom 2002; Frank et al. 2021). From a
-practical perspective, early vocabulary is an important precursor -- and
-predictor -- of academic achievement (Marchman and Fernald 2008; Catts
-et al. 2002; Muter et al. 2004). From a methodological perspective,
-vocabulary also affords a unique psychometric opportunity to study human
-variation because, unlike nearly all important human psychological
-metrics, there is a true zero point -- a time before which children know
-no words. Thus, absolute levels of variability can be calculated.
+Children's early vocabulary grows rapidly during early childhood, with
+large variation between children (Fenson et al. 1994; Kidd and Donnelly
+2020; Frank et al. 2021). The growth has theoretical, practical, and
+methodological importance. From a theoretical perspective, growth
+mechanisms shed light on children's fundamental learning mechanisms and
+how they change across childhood (McMurray 2007; Bloom 2002; Frank et
+al. 2021). From a practical perspective, early vocabulary is an
+important precursor -- and predictor -- of academic achievement
+(Marchman and Fernald 2008; Catts et al. 2002; Muter et al. 2004). From
+a methodological perspective, vocabulary also affords a unique
+psychometric opportunity to study human variation because, unlike nearly
+all important human psychological metrics, there is a true zero point --
+a time before which children know no words. Thus, absolute levels of
+variability can be calculated.
 
 One dominant viewpoint is that children's vocabulary growth can be
 characterized as a process of accumulation (McMurray 2007; Mitchell and
@@ -384,8 +397,6 @@ Following the bucket metaphor, this modification allows children to have
 different size buckets. This extension defines a longitudinal growth
 model that can be fit directly to large-scale datasets about children's
 actual vocabularies.
-
-CITE EVAN KIDD
 
 Critically, our framework is posed in terms of ratio-scale variables
 with real units: words (tokens) per hour, total words (types) in the
@@ -503,23 +514,36 @@ by an exponent \(\kappa\).
 
 \[\text{M2: }\theta_i(t)  = \log(r_i) + \kappa ~ \log(t/a_0)\]
 \noindent When \(\kappa>1\), each successive month yields more
-accumulation than the last.
+accumulation than the last. Following the literature, we focus here on
+linear accumulator models, which show power-law growth of ability over
+time because \(\theta\) is a function of \(\log(t)\).
+
+Neither of these models has any way to capture variation across children
+beyond variation in input rate. Thus, we relax the basic accelerating
+accumulator, moving away from pure rate-related variation (which we
+return to below) and rewriting this model as the sum of an
+individually-variable efficiency term:
+
+\[\text{M3: }\theta_i(t) = \xi_i + \kappa ~ \log(t/a_0)\]
+
+We further augment this model with an individually-variable acceleration
+term \(\kappa_i\), giving us
+
+\[\text{M4: }\theta_i(t) = \xi_i + \kappa_i ~ \log(t/a_0)\]
 
 Model 4 instantiates the idea that children vary in their base rate of
 efficiency and their acceleration, creating variant of a standard
 longitudinal growth model in which children vary on their slope and
 intercept (Grimm, Ram, and Estabrook 2016).
 
-As we will show, Model 4 provides a good description of variation in
-children's longitudinal growth trajectories. Figure~\ref{fig-schematic}
-(top) shows schematic predictions from a pure accumulator model (M1), an
-accelerating accumulator (M2) in comparison to models including
-child-level variation in efficiency (M3) and both efficiency and
-acceleration (M4). Each model's predictions are represented as ability
-scores (\(\theta\)) across age and then also projected into proportion
-correct scores on a discrete set of vocabulary items, representing an
-observed accuracy score that is subject to compression at floor and
-ceiling.
+Figure~\ref{fig-schematic} (top) shows schematic predictions from a pure
+accumulator model (M1), an accelerating accumulator (M2) in comparison
+to models including child-level variation in efficiency (M3) and both
+efficiency and acceleration (M4). Each model's predictions are
+represented as ability scores (\(\theta\)) across age and then also
+projected into proportion correct scores on a discrete set of vocabulary
+items, representing an observed accuracy score that is subject to
+compression at floor and ceiling.
 
 Our analysis generally depends on the availability of longitudinal data
 at the item level. The different models described above are not
@@ -566,19 +590,19 @@ Figure~\ref{fig-schematic} (bottom) shows the fit of the four model
 variants; the increasing spread of children's trajectories with age is
 especially noticeable for low-vocabulary older children {[}who may be
 classified as ``late talkers''; Fernald and Marchman (2012); Rescorla
-(2011){]}.\footnote{Following the literature, we primarily investigate
-  linear accumulator models, which show power-law growth of ability over
-  time because \(\theta\) is a function of \(\log(t)\). However, it is
-  also possible that ability grows linearly in time, which would lead to
-  exponential increases in the probability of word production. We fit
-  linear-time models, but found that they were dispreferred
-  statistically in all but one case, though differences were relatively
-  small within the restricted age range for which we have data (See SI:
-  Full Cross-linguistic Model Ladder).} Notably, variation in both
-efficiency and acceleration was unimodal across all samples (see SI:
-Characterizing Variation in Efficiency and Acceleration), providing no
-evidence of discrete clusters corresponding to language impairment
-(Pinstock and Schramm 2026; Singletary et al. 2025).
+(2011){]}.\footnote{It is possible that ability grows linearly with age,
+  rather than linearly with the logarithm of age. Linear growth in
+  ability would lead to exponential increases in the probability of word
+  production. We fit linear-time models, but found that they were
+  dispreferred statistically in all but one case. Differences were
+  relatively small within the restricted age range for which we have
+  data, but we believe these models should be dispreferred on
+  theoretical grounds as well (See SI: Full Cross-linguistic Model
+  Ladder).} Notably, variation in both efficiency and acceleration was
+unimodal across all samples (see SI: Characterizing Variation in
+Efficiency and Acceleration), providing no evidence of discrete clusters
+corresponding to language impairment (Pinstock and Schramm 2026;
+Singletary et al. 2025).
 
 \subsubsection{Efficiency and acceleration relate to separate
 demographic
@@ -602,14 +626,12 @@ for cross-sectional and longitudinal datasets.}
 
 \end{figure}%
 
-Children's vocabulary is known to be related to a number of
-sociodemographic predictors, including sex and maternal education (which
-is interpreted as a proxy for socioeconomic status). In particular,
-female children show consistently larger vocabularies than male children
-across dozens of languages and countries (Eriksson et al. 2012; Frank et
-al. 2021). Similarly, children of more educated mothers tend to show
-larger vocabularies, though this effect is somewhat more heterogeneous
-across countries and languages (Frank et al. 2021).
+Children's vocabulary is related to a number of sociodemographic
+factors. Female children show consistently larger vocabularies than male
+children across dozens of languages and countries (Eriksson et al. 2012;
+Frank et al. 2021). Similarly, children of more educated mothers tend to
+show larger vocabularies, though this effect is somewhat more
+heterogeneous across countries and languages (Frank et al. 2021).
 
 Our model offers a summary of children's growth in terms of both their
 efficiency (intercept) and their acceleration (slope). This
@@ -620,9 +642,10 @@ unbiased prediction (BLUP) from our models. We then regressed intercept
 and slope terms against each demographic predictor separately for each
 language. Although we cannot fit individual children's growth
 trajectories in cross-sectional data, we can also in principle apply the
-same model to recover population parameters based on cross-sectional
-data, so we did so for an additional group of datasets for which sex and
-maternal education information were available.
+same model to recover \emph{population} parameters, so we did so for an
+additional group of datasets from Wordbank for which children's sex
+(N=VALUE NOT SPECIFIED) and maternal education (N=VALUE NOT SPECIFIED)
+were available.
 
 Figure~\ref{fig-demographics} shows the per-language coefficients from
 this analysis, along with a cross-language meta-analytic estimate for
@@ -655,70 +678,148 @@ words}\label{growth-in-ability-leads-to-rapid-changes-in-learning-times-for-indi
 
 \end{figure}%
 
-As an illustration of the changes in efficiency and acceleration that we
-observe in our data, we computed the average proportion of exposures
-necessary for a child to learn a word across ages.
+The accelerating accumulator model provides a quantitative description
+of a very salient fact about language acquisition: the number of
+exposures necessary to learn a word decreases dramatically over
+childhood. While a toddler may have heard a word like ``book'' thousands
+of times before they say it, a few years later a preschooler may hear
+``ibex'' a handful of times on a trip to the zoo and repeat it the next
+day. To quantify this phenomenon, we computed the average proportion of
+exposures necessary for a child to learn a word across ages.
+
 Figure~\ref{fig-efficiency} shows a model-derived estimate of the
 average number of times a word is heard before more than 50\% of
 children produce it (See SI: Changes in Word Efficiency), using
 frequency estimates from the CHILDES Corpus (MacWhinney 2000; Sanchez et
-al. 2019).
-
-Across different word classes (e.g., nouns, verbs, closed class words),
-efficiency increases exponentially, such that early-learned words such
-as ``book'' may be heard tens of thousands of times before they are
-produced, while later learned words such as ``vitamin'' might only be
-heard hundreds times before being produced. Indeed, this analysis likely
-understates the degree of change in efficiency as it assumes that each
-exposure to a word is equally meaningful. In fact, individual exposures
-vary widely in how much information they give. Sometimes words are
-overheard rather than directed to the child, or lack physical context to
-allow for clear inference (Cartmill et al. 2013; Trueswell et al. 2013;
-Mollica and Piantadosi 2017). Thus, in line with both intuition and
+al. 2019). Across different word classes (e.g., nouns, verbs, closed
+class words), number of examples needed for learning drops exponentially
+with development.\footnote{Indeed, this analysis likely understates the
+  degree of change in efficiency as it assumes that each exposure to a
+  word is equally meaningful. In fact, individual exposures vary widely
+  in how much information they give. Sometimes words are overheard
+  rather than directed to the child, or lack physical context to allow
+  for clear inference (Cartmill et al. 2013; Trueswell et al. 2013;
+  Mollica and Piantadosi 2017).} Thus, in line with both intuition and
 experiments, the total number of exposures required on average to learn
 a word might indeed be only a small handful by age three (Markson and
 Bloom 1997; Bloom 2002).
 
-\section{Using the accelerating accumulator to study the effects of home
-input}\label{using-the-accelerating-accumulator-to-study-the-effects-of-home-input}
+\section{Quantifying effects of language
+input}\label{quantifying-effects-of-language-input}
 
-\section{Model}\label{model-1}
+\subsection{Model}\label{model-1}
 
-Neither of these models has any way to capture variation across children
-beyond variation in input rate. Thus, we augment the basic accelerating
-accumulator, rewriting it as the sum of an individually variable
-efficiency term:
+Up to this point, we have fit our models with efficiency and
+acceleration as free parameters derived from longitudinal growth. Now we
+ask whether we can estimate the relationship of these parameters to
+children's language input and processing efficiency. In particular, we
+use Bayesian data analysis to link within-child longitudinal measures of
+both input and processing to children's efficiency and acceleration.
 
-\[\text{M3: }\theta_i(t) = \xi_i + \kappa ~ \log(t/a_0)\]
+For both input and processing measures, we establish a measurement model
+in which multiple noisy observations are pooled to estimate an
+individual's deviation from the population (see SI: Joint
+Input-Processing Model). In the case of input, the words heard per hour
+is quite stable across development, so we estimate each child's
+deviation from the mean across families (\(d_i\)). In the case of
+processing speed, log reaction time declines linearly in the log of age
+(Frank et al. 2026), so we estimate each child's deviation from this
+linear trend (\(w_i\)).
 
-The intercept term \(\xi_i = \log(r_i) + \log(\alpha_i)\) can then be
-used to break down individual variation into both input rate-related and
-other variation in children's efficiency.
+We then estimate the relationship of each of these predictors to each
+child's efficiency (\(\xi_i\)) and acceleration (\(\kappa_i\)),
+respectively:
 
-Our final model includes individually variable efficiency and
-acceleration terms:
+\begin{align}
+\xi_i   &=& \mu_\xi + d_i + \beta_w\,w_i + \epsilon^\xi_i \\
+\kappa_i &=& \mu_\kappa + \beta_d\,d_i + \beta'_w\,w_i + \epsilon^\kappa_i
+\end{align}
 
-\[\text{M4: }\theta_i(t) = \xi_i + \kappa_i ~ \log(t/a_0)\]
+\noindent where \(\mu_\xi\) and \(\mu_\kappa\) represent the population
+means respectively, the \(\beta\) values act as regression coefficients
+estimating the strength of the coupling between an individual's input
+and processing and the parameters of their vocabulary growth.\footnote{There
+  is no coefficient on \(d_i\) as this term enters the accumulator model
+  directly as part of the overall rate of language accumulation.}
 
-In this model, the slope term
-\(\kappa_i = \kappa + \gamma \log r_i + \zeta_i\) adds \emph{individual
-variation in acceleration}, decomposing acceleration into a population
-term, input-related acceleration, and a child‑specific residual
-acceleration \(\zeta_i\) (the part not explained by input). The
-coefficient \(\gamma\) then captures the strength of the relationship
-between input and acceleration.
+Taken together, this model essentially creates a set of linked
+measurement models that define a principled, parametric relationship
+between language input, measures of in-the-moment processing, and the
+growth of vocabulary over time.
 
 \subsection{Results}\label{results-1}
+
+\subsubsection{Input predicts both efficiency and acceleration, while
+processing speed relates only to
+efficiency}\label{input-predicts-both-efficiency-and-acceleration-while-processing-speed-relates-only-to-efficiency}
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{standard_model_files/figure-pdf/fig-io-partition-1.pdf}
+
+}
+
+\caption{\label{fig-io-partition}}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{standard_model_files/figure-pdf/fig-io-data-panels-1.pdf}
+
+}
+
+\caption{\label{fig-io-data-panels}Observed data entering the io-proc
+analysis, one colour per dataset (constant across panels). (A) CDI
+vocabulary: each line is a child's words-produced count across
+administrations (no points), with a per-dataset loess trend. (B)
+Looking-while-listening reaction time (log scale): per-child
+session-mean RT with a per-dataset trend; RT declines with age in every
+dataset. (C) Observed input rate (log; study-specific units, so absolute
+levels are not comparable across datasets --- only the age trends):
+per-child trajectories with a per-dataset trend, with BabyView head-cam
+recordings averaged to monthly means so they do not swamp the sparser
+LENA datasets. \emph{{[}Draft caption --- MCF to review.{]}}}
+
+\end{figure}%
+
+To estimate the separate contributions of language input and language
+processing to efficiency and acceleration, we turn to a set of six
+longitudinal English datasets (described in SI: Datasets) that include
+either dense home recordings, longitudinal LWL processing data, or both.
+Four include recordings from day-long audio recordings using LENA
+(Language Environment Analysis) recorders, which offers an automated
+adult word count estimate that has been validated by transcription
+studies (Cristia et al. 2021). One includes short video recordings of
+egocentric video recorded in children's homes, with word counts
+estimated from automated transcripts (Long et al. 2024). Each of these
+metrics provides a noisy proxy for total home input, but nevertheless
+allows us to estimate models that include individual input. Further,
+five of the six include multiple LWL sessions per individual, offering
+data on children's reaction time in word recognition.
+
+Figure~\ref{fig-io-partition} (B) shows the coefficients of the dual
+measurement model fit to this dataset. The model shows a strong
+relationship between observed word recognition speed and efficiency, but
+a much smaller, non-significant relationship to acceleration. In
+contrast, input was more balanced between channels.
 
 \subsubsection{Population input-related variation corresponds to
 meta-analytic
 estimates}\label{population-input-related-variation-corresponds-to-meta-analytic-estimates}
 
-In our prior model fits, we fit population variation in efficiency and
-acceleration without considering the connection to language input. We
-next consider whether this relationship can be estimated at a population
-level. We use markov chain monte carlo to fit a version of model 4 with
-a linkage between efficiency and input rate such that
+In the prior model, we fit population variation in efficiency and
+acceleration on the individual level. We next consider whether this
+relationship can be estimated at a population level. We ask how much
+variation in vocabulary in the longitudinal data above could be
+explained by a range of possible levels of variation in input quantity.
+
+In particular, we fit a version of model 4 with a linkage between
+efficiency and input rate such that
 \(\xi_i = \log(r_i) + \log(\alpha_i)\), where \(r_i\) is not known but
 we assume that there is a population variation in language input rate:
 \(\sigma_r\). This model -- which does not include individual
@@ -740,7 +841,7 @@ Thus, we consider the share of variation due to input across a range of
 plausible values, anchored via a range of estimates in the published
 literature (see SI: Population Input Range Estimation).
 
-Figure~\ref{fig-io-partition} (panel F) shows the results models fit
+Figure~\ref{fig-io-partition} (panel C) shows the results models fit
 with three values for each language, interpolated with an analytic
 estimate of the relationship between \(\sigma_r\) and the total
 proportion of variance in efficiency that could be attributed to input.
@@ -751,52 +852,6 @@ reported by Coffey and Snedeker (2026) (4--7\%). This consistency both
 supports the overall plausibility of the model and provides a second
 route for estimating the significant but modest contribution of input
 quantity to variation in children's outcomes.
-
-\subsubsection{Input predicts both efficiency and acceleration, while
-processing speed relates only to
-efficiency}\label{input-predicts-both-efficiency-and-acceleration-while-processing-speed-relates-only-to-efficiency}
-
-\begin{figure}
-
-\centering{
-
-\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{standard_model_files/figure-pdf/fig-io-partition-1.pdf}
-
-}
-
-\caption{\label{fig-io-partition}}
-
-\end{figure}%
-
-Population estimates of input sensitivity do not offer a direct estimate
-of input couplings within individual children, and they do not allow us
-to estimate the separate contributions of language input and language
-processing to efficiency and acceleration.For this, we turn to a set of
-five longitudinal datasets (described shown in SI: Datasets) that
-include either dense home recordings, longitudinal LWL processing data,
-or both. Three include recordings from day-long audio recordings using
-LENA (Language Environment Analysis) recorders, which offer an automated
-adult word count estimate that has been validated by transcription
-studies (Cristia et al. 2021). One includes short video recordings of
-egocentric video recorded in children's homes, with word counts
-estimated from automated transcripts (Long et al. 2024). Each of these
-metrics provides a noisy proxy for total home input, but nevertheless
-allows us to estimate models that include individual input. Further,
-four of the five include multiple LWL sessions per individual, offering
-data on children's word recognition speed (\(w_i\)).
-
-We investigated several variants of Model 4 (See SI: Predicting a
-version of Model 4 to this dataset, with modifications to allow input
-and acceleration to contribute to both acceleration and efficiency. We
-then fit this model to the joint dataset but with observations of
-\(r_i\) and \(w_i\) for individual children.
-
-Figure~\ref{fig-io-partition} (B) shows small but highly reliable
-effects of language input on both efficiency and acceleration. These
-effects are also in the range of the meta-analyses, but they suggest
-that input-related differences -- though small -- could compound through
-their effect on acceleration. In contrast, processing predicted
-\emph{only} efficiency and not acceleration.
 
 \section{Coda: Large language models show no acceleration in their
 vocabulary
@@ -816,8 +871,6 @@ English and Norwegian models.}
 
 \end{figure}%
 
-REMEMBER ACCELERATION ACROSS DATA - KAPPA AND SCALING LAWS
-
 Small-scale language models trained on developmentally-realistic corpora
 have become a useful tool for understanding early language development
 (Huebner et al. 2021; Futrell and Mahowald 2025; Frank and Goodman
@@ -834,14 +887,14 @@ individual words across training, estimating a logistic curve for each
 word, just as our Rasch model does. Critically for our purposes, the
 slope of these logistic curves provides a direct analogue to our
 \(\kappa\) parameter capturing acceleration in the accumulation process
-(see SI: Computing Acceleration in LMs).
+(see SI: Computing Acceleration in LMs). We compared the word-by-word
+acceleration of small-scale LLMs to children across several experiments.
+First, we extracted slopes from fits provided by Chang and Bergen
+(2022), in which four different language model architectures (LSTM,
+BiLSTM, GPT-2, and BERT) were fit to standard corpora (BookCorpus and
+WikiText-103). This training setup was disanalogous with our studies of
+children in at least two ways, however.
 
-We compared the word-by-word acceleration of small-scale LLMs to
-children across several experiments. First, we extracted slopes from
-fits provided by Chang and Bergen (2022), in which four different
-language model architectures (LSTM, BiLSTM, GPT-2, and BERT) were fit to
-standard corpora (BookCorpus and WikiText-103). This training setup was
-disanalogous with our studies of children in at least two ways, however.
 First, models were not trained on child directed speech, so we retrained
 new GPT-2 (small) models on 24.5M words from CHILDES, following the
 protocol in Feng, Goodman, and Frank (2024). Second, unlike children,
@@ -866,8 +919,6 @@ accelerating accumulators.
 
 \section{Discussion}\label{discussion}
 
-IS THIS ALL PHONOLOGY??
-
 How does children's vocabulary grow over early childhood? We proposed
 that this process is characterized as accelerating accumulation, in
 which variation between children is produced by differences in both the
@@ -884,11 +935,10 @@ increasing fan, such that older children are more different from one
 another than younger ones. On the side of demographics, we found
 evidence that while sex differences manifest as differences in
 efficiency, socioeconomic differences show up in acceleration as well.
-Evidence about language input paints a similar picture: while language
-processing measures such as LWL index differences in efficiency,
-language input variation appears to affect acceleration as well. Thus,
-our model identifies a channel by which experience might compound across
-development.
+Evidence about language input and processing suggest that while language
+processing relates primarily to differences in efficiency, language
+input variation appears to affect both Thus, our model identifies a
+channel by which experience might compound across development.
 
 Where does the acceleration in children's learning come from? One
 possibility is that it is driven by developmental maturation of general
@@ -933,7 +983,7 @@ providing signatures of longitudinal variation, we can inspire further
 work using both dense measurement and intervention that can gain causal
 traction on the mechanisms of vocabulary growth.
 
-Two often, psychology and cognitive science focus either only on
+Too often, psychology and cognitive science focus either only on
 universal mechanisms or variability between individuals. Word learning
 is a unique case study in cognitive science because it describes a basic
 process of knowledge acquisition that also captures large, meaningful
@@ -1013,8 +1063,6 @@ models}\label{input-and-processing-models}
 \subsubsection{Input}\label{input}
 
 \subsubsection{GPT-2 models}\label{gpt-2-models}
-
-We trained XYZ
 
 \section{Acknowledgements}\label{acknowledgements}
 
@@ -1144,11 +1192,6 @@ Language Processing}, edited by Yaser Al-Onaizan, Mohit Bansal, and
 Yun-Nung Chen, 22055--71. Miami, Florida, USA: Association for
 Computational Linguistics.
 \url{https://doi.org/10.18653/v1/2024.emnlp-main.1231}.
-
-\bibitem[\citeproctext]{ref-fenson2007}
-Fenson, Larry et al. 2007. \emph{MacArthur-Bates Communicative
-Development Inventories}. Baltimore, MD: Paul H. Brookes Publishing
-Company.
 
 \bibitem[\citeproctext]{ref-fenson1994}
 Fenson, Larry, Philip S Dale, J Steven Reznick, Elizabeth Bates, Donna J
@@ -1312,6 +1355,11 @@ Kachergis, George, Virginia A Marchman, and Michael C Frank. 2022.
 Kachergis, George, Chen Yu, and Richard M Shiffrin. 2012. {``An
 Associative Model of Adaptive Inference for Learning Word--Referent
 Mappings.''} \emph{Psychonomic Bulletin \& Review} 19 (2): 317--24.
+
+\bibitem[\citeproctext]{ref-kidd2020}
+Kidd, Evan, and Seamus Donnelly. 2020. {``Individual Differences in
+First Language Acquisition.''} \emph{Annual Review of Linguistics} 6
+(1): 319--40.
 
 \bibitem[\citeproctext]{ref-long2024}
 Long, Bria, Robert Z Sparks, Violet Xiang, Stefan Stojanov, Zi Yin,
@@ -1594,28 +1642,30 @@ differences (A) vs.~varying growth slopes (B).}
 Channels}\label{input-and-processing-channels}
 
 The input and processing channels enter a child's ability with different
-geometry, which Figure~\ref{fig-io-proc-schematic} makes concrete for
+geometry, which \textbf{?@fig-io-proc-schematic} makes concrete for
 hypothetical children. \emph{{[}Draft prose --- MCF to
 review/expand.{]}}
 
 \begin{figure}
 
-\centering{
+\begin{minipage}{\linewidth}
+\pandocbounded{\includegraphics[keepaspectratio]{figs/graphical_model_accumulator.pdf}}\end{minipage}%
+\newline
+\begin{minipage}{\linewidth}
+\pandocbounded{\includegraphics[keepaspectratio]{figs/graphical_model_ioproc.pdf}}\end{minipage}%
 
-\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{standard_model_files/figure-pdf/fig-io-proc-schematic-1.pdf}
-
-}
-
-\caption{\label{fig-io-proc-schematic}How a one-standard-deviation
-change in input versus processing moves a child's vocabulary trajectory,
-shown for a lower-ability (green) and a higher-ability (purple) child.
-Input loads on both the efficiency intercept and the acceleration, so
-its perturbations (dashed) fan out with age; processing loads on the
-intercept alone, so its perturbations (dotted) slide the trajectory in
-parallel. Left panel: latent ability theta. Right panel: expected words
-produced (a logistic transform of theta). Effects are drawn at
-plus/minus two standard deviations for legibility; parameters are taken
-from the io-proc-lean fit.}
+\caption{\label{fig-graphical-models}Graphical-model view of the model.
+\textbf{(A)} the accelerating accumulator: each child \(i\) has an
+efficiency \(\xi_i\) and an acceleration \(\kappa_i\) that combine into
+a latent ability \(\theta_i(t)=\xi_i+\kappa_i\log(t/a_0)\); with word
+difficulty \(\delta_j\) this yields the produced/not-produced response
+\(w_{ij}\). \textbf{(B)} the same model with the input (\(d_i\)) and
+processing (\(p_i\)) measurement models attached: input loads on both
+efficiency (coefficient 1) and acceleration (\(\gamma_{\text{in}}\)),
+processing on efficiency alone (\(\beta_\xi\)); \(r_i\), \(s_i\) are the
+observed input and reaction-time measurements. \emph{{[}Two panels
+parked here for now; caption a placeholder --- MCF to
+refine/relocate.{]}}}
 
 \end{figure}%
 
@@ -1626,28 +1676,6 @@ Figure~\ref{fig-io-data-panels} shows the raw measurements entering the
 three channels of the analysis, with one colour per dataset (held
 constant across panels). \emph{{[}Draft prose --- MCF to
 review/expand.{]}}
-
-\begin{figure}
-
-\centering{
-
-\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{standard_model_files/figure-pdf/fig-io-data-panels-1.pdf}
-
-}
-
-\caption{\label{fig-io-data-panels}Observed data entering the io-proc
-analysis, one colour per dataset (constant across panels). (A) CDI
-vocabulary: each line is a child's words-produced count across
-administrations (no points), with a per-dataset loess trend. (B)
-Looking-while-listening reaction time (log scale): per-child
-session-mean RT with a per-dataset trend; RT declines with age in every
-dataset. (C) Observed input rate (log; study-specific units, so absolute
-levels are not comparable across datasets --- only the age trends):
-per-child trajectories with a per-dataset trend, with BabyView head-cam
-recordings averaged to monthly means so they do not swamp the sparser
-LENA datasets. \emph{{[}Draft caption --- MCF to review.{]}}}
-
-\end{figure}%
 
 \section{Datasets Used}\label{datasets-used}
 
@@ -1733,6 +1761,17 @@ Citation & Language & N & Admins & Mean & Min & Max & Long. & Input & Recordings
 
 \endgroup{}
 \end{landscape}
+
+\subsection{Joint input-processing
+model}\label{joint-input-processing-model}
+
+\[\log \mathrm{RT}_{it} \sim \mathcal N\!\big(\alpha_{s(i)} + w_i + \psi\,\log(t/a_0),\; \sigma_{\mathrm{RT}}^2\big)\]
+
+\[\log r_{iv} \sim \mathcal N\!\big(\mu_{s(i)} + d_i,\; \sigma^2_{m(v)}\big)\]
+
+\[\xi_i    = \mu_\xi + d_i + \beta_w\,w_i + \epsilon^\xi_i\]
+
+\[\kappa_i = \bar\kappa + \gamma\,d_i + \beta'_w\,w_i + \epsilon^\kappa_i\]
 
 \subsection{Datasets entering the joint input--processing
 model}\label{datasets-entering-the-joint-inputprocessing-model}

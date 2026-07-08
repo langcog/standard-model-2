@@ -1,0 +1,409 @@
+---
+author:
+  - name: Michael C. Frank
+    affiliations: 
+      - name: Department of Psychology, Stanford University
+
+title: Children but not language models learn vocabulary via accelerating accumulation
+#Efficiency and acceleration in the accumulation of children’s early vocabulary
+title-short: Efficiency and acceleration 
+keywords: Early word learning; Bayesian data analysis; Large language models
+abstract: |
+  \noindent Children typically learn hundreds of words over the first few years of their life, in a process that begins slowly but quickly picks up speed.  Prior models of word learning describe vocabulary growth as a process of accumulation of evidence over time. Here we show that the process is best characterized as *accelerating* accumulation, with children varying in both the overall efficiency with which they accumulate vocabulary and their acceleration rate. In contrast to children, language models -- even those trained on child-directed speech -- are not well-described by this model: they show standard accumulator dynamics with no acceleration and very limited variability. Children leaern using orders of magnitude less training data than language models do. Our findings suggest a potential explanation: children -- but not language models -- ``learn to learn'', leveraging the knowledge they have to accelerate future learning. 
+
+bibliography: standard_model.bib
+# Dataset citations appear as plain text in Table 1 (kable can't render
+# [@key] markers); list their bib keys here so they still appear in the
+# References. Add @marchman / @smith dataset keys once they exist in the bib.
+nocite: |
+  @thal2013, @simonsen2014, @hagihara2023, @long2024, @egan2025, @adams2018, @fernald2013
+format:
+  pdf:
+    documentclass: article
+    geometry: margin=1in
+    fontsize: 11pt
+    linestretch: 1.05
+    colorlinks: true
+    keep-tex: true
+    # pdflscape: needed by kableExtra::landscape() (Table 1). Declared
+    # explicitly because kableExtra's automatic dependency injection is
+    # unreliable in Quarto (dropped on cached-chunk replay), which makes
+    # the compile fail with "Environment landscape undefined."
+    include-in-header:
+      text: |
+        \usepackage{pdflscape}
+---
+
+```{r setup, include=FALSE}
+suppressPackageStartupMessages({
+  library(here); library(dplyr); library(tidyr); library(readr)
+  library(ggplot2); library(patchwork); library(latex2exp)
+  library(knitr); library(scales); library(stringr); library(forcats)
+  library(broom); library(png); library(grid); library(gridExtra)
+  library(ggrepel)
+})
+source(here("paper", "_helpers.R"))
+
+XYZ <- "VALUE NOT SPECIFIED"
+
+# load cached data — produced by `Rscript paper/build_cache.R`
+# (Table 1 is built inline in its own chunk, not cached.)
+CACHE <- here("paper", "cache")
+ladder     <- readRDS(file.path(CACHE, "fig2_glmer_ladder.rds"))
+demo_blups <- readRDS(file.path(CACHE, "blups_demographics.rds"))
+io_summary <- readRDS(file.path(CACHE, "fig5_io_summary.rds"))
+input3     <- readRDS(file.path(CACHE, "fig3_input.rds"))
+aic        <- readRDS(file.path(CACHE, "aic_summary.rds"))
+exposure   <- readRDS(file.path(CACHE, "fig4_exposure.rds"))
+llm_slopes <- readRDS(file.path(CACHE, "fig6_llm_slopes.rds"))
+io_part    <- readRDS(file.path(CACHE, "io_partition.rds"))
+io_fig     <- readRDS(file.path(CACHE, "fig_io_imputed_proc.rds"))
+
+# implied input-efficiency share for a language as a RANGE over the plausible
+# sigma_r band (Fig 3A vertical band, [0.36, 0.58]); = sigma_r^2/sigma_xi^2 read
+# off the analytic curve at the band edges. Renders e.g. "3.5--9.1%".
+io_share <- function(model) {
+  cur <- io_fig$panelA$curves; b <- io_fig$panelA$sr_band
+  cur <- cur[cur$model == model, ]
+  lo <- cur$share[which.min(abs(cur$sigma_r - b[1]))]
+  hi <- cur$share[which.min(abs(cur$sigma_r - b[2]))]
+  sprintf("%.1f--%.1f%%", 100 * lo, 100 * hi)
+}
+
+# Inline range: how much worse the best (D) model becomes when age enters
+# linearly rather than as log-age, across the four languages (dAIC of
+# D_lin relative to the best model, D_log).
+.dlin <- aic |> filter(model == "D_lin") |> pull(dAIC)
+aic_loglin_range <- sprintf("%s--%s",
+  format(round(min(.dlin)), big.mark = ","),
+  format(round(max(.dlin)), big.mark = ","))
+
+knitr::opts_chunk$set(
+  echo = FALSE, message = FALSE, warning = FALSE, cache=TRUE,
+  fig.align = "center", out.width = "100%", dpi = 300
+)
+```
+
+
+Children’s early vocabulary grows rapidly during early childhood [@frank2021;@kidd2020;@fenson1994], and this "explosion" of expressive vocabulary is a signature human cognitive achievement [@bloom2002;@spelke2003]. Yet children's vocabulary also varies widely between individuals [@frank2021],
+and the relative size of early vocabulary is a predictor of later academic success [@marchman2008;@catts2002;@muter2004]. Providing quantitative characterization of this process is an important scientific challenge [@frank2009;@mcmurray2012;@trueswell2014;@kachergis2012;@jones2017;@goodman2008;@hidaka2013;@roy2015;@braginsky2019;@kachergis2022;@kachergis2022b]
+
+Until recently, language acquisition could only be studied in human learners. Language models (LMs) show increasing linguistic sophistication, however, allowing them to become a model system for the study of human language [@futtrell2025;@frank2025]. The most successful LMs differ from human learners in an important way, however: they are trained on vastly more data -- by some estimates, up to 5--6 orders of magnitude more -- than human learners receive during childhood [@frank2023;@warstadt2023]. Why? 
+
+Here we study this ``data gap'' by comparing children and LMs on their vocabulary growth. In addition to its overall importance, it is a concrete and well-measured indicator. We begin by developing a statistic model of vocabulary growth in human children -- an "accelerating accumulator" model. Making use of GPT-2 models trained on human developmental data, we show that -- in contrast to children -- these models function as pure accumulators, with no acceleration and very limited variability. This analysis exposes a critical disanalogy between LMs and human learners. 
+ 
+
+<!-- The goal of the current work is to address these puzzles through systematic investigation and extension of accumulator models. All accumulator models seek to explain the same pattern: that the overall size of children's vocabulary increases supra-linearly. Where they differ is in what this growth means for the underlying learning process. Following previous work, we start with the idea that children's *internal learning ability* (not just their observed supra-linear vocabulary growth) accelerates across development [@hidaka2013;@mayor2010]. We then extend a prior psychometric accumulator model [@kachergis2022]: our key addition is to describe variation between individual children by modeling both their individual learning efficiency and the acceleration of their learning. Following the bucket metaphor, this modification allows children to have different size buckets. This extension defines a longitudinal growth model that can be fit directly to large-scale datasets about children's actual vocabularies. -->
+
+# An accelerating accumulator model of vocabulary growth
+
+Recent models describe children's vocabulary growth as a process of accumulation [@mcmurray2007; @mitchell2009; @hidaka2013; @mollica2017; @kachergis2022]. Each distinct word (type) can be conceptualized as a "bucket," and every token of language input then is a "drop" that falls into its respective bucket. When each bucket is full, the word is learned [@mcmurray2007;@kachergis2022]. These models have been used to recover interpretable differences in "bucket size," often based on word properties including concreteness and syntactic category [@hidaka2013;@kachergis2022]. They also provide a graded explanation for the widely-observed "vocabulary spurt" phenomenon -- in which children's rate of vocabulary learning appears to increase dramatically [@frank2021;@ganger2004;@gomezdiaz2024]. 
+
+<!-- While there are many other computational models of early word learning, in practice they have been more difficult to connect quantitatively with large-scale patterns of vocabulary growth [@frank2009;@mcmurray2012;@trueswell2014;@kachergis2012;@jones2017]. -->
+
+
+We begin with the model of @kachergis2021, an accumulator over ratio-scale variables with real units: words (tokens) per hour, total words (types) in the child's vocabulary, and reaction times in word processing. The absolute magnitude of these variables -- not just their variability -- can be measured and compared across studies and relations can be estimated and compared between them. Further, the presence of a true zero for each means that they can be log transformed, which is critical for capturing the shape of their growth over development [@frank2026;@kail1991]. These features distinguish our modeling approach from the wide variety of models of early word learning that typically establish either schematic or variability-based linkages to developmental data [@frank2009;@mcmurray2012;@trueswell2014;@kachergis2012]. 
+
+We start with the Rasch model from psychometrics [@rasch1960;@bond2013], which assumes that each child $i$ has a learning ability $\theta_i$ and each word $j$ has a difficulty $\delta_j$.^[A variety of previous work has focused on estimating the properties of individual words  [@goodman2008;@hidaka2013;@roy2015;@braginsky2019;@kachergis2022;@kachergis2022b]. These analyses reveal that there is predictable word-level difficulty information but that only a modest portion of the variation between words is carried by frequency information. Words can be hard for a child to acquire because they vary also in the complexity and concreteness of their meanings, their syntactic category and syntactic context, their phonology, and many other factors. In the current work, we estimate word difficulty as a free parameter, and focus instead on variation between children.] The probability that child $i$ produces word $j$ is: 
+
+$$P(w_{i,j}=1 \mid \theta_i, \delta_j) =\frac{\exp(\theta_i - \delta_j)}{1 + \exp(\theta_i - \delta_j)}$$
+  
+We then describe the child's ability as
+
+  $$\theta_i(t) = \xi_i + log(r_i) + \kappa_i ~ \log(t/a_0)$$
+\noindent which is contains three terms, an intercept $\xi_i$, an accumulator term $\log(r_i)$, and an acceleration term, $\kappa_i ~ \log(t/a_0)$ that describes the rate of accumulation growing exponentially in the log of the child's age. This is our "accelerating accumulator" model, in which accumulating language ``counts for more'' later in development. Children vary on both their initial rate of accumulation $\xi_i$ and their acceleration $\kappa_i$, creating variant of a standard longitudinal growth model in which children vary on their slope and intercept [@grimm2016]. Our model is closest to the formulations of @hidaka2013 and @kachergis2022, but has not yet been described in the literature (see SI: Comparison with Prior Models).
+
+Under this model, we can use the mean value of $\kappa$ to distinguish pure accumulator behavior ($\kappa \approx 1$) and accelerating accumulator behavior ($\kappa > 1$). Note that it is critical to distinguish between supra-linear growth in children's actual vocabulary (in terms of count) -- a pattern that is robustly observed across children worldwide [@frank2021;@fenson1994] -- and the idea that children's *internal learning ability* accelerates across development, which the substantive claim we test here.
+
+# Fitting the accumulator model 
+
+Our analysis generally depends on the availability of longitudinal data at the individual word level. Aggregate data do not allow for the estimation of word difficulties $\delta$, thus their distribution remains latent; in this regime different difficulty distributions can be posited to explain the accelerating shape of vocabulary growth [@mcmurray2007; @mitchell2009]. In addition, cross-sectional data do not allow for identification of whether individual children's variation is due to differences in efficiency (intercept) or acceleration (slope) (see SI: Non-identifiability in Cross-Sectional Data). 
+
+Thus, to constrain our model, we use data from the MacArthur-Bates Communicative Development Inventories [MB-CDI; @fenson1994;@marchman2021], a popular parent report instrument in which parents are asked to indicate which words their child produces and understands. Here we focus exclusively on production, which is used with older children and which tends to be a more reliable measure [@frank2021]. We downloaded data from Wordbank [@frank2017], an open repository of MB-CDI data. identifying five longitudinal datasets of monolingual, typically-developing children ages `r XYZ`--`r XYZ` (three from American English and one each from Norwegian and Japanese, $N_{total} = 3135$; see SI: Datasets). 
+
+We fit the accelerating accumulator model to each of these datasets using Bayesian inference in Stan [@stancite]. To test whether each model component was necessary, we additionally fit three model ablations, removing individual variation in acceleration (removing $\kappa_i$), accumulation (removing $\xi_i$), and finally acceleration entirely (removing $\kappa$). 
+The accelerating accumulator provided the best fit to children's growth trajectories (@fig-fits, see SI: Full Model Comparison Results), with differences between the next best model LOO ELPD $>XYZ$ for all five datasets. For all five datasets, estimates of acceleration ($\kappa$) were high: `r XYZ` [`r XYZ`, `r XYZ`] -- `r XYZ` [`r XYZ`, `r XYZ`]. 
+
+It is possible that ability grows linearly with age, rather than linearly with the logarithm of age -- linear growth in ability would lead to exponential increases in the probability of word production. However, linear time models were dispreferred statistically (see SI: Linear vs. Logistic Age). Further, the increasing spread of children's trajectories with age is especially noticeable for low-vocabulary older children [who may be classified as "late talkers"; @fernald2012; @rescorla2011], but variation was unimodal across all samples (see SI: Characterizing Variation in Efficiency and Acceleration) [@pinstock2026;@singletary2025]. 
+
+
+```{r fig-schematic, fig.width=8, fig.height=6}
+#| label: fig-schematic
+#| fig-cap: "(A) Schematic predictions of all four models for vocabulary growth across age. Pure accumulator (M1) and accelerating accumulator (M2) models predict no variability across children, while M3 predicts variation and M4 predicts an increasing spread across chidren. (B) Best fitting model (M4) for five datasets. Gray lines show individual children's trajectories; colored lines show bootstrapped predictions at standard quantiles. Transparency is higher for panels with denser data to avoid overplotting."
+
+## ---- (A) illustrative vocab-space buildup (schematic) ----
+ages <- seq(8, 30, length.out = 80)
+A0   <- 8                                  # anchor age: log(t/A0) >= 0
+L    <- log(ages / A0)
+qs   <- c(0.1, 0.25, 0.5, 0.75, 0.9)
+z    <- qnorm(qs)
+XI0     <- -2.0                            # median intercept (log r + log alpha)
+KAPPA_A <- 2.5                             # acceleration for M2-M4
+DELTA   <- qnorm(ppoints(150), mean = 0, sd = 1.5)   # shared difficulties
+vocab_of <- function(th) vapply(th, function(x) mean(plogis(x - DELTA)), numeric(1))
+
+variants <- tibble::tribble(
+  ~name,                       ~kappa_pop, ~sigma_alpha, ~sigma_kappa,
+  "(M1) accumulator",          1,           0,            0,
+  "(M2) + acceleration",       KAPPA_A,     0,            0,
+  "(M3) + efficiency var.",    KAPPA_A,     1.1,          0,
+  "(M4) + per-child accel.",   KAPPA_A,     1.1,          0.7
+)
+sim <- variants |>
+  mutate(name = factor(name, levels = name)) |>
+  rowwise() |>
+  do({
+    v <- .
+    bind_rows(lapply(seq_along(qs), function(i) {
+      th <- XI0 + z[i] * v$sigma_alpha + (v$kappa_pop + z[i] * v$sigma_kappa) * L
+      tibble(name = v$name,
+             qprob_f = factor(as.character(qs[i]),
+                              levels = c("0.1","0.25","0.5","0.75","0.9")),
+             age = ages, vocab = vocab_of(th))
+    }))
+  }) |>
+  ungroup()
+lwidth <- function(qf) ifelse(as.character(qf) == "0.5", 0.95, 0.55)
+
+p_schematic <- ggplot(sim, aes(age, vocab, color = qprob_f, group = qprob_f)) +
+  geom_line(aes(linewidth = lwidth(qprob_f))) +
+  facet_wrap(~ name, nrow = 1) +
+  scale_color_manual(values = WORDBANK_PALETTE, name = "Percentile",
+                     labels = c("10th","25th","50th","75th","90th"), drop = FALSE) +
+  scale_linewidth_identity() +
+  scale_y_continuous(limits = c(0, 1), breaks = c(0, 0.5, 1)) +
+  labs(x = NULL, y = "expected vocab.\nproportion") +
+  theme_minimal(base_size = 9) +
+  theme(strip.text = element_text(face = "bold", size = 8),
+        legend.position = "bottom", panel.grid.minor = element_blank())
+
+## ---- (B) best model (M4 / D_log) fit to real data, 5 datasets ----
+qt_mb <- ladder$qtiles |>
+  filter(model == "D_log") |>
+  mutate(qprob_f = factor(qprob, levels = c(0.1,0.25,0.5,0.75,0.9),
+                          labels = c("0.1","0.25","0.5","0.75","0.9")))
+emp <- ladder$emp |> mutate(child_lang = paste(lang_slug, child_id, sep = "::"))
+lang_lab <- ladder$lang_labels
+emp$lang_label   <- factor(lang_lab[emp$lang_slug],   levels = lang_lab)
+qt_mb$lang_label <- factor(lang_lab[qt_mb$lang_slug], levels = lang_lab)
+
+p_mbest <- ggplot() +
+  geom_line(data = filter(emp, language %in% c("English (American)", "Norwegian")),
+            aes(age, vocab, group = child_lang),
+            color = "grey25", alpha = 0.03, linewidth = 0.25) +
+  geom_line(data = filter(emp, !(language %in% c("English (American)", "Norwegian"))),
+            aes(age, vocab, group = child_lang),
+            color = "grey25", alpha = 0.25, linewidth = 0.25) +
+  geom_line(data = qt_mb,
+            aes(age, vocab, color = qprob_f, group = qprob_f,
+                linewidth = ifelse(as.character(qprob_f) == "0.5", 0.95, 0.55))) +
+  facet_wrap(~ lang_label, nrow = 1, scales = "free_y") +
+  scale_color_manual(values = WORDBANK_PALETTE, name = "Percentile",
+                     labels = c("10th","25th","50th","75th","90th"), drop = FALSE) +
+  scale_linewidth_identity() +
+  labs(x = "Age (months)", y = "Productive vocabulary") +
+  theme_minimal(base_size = 9) +
+  theme(strip.text = element_text(face = "bold", size = 8),
+        legend.position = "bottom", panel.grid.minor = element_blank(),
+        panel.spacing = unit(0.3, "lines"))
+
+(p_schematic / p_mbest) +
+  plot_layout(guides = "collect", heights = c(1, 1.1)) +
+  plot_annotation(tag_levels = "A") &
+  theme(legend.position = "bottom")
+```
+
+
+
+<!-- Taking advantage of the equivalence of Rasch models to generalized linear mixed effects models [@deboeck2011], we fit the set of models shown in @fig-schematic as a series of multi-level logistic regressions. Each model predicted the probability of an individual child producing a particular word as a function of age (either unmodified in M1 or multiplied by a constant in M2) and a random effect of word difficulty. Successive models add random intercepts (M3) and slopes (M4) by child. This initial set of fits simply attempts to describe the distribution of vocabulary growth curves.  -->
+
+
+
+# Growth in ability leads to rapid changes in learning times for individual words
+
+```{r fig-efficiency, fig.width=7, fig.height=4}
+#| label: fig-efficiency
+#| fig-cap: ""
+# Per-word "exposures to 50% production" for a typical English child,
+# from the M_best fit + CHILDES frequencies (data in fig4_exposure.rds;
+# see paper/build_cache.R section 5 and model/scripts/exposure_to_learn.R).
+# Each point is a word; x = predicted age at 50% production, y = cumulative
+# exposures of that word by that age (log scale). Lines: per-class lm fits.
+items <- exposure$items
+meta  <- exposure$meta
+
+# label the extreme word per class on log-exposure (balanced across classes)
+n_to_label <- 3
+  
+labels_df <- items |>
+  mutate(log_N = log10(N_word)) |>
+  group_by(lexical_class) |>
+  arrange(log_N) |>
+  slice(c(1:n_to_label, (n() - n_to_label):n())) |>
+  ungroup()
+
+ggplot(items, aes(t_50, N_word, colour = lexical_class)) +
+  geom_point(alpha = 0.55, size = 1.1) +
+  geom_smooth(method = "lm", se = FALSE, linewidth = 0.7, formula = y ~ x) +
+  geom_label_repel(data = labels_df, aes(label = item),
+                   size = 2.8, alpha = 0.95, show.legend = FALSE,
+                   box.padding = 0.4, max.overlaps = Inf,
+                   min.segment.length = 0) +
+  scale_y_log10(labels = scales::label_number(big.mark = ","),
+                breaks = c(100,1000,10000,100000), 
+                limits = c(100, 1000000)) +
+  scale_x_continuous(limits = c(10, 40)) +
+  scale_colour_brewer(palette = "Dark2", name = "Class") +
+  labs(x = "Age (months) when 50% of children produce word",
+       y = "Cumulative exposures at AoA") +
+  theme_minimal(base_size = 11) +
+  theme(plot.title = element_text(face = "bold"),
+        plot.subtitle = element_text(size = 9, colour = "grey25"),
+        legend.position = "bottom")
+```
+
+The accelerating accumulator model provides a quantitative description of a very salient fact about language acquisition: the number of exposures necessary to learn a word decreases dramatically over childhood. While a toddler may have heard a word like "book" thousands of times before they say it, a few years later a preschooler may hear "ibex" a handful of times on a trip to the zoo and repeat it the next day. To quantify this phenomenon, we computed the average proportion of exposures necessary for a child to learn a word across ages. 
+
+@fig-efficiency shows a model-derived estimate of the average number of times a word is heard before more than 50% of children produce it (See SI: Changes in Word Efficiency), using frequency estimates from the CHILDES Corpus [@macwhinney2000;@sanchez2019]. Across different word classes (e.g., nouns, verbs, closed class words), number of examples needed for learning drops exponentially with development.^[Indeed, this analysis likely understates the degree of change in efficiency as it assumes that each exposure to a word is equally meaningful. In fact, individual exposures vary widely in how much information they give. Sometimes words are overheard rather than directed to the child, or lack physical context to allow for clear inference [@cartmill2013;@trueswell2013;@mollica2017].] Thus, in line with both intuition and experiments, the total number of exposures required on average to learn a word might indeed be only a small handful by age three [@markson1997;@bloom2002].
+
+
+# Large language models show no acceleration in their vocabulary growth
+
+
+```{r fig-llm-acceleration, fig.width=7, fig.height=4}
+#| label: fig-llm-acceleration
+#| fig-cap: "The density of acceleration slopes for language models (by word) and children (by child), extracted from English and Norwegian models."
+
+# Children's per-child kappa_i vs. LLM per-word sigmoid slopes (Chang &
+# Bergen 2022), placed on a common "logit per natural-log experience"
+# axis. Data cached by paper/build_cache.R section 6 (fig6_llm_slopes.rds):
+# `sl` is the per-instance long frame; `sm` the per-population summary
+# (median, 95% interval, n) available for inline numbers.
+sl <- llm_slopes$slopes
+sm <- llm_slopes$summary
+
+# Children: by-child kappa_i (the acceleration signature). LMs: by-word
+# sigmoid slope, three populations -- Chang & Bergen (2022): 4 architectures
+# (LSTM, BiLSTM, GPT-2, BERT) on a BookCorpus+WikiText-103 corpus, training
+# axis; our CHILDES GPT-2 on the training axis; and our CHILDES ladder on the
+# DISTINCT-INPUT (development) axis. All three cluster at the kappa = 1
+# unit-accumulator boundary; children sit ~10x higher.
+slope_pal <- c("Children (English)"              = "#c41e37",
+               "Children (Norwegian)"            = "#fb9a99",
+               "LMs: C&B 2022 (4 architectures)" = "#8856a7",
+               "LMs: CHILDES (training)"         = "#2c7fb8",
+               "LMs: CHILDES (development)"      = "#41ab5d")
+
+ggplot(sl, aes(slope_natural, fill = group, colour = group)) +
+  geom_density(alpha = 0.32, linewidth = 0.5) +
+  geom_vline(xintercept = 1, linetype = "dashed", colour = "grey55",
+             linewidth = 0.4) +
+  annotate("text", x = 1.6, y = 0.92, hjust = 0, vjust = 1, size = 3.0,
+           colour = "grey45",
+           label = "kappa = 1\nunit accumulator\n(no acceleration)") +
+  # annotate("segment", x = 2.7, xend = 1.15, y = 1.2, yend = 1.2,
+  #          arrow = arrow(length = unit(0.12, "cm")), colour = "#2c7fb8") +
+  # annotate("text", x = 2.8, y = 1.2, hjust = 0, vjust = 0.5, size = 2.8,
+  #          colour = "#2c7fb8", label = "all LMs cluster here") +
+  scale_fill_manual(values = slope_pal, name = NULL) +
+  scale_colour_manual(values = slope_pal, name = NULL) +
+  coord_cartesian(xlim = c(0, 22)) +
+  labs(x = "kappa: slope on log(experience) (logit per natural-log unit)",
+       y = "density") +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = c(0.70, 0.60),
+        legend.background = element_rect(fill = "white", colour = NA))
+```
+
+<!-- REMEMBER ACCELERATION ACROSS DATA - KAPPA AND SCALING LAWS -->
+
+Small-scale language models trained on developmentally-realistic corpora have become a useful tool for understanding early language development [@huebner2021;@futrell2025;@frank2025]. One major disanalogy between humans and language models, however, is the massive scale of training data necessary for language models to achieve high levels of performance [@warstadt2023;@frank2023].
+
+For our final experiments, we were interested in whether language models show the same patterns of developmental change in efficiency or acceleration. We make use of work by @chang2022, who extracted per-word acquisition curves from language models. They computed logistic fits to the surprisal (negative log probability) of individual words across training, estimating a logistic curve for each word, just as our Rasch model does. Critically for our purposes, the slope of these logistic curves provides a direct analogue to our $\kappa$ parameter capturing acceleration in the accumulation process (see SI: Computing Acceleration in LMs). 
+We compared the word-by-word acceleration of small-scale LLMs to children across several experiments. First, we extracted slopes from fits provided by @chang2022, in which four different language model architectures (LSTM, BiLSTM, GPT-2, and BERT) were fit to standard corpora (BookCorpus and WikiText-103). This training setup was disanalogous with our studies of children in at least two ways, however.
+
+First, models were not trained on child directed speech, so we retrained new GPT-2 (small) models on 24.5M words from CHILDES, following the protocol in @feng2024. Second, unlike children, both our first set of models and those trained by @chang2022 were trained to convergence, with acquisition curves reflecting changing predictions across repeated passes through the same training data. To isolate developmental change, we trained a separate set of GPT-2 models each to convergence on increasingly larger subsamples of the same CHILDES data, allowing us to estimate surprisal as a function of actual amount of input data -- a more direct developmental analogue. 
+
+The results across all three sets of models were clear (@fig-llm-acceleration): $\kappa$ for all models was clustered near 1, the unit accumulator posited by @mcmurray2007. In contrast, $\kappa$ estimates for children for our large longitudinal samples were much higher (EN: `r XYZ` and NO: `r XYZ`) and highly variable across children (EN SD: `r XYZ` and NO SD: `r XYZ`). In sum, language models -- but not children -- behave like Model 1 (an accumulator). In contrast, children are best described by Model 4 -- they are variable, accelerating accumulators. 
+
+# Discussion
+
+<!-- IS THIS ALL PHONOLOGY?? -->
+
+How does children's vocabulary grow over early childhood? We proposed that this process is characterized as accelerating accumulation, in which variation between children is produced by differences in both the efficiency of the accumulation process and the rate of acceleration. This cognitive process leads to a simple two parameter longitudinal growth model that provides a good description of cross-linguistic data. 
+
+These two parameters provide a set of measures with which to distinguish a number of important factors that are related to overall vocabulary size in prior work. Factors that load on efficiency alone relate to children's overall learning trajectory, creating a constant offset in language ability. In contrast, those that load on acceleration create an increasing fan, such that older children are more different from one another than younger ones. On the side of demographics, we found evidence that while sex differences manifest as differences in efficiency, socioeconomic differences show up in acceleration as well. Evidence about language input and processing suggest that while language processing relates primarily to differences in efficiency, language input variation appears to affect both Thus, our model identifies a channel by which experience might compound across development.
+
+Where does the acceleration in children's learning come from? One possibility is that it is driven by developmental maturation of general abilities such as learning, memory, and attention -- such changes could mean that children's "buckets" require fewer drops to fill them. Another possibility is that children's increasingly sophisticated inferential abilities allow them to extract progressively more information from the linguistic signal [@smith2002;@markman1988;@bohn2019;meylan2022]; @mitchell2009 study how these sorts of "leverage" mechanisms can change the slope of acceleration in accumulator models. Network growth models provide one promising avenue for understanding how leverage might play out in specific patterns of vocabulary growth at the level of word content [@hills2009;@fourtassi2020].
+
+Our work here has a number of limitations that suggest avenues for new work. First, while we analyzed a range of cross-linguistic data where it was available, most of the open data on children's input and processing are available only in English, and for convenience samples. Thus, the specific numerical estimates that we were able to derive are at best approximations and do not represent estimates for broader populations of interest. Systematic representative sampling would be required for generalization. Further, the studies we included here focused exclusively on monolingual, typically-developing children. Though we have reason to expect that these mechanisms would apply in multilingual acquisition, significant work will be necessary to adapt and test our proposal in multilingual datasets [@gomezdiaz2024;@tan2024].
+
+In addition, we focused on the role of input quantity as a key first-order factor influencing the accumulation of language. However, a rich tradition describes quantity-related variation as well [e.g., @anderson2021;@rowe2012;@hirsh2015]. While individual studies have identified a wide variety of indicators of quality, they are still challenging to compute at scale from audio and video recordings. Extracting these and connecting them to growth over time is an exciting prospect for future work. 
+
+Finally, our study is a computational analysis of observational data; it provides at best hypotheses about causal structure. Our hope is that by providing signatures of longitudinal variation, we can inspire further work using both dense measurement and intervention that can gain causal traction on the mechanisms of vocabulary growth.
+
+Too often, psychology and cognitive science focus either only on universal mechanisms or variability between individuals. Word learning is a unique case study in cognitive science because it describes a basic process of knowledge acquisition that also captures large, meaningful individual variation. As such, it becomes possible to link mechanistic models of learning (such as accumulators) to the signatures that form the locus of variation in human learners. 
+
+The accumulator idea that forms the basis of our model is extremely simple, but it is potentially compatible with a wide range of more elaborated computational models of early language learning [@frank2009;@mcmurray2012;@trueswell2014;@kachergis2012]. One important direction for future work is to survey and analyze models from the literature to understand which of these show learning dynamics congruent with the statistical signatures we have identified in actual children's vocabulary growth. We have shown that one class of models does not show these signatures, however. 
+
+Modern language models (both transformer-based and recurrent) failed to manifest the acceleration that we found pervasively in our data. This lack of "leverage" in such models is one potential clue to why they require such massive amounts of data to learn, relative to human children. 
+
+# Methods
+
+## Data and Code
+
+Data were retrieved from Wordbank using the `wordbankr` package [@frank2017], childes-db VER using `childesr` [@sanchez2019].
+
+Reproducible code for this paper is available at http://github.com/langcog/standard-model-2. 
+
+All longitudinal datasets with three or more observations per child were included. We excluded a small number of children from the English (Marchman) and Norwegian datasets,(`r XYZ`% and `r XYZ`&, respectively, due to suspicious observations in which there was a decline in vocabulary of more than 20% in some longitudinal observations. 
+
+## Models
+
+### Frequentist models 
+
+Initial models were fit with `glmer` [@glmer], with the following specifications:
+
+* M1: `produces ~ offset(log_age) + (1 | item)` 
+* M2: `produces ~ 1 + log_age + (1 | item)` 
+* M3: `produces ~ 1 + log_age + (1 | item) + (1 | child)` 
+* M4: `produces ~ 1 + log_age + (1 | item) + (log_age | child)` 
+
+Linear variants reported in the supplement used linear age rather than log age. 
+
+### Bayesian models
+
+Bayesian models were fit using Stan [@stan].
+
+### Priors
+
+### Inference
+
+
+### GPT-2 models
+
+<!-- We trained XYZ -->
+
+# Acknowledgements
+
+Some of the computing for this project was performed on the Sherlock and Marlowe clusters. We would like to thank Stanford University and Stanford Research Computing for providing computational resources and support that contributed to these research results. Funds for computational experiments were also provided by a gift from Meta to support research on children's home language environment. Claude Code was used for literature review, code generation, visualization, and simulation infrastructure. 
+
+# References
+
+::: {#refs}
+:::
+
+
+<!-- :::{.suppinfo} -->
+
+
+<!-- ::: -->
+
+```{=latex}
+\newpage
+\begin{center}
+{\LARGE\bfseries Supplemental Information}
+\end{center}
+```
+
+{{< include supplemental.qmd >}}
