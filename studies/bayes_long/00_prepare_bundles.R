@@ -32,6 +32,7 @@ EXCLUDE_DATASETS <- c("Edgin","Byers")           # clinical
 A0        <- 18                                   # anchor age (explosion milestone)
 LOG_H     <- log(365)                             # ~waking hours/month; interpretive offset
 MIN_ITEM_OBS <- 100                               # per-unit item filter
+MIN_ADMINS   <- as.integer(Sys.getenv("MIN_ADMINS", "2"))  # min administrations per child
 
 OUT_DIR <- here("fits","bayes_long"); dir.create(OUT_DIR, recursive=TRUE, showWarnings=FALSE)
 
@@ -83,7 +84,7 @@ build_bundle <- function(it_unit, slug, label) {
     summarise(produces = max(produces), .groups="drop")
 
   ## longitudinal: >=2 administrations (distinct child x age)
-  keep <- df |> distinct(ckey, age) |> count(ckey) |> filter(n>=2) |> pull(ckey)
+  keep <- df |> distinct(ckey, age) |> count(ckey) |> filter(n>=MIN_ADMINS) |> pull(ckey)
   df <- df |> filter(ckey %in% keep)
 
   ## per-unit item filter
@@ -105,20 +106,21 @@ build_bundle <- function(it_unit, slug, label) {
     admin_to_child = admin_ix$ii, admin_age = admin_ix$age,
     log_H = LOG_H, a0 = A0)
 
-  ## reporting
+  ## reporting (>=3-admin bundles get an _a<N> suffix so they don't clobber the base)
+  out_slug <- if (MIN_ADMINS > 2) sprintf("%s_a%d", slug, MIN_ADMINS) else slug
   ad_per_kid <- admin_ix |> count(ii) |> pull(n)
-  meta <- list(slug=slug, label=label,
+  meta <- list(slug=out_slug, label=label,
                n_kids=nrow(child_ix), n_admins=nrow(admin_ix), n_items=nrow(item_ix),
                n_obs=nrow(obs), age_range=range(admin_ix$age),
                med_admins_per_kid=median(ad_per_kid),
                max_admins_per_kid=max(ad_per_kid))
   cat(sprintf("  [%s] kids=%d admins=%d items=%d obs=%d | age %d-%d | admins/kid med=%d max=%d\n",
-              slug, meta$n_kids, meta$n_admins, meta$n_items, meta$n_obs,
+              out_slug, meta$n_kids, meta$n_admins, meta$n_items, meta$n_obs,
               meta$age_range[1], meta$age_range[2], meta$med_admins_per_kid, meta$max_admins_per_kid))
 
   saveRDS(list(stan_data=stan_data, child_ix=child_ix, item_ix=item_ix,
                admin_ix=admin_ix, meta=meta),
-          file.path(OUT_DIR, sprintf("bundle_%s.rds", slug)))
+          file.path(OUT_DIR, sprintf("bundle_%s.rds", out_slug)))
 }
 
 ## ---- run: pull each needed language once, split into its units ----
