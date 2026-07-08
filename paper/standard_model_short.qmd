@@ -46,37 +46,12 @@ source(here("paper", "_helpers.R"))
 
 XYZ <- "VALUE NOT SPECIFIED"
 
-# load cached data — produced by `Rscript paper/build_cache.R`
-# (Table 1 is built inline in its own chunk, not cached.)
+# Cached data for the three main-text figures — produced by
+# `Rscript paper/build_cache_short.R`.
 CACHE <- here("paper", "cache")
-ladder     <- readRDS(file.path(CACHE, "fig2_glmer_ladder.rds"))
-demo_blups <- readRDS(file.path(CACHE, "blups_demographics.rds"))
-io_summary <- readRDS(file.path(CACHE, "fig5_io_summary.rds"))
-input3     <- readRDS(file.path(CACHE, "fig3_input.rds"))
-aic        <- readRDS(file.path(CACHE, "aic_summary.rds"))
-exposure   <- readRDS(file.path(CACHE, "fig4_exposure.rds"))
-llm_slopes <- readRDS(file.path(CACHE, "fig6_llm_slopes.rds"))
-io_part    <- readRDS(file.path(CACHE, "io_partition.rds"))
-io_fig     <- readRDS(file.path(CACHE, "fig_io_imputed_proc.rds"))
-
-# implied input-efficiency share for a language as a RANGE over the plausible
-# sigma_r band (Fig 3A vertical band, [0.36, 0.58]); = sigma_r^2/sigma_xi^2 read
-# off the analytic curve at the band edges. Renders e.g. "3.5--9.1%".
-io_share <- function(model) {
-  cur <- io_fig$panelA$curves; b <- io_fig$panelA$sr_band
-  cur <- cur[cur$model == model, ]
-  lo <- cur$share[which.min(abs(cur$sigma_r - b[1]))]
-  hi <- cur$share[which.min(abs(cur$sigma_r - b[2]))]
-  sprintf("%.1f--%.1f%%", 100 * lo, 100 * hi)
-}
-
-# Inline range: how much worse the best (D) model becomes when age enters
-# linearly rather than as log-age, across the four languages (dAIC of
-# D_lin relative to the best model, D_log).
-.dlin <- aic |> filter(model == "D_lin") |> pull(dAIC)
-aic_loglin_range <- sprintf("%s--%s",
-  format(round(min(.dlin)), big.mark = ","),
-  format(round(max(.dlin)), big.mark = ","))
+fig1_fan   <- readRDS(file.path(CACHE, "fig1_fan.rds"))        # Fig 1: M0-M3 schematic + per-dataset M3 fan
+exposure   <- readRDS(file.path(CACHE, "fig4_exposure.rds"))   # Fig 2: exposures-to-learn (interim; rewire to M3 psi export)
+llm_slopes <- readRDS(file.path(CACHE, "fig6_llm_slopes.rds")) # Fig 3: child vs LLM acceleration
 
 knitr::opts_chunk$set(
   echo = FALSE, message = FALSE, warning = FALSE, cache=TRUE,
@@ -131,45 +106,15 @@ It is possible that ability grows linearly with age, rather than linearly with t
 #| label: fig-schematic
 #| fig-cap: "(A) Schematic predictions of all four models for vocabulary growth across age. Pure accumulator (M1) and accelerating accumulator (M2) models predict no variability across children, while M3 predicts variation and M4 predicts an increasing spread across chidren. (B) Best fitting model (M4) for five datasets. Gray lines show individual children's trajectories; colored lines show bootstrapped predictions at standard quantiles. Transparency is higher for panels with denser data to avoid overplotting."
 
-## ---- (A) illustrative vocab-space buildup (schematic) ----
-ages <- seq(8, 30, length.out = 80)
-A0   <- 8                                  # anchor age: log(t/A0) >= 0
-L    <- log(ages / A0)
-qs   <- c(0.1, 0.25, 0.5, 0.75, 0.9)
-z    <- qnorm(qs)
-XI0     <- -2.0                            # median intercept (log r + log alpha)
-KAPPA_A <- 2.5                             # acceleration for M2-M4
-DELTA   <- qnorm(ppoints(150), mean = 0, sd = 1.5)   # shared difficulties
-vocab_of <- function(th) vapply(th, function(x) mean(plogis(x - DELTA)), numeric(1))
+## Fig 1 precomputed in paper/build_cache_short.R (fig1_fan.rds):
+## (A) illustrative M0-M3 schematic; (B) per-dataset Bayesian M3 model-implied
+## fan over empirical trajectories. Norwegian appears once its M3 fit lands.
+pal <- unname(WORDBANK_PALETTE)
 
-variants <- tibble::tribble(
-  ~name,                       ~kappa_pop, ~sigma_alpha, ~sigma_kappa,
-  "(M1) accumulator",          1,           0,            0,
-  "(M2) + acceleration",       KAPPA_A,     0,            0,
-  "(M3) + efficiency var.",    KAPPA_A,     1.1,          0,
-  "(M4) + per-child accel.",   KAPPA_A,     1.1,          0.7
-)
-sim <- variants |>
-  mutate(name = factor(name, levels = name)) |>
-  rowwise() |>
-  do({
-    v <- .
-    bind_rows(lapply(seq_along(qs), function(i) {
-      th <- XI0 + z[i] * v$sigma_alpha + (v$kappa_pop + z[i] * v$sigma_kappa) * L
-      tibble(name = v$name,
-             qprob_f = factor(as.character(qs[i]),
-                              levels = c("0.1","0.25","0.5","0.75","0.9")),
-             age = ages, vocab = vocab_of(th))
-    }))
-  }) |>
-  ungroup()
-lwidth <- function(qf) ifelse(as.character(qf) == "0.5", 0.95, 0.55)
-
-p_schematic <- ggplot(sim, aes(age, vocab, color = qprob_f, group = qprob_f)) +
-  geom_line(aes(linewidth = lwidth(qprob_f))) +
+p_schematic <- ggplot(fig1_fan$schematic, aes(age, vocab, color = qf, group = qf)) +
+  geom_line(aes(linewidth = ifelse(qf == "50th", 0.95, 0.55))) +
   facet_wrap(~ name, nrow = 1) +
-  scale_color_manual(values = WORDBANK_PALETTE, name = "Percentile",
-                     labels = c("10th","25th","50th","75th","90th"), drop = FALSE) +
+  scale_color_manual(values = pal, name = "Percentile", drop = FALSE) +
   scale_linewidth_identity() +
   scale_y_continuous(limits = c(0, 1), breaks = c(0, 0.5, 1)) +
   labs(x = NULL, y = "expected vocab.\nproportion") +
@@ -177,37 +122,24 @@ p_schematic <- ggplot(sim, aes(age, vocab, color = qprob_f, group = qprob_f)) +
   theme(strip.text = element_text(face = "bold", size = 8),
         legend.position = "bottom", panel.grid.minor = element_blank())
 
-## ---- (B) best model (M4 / D_log) fit to real data, 5 datasets ----
-qt_mb <- ladder$qtiles |>
-  filter(model == "D_log") |>
-  mutate(qprob_f = factor(qprob, levels = c(0.1,0.25,0.5,0.75,0.9),
-                          labels = c("0.1","0.25","0.5","0.75","0.9")))
-emp <- ladder$emp |> mutate(child_lang = paste(lang_slug, child_id, sep = "::"))
-lang_lab <- ladder$lang_labels
-emp$lang_label   <- factor(lang_lab[emp$lang_slug],   levels = lang_lab)
-qt_mb$lang_label <- factor(lang_lab[qt_mb$lang_slug], levels = lang_lab)
-
-p_mbest <- ggplot() +
-  geom_line(data = filter(emp, language %in% c("English (American)", "Norwegian")),
-            aes(age, vocab, group = child_lang),
-            color = "grey25", alpha = 0.03, linewidth = 0.25) +
-  geom_line(data = filter(emp, !(language %in% c("English (American)", "Norwegian"))),
-            aes(age, vocab, group = child_lang),
-            color = "grey25", alpha = 0.25, linewidth = 0.25) +
-  geom_line(data = qt_mb,
-            aes(age, vocab, color = qprob_f, group = qprob_f,
-                linewidth = ifelse(as.character(qprob_f) == "0.5", 0.95, 0.55))) +
-  facet_wrap(~ lang_label, nrow = 1, scales = "free_y") +
-  scale_color_manual(values = WORDBANK_PALETTE, name = "Percentile",
-                     labels = c("10th","25th","50th","75th","90th"), drop = FALSE) +
+p_fits <- ggplot() +
+  geom_line(data = fig1_fan$spag,
+            aes(age, prop, group = interaction(lang, child)),
+            color = "grey25", alpha = 0.12, linewidth = 0.22) +
+  geom_line(data = fig1_fan$fan,
+            aes(age, vocab, color = qf, group = qf,
+                linewidth = ifelse(qf == "50th", 0.95, 0.55))) +
+  facet_wrap(~ lang, nrow = 1) +
+  scale_color_manual(values = pal, name = "Percentile", drop = FALSE) +
   scale_linewidth_identity() +
-  labs(x = "Age (months)", y = "Productive vocabulary") +
+  scale_y_continuous(limits = c(0, 1)) +
+  labs(x = "Age (months)", y = "proportion of items produced") +
   theme_minimal(base_size = 9) +
   theme(strip.text = element_text(face = "bold", size = 8),
         legend.position = "bottom", panel.grid.minor = element_blank(),
         panel.spacing = unit(0.3, "lines"))
 
-(p_schematic / p_mbest) +
+(p_schematic / p_fits) +
   plot_layout(guides = "collect", heights = c(1, 1.1)) +
   plot_annotation(tag_levels = "A") &
   theme(legend.position = "bottom")
