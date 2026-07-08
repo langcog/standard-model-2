@@ -2518,8 +2518,25 @@ rsynced the two changed ones (Marchman, Norwegian) to Sherlock, and launched the
 complete **M0–M3 sweep** (17 jobs): Marchman M3 as the confirmation case, Norwegian
 M0–M3 (M3 on `--qos=long`, 3 d), Marchman M0–M2, and Thal/Smith/Japanese M0–M2.
 Thal/Smith/Japanese M3 are **not** re-run — QC dropped 0 there, so those bundles and
-their §40 M3 fits are unchanged and stand. Expectation: Marchman σ_b drops from
-~8.3 and the fan calibrates.
+their §40 M3 fits are unchanged and stand.
+
+**(d) Marchman M3 post-QC result — σ_b did NOT drop; the prediction was wrong (and
+informative).** Pre→post-QC: **σ_b 8.31 → 8.39 (flat)**, but **κ 9.37 → 10.66 (+1.3)**.
+The 21 tent-shaped decliners were *not* inflating the variance — their spurious
+negative slopes were dragging the population *mean* κ down (out of line with the
+other datasets' 10–13); removing them corrects κ into line but leaves σ_b put.
+**σ_b ≈ 8 is therefore structural** — Marchman's wide 8–30 mo range × median-3
+depth, exactly as §40's age-range reading predicted — not a decliner artifact. The
+regenerated fan (`fan_m3_a3.png`) confirms it: the empirical overlay is now clean
+(all trajectories monotone) but the model-implied 10th percentile still flatlines
+near 0 to 30 mo (over-wide low tail), while Thal (σ_b 3.2) hugs its spaghetti.
+**Upshot:** the QC is a *data-integrity* fix (removes impossible records, corrects
+κ), NOT a σ_b fix. Paper stance unchanged from §40 — acceleration-*varies* direction
+is robust everywhere (Marchman's M2→M3 ELPD stands); report the σ_b *magnitude* from
+the denser Thal with the sparse/wide-design caveat. (Post-QC M3 mixing is marginal
+on the correlation block — rho_ab/tau_delta rhat ≈ 1.04–1.05, ess 77–177 — though
+σ_b itself is clean, rhat 1.005 / ess 277; consider more iters or adapt_delta on the
+final M3s.)
 
 **File hygiene (two generations).** `fits/bayes_long/` now holds a superseded base
 (2+-admin, no suffix) generation and the current `_a3` generation. Stale artifacts
