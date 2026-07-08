@@ -101,13 +101,26 @@ cat(sprintf("Wrote %s (%d datasets)\n\n", file.path(CACHE, "fig1_fan.rds"), nrow
 ## ============ 2. Fig 2: per-dataset exposures-to-learn ===================
 ## PENDING a per-item difficulty export from studies/bayes_long/01_fit.R.
 ## Expected per dataset: fits/bayes_long/summaries/<slug>_a3_m3_psi.csv
-##   columns: jj, item, delta_j   (posterior-median item difficulty)
-## Then per dataset, mirroring the retired build_cache.R section 5:
-##   t_50   = a0 * exp((delta_j - log_H - mu_xi) / kappa_pop)
-##   N_word = exp(mu_xi) * exp(log_H) * t_50 * prob
-## with prob = per-item token frequency (per-language table: english_word_freq /
-## norwegian_word_freq / a Japanese source TBD) and lexical_class from the CDI
-## item metadata. Panels laid out per dataset, matching the Fig 1 fan facets.
+##   columns: jj, item, delta_j, emp_prod
+##     delta_j  = posterior-median item difficulty (THE source of word AoA)
+##     emp_prod = empirical per-item production rate (for the §34 validation)
+##
+## A word's age-of-acquisition comes from the MODEL's delta_j, NOT from raw
+## corpus frequency. This is the journal §34 correction: delta_j must be
+## validated against PRODUCTION (emp_prod), not frequency -- high-frequency
+## function words ("in", "if") are late-learned, so cor(delta_j, freq) ~ 0 and a
+## frequency-based check false-alarms. Guard: cor(delta_j, emp_prod) strongly
+## negative (easy words are produced by more children). Show this validation.
+##
+## Per dataset, mirroring the retired build_cache.R section 5:
+##   t_50   = a0 * exp((delta_j - log_H - mu_xi) / kappa_pop)   # AoA from delta_j
+##   N_word = exp(mu_xi) * exp(log_H) * t_50 * prob             # cumulative exposures
+## Word difficulty/AoA = delta_j. The `prob` on the y-axis (exposures) is per-item
+## token frequency purely as the exposure COUNT (not as a difficulty proxy) --
+## CONFIRM with the fitting session whether the new figure keeps that y-axis or
+## switches to a delta_j/emp_prod-only quantity. Per-language freq: english_word_freq
+## / norwegian_word_freq / Japanese TBD; lexical_class from CDI item metadata.
+## Panels laid out per dataset, matching the Fig 1 fan facets.
 PSI <- function(slug) file.path(SUMM, paste0(slug, SFX, "_m3_psi.csv"))
 if (!any(vapply(names(DATASETS), function(s) file.exists(PSI(s)), logical(1)))) {
   cat("Fig 2: SKIPPED -- no per-item delta_j exports yet (<slug>_a3_m3_psi.csv).\n",
