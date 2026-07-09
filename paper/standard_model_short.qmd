@@ -146,11 +146,6 @@ p_fits <- ggplot() +
 ```
 
 
-
-<!-- Taking advantage of the equivalence of Rasch models to generalized linear mixed effects models [@deboeck2011], we fit the set of models shown in @fig-schematic as a series of multi-level logistic regressions. Each model predicted the probability of an individual child producing a particular word as a function of age (either unmodified in M1 or multiplied by a constant in M2) and a random effect of word difficulty. Successive models add random intercepts (M3) and slopes (M4) by child. This initial set of fits simply attempts to describe the distribution of vocabulary growth curves.  -->
-
-
-
 # Growth in ability leads to rapid changes in learning times for individual words
 
 ```{r fig-efficiency, fig.width=7, fig.height=4}
