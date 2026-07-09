@@ -223,3 +223,20 @@ si_loglin <- bind_rows(Map(loglin_one, names(DATASETS), DATASETS)) |>
 saveRDS(si_loglin, file.path(CACHE, "si_loglin.rds"))
 cat(sprintf("Wrote %s (%d datasets)\n",
             file.path(CACHE, "si_loglin.rds"), nrow(si_loglin)))
+
+## ============ 5. SI: per-child BLUPs (efficiency xi, acceleration kappa) ==
+## From the M3 per-child exports (<slug>_a3_m3_child.csv: xi_median, kappa_median).
+## Replaces the retired glmer blups_demographics.rds for the dip-test / histogram
+## in "Characterizing Variation".
+cat("SI: per-child BLUPs (M3)\n")
+child_one <- function(slug, label) {
+  f <- file.path(SUMM, paste0(slug, SFX, "_m3_child.csv"))
+  if (!file.exists(f)) { cat("  skip", slug, "(no child csv)\n"); return(NULL) }
+  read.csv(f) |> transmute(lang = label, ckey, n_admins,
+                           xi = xi_median, kappa = kappa_median)
+}
+si_blups <- bind_rows(Map(child_one, names(DATASETS), DATASETS)) |>
+  mutate(lang = factor(lang, levels = unname(DATASETS)))
+saveRDS(si_blups, file.path(CACHE, "si_blups.rds"))
+cat(sprintf("Wrote %s (%d children, %d datasets)\n",
+            file.path(CACHE, "si_blups.rds"), nrow(si_blups), dplyr::n_distinct(si_blups$lang)))
