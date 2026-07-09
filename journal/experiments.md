@@ -2588,6 +2588,34 @@ Validated on a throwaway tiny fit: delta_j vs empirical production r = −0.92 (
 sign/scale). psi written for every model (all expose delta_j); child for m2/m3/m3lin.
 Marchman M3 re-queued to pick up the export (it had run under the old code).
 
+### 40.3 Complete 5-dataset ladder (post-QC, seeded, exported) + log-vs-linear age (2026-07-08)
+
+Full production sweep landed — **M0–M3 × 5 datasets on the QC'd `_a3` bundles**, all
+new-code (seeded, `_psi.csv`/`_child.csv` exported), LOO on the deterministic
+per-slug obs subsample (comparable ELPD within dataset).
+
+| dataset | M0→M1 | M1→M2 | M2→M3 | κ | σ_b |
+|---|--:|--:|--:|--:|--:|
+| Thal      | +108 463 | +38 335 | +7 880 | 11.5 | 3.2 |
+| Smith     | +40 393  | +55 739 | +6 542 | 12.9 | 5.1 |
+| Marchman  | +41 653  | +34 633 | +5 354 | 11.5 | 8.0 |
+| Norwegian | +59 093  | +64 725 | +5 551 | 13.2 | 5.6 |
+| Japanese  | +16 705  | +7 161  | +761   | 11.6 | 5.4 |
+
+**Every rung positive in every dataset.** M0→M1 (acceleration exists) dominant
+everywhere; M1→M2 (efficiency varies) large; **M2→M3 (acceleration VARIES — the hard
+claim) positive in all five** (+761 to +7 880). κ ≈ 11.5–13.2 (~12× LLM κ=1). σ_b
+tracks longitudinal density × age-range as in §40.1: Norwegian widest age (8–36) but
+deepest (med 5 admins) → σ_b 5.6; sparse Marchman → 8.0; dense Thal → 3.2. Norwegian
+M3 shows strong ρ_ab = −0.61 (weak elsewhere); nuisance tau_delta/rho rhat ≈ 1.05–1.07,
+headline params clean.
+
+**Log-vs-linear age (M3 vs M3lin, paired `loo_compare`) — LOG wins everywhere:**
+Smith −254.5 (10.9 SE), Marchman −178.7 (6.8 SE), Japanese −39.3 (5.1 SE); Thal +
+Norwegian m3lin still fitting. Log-age is the better functional form (margin scales
+with dataset size) — the Bayesian confirmation of the glmer D_log > D_lin result
+(§29), and the scale on which the accumulator/κ framing lives.
+
 **File hygiene (two generations).** `fits/bayes_long/` now holds a superseded base
 (2+-admin, no suffix) generation and the current `_a3` generation. Stale artifacts
 moved to `fits/bayes_long/_superseded/` (see its README): all base 2+ bundles+fits,
