@@ -5,7 +5,10 @@ suppressPackageStartupMessages({
   library(diptest)
 })
 source(here("paper", "_helpers.R"))
-blups  <- readRDS(here("paper", "cache", "blups_demographics.rds"))
+si_blups  <- readRDS(here("paper", "cache", "si_blups.rds"))   # per-child BLUPs (M3): xi, kappa
+si_loo    <- readRDS(here("paper", "cache", "si_loo.rds"))     # LOO ladder (M0-M3)
+si_loglin <- readRDS(here("paper", "cache", "si_loglin.rds"))  # log- vs linear-age (M3)
+fig2      <- readRDS(here("paper", "cache", "fig2_efficiency.rds"))  # word efficiency + delta validation
 knitr::opts_chunk$set(
   echo = FALSE, message = FALSE, warning = FALSE,
   fig.align = "center", out.width = "100%", dpi = 300
@@ -14,13 +17,13 @@ knitr::opts_chunk$set(
 
 # Generative Model
 
-*[Pending prose for the generative accumulator model. The figure below shows the latent-ability (theta) buildup across the model rungs. NOTE: the figure's rung labels still read M1-M4 and should be renumbered M0-M3 to match the main text.]*
+*[Pending prose for the generative accumulator model. The figure below shows the latent-ability ($\theta$) buildup across the model rungs M0-M3.]*
 
 ```{r fig-schematic-theta, fig.width=8, fig.height=2.6}
 #| label: fig-schematic-theta
 #| fig-cap: ""
 # [MCF: caption on next pass.] Latent-ability (theta) version of the
-# main-text model buildup (M1->M4). The main text shows only the vocab-
+# main-text model buildup (M0->M3). The main text shows only the vocab-
 # space projection of these curves; here is theta_i(t) itself, before it
 # is pushed through the word-difficulty distribution. Illustrative
 # parameters, not estimated.
@@ -30,10 +33,10 @@ qs <- c(0.1, 0.25, 0.5, 0.75, 0.9); z <- qnorm(qs)
 XI0 <- -2.0; KAPPA_A <- 2.5
 variants <- tibble::tribble(
   ~name,                       ~kappa_pop, ~sigma_alpha, ~sigma_kappa, ~eq,
-  "(M1) accumulator",          1,           0,            0,            r"($\theta = \log(r) + \log(t)$)",
-  "(M2) + acceleration",       KAPPA_A,     0,            0,            r"($\theta = \log(r) + \kappa\,\log(t)$)",
-  "(M3) + efficiency var.",    KAPPA_A,     1.1,          0,            r"($\theta = \xi_i + \kappa\,\log(t)$)",
-  "(M4) + per-child accel.",   KAPPA_A,     1.1,          0.7,          r"($\theta = \xi_i + \kappa_i\,\log(t)$)"
+  "(M0) accumulator",          1,           0,            0,            r"($\theta = \log(r) + \log(t)$)",
+  "(M1) + acceleration",       KAPPA_A,     0,            0,            r"($\theta = \log(r) + \kappa\,\log(t)$)",
+  "(M2) + efficiency var.",    KAPPA_A,     1.1,          0,            r"($\theta = \xi_i + \kappa\,\log(t)$)",
+  "(M3) + per-child accel.",   KAPPA_A,     1.1,          0.7,          r"($\theta = \xi_i + \kappa_i\,\log(t)$)"
 )
 sim <- variants |>
   mutate(name = factor(name, levels = name)) |>
@@ -93,7 +96,7 @@ single unit rate ($\kappa = 1$) and children do not differ
 because ability sweeps through a distribution of word difficulties — the
 construction reproduced in panel (A) of our schematic. Acceleration here
 is a population-level property of the difficulty distribution, not a
-change in the child. This corresponds to our M1.
+change in the child. This corresponds to our M0.
 
 **Mitchell & McMurray [-@mitchell2009]** add a leverage term: already-known
 words speed the acquisition of new ones. They prove that this feedback
@@ -106,7 +109,7 @@ not embed cleanly in the linear predictor above.
 **Hidaka [-@hidaka2013]** introduces a rate-change process in which ability
 grows as $t^{D+1}$; his exponent $D$ is exactly $\kappa_{\text{pop}} - 1$
 in our notation, so $D > 0$ is population-level acceleration
-($\kappa_{\text{pop}} > 1$). This is our M2. The acceleration is shared
+($\kappa_{\text{pop}} > 1$). This is our M1. The acceleration is shared
 across children ($\sigma_\kappa = 0$). Hidaka relates $D$ to word
 imageability — i.e. a *per-word* scaling exponent — which is an
 interesting direction we do not pursue here.
@@ -121,7 +124,7 @@ the Gamma shape parameter, which corresponds to a per-word discrimination
 **Kachergis et al. [-@kachergis2022]** are the first to free
 $\sigma_\alpha$: they cast vocabulary as a Rasch model in which each child
 has their own latent ability, unifying the accumulator and item-response
-traditions. This is our M3. But the scaling exponent remains shared across
+traditions. This is our M2. But the scaling exponent remains shared across
 children ($\sigma_\kappa = 0$), and the model is proposed as a framework
 rather than fit to longitudinal individual data.
 
@@ -136,12 +139,12 @@ frees $\sigma_\alpha$ — but every model holds $\sigma_\kappa = 0$.
 | Hidaka (2013), rate-change | 0 | $D+1$ | 0 | free |
 | Mollica & Piantadosi (2017)| 0 | 1     | 0 | free |
 | Kachergis et al. (2022)    | free | free | 0 | free |
-| **This work (M4)**         | **free** | **free** | **free** | **free** |
+| **This work (M3)**         | **free** | **free** | **free** | **free** |
 
 Our contribution is to free $\sigma_\kappa$: children differ not only in
 how efficient they are but in how steeply their learning accelerates. This
 is the load-bearing addition — it is what lets the model fit the widening
-fan of trajectories with age (M4 vs M3 in the main text). It is also a
+fan of trajectories with age (M3 vs M2 in the main text). It is also a
 falsifiable claim rather than a parameter convenience: if $\sigma_\kappa$
 were near zero the model would collapse onto Kachergis et al., but the
 estimated per-child slope variance is well above zero and large relative
@@ -262,29 +265,65 @@ table1 |>
 
 # Full Model Comparison Results
 
-*[Pending: the Bayesian LOO/ELPD model-comparison ladder (M0-M3) per dataset. The glmer dAIC/dBIC tables and the seven-variant glmer ladder figure have been retired -- model comparison is now purely Bayesian LOO -- so this section awaits the M0-M2 Bayesian fits (M3 is done).]*
+```{r tbl-loo}
+#| label: tbl-loo
+#| tbl-cap: "Bayesian leave-one-out (LOO) model comparison. Each cell is the difference in expected log predictive density (ELPD) relative to the best model (M3), with the standard error of the difference in parentheses; more negative is worse. Every step of the ladder improves fit in every dataset, and the full model M3 (per-child efficiency *and* acceleration) is preferred throughout. Built from the per-fit LOO objects (paper/build_cache_short.R)."
+short <- c("English (Thal)" = "Thal", "English (Smith)" = "Smith",
+           "English (Marchman)" = "Marchman", "Norwegian" = "Norwegian",
+           "Japanese" = "Japanese")
+mod_desc <- c(M0 = "M0. accumulator ($\\kappa=1$)",
+              M1 = "M1. + acceleration",
+              M2 = "M2. + efficiency var.",
+              M3 = "M3. + acceleration var.")
+lang_order <- levels(si_loo$lang)
+cell <- function(m, e, s) ifelse(m == "M3", "0",
+  sprintf("%s (%s)", format(round(e), big.mark = ","), format(round(s))))
+tab <- si_loo |>
+  mutate(txt = cell(as.character(model), elpd_diff, se_diff)) |>
+  select(model, lang, txt) |>
+  tidyr::pivot_wider(names_from = lang, values_from = txt) |>
+  arrange(model) |>
+  mutate(Model = mod_desc[as.character(model)]) |>
+  select(Model, all_of(lang_order))
+knitr::kable(tab, align = c("l", rep("r", length(lang_order))), escape = FALSE,
+             col.names = c("Model", unname(short[lang_order]))) |>
+  kableExtra::add_header_above(
+    c(" " = 1, "$\\\\Delta$ELPD vs M3 (SE)" = length(lang_order)), escape = FALSE) |>
+  kableExtra::kable_styling(latex_options = "scale_down", font_size = 8)
+```
 
 # Linear vs. Logistic Age
 
-*[Pending: the log-age vs linear-age comparison, from the Bayesian M3-log vs M3-linear fits (studies/bayes_long).]*
+```{r tbl-loglin}
+#| label: tbl-loglin
+#| tbl-cap: "Log-age vs linear-age accumulation. LOO ELPD advantage of the log-age model (M3) over its linear-age counterpart, with SE; positive favors log-age. Log-age is preferred in every dataset tested. (Norwegian's linear-age fit is pending.)"
+short <- c("English (Thal)" = "Thal", "English (Smith)" = "Smith",
+           "English (Marchman)" = "Marchman", "Norwegian" = "Norwegian",
+           "Japanese" = "Japanese")
+tab <- si_loglin |>
+  mutate(Dataset = unname(short[as.character(lang)]),
+         adv = sprintf("%s (%s)", format(round(-elpd_diff), big.mark = ","),
+                       format(round(se_diff)))) |>
+  select(Dataset, adv)
+knitr::kable(tab, align = c("l", "r"), escape = FALSE,
+             col.names = c("Dataset", "$\\Delta$ELPD (log $-$ linear)")) |>
+  kableExtra::kable_styling(font_size = 9, latex_options = "hold_position")
+```
 
 # Characterizing Variation in Efficiency and Acceleration
 
 ```{r blup-prep, include=FALSE}
-# Per-child BLUP distributions (efficiency xi, acceleration zeta) from the
-# D_log (M4) fits, used for the dip-test table and histogram below. We
-# z-score WITHIN dataset (datasets differ in scale) and drop a handful of
-# extreme BLUPs (|z| > 4) that come from sparsely-observed children rather
+# Per-child BLUP distributions (efficiency xi, acceleration kappa) from the
+# Bayesian M3 fits (per-child exports), used for the dip-test table and histogram
+# below. We z-score WITHIN dataset (datasets differ in scale) and drop a handful
+# of extreme BLUPs (|z| > 4) that come from sparsely-observed children rather
 # than distinct subgroups.
-study_lab <- c(thal = "English (Thal)", smith = "English (Smith)",
-               marchman = "English (Marchman)", norwegian = "Norwegian",
-               japanese = "Japanese")
-bz <- blups |>
-  group_by(lang_slug) |>
-  mutate(xz = as.numeric(scale(xi)), zz = as.numeric(scale(zeta))) |>
+bz <- si_blups |>
+  group_by(lang) |>
+  mutate(xz = as.numeric(scale(xi)), zz = as.numeric(scale(kappa))) |>
   ungroup() |>
   filter(is.finite(xz), is.finite(zz), abs(xz) <= 4, abs(zz) <= 4) |>
-  mutate(study = factor(study_lab[lang_slug], levels = unname(study_lab)))
+  rename(study = lang)
 ```
 
 ```{r tbl-blup-dip}
@@ -300,15 +339,15 @@ dip_row <- function(d, label) {
                  acc = diptest::dip.test(d$zz)$p.value)
 }
 diptab <- bind_rows(
-  lapply(names(study_lab), function(s)
-    dip_row(filter(bz, lang_slug == s), study_lab[[s]])),
+  lapply(levels(bz$study), function(s)
+    dip_row(filter(bz, study == s), s)),
   dip_row(bz, "Pooled"))
 pfmt <- function(p) ifelse(p >= 0.995, ">0.99", sprintf("%.2f", p))
 diptab |>
   mutate(eff = pfmt(eff), acc = pfmt(acc)) |>
   knitr::kable(align = c("l", "r", "r", "r"), escape = FALSE,
                col.names = c("Dataset", "N",
-                             "Efficiency ($\\xi$)", "Acceleration ($\\zeta$)")) |>
+                             "Efficiency ($\\xi$)", "Acceleration ($\\kappa$)")) |>
   kableExtra::kable_styling(font_size = 9, latex_options = "hold_position")
 ```
 
@@ -316,14 +355,14 @@ diptab |>
 #| label: fig-blup-hist
 #| fig-cap: ""
 # Histograms of the per-child BLUPs (within-dataset z-scored): efficiency
-# (xi) and acceleration (zeta), one row per dataset. Dashed curve is the
+# (xi) and acceleration (kappa), one row per dataset. Dashed curve is the
 # standard-normal reference. Distributions are single-moded (cf. dip-test
 # table), consistent with continuous between-child variation.
 hist_df <- bz |>
   select(study, xz, zz) |>
   pivot_longer(c(xz, zz), names_to = "param", values_to = "z") |>
   mutate(param = factor(param, levels = c("xz", "zz"),
-                        labels = c("Efficiency~(xi)", "Acceleration~(zeta)")))
+                        labels = c("Efficiency~(xi)", "Acceleration~(kappa)")))
 ggplot(hist_df, aes(z)) +
   geom_histogram(aes(y = after_stat(density)), bins = 30,
                  fill = "#2b8cbe", colour = "white", linewidth = 0.1) +
@@ -339,7 +378,56 @@ ggplot(hist_df, aes(z)) +
 
 # Changes in Word Efficiency
 
-*[Pending: per-word exposures-to-learn backing Fig 2, rebuilt from the M3 item-difficulty posteriors (delta_j) and validated against production (emp_prod), per journal section 34 (validate delta_j against production, not frequency).]*
+```md
+## Word-level efficiency: from difficulty to exposures  [draft for promotion — MCF to review]
+
+The main-text efficiency figure translates the fitted model into a concrete
+developmental claim: the number of exposures a word requires before it is learned
+falls by orders of magnitude across early childhood. Two quantities underlie each
+point.
+
+**Age of acquisition.** For a word with fitted difficulty $\delta_j$, the age at
+which a typical child (population intercept $\mu_\xi$, scaling $\kappa$) reaches
+50% production probability is
+$$t_{50}(j) = a_0 \exp\!\big((\delta_j - \log H - \mu_\xi)/\kappa\big),$$
+read directly off the accumulator's linear predictor. Word difficulty here is the
+*model's* $\delta_j$, not corpus frequency: high-frequency function words such as
+"in" and "if" are acquired late, so frequency is a poor proxy for difficulty.
+
+**Cumulative exposures.** The number of times a word has been heard by $t_{50}$ is
+the input rate times the time-to-learn times the word's share of tokens,
+$N_j = R \cdot t_{50}(j) \cdot p_j$, with $p_j$ the word's CHILDES token frequency
+and $R$ the typical input rate. The descriptive model does not itself estimate an
+input rate, so we anchor $R$ to the population input-rate estimates (see
+Population Input Range Estimation): the figure uses the central value and the text
+reports the range across sources.
+
+**Validation.** Because $\delta_j$ drives the age axis, it must track how hard
+words actually are for children. Fitted difficulty is strongly *negatively*
+correlated with each word's empirical production rate in every dataset (easy words
+are produced by more children; @fig-delta-validation) — the frequency-based check
+that this replaces gives near-zero correlations and false-alarms.
+```
+
+```{r fig-delta-validation, fig.width=8, fig.height=2.4}
+#| label: fig-delta-validation
+#| fig-cap: ""
+# Model item difficulty (delta_j) vs empirical per-item production rate, per
+# dataset. The strong negative relationship confirms delta_j tracks how hard
+# words are for children (validated against production, not frequency).
+.rlab <- fig2$meta |> mutate(txt = sprintf("r = %.2f", cor_dj_prod),
+                             lang = factor(lang, levels = levels(fig2$items$lang)))
+ggplot(fig2$items, aes(emp_prod, delta_j)) +
+  geom_point(alpha = 0.30, size = 0.6, colour = "#2b8cbe") +
+  geom_smooth(method = "lm", se = FALSE, colour = "grey20", linewidth = 0.6, formula = y ~ x) +
+  geom_text(data = .rlab, aes(x = Inf, y = Inf, label = txt), inherit.aes = FALSE,
+            hjust = 1.1, vjust = 1.5, size = 2.6, colour = "grey25") +
+  facet_wrap(~ lang, nrow = 1) +
+  labs(x = "empirical production rate", y = expression("fitted difficulty  " * delta[j])) +
+  theme_minimal(base_size = 9) +
+  theme(strip.text = element_text(face = "bold", size = 8),
+        panel.grid.minor = element_blank())
+```
 
 # Computing Acceleration in LMs
 
@@ -428,51 +516,38 @@ data gap may be harder to close than raw data counts suggest.
 
 # Generating the Model-Ladder Quantile Fans
 
-*[STALE: this describes the retired glmer BLUP-bootstrap fan. The short paper's Fig 1 fan is instead drawn from the Bayesian M3 scalar posteriors (a synthetic MVN population; studies/bayes_long/03_fan.R). Rewrite to match, or remove.]*
-
 ```md
-## How the model-ladder quantile bands are generated  [draft for promotion — MCF to review]
+## How the model-implied quantile bands are generated  [draft for promotion — MCF to review]
 
-The percentile bands ("fans") overlaid on the empirical trajectories in the
-model-ladder figures are not closed-form quantiles of a fitted distribution. For
-each (dataset, model) fit we generate them by Monte-Carlo simulation: we build a
-synthetic population of children and read off vocabulary percentiles at each age.
+The percentile bands ("fans") overlaid on the empirical trajectories in the model
+figure are not closed-form quantiles; for each dataset we generate them by
+Monte-Carlo simulation from the fitted M3 posterior — a synthetic population of
+children whose vocabulary percentiles we read off at each age.
 
-**Bootstrapping children from the fitted random effects.** For the models with a
-per-child random effect (the C and D variants in both age bases) we draw
-$N = 500$ synthetic children by resampling *with replacement* from the fit's
-per-child BLUPs — the shrunken empirical-Bayes estimates of each observed child's
-random intercept and, for the D models, random slope. The resampling uses a fixed
-seed, so the bands are reproducible. The models with no per-child random effect
-(the Rasch-style model A and the population-slope B models) have no child
-distribution to resample and so collapse to a single median curve rather than a
-fan.
+**Drawing a synthetic population.** From each dataset's M3 fit we take the
+posterior medians of the population parameters: mean efficiency $\mu_\xi$,
+population scaling $\kappa_{\text{pop}} = 1 + \delta$, the between-child SDs of
+efficiency and acceleration ($\sigma_a$, $\sigma_b$), their correlation $\rho$, and
+the item-difficulty SD $\tau_\delta$. We draw $N = 500$ synthetic children by
+sampling their (efficiency, acceleration) deviations from the fitted bivariate
+normal,
+$(a_i, b_i) \sim \mathcal{N}\!\big(\mathbf{0}, \Sigma(\sigma_a, \sigma_b, \rho)\big)$,
+so child $i$ has $\xi_i = \mu_\xi + a_i$ and $\kappa_i = \kappa_{\text{pop}} + b_i$;
+a fixed seed makes the bands reproducible. Because the Bayesian hierarchy estimates
+the population covariance $\Sigma$ directly (with partial pooling), sampling from it
+*is* the population draw — unlike a frequentist point-estimate fit, there are no
+unshrunken per-child BLUPs to resample.
 
-We bootstrap the realised BLUPs rather than sampling parametrically from
-$\mathcal{N}(0, \hat\Sigma)$. The two agree in expectation, but parametric
-sampling assumes the *unshrunken* population covariance and routinely generates
-extreme intercept–slope pairs that no real child exhibited; at ages where the
-data are thin this inflates the upper percentiles. Resampling the BLUPs keeps the
-simulated population conditional on the children we actually observed.
+**Each child's expected vocabulary curve.** Ages run on a per-dataset grid spanning
+the 5th–95th percentile of that dataset's observed ages, so the bands are not
+extrapolated beyond the data. We draw $M$ synthetic item difficulties
+$\delta_j \sim \mathcal{N}(0, \tau_\delta)$ to stand in for a typical item set;
+child $i$'s expected productive vocabulary, as a proportion of items, at age $t$ is
+$$V_i(t) = \frac{1}{M}\sum_{j=1}^{M} \operatorname{logit}^{-1}\!\big(\xi_i + \kappa_i \log(t/a_0) + \log H - \delta_j\big),$$
+an *expected* proportion, so each simulated child's curve is smooth and the width
+of the fan reflects between-child variation alone.
 
-**Each child's expected vocabulary curve.** Ages run on a per-dataset integer
-grid spanning the 5th–95th percentile of that dataset's observed ages, so the
-bands are never extrapolated beyond the data window. For a bootstrapped child $i$
-with random intercept $u^{0}_i$ and slope $u^{1}_i$, the linear predictor for item
-$j$ at age $t$ is
-$$\eta_{ij}(t) = \beta_0 + (\beta_{\text{age}} + u^{1}_i)\, g(t) + u^{0}_i + b_j,$$
-where $\beta_0$ and $\beta_{\text{age}}$ are the fixed effects, $b_j$ is item $j$'s
-fitted random effect, and $g(t) = \log(t / a_0)$ for the log-age models (and for
-model A, whose offset pins $\beta_{\text{age}} \equiv 1$) or $g(t) = t - a_0$ for
-the linear-age models. The child's expected productive vocabulary is the sum of
-per-item production probabilities over the dataset's $J$ items,
-$$V_i(t) = \sum_{j=1}^{J} \operatorname{logit}^{-1}\!\big(\eta_{ij}(t)\big),$$
-clamped to $[0, J]$. Item random effects are held at their fitted values — only
-children are resampled — and $V_i(t)$ is an *expected* count, so each simulated
-child's curve is smooth and the width of the fan reflects between-child variation
-alone.
-
-**Quantiles.** At each (dataset, model, age) the plotted bands are the 10th,
-25th, 50th, 75th, and 90th percentiles of $\{V_i(t)\}_{i=1}^{500}$. The simulation
-is implemented in `studies/glmer_ladder/04a_simulate.R`.
+**Quantiles.** At each (dataset, age) the plotted bands are the 10th, 25th, 50th,
+75th, and 90th percentiles of $\{V_i(t)\}_{i=1}^{500}$. The simulation is
+implemented in `studies/bayes_long/03_fan.R` (mirrored in `paper/build_cache_short.R`).
 ```

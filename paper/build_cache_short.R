@@ -99,33 +99,144 @@ saveRDS(fig1, file.path(CACHE, "fig1_fan.rds"))
 cat(sprintf("Wrote %s (%d datasets)\n\n", file.path(CACHE, "fig1_fan.rds"), nrow(fig1$meta)))
 
 ## ============ 2. Fig 2: per-dataset exposures-to-learn ===================
-## PENDING a per-item difficulty export from studies/bayes_long/01_fit.R.
-## Expected per dataset: fits/bayes_long/summaries/<slug>_a3_m3_psi.csv
-##   columns: jj, item, delta_j, emp_prod
-##     delta_j  = posterior-median item difficulty (THE source of word AoA)
-##     emp_prod = empirical per-item production rate (for the §34 validation)
-##
-## A word's age-of-acquisition comes from the MODEL's delta_j, NOT from raw
-## corpus frequency. This is the journal §34 correction: delta_j must be
-## validated against PRODUCTION (emp_prod), not frequency -- high-frequency
-## function words ("in", "if") are late-learned, so cor(delta_j, freq) ~ 0 and a
-## frequency-based check false-alarms. Guard: cor(delta_j, emp_prod) strongly
-## negative (easy words are produced by more children). Show this validation.
-##
-## Per dataset, mirroring the retired build_cache.R section 5:
+## For a typical child, the number of exposures a word needs before it is learned.
+## Word difficulty / age-of-acquisition comes from the MODEL's delta_j (NOT from
+## frequency -- the journal §34 correction: delta_j is validated against PRODUCTION
+## via emp_prod, since high-frequency function words are late-learned). Frequency
+## enters only as the per-word exposure COUNT on the y-axis:
 ##   t_50   = a0 * exp((delta_j - log_H - mu_xi) / kappa_pop)   # AoA from delta_j
-##   N_word = exp(mu_xi) * exp(log_H) * t_50 * prob             # cumulative exposures
-## Word difficulty/AoA = delta_j. The `prob` on the y-axis (exposures) is per-item
-## token frequency purely as the exposure COUNT (not as a difficulty proxy) --
-## CONFIRM with the fitting session whether the new figure keeps that y-axis or
-## switches to a delta_j/emp_prod-only quantity. Per-language freq: english_word_freq
-## / norwegian_word_freq / Japanese TBD; lexical_class from CDI item metadata.
-## Panels laid out per dataset, matching the Fig 1 fan facets.
+##   N_word = exp(mu_xi + log_H) * t_50 * prob                  # cumulative exposures
+##
+## The lean bayes_long bundles dropped CDI item metadata, so we recover the word +
+## lexical_class per item via wordbankr (REQUIRES NETWORK at cache-build time): item
+## ids are `ul:<uni_lemma>` (unambiguous cross-linked items) else `id:<item_def>`,
+## joined back to get_item_data() by uni_lemma / item_definition. Per-language token
+## frequency: english_word_freq / norwegian_word_freq. Japanese is EXCLUDED -- no
+## CHILDES frequency pull exists for it (no pull_japanese_freq.R); addable later.
+suppressPackageStartupMessages(library(wordbankr))
+FIG2_CFG <- list(
+  thal      = list(wl = "English (American)", form = "WS", freq = "english"),
+  smith     = list(wl = "English (American)", form = "WS", freq = "english"),
+  marchman  = list(wl = "English (American)", form = "WS", freq = "english"),
+  norwegian = list(wl = "Norwegian",          form = "WS", freq = "norwegian"))
+FREQ <- list(english   = readRDS(here("fits", "english_word_freq.rds")),
+             norwegian = readRDS(here("fits", "norwegian_word_freq.rds")))
+## Exposure-COUNT anchor. The descriptive M3 carries no input rate, so cumulative
+## exposures are anchored to the paper's own population input-rate table
+## (input_rate_table.rds): each per-source estimate is tokens/month. We take the
+## span across sources as the plausible range and its median as the central
+## anchor; the figure uses the central value, the text reports LO-HI.
+## [MCF: confirm range = spread of the 6 per-source monthly means (167k-561k),
+##  central = their median.]
+.rates <- sort(unique(readRDS(here("paper", "cache", "input_rate_table.rds"))$mean_mo))
+.rates <- .rates[is.finite(.rates)]
+R_LO <- min(.rates); R_HI <- max(.rates); R_MID <- median(.rates)
+clean_word <- function(x) tolower(trimws(sub("[ ]*\\(.*\\)$", "", x)))
+KEEP_CLASS <- c("nouns", "predicates", "function_words")   # drop "other" (heterogeneous)
 PSI <- function(slug) file.path(SUMM, paste0(slug, SFX, "_m3_psi.csv"))
-if (!any(vapply(names(DATASETS), function(s) file.exists(PSI(s)), logical(1)))) {
-  cat("Fig 2: SKIPPED -- no per-item delta_j exports yet (<slug>_a3_m3_psi.csv).\n",
-      "        fig-efficiency stays on the existing fig4_exposure.rds until they land.\n", sep = "")
-} else {
-  stop("Fig 2 inputs detected but the per-dataset efficiency build is not wired yet ",
-       "-- implement here once the psi export format + per-language frequency are settled.")
+
+eff_one <- function(slug, label) {
+  cfg <- FIG2_CFG[[slug]]; if (is.null(cfg)) { cat("  skip", slug, "(no freq table)\n"); return(NULL) }
+  pf <- PSI(slug); sf <- file.path(SUMM, paste0(slug, SFX, "_m3.summary.rds"))
+  bf <- file.path(BL, paste0("bundle_", slug, SFX, ".rds"))
+  if (!all(file.exists(c(pf, sf, bf)))) { cat("  skip", slug, "(missing inputs)\n"); return(NULL) }
+  psi <- read.csv(pf) |> mutate(kind = sub(":.*", "", item), key = sub("^[^:]+:", "", item))
+  s <- as.data.frame(readRDS(sf)); g <- function(v) s$median[s$variable == v]
+  sd <- readRDS(bf)$stan_data
+  mu_xi <- g("mu_xi"); kappa <- g("kappa_pop"); log_H <- sd$log_H; a0 <- sd$a0
+
+  it   <- wordbankr::get_item_data(language = cfg$wl, form = cfg$form) |> filter(item_kind == "word")
+  byul <- it |> filter(!is.na(uni_lemma)) |> distinct(uni_lemma, item_definition, lexical_category)
+  byid <- it |> distinct(item_definition, lexical_category)
+  m <- bind_rows(
+    psi |> filter(kind == "ul") |> left_join(byul, by = c("key" = "uni_lemma")),
+    psi |> filter(kind == "id") |> left_join(byid, by = c("key" = "item_definition")) |>
+      mutate(item_definition = key))
+  fr <- FREQ[[cfg$freq]] |> transmute(w = tolower(w), prob)
+
+  m <- m |>
+    mutate(word = coalesce(item_definition, key), w = clean_word(word)) |>
+    left_join(fr, by = "w") |>
+    filter(!is.na(lexical_category), lexical_category %in% KEEP_CLASS, !is.na(prob), prob > 0) |>
+    mutate(lexical_class = factor(lexical_category, levels = KEEP_CLASS),
+           t_50   = a0 * exp((delta_j - log_H - mu_xi) / kappa),  # AoA from delta_j (model)
+           # cumulative exposures = (input rate) x (months to learn) x (word share);
+           # input rate anchored externally (R_MID), lo/hi span the source range.
+           N_word    = R_MID * t_50 * prob,
+           N_word_lo = R_LO  * t_50 * prob,
+           N_word_hi = R_HI  * t_50 * prob,
+           slug = slug, lang = label)
+  r <- cor(m$delta_j, m$emp_prod)                        # §34 validation
+  cat(sprintf("  %-10s items=%d  cor(delta_j,emp_prod)=%.2f\n", slug, nrow(m), r))
+  if (is.na(r) || r > -0.5)
+    stop(sprintf("Fig 2 %s: cor(delta_j, emp_prod)=%.2f -- expected strongly negative (§34)", slug, r))
+  list(items = m |> select(slug, lang, item, word, lexical_class, delta_j, emp_prod,
+                           prob, t_50, N_word, N_word_lo, N_word_hi),
+       meta  = data.frame(slug = slug, lang = label, cor_dj_prod = r, n_items = nrow(m)))
 }
+cat("Fig 2: per-dataset exposures-to-learn (wordbankr metadata join)\n")
+e2 <- Filter(Negate(is.null), Map(eff_one, names(DATASETS), DATASETS))
+fig2 <- list(items = bind_rows(lapply(e2, `[[`, "items")) |> mutate(lang = factor(lang, levels = unname(DATASETS))),
+             meta  = bind_rows(lapply(e2, `[[`, "meta")),
+             anchor = list(lo = R_LO, mid = R_MID, hi = R_HI))  # tokens/month input-rate anchor
+saveRDS(fig2, file.path(CACHE, "fig2_efficiency.rds"))
+cat(sprintf("Wrote %s (%d datasets, Japanese excluded -- no frequency)\n\n",
+            file.path(CACHE, "fig2_efficiency.rds"), nrow(fig2$meta)))
+
+## ============ 3. SI: LOO model-comparison ladder (M0-M3) =================
+## Per dataset: loo_compare across the four rungs -> elpd_diff vs best (M3) + se.
+suppressPackageStartupMessages(library(loo))
+LADDER <- c(M0 = "m0", M1 = "m1", M2 = "m2", M3 = "m3")
+loo_one <- function(slug, label) {
+  fs <- file.path(SUMM, paste0(slug, SFX, "_", LADDER, ".loo.rds"))
+  if (!all(file.exists(fs))) { cat("  skip", slug, "(missing loo rungs)\n"); return(NULL) }
+  ls <- lapply(fs, readRDS); names(ls) <- names(LADDER)
+  cmp <- loo::loo_compare(ls)
+  data.frame(slug = slug, lang = label, model = rownames(cmp),
+             elpd_diff = cmp[, "elpd_diff"], se_diff = cmp[, "se_diff"],
+             row.names = NULL)
+}
+cat("SI: LOO ladder (M0-M3)\n")
+si_loo <- bind_rows(Map(loo_one, names(DATASETS), DATASETS)) |>
+  mutate(lang = factor(lang, levels = unname(DATASETS)),
+         model = factor(model, levels = names(LADDER)))
+saveRDS(si_loo, file.path(CACHE, "si_loo.rds"))
+cat(sprintf("Wrote %s (%d datasets)\n\n",
+            file.path(CACHE, "si_loo.rds"), dplyr::n_distinct(si_loo$slug)))
+
+## ============ 4. SI: log-age vs linear-age (M3 vs M3-linear) =============
+## Per dataset: loo_compare(M3-log, M3-linear). elpd_diff is the loser's deficit
+## relative to the winner (log wins everywhere so far; Norwegian m3lin pending).
+loglin_one <- function(slug, label) {
+  f3 <- file.path(SUMM, paste0(slug, SFX, "_m3.loo.rds"))
+  fl <- file.path(SUMM, paste0(slug, SFX, "_m3lin.loo.rds"))
+  if (!file.exists(f3) || !file.exists(fl)) { cat("  skip", slug, "(no m3lin)\n"); return(NULL) }
+  cmp <- loo::loo_compare(list(log = readRDS(f3), linear = readRDS(fl)))
+  loser <- rownames(cmp)[2]
+  data.frame(slug = slug, lang = label, winner = rownames(cmp)[1],
+             elpd_diff = cmp[loser, "elpd_diff"], se_diff = cmp[loser, "se_diff"],
+             row.names = NULL)
+}
+cat("SI: log vs linear age (M3 vs M3-linear)\n")
+si_loglin <- bind_rows(Map(loglin_one, names(DATASETS), DATASETS)) |>
+  mutate(lang = factor(lang, levels = unname(DATASETS)))
+saveRDS(si_loglin, file.path(CACHE, "si_loglin.rds"))
+cat(sprintf("Wrote %s (%d datasets)\n",
+            file.path(CACHE, "si_loglin.rds"), nrow(si_loglin)))
+
+## ============ 5. SI: per-child BLUPs (efficiency xi, acceleration kappa) ==
+## From the M3 per-child exports (<slug>_a3_m3_child.csv: xi_median, kappa_median).
+## Replaces the retired glmer blups_demographics.rds for the dip-test / histogram
+## in "Characterizing Variation".
+cat("SI: per-child BLUPs (M3)\n")
+child_one <- function(slug, label) {
+  f <- file.path(SUMM, paste0(slug, SFX, "_m3_child.csv"))
+  if (!file.exists(f)) { cat("  skip", slug, "(no child csv)\n"); return(NULL) }
+  read.csv(f) |> transmute(lang = label, ckey, n_admins,
+                           xi = xi_median, kappa = kappa_median)
+}
+si_blups <- bind_rows(Map(child_one, names(DATASETS), DATASETS)) |>
+  mutate(lang = factor(lang, levels = unname(DATASETS)))
+saveRDS(si_blups, file.path(CACHE, "si_blups.rds"))
+cat(sprintf("Wrote %s (%d children, %d datasets)\n",
+            file.path(CACHE, "si_blups.rds"), nrow(si_blups), dplyr::n_distinct(si_blups$lang)))

@@ -50,7 +50,7 @@ XYZ <- "VALUE NOT SPECIFIED"
 # `Rscript paper/build_cache_short.R`.
 CACHE <- here("paper", "cache")
 fig1_fan   <- readRDS(file.path(CACHE, "fig1_fan.rds"))        # Fig 1: M0-M3 schematic + per-dataset M3 fan
-exposure   <- readRDS(file.path(CACHE, "fig4_exposure.rds"))   # Fig 2: exposures-to-learn (interim; rewire to M3 psi export)
+fig2       <- readRDS(file.path(CACHE, "fig2_efficiency.rds")) # Fig 2: per-word exposures-to-learn (M3)
 llm_slopes <- readRDS(file.path(CACHE, "fig6_llm_slopes.rds")) # Fig 3: child vs LLM acceleration
 
 knitr::opts_chunk$set(
@@ -148,45 +148,30 @@ p_fits <- ggplot() +
 
 # Growth in ability leads to rapid changes in learning times for individual words
 
-```{r fig-efficiency, fig.width=7, fig.height=4}
+```{r fig-efficiency, fig.width=10, fig.height=3.6}
 #| label: fig-efficiency
 #| fig-cap: ""
-# Per-word "exposures to 50% production" for a typical English child,
-# from the M_best fit + CHILDES frequencies (data in fig4_exposure.rds;
-# see paper/build_cache.R section 5 and model/scripts/exposure_to_learn.R).
-# Each point is a word; x = predicted age at 50% production, y = cumulative
-# exposures of that word by that age (log scale). Lines: per-class lm fits.
-items <- exposure$items
-meta  <- exposure$meta
-
-# label the extreme word per class on log-exposure (balanced across classes)
-n_to_label <- 3
-  
-labels_df <- items |>
-  mutate(log_N = log10(N_word)) |>
-  group_by(lexical_class) |>
-  arrange(log_N) |>
-  slice(c(1:n_to_label, (n() - n_to_label):n())) |>
-  ungroup()
-
-ggplot(items, aes(t_50, N_word, colour = lexical_class)) +
-  geom_point(alpha = 0.55, size = 1.1) +
+# Per-word "exposures to learn", per dataset (fig2_efficiency.rds, built by
+# paper/build_cache_short.R). Word AoA comes from the model's item difficulty
+# (delta_j); frequency (CHILDES) enters only as the exposure count. Item word +
+# lexical class recovered via wordbankr. Each point is a word: x = predicted age
+# at 50% production, y = cumulative exposures by that age (log scale); lines are
+# per-class lm fits. Japanese omitted (no CHILDES frequency table).
+ggplot(fig2$items, aes(t_50, N_word, colour = lexical_class)) +
+  geom_point(alpha = 0.45, size = 0.8) +
   geom_smooth(method = "lm", se = FALSE, linewidth = 0.7, formula = y ~ x) +
-  geom_label_repel(data = labels_df, aes(label = item),
-                   size = 2.8, alpha = 0.95, show.legend = FALSE,
-                   box.padding = 0.4, max.overlaps = Inf,
-                   min.segment.length = 0) +
+  facet_wrap(~ lang, nrow = 1) +
   scale_y_log10(labels = scales::label_number(big.mark = ","),
-                breaks = c(100,1000,10000,100000), 
-                limits = c(100, 1000000)) +
-  scale_x_continuous(limits = c(10, 40)) +
-  scale_colour_brewer(palette = "Dark2", name = "Class") +
+                breaks = c(100, 1000, 10000, 100000),
+                limits = c(50, 1000000)) +
+  scale_x_continuous(limits = c(10, 42)) +
+  scale_colour_brewer(palette = "Dark2", name = "Class",
+                      labels = c("nouns", "predicates", "function words")) +
   labs(x = "Age (months) when 50% of children produce word",
        y = "Cumulative exposures at AoA") +
-  theme_minimal(base_size = 11) +
-  theme(plot.title = element_text(face = "bold"),
-        plot.subtitle = element_text(size = 9, colour = "grey25"),
-        legend.position = "bottom")
+  theme_minimal(base_size = 10) +
+  theme(strip.text = element_text(face = "bold", size = 8),
+        legend.position = "bottom", panel.grid.minor = element_blank())
 ```
 
 The accelerating accumulator model provides a quantitative description of a very salient fact about language acquisition: the number of exposures necessary to learn a word decreases dramatically over childhood. While a toddler may have heard a word like "book" thousands of times before they say it, a few years later a preschooler may hear "ibex" a handful of times on a trip to the zoo and repeat it the next day. To quantify this phenomenon, we computed the average proportion of exposures necessary for a child to learn a word across ages. 
