@@ -11,8 +11,8 @@
 //
 //   (a_i, b_i) ~ MVN(0, Sigma)             correlated intercept / slope
 //   xi_i    = mu_xi + a_i                  efficiency (intercept at age a0)
-//   slope_i = delta + b_i                  per-child linear slope on (age - a0)
-//   y ~ Bernoulli_logit( xi_i + log_H + slope_i * (age - a0) - delta_j )
+//   slope_i = delta + b_i                  per-child linear slope on standardized age
+//   y ~ Bernoulli_logit( xi_i + log_H + slope_i * (age - a0)/sd_age - delta_j )
 
 functions {
   real partial_sum_lpmf(array[] int y_slice, int start, int end,
@@ -47,6 +47,17 @@ data {
   real<lower=0> tau_delta_prior_sd;
 }
 
+transformed data {
+  // Standardize the linear age predictor: (age - a0)/sd. Raw (age - a0) spans
+  // ~+-10-18 months, forcing the slope + sigma_b to a tiny scale (~0.2) that
+  // funnels the non-centered parameterization (severe non-convergence, worst on
+  // wide-age Norwegian). Scaling puts slope/sigma_b at ~unit scale. The likelihood
+  // (hence LOO/elpd) is INVARIANT to this linear rescaling -- only the geometry
+  // improves. beta_pop is then the population slope per SD-of-age.
+  real age_scale = sd(admin_age - a0);
+  vector[A] age_z = (admin_age - a0) / age_scale;
+}
+
 parameters {
   matrix[2, I] z_child;                        // non-centered (intercept, slope)
   vector<lower=0>[2] sigma_child;              // (sigma_a, sigma_b)
@@ -70,7 +81,7 @@ transformed parameters {
   vector[A] admin_base;
   for (a in 1:A) {
     int ch = admin_to_child[a];
-    admin_base[a] = xi[ch] + log_H + slope[ch] * (admin_age[a] - a0);
+    admin_base[a] = xi[ch] + log_H + slope[ch] * age_z[a];
   }
   vector[J] item_offset = -delta_j;
 }
