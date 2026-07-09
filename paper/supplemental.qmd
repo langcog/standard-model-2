@@ -8,6 +8,7 @@ source(here("paper", "_helpers.R"))
 blups     <- readRDS(here("paper", "cache", "blups_demographics.rds"))
 si_loo    <- readRDS(here("paper", "cache", "si_loo.rds"))     # LOO ladder (M0-M3)
 si_loglin <- readRDS(here("paper", "cache", "si_loglin.rds"))  # log- vs linear-age (M3)
+fig2      <- readRDS(here("paper", "cache", "fig2_efficiency.rds"))  # word efficiency + delta validation
 knitr::opts_chunk$set(
   echo = FALSE, message = FALSE, warning = FALSE,
   fig.align = "center", out.width = "100%", dpi = 300
@@ -380,7 +381,56 @@ ggplot(hist_df, aes(z)) +
 
 # Changes in Word Efficiency
 
-*[Pending: per-word exposures-to-learn backing Fig 2, rebuilt from the M3 item-difficulty posteriors (delta_j) and validated against production (emp_prod), per journal section 34 (validate delta_j against production, not frequency).]*
+```md
+## Word-level efficiency: from difficulty to exposures  [draft for promotion — MCF to review]
+
+The main-text efficiency figure translates the fitted model into a concrete
+developmental claim: the number of exposures a word requires before it is learned
+falls by orders of magnitude across early childhood. Two quantities underlie each
+point.
+
+**Age of acquisition.** For a word with fitted difficulty $\delta_j$, the age at
+which a typical child (population intercept $\mu_\xi$, scaling $\kappa$) reaches
+50% production probability is
+$$t_{50}(j) = a_0 \exp\!\big((\delta_j - \log H - \mu_\xi)/\kappa\big),$$
+read directly off the accumulator's linear predictor. Word difficulty here is the
+*model's* $\delta_j$, not corpus frequency: high-frequency function words such as
+"in" and "if" are acquired late, so frequency is a poor proxy for difficulty.
+
+**Cumulative exposures.** The number of times a word has been heard by $t_{50}$ is
+the input rate times the time-to-learn times the word's share of tokens,
+$N_j = R \cdot t_{50}(j) \cdot p_j$, with $p_j$ the word's CHILDES token frequency
+and $R$ the typical input rate. The descriptive model does not itself estimate an
+input rate, so we anchor $R$ to the population input-rate estimates (see
+Population Input Range Estimation): the figure uses the central value and the text
+reports the range across sources.
+
+**Validation.** Because $\delta_j$ drives the age axis, it must track how hard
+words actually are for children. Fitted difficulty is strongly *negatively*
+correlated with each word's empirical production rate in every dataset (easy words
+are produced by more children; @fig-delta-validation) — the frequency-based check
+that this replaces gives near-zero correlations and false-alarms.
+```
+
+```{r fig-delta-validation, fig.width=8, fig.height=2.4}
+#| label: fig-delta-validation
+#| fig-cap: ""
+# Model item difficulty (delta_j) vs empirical per-item production rate, per
+# dataset. The strong negative relationship confirms delta_j tracks how hard
+# words are for children (validated against production, not frequency).
+.rlab <- fig2$meta |> mutate(txt = sprintf("r = %.2f", cor_dj_prod),
+                             lang = factor(lang, levels = levels(fig2$items$lang)))
+ggplot(fig2$items, aes(emp_prod, delta_j)) +
+  geom_point(alpha = 0.30, size = 0.6, colour = "#2b8cbe") +
+  geom_smooth(method = "lm", se = FALSE, colour = "grey20", linewidth = 0.6, formula = y ~ x) +
+  geom_text(data = .rlab, aes(x = Inf, y = Inf, label = txt), inherit.aes = FALSE,
+            hjust = 1.1, vjust = 1.5, size = 2.6, colour = "grey25") +
+  facet_wrap(~ lang, nrow = 1) +
+  labs(x = "empirical production rate", y = expression("fitted difficulty  " * delta[j])) +
+  theme_minimal(base_size = 9) +
+  theme(strip.text = element_text(face = "bold", size = 8),
+        panel.grid.minor = element_blank())
+```
 
 # Computing Acceleration in LMs
 
