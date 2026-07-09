@@ -121,11 +121,54 @@ cat(sprintf("Wrote %s (%d datasets)\n\n", file.path(CACHE, "fig1_fan.rds"), nrow
 ## switches to a delta_j/emp_prod-only quantity. Per-language freq: english_word_freq
 ## / norwegian_word_freq / Japanese TBD; lexical_class from CDI item metadata.
 ## Panels laid out per dataset, matching the Fig 1 fan facets.
-PSI <- function(slug) file.path(SUMM, paste0(slug, SFX, "_m3_psi.csv"))
-if (!any(vapply(names(DATASETS), function(s) file.exists(PSI(s)), logical(1)))) {
-  cat("Fig 2: SKIPPED -- no per-item delta_j exports yet (<slug>_a3_m3_psi.csv).\n",
-      "        fig-efficiency stays on the existing fig4_exposure.rds until they land.\n", sep = "")
-} else {
-  stop("Fig 2 inputs detected but the per-dataset efficiency build is not wired yet ",
-       "-- implement here once the psi export format + per-language frequency are settled.")
+## The _psi.csv exports now exist (delta_j + emp_prod), BUT the exposures figure
+## also needs each item's word form -> token frequency and its lexical class, and
+## the lean bayes_long bundles dropped that CDI item metadata: item ids are
+## prefixed id:/ul: uni-lemmas (~25/681 join to english_word_freq), and there is
+## no Japanese frequency table. So the per-dataset exposures figure is still
+## blocked on an item-metadata source (word + lexical_class per item). The
+## delta_j-vs-emp_prod §34 validation, by contrast, needs only the psi file.
+cat("Fig 2: SKIPPED -- psi exports present, but item metadata (word->frequency,\n",
+    "        lexical_class) is not; the exposures figure needs a metadata source.\n",
+    "        fig-efficiency stays on fig4_exposure.rds for now.\n", sep = "")
+
+## ============ 3. SI: LOO model-comparison ladder (M0-M3) =================
+## Per dataset: loo_compare across the four rungs -> elpd_diff vs best (M3) + se.
+suppressPackageStartupMessages(library(loo))
+LADDER <- c(M0 = "m0", M1 = "m1", M2 = "m2", M3 = "m3")
+loo_one <- function(slug, label) {
+  fs <- file.path(SUMM, paste0(slug, SFX, "_", LADDER, ".loo.rds"))
+  if (!all(file.exists(fs))) { cat("  skip", slug, "(missing loo rungs)\n"); return(NULL) }
+  ls <- lapply(fs, readRDS); names(ls) <- names(LADDER)
+  cmp <- loo::loo_compare(ls)
+  data.frame(slug = slug, lang = label, model = rownames(cmp),
+             elpd_diff = cmp[, "elpd_diff"], se_diff = cmp[, "se_diff"],
+             row.names = NULL)
 }
+cat("SI: LOO ladder (M0-M3)\n")
+si_loo <- bind_rows(Map(loo_one, names(DATASETS), DATASETS)) |>
+  mutate(lang = factor(lang, levels = unname(DATASETS)),
+         model = factor(model, levels = names(LADDER)))
+saveRDS(si_loo, file.path(CACHE, "si_loo.rds"))
+cat(sprintf("Wrote %s (%d datasets)\n\n",
+            file.path(CACHE, "si_loo.rds"), dplyr::n_distinct(si_loo$slug)))
+
+## ============ 4. SI: log-age vs linear-age (M3 vs M3-linear) =============
+## Per dataset: loo_compare(M3-log, M3-linear). elpd_diff is the loser's deficit
+## relative to the winner (log wins everywhere so far; Norwegian m3lin pending).
+loglin_one <- function(slug, label) {
+  f3 <- file.path(SUMM, paste0(slug, SFX, "_m3.loo.rds"))
+  fl <- file.path(SUMM, paste0(slug, SFX, "_m3lin.loo.rds"))
+  if (!file.exists(f3) || !file.exists(fl)) { cat("  skip", slug, "(no m3lin)\n"); return(NULL) }
+  cmp <- loo::loo_compare(list(log = readRDS(f3), linear = readRDS(fl)))
+  loser <- rownames(cmp)[2]
+  data.frame(slug = slug, lang = label, winner = rownames(cmp)[1],
+             elpd_diff = cmp[loser, "elpd_diff"], se_diff = cmp[loser, "se_diff"],
+             row.names = NULL)
+}
+cat("SI: log vs linear age (M3 vs M3-linear)\n")
+si_loglin <- bind_rows(Map(loglin_one, names(DATASETS), DATASETS)) |>
+  mutate(lang = factor(lang, levels = unname(DATASETS)))
+saveRDS(si_loglin, file.path(CACHE, "si_loglin.rds"))
+cat(sprintf("Wrote %s (%d datasets)\n",
+            file.path(CACHE, "si_loglin.rds"), nrow(si_loglin)))

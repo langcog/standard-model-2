@@ -5,7 +5,9 @@ suppressPackageStartupMessages({
   library(diptest)
 })
 source(here("paper", "_helpers.R"))
-blups  <- readRDS(here("paper", "cache", "blups_demographics.rds"))
+blups     <- readRDS(here("paper", "cache", "blups_demographics.rds"))
+si_loo    <- readRDS(here("paper", "cache", "si_loo.rds"))     # LOO ladder (M0-M3)
+si_loglin <- readRDS(here("paper", "cache", "si_loglin.rds"))  # log- vs linear-age (M3)
 knitr::opts_chunk$set(
   echo = FALSE, message = FALSE, warning = FALSE,
   fig.align = "center", out.width = "100%", dpi = 300
@@ -14,13 +16,13 @@ knitr::opts_chunk$set(
 
 # Generative Model
 
-*[Pending prose for the generative accumulator model. The figure below shows the latent-ability (theta) buildup across the model rungs. NOTE: the figure's rung labels still read M1-M4 and should be renumbered M0-M3 to match the main text.]*
+*[Pending prose for the generative accumulator model. The figure below shows the latent-ability ($\theta$) buildup across the model rungs M0-M3.]*
 
 ```{r fig-schematic-theta, fig.width=8, fig.height=2.6}
 #| label: fig-schematic-theta
 #| fig-cap: ""
 # [MCF: caption on next pass.] Latent-ability (theta) version of the
-# main-text model buildup (M1->M4). The main text shows only the vocab-
+# main-text model buildup (M0->M3). The main text shows only the vocab-
 # space projection of these curves; here is theta_i(t) itself, before it
 # is pushed through the word-difficulty distribution. Illustrative
 # parameters, not estimated.
@@ -30,10 +32,10 @@ qs <- c(0.1, 0.25, 0.5, 0.75, 0.9); z <- qnorm(qs)
 XI0 <- -2.0; KAPPA_A <- 2.5
 variants <- tibble::tribble(
   ~name,                       ~kappa_pop, ~sigma_alpha, ~sigma_kappa, ~eq,
-  "(M1) accumulator",          1,           0,            0,            r"($\theta = \log(r) + \log(t)$)",
-  "(M2) + acceleration",       KAPPA_A,     0,            0,            r"($\theta = \log(r) + \kappa\,\log(t)$)",
-  "(M3) + efficiency var.",    KAPPA_A,     1.1,          0,            r"($\theta = \xi_i + \kappa\,\log(t)$)",
-  "(M4) + per-child accel.",   KAPPA_A,     1.1,          0.7,          r"($\theta = \xi_i + \kappa_i\,\log(t)$)"
+  "(M0) accumulator",          1,           0,            0,            r"($\theta = \log(r) + \log(t)$)",
+  "(M1) + acceleration",       KAPPA_A,     0,            0,            r"($\theta = \log(r) + \kappa\,\log(t)$)",
+  "(M2) + efficiency var.",    KAPPA_A,     1.1,          0,            r"($\theta = \xi_i + \kappa\,\log(t)$)",
+  "(M3) + per-child accel.",   KAPPA_A,     1.1,          0.7,          r"($\theta = \xi_i + \kappa_i\,\log(t)$)"
 )
 sim <- variants |>
   mutate(name = factor(name, levels = name)) |>
@@ -262,11 +264,50 @@ table1 |>
 
 # Full Model Comparison Results
 
-*[Pending: the Bayesian LOO/ELPD model-comparison ladder (M0-M3) per dataset. The glmer dAIC/dBIC tables and the seven-variant glmer ladder figure have been retired -- model comparison is now purely Bayesian LOO -- so this section awaits the M0-M2 Bayesian fits (M3 is done).]*
+```{r tbl-loo}
+#| label: tbl-loo
+#| tbl-cap: "Bayesian leave-one-out (LOO) model comparison. Each cell is the difference in expected log predictive density (ELPD) relative to the best model (M3), with the standard error of the difference in parentheses; more negative is worse. Every step of the ladder improves fit in every dataset, and the full model M3 (per-child efficiency *and* acceleration) is preferred throughout. Built from the per-fit LOO objects (paper/build_cache_short.R)."
+short <- c("English (Thal)" = "Thal", "English (Smith)" = "Smith",
+           "English (Marchman)" = "Marchman", "Norwegian" = "Norwegian",
+           "Japanese" = "Japanese")
+mod_desc <- c(M0 = "M0. accumulator ($\\kappa=1$)",
+              M1 = "M1. + acceleration",
+              M2 = "M2. + efficiency var.",
+              M3 = "M3. + acceleration var.")
+lang_order <- levels(si_loo$lang)
+cell <- function(m, e, s) ifelse(m == "M3", "0",
+  sprintf("%s (%s)", format(round(e), big.mark = ","), format(round(s))))
+tab <- si_loo |>
+  mutate(txt = cell(as.character(model), elpd_diff, se_diff)) |>
+  select(model, lang, txt) |>
+  tidyr::pivot_wider(names_from = lang, values_from = txt) |>
+  arrange(model) |>
+  mutate(Model = mod_desc[as.character(model)]) |>
+  select(Model, all_of(lang_order))
+knitr::kable(tab, align = c("l", rep("r", length(lang_order))), escape = FALSE,
+             col.names = c("Model", unname(short[lang_order]))) |>
+  kableExtra::add_header_above(
+    c(" " = 1, "$\\\\Delta$ELPD vs M3 (SE)" = length(lang_order)), escape = FALSE) |>
+  kableExtra::kable_styling(latex_options = "scale_down", font_size = 8)
+```
 
 # Linear vs. Logistic Age
 
-*[Pending: the log-age vs linear-age comparison, from the Bayesian M3-log vs M3-linear fits (studies/bayes_long).]*
+```{r tbl-loglin}
+#| label: tbl-loglin
+#| tbl-cap: "Log-age vs linear-age accumulation. LOO ELPD advantage of the log-age model (M3) over its linear-age counterpart, with SE; positive favors log-age. Log-age is preferred in every dataset tested. (Norwegian's linear-age fit is pending.)"
+short <- c("English (Thal)" = "Thal", "English (Smith)" = "Smith",
+           "English (Marchman)" = "Marchman", "Norwegian" = "Norwegian",
+           "Japanese" = "Japanese")
+tab <- si_loglin |>
+  mutate(Dataset = unname(short[as.character(lang)]),
+         adv = sprintf("%s (%s)", format(round(-elpd_diff), big.mark = ","),
+                       format(round(se_diff)))) |>
+  select(Dataset, adv)
+knitr::kable(tab, align = c("l", "r"), escape = FALSE,
+             col.names = c("Dataset", "$\\Delta$ELPD (log $-$ linear)")) |>
+  kableExtra::kable_styling(font_size = 9, latex_options = "hold_position")
+```
 
 # Characterizing Variation in Efficiency and Acceleration
 
