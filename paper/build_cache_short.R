@@ -240,3 +240,30 @@ si_blups <- bind_rows(Map(child_one, names(DATASETS), DATASETS)) |>
 saveRDS(si_blups, file.path(CACHE, "si_blups.rds"))
 cat(sprintf("Wrote %s (%d children, %d datasets)\n",
             file.path(CACHE, "si_blups.rds"), nrow(si_blups), dplyr::n_distinct(si_blups$lang)))
+
+## ============ 6. SI: datasets table (from the 5 M3 bundles) ==============
+## Single-source replacement for the retired build_table1.R / table1_datasets.csv
+## (which pooled glmer + io/proc + cross-sectional). Just the 5 longitudinal
+## bundles now. Citations are plain text (kable can't render [@key] markers);
+## Thal/Smith/Marchman years are placeholders. [MCF: confirm citations/years.]
+cat("SI: datasets table\n")
+DS_CITE <- c(thal = "Thal et al. (20XX)", smith = "Smith et al. (20XX)",
+             marchman = "Marchman et al. (20XX)", norwegian = "Simonsen et al. (2014)",
+             japanese = "Hagihara et al. (2023)")
+DS_LANG <- c(thal = "English (American)", smith = "English (American)",
+             marchman = "English (American)", norwegian = "Norwegian",
+             japanese = "Japanese")
+ds_one <- function(slug, label) {
+  bf <- file.path(BL, paste0("bundle_", slug, SFX, ".rds"))
+  if (!file.exists(bf)) return(NULL)
+  b <- readRDS(bf); m <- b$meta; ag <- b$stan_data$admin_age
+  data.frame(citation = DS_CITE[[slug]], language = DS_LANG[[slug]],
+             n_kids = m$n_kids, n_admins = m$n_admins,
+             min_age = min(ag), max_age = max(ag), mean_age = mean(ag),
+             med_admins = m$med_admins_per_kid, stringsAsFactors = FALSE)
+}
+si_datasets <- bind_rows(Map(ds_one, names(DATASETS), DATASETS))
+saveRDS(si_datasets, file.path(CACHE, "si_datasets.rds"))
+cat(sprintf("Wrote %s (%d datasets, %s children total)\n",
+            file.path(CACHE, "si_datasets.rds"), nrow(si_datasets),
+            format(sum(si_datasets$n_kids), big.mark = ",")))
