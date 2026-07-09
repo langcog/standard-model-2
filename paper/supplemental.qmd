@@ -9,6 +9,7 @@ si_blups  <- readRDS(here("paper", "cache", "si_blups.rds"))   # per-child BLUPs
 si_loo    <- readRDS(here("paper", "cache", "si_loo.rds"))     # LOO ladder (M0-M3)
 si_loglin <- readRDS(here("paper", "cache", "si_loglin.rds"))  # log- vs linear-age (M3)
 fig2      <- readRDS(here("paper", "cache", "fig2_efficiency.rds"))  # word efficiency + delta validation
+si_ds     <- readRDS(here("paper", "cache", "si_datasets.rds"))      # datasets table (5 M3 bundles)
 knitr::opts_chunk$set(
   echo = FALSE, message = FALSE, warning = FALSE,
   fig.align = "center", out.width = "100%", dpi = 300
@@ -226,41 +227,29 @@ mk(fanning,  "(B) diverging trajectories (slopes vary)")
 ```{r tbl-datasets}
 #| label: tbl-datasets
 #| tbl-cap: "Characteristics of all datasets used in the paper. N and ages reflect the analysis samples (post-exclusion). Cross-sectional rows pool all contributed Wordbank datasets for a language. For AM2018 and FMW2013, which enter both the input and processing analyses with slightly different inclusion criteria, N is the union of the two subsamples."
-# Reads paper/cache/table1_datasets.csv, built by paper/build_table1.R from
-# the analysis bundles (glmer_ladder bundles; io_pooled + proc_dp bundles;
-# cross_sectional_demographics frames). Re-run that script when subsamples
-# change; the CSV is committed so rendering needs no fit bundles.
-#
-# The Citation column is PLAIN TEXT because kable does not render [@key]
-# markers; the matching bib keys are listed in `nocite:` in the YAML header
-# so the references still appear in the bibliography.
-# [MCF: (a) confirm Thal/Smith/Marchman citations + years (@smith/@marchman
-#  keys still missing from the bib). (b) cross-sectional rows currently cite
-#  Wordbank (@frank2017) -- swap in per-language CDI-adaptation citations if
-#  you prefer. (c) caption wording is a first pass. (d) the intro sentence
-#  above still says "four longitudinal datasets" -- needs updating for the
-#  by-study table.]
-table1 <- read.csv(file.path(CACHE, "table1_datasets.csv")) |>
-  mutate(across(c(input, longitudinal), ~ ifelse(is.na(.x), "", .x)),
-         n = format(n, big.mark = ","),
-         n_admins = format(n_admins, big.mark = ","),
-         mean_age = sprintf("%.1f", mean_age),
-         across(c(n_recordings, n_lwl),
-                ~ ifelse(is.na(.x), "", format(.x, big.mark = ","))))
-
-grp_n <- table(factor(table1$group, levels = unique(table1$group)))
-table1 |>
-  select(-group) |>
+# Built by paper/build_cache_short.R (section 6, si_datasets.rds) from the five
+# longitudinal M3 bundles -- the single source now that the io/proc/cross-sectional
+# analyses are cut (replaces the retired build_table1.R / table1_datasets.csv).
+# Citation column is plain text (kable can't render [@key]); bib keys live in the
+# YAML `nocite:`.
+# [MCF: (a) Thal/Smith/Marchman citation years are 20XX placeholders (@smith/
+#  @marchman keys still missing from the bib). (b) the caption above still
+#  describes the OLD multi-analysis table -- rewrite for the 5 longitudinal
+#  datasets. (c) intro N_total says 3,135 but the a3 (3+-admin) analysis sample
+#  is 1,834 -- reconcile.]
+si_ds |>
+  transmute(citation, language,
+            n = format(n_kids, big.mark = ","),
+            n_admins = format(n_admins, big.mark = ","),
+            mean_age = sprintf("%.1f", mean_age),
+            min_age = as.character(min_age), max_age = as.character(max_age),
+            med_admins = as.character(med_admins)) |>
   knitr::kable(
     col.names = c("Citation", "Language", "N", "Admins",
-                  "Mean", "Min", "Max", "Long.", "Input", "Recordings", "LWL sessions"),
-    align = "llrrrrrclrr") |>
-  kableExtra::add_header_above(c(" " = 4, "Age (months)" = 3, " " = 4)) |>
-  kableExtra::pack_rows(index = grp_n) |>
-  # Quarto forces longtable in PDF (scale_down is a no-op there), so the
-  # oversize table goes on a landscape page until it moves to the supplement.
-  kableExtra::kable_styling(font_size = 8, latex_options = "repeat_header") |>
-  kableExtra::landscape()
+                  "Mean", "Min", "Max", "Adm./kid"),
+    align = "llrrrrrr") |>
+  kableExtra::add_header_above(c(" " = 4, "Age (months)" = 3, " " = 1)) |>
+  kableExtra::kable_styling(font_size = 9, latex_options = "hold_position")
 ```
 
 # Full Model Comparison Results
