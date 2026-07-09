@@ -2610,11 +2610,19 @@ deepest (med 5 admins) → σ_b 5.6; sparse Marchman → 8.0; dense Thal → 3.2
 M3 shows strong ρ_ab = −0.61 (weak elsewhere); nuisance tau_delta/rho rhat ≈ 1.05–1.07,
 headline params clean.
 
-**Log-vs-linear age (M3 vs M3lin, paired `loo_compare`) — LOG wins everywhere:**
-Smith −254.5 (10.9 SE), Marchman −178.7 (6.8 SE), Japanese −39.3 (5.1 SE); Thal +
-Norwegian m3lin still fitting. Log-age is the better functional form (margin scales
-with dataset size) — the Bayesian confirmation of the glmer D_log > D_lin result
-(§29), and the scale on which the accumulator/κ framing lives.
+**Log-vs-linear age (M3 vs M3lin, paired `loo_compare`) — LOG wins, but m3lin had a
+convergence bug (found + fixed).** Direction is solid where m3lin converged cleanly:
+**Japanese −39.3 (5.1 SE), Marchman −178.7 (6.8 SE)** — log-age the better form, the
+Bayesian confirmation of glmer D_log > D_lin (§29). **BUT** the raw linear-age
+parameterization funnels: `(age−a0)` spans ±10–18 mo → slope + `sigma_b` forced to
+~0.2 scale → non-centered funnel → **Norwegian m3lin failed (rhat 2.5, ess 5)**,
+Thal/Smith marginal (rhat 1.17–1.32); Norwegian's dramatic −3306 (60 SE) was a
+non-convergence artifact, **retracted**. Fix (`m3_full_lin.stan`, committed): scale
+the predictor to `(age−a0)/sd` (unit slope, funnel relieved; likelihood/elpd
+invariant, so clean Japanese/Marchman unaffected). Refit Norwegian/Thal/Smith m3lin
+scaled (adapt_delta 0.95, warmup 1500). Lesson: the 15h Norwegian runtime + wide
+per-chain spread (4.9–10.3h) was the *symptom* — no divergences, but chains stuck in
+different regions; always check rhat, runtime alone isn't a convergence signal.
 
 **File hygiene (two generations).** `fits/bayes_long/` now holds a superseded base
 (2+-admin, no suffix) generation and the current `_a3` generation. Stale artifacts
