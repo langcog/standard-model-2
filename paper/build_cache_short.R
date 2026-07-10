@@ -121,7 +121,7 @@ EN <- c("thal", "smith", "marchman")
 .rates <- .rates[is.finite(.rates)]
 R_LO <- min(.rates); R_HI <- max(.rates); R_MID <- median(.rates)
 clean_word <- function(x) tolower(trimws(sub("[ ]*\\(.*\\)$", "", x)))
-KEEP_CLASS <- c("nouns", "predicates", "function_words")   # drop "other" (heterogeneous)
+CLASS4 <- c("nouns", "action words", "descriptive words", "function words")  # predicates split; "other" dropped
 PSI <- function(slug) file.path(SUMM, paste0(slug, SFX, "_m3_psi.csv"))
 
 cat("Fig 2: English exposures-to-learn (sample-weighted pool of thal/smith/marchman)\n")
@@ -147,8 +147,8 @@ cat(sprintf("  pooled: n_kids=%.0f  mu_xi=%.2f kappa=%.2f  items=%d\n",
 
 ## wordbankr metadata (word + lexical_class) + CHILDES frequency
 it   <- wordbankr::get_item_data(language = "English (American)", form = "WS") |> filter(item_kind == "word")
-byul <- it |> filter(!is.na(uni_lemma)) |> distinct(uni_lemma, item_definition, lexical_category)
-byid <- it |> distinct(item_definition, lexical_category)
+byul <- it |> filter(!is.na(uni_lemma)) |> distinct(uni_lemma, item_definition, lexical_category, category)
+byid <- it |> distinct(item_definition, lexical_category, category)
 m <- bind_rows(
   psi |> filter(kind == "ul") |> left_join(byul, by = c("key" = "uni_lemma")),
   psi |> filter(kind == "id") |> left_join(byid, by = c("key" = "item_definition")) |>
@@ -157,8 +157,14 @@ fr <- readRDS(here("fits", "english_word_freq.rds")) |> transmute(w = tolower(w)
 items <- m |>
   mutate(word = coalesce(item_definition, key), w = clean_word(word)) |>
   left_join(fr, by = "w") |>
-  filter(!is.na(lexical_category), lexical_category %in% KEEP_CLASS, !is.na(prob), prob > 0) |>
-  mutate(lang = factor("English"), lexical_class = factor(lexical_category, levels = KEEP_CLASS),
+  mutate(lex4 = dplyr::case_when(                       # split predicates; drop "other"
+           lexical_category == "nouns"          ~ "nouns",
+           category == "action_words"           ~ "action words",
+           category == "descriptive_words"      ~ "descriptive words",
+           lexical_category == "function_words" ~ "function words",
+           TRUE ~ NA_character_)) |>
+  filter(!is.na(lex4), !grepl(" ", w), !is.na(prob), prob > 0) |>  # drop multi-word items (bad unigram freq)
+  mutate(lang = factor("English"), lexical_class = factor(lex4, levels = CLASS4),
          t_50   = a0 * exp((delta_j - log_H - mu_xi) / kappa),
          N_word    = R_MID * t_50 * prob,
          N_word_lo = R_LO  * t_50 * prob,
