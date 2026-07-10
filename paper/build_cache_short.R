@@ -98,90 +98,90 @@ fig1 <- list(
 saveRDS(fig1, file.path(CACHE, "fig1_fan.rds"))
 cat(sprintf("Wrote %s (%d datasets)\n\n", file.path(CACHE, "fig1_fan.rds"), nrow(fig1$meta)))
 
-## ============ 2. Fig 2: per-dataset exposures-to-learn ===================
-## For a typical child, the number of exposures a word needs before it is learned.
-## Word difficulty / age-of-acquisition comes from the MODEL's delta_j (NOT from
-## frequency -- the journal §34 correction: delta_j is validated against PRODUCTION
-## via emp_prod, since high-frequency function words are late-learned). Frequency
-## enters only as the per-word exposure COUNT on the y-axis:
+## ============ 2. Fig 2: English exposures-to-learn (pooled) ==============
+## A single English figure, so the item cloud can be shown and words labeled. We
+## take a sample-weighted (by n_kids) average of the three English M3 fits
+## (thal/smith/marchman): pooled population params (mu_xi, kappa_pop) and pooled
+## per-item difficulty delta_j / production emp_prod, over items present in all
+## three. Word AoA comes from the MODEL's delta_j, NOT frequency (§34: delta_j is
+## validated against PRODUCTION via emp_prod, since high-frequency function words
+## are late-learned). Frequency enters only as the per-word exposure COUNT:
 ##   t_50   = a0 * exp((delta_j - log_H - mu_xi) / kappa_pop)   # AoA from delta_j
-##   N_word = exp(mu_xi + log_H) * t_50 * prob                  # cumulative exposures
-##
-## The lean bayes_long bundles dropped CDI item metadata, so we recover the word +
-## lexical_class per item via wordbankr (REQUIRES NETWORK at cache-build time): item
-## ids are `ul:<uni_lemma>` (unambiguous cross-linked items) else `id:<item_def>`,
-## joined back to get_item_data() by uni_lemma / item_definition. Per-language token
-## frequency: english_word_freq / norwegian_word_freq. Japanese is EXCLUDED -- no
-## CHILDES frequency pull exists for it (no pull_japanese_freq.R); addable later.
+##   N_word = R * t_50 * prob            # R = external input-rate anchor (below)
+## word + lexical_class recovered via wordbankr (get_item_data, English WS;
+## REQUIRES NETWORK at build time). Frequency: english_word_freq.
 suppressPackageStartupMessages(library(wordbankr))
-FIG2_CFG <- list(
-  thal      = list(wl = "English (American)", form = "WS", freq = "english"),
-  smith     = list(wl = "English (American)", form = "WS", freq = "english"),
-  marchman  = list(wl = "English (American)", form = "WS", freq = "english"),
-  norwegian = list(wl = "Norwegian",          form = "WS", freq = "norwegian"))
-FREQ <- list(english   = readRDS(here("fits", "english_word_freq.rds")),
-             norwegian = readRDS(here("fits", "norwegian_word_freq.rds")))
-## Exposure-COUNT anchor. The descriptive M3 carries no input rate, so cumulative
-## exposures are anchored to the paper's own population input-rate table
-## (input_rate_table.rds): each per-source estimate is tokens/month. We take the
-## span across sources as the plausible range and its median as the central
-## anchor; the figure uses the central value, the text reports LO-HI.
-## [MCF: confirm range = spread of the 6 per-source monthly means (167k-561k),
-##  central = their median.]
+EN <- c("thal", "smith", "marchman")
+## Exposure-count anchor: the descriptive M3 has no input rate, so anchor
+## cumulative exposures to the paper's population input-rate table
+## (input_rate_table.rds, tokens/month). Figure uses the central (median-of-
+## sources) value; lo/hi span the range for in-text reporting.
+## [MCF: confirm range = spread of the 6 per-source monthly means, central = median.]
 .rates <- sort(unique(readRDS(here("paper", "cache", "input_rate_table.rds"))$mean_mo))
 .rates <- .rates[is.finite(.rates)]
 R_LO <- min(.rates); R_HI <- max(.rates); R_MID <- median(.rates)
 clean_word <- function(x) tolower(trimws(sub("[ ]*\\(.*\\)$", "", x)))
-KEEP_CLASS <- c("nouns", "predicates", "function_words")   # drop "other" (heterogeneous)
+CLASS4 <- c("nouns", "action words", "descriptive words", "function words")  # predicates split; "other" dropped
 PSI <- function(slug) file.path(SUMM, paste0(slug, SFX, "_m3_psi.csv"))
 
-eff_one <- function(slug, label) {
-  cfg <- FIG2_CFG[[slug]]; if (is.null(cfg)) { cat("  skip", slug, "(no freq table)\n"); return(NULL) }
-  pf <- PSI(slug); sf <- file.path(SUMM, paste0(slug, SFX, "_m3.summary.rds"))
-  bf <- file.path(BL, paste0("bundle_", slug, SFX, ".rds"))
-  if (!all(file.exists(c(pf, sf, bf)))) { cat("  skip", slug, "(missing inputs)\n"); return(NULL) }
-  psi <- read.csv(pf) |> mutate(kind = sub(":.*", "", item), key = sub("^[^:]+:", "", item))
-  s <- as.data.frame(readRDS(sf)); g <- function(v) s$median[s$variable == v]
-  sd <- readRDS(bf)$stan_data
-  mu_xi <- g("mu_xi"); kappa <- g("kappa_pop"); log_H <- sd$log_H; a0 <- sd$a0
+cat("Fig 2: English exposures-to-learn (sample-weighted pool of thal/smith/marchman)\n")
+parts <- lapply(EN, function(slug) {
+  b <- readRDS(file.path(BL, paste0("bundle_", slug, SFX, ".rds")))
+  s <- as.data.frame(readRDS(file.path(SUMM, paste0(slug, SFX, "_m3.summary.rds"))))
+  g <- function(v) s$median[s$variable == v]
+  list(w = b$meta$n_kids, mu_xi = g("mu_xi"), kappa = g("kappa_pop"),
+       log_H = b$stan_data$log_H, a0 = b$stan_data$a0,
+       psi = read.csv(PSI(slug)) |> transmute(item, delta_j, emp_prod))
+})
+W <- vapply(parts, `[[`, numeric(1), "w"); wsum <- sum(W)
+wavg <- function(f) sum(W * vapply(parts, `[[`, numeric(1), f)) / wsum
+mu_xi <- wavg("mu_xi"); kappa <- wavg("kappa"); log_H <- wavg("log_H"); a0 <- wavg("a0")
+## sample-weighted per-item delta_j / emp_prod, over items present in all three
+psi <- bind_rows(Map(function(p, w) mutate(p$psi, w = w), parts, W)) |>
+  group_by(item) |> filter(n() == length(EN)) |>
+  summarise(delta_j = weighted.mean(delta_j, w), emp_prod = weighted.mean(emp_prod, w),
+            .groups = "drop") |>
+  mutate(kind = sub(":.*", "", item), key = sub("^[^:]+:", "", item))
+cat(sprintf("  pooled: n_kids=%.0f  mu_xi=%.2f kappa=%.2f  items=%d\n",
+            wsum, mu_xi, kappa, nrow(psi)))
 
-  it   <- wordbankr::get_item_data(language = cfg$wl, form = cfg$form) |> filter(item_kind == "word")
-  byul <- it |> filter(!is.na(uni_lemma)) |> distinct(uni_lemma, item_definition, lexical_category)
-  byid <- it |> distinct(item_definition, lexical_category)
-  m <- bind_rows(
-    psi |> filter(kind == "ul") |> left_join(byul, by = c("key" = "uni_lemma")),
-    psi |> filter(kind == "id") |> left_join(byid, by = c("key" = "item_definition")) |>
-      mutate(item_definition = key))
-  fr <- FREQ[[cfg$freq]] |> transmute(w = tolower(w), prob)
-
-  m <- m |>
-    mutate(word = coalesce(item_definition, key), w = clean_word(word)) |>
-    left_join(fr, by = "w") |>
-    filter(!is.na(lexical_category), lexical_category %in% KEEP_CLASS, !is.na(prob), prob > 0) |>
-    mutate(lexical_class = factor(lexical_category, levels = KEEP_CLASS),
-           t_50   = a0 * exp((delta_j - log_H - mu_xi) / kappa),  # AoA from delta_j (model)
-           # cumulative exposures = (input rate) x (months to learn) x (word share);
-           # input rate anchored externally (R_MID), lo/hi span the source range.
-           N_word    = R_MID * t_50 * prob,
-           N_word_lo = R_LO  * t_50 * prob,
-           N_word_hi = R_HI  * t_50 * prob,
-           slug = slug, lang = label)
-  r <- cor(m$delta_j, m$emp_prod)                        # §34 validation
-  cat(sprintf("  %-10s items=%d  cor(delta_j,emp_prod)=%.2f\n", slug, nrow(m), r))
-  if (is.na(r) || r > -0.5)
-    stop(sprintf("Fig 2 %s: cor(delta_j, emp_prod)=%.2f -- expected strongly negative (§34)", slug, r))
-  list(items = m |> select(slug, lang, item, word, lexical_class, delta_j, emp_prod,
-                           prob, t_50, N_word, N_word_lo, N_word_hi),
-       meta  = data.frame(slug = slug, lang = label, cor_dj_prod = r, n_items = nrow(m)))
-}
-cat("Fig 2: per-dataset exposures-to-learn (wordbankr metadata join)\n")
-e2 <- Filter(Negate(is.null), Map(eff_one, names(DATASETS), DATASETS))
-fig2 <- list(items = bind_rows(lapply(e2, `[[`, "items")) |> mutate(lang = factor(lang, levels = unname(DATASETS))),
-             meta  = bind_rows(lapply(e2, `[[`, "meta")),
+## wordbankr metadata (word + lexical_class) + CHILDES frequency
+it   <- wordbankr::get_item_data(language = "English (American)", form = "WS") |> filter(item_kind == "word")
+byul <- it |> filter(!is.na(uni_lemma)) |> distinct(uni_lemma, item_definition, lexical_category, category)
+byid <- it |> distinct(item_definition, lexical_category, category)
+m <- bind_rows(
+  psi |> filter(kind == "ul") |> left_join(byul, by = c("key" = "uni_lemma")),
+  psi |> filter(kind == "id") |> left_join(byid, by = c("key" = "item_definition")) |>
+    mutate(item_definition = key))
+fr <- readRDS(here("fits", "english_word_freq.rds")) |> transmute(w = tolower(w), prob)
+items <- m |>
+  mutate(word = coalesce(item_definition, key), w = clean_word(word)) |>
+  left_join(fr, by = "w") |>
+  mutate(lex4 = dplyr::case_when(                       # split predicates; drop "other"
+           lexical_category == "nouns"          ~ "nouns",
+           category == "action_words"           ~ "action words",
+           category == "descriptive_words"      ~ "descriptive words",
+           lexical_category == "function_words" ~ "function words",
+           TRUE ~ NA_character_)) |>
+  filter(!is.na(lex4), !grepl(" ", w), !is.na(prob), prob > 0) |>  # drop multi-word items (bad unigram freq)
+  mutate(lang = factor("English"), lexical_class = factor(lex4, levels = CLASS4),
+         t_50   = a0 * exp((delta_j - log_H - mu_xi) / kappa),
+         N_word    = R_MID * t_50 * prob,
+         N_word_lo = R_LO  * t_50 * prob,
+         N_word_hi = R_HI  * t_50 * prob) |>
+  select(lang, item, word, lexical_class, delta_j, emp_prod, prob, t_50,
+         N_word, N_word_lo, N_word_hi)
+r <- cor(items$delta_j, items$emp_prod)                     # §34 validation
+cat(sprintf("  items=%d  cor(delta_j,emp_prod)=%.2f\n", nrow(items), r))
+if (is.na(r) || r > -0.5)
+  stop(sprintf("Fig 2: cor(delta_j, emp_prod)=%.2f -- expected strongly negative (§34)", r))
+fig2 <- list(items = items,
+             meta  = data.frame(lang = "English", n_kids = wsum, mu_xi = mu_xi,
+                                kappa = kappa, cor_dj_prod = r, n_items = nrow(items)),
              anchor = list(lo = R_LO, mid = R_MID, hi = R_HI))  # tokens/month input-rate anchor
 saveRDS(fig2, file.path(CACHE, "fig2_efficiency.rds"))
-cat(sprintf("Wrote %s (%d datasets, Japanese excluded -- no frequency)\n\n",
-            file.path(CACHE, "fig2_efficiency.rds"), nrow(fig2$meta)))
+cat(sprintf("Wrote %s (English pooled, %d items)\n\n",
+            file.path(CACHE, "fig2_efficiency.rds"), nrow(items)))
 
 ## ============ 3. SI: LOO model-comparison ladder (M0-M3) =================
 ## Per dataset: loo_compare across the four rungs -> elpd_diff vs best (M3) + se.
