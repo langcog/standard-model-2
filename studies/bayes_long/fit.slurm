@@ -19,7 +19,8 @@ SLUG="$1"; MODEL="$2"
 cd "$HOME/standard_model_2"
 ml R
 # 4 parallel chains x 8 threads/chain = 32 cores (reduce_sum within-chain threading)
-export STAN_CHAINS=4 STAN_WARMUP=1000 STAN_ITER=1000 STAN_ADAPT_DELTA=0.9
+# defaults; each overridable via sbatch --export=ALL,VAR=val (do NOT hardcode-clobber)
+export STAN_CHAINS="${STAN_CHAINS:-4}" STAN_WARMUP="${STAN_WARMUP:-1000}" STAN_ITER="${STAN_ITER:-1000}" STAN_ADAPT_DELTA="${STAN_ADAPT_DELTA:-0.9}"
 export STAN_THREADS="${STAN_THREADS:-8}"   # override via sbatch --export=ALL,STAN_THREADS=N (match --cpus-per-task)
 echo "===== job $SLURM_JOB_ID  $SLUG/$MODEL  host $(hostname)  start $(date) ====="
 Rscript studies/bayes_long/01_fit.R "$SLUG" "$MODEL"
