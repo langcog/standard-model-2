@@ -160,30 +160,38 @@ p_fits <- ggplot() +
 
 # Growth in ability leads to rapid changes in learning times for individual words
 
-```{r fig-efficiency, fig.width=10, fig.height=3.6}
+```{r fig-efficiency, fig.width=7, fig.height=5}
 #| label: fig-efficiency
 #| fig-cap: ""
-# Per-word "exposures to learn", per dataset (fig2_efficiency.rds, built by
-# paper/build_cache_short.R). Word AoA comes from the model's item difficulty
-# (delta_j); frequency (CHILDES) enters only as the exposure count. Item word +
-# lexical class recovered via wordbankr. Each point is a word: x = predicted age
-# at 50% production, y = cumulative exposures by that age (log scale); lines are
-# per-class lm fits. Japanese omitted (no CHILDES frequency table).
-ggplot(fig2$items, aes(t_50, N_word, colour = lexical_class)) +
-  geom_point(alpha = 0.45, size = 0.8) +
-  geom_smooth(method = "lm", se = FALSE, linewidth = 0.7, formula = y ~ x) +
-  facet_wrap(~ lang, nrow = 1) +
+# Per-word "exposures to learn" for English -- a sample-weighted pool of the three
+# English M3 fits (fig2_efficiency.rds). Each point is a word: x = predicted age at
+# 50% production (from the model's item difficulty delta_j), y = cumulative
+# exposures by that age (log scale) = the external input-rate anchor x time-to-learn
+# x CHILDES word frequency. Coloured by lexical class; lines are per-class lm fits;
+# the highest- and lowest-exposure words in each class are labelled.
+items <- fig2$items
+n_to_label <- 5
+labels_df <- items |>
+  group_by(lexical_class) |>
+  arrange(N_word) |>
+  slice(c(1:n_to_label, (n() - n_to_label + 1):n())) |>
+  ungroup()
+ggplot(items, aes(t_50, N_word, colour = lexical_class)) +
+  geom_point(alpha = 0.5, size = 1.1) +
+  geom_smooth(method = "lm", se = FALSE, linewidth = 0.8, formula = y ~ x) +
+  ggrepel::geom_text_repel(data = labels_df, aes(label = word), size = 2.7,
+                           max.overlaps = Inf, min.segment.length = 0,
+                           segment.size = 0.2, show.legend = FALSE) +
   scale_y_log10(labels = scales::label_number(big.mark = ","),
                 breaks = c(100, 1000, 10000, 100000),
                 limits = c(50, 1000000)) +
   scale_x_continuous(limits = c(10, 42)) +
-  scale_colour_brewer(palette = "Dark2", name = "Class",
+  scale_colour_brewer(palette = "Dark2", name = NULL,
                       labels = c("nouns", "predicates", "function words")) +
   labs(x = "Age (months) when 50% of children produce word",
-       y = "Cumulative exposures at AoA") +
-  theme_minimal(base_size = 10) +
-  theme(strip.text = element_text(face = "bold", size = 8),
-        legend.position = "bottom", panel.grid.minor = element_blank())
+       y = "Cumulative exposures at age of acquisition") +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom", panel.grid.minor = element_blank())
 ```
 
 The accelerating accumulator model provides a quantitative description of a very salient fact about language acquisition: the number of exposures necessary to learn a word decreases dramatically over childhood. While a toddler may have heard a word like "book" thousands of times before they say it, a few years later a preschooler may hear "ibex" a handful of times on a trip to the zoo and repeat it the next day. To quantify this phenomenon, we computed the average proportion of exposures necessary for a child to learn a word across ages. 
