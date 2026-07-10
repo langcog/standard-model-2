@@ -5,6 +5,106 @@
 %% Created for Michael Frank at 2020-03-05 20:55:46 -0800 
 
 %% Saved with string encoding Unicode (UTF-8) 
+@inproceedings{choshen2022,
+    title = "The Grammar-Learning Trajectories of Neural Language Models",
+    author = "Choshen, Leshem  and
+      Hacohen, Guy  and
+      Weinshall, Daphna  and
+      Abend, Omri",
+    editor = "Muresan, Smaranda  and
+      Nakov, Preslav  and
+      Villavicencio, Aline",
+    booktitle = "Proceedings of the 60th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)",
+    month = may,
+    year = "2022",
+    address = "Dublin, Ireland",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2022.acl-long.568/",
+    doi = "10.18653/v1/2022.acl-long.568",
+    pages = "8281--8297",
+    abstract = "The learning trajectories of linguistic phenomena in humans provide insight into linguistic representation, beyond what can be gleaned from inspecting the behavior of an adult speaker. To apply a similar approach to analyze neural language models (NLM), it is first necessary to establish that different models are similar enough in the generalizations they make. In this paper, we show that NLMs with different initialization, architecture, and training data acquire linguistic phenomena in a similar order, despite their different end performance. These findings suggest that there is some mutual inductive bias that underlies these models' learning of linguistic phenomena. Taking inspiration from psycholinguistics, we argue that studying this inductive bias is an opportunity to study the linguistic representation implicit in NLMs.Leveraging these findings, we compare the relative performance on different phenomena at varying learning stages with simpler reference models. Results suggest that NLMs exhibit consistent ``developmental'' stages. Moreover, we find the learning trajectory to be approximately one-dimensional: given an NLM with a certain overall performance, it is possible to predict what linguistic generalizations it has already acquired. Initial analysis of these stages presents phenomena clusters (notably morphological ones), whose performance progresses in unison, suggesting a potential link between the generalizations behind them."
+}
+
+@article{radford2019,
+  added-at = {2024-11-15T12:44:17.000+0100},
+  author = {Radford, Alec and Wu, Jeffrey and Child, Rewon and Luan, David and Amodei, Dario and Sutskever, Ilya},
+  biburl = {https://www.bibsonomy.org/bibtex/233e4b003b64b1060334660fbf6db1f3f/albinzehe},
+  interhash = {b926ece39c03cdf5499f6540cf63babd},
+  intrahash = {33e4b003b64b1060334660fbf6db1f3f},
+  journal = {OpenAI},
+  keywords = {gpt gpt2 languagemodelling transferlearning transformer},
+  note = {Accessed: 2024-11-15},
+  timestamp = {2024-11-15T12:44:17.000+0100},
+  title = {Language Models are Unsupervised Multitask Learners},
+  url = {https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf},
+  year = 2019
+}
+
+
+@inproceedings{misra2024,
+  title={Language models learn rare phenomena from less rare phenomena: The case of the missing AANNs},
+  author={Misra, Kanishka and Mahowald, Kyle},
+  booktitle={Proceedings of the 2024 conference on empirical methods in natural language processing},
+  pages={913--929},
+  year={2024}
+}
+
+@inproceedings{evanson2023,
+    title = "Language acquisition: do children and language models follow similar learning stages?",
+    author = "Evanson, Linnea  and
+      Lakretz, Yair  and
+      King, Jean R{\'e}mi",
+    editor = "Rogers, Anna  and
+      Boyd-Graber, Jordan  and
+      Okazaki, Naoaki",
+    booktitle = "Findings of the Association for Computational Linguistics: ACL 2023",
+    month = jul,
+    year = "2023",
+    address = "Toronto, Canada",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2023.findings-acl.773/",
+    doi = "10.18653/v1/2023.findings-acl.773",
+    pages = "12205--12218",
+    abstract = "During language acquisition, children follow a typical sequence of learning stages, whereby they first learn to categorize phonemes before they develop their lexicon and eventually master increasingly complex syntactic structures. However, the computational principles that lead to this learning trajectory remain largely unknown. To investigate this, we here compare the learning trajectories of deep language models to those of human children. Specifically, we test whether, during its training, GPT-2 exhibits stages of language acquisition comparable to those observed in children aged between 18 months and 6 years. For this, we train 48 GPT-2 models from scratch and evaluate their syntactic and semantic abilities at each training step, using 96 probes curated from the BLiMP, Zorro and BIG-Bench benchmarks. We then compare these evaluations with the behavior of 54 children during language production. Our analyses reveal three main findings. First, similarly to children, the language models tend to learn linguistic skills in a systematic order. Second, this learning scheme is parallel: the language tasks that are learned last improve from the very first training steps. Third, some {--} but not all {--} learning stages are shared between children and these language models. Overall, these results shed new light on the principles of language acquisition, and highlight important divergences in how humans and modern algorithms learn to process natural language."
+}
+
+@article{bates1994,
+  title={Developmental and stylistic variation in the composition of early vocabulary},
+  author={Bates, Elizabeth and Marchman, Virginia and Thal, Donna and Fenson, Larry and Dale, Philip and Reznick, J Steven and Reilly, Judy and Hartung, Jeff},
+  journal={Journal of child language},
+  volume={21},
+  number={1},
+  pages={85--123},
+  year={1994},
+  publisher={Cambridge University Press}
+}
+
+@article{marchman1994,
+  title={Continuity in lexical and morphological development: A test of the critical mass hypothesis},
+  author={Marchman, Virginia A and Bates, Elizabeth},
+  journal={Journal of child language},
+  volume={21},
+  number={2},
+  pages={339--366},
+  year={1994},
+  publisher={Cambridge University Press}
+}
+
+@inproceedings{hu2024,
+  title={Findings of the second BabyLM challenge: Sample-efficient pretraining on developmentally plausible corpora},
+  author={Hu, Michael Y and Mueller, Aaron and Ross, Candace and Williams, Adina and Linzen, Tal and Zhuang, Chengxu and Cotterell, Ryan and Choshen, Leshem and Warstadt, Alex and Wilcox, Ethan Gotlieb},
+  booktitle={The 2nd BabyLM Challenge at the 28th Conference on Computational Natural Language Learning},
+  pages={1--21},
+  year={2024}
+}
+
+@article{gao2020,
+  title={The pile: An 800gb dataset of diverse text for language modeling},
+  author={Gao, Leo and Biderman, Stella and Black, Sid and Golding, Laurence and Hoppe, Travis and Foster, Charles and Phang, Jason and He, Horace and Thite, Anish and Nabeshima, Noa and others},
+  journal={arXiv preprint arXiv:2101.00027},
+  year={2020}
+}
+
 @article{stancite,
   title={Stan: A probabilistic programming language},
   author={Carpenter, Bob and Gelman, Andrew and Hoffman, Matthew D and Lee, Daniel and Goodrich, Ben and Betancourt, Michael and Brubaker, Marcus and Guo, Jiqiang and Li, Peter and Riddell, Allen},
