@@ -2617,12 +2617,33 @@ Bayesian confirmation of glmer D_log > D_lin (§29). **BUT** the raw linear-age
 parameterization funnels: `(age−a0)` spans ±10–18 mo → slope + `sigma_b` forced to
 ~0.2 scale → non-centered funnel → **Norwegian m3lin failed (rhat 2.5, ess 5)**,
 Thal/Smith marginal (rhat 1.17–1.32); Norwegian's dramatic −3306 (60 SE) was a
-non-convergence artifact, **retracted**. Fix (`m3_full_lin.stan`, committed): scale
-the predictor to `(age−a0)/sd` (unit slope, funnel relieved; likelihood/elpd
-invariant, so clean Japanese/Marchman unaffected). Refit Norwegian/Thal/Smith m3lin
-scaled (adapt_delta 0.95, warmup 1500). Lesson: the 15h Norwegian runtime + wide
-per-chain spread (4.9–10.3h) was the *symptom* — no divergences, but chains stuck in
-different regions; always check rhat, runtime alone isn't a convergence signal.
+non-convergence artifact, **retracted**. Two-part fix, both committed:
+(1) **scale the predictor** to `(age−a0)/sd` in `m3_full_lin.stan` (unit slope, funnel
+relieved; likelihood/elpd invariant, so clean Japanese/Marchman unaffected) — this
+alone converged small Smith (rhat 1.17→1.07) but not the bigger datasets; (2) **tighter
+init** `STAN_INIT=0.5` (added to `01_fit.R`; `fit.slurm` also fixed to stop
+hardcode-clobbering STAN_* overrides) — the residual failure was a *stuck chain* (one
+of four trapped at 20% warmup from a pathological default init in [−2,2]), not a
+funnel; adapt_delta wouldn't help (slows a stuck chain). init=0.5 fixed it.
+
+**FINAL log-vs-linear — all 5 converged, LOG wins everywhere (5–11 SE):**
+
+| dataset | elpd_diff | SE | max rhat |
+|---|--:|--:|--:|
+| Japanese  | −39.3  | 5.1  | 1.01 |
+| Marchman  | −178.7 | 6.8  | 1.07 |
+| Smith     | −248.7 | 10.7 | 1.07 |
+| Thal      | −266.8 | 8.7  | 1.09 |
+| Norwegian | −295.4 | 7.4  | 1.14† |
+
+†Norwegian's only marginal param is the tau_delta item nuisance; all elpd-relevant
+params clean. **Norwegian's converged −295.4 (7.4 SE) replaces the retracted −3306
+(60 SE)** — that was pure non-convergence artifact. Magnitudes now sane, scaling with
+dataset size. Log-age is the better functional form everywhere — Bayesian
+confirmation of glmer D_log > D_lin (§29), the scale on which the accumulator/κ lives.
+**Lessons:** (a) runtime + per-chain spread was the *symptom*, not proof of hard
+geometry — always check rhat, never quote elpd from an unconverged fit; (b) a large
+elpd_diff with a huge SE is a non-convergence smell, not a strong result.
 
 **File hygiene (two generations).** `fits/bayes_long/` now holds a superseded base
 (2+-admin, no suffix) generation and the current `_a3` generation. Stale artifacts
