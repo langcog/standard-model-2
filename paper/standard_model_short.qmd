@@ -45,14 +45,25 @@ suppressPackageStartupMessages({
 })
 source(here("paper", "_helpers.R"))
 
-XYZ <- "VALUE NOT SPECIFIED"
-
 # Cached data for the three main-text figures — produced by
 # `Rscript paper/build_cache_short.R`.
 CACHE <- here("paper", "cache")
 fig1_fan   <- readRDS(file.path(CACHE, "fig1_fan.rds"))        # Fig 1: M0-M3 schematic + per-dataset M3 fan
 fig2       <- readRDS(file.path(CACHE, "fig2_efficiency.rds")) # Fig 2: per-word exposures-to-learn (M3)
 llm_slopes <- readRDS(file.path(CACHE, "fig6_llm_slopes.rds")) # Fig 3: child vs LLM acceleration
+
+# Inline text values (raw numbers in si_inline.rds, built by build_cache_short
+# section 7); formatted here to the precision they render at in the text.
+inl <- readRDS(file.path(CACHE, "si_inline.rds"))
+.k1  <- function(x) sprintf("%.1f", x)                        # kappa: one decimal
+.pct <- function(x) if (x >= 10) sprintf("%.0f", x) else sprintf("%.1f", x)
+age_lo   <- inl$age_lo; age_hi <- inl$age_hi                  # integer months
+loo_min  <- format(signif(inl$loo_min, 2), big.mark = ",")   # 2 sig figs
+kap_lo   <- .k1(inl$kappa_lo); kap_lo_q5 <- .k1(inl$kappa_lo_q5); kap_lo_q95 <- .k1(inl$kappa_lo_q95)
+kap_hi   <- .k1(inl$kappa_hi); kap_hi_q5 <- .k1(inl$kappa_hi_q5); kap_hi_q95 <- .k1(inl$kappa_hi_q95)
+en_kappa <- .k1(inl$en_kappa); no_kappa <- .k1(inl$no_kappa)
+en_sd    <- .k1(inl$en_sd);    no_sd    <- .k1(inl$no_sd)
+qc_mar   <- .pct(inl$qc_marchman); qc_nor <- .pct(inl$qc_norwegian)
 
 knitr::opts_chunk$set(
   echo = FALSE, message = FALSE, warning = FALSE, cache=TRUE,
@@ -95,10 +106,10 @@ Under this model, we can use the mean value of $\kappa$ to distinguish pure accu
 
 Our analysis generally depends on the availability of longitudinal data at the individual word level. Aggregate data do not allow for the estimation of word difficulties $\delta$, thus their distribution remains latent; in this regime different difficulty distributions can be posited to explain the accelerating shape of vocabulary growth [@mcmurray2007; @mitchell2009]. In addition, cross-sectional data do not allow for identification of whether individual children's variation is due to differences in efficiency (intercept) or acceleration (slope) (see SI: Non-identifiability in Cross-Sectional Data). 
 
-Thus, to constrain our model, we use data from the MacArthur-Bates Communicative Development Inventories [MB-CDI; @fenson1994;@marchman2021], a popular parent report instrument in which parents are asked to indicate which words their child produces and understands. Here we focus exclusively on production, which is used with older children and which tends to be a more reliable measure [@frank2021]. We downloaded data from Wordbank [@frank2017], an open repository of MB-CDI data. identifying five longitudinal datasets of monolingual, typically-developing children ages `r XYZ`--`r XYZ` (three from American English and one each from Norwegian and Japanese, $N_{total} = 3135$; see SI: Datasets). 
+Thus, to constrain our model, we use data from the MacArthur-Bates Communicative Development Inventories [MB-CDI; @fenson1994;@marchman2021], a popular parent report instrument in which parents are asked to indicate which words their child produces and understands. Here we focus exclusively on production, which is used with older children and which tends to be a more reliable measure [@frank2021]. We downloaded data from Wordbank [@frank2017], an open repository of MB-CDI data. identifying five longitudinal datasets of monolingual, typically-developing children ages `r age_lo`--`r age_hi` (three from American English and one each from Norwegian and Japanese, $N_{total} = 3135$; see SI: Datasets). 
 
 We fit the accelerating accumulator model to each of these datasets using Bayesian inference in Stan [@stancite]. To test whether each model component was necessary, we additionally fit three model ablations, removing individual variation in acceleration (removing $\kappa_i$), accumulation (removing $\xi_i$), and finally acceleration entirely (removing $\kappa$). 
-The accelerating accumulator provided the best fit to children's growth trajectories (@fig-schematic, see SI: Full Model Comparison Results), with differences between the next best model LOO ELPD $>XYZ$ for all five datasets. For all five datasets, estimates of acceleration ($\kappa$) were high: `r XYZ` [`r XYZ`, `r XYZ`] -- `r XYZ` [`r XYZ`, `r XYZ`]. 
+The accelerating accumulator provided the best fit to children's growth trajectories (@fig-schematic, see SI: Full Model Comparison Results), with differences between the next best model LOO ELPD $>`r loo_min`$ for all five datasets. For all five datasets, estimates of acceleration ($\kappa$) were high: `r kap_lo` [`r kap_lo_q5`, `r kap_lo_q95`] -- `r kap_hi` [`r kap_hi_q5`, `r kap_hi_q95`]. 
 
 It is possible that ability grows linearly with age, rather than linearly with the logarithm of age -- linear growth in ability would lead to exponential increases in the probability of word production. However, linear time models were dispreferred statistically (see SI: Linear vs. Logistic Age). Further, the increasing spread of children's trajectories with age is especially noticeable for low-vocabulary older children [who may be classified as "late talkers"; @fernald2012; @rescorla2011], but variation was unimodal across all samples (see SI: Characterizing Variation in Efficiency and Acceleration) [@pinstock2026;@singletary2025]. 
 
@@ -237,7 +248,7 @@ We compared the word-by-word acceleration of small-scale LLMs to children across
 
 First, models were not trained on child directed speech, so we retrained new GPT-2 (small) models on 24.5M words from CHILDES, following the protocol in @feng2024. Second, unlike children, both our first set of models and those trained by @chang2022 were trained to convergence, with acquisition curves reflecting changing predictions across repeated passes through the same training data. To isolate developmental change, we trained a separate set of GPT-2 models each to convergence on increasingly larger subsamples of the same CHILDES data, allowing us to estimate surprisal as a function of actual amount of input data -- a more direct developmental analogue. 
 
-The results across all three sets of models were clear (@fig-llm-acceleration): $\kappa$ for all models was clustered near 1, the unit accumulator posited by @mcmurray2007. In contrast, $\kappa$ estimates for children for our large longitudinal samples were much higher (EN: `r XYZ` and NO: `r XYZ`) and highly variable across children (EN SD: `r XYZ` and NO SD: `r XYZ`). In sum, language models -- but not children -- behave like Model 1 (an accumulator). In contrast, children are best described by Model 4 -- they are variable, accelerating accumulators. 
+The results across all three sets of models were clear (@fig-llm-acceleration): $\kappa$ for all models was clustered near 1, the unit accumulator posited by @mcmurray2007. In contrast, $\kappa$ estimates for children for our large longitudinal samples were much higher (EN: `r en_kappa` and NO: `r no_kappa`) and highly variable across children (EN SD: `r en_sd` and NO SD: `r no_sd`). In sum, language models -- but not children -- behave like Model 1 (an accumulator). In contrast, children are best described by Model 4 -- they are variable, accelerating accumulators. 
 
 # Discussion
 
@@ -258,7 +269,7 @@ Data were retrieved from Wordbank using the `wordbankr` package [@frank2017], ch
 
 Reproducible code for this paper is available at http://github.com/langcog/standard-model-2. 
 
-All longitudinal datasets with three or more observations per child were included. We excluded a small number of children from the English (Marchman) and Norwegian datasets,(`r XYZ`% and `r XYZ`&, respectively, due to suspicious observations in which there was a decline in vocabulary of more than 20% in some longitudinal observations. 
+All longitudinal datasets with three or more observations per child were included. We excluded a small number of children from the English (Marchman) and Norwegian datasets,(`r qc_mar`% and `r qc_nor`&, respectively, due to suspicious observations in which there was a decline in vocabulary of more than 20% in some longitudinal observations. 
 
 ## Models
 

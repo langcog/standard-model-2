@@ -267,3 +267,35 @@ saveRDS(si_datasets, file.path(CACHE, "si_datasets.rds"))
 cat(sprintf("Wrote %s (%d datasets, %s children total)\n",
             file.path(CACHE, "si_datasets.rds"), nrow(si_datasets),
             format(sum(si_datasets$n_kids), big.mark = ",")))
+
+## ============ 7. Inline text values (rendered as `r ...` in the paper) ====
+## One reproducible bundle of the numbers that appear inline in
+## standard_model_short.qmd, so they are cache-derived rather than hand-typed.
+## Raw values here; the qmd preamble formats them to the intended precision.
+cat("Inline text values\n")
+kap <- bind_rows(lapply(names(DATASETS), function(slug) {
+  r <- as.data.frame(readRDS(file.path(SUMM, paste0(slug, SFX, "_m3.summary.rds"))))
+  r <- r[r$variable == "kappa_pop", ]
+  data.frame(slug = slug, med = r$median, q5 = r$q5, q95 = r$q95)
+}))
+klo <- kap[which.min(kap$med), ]; khi <- kap[which.max(kap$med), ]  # min / max kappa dataset
+qc_pct <- function(slug) {                                          # % children QC-excluded
+  m <- readRDS(file.path(BL, paste0("bundle_", slug, SFX, ".rds")))$meta
+  100 * m$n_qc_dropped / (m$n_kids + m$n_qc_dropped)
+}
+llm <- readRDS(file.path(CACHE, "fig6_llm_slopes.rds"))             # children EN/NO kappa
+kap_grp <- function(g) {
+  v <- llm$slopes$slope_natural[llm$slopes$group == g]
+  c(median = median(v), sd = sd(v))
+}
+en <- kap_grp("Children (English)"); no <- kap_grp("Children (Norwegian)")
+inline <- list(
+  age_lo = min(si_datasets$min_age), age_hi = max(si_datasets$max_age),
+  loo_min = min(abs(si_loo$elpd_diff[si_loo$model == "M2"])),  # smallest M3-vs-next-best gap
+  kappa_lo = klo$med, kappa_lo_q5 = klo$q5, kappa_lo_q95 = klo$q95,
+  kappa_hi = khi$med, kappa_hi_q5 = khi$q5, kappa_hi_q95 = khi$q95,
+  en_kappa = unname(en["median"]), no_kappa = unname(no["median"]),
+  en_sd = unname(en["sd"]), no_sd = unname(no["sd"]),
+  qc_marchman = qc_pct("marchman"), qc_norwegian = qc_pct("norwegian"))
+saveRDS(inline, file.path(CACHE, "si_inline.rds"))
+cat(sprintf("Wrote %s\n", file.path(CACHE, "si_inline.rds")))
