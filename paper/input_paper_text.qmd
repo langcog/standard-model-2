@@ -233,6 +233,22 @@ Fitting this model requires a guess about the range of input variation present i
 @fig-io-partition (panel C) shows the results models fit with three values for each language, interpolated with an analytic estimate of the relationship between $\sigma_r$ and the total proportion of variance in efficiency that could be attributed to input. Within the range of plausible input values from the literature, we observed a strong congruence between the model estimates of input variance (EN: `r io_share("English (D)")`, NO: `r io_share("Norwegian (D)")`) and the meta-analytic range reported by @coffey2026 (4--7%). This consistency both supports the overall plausibility of the model and provides a second route for estimating the significant but modest contribution of input quantity to variation in children's outcomes. 
 
 
+
+Our work here has a number of limitations that suggest avenues for new work. First, while we analyzed a range of cross-linguistic data where it was available, most of the open data on children's input and processing are available only in English, and for convenience samples. Thus, the specific numerical estimates that we were able to derive are at best approximations and do not represent estimates for broader populations of interest. Systematic representative sampling would be required for generalization. Further, the studies we included here focused exclusively on monolingual, typically-developing children. Though we have reason to expect that these mechanisms would apply in multilingual acquisition, significant work will be necessary to adapt and test our proposal in multilingual datasets [@gomezdiaz2024;@tan2024].
+
+In addition, we focused on the role of input quantity as a key first-order factor influencing the accumulation of language. However, a rich tradition describes quantity-related variation as well [e.g., @anderson2021;@rowe2012;@hirsh2015]. While individual studies have identified a wide variety of indicators of quality, they are still challenging to compute at scale from audio and video recordings. Extracting these and connecting them to growth over time is an exciting prospect for future work. 
+
+Finally, our study is a computational analysis of observational data; it provides at best hypotheses about causal structure. Our hope is that by providing signatures of longitudinal variation, we can inspire further work using both dense measurement and intervention that can gain causal traction on the mechanisms of vocabulary growth.
+
+Too often, psychology and cognitive science focus either only on universal mechanisms or variability between individuals. Word learning is a unique case study in cognitive science because it describes a basic process of knowledge acquisition that also captures large, meaningful individual variation. As such, it becomes possible to link mechanistic models of learning (such as accumulators) to the signatures that form the locus of variation in human learners. 
+
+The accumulator idea that forms the basis of our model is extremely simple, but it is potentially compatible with a wide range of more elaborated computational models of early language learning [@frank2009;@mcmurray2012;@trueswell2013;@kachergis2012]. One important direction for future work is to survey and analyze models from the literature to understand which of these show learning dynamics congruent with the statistical signatures we have identified in actual children's vocabulary growth. We have shown that one class of models does not show these signatures, however. 
+
+# Discussion
+
+
+These two parameters provide a set of measures with which to distinguish a number of important factors that are related to overall vocabulary size in prior work. Factors that load on efficiency alone relate to children's overall learning trajectory, creating a constant offset in language ability. In contrast, those that load on acceleration create an increasing fan, such that older children are more different from one another than younger ones. On the side of demographics, we found evidence that while sex differences manifest as differences in efficiency, socioeconomic differences show up in acceleration as well. Evidence about language input and processing suggest that while language processing relates primarily to differences in efficiency, language input variation appears to affect both Thus, our model identifies a channel by which experience might compound across development.
+
 # Methods
 
 
