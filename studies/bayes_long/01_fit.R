@@ -47,10 +47,13 @@ cat(sprintf("=== %s / %s ===  N=%d A=%d I=%d J=%d  grainsize=%d  (%d chains x %d
             slug, model, sd0$N, sd0$A, sd0$I, sd0$J, grainsize, CHAINS, WARMUP, ITER, THREADS))
 
 SEED <- as.integer(sum(utf8ToInt(paste0(slug,"_",model))) %% 2147483647L)  # reproducible per fit
+INIT <- Sys.getenv("STAN_INIT","")   # e.g. 0.5 -> tighter init range, avoids stuck chains (m3lin)
 mod <- cmdstan_model(file.path("studies","bayes_long","stan", paste0(STAN_FILE, ".stan")),
                      cpp_options=list(stan_threads=TRUE))
-fit <- mod$sample(data=dat, seed=SEED, chains=CHAINS, parallel_chains=CHAINS, threads_per_chain=THREADS,
-                  iter_warmup=WARMUP, iter_sampling=ITER, adapt_delta=ADELTA, refresh=200)
+sargs <- list(data=dat, seed=SEED, chains=CHAINS, parallel_chains=CHAINS, threads_per_chain=THREADS,
+              iter_warmup=WARMUP, iter_sampling=ITER, adapt_delta=ADELTA, refresh=200)
+if (INIT != "") sargs$init <- as.numeric(INIT)   # unset -> cmdstanr default (main ladder unchanged)
+fit <- do.call(mod$sample, sargs)
 
 dg <- fit$diagnostic_summary()
 cat(sprintf("divergences: %d | max_treedepth hits: %d\n",
