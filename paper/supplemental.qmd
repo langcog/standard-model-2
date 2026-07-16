@@ -469,41 +469,6 @@ distribution is doing more of the work than we currently attribute to it.
 ```
 
 ```md
-## Connection to neural scaling laws  [draft for promotion — MCF to review; most speculative of the three]
-
-The per-word picture above connects to a more familiar aggregate
-phenomenon: neural scaling laws. A model's loss falls as a smooth power
-law in the amount of training data, and this descent is remarkably
-regular — different runs, and different model sizes, trace nearly the same
-curve (Kaplan et al., 2020; Hoffmann et al., 2022). Our per-word analysis
-is the micro-level counterpart of that regularity. Each word is acquired
-along a sigmoid whose slope sits near the unit-accumulator value, and the
-spread of those slopes — across words and across runs — is small. The
-aggregate smoothness of scaling laws and the per-word $\kappa \approx 1$
-we recover are two views of the same property: language models convert
-experience into knowledge as near-pure accumulators, with little
-instance-to-instance variation.
-
-Children depart from this picture on both axes at once. Their per-instance
-scaling is far steeper ($\kappa \approx 10$), and they vary substantially
-from one another in that exponent ($\sigma_\kappa$ well above zero). The
-"data gap" between children and language models [@frank2023; @warstadt2023]
-is therefore not only that children reach adult competence from orders of
-magnitude less input. It is that children convert experience into knowledge
-through a different scaling relationship — steeper, and far more variable
-across individuals — than the one that scaling laws describe for models.
-
-This connection is analogical rather than formal: scaling laws characterize
-aggregate loss, whereas our $\kappa$ characterizes per-item acquisition,
-and the two need not move together. We offer it as a framing for why the
-data gap may be harder to close than raw data counts suggest.
-
-<!-- [BIB NEEDED] Kaplan et al. (2020) and Hoffmann et al. (2022) are named
-     in text but have NO verified bib entries yet — do not promote with live
-     @ markers until added. -->
-```
-
-```md
 ## Relation to scaling laws  [draft for promotion — MCF to review]
 
 The main-text figure (panel B) plots the models' *effective acceleration*

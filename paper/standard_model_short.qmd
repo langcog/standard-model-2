@@ -102,10 +102,10 @@ Under this model, we can use the mean value of $\kappa$ to distinguish pure accu
 
 Our analysis generally depends on the availability of longitudinal data at the individual word level. Aggregate data do not allow for the estimation of word difficulties $\delta$, thus their distribution remains latent; in this regime different difficulty distributions can be posited to explain the accelerating shape of vocabulary growth [@mcmurray2007; @mitchell2009]. In addition, cross-sectional data do not allow for identification of whether individual children's variation is due to differences in efficiency (intercept) or acceleration (slope) (see SI: Non-identifiability in Cross-Sectional Data). 
 
-Thus, to constrain our model, we use data from CDIs archived in Wordbank. Here we focus exclusively on production, which is used with older children and which tends to be a more reliable measure [@frank2021]. We downloaded data from Wordbank, focusing on five longitudinal datasets of monolingual, typically-developing children ages `r age_lo`--`r age_hi` (three from American English and one each from Norwegian and Japanese, $N_{total} = sum(fig1$meta$n_kids)$; see SI: Datasets). 
+Thus, to constrain our model, we use data from CDIs archived in Wordbank. Here we focus exclusively on production, which is used with older children and which tends to be a more reliable measure [@frank2021]. We downloaded data from Wordbank, focusing on five longitudinal datasets of monolingual, typically-developing children ages `r age_lo`--`r age_hi` (three from American English and one each from Norwegian and Japanese, $N_{total} = `r sum(fig1_fan$meta$n_kids)`$; see SI: Datasets). 
 
 We fit the accelerating accumulator model to each of these datasets using Bayesian inference in Stan [@stancite]. To test whether each model component was necessary, we additionally fit three model ablations, removing individual variation in acceleration (removing $\kappa_i$), accumulation (removing $\xi_i$), and finally acceleration entirely (removing $\kappa$). 
-The accelerating accumulator provided the best fit to children's growth trajectories (@fig-schematic, see SI: Full Model Comparison Results), with substantial differences in cross-validated predicted probability between the accelerating accumulator and the next best model (LOO ELPD $>`r loo_min`$ for all five datasets). For all datasets, estimates of acceleration were high, robustly rejecting the pure accumulator at $\kappa$=1: $\kappa = $ `r kap_lo` [`r kap_lo_q5`, `r kap_lo_q95`] -- `r kap_hi` [`r kap_hi_q5`, `r kap_hi_q95`]. 
+The accelerating accumulator provided the best fit to children's growth trajectories (@fig-schematic, see SI: Full Model Comparison Results), with substantial differences in cross-validated predicted probability between the accelerating accumulator and the next best model (LOO ELPD $>`r loo_min`$ for all five datasets). For all datasets, estimates of acceleration were high, robustly rejecting the pure accumulator ($\kappa=1$):`r kap_lo` [`r kap_lo_q5`, `r kap_lo_q95`] -- `r kap_hi` [`r kap_hi_q5`, `r kap_hi_q95`]. 
 
 We considered linear growth in ability with the logarithm of age. Pure linear growth is also possible, but linear time models were dispreferred statistically (see SI: Linear vs. Logistic Age). Further, the increasing spread of children's trajectories with age is especially noticeable for low-vocabulary older children [who may be classified as "late talkers"; @fernald2012; @rescorla2011], but variation was unimodal across all samples (see SI: Characterizing Variation in Efficiency and Acceleration) [@pinstock2026;@singletary2025]. 
 
@@ -236,7 +236,7 @@ pA | pB
 
 Small-scale language models trained on developmentally-realistic corpora have become a useful tool for understanding early language development [@huebner2021;@futrell2025;@frank2025;@evanson2023;@misra2024]. One major disanalogy between humans and language models, however, is the massive scale of training data necessary for language models to achieve high levels of performance on linguistic tasks [@warstadt2023;@frank2023;@hu2024]. In our final set of analyses, we hypothesized that this data gap might be related to a lack of acceleration in the learning process. 
 
-We begin by building a bridge between the well-known "scaling law" for large language models [@hoffmann2022;@kaplan2020] and the model we describe here for vocabulary growth. The form of one popular scaling law is that the loss $L$ of a neural network language model on a dataset size $D$ is $L = E + \frac{B}{D^\beta}$ (holding the size of the the network constant), where $B$ and $\beta$ are the free parameters of a power law and $E$ is the entropy of the text being modeled. @michaud2023 propose that this power law scaling behavior can emerge from a set of independently learned "quanta" that are themselves power-law distributed, much like the words of natural language [@zipf1949]. 
+We begin by building a bridge between the well-known "scaling law" for large language models [@hoffmann2022;@kaplan2020] and the model we describe here for vocabulary growth. The form of one popular scaling law is that the loss $L$ of a neural network language model on a dataset size $D$ is $L = E + \frac{B}{D^\beta}$ (holding the size of the the network constant), where $B$ and $\beta$ are the free parameters of a power law and $E$ is the entropy of the text being modeled. @michaud2024 propose that this power law scaling behavior can emerge from a set of independently learned "quanta" that are themselves power-law distributed, much like the words of natural language [@zipf1949]. 
 
 Following this idea, we explore the emergence of individual words in neural language models. If their emergence indeed follows the kind of power-law dynamics described by @michaud2024, then it would follow that their accumulation *decelerates* rather than accelerating (as we have shown in children). In particular, each further order of magnitude of data should produce a smaller gain in word knowledge. This finding is in contrast to children, who we have shown grow linearly in the logarithm of age. Since children receive relatively constant levels of input across development 
 
@@ -252,22 +252,21 @@ In sum, neural scaling laws suggest that language models decelerate in their acq
 
 How does children's vocabulary grow over early childhood? We proposed that this process is characterized as accelerating accumulation, in which variation between children is produced by differences in both the efficiency of the accumulation process and the rate of acceleration. This cognitive process leads to a simple longitudinal growth model that provides a good description of cross-linguistic data. In contrast to children, language models follow neural scaling laws, meaning that they decelerate across training rather than accelerating. 
 
-Where does the acceleration in children's learning come from? One possibility is that it is driven by developmental maturation of general abilities such as learning, memory, or attention -- such changes could mean that children's "buckets" require fewer drops to fill them. However, as we document, the degree of acceleration we show means that word learning becomes more efficient by several orders of magnitude. This improvement goes well beyond measured changes in domain general cognitive processes []. Thus, we view this account as implausible. 
+Where does the acceleration in children's learning come from? One possibility is that it is driven by developmental maturation of general abilities such as learning, memory, or attention -- such changes could mean that children's "buckets" require fewer drops to fill them. However, as we document, the degree of acceleration we show means that word learning becomes more efficient by several orders of magnitude. This improvement goes well beyond measured changes in domain general cognitive processes [@hartshorn1998;@bauer2000]. Thus, we view this account as implausible. 
 
 A more plausible account is that children "learn to learn": their increasingly sophisticated inferential abilities allow them to extract progressively more information from the linguistic signal [@smith2002;@markman1988;@bohn2019;meylan2022]. This process likely has multiple components that work synergistically. First, they learn "overhypotheses" that guide their inferences based on general regularities in how their language works -- for example, that many nouns are organized by shape [@kemp2007;@smith2002]. Second, they use the language they already know in the moment to extract more information from new utterances -- leveraging word meanings [@markman1988;@clark1988], syntactic knowledge [@gleitman1990], and pragmatic inference [@bohn2019] to make sophisticated inferences about gaps in their knowledge [@frank2009;@bloom2002].
 
-
 @mitchell2009 studied how these sorts of "leverage" mechanisms can change the slope of acceleration in accumulator models. Network growth models provide one promising avenue for understanding how leverage might play out in specific patterns of vocabulary growth at the level of word content [@hills2009;@fourtassi2020].
+
+The "data gap" in learning efficiency between children and large language models is likely due to many factors, including children's rich representations of the world and their multimodal input. These differences are likely responsible for  overall faster learning slopes in children; our study here identifies fundamental differences in acceleration as well. Characterizing this process of acceleration and understanding the circumstances under which it can arise in artificial systems should thus be a focus for future work. 
 
 # Methods
 
 ## Data and Code
 
-Data were retrieved from Wordbank using the `wordbankr` package [@frank2017], childes-db VER using `childesr` [@sanchez2019].
+Reproducible code for this paper is available at \href{}{http://github.com/langcog/standard-model-2}. Data were retrieved from Wordbank using the `wordbankr` package [@frank2017].
 
-Reproducible code for this paper is available at http://github.com/langcog/standard-model-2. 
-
-All longitudinal datasets with three or more observations per child were included. We excluded a small number of children from the English (Marchman) and Norwegian datasets,(`r qc_mar`% and `r qc_nor`&, respectively, due to suspicious observations in which there was a decline in vocabulary of more than 20% in some longitudinal observations. 
+All longitudinal datasets with three or more observations per child were included. We excluded a small number of children from the English (Marchman) and Norwegian datasets,(`r qc_mar`% and `r qc_nor`%, respectively), due to suspicious observations in which there was a decline in vocabulary of more than 20% in some longitudinal observations. 
 
 ## Bayesian models
 
@@ -278,7 +277,12 @@ $\sigma_b \sim \mathrm{Half\text{-}Normal}(0,\ 5)$ and the item difficulties $\t
 
 ### Neural network language models
 
-Following @feng2024, we fit \texttt{GPT-2-small} (124M parameters), using the same 24M word preparation of English-language CHILDES data from that study. The data were segmented into 18 cumulative blocks ranging from .5M to the full 24M, and models were trained to convergence. Training was performed on NVIDIA A40 GPUs.
+Following @feng2024, we fit randomly-initialized \texttt{GPT-2-small} (124M parameters) models, using the 24M word (~47M token) preparation of English-language CHILDES data from that study. Data were tokenized using a standard BPE tokenizer, trained on the full dataset. Surprisal was computed as mean per-word negative log likelihood over ~50 held-out validation contexts (last 128 tokens each) for the 609 CDI words that were used in @chang2022 and that appeared in the training data with sufficient frequency in the held-out contexts. Surprisal values for sigmoid fits were read out from the epoch with lowest validation loss.
+
+For the computation of surprisal across training runs ("training"), we trained models using 3 random seeds on the full dataset. For the computation across different dataset sizes ("development"), the data were segmented into 18 nested datasets ranging in size from .5M to the full 24M. We then chose 10 random seed values and trained 10 models on each dataset for a total of 180 models. 
+
+Models were trained for a total of 20 epochs with sequence length 1024 and batch size 8, using AdamW for optimization and learning rate of 1e-4 with a linear decay, no warmup, weight decay of 0, and no in-epoch shuffling. Training was performed on NVIDIA A40 GPUs. 
+
 
 # Acknowledgements
 
