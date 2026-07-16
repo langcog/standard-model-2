@@ -5,7 +5,10 @@
 ##   paper/cache/fig1_fan.rds        Fig 1: M0-M3 schematic + per-dataset M3 fan
 ##   paper/cache/fig2_efficiency.rds Fig 2: per-dataset per-word exposures-to-learn
 ##                                   (PENDING a per-item delta_j export -- see below)
-## Fig 3 (LLM) reuses the existing paper/cache/fig6_llm_slopes.rds unchanged.
+## Fig 3A (LLM slope density) reuses the existing paper/cache/fig6_llm_slopes.rds
+## (slopes/summary built by build_cache.R); section 8 below AUGMENTS that rds with
+## the Fig 3B scaling-ladder data (scaling_bud/scaling_par). Run order: build_cache.R
+## (builds slopes/summary) THEN build_cache_short.R (augments + fig1/fig2 + inline).
 ##
 ## Model numbering (new bayes_long ladder): M0 = kappa=1 pure accumulator (LLM
 ## analog); M1 = +acceleration; M2 = +per-child efficiency; M3 = +per-child
@@ -299,3 +302,26 @@ inline <- list(
   qc_marchman = qc_pct("marchman"), qc_norwegian = qc_pct("norwegian"))
 saveRDS(inline, file.path(CACHE, "si_inline.rds"))
 cat(sprintf("Wrote %s\n", file.path(CACHE, "si_inline.rds")))
+
+## ============ 8. Fig 3B: scaling-law ladder (development axis) ============
+## Augment fig6_llm_slopes.rds (panel A = EN/NO child + LM slope densities, from
+## build_cache.R) with the panel-B scaling curve. On the distinct-input ladder,
+## aggregate loss (mean CDI-word surprisal per data budget) follows the Chinchilla
+## form L = E + B*D^-beta; the effective acceleration kappa_eff = beta*(L - E)
+## declines as a power law (log-log linear, slope -beta). See SI: Relation to
+## Scaling Laws.
+fig6        <- readRDS(file.path(CACHE, "fig6_llm_slopes.rds"))
+ladder      <- read_csv(here("fits", "llm", "ladder_bestval_finer.csv"), show_col_types = FALSE)
+scaling_bud <- ladder |>
+  group_by(words) |> summarise(L = mean(surprisal), .groups = "drop") |> arrange(words)
+scaling_fit <- nls(L ~ E + B * words^(-beta), data = scaling_bud,
+                   start = list(E = 3, B = 50, beta = 0.3),
+                   control = nls.control(maxiter = 500, warnOnly = TRUE))
+scaling_par <- as.list(coef(scaling_fit))          # E (entropy floor), B, beta
+scaling_bud <- scaling_bud |>
+  mutate(kappa = scaling_par$beta * (L - scaling_par$E))
+fig6$scaling_bud <- scaling_bud
+fig6$scaling_par <- scaling_par
+saveRDS(fig6, file.path(CACHE, "fig6_llm_slopes.rds"))
+cat(sprintf("Augmented fig6_llm_slopes.rds with scaling ladder (beta=%.3f, E=%.2f)\n",
+            scaling_par$beta, scaling_par$E))

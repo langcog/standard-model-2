@@ -196,49 +196,42 @@ We computed each word's age of acquisition (AoA) $A$ from our fitted models, wit
 
 # Large language models show no acceleration in their vocabulary growth
 
-```{r fig-llm-acceleration, fig.width=7, fig.height=4}
+```{r fig-llm-acceleration, fig.width=10, fig.height=4}
 #| label: fig-llm-acceleration
-#| fig-cap: "The density of acceleration slopes for language models (by word) and children (by child), extracted from English and Norwegian models."
+#| fig-cap: "Language models decelerate where children accelerate. (A) Density of the acceleration exponent $\\kappa$: children (per child, English and Norwegian) sit an order of magnitude above the $\\kappa = 1$ unit-accumulator line, whereas language models -- Chang \\& Bergen's four architectures and our CHILDES-trained GPT-2, on both the training and distinct-input axes -- cluster at it. (B) On the distinct-input (development) ladder, the models' effective acceleration $\\kappa_{\\text{eff}} = \\beta\\,(L - E)$ falls as a power law with training data (log-log linear, slope $-\\beta$), crossing below $\\kappa = 1$: the deceleration implied by neural scaling laws (see SI: Relation to Scaling Laws)."
 
-# Children's per-child kappa_i vs. LLM per-word sigmoid slopes (Chang &
-# Bergen 2022), placed on a common "logit per natural-log experience"
-# axis. Data cached by paper/build_cache.R section 6 (fig6_llm_slopes.rds):
-# `sl` is the per-instance long frame; `sm` the per-population summary
-# (median, 95% interval, n) available for inline numbers.
-sl <- llm_slopes$slopes
-sm <- llm_slopes$summary
+sl <- llm_slopes$slopes; sm <- llm_slopes$summary
+scaling_bud <- llm_slopes$scaling_bud; scaling_par <- llm_slopes$scaling_par
+slope_pal <- c("Children (English)"="#c41e37","Children (Norwegian)"="#fb9a99",
+               "LMs: C&B 2022 (4 architectures)"="#8856a7","LMs: CHILDES (training)"="#2c7fb8",
+               "LMs: CHILDES (development)"="#41ab5d")
+pA <- ggplot(sl, aes(slope_natural, fill=group, colour=group)) +
+  geom_density(alpha=0.32, linewidth=0.5) +
+  geom_vline(xintercept=1, linetype="dashed", colour="grey55", linewidth=0.4) +
+  annotate("text", x=1.6, y=0.92, hjust=0, vjust=1, size=3.0, colour="grey45",
+           label="kappa = 1\nunit accumulator\n(no acceleration)") +
+  scale_fill_manual(values=slope_pal, name=NULL) + scale_colour_manual(values=slope_pal, name=NULL) +
+  coord_cartesian(xlim=c(0,22)) +
+  labs(subtitle="A. Acceleration (κ): children by child, LMs by word",
+       x="kappa: slope on log(experience) (logit per natural-log unit)", y="density") +
+  theme_minimal(base_size=11) +
+  theme(legend.position=c(0.70,0.60), legend.text=element_text(size=7.2),
+        legend.background=element_rect(fill="white",colour=NA), plot.subtitle=element_text(face="bold"))
 
-# Children: by-child kappa_i (the acceleration signature). LMs: by-word
-# sigmoid slope, three populations -- Chang & Bergen (2022): 4 architectures
-# (LSTM, BiLSTM, GPT-2, BERT) on a BookCorpus+WikiText-103 corpus, training
-# axis; our CHILDES GPT-2 on the training axis; and our CHILDES ladder on the
-# DISTINCT-INPUT (development) axis. All three cluster at the kappa = 1
-# unit-accumulator boundary; children sit ~10x higher.
-slope_pal <- c("Children (English)"              = "#c41e37",
-               "Children (Norwegian)"            = "#fb9a99",
-               "LMs: C&B 2022 (4 architectures)" = "#8856a7",
-               "LMs: CHILDES (training)"         = "#2c7fb8",
-               "LMs: CHILDES (development)"      = "#41ab5d")
-
-ggplot(sl, aes(slope_natural, fill = group, colour = group)) +
-  geom_density(alpha = 0.32, linewidth = 0.5) +
-  geom_vline(xintercept = 1, linetype = "dashed", colour = "grey55",
-             linewidth = 0.4) +
-  annotate("text", x = 1.6, y = 0.92, hjust = 0, vjust = 1, size = 3.0,
-           colour = "grey45",
-           label = "kappa = 1\nunit accumulator\n(no acceleration)") +
-  # annotate("segment", x = 2.7, xend = 1.15, y = 1.2, yend = 1.2,
-  #          arrow = arrow(length = unit(0.12, "cm")), colour = "#2c7fb8") +
-  # annotate("text", x = 2.8, y = 1.2, hjust = 0, vjust = 0.5, size = 2.8,
-  #          colour = "#2c7fb8", label = "all LMs cluster here") +
-  scale_fill_manual(values = slope_pal, name = NULL) +
-  scale_colour_manual(values = slope_pal, name = NULL) +
-  coord_cartesian(xlim = c(0, 22)) +
-  labs(x = "kappa: slope on log(experience) (logit per natural-log unit)",
-       y = "density") +
-  theme_minimal(base_size = 11) +
-  theme(legend.position = c(0.70, 0.60),
-        legend.background = element_rect(fill = "white", colour = NA))
+sm_curve <- data.frame(words=10^seq(log10(min(scaling_bud$words)), log10(max(scaling_bud$words)), length=100))
+sm_curve$kappa <- scaling_par$beta * scaling_par$B * sm_curve$words^(-scaling_par$beta)
+xb <- c(5e5,1e6,3e6,1e7,2.4e7); xl <- c("0.5M","1M","3M","10M","24M")
+pB <- ggplot(scaling_bud, aes(words, kappa)) +
+  geom_line(data=sm_curve, colour="#2c7fb8", linewidth=0.8) + geom_point(size=2, colour="#2c7fb8") +
+  geom_hline(yintercept=1, linetype="dashed", colour="grey55") +
+  annotate("text", x=1.3e7, y=1.06, hjust=0, size=2.9, colour="grey45", label="kappa = 1") +
+  annotate("text", x=6e5, y=0.62, hjust=0, size=3.1, colour="#2c7fb8", fontface="bold",
+           label=sprintf("kappa = beta x (L - E)\npower law, slope -beta = -%.2f", scaling_par$beta)) +
+  scale_x_log10(breaks=xb, labels=xl) + scale_y_log10(breaks=c(0.5,0.7,1,1.5)) +
+  labs(subtitle="B. Effective κ falls as a power law (log-log linear, slope -β)",
+       x="training data (distinct words)", y="effective kappa  (= beta x excess loss, log scale)") +
+  theme_minimal(base_size=11) + theme(plot.subtitle=element_text(face="bold"))
+pA | pB
 ```
 
 Small-scale language models trained on developmentally-realistic corpora have become a useful tool for understanding early language development [@huebner2021;@futrell2025;@frank2025;@evanson2023;@misra2024]. One major disanalogy between humans and language models, however, is the massive scale of training data necessary for language models to achieve high levels of performance on linguistic tasks [@warstadt2023;@frank2023;@hu2024]. In our final set of analyses, we hypothesized that this data gap might be related to a lack of acceleration in the learning process. 
@@ -259,9 +252,10 @@ In sum, neural scaling laws suggest that language models decelerate in their acq
 
 How does children's vocabulary grow over early childhood? We proposed that this process is characterized as accelerating accumulation, in which variation between children is produced by differences in both the efficiency of the accumulation process and the rate of acceleration. This cognitive process leads to a simple longitudinal growth model that provides a good description of cross-linguistic data. In contrast to children, language models follow neural scaling laws, meaning that they decelerate across training rather than accelerating. 
 
-Where does the acceleration in children's learning come from? One possibility is that it is driven by developmental maturation of general abilities such as learning, memory, and attention -- such changes could mean that children's "buckets" require fewer drops to fill them. 
+Where does the acceleration in children's learning come from? One possibility is that it is driven by developmental maturation of general abilities such as learning, memory, or attention -- such changes could mean that children's "buckets" require fewer drops to fill them. However, as we document, the degree of acceleration we show means that word learning becomes more efficient by several orders of magnitude. This improvement goes well beyond measured changes in domain general cognitive processes []. Thus, we view this account as implausible. 
 
-Another possibility is that children's increasingly sophisticated inferential abilities allow them to extract progressively more information from the linguistic signal [@smith2002;@markman1988;@bohn2019;meylan2022]. 
+A more plausible account is that children "learn to learn": their increasingly sophisticated inferential abilities allow them to extract progressively more information from the linguistic signal [@smith2002;@markman1988;@bohn2019;meylan2022]. This process likely has multiple components that work synergistically. First, they learn "overhypotheses" that guide their inferences based on general regularities in how their language works -- for example, that many nouns are organized by shape [@kemp2007;@smith2002]. Second, they use the language they already know in the moment to extract more information from new utterances -- leveraging word meanings [@markman1988;@clark1988], syntactic knowledge [@gleitman1990], and pragmatic inference [@bohn2019] to make sophisticated inferences about gaps in their knowledge [@frank2009;@bloom2002].
+
 
 @mitchell2009 studied how these sorts of "leverage" mechanisms can change the slope of acceleration in accumulator models. Network growth models provide one promising avenue for understanding how leverage might play out in specific patterns of vocabulary growth at the level of word content [@hills2009;@fourtassi2020].
 
@@ -277,12 +271,14 @@ All longitudinal datasets with three or more observations per child were include
 
 ## Bayesian models
 
-Bayesian models were fit using Stan [@stan].
+Bayesian models were fit independently to each dataset using Stan [@stan] using four independent chains, per the specification described in the text. The model was parameterized to capture individual children's variation from the population mean such that $\xi_i = \mu_\xi + a_i$ and $\kappa_i = \mu_\kappa + b_i$, where $(a_i, b_i) \sim \mathrm{MVN}(\mathbf 0, \Sigma)$. To facilitate interpretation of the accumulator mechanism, we included the constant $\log H = \log(365) \approx 5.90$ (waking hours/month) and the anchor age $a_0 = 18$ months (so $\log(t/a_0)=0$ at 18 months).
 
+We chose weakly informative priors throughout, including on the efficiency and acceleration parameters $\mu_\xi \sim \mathcal N(-6,\ 5)$ and $\mu_\kappa \sim \mathcal N(0,\ 5)$ as well as the individual child standard deviations $\sigma_a \sim \mathrm{Half\text{-}Normal}(0,\ 3)$ and 
+$\sigma_b \sim \mathrm{Half\text{-}Normal}(0,\ 5)$ and the item difficulties $\tau_\delta \sim \mathrm{Half\text{-}Normal}(0,\ 5)$. We also chose a prior that mildly regularized the correlations between $a_i$ and $b_i$ ($\mathbf L \sim \mathrm{LKJ}(2)$).
 
 ### Neural network language models
 
-Following @feng2024, we fit \texttt{GPT-2-small} (124M parameters). Training was performed on NVIDIA A40 GPUs.
+Following @feng2024, we fit \texttt{GPT-2-small} (124M parameters), using the same 24M word preparation of English-language CHILDES data from that study. The data were segmented into 18 cumulative blocks ranging from .5M to the full 24M, and models were trained to convergence. Training was performed on NVIDIA A40 GPUs.
 
 # Acknowledgements
 
