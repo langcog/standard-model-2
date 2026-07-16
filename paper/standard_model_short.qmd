@@ -241,31 +241,29 @@ ggplot(sl, aes(slope_natural, fill = group, colour = group)) +
         legend.background = element_rect(fill = "white", colour = NA))
 ```
 
-<!-- REMEMBER ACCELERATION ACROSS DATA - KAPPA AND SCALING LAWS -->
-
 Small-scale language models trained on developmentally-realistic corpora have become a useful tool for understanding early language development [@huebner2021;@futrell2025;@frank2025;@evanson2023;@misra2024]. One major disanalogy between humans and language models, however, is the massive scale of training data necessary for language models to achieve high levels of performance on linguistic tasks [@warstadt2023;@frank2023;@hu2024]. In our final set of analyses, we hypothesized that this data gap might be related to a lack of acceleration in the learning process. 
 
-Our first step was to develop methods for quantifying acceleration in LMs' word learning. Because LMs -- especially relatively small LMs -- are at their heart simply predictive models, they do not exhibit the same discrete acquisition behavior that children show. Instead, as model weights change across training, an words become more predictable in context (lower surprisal). @chang2022 fit  sigmoidal curves for individual words on the trajectory of surprisal values across training, providing a direct analogue to the logistic curves in the Rasch model we used with children. The slope of the sigmoid for each word is directly analogous to our acceleration parameter $\kappa$ as it captures how fast evidence for that word accumulates with training data (see SI: Computing Acceleration in LMs).
+We begin by building a bridge between the well-known "scaling law" for large language models [@hoffmann2022;@kaplan2020] and the model we describe here for vocabulary growth. The form of one popular scaling law is that the loss $L$ of a neural network language model on a dataset size $D$ is $L = E + \frac{B}{D^\beta}$ (holding the size of the the network constant), where $B$ and $\beta$ are the free parameters of a power law and $E$ is the entropy of the text being modeled. @michaud2023 propose that this power law scaling behavior can emerge from a set of independently learned "quanta" that are themselves power-law distributed, much like the words of natural language [@zipf1949]. 
 
-We first trained a population of XYZ models varying their random seeds and underlying training data, but unlike children, variation between LM runs was extremely minimal (see SI: Training LMs and SI: Variation between LM training runs). Thus, we instead examined word-level acceleration -- how fast evidence about individual words accumulated -- drawing the word list from the CDI words we analyzed from children.
+Following this idea, we explore the emergence of individual words in neural language models. If their emergence indeed follows the kind of power-law dynamics described by @michaud2024, then it would follow that their accumulation *decelerates* rather than accelerating (as we have shown in children). In particular, each further order of magnitude of data should produce a smaller gain in word knowledge. This finding is in contrast to children, who we have shown grow linearly in the logarithm of age. Since children receive relatively constant levels of input across development 
 
-First, we extracted slopes from fits provided by @chang2022, in which four different language model architectures (LSTM, BiLSTM, GPT-2, and BERT) were fit to standard corpora (BookCorpus and WikiText-103). Next, to compare to models fit to developmental data, we fit GPT-2 to the full set of English transcripts in CHILDES [@feng2024].^[We used GPT-2 for this analysis [@radford2019] as it has become the preferred model system for such investigations [@feng2024;@misra2024;@evanson2023;@choshen2022].]  In both @cheng2022's models and ours, $\kappa$ was essentially 1 (see @fig-llm-acceleration): knowledge about individual words accumulated gradually. In contrast, across all five of our samples, children's $\kappa$ values were both high and highly variable. 
+To trace the emergence of individual words in language models, we follow @chang2022, who fit sigmoidal curves for individual words on the trajectory of surprisal values across training. These sigmoids providing a direct analogue to the logistic curves in the Rasch model we used with children. The slope of the sigmoid for each word is directly analogous to our acceleration parameter $\kappa$ as it captures how fast evidence for that word accumulates with training data (see SI: Computing Acceleration in LMs).
 
-However, this analysis cannot show acceleration directly because learning is shown across training passes through the same dataset. To isolate developmental change, we trained a separate set of GPT-2 models each to convergence on increasingly larger subsamples of the same CHILDES data, allowing us to estimate surprisal as a function of actual amount of input data -- a more direct developmental analogue. Again, we found that individual words showed $\kappa$ values tightly clusted around 1, consistent with a pure accumulator model, not an accelerating accumulator. 
+First, we extracted slopes from fits provided by @chang2022, in which four different language model architectures (LSTM, BiLSTM, GPT-2, and BERT) were fit to standard corpora (BookCorpus and WikiText-103). Next, to compare to models fit to developmental data, we fit GPT-2 to the full set of English transcripts in CHILDES [@feng2024]. We used GPT-2 for this analysis [@radford2019] as it has become the preferred model system for such investigations [@feng2024;@misra2024;@evanson2023;@choshen2022]. In both @chang2022's models and ours, $\kappa$ clustered around 1 (see @fig-llm-acceleration, A): knowledge about individual words accumulated gradually. In contrast, across all five of our samples, children's $\kappa$ values were both high and highly variable. 
 
-This analysis still might mask some change in the slope of accumulation from easy word to hard words, however. In our final analysis, we examined the change in word slopes between early-learned and later-learned words. This analysis revealed that early-learned words were, if anything, learned *faster* than later learned words. Thus, language models showed some signs of decelerating with more data. In sum, language models do not show any evidence of acceleration. 
+However, this analysis cannot show acceleration directly because learning is shown across training passes through the same dataset. To isolate developmental change, we trained a separate set of GPT-2 models each to convergence on increasingly larger subsamples of the same CHILDES data, allowing us to estimate surprisal as a function of actual amount of input data -- a more direct developmental analogue. This analysis revealed strong support for the scaling laws analysis above -- when we plotted $\kappa$ values on a log-log plot, they were precisely linear, showing the predicted power law structure (@fig-llm-acceleration, B; see SI: Relation to Scaling Laws). 
+
+In sum, neural scaling laws suggest that language models decelerate in their acquisition of individual quanta of knowledge -- including words. Our fitted, child-scale models confirm this regularity. This deceleration stands in fundamental contrast to the acceleration we robustly observe in human learners.  
 
 # Discussion
 
-How does children's vocabulary grow over early childhood? We proposed that this process is characterized as accelerating accumulation, in which variation between children is produced by differences in both the efficiency of the accumulation process and the rate of acceleration. This cognitive process leads to a simple longitudinal growth model that provides a good description of cross-linguistic data. In contrast to children, language models, even those trained on child-directed input, showed no sign of acceleration. Instead, they were better described as pure accumulators. 
+How does children's vocabulary grow over early childhood? We proposed that this process is characterized as accelerating accumulation, in which variation between children is produced by differences in both the efficiency of the accumulation process and the rate of acceleration. This cognitive process leads to a simple longitudinal growth model that provides a good description of cross-linguistic data. In contrast to children, language models follow neural scaling laws, meaning that they decelerate across training rather than accelerating. 
 
+Where does the acceleration in children's learning come from? One possibility is that it is driven by developmental maturation of general abilities such as learning, memory, and attention -- such changes could mean that children's "buckets" require fewer drops to fill them. 
 
-Where does the acceleration in children's learning come from? One possibility is that it is driven by developmental maturation of general abilities such as learning, memory, and attention -- such changes could mean that children's "buckets" require fewer drops to fill them. Another possibility is that children's increasingly sophisticated inferential abilities allow them to extract progressively more information from the linguistic signal [@smith2002;@markman1988;@bohn2019;meylan2022]; @mitchell2009 study how these sorts of "leverage" mechanisms can change the slope of acceleration in accumulator models. Network growth models provide one promising avenue for understanding how leverage might play out in specific patterns of vocabulary growth at the level of word content [@hills2009;@fourtassi2020].
+Another possibility is that children's increasingly sophisticated inferential abilities allow them to extract progressively more information from the linguistic signal [@smith2002;@markman1988;@bohn2019;meylan2022]. 
 
-SCALING LAWS
-
-
-Modern language models (both transformer-based and recurrent) failed to manifest the acceleration that we found pervasively in our data. This lack of "leverage" in such models is one potential clue to why they require such massive amounts of data to learn, relative to human children. 
+@mitchell2009 studied how these sorts of "leverage" mechanisms can change the slope of acceleration in accumulator models. Network growth models provide one promising avenue for understanding how leverage might play out in specific patterns of vocabulary growth at the level of word content [@hills2009;@fourtassi2020].
 
 # Methods
 
@@ -277,31 +275,14 @@ Reproducible code for this paper is available at http://github.com/langcog/stand
 
 All longitudinal datasets with three or more observations per child were included. We excluded a small number of children from the English (Marchman) and Norwegian datasets,(`r qc_mar`% and `r qc_nor`&, respectively, due to suspicious observations in which there was a decline in vocabulary of more than 20% in some longitudinal observations. 
 
-## Models
-
-### Frequentist models 
-
-Initial models were fit with `glmer` [@glmer], with the following specifications:
-
-* M1: `produces ~ offset(log_age) + (1 | item)` 
-* M2: `produces ~ 1 + log_age + (1 | item)` 
-* M3: `produces ~ 1 + log_age + (1 | item) + (1 | child)` 
-* M4: `produces ~ 1 + log_age + (1 | item) + (log_age | child)` 
-
-Linear variants reported in the supplement used linear age rather than log age. 
-
-### Bayesian models
+## Bayesian models
 
 Bayesian models were fit using Stan [@stan].
 
-### Priors
 
-### Inference
+### Neural network language models
 
-
-### GPT-2 models
-
-<!-- We trained XYZ -->
+Following @feng2024, we fit \texttt{GPT-2-small} (124M parameters). Training was performed on NVIDIA A40 GPUs.
 
 # Acknowledgements
 
