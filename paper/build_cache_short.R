@@ -74,7 +74,7 @@ fan_one <- function(slug, label) {
   emp <- tibble(aa = sd$aa, y = sd$y) |>
     group_by(aa) |> summarise(prop = mean(y), .groups = "drop") |>
     mutate(age = sd$admin_age[aa], child = sd$admin_to_child[aa])
-  aw <- quantile(emp$age, c(.05, .95)); ages <- seq(floor(aw[1]), ceiling(aw[2]), by = 0.5)
+  ages <- seq(floor(min(emp$age)), ceiling(max(emp$age)), by = 0.5)   # full observed range (bands cover the data)
   kids <- sample(unique(emp$child), min(N_SPAG, n_distinct(emp$child)))
   spag <- emp |> filter(child %in% kids) |> transmute(lang = label, child, age, prop)
 
@@ -93,8 +93,33 @@ fan_one <- function(slug, label) {
 cat("Fig 1: per-dataset M3 fan\n")
 res <- Filter(Negate(is.null), Map(fan_one, names(DATASETS), DATASETS))
 lvl <- unname(DATASETS)
+
+## ---- (A2) conceptual theta -> CDI mechanism (short-paper Fig 1, block B) ----
+## Replaces the old M0-M3 schematic in the short paper: shows the pure vs
+## accelerating accumulator and the two dimensions of individual variation
+## (efficiency xi = a level shift; acceleration kappa = a fan) in latent-ability
+## (theta) space and projected into words-produced (CDI) space. Illustrative.
+a0c <- 6; ages_c <- seq(6, 60, length.out = 140); Lc <- log(ages_c / a0c)
+KA_C <- 2.5; DELTA_C <- qnorm(ppoints(150), 0, 1.5)
+vocab_c <- function(th) vapply(th, function(x) mean(plogis(x - DELTA_C)), numeric(1))
+qlab_c <- c(theta = "Latent Ability (θ)", cdi = "Words Produced (CDI)")
+conceptual <- tribble(
+  ~scenario,        ~xi,   ~kappa,      ~kind,
+  "Pure (κ=1)",     -3.5,  1.0,         "pure",
+  "Baseline",       -3.5,  KA_C,        "accel",
+  "↑ Efficiency",   -1.5,  KA_C,        "accel",
+  "↑ Acceleration", -3.5,  KA_C + 1.5,  "accel") |>
+  mutate(scenario = factor(scenario, levels = scenario)) |>
+  rowwise() |>
+  mutate(d = list(tibble(age = ages_c, theta = xi + kappa * Lc, cdi = vocab_c(xi + kappa * Lc)))) |>
+  ungroup() |> unnest(d) |>
+  pivot_longer(c(theta, cdi), names_to = "q", values_to = "value") |>
+  mutate(quantity = factor(qlab_c[q], levels = qlab_c))
+conceptual_lab <- conceptual |> group_by(scenario, quantity) |> slice_max(age, n = 1) |> ungroup()
+
 fig1 <- list(
-  schematic = schematic,
+  schematic  = schematic,          # retained (unused by short-paper Fig 1; kept for compatibility)
+  conceptual = conceptual, conceptual_lab = conceptual_lab,
   fan  = bind_rows(lapply(res, `[[`, "fan"))  |> mutate(lang = factor(lang, levels = lvl)),
   spag = bind_rows(lapply(res, `[[`, "spag")) |> mutate(lang = factor(lang, levels = lvl)),
   meta = bind_rows(lapply(res, `[[`, "meta")))

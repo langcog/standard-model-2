@@ -110,47 +110,67 @@ The accelerating accumulator provided the best fit to children's growth trajecto
 We considered linear growth in ability with the logarithm of age. Pure linear growth is also possible, but linear time models were dispreferred statistically (see SI: Linear vs. Logistic Age). Further, the increasing spread of children's trajectories with age is especially noticeable for low-vocabulary older children [who may be classified as "late talkers"; @fernald2012; @rescorla2011], but variation was unimodal across all samples (see SI: Characterizing Variation in Efficiency and Acceleration) [@pinstock2026;@singletary2025]. 
 
 
-```{r fig-schematic, fig.width=8, fig.height=6}
+```{r fig-schematic, fig.width=11, fig.height=8}
 #| label: fig-schematic
-#| fig-cap: "(A) Schematic predictions of all four models for vocabulary growth across age. Pure accumulator (M1) and accelerating accumulator (M2) models predict no variability across children, while M3 predicts variation and M4 predicts an increasing spread across chidren. (B) Best fitting model (M4) for five datasets. Gray lines show individual children's trajectories; colored lines show bootstrapped predictions at standard quantiles. Transparency is higher for panels with denser data to avoid overplotting."
+#| fig-cap: "[PLACEHOLDER CAPTION -- MCF to revise] The accelerating accumulator model of early vocabulary growth. (A) Generative model: each child $i$ has an efficiency $\\xi_i$ and an acceleration $\\kappa_i$ that set their latent ability $\\theta_i(t) = \\xi_i + \\kappa_i \\log(t/a_0)$; whether child $i$ produces word $j$ depends on $\\theta_i(t)$ relative to the word's difficulty $\\delta_j$. (B) Model predictions in latent-ability ($\\theta$) space and, projected through the item model, in words-produced (CDI) space, for a pure accumulator ($\\kappa = 1$, dashed) and an accelerating accumulator, illustrating the model's two dimensions of individual variation: greater efficiency ($\\xi$) lifts the curve's level, while greater acceleration ($\\kappa$) fans it open. (C) Model-implied vocabulary-growth fan (colored percentile bands) over individual children's observed trajectories (gray) for each of the five longitudinal datasets."
 
-## Fig 1 precomputed in paper/build_cache_short.R (fig1_fan.rds):
-## (A) illustrative M0-M3 schematic; (B) per-dataset Bayesian M3 model-implied
-## fan over empirical trajectories. Norwegian appears once its M3 fit lands.
+## Fig 1 precomputed in paper/build_cache_short.R (fig1_fan.rds). Three-block
+## composite via cowplot: (A) graphical model image; (B) conceptual theta -> CDI
+## mechanism (two facets); (C) per-dataset model-implied fan over trajectories
+## (five facets, legend in the empty 6th cell). Only block-level A/B/C labels.
+library(cowplot)
 pal <- unname(WORDBANK_PALETTE)
+col_scn <- c("Pure (κ=1)" = "grey55", "Baseline" = "#222222",
+             "↑ Efficiency" = "#0072B2", "↑ Acceleration" = "#D55E00")
+lty_scn <- c("pure" = "21", "accel" = "solid")
 
-p_schematic <- ggplot(fig1_fan$schematic, aes(age, vocab, color = qf, group = qf)) +
-  geom_line(aes(linewidth = ifelse(qf == "50th", 0.95, 0.55))) +
-  facet_wrap(~ name, nrow = 1) +
-  scale_color_manual(values = pal, name = "Percentile", drop = FALSE) +
+## Block B: conceptual theta -> CDI (two facets, shared axes, direct line labels)
+pB <- ggplot(fig1_fan$conceptual,
+             aes(age, value, color = scenario, linetype = kind, group = scenario)) +
+  geom_line(linewidth = 0.8) +
+  ggrepel::geom_text_repel(data = fig1_fan$conceptual_lab, aes(label = scenario),
+                           size = 2.3, hjust = 0, direction = "y", nudge_x = 2,
+                           segment.size = 0.2, xlim = c(60, NA)) +
+  facet_wrap(~ quantity, scales = "free_y") +
+  scale_color_manual(values = col_scn, guide = "none") +
+  scale_linetype_manual(values = lty_scn, guide = "none") +
+  coord_cartesian(xlim = c(6, 86), clip = "off") +
+  labs(x = "Age (Months)", y = NULL) +
+  theme_minimal(base_size = 9) +
+  theme(strip.text = element_text(face = "bold", size = 9),
+        panel.grid.minor = element_blank(), panel.spacing = unit(1, "lines"),
+        plot.margin = margin(16, 8, 4, 6))
+
+## Block C: per-dataset fits (one faceted plot; legend flush in the empty 6th cell)
+pC <- ggplot() +
+  geom_line(data = fig1_fan$spag, aes(age, prop, group = interaction(lang, child)),
+            color = "grey30", alpha = 0.14, linewidth = 0.22) +
+  geom_line(data = fig1_fan$fan, aes(age, vocab, color = qf, group = qf,
+            linewidth = ifelse(qf == "50th", 0.9, 0.5))) +
+  facet_wrap(~ lang, scales = "free_x", nrow = 2) +
+  scale_color_manual(values = pal, name = "Child\nPercentile", drop = FALSE) +
   scale_linewidth_identity() +
   scale_y_continuous(limits = c(0, 1), breaks = c(0, 0.5, 1)) +
-  labs(x = NULL, y = "expected vocab.\nproportion") +
+  labs(x = "Age (Months)", y = "Proportion of Items Produced") +
+  guides(color = guide_legend(override.aes = list(linewidth = 1.1))) +
   theme_minimal(base_size = 9) +
-  theme(strip.text = element_text(face = "bold", size = 8),
-        legend.position = "bottom", panel.grid.minor = element_blank())
+  theme(strip.text = element_text(face = "bold", size = 9),
+        panel.grid.minor = element_blank(), panel.spacing = unit(1, "lines"),
+        plot.margin = margin(16, 8, 4, 6),
+        legend.position = c(0.70, 0.26), legend.justification = c(0, 0.5),
+        legend.key.width = unit(15, "pt"), legend.title = element_text(size = 8.5),
+        legend.background = element_rect(fill = "white", color = NA))
 
-p_fits <- ggplot() +
-  geom_line(data = fig1_fan$spag,
-            aes(age, prop, group = interaction(lang, child)),
-            color = "grey25", alpha = 0.12, linewidth = 0.22) +
-  geom_line(data = fig1_fan$fan,
-            aes(age, vocab, color = qf, group = qf,
-                linewidth = ifelse(qf == "50th", 0.95, 0.55))) +
-  facet_wrap(~ lang, nrow = 1) +
-  scale_color_manual(values = pal, name = "Percentile", drop = FALSE) +
-  scale_linewidth_identity() +
-  scale_y_continuous(limits = c(0, 1)) +
-  labs(x = "Age (months)", y = "proportion of items produced") +
-  theme_minimal(base_size = 9) +
-  theme(strip.text = element_text(face = "bold", size = 8),
-        legend.position = "bottom", panel.grid.minor = element_blank(),
-        panel.spacing = unit(0.3, "lines"))
+## Block A: graphical model (title-less asset built from paper/mockups/fig1_gm_notitle.tex)
+gm <- cowplot::ggdraw() +
+  cowplot::draw_grob(grid::rasterGrob(png::readPNG(here("paper", "mockups", "fig1_gm_notitle.png")),
+                                      interpolate = TRUE, width = grid::unit(0.98, "npc")))
 
-(p_schematic / p_fits) +
-  plot_layout(guides = "collect", heights = c(1, 1.1)) +
-  plot_annotation(tag_levels = "A") &
-  theme(legend.position = "bottom")
+## compose: [A | B B] over [C C C], only block-level A/B/C labels
+top <- cowplot::plot_grid(gm, pB, ncol = 2, rel_widths = c(1, 2),
+                          labels = c("A", "B"), label_size = 15, vjust = 1.1)
+cowplot::plot_grid(top, pC, ncol = 1, rel_heights = c(1, 1.85),
+                   labels = c("", "C"), label_size = 15, vjust = 1.1)
 ```
 
 
