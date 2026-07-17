@@ -471,68 +471,80 @@ distribution is doing more of the work than we currently attribute to it.
 ```md
 ## Relation to scaling laws  [draft for promotion — MCF to review]
 
-The main-text figure (panel B) plots the models' *effective acceleration*
-on the distinct-input ladder and states that it falls as a power law. Here
-we derive that relationship from the scaling law, which makes the contrast
-with children exact rather than descriptive.
+The main-text figure places children and language models on one axis by
+re-expressing both as a *fractional return to experience*. Here we derive
+that axis from the scaling law, which makes the contrast exact rather than
+descriptive.
 
 Take the model's aggregate competence to be its loss on the target
 vocabulary: the mean surprisal $L(D)$ of the CDI words after training on
-$D$ distinct words of input. On the ladder this follows the Chinchilla form
+$D$ word tokens of input. On the ladder this follows the Chinchilla form
 $$L(D) = E + B\,D^{-\beta},$$
 with $E$ the irreducible entropy floor and $B, \beta$ fit across budgets
 (here $E \approx 2.94$ nats, $B \approx 312$, $\beta \approx 0.32$,
-$R^2 = 0.998$). The *excess loss* $L(D) - E = B\,D^{-\beta}$ is the
-reducible part that training removes.
+$R^2 = 0.998$). The *excess loss* $L(D) - E = B\,D^{-\beta}$ is the reducible
+part that training removes; it falls as a power law of slope $-\beta$
+(panel B), with the per-seed points scattering tightly around it.
 
-Define the model's effective acceleration exactly as we define a child's
-$\kappa$ — the return to an $e$-fold of experience, i.e. the gain in
-competence per unit of *log* data. For a child, competence is
-logit-production and $\kappa_i = \mathrm{d}\eta_i / \mathrm{d}\log t$ is a
-constant of the trajectory. For a model, competence is negative loss, so
-$$\kappa_{\text{eff}}(D) = -\frac{\mathrm{d}L}{\mathrm{d}\ln D}.$$
-Differentiating the scaling law,
-$$\frac{\mathrm{d}L}{\mathrm{d}\ln D} = D\,\frac{\mathrm{d}L}{\mathrm{d}D}
- = D\,\big(-\beta B\,D^{-\beta-1}\big) = -\beta B\,D^{-\beta} = -\beta\,(L - E),$$
-so that
-$$\kappa_{\text{eff}}(D) = \beta\,\big(L(D) - E\big) = \beta \times \text{excess loss}.$$
+The model's *marginal return* to experience is the loss it removes per
+$e$-fold of data,
+$$R(D) = -\frac{\mathrm{d}L}{\mathrm{d}\ln D} = \beta\,\big(L(D) - E\big),$$
+obtained by differentiating the scaling law. This is a genuine return, but
+it is measured in nats of loss, not in the logit units of a child's
+$\kappa$; we do *not* call it an acceleration, and its numerical value — and
+where it would cross any fixed threshold — depends on the arbitrary choice
+of nats versus bits. What *is* unit-free is its ratio to the excess loss:
+the *fractional return*, the share of the remaining reducible loss removed
+per $e$-fold,
+$$\gamma_{\text{LM}}(D) = \frac{R(D)}{L(D) - E} = \beta.$$
+For a power law this is constant — $\gamma_{\text{LM}} = \beta \approx 0.32$
+at every budget. That constancy *is* the scaling law.
 
-Two consequences follow. First, effective acceleration is *proportional to
-excess loss*: as the model nears the entropy floor ($L \to E$),
-$\kappa_{\text{eff}} \to 0$. The model decelerates — each further $e$-fold
-of data buys less — and does so smoothly, governed by the single exponent
-$\beta$. Second, taking logs,
-$$\log \kappa_{\text{eff}}(D) = \log(\beta B) - \beta \log D,$$
-so effective acceleration against data is a straight line of slope
-$-\beta$ on log-log axes. That is panel B: the ladder points lie on this
-line, and it crosses the unit-accumulator value $\kappa_{\text{eff}} = 1$
-at $D = (\beta B)^{1/\beta} \approx 2$M words, below which the model's
-returns fall short of a pure accumulator's.
+The same construction applies to a child. Take competence to be production
+loss, $L_i(t) = \operatorname{mean}_j[-\log p_{ij}(t)]$, whose floor is zero
+(a known word is produced, $p \to 1$). Its marginal return is
+$R_i(t) = -\mathrm{d}L_i/\mathrm{d}\log t = \kappa_i\,\operatorname{mean}_j(1 - p_{ij})$,
+so the fractional return is
+$$\gamma_i(t) = \frac{R_i(t)}{L_i(t)}
+ = \kappa_i\,\frac{\operatorname{mean}_j(1 - p_{ij})}{\operatorname{mean}_j(-\log p_{ij})},$$
+which rises toward the child's own $\kappa_i$ as the vocabulary saturates.
+Panel C plots $\gamma$ for both populations against the *same absolute*
+amount of input — training tokens for the models, and for each child the
+cumulative tokens implied by their age under the pooled input rate (see
+Population Input Range Estimation), so that age serves as experience. The
+models sit at $\gamma = \beta \approx 0.32$, a third of a unit accumulator,
+uniformly across the token axis; children rise from near the accumulator
+boundary toward $\kappa_i \sim 10$ — an order of magnitude higher — and vary
+widely across individuals.
 
-The contrast with children is now formal. A child's $\kappa_i$ carries no
-decay term — competence is linear in log-age, so acceleration is held fixed
-across development. A model's $\kappa_{\text{eff}}$ is $\beta$ times a
-quantity that shrinks to zero. Children hold their acceleration; models
-spend theirs down as they consume data.
+The contrast is now formal, and it is about functional *form*. The model's
+reducible loss follows a single-exponent power law, so its fractional return
+is pinned at $\beta$; the child's does not, so its fractional return climbs.
+Neither learner has flat returns in absolute terms — both slow as they
+approach their floor — but the model spends its returns down along a fixed
+exponent while the child's exponent grows.
 
-Two caveats. The identity is aggregate: $L$ is the mean over CDI words and
-$\kappa_{\text{eff}}$ is the return of that aggregate, not of any single
-word — the quantization account (Michaud et al., 2023) is what links the
-smooth aggregate curve to discrete per-word acquisition. And the two
-$\kappa$'s share an axis — return per $e$-fold of experience — but are
-measured in different competence units (logit-production for children,
-nats of loss for models); the comparison is of the *shape and magnitude of
-returns*, not of one identical quantity. The factor $1/\ln 10 \approx
-0.434$ that appears when converting per-word sigmoid slopes from
-$\log_{10}$-steps to natural-log experience (LM methods) is only
-base-change bookkeeping and plays no part here.
+Three caveats bound the comparison. First, the identity is *aggregate*: $L$
+is the mean over CDI words and $\gamma$ is the return of that aggregate, not
+of any single word — the quantization account (Michaud et al., 2023) is what
+links the smooth aggregate curve to discrete per-word acquisition. Second,
+the two $\gamma$'s share a *definition* — reducible loss removed per $e$-fold
+of experience — but not a *task*: the model's loss is next-token surprisal
+and the child's is production surprisal, so the comparison is of the rate and
+shape of returns, not of one identical quantity. Third, the child's *rising*
+$\gamma$ is the loss-currency reflection of a **constant** $\kappa_i$
+(production probability saturating), not of $\kappa$ increasing over
+development; the invariant claim is the constant-versus-rising exponent. The
+horizontal placement of the child curves carries the input-rate uncertainty
+($\pm 1$ SD $\approx \times 1.7$; panel C ribbons), which shifts children
+along the token axis without changing $\gamma$.
 
 <!-- [BIB NEEDED] Hoffmann et al. (2022) / Chinchilla and Michaud et al. (2023)
      are named in plain text (as in the block above). The main text already uses
      @hoffmann2022 and @michaud2023 markers; if those bib entries are verified,
      these can be promoted to live @ markers. Fitted constants (E, B, beta, R^2)
-     are from the ladder nls fit in build_cache_short.R section 8 — wire to inline
-     values on promotion rather than hard-coding. -->
+     and the panel C series are from build_cache_short.R section 8 — wire to
+     inline values on promotion rather than hard-coding. -->
 ```
 
 # Generating the Model-Ladder Quantile Fans
