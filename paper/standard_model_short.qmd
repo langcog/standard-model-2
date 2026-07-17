@@ -134,17 +134,17 @@ pB <- ggplot(fig1_fan$conceptual,
              aes(age, value, color = scenario, linetype = kind, group = scenario)) +
   geom_blank(data = data.frame(
                quantity = factor(cdi_facet, levels = levels(fig1_fan$conceptual$quantity)),
-               age = 6, value = c(0, 1)),
+               age = 8, value = c(0, 1)),
              aes(age, value), inherit.aes = FALSE) +
   geom_line(linewidth = 0.8) +
   ggrepel::geom_text_repel(data = fig1_fan$conceptual_lab, aes(label = scenario),
-                           size = 2.3, hjust = 0, direction = "y", nudge_x = 2,
-                           segment.size = 0.2, xlim = c(60, NA)) +
+                           size = 2.3, hjust = 0, direction = "y", nudge_x = 1,
+                           segment.size = 0.2, xlim = c(36, NA)) +
   facet_wrap(~ quantity, scales = "free_y") +
   scale_color_manual(values = col_scn, guide = "none") +
   scale_linetype_manual(values = lty_scn, guide = "none") +
-  scale_x_continuous(breaks = c(12, 24, 36, 48, 60)) +
-  coord_cartesian(xlim = c(6, 80), clip = "off") +
+  scale_x_continuous(breaks = c(12, 24, 36)) +
+  coord_cartesian(xlim = c(8, 46), clip = "off") +
   labs(x = "Age (Months)", y = NULL) +
   theme_minimal(base_size = 9) +
   theme(strip.text = element_text(face = "bold", size = 9),
