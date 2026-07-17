@@ -303,13 +303,20 @@ inline <- list(
 saveRDS(inline, file.path(CACHE, "si_inline.rds"))
 cat(sprintf("Wrote %s\n", file.path(CACHE, "si_inline.rds")))
 
-## ============ 8. Fig 3B: scaling-law ladder (development axis) ============
+## ============ 8. Fig 3 (LM panels B & C): scaling law + matched-input return ====
 ## Augment fig6_llm_slopes.rds (panel A = EN/NO child + LM slope densities, from
-## build_cache.R) with the panel-B scaling curve. On the distinct-input ladder,
-## aggregate loss (mean CDI-word surprisal per data budget) follows the Chinchilla
-## form L = E + B*D^-beta; the effective acceleration kappa_eff = beta*(L - E)
-## declines as a power law (log-log linear, slope -beta). See SI: Relation to
-## Scaling Laws.
+## build_cache.R) with panels B and C. On the distinct-input ladder, aggregate loss
+## (mean CDI-word surprisal per data budget) follows the Chinchilla form
+## L = E + B*D^-beta.
+##   Panel B: excess loss (L - E) falls as a power law (slope -beta), shown with the
+##            per-seed points so the model-to-model variability is visible.
+##   Panel C: children and LMs on ONE dimensionless axis -- the fractional return
+##            gamma = (reduction of excess loss per e-fold of experience) / (excess
+##            loss remaining) -- at matched ABSOLUTE input (cumulative word tokens).
+##            For a power law gamma = beta (LMs, constant). For the child accumulator
+##            gamma_i(t) = kappa_i * mean_j(1 - p_ij) / mean_j(-log p_ij), whose
+##            ceiling is the child's kappa_i. Child AGE is mapped to cumulative tokens
+##            via the pooled input rate from studies/input_estimation (age = experience).
 fig6        <- readRDS(file.path(CACHE, "fig6_llm_slopes.rds"))
 ladder      <- read_csv(here("fits", "llm", "ladder_bestval_finer.csv"), show_col_types = FALSE)
 scaling_bud <- ladder |>
@@ -319,9 +326,59 @@ scaling_fit <- nls(L ~ E + B * words^(-beta), data = scaling_bud,
                    control = nls.control(maxiter = 500, warnOnly = TRUE))
 scaling_par <- as.list(coef(scaling_fit))          # E (entropy floor), B, beta
 scaling_bud <- scaling_bud |>
-  mutate(kappa = scaling_par$beta * (L - scaling_par$E))
+  mutate(kappa = scaling_par$beta * (L - scaling_par$E))   # retained for SI derivation
 fig6$scaling_bud <- scaling_bud
 fig6$scaling_par <- scaling_par
+E <- scaling_par$E
+
+## (B) per-seed excess loss (the scaling-law points, with variability)
+seed_excess <- ladder |>
+  group_by(seed, words) |> summarise(L = mean(surprisal), .groups = "drop") |>
+  mutate(excess = L - E) |> filter(excess > 0)
+## (C, LM) per-seed smooth local exponent gamma(D) = -d log(excess)/d log D
+Dgrid <- 10^seq(log10(3e6), log10(2.4e7), length = 50)
+lm_gamma <- seed_excess |> group_by(seed) |> group_modify(~{
+  f <- lm(log(excess) ~ poly(log(words), 2, raw = TRUE), data = .x)
+  b <- coef(f); ld <- log(Dgrid)
+  tibble(words = Dgrid, gamma = -(b[2] + 2 * b[3] * ld)) }) |> ungroup() |> filter(gamma > 0)
+
+## input rate + between-child SD of log rate, from the input-estimation validation set
+## (POOLED row); single-sourced here rather than duplicated in the figure chunk.
+vpool <- read_csv(here("studies", "input_estimation", "validation_set.csv"), show_col_types = FALSE) |>
+  filter(grepl("POOLED", source)) |> slice(1)
+rate_hr <- vpool$tokens_per_hour_mean; sig_r <- vpool$log_r_sd
+tok_per_mo <- rate_hr * 365; f1 <- exp(sig_r)      # x / division per +/-1 SD of log input rate
+a0 <- 18; log_H <- log(365)                        # model constants (Methods)
+
+## (C, children) per-dataset item difficulties (delta_j) and measured age spans
+## (spans per si_datasets.rds: Thal 12-29, Smith 16-30, Marchman 8-30).
+EN_INFO <- tibble(lang = c("English (Thal)", "English (Smith)", "English (Marchman)"),
+                  slug = c("thal", "smith", "marchman"), amin = c(12, 16, 8), amax = c(29, 30, 30))
+dj_of <- lapply(setNames(EN_INFO$slug, EN_INFO$lang), function(s) read.csv(PSI(s))$delta_j)
+gamma_curve <- function(xi, kap, dj, ages)
+  vapply(ages, function(t) { p <- plogis(xi + kap * log(t / a0) + log_H - dj)
+                             kap * mean(1 - p) / mean(-log(p)) }, numeric(1))
+elig <- readRDS(file.path(CACHE, "si_blups.rds")) |>
+  filter(lang %in% EN_INFO$lang, kappa > 0, n_admins >= 3) |> left_join(EN_INFO, by = "lang")
+## all eligible English children: gamma over each child's DATASET measured age span
+child_bg <- elig |> rowwise() |>
+  reframe(ckey = ckey, age = seq(amin, amax, by = 0.4),
+          gamma = gamma_curve(xi, kappa, dj_of[[lang]], seq(amin, amax, by = 0.4))) |>
+  ungroup() |> mutate(tokens = age * tok_per_mo)
+## three exemplars (low/med/high kappa) from Marchman (widest span), with +/-1 SD input ribbon
+mar  <- filter(elig, slug == "marchman")
+exk  <- quantile(mar$kappa, c(.1, .5, .9))
+exid <- vapply(exk, function(k) mar$ckey[which.min(abs(mar$kappa - k))], character(1))
+child_ex <- elig |> filter(ckey %in% exid) |> rowwise() |>
+  reframe(ckey = ckey, kappa = kappa, age = seq(amin, amax, by = 0.25),
+          gamma = gamma_curve(xi, kappa, dj_of[[lang]], seq(amin, amax, by = 0.25))) |>
+  ungroup() |> mutate(tokens = age * tok_per_mo, lo = tokens / f1, hi = tokens * f1)
+
+fig6$fig3 <- list(seed_excess = seed_excess, lm_gamma = lm_gamma,
+                  child_bg = child_bg, child_ex = child_ex,
+                  consts = list(rate_hr = rate_hr, sig_r = sig_r, tok_per_mo = tok_per_mo, f1 = f1,
+                                band_lo = 8 * tok_per_mo, band_hi = 30 * tok_per_mo))
 saveRDS(fig6, file.path(CACHE, "fig6_llm_slopes.rds"))
-cat(sprintf("Augmented fig6_llm_slopes.rds with scaling ladder (beta=%.3f, E=%.2f)\n",
-            scaling_par$beta, scaling_par$E))
+cat(sprintf("Augmented fig6_llm_slopes.rds: scaling (beta=%.3f, E=%.2f) + fig3 (n_child=%d, exemplars kappa=%s)\n",
+            scaling_par$beta, scaling_par$E, dplyr::n_distinct(child_bg$ckey),
+            paste(round(exk, 1), collapse = "/")))
