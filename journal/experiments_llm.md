@@ -285,6 +285,65 @@ re-run `build_cache.R`.
 
 ---
 
+## 🟡 L6-archive. ccn2 — re-train + share the L6 ladder for reuse (2026-07-17, running)
+
+**Why.** L4/L6's 180 checkpoints were discarded after surprisal extraction
+(`--save_total_limit 1` then `rm -rf checkpoint-*`; `/data2` was 100% full). They're
+needed for multiple downstream projects + HF sharing → re-train the **exact** L6 ladder
+(byte-identical `chunks/`, same config) and stream each model to HF.
+
+**What.** 10 seeds × 18 rungs = 180 GPT-2-small, re-trained from the intact chunks with the
+L6 config (40 epochs, ES patience 4, batch 8, LR 1e-4). Only change vs L6: instead of
+deleting the best checkpoint, export **bf16 safetensors → HF** (`mcxfrank/childes-gpt2-ladder`,
+private) + save surprisal CSVs. Atomic-claim per-GPU dispatcher (`worker.sh`), 8-wide.
+
+**Fidelity** (smoke, seed42/0.5M): re-trained per-word surprisal vs published
+`ladder_bestval_finer.csv` — **r = 0.988**, aggregate mean within **0.04 nats**. Faithful
+re-training (GPU nondeterminism → not bit-identical; published CSVs remain ground truth).
+
+**Status.** ~140/180 uploaded, 0 failures. ~207 GPU-hr / ~1 day 8-wide.
+**Artifacts.** `mcxfrank/childes-gpt2-ladder` (HF, private); `retrain_dev/surprisal_*.csv`;
+`worker.sh` + `export_and_upload.py` on ccn2.
+
+---
+
+## 🟡 L7. ccn2 — composition control: BabyLM vs ClimbMix (2026-07-17, queued)
+
+**Question — the affirmative leg for L5.** L5 split CHILDES halves (distributionally near-
+identical, low power to *find* divergence). Do LM "individuals" still converge in developmental
+rate on *maximally different* corpora? Between-corpus (child-oriented vs web) is the strong lever;
+disjoint subsets within each corpus give the sample-variance floor.
+
+**Design.** 6 datasets = 3 disjoint **BabyLM-2024** subsets (CHILDES source **excluded** to avoid
+overlap with our ladders — ~23.4M words each from the 70.2M non-CHILDES: gutenberg/open_subtitles/
+simple_wiki/bnc/switchboard) + 3 disjoint **ClimbMix** subsets (24M each,
+`karpathy/climbmix-400b-shuffle`). **8 seeds × 12 rungs [0.5…24M] = 576 runs.** Identical
+measurement to L6 (`GPT2_CHILDES` tokenizer, CHILDES-val CDI probe, ES pipeline). Variance model:
+`κ ~ 1 + corpus + (subset|corpus) + (seed|subset)` → σ_corpus / σ_subset / σ_seed vs children σ_κ≈3.5.
+
+**Zero-GPU go/no-go — CDI-word frequency across corpora** (surprisal ∝ log-freq, so freq gates
+learnability *and* previews the contrast):
+
+| corpus | words | CDI present | ≥1/M | ≥10/M | median/M |
+|---|---|---|---|---|---|
+| CHILDES (ref) | 24.5M | 611/611 | 609 | 588 | 104 |
+| BabyLM non-CHILDES | 70.1M | 611/611 | 602 | 493 | 62 |
+| ClimbMix (web) | 124M | 611/611 | 599 | 489 | 49 |
+
+**GREEN**: all 611 CDI words present in every corpus (probe not floor-bound on web). The
+composition contrast is **modest** — CDI log-freq profiles correlate r = 0.76 (CHILDES↔ClimbMix),
+0.84 (↔BabyLM), 0.89 (BabyLM↔ClimbMix). Since LM surprisal ≈ log-freq, this **predicts convergence**
+even child-vs-web, and is a mechanistic account of the L4/L5 null (cross-corpus convergence =
+corpus-invariant frequency structure). MCF committed to genuine interpretation either way.
+
+**Compute/infra.** ~5 days 8-wide. Auto-queued after L6-archive by a self-healing `supervisor.sh`
+(smoke-gate → 8 workers → dead-worker restart + stale-claim reap; resumable). Models →
+`mcxfrank/gpt2-composition-control` (HF, private, bf16). Builder `make_register_data.py`; spec
+[`notes/babylm_register_control_spec.md`](notes/babylm_register_control_spec.md); CDI-freq table
+`cdi_freq_corpora.csv`.
+
+---
+
 ## Infrastructure & environment
 
 - **Data provenance.** All self-contained in the public `styfeng/TinyDialogues`
