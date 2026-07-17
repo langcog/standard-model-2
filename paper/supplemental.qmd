@@ -560,8 +560,8 @@ the population covariance $\Sigma$ directly (with partial pooling), sampling fro
 unshrunken per-child BLUPs to resample.
 
 **Each child's expected vocabulary curve.** Ages run on a per-dataset grid spanning
-the 5th–95th percentile of that dataset's observed ages, so the bands are not
-extrapolated beyond the data. We draw $M$ synthetic item difficulties
+the full range of that dataset's observed ages, so the bands cover the plotted
+trajectories without extrapolating beyond the data. We draw $M$ synthetic item difficulties
 $\delta_j \sim \mathcal{N}(0, \tau_\delta)$ to stand in for a typical item set;
 child $i$'s expected productive vocabulary, as a proportion of items, at age $t$ is
 $$V_i(t) = \frac{1}{M}\sum_{j=1}^{M} \operatorname{logit}^{-1}\!\big(\xi_i + \kappa_i \log(t/a_0) + \log H - \delta_j\big),$$
