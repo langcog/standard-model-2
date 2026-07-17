@@ -89,16 +89,16 @@ Recent models describe children's vocabulary growth as a process of accumulation
 
 We begin with the model of @kachergis2022, an accumulator over ratio-scale variables with real units: words (tokens) per hour, total words (types) in the child's vocabulary, and reaction times in word processing. The absolute magnitude of these variables -- not just their variability -- can be measured and compared across studies and relations can be estimated and compared between them. Further, the presence of a true zero for each means that they can be log transformed, which is critical for capturing the shape of their growth over development [@frank2026;@kail1991]. These features distinguish our modeling approach from the wide variety of models of early word learning that typically establish either schematic or variability-based linkages to developmental data [@frank2009;@mcmurray2012;@trueswell2013;@kachergis2012]. 
 
-We start with the Rasch model from psychometrics [@rasch1960;@bond2013], which assumes that each child $i$ has a learning ability $\theta_i$ and each word $j$ has a difficulty $\delta_j$.^[A variety of previous work has focused on estimating the properties of individual words  [@goodman2008;@hidaka2013;@roy2015;@braginsky2019;@kachergis2022;@kachergis2022b]. These analyses reveal that there is predictable word-level difficulty information but that only a modest portion of the variation between words is carried by frequency information. Words can be hard for a child to acquire because they vary also in the complexity and concreteness of their meanings, their syntactic category and syntactic context, their phonology, and many other factors. In the current work, we estimate word difficulty as a free parameter, and focus instead on variation between children.] The probability that child $i$ produces word $j$ is: 
+We use the Rasch model from psychometrics [@rasch1960;@bond2013], which assumes that each child $i$ has a learning ability $\theta_i$ and each word $j$ has a difficulty $\delta_j$.^[A variety of previous work has focused on estimating the properties of individual words  [@goodman2008;@hidaka2013;@roy2015;@braginsky2019;@kachergis2022;@kachergis2022b]. These analyses reveal that there is predictable word-level difficulty information but that only a modest portion of the variation between words is carried by frequency information. Words can be hard for a child to acquire because they vary also in the complexity and concreteness of their meanings, their syntactic category and syntactic context, their phonology, and many other factors. In the current work, we estimate word difficulty as a free parameter, and focus instead on variation between children.] The probability that child $i$ produces word $j$ is: 
 
 $$P(w_{i,j}=1 \mid \theta_i, \delta_j) =\frac{\exp(\theta_i - \delta_j)}{1 + \exp(\theta_i - \delta_j)}$$
   
 We then describe the child's ability as
 
   $$\theta_i(t) = \xi_i + \kappa_i ~ \log(t/a_0) + \log(H)$$
-\noindent which is contains three terms, an intercept $\xi_i$, an acceleration term, $\kappa_i ~ \log(t/a_0)$ that describes the rate of accumulation growing exponentially in the log of the child's age, and a constant offset $H$ for the number of hours over which accumulation occurs (See SI: Generative Model). This is our "accelerating accumulator" model, in which accumulating language ``counts for more'' later in development. Children vary on both their initial rate of accumulation $\xi_i$ and their acceleration $\kappa_i$, creating variant of a standard longitudinal growth model in which children vary on their slope and intercept [@grimm2016]. Our model is closest to the formulations of @hidaka2013 and @kachergis2022, but has not yet been described in the literature (see SI: Comparison with Prior Models).
+\noindent which is contains three terms, an intercept $\xi_i$, an acceleration term, $\kappa_i ~ \log(t/a_0)$ that describes the rate of accumulation growing exponentially in the log of the child's age, and a constant offset $H$ for the number of hours over which accumulation occurs (See @fig-schematic, A). This is an "accelerating accumulator" model, in which accumulating language ``counts for more'' later in development. Children vary on both their initial rate of accumulation $\xi_i$ and their acceleration $\kappa_i$, creating variant of a standard longitudinal growth model in which children vary on their slope and intercept [@grimm2016]. In terms of previous accumulator models, our model is closest to the formulations of @hidaka2013 and @kachergis2022, but has not yet been described in the literature (see SI: Comparison with Prior Models).
 
-Under this model, we can use the mean value of $\kappa$ to distinguish pure accumulator behavior ($\kappa \approx 1$) and accelerating accumulator behavior ($\kappa > 1$). Note that it is critical to distinguish between supra-linear growth in children's actual vocabulary (in terms of count) -- a pattern that is robustly observed across children worldwide [@frank2021;@fenson1994] -- and the idea that children's *internal learning ability* accelerates across development, which is the substantive claim we test here.
+Under this model, we can use the mean value of $\kappa$ to distinguish pure accumulator behavior ($\kappa \approx 1$) from accelerating accumulator behavior ($\kappa > 1$). Note that it is critical to distinguish between supra-linear growth in children's actual vocabulary (in terms of count) -- a pattern that is robustly observed across children worldwide [@frank2021;@fenson1994] -- and the idea that children's *internal learning ability* accelerates across development, which is the substantive claim we test here (see @fig-schematic, B for an illustration of model predictions in both latent space and vocabulary space).
 
 # Fitting the accumulator model 
 
@@ -127,8 +127,15 @@ col_scn <- c("Pure (κ=1)" = "grey55", "Baseline" = "#222222",
 lty_scn <- c("pure" = "21", "accel" = "solid")
 
 ## Block B: conceptual theta -> CDI (two facets, shared axes, direct line labels)
+## force the CDI (right) facet to span the full proportion range [0, 1] while
+## leaving the free-y theta facet untouched
+cdi_facet <- levels(fig1_fan$conceptual$quantity)[2]
 pB <- ggplot(fig1_fan$conceptual,
              aes(age, value, color = scenario, linetype = kind, group = scenario)) +
+  geom_blank(data = data.frame(
+               quantity = factor(cdi_facet, levels = levels(fig1_fan$conceptual$quantity)),
+               age = 6, value = c(0, 1)),
+             aes(age, value), inherit.aes = FALSE) +
   geom_line(linewidth = 0.8) +
   ggrepel::geom_text_repel(data = fig1_fan$conceptual_lab, aes(label = scenario),
                            size = 2.3, hjust = 0, direction = "y", nudge_x = 2,
@@ -136,7 +143,8 @@ pB <- ggplot(fig1_fan$conceptual,
   facet_wrap(~ quantity, scales = "free_y") +
   scale_color_manual(values = col_scn, guide = "none") +
   scale_linetype_manual(values = lty_scn, guide = "none") +
-  coord_cartesian(xlim = c(6, 86), clip = "off") +
+  scale_x_continuous(breaks = c(12, 24, 36, 48, 60)) +
+  coord_cartesian(xlim = c(6, 80), clip = "off") +
   labs(x = "Age (Months)", y = NULL) +
   theme_minimal(base_size = 9) +
   theme(strip.text = element_text(face = "bold", size = 9),
