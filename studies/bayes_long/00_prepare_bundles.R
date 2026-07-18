@@ -33,9 +33,14 @@ A0        <- 18                                   # anchor age (explosion milest
 LOG_H     <- log(365)                             # ~waking hours/month; interpretive offset
 MIN_ITEM_OBS <- 100                               # per-unit item filter
 MIN_ADMINS   <- as.integer(Sys.getenv("MIN_ADMINS", "2"))  # min administrations per child
-QC_REL_TOL   <- 0.25    # drop child if FINAL vocab craters >25% below its running peak
-QC_PEAK      <- 0.10    #   ...only if the peak reached at least this (ignore tiny-vocab kids)
-QC_DROP      <- 0.05    #   ...and the absolute end-drop is at least this (ignore noise wiggles)
+# Unified local-outlier QC (see clean_child below). A true production trajectory is
+# monotone non-decreasing (can't un-produce words) and rises at a plausible rate.
+QC_REL_TOL   <- 0.25    # CRATER: an admin >25% below the running peak is a low outlier
+QC_PEAK      <- 0.10    #   ...counted only when the running peak reached at least this
+QC_DROP      <- 0.05    #   ...and the absolute drop is at least this (ignore report noise)
+QC_RATE_MAX  <- 0.40    # JUMP: a rise faster than this (proportion of items / month)...
+QC_JUMP_BASE <- 0.10    #   ...launched from a base below this is a high outlier (impossible;
+                        #   real fast risers climb from a non-trivial base, so they're spared)
 
 OUT_DIR <- here("fits","bayes_long"); dir.create(OUT_DIR, recursive=TRUE, showWarnings=FALSE)
 
@@ -79,6 +84,44 @@ harmonize_items <- function(it) {
                               paste0("id:", item_definition)))
 }
 
+## ---- unified local-outlier cleaner (per child) ----
+## A true production trajectory is monotone non-decreasing (a child cannot un-produce
+## words) and its rises are rate-bounded (a child cannot learn ~half the CDI in a
+## month). A single administration that violates either is a local outlier -- the same
+## mis-keyed WG-comprehension record shows up as an end-crater, a mid spike-then-crash,
+## or an impossible end-spike. Greedily remove the single most-severe outlier admin and
+## re-check, until the trajectory is clean. Returns a logical KEEP mask over the input
+## (age, prop) rows (assumed sorted by age); the >=MIN_ADMINS filter then drops any child
+## left with too few waves.
+##   - CRATER admin: value >QC_REL_TOL below the running peak (floors QC_PEAK, QC_DROP)
+##                   -> the LOW point is the artifact -> remove it.
+##   - JUMP admin:   reached via a rise >QC_RATE_MAX/mo from a base <QC_JUMP_BASE
+##                   -> the HIGH point is the artifact (impossible speed) -> remove it.
+clean_child <- function(age, prop) {
+  keep <- rep(TRUE, length(prop))
+  repeat {
+    ix <- which(keep); if (length(ix) < 2) break
+    a <- age[ix]; p <- prop[ix]; peak <- cummax(p)
+    jp <- integer(0); js <- numeric(0); cp <- integer(0); cs <- numeric(0)
+    for (j in 2:length(p)) {
+      drop_amt <- peak[j-1] - p[j]
+      rate     <- (p[j] - p[j-1]) / (a[j] - a[j-1])
+      if (rate > QC_RATE_MAX && p[j-1] < QC_JUMP_BASE) {                  # jump: high admin j
+        jp <- c(jp, ix[j]); js <- c(js, rate)
+      } else if (peak[j-1] >= QC_PEAK && drop_amt > QC_REL_TOL*peak[j-1] && drop_amt >= QC_DROP) {
+        cp <- c(cp, ix[j]); cs <- c(cs, drop_amt/peak[j-1])              # crater: low admin j
+      }
+    }
+    ## remove JUMPS first: a spike inflates the running peak, making every real point
+    ## after it look like a crater -- kill the spike and those induced craters vanish.
+    if (length(jp))      keep[jp[which.max(js)]] <- FALSE
+    else if (length(cp)) keep[cp[which.max(cs)]] <- FALSE
+    else break
+    if (sum(keep) < MIN_ADMINS) break                    # will be dropped by admin-count filter
+  }
+  keep
+}
+
 build_bundle <- function(it_unit, slug, label) {
   ## collapse to one obs per (child, age, item): produces if produced in any
   ## admin that month (merges WG+WS at the same age, and same-form retests)
@@ -94,20 +137,21 @@ build_bundle <- function(it_unit, slug, label) {
   it_keep <- df |> count(item) |> filter(n>=MIN_ITEM_OBS) |> pull(item)
   df <- df |> filter(item %in% it_keep)
 
-  ## QC: drop whole child if their FINAL vocabulary craters -- per-admin proportion
-  ## produced ends >QC_REL_TOL below the child's running peak (with floors so trivial
-  ## low-vocab wiggles don't count). A child cannot un-produce words, so a sustained
-  ## end-of-trajectory collapse signals a corrupted record (Marchman WG comprehension
-  ## mis-keyed as production: spikes then craters to ~0). Endpoint- and peak-relative:
-  ## catches low-vocab craters an absolute rule misses, while sparing dip-then-recover
-  ## kids that end at their peak (Norwegian's noisy-but-growing trajectories).
-  prop <- df |> group_by(ckey, age) |> summarise(v = mean(produces), .groups="drop")
-  qc_bad <- prop |> arrange(ckey, age) |> group_by(ckey) |>
-    summarise(peak = max(v), last = v[which.max(age)],
-              bad = peak >= QC_PEAK & (peak-last) > QC_REL_TOL*peak & (peak-last) >= QC_DROP,
-              .groups="drop") |>
-    filter(bad) |> pull(ckey)
-  df <- df |> filter(!(ckey %in% qc_bad))
+  ## QC: unified local-outlier cleaner (see clean_child). Per child, greedily remove
+  ## administrations that violate monotone + rate-bounded growth (impossible craters
+  ## OR impossible jumps -- both are the mis-keyed WG-comprehension artifact). Removes
+  ## the outlier admin, not the whole child; children left with <MIN_ADMINS waves are
+  ## then dropped by the admin-count re-filter below.
+  prop <- df |> group_by(ckey, age) |> summarise(v = mean(produces), .groups="drop") |> arrange(ckey, age)
+  n_admin_before <- nrow(prop)
+  keep_adm <- prop |> group_by(ckey) |>
+    group_modify(~ mutate(.x, keep = clean_child(.x$age, .x$v))) |> ungroup()
+  n_out <- sum(!keep_adm$keep)
+  df <- df |> semi_join(filter(keep_adm, keep) |> select(ckey, age), by=c("ckey","age"))
+  ## re-apply the >=MIN_ADMINS filter (children may have lost waves to the cleaner)
+  keep2 <- df |> distinct(ckey, age) |> count(ckey) |> filter(n >= MIN_ADMINS) |> pull(ckey)
+  n_kid_dropped <- length(setdiff(unique(keep_adm$ckey), keep2))
+  df <- df |> filter(ckey %in% keep2)
 
   ## integer indices for Stan
   df <- df |> mutate(admin = paste(ckey, age, sep="@@"))
@@ -132,13 +176,13 @@ build_bundle <- function(it_unit, slug, label) {
                n_obs=nrow(obs), age_range=range(admin_ix$age),
                med_admins_per_kid=median(ad_per_kid),
                max_admins_per_kid=max(ad_per_kid),
-               n_qc_dropped=length(qc_bad),
-               qc_rule=sprintf("end<peak*(1-%.2f), peak>=%.2f, drop>=%.2f",
-                               QC_REL_TOL, QC_PEAK, QC_DROP))
-  cat(sprintf("  [%s] kids=%d admins=%d items=%d obs=%d | age %d-%d | admins/kid med=%d max=%d | QC-dropped=%d\n",
+               qc_admins_removed=n_out, qc_kids_dropped=n_kid_dropped,
+               qc_rule=sprintf("local-outlier: crater(>%.2f below peak, floors %.2f/%.2f) | jump(>%.2f/mo from base<%.2f)",
+                               QC_REL_TOL, QC_PEAK, QC_DROP, QC_RATE_MAX, QC_JUMP_BASE))
+  cat(sprintf("  [%s] kids=%d admins=%d items=%d obs=%d | age %d-%d | admins/kid med=%d max=%d | QC: %d admins removed, %d kids dropped\n",
               out_slug, meta$n_kids, meta$n_admins, meta$n_items, meta$n_obs,
               meta$age_range[1], meta$age_range[2], meta$med_admins_per_kid, meta$max_admins_per_kid,
-              meta$n_qc_dropped))
+              n_out, n_kid_dropped))
 
   saveRDS(list(stan_data=stan_data, child_ix=child_ix, item_ix=item_ix,
                admin_ix=admin_ix, meta=meta),
