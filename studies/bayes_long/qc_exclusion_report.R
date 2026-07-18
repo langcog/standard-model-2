@@ -41,6 +41,28 @@ cat("=== QC exclusion table (MIN_ADMINS=2, unified local-outlier filter) ===\n")
 saveRDS(tab, here("studies","bayes_long","qc_exclusion_table.rds"))
 
 TR <- bind_rows(traj) |> mutate(dataset=factor(dataset, levels=UNITS$slug))
+
+## ---- paper cache: sample/exclusion table (methods) + spaghetti data (SI figure) ----
+## Self-contained (bundles only), so it renders without the still-running fits.
+LAB <- c(thal="English (Thal)", smith="English (Smith)", marchman="English (Marchman)",
+         norwegian="Norwegian", japanese="Japanese")
+samp <- bind_rows(lapply(UNITS$slug, function(s){
+  m <- readRDS(here("fits","bayes_long", paste0("bundle_",s,".rds")))$meta
+  e <- tab[tab$dataset==s,]
+  tibble(dataset=s, label=LAB[[s]], n_kids_raw=e$kids, n_kids=m$n_kids, n_admins=m$n_admins,
+         n_obs=m$n_obs, age_lo=m$age_range[1], age_hi=m$age_range[2],
+         kids_excluded=e$kids_excluded, admins_removed=e$admins_removed,
+         pct_kids_excluded=100*e$kids_excluded/e$kids)
+}))
+samp <- bind_rows(samp, summarise(samp, dataset="total", label="All", n_kids_raw=sum(n_kids_raw),
+  n_kids=sum(n_kids), n_admins=sum(n_admins), n_obs=sum(n_obs), age_lo=min(age_lo), age_hi=max(age_hi),
+  kids_excluded=sum(kids_excluded), admins_removed=sum(admins_removed),
+  pct_kids_excluded=100*sum(kids_excluded)/sum(n_kids_raw)))
+saveRDS(list(sample=samp, min_admins=2,
+             qc_rule=list(rel_tol=0.25, peak_floor=0.10, drop_floor=0.05, rate_max=0.40, jump_base=0.10)),
+        here("paper","cache","bayes_long_sample.rds"))
+saveRDS(TR, here("paper","cache","qc_spaghetti_data.rds"))
+cat("wrote paper/cache/{bayes_long_sample,qc_spaghetti_data}.rds\n")
 p <- ggplot() +
   geom_line(data=filter(TR,!bad), aes(age, v, group=ckey), color="grey70", alpha=0.20, linewidth=0.25) +
   geom_line(data=filter(TR, bad), aes(age, v, group=ckey), color="#d7191c", alpha=0.70, linewidth=0.4) +
