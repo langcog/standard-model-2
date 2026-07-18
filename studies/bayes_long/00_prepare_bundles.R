@@ -142,7 +142,13 @@ build_bundle <- function(it_unit, slug, label) {
   ## OR impossible jumps -- both are the mis-keyed WG-comprehension artifact). Removes
   ## the outlier admin, not the whole child; children left with <MIN_ADMINS waves are
   ## then dropped by the admin-count re-filter below.
-  prop <- df |> group_by(ckey, age) |> summarise(v = mean(produces), .groups="drop") |> arrange(ckey, age)
+  ## proportion over the FULL checklist J (not per-administered items): WS is a superset
+  ## of WG, so a WG admin scored over its ~396 easy items inflates vs a WS admin over ~680.
+  ## Using sum(produces)/J puts both forms on one scale, so a monotonicity violation is a
+  ## real decline, not a cross-form item-difficulty artifact. (Rescues ~56 Marchman kids
+  ## the per-admin proportion over-excluded; keeps the genuinely-bad craters/tents.)
+  J_qc <- n_distinct(df$item)
+  prop <- df |> group_by(ckey, age) |> summarise(v = sum(produces)/J_qc, .groups="drop") |> arrange(ckey, age)
   n_admin_before <- nrow(prop)
   keep_adm <- prop |> group_by(ckey) |>
     group_modify(~ mutate(.x, keep = clean_child(.x$age, .x$v))) |> ungroup()
