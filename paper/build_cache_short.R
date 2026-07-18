@@ -99,16 +99,16 @@ lvl <- unname(DATASETS)
 ## accelerating accumulator and the two dimensions of individual variation
 ## (efficiency xi = a level shift; acceleration kappa = a fan) in latent-ability
 ## (theta) space and projected into words-produced (CDI) space. Illustrative.
-a0c <- 6; ages_c <- seq(6, 60, length.out = 140); Lc <- log(ages_c / a0c)
-KA_C <- 2.5; DELTA_C <- qnorm(ppoints(150), 0, 1.5)
+a0c <- 8; ages_c <- seq(8, 36, length.out = 140); Lc <- log(ages_c / a0c)
+KA_C <- 3.6; DELTA_C <- qnorm(ppoints(150), 0, 1.5)
 vocab_c <- function(th) vapply(th, function(x) mean(plogis(x - DELTA_C)), numeric(1))
 qlab_c <- c(theta = "Latent Ability (θ)", cdi = "Words Produced (CDI)")
 conceptual <- tribble(
   ~scenario,        ~xi,   ~kappa,      ~kind,
-  "Pure (κ=1)",     -3.5,  1.0,         "pure",
-  "Baseline",       -3.5,  KA_C,        "accel",
-  "↑ Efficiency",   -1.5,  KA_C,        "accel",
-  "↑ Acceleration", -3.5,  KA_C + 1.5,  "accel") |>
+  "Pure (κ=1)",     -4.0,  1.0,         "pure",
+  "Baseline",       -4.0,  KA_C,        "accel",
+  "↑ Efficiency",   -1.8,  KA_C,        "accel",
+  "↑ Acceleration", -4.0,  KA_C + 1.8,  "accel") |>
   mutate(scenario = factor(scenario, levels = scenario)) |>
   rowwise() |>
   mutate(d = list(tibble(age = ages_c, theta = xi + kappa * Lc, cdi = vocab_c(xi + kappa * Lc)))) |>
