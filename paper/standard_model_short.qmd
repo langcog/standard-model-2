@@ -63,7 +63,16 @@ kap_lo   <- .k1(inl$kappa_lo); kap_lo_q5 <- .k1(inl$kappa_lo_q5); kap_lo_q95 <- 
 kap_hi   <- .k1(inl$kappa_hi); kap_hi_q5 <- .k1(inl$kappa_hi_q5); kap_hi_q95 <- .k1(inl$kappa_hi_q95)
 en_kappa <- .k1(inl$en_kappa); no_kappa <- .k1(inl$no_kappa)
 en_sd    <- .k1(inl$en_sd);    no_sd    <- .k1(inl$no_sd)
-qc_mar   <- .pct(inl$qc_marchman); qc_nor <- .pct(inl$qc_norwegian)
+
+# Longitudinal sample + QC exclusions (bayes_long_sample.rds; built from the bundles by
+# studies/bayes_long/qc_exclusion_report.R, so it renders independently of the fit caches).
+bl_samp  <- readRDS(file.path(CACHE, "bayes_long_sample.rds"))
+.bl      <- function(s) bl_samp$sample[bl_samp$sample$dataset == s, ]
+qc_mar   <- .pct(.bl("marchman")$pct_kids_excluded)   # % children excluded, Marchman
+qc_nor   <- .pct(.bl("norwegian")$pct_kids_excluded)  # % children excluded, Norwegian
+n_total  <- format(.bl("total")$n_kids, big.mark = ",")      # kids retained, all datasets
+n_excl   <- .bl("total")$kids_excluded                       # kids excluded, all datasets
+pct_excl <- .pct(.bl("total")$pct_kids_excluded)
 
 knitr::opts_chunk$set(
   echo = FALSE, message = FALSE, warning = FALSE, cache=TRUE,
@@ -327,7 +336,46 @@ The "data gap" in learning efficiency between children and large language models
 
 Reproducible code for this paper is available at \href{}{http://github.com/langcog/standard-model-2}. Data were retrieved from Wordbank using the `wordbankr` package [@frank2017].
 
-All longitudinal datasets with three or more observations per child were included. We excluded a small number of children from the English (Marchman) and Norwegian datasets,(`r qc_mar`% and `r qc_nor`%, respectively), due to suspicious observations in which there was a decline in vocabulary of more than 20% in some longitudinal observations. 
+All longitudinal datasets with three or more observations per child were included. We excluded a small number of children from the English (Marchman) and Norwegian datasets,(`r qc_mar`% and `r qc_nor`%, respectively), due to suspicious observations in which there was a decline in vocabulary of more than 20% in some longitudinal observations.
+
+```md
+[draft for promotion — MCF to review; replaces the paragraph above, which is now stale
+ (we moved from a 3+ to a 2+ inclusion threshold and from the decline-only rule to the
+ unified local-outlier rule over the full checklist). Inline values are cache-derived.]
+
+We included every child with two or more longitudinal administrations
+(`r n_total` children across the five datasets). Because a child cannot un-produce
+words and cannot plausibly acquire a large fraction of the vocabulary in a single month,
+we applied a data-quality filter to each child's trajectory of proportion-produced,
+computed over the full checklist so that the shorter Words-and-Gestures form and the
+longer Words-and-Sentences form are on a common scale. Within each child we removed any
+administration that either fell more than 25% below an earlier peak (an impossible
+decline) or was reached by a rise of more than 40 percentage points per month from a
+near-zero base (an impossible jump); a child was dropped only if fewer than two
+administrations remained. This excluded `r n_excl` children in total (`r pct_excl`%),
+almost all from the English (Marchman) dataset (`r qc_mar`%; Norwegian `r qc_nor`%, the
+others none). Figure S-QC shows every excluded trajectory.
+```
+
+<!-- [draft SI figure — MCF to relocate to the supplement] Renders from the bundles-only
+     cache paper/cache/qc_spaghetti_data.rds. -->
+
+```{r}
+#| label: fig-qc
+#| echo: false
+#| fig-width: 11
+#| fig-height: 3.6
+#| fig-cap: "[draft caption — MCF to review] Quality-control exclusions. Each line is one child's proportion of items produced across administrations; grey = retained, red = excluded, red dots = the specific administrations removed. Exclusions are concentrated in the English (Marchman) dataset and are negligible elsewhere."
+TR <- readRDS(file.path(CACHE, "qc_spaghetti_data.rds"))
+ggplot() +
+  geom_line(data = subset(TR, !bad), aes(age, v, group = ckey), color = "grey70", alpha = 0.20, linewidth = 0.25) +
+  geom_line(data = subset(TR,  bad), aes(age, v, group = ckey), color = "#d7191c", alpha = 0.70, linewidth = 0.40) +
+  geom_point(data = subset(TR, bad & !keep), aes(age, v), color = "#d7191c", size = 0.7) +
+  facet_wrap(~dataset, nrow = 1) + scale_y_continuous(limits = c(0, 1)) +
+  labs(x = "Age (months)", y = "Proportion of items produced") +
+  theme_minimal(base_size = 9) +
+  theme(strip.text = element_text(face = "bold"), panel.grid.minor = element_blank())
+```
 
 ## Bayesian models
 
