@@ -2651,3 +2651,76 @@ moved to `fits/bayes_long/_superseded/` (see its README): all base 2+ bundles+fi
 plus the pre-QC `marchman_a3_m3`/`norwegian_a3_m3` (being overwritten by the
 reruns). Current-and-kept: `_a3` bundles + `{thal,smith,japanese}_a3_m3` +
 incoming reruns.
+
+## 🟢 41. σ_b decomposition, unified outlier QC, and the move to 2+ (drop the 3+ filter) (2026-07-17)
+
+Triggered by the GAMLSS SI prototype (§ studies/gamlss): the parametric M3 fan matched
+the non-parametric beta-regression quantiles well in the median/upper range but ran a
+too-wide **low tail**, worst on the sparse datasets. MCF pushed on whether σ_b (the
+acceleration-variance) overdispersion was *structural* (sparse-data misfit) or still
+*bad data*. It was both — and chasing it apart reshaped the whole pipeline.
+
+**(a) σ_b inflation is driven by the UPPER κ tail, and it's jump-correlated.** Per-child
+κ_i correlates 0.5–0.78 with each child's steepest single-month rise. Marchman's κ 99th
+pct was **51** (max 63) vs a median of 11 — physically impossible (κ≈63 = producing ~500
+words in a month). These are the *same* mis-keyed WG-comprehension records as the craters,
+but landing as impossible **jumps** (a spurious high point), which the endpoint crater
+filter missed because they *end high*. Norwegian's high-κ kids, by contrast, are mostly
+real smooth risers — which is why NO σ_b (5.6) < Marchman (8.0) despite more high-κ kids.
+
+**(b) Jump-rate has a natural ceiling.** Across all clean kids, single-step rise rate
+tops out ~0.30/mo (Thal/Japanese never exceed 0.17–0.21; pooled 99.5th = 0.30). Artifacts
+sit alone beyond 0.40/mo (Marchman 4 steps up to 0.81, in an empty gap). **All high-rate
+steps are 1-month gaps — zero multi-month steps exceed 0.40** (the rate metric already
+normalizes gaps, so no hidden 2–3 month pathology).
+
+**(c) Unified local-outlier QC (`clean_child` in 00_prepare_bundles.R).** Replaced the
+endpoint-crater rule with one per-child cleaner: a true trajectory is monotone +
+rate-bounded, so greedily remove admins that violate either — **craters** (>25% below
+running peak, floors 0.10/0.05) or **jumps** (>0.40/mo from base <0.10). **Jumps removed
+first** (a spike inflates the running peak, making real later points look like craters).
+Removes the outlier **admin**, not the child (child falls out only if left <MIN_ADMINS).
+Validated on all verified cases (Marchman end-spikes dropped; Norwegian spike excised
+keeping its 8 good waves; **real fast riser spared**; noise dips <25% spared).
+
+**(d) Cross-form confound → proportion over the full checklist J.** WS ⊇ WG, so a WG admin
+scored over its ~396 *easy* items inflates vs a WS admin over ~680: real ability growth
+reads as a proportion *decline*, over-excluding two-wave WG→WS kids. Fix: QC proportion =
+`sum(produces)/J` (full checklist), not per-administered-items. On Marchman the per-admin
+metric touched 142 kids; /J touches 88 — **56 were confounded over-exclusions (rescued)**,
+86 robustly bad under either denominator (kept). The model itself was always fine (δ_j
+handles item difficulty); only the raw-proportion QC needed the fix.
+
+**(e) σ_b test refit (Marchman M3, unified /J filter, 3+ bundle): 8.00 → 4.33.** κ steady
+at 10.7. **~Half of Marchman's overdispersion was bad data** — the jump artifacts inflating
+the variance through the upper tail. σ_b 4.33 is the structural floor, in line with the
+clean datasets (Thal 3.2, JP 5.4, NO 5.6). Confirms MCF's data-quality instinct; the
+crater-only filter had left σ_b flat (8.39→8.00) because craters shift the *mean*, jumps
+the *variance*.
+
+**(f) The 3+ filter audit → DROPPED; move to 2+.** Checked the log: the 3+ filter (§40.1a)
+was adopted *only* to probe the σ_b/convergence mystery (Smith σ_b 8→5, NO convergence,
+exposed the Marchman pathology). No data-quality reason. Cost: it discards **63% of all
+children** (2+: 4,984 kids → 3+: 1,829), and **93% of Marchman** (2,091 → 151), because
+Marchman is a two-wave design (median 2 admins). Every job it did is now done better: bad
+data by the jump filter, convergence by the init/scaling fixes (§40.2), sparse-slope
+regularization by the coming partial-pooled mega-model. So dropped it. **Rebuilt all five
+at 2+** with the unified /J QC: Thal 653, Smith 316, Marchman **2,136**, Norwegian 1,630,
+Japanese 187 = **4,922 kids** (QC excludes 62 = 1.24%, concentrated in Marchman 2.6%).
+
+**(g) GAMLSS benchmark validated.** The stub was cross-sectional; applied to longitudinal
+data it treats admins as independent. But full-longitudinal vs one-admin-per-child centiles
+are identical to ≤0.02 (NO, the deepest repeated-measures case) — the correlation affects
+SEs (unused) not the quantile point-estimates. It's a valid *marginal-quantile* benchmark;
+frame it as such in the SI.
+
+**Artifacts:** `studies/bayes_long/qc_exclusion_report.R` (spaghetti + count table, saved
+`qc_exclusion_{spaghetti.png,table.rds}`); `studies/gamlss/01_gamlss_overlay.R`. Exclusion
+numbers destined for a cached methods block + SI spaghetti (PR).
+
+**Status.** 2+ ladder launched (20 fits; NO M3 on `-p mcfrank` owner node, rest on
+`-p owners` auto-requeue). Next: by-dataset ladder ELPD at 2+, then the partial-pooled
+mega-model (shared/partially-pooled child variance across datasets; items nested within
+dataset) as the unified best-estimate model, with the ladder kept as independent
+replication. Report σ_b *magnitude* from the mega-model, not per-dataset (2+ per-dataset
+σ_b is inflated for sparse data — the motivation for pooling).

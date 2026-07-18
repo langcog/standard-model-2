@@ -21,7 +21,13 @@ suppressPackageStartupMessages({
 CACHE <- here("paper", "cache")
 BL    <- here("fits", "bayes_long")
 SUMM  <- file.path(BL, "summaries")
-SFX   <- "_a3"                              # the 3+-admin fit variant
+SFX   <- ""                                 # 2+-admin variant (base bundle/fit names; the 3+
+                                            # `_a3` filter was dropped -- see journal §41).
+                                            # NB: sample/QC numbers are in the self-contained
+                                            # paper/cache/bayes_long_sample.rds (built by
+                                            # studies/bayes_long/qc_exclusion_report.R), which
+                                            # only needs the bundles -- so the methods numbers
+                                            # render before these fit-dependent caches rebuild.
 DATASETS <- c(thal = "English (Thal)", smith = "English (Smith)",
               marchman = "English (Marchman)", norwegian = "Norwegian",
               japanese = "Japanese")
@@ -307,10 +313,8 @@ kap <- bind_rows(lapply(names(DATASETS), function(slug) {
   data.frame(slug = slug, med = r$median, q5 = r$q5, q95 = r$q95)
 }))
 klo <- kap[which.min(kap$med), ]; khi <- kap[which.max(kap$med), ]  # min / max kappa dataset
-qc_pct <- function(slug) {                                          # % children QC-excluded
-  m <- readRDS(file.path(BL, paste0("bundle_", slug, SFX, ".rds")))$meta
-  100 * m$n_qc_dropped / (m$n_kids + m$n_qc_dropped)
-}
+## (QC exclusion % moved to paper/cache/bayes_long_sample.rds -- built from bundles only,
+##  so it doesn't depend on these fits.)
 llm <- readRDS(file.path(CACHE, "fig6_llm_slopes.rds"))             # children EN/NO kappa
 kap_grp <- function(g) {
   v <- llm$slopes$slope_natural[llm$slopes$group == g]
@@ -323,8 +327,7 @@ inline <- list(
   kappa_lo = klo$med, kappa_lo_q5 = klo$q5, kappa_lo_q95 = klo$q95,
   kappa_hi = khi$med, kappa_hi_q5 = khi$q5, kappa_hi_q95 = khi$q95,
   en_kappa = unname(en["median"]), no_kappa = unname(no["median"]),
-  en_sd = unname(en["sd"]), no_sd = unname(no["sd"]),
-  qc_marchman = qc_pct("marchman"), qc_norwegian = qc_pct("norwegian"))
+  en_sd = unname(en["sd"]), no_sd = unname(no["sd"]))
 saveRDS(inline, file.path(CACHE, "si_inline.rds"))
 cat(sprintf("Wrote %s\n", file.path(CACHE, "si_inline.rds")))
 
