@@ -9,9 +9,19 @@
 # (a job only uses what it needs; over-requesting costs nothing, a short cap kills
 # mid-sample). For >48h fits add: sbatch --qos=long --time=4-00:00:00 ...
 #
+# PARTITIONS (the in-script default is `normal`; override on the CLI):
+#   -p mcfrank  our OWNED node sh04-17n29 (24 cores, 192 GB) -- exclusive, OFF the
+#               fairshare pool, never preempted. Use when fairshare is depleted.
+#               It has 24 cores, NOT 32 -> must pass --cpus-per-task=24 + STAN_THREADS=6:
+#     sbatch -p mcfrank --cpus-per-task=24 --export=ALL,STAN_THREADS=6 \
+#            --job-name=blong_<slug>_<model> studies/bayes_long/fit.slurm <slug> <model>
+#   -p owners   any owner's idle node (more cores) but PREEMPTIBLE -- killed when that
+#               owner submits. Good for the fast, low-stakes rest of a burst.
+#   -p normal   shared fairshare-gated pool (default below). Wide bursts.
+#
 # Fit one (dataset, model) of the bayes_long ladder on Sherlock.
 # Usage: sbatch --job-name=blong_<slug>_<model> studies/bayes_long/fit.slurm <slug> <model>
-# Full sweep:
+# Full sweep (owner node for the long pole, owners for the fast rest):
 #   for s in japanese thal smith marchman norwegian; do for m in m0 m1 m2 m3; do
 #     sbatch --job-name=blong_${s}_${m} studies/bayes_long/fit.slurm $s $m; done; done
 set -euo pipefail
