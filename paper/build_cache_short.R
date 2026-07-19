@@ -59,23 +59,23 @@ schematic <- variants |>
              age = ages_s, vocab = vocab_of(th)) })) }) |>
   ungroup()
 
-## ---- (B) per-dataset model-implied fan from the M3 scalar posteriors ----
-## Synthetic population (xi, kappa) ~ MVN + synthetic item difficulties; overlay
-## 10/25/50/75/90 vocab quantiles on empirical trajectories. Mirrors 03_fan.R.
-set.seed(1); N_SIM <- 500; N_SPAG <- 150; M_ITEM <- 500
+## ---- (B) per-dataset model-implied fan from the FITTED per-child posteriors ----
+## Quantiles over each child's fitted (xi_i, kappa_i) with the fitted item difficulties
+## -- NOT an MVN resample of the population variance. The fitted kappa distribution is
+## right-skewed (see supplement, fig-kappa-skew), so a Gaussian resample invents
+## low-acceleration children and over-disperses the lower tail at older ages.
+set.seed(1); N_SPAG <- 150
 fan_one <- function(slug, label) {
   sf <- file.path(SUMM, paste0(slug, SFX, "_m3.summary.rds"))
   bf <- file.path(BL,   paste0("bundle_", slug, SFX, ".rds"))
-  if (!file.exists(sf) || !file.exists(bf)) { cat("  skip", slug, "(no m3 fit)\n"); return(NULL) }
+  cf <- file.path(SUMM, paste0(slug, SFX, "_m3_child.csv"))
+  pf <- file.path(SUMM, paste0(slug, SFX, "_m3_psi.csv"))
+  if (!all(file.exists(c(sf, bf, cf, pf)))) { cat("  skip", slug, "(missing m3 fit/exports)\n"); return(NULL) }
   s  <- as.data.frame(readRDS(sf)); g <- function(v) s$median[s$variable == v]
-  sd <- readRDS(bf)$stan_data
-  mu_xi <- g("mu_xi"); delta <- g("delta"); sa <- g("sigma_a"); sb <- g("sigma_b")
-  rho <- g("rho_ab"); tau <- g("tau_delta"); log_H <- sd$log_H; a0 <- sd$a0
-
-  Sig <- matrix(c(sa^2, rho * sa * sb, rho * sa * sb, sb^2), 2)
-  Z <- matrix(rnorm(N_SIM * 2), N_SIM, 2) %*% chol(Sig)
-  xi <- mu_xi + Z[, 1]; kappa <- 1 + delta + Z[, 2]
-  base_j <- log_H - rnorm(M_ITEM, 0, tau)     # synthetic item difficulties
+  sd <- readRDS(bf)$stan_data; log_H <- sd$log_H; a0 <- sd$a0
+  sa <- g("sigma_a"); sb <- g("sigma_b"); rho <- g("rho_ab"); delta <- g("delta")
+  ch <- read.csv(cf); dj <- read.csv(pf)$delta_j      # fitted per-child (xi,kappa) + item difficulties
+  xi <- ch$xi_median; kappa <- ch$kappa_median; base_j <- log_H - dj
 
   emp <- tibble(aa = sd$aa, y = sd$y) |>
     group_by(aa) |> summarise(prop = mean(y), .groups = "drop") |>
