@@ -241,10 +241,13 @@ cat(sprintf("Wrote %s (%d datasets)\n\n",
 ## ============ 4. SI: log-age vs linear-age (M3 vs M3-linear) =============
 ## Per dataset: loo_compare(M3-log, M3-linear). elpd_diff is the loser's deficit
 ## relative to the winner (log wins everywhere so far; Norwegian m3lin pending).
+## Log-vs-linear is a 3+ (_a3) analysis (m3lin was only fit there; the two-point kids
+## can't identify per-child slope curvature). So force the 3+ suffix here regardless
+## of the global SFX (which is "" / 2+ for the main ladder + Fig 1-2).
 loglin_one <- function(slug, label) {
-  f3 <- file.path(SUMM, paste0(slug, SFX, "_m3.loo.rds"))
-  fl <- file.path(SUMM, paste0(slug, SFX, "_m3lin.loo.rds"))
-  if (!file.exists(f3) || !file.exists(fl)) { cat("  skip", slug, "(no m3lin)\n"); return(NULL) }
+  f3 <- file.path(SUMM, paste0(slug, "_a3_m3.loo.rds"))
+  fl <- file.path(SUMM, paste0(slug, "_a3_m3lin.loo.rds"))
+  if (!file.exists(f3) || !file.exists(fl)) { cat("  skip", slug, "(no _a3 m3lin)\n"); return(NULL) }
   cmp <- loo::loo_compare(list(log = readRDS(f3), linear = readRDS(fl)))
   loser <- rownames(cmp)[2]
   data.frame(slug = slug, lang = label, winner = rownames(cmp)[1],
