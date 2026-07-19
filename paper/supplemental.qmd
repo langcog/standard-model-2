@@ -10,6 +10,7 @@ si_loo    <- readRDS(here("paper", "cache", "si_loo.rds"))     # LOO ladder (M0-
 si_loglin <- readRDS(here("paper", "cache", "si_loglin.rds"))  # log- vs linear-age (M3)
 fig2      <- readRDS(here("paper", "cache", "fig2_efficiency.rds"))  # word efficiency + delta validation
 si_ds     <- readRDS(here("paper", "cache", "si_datasets.rds"))      # datasets table (5 M3 bundles)
+si_gamlss <- readRDS(here("paper", "cache", "si_gamlss.rds"))        # parametric vs GAMLSS overlay + per-child kappa
 knitr::opts_chunk$set(
   echo = FALSE, message = FALSE, warning = FALSE,
   fig.align = "center", out.width = "100%", dpi = 300
@@ -583,4 +584,64 @@ of the fan reflects between-child variation alone.
 **Quantiles.** At each (dataset, age) the plotted bands are the 10th, 25th, 50th,
 75th, and 90th percentiles of $\{V_i(t)\}_{i=1}^{500}$. The simulation is
 implemented in `studies/bayes_long/03_fan.R` (mirrored in `paper/build_cache_short.R`).
+```
+
+# Comparison to a Non-Parametric Quantile Model
+
+## The parametric fan reproduces the data's quantile structure  [draft for promotion — MCF to review]
+
+```md
+[draft for promotion — MCF to review]
+
+To check that the accumulator model is not imposing its shape on the data, we compare
+its model-implied quantile fan to a *non-parametric* benchmark: a GAMLSS beta-regression
+of proportion-produced on age (a penalized spline on the mean and on the scale; the model
+used for the CDI norms), fit to the same per-administration sumscores. Across all five
+datasets the parametric fan (@fig-gamlss-overlay, blue) tracks both the non-parametric
+GAMLSS fit (orange) and the empirical quantiles (circles) — the accelerating accumulator
+is a faithful, low-dimensional compression of the data's quantile structure, not an
+artifact of its functional form.
+
+Two implementation notes. First, we let the GAMLSS choose its smoothing by marginal
+likelihood; over-smoothing the mean spline makes the non-parametric fit artificially
+tight at older ages. Second, we draw each simulated child's curve from the model's
+*fitted* per-child acceleration $\kappa_i$ rather than a fresh Gaussian resample of the
+population variance. This matters because the fitted acceleration distribution is
+right-skewed with a light lower tail (@fig-kappa-skew): a symmetric resample invents
+low-acceleration children who do not exist and over-disperses the lower tail at older
+ages, whereas the fitted-$\kappa$ fan matches the empirical quantiles at every age.
+```
+
+```{r fig-gamlss-overlay, fig.width=13, fig.height=3.5}
+#| label: fig-gamlss-overlay
+#| fig-cap: "[draft caption — MCF] Parametric accumulator fan (blue, drawn from fitted per-child acceleration) vs. a non-parametric GAMLSS beta-regression (orange), with empirical 10th/50th/90th percentiles (open circles). Lines are the 10/50/90 percentiles of each model. Color denotes model."
+ll <- si_gamlss$overlay$lines |> dplyr::filter(model != "M3 (MVN draw)") |>
+  tidyr::pivot_longer(c(q10, q50, q90), names_to = "pct", values_to = "v") |>
+  dplyr::mutate(dataset = factor(dataset, levels = si_gamlss$levels))
+empd <- si_gamlss$overlay$emp |> dplyr::mutate(dataset = factor(dataset, levels = si_gamlss$levels))
+ggplot() +
+  geom_point(data = empd, aes(age, v), shape = 1, size = 1.2, stroke = .6, color = "grey25") +
+  geom_line(data = ll, aes(age, v, color = model, group = interaction(model, pct)), linewidth = .7) +
+  facet_wrap(~dataset, nrow = 1) +
+  scale_color_manual(values = c("M3 (fitted-κ)" = "#2c7fb8", "GAMLSS (auto-λ)" = "#d95f02"), name = NULL) +
+  scale_y_continuous(limits = c(0, 1)) +
+  labs(x = "Age (months)", y = "Proportion of items produced") +
+  theme_minimal(base_size = 9) +
+  theme(legend.position = "bottom", panel.grid.minor = element_blank(), strip.text = element_text(face = "bold"))
+```
+
+```{r fig-kappa-skew, fig.width=13, fig.height=3}
+#| label: fig-kappa-skew
+#| fig-cap: "[draft caption — MCF] Distribution of fitted per-child acceleration (kappa) in each dataset (grey), with a matched Normal (red). Every dataset is right-skewed with a lighter lower tail than the Normal, so a Gaussian resample of the population variance would place too many children at low acceleration. Dotted line: kappa = 1 (pure accumulation, the LLM regime)."
+K <- si_gamlss$kappa |> dplyr::mutate(dataset = factor(dataset, levels = si_gamlss$levels))
+nrm <- K |> dplyr::group_by(dataset) |> dplyr::summarise(m = mean(kappa), s = sd(kappa), .groups = "drop") |>
+  dplyr::rowwise() |> dplyr::mutate(x = list(seq(-6, 35, .5))) |> tidyr::unnest(x) |> dplyr::mutate(dens = dnorm(x, m, s))
+ggplot(K, aes(kappa)) +
+  geom_histogram(aes(y = after_stat(density)), binwidth = 1.5, fill = "grey72", color = "white") +
+  geom_line(data = nrm, aes(x, dens), color = "#c41e37", linewidth = .7) +
+  geom_vline(xintercept = 1, linetype = "dotted") +
+  facet_wrap(~dataset, nrow = 1, scales = "free_y") + coord_cartesian(xlim = c(-6, 32)) +
+  labs(x = "Fitted per-child acceleration (κ)", y = "Density") +
+  theme_minimal(base_size = 9) +
+  theme(panel.grid.minor = element_blank(), strip.text = element_text(face = "bold"))
 ```
