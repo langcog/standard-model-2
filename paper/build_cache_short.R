@@ -21,9 +21,14 @@ suppressPackageStartupMessages({
 CACHE <- here("paper", "cache")
 BL    <- here("fits", "bayes_long")
 SUMM  <- file.path(BL, "summaries")
-SFX   <- ""                                 # 2+-admin variant (base bundle/fit names; the 3+
-                                            # `_a3` filter was dropped -- see journal §41).
-                                            # NB: sample/QC numbers are in the self-contained
+## MAIN TEXT = 3+ (_a3): the ladder, the log-vs-linear comparison, and the mega-model
+## are all 3+, so the main-text figures/numbers use the same threshold. This matters most
+## for sigma_b: at 2+ the two-wave children inflate it (Smith 5.1->8.1, Marchman 6.6->6.9,
+## Norwegian 5.7->7.6) because a two-point slope can't separate acceleration from
+## trajectory shape. The SI reports BOTH ladders (see section 3).
+SFX   <- "_a3"
+SFX2  <- ""                                 # the 2+ (all-data) variant, for the SI dual ladder
+                                            # NB: sample/QC numbers live in the self-contained
                                             # paper/cache/bayes_long_sample.rds (built by
                                             # studies/bayes_long/qc_exclusion_report.R), which
                                             # only needs the bundles -- so the methods numbers
@@ -220,20 +225,28 @@ cat(sprintf("Wrote %s (English pooled, %d items)\n\n",
 ## ============ 3. SI: LOO model-comparison ladder (M0-M3) =================
 ## Per dataset: loo_compare across the four rungs -> elpd_diff vs best (M3) + se.
 suppressPackageStartupMessages(library(loo))
+## Computed at BOTH thresholds: 3+ (the main-text analysis, where per-child slopes are
+## identifiable) and 2+ (the full longitudinal sample). The SI reports both; the main
+## text quotes the 3+ rows. `threshold` distinguishes them.
 LADDER <- c(M0 = "m0", M1 = "m1", M2 = "m2", M3 = "m3")
-loo_one <- function(slug, label) {
-  fs <- file.path(SUMM, paste0(slug, SFX, "_", LADDER, ".loo.rds"))
-  if (!all(file.exists(fs))) { cat("  skip", slug, "(missing loo rungs)\n"); return(NULL) }
+loo_one <- function(slug, label, sfx, thr) {
+  fs <- file.path(SUMM, paste0(slug, sfx, "_", LADDER, ".loo.rds"))
+  if (!all(file.exists(fs))) { cat("  skip", slug, " (", thr, ": missing loo rungs)\n", sep=""); return(NULL) }
   ls <- lapply(fs, readRDS); names(ls) <- names(LADDER)
   cmp <- loo::loo_compare(ls)
-  data.frame(slug = slug, lang = label, model = rownames(cmp),
+  data.frame(slug = slug, lang = label, threshold = thr, model = rownames(cmp),
              elpd_diff = cmp[, "elpd_diff"], se_diff = cmp[, "se_diff"],
              row.names = NULL)
 }
-cat("SI: LOO ladder (M0-M3)\n")
-si_loo <- bind_rows(Map(loo_one, names(DATASETS), DATASETS)) |>
+cat("SI: LOO ladder (M0-M3), both thresholds\n")
+## NB: unname() the Map results -- bind_rows() with two *named* lists binds them as
+## columns (thal/smith/...) instead of stacking rows.
+si_loo <- bind_rows(
+    unname(Map(function(s, l) loo_one(s, l, SFX,  "3+"), names(DATASETS), DATASETS)),
+    unname(Map(function(s, l) loo_one(s, l, SFX2, "2+"), names(DATASETS), DATASETS))) |>
   mutate(lang = factor(lang, levels = unname(DATASETS)),
-         model = factor(model, levels = names(LADDER)))
+         model = factor(model, levels = names(LADDER)),
+         threshold = factor(threshold, levels = c("3+", "2+")))
 saveRDS(si_loo, file.path(CACHE, "si_loo.rds"))
 cat(sprintf("Wrote %s (%d datasets)\n\n",
             file.path(CACHE, "si_loo.rds"), dplyr::n_distinct(si_loo$slug)))
@@ -326,7 +339,8 @@ kap_grp <- function(g) {
 en <- kap_grp("Children (English)"); no <- kap_grp("Children (Norwegian)")
 inline <- list(
   age_lo = min(si_datasets$min_age), age_hi = max(si_datasets$max_age),
-  loo_min = min(abs(si_loo$elpd_diff[si_loo$model == "M2"])),  # smallest M3-vs-next-best gap
+  # smallest M3-vs-next-best gap, from the MAIN-TEXT (3+) ladder only
+  loo_min = min(abs(si_loo$elpd_diff[si_loo$model == "M2" & si_loo$threshold == "3+"])),
   kappa_lo = klo$med, kappa_lo_q5 = klo$q5, kappa_lo_q95 = klo$q95,
   kappa_hi = khi$med, kappa_hi_q5 = khi$q5, kappa_hi_q95 = khi$q95,
   en_kappa = unname(en["median"]), no_kappa = unname(no["median"]),
