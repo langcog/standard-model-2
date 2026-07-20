@@ -11,6 +11,8 @@ si_loglin <- readRDS(here("paper", "cache", "si_loglin.rds"))  # log- vs linear-
 fig2      <- readRDS(here("paper", "cache", "fig2_efficiency.rds"))  # word efficiency + delta validation
 si_ds     <- readRDS(here("paper", "cache", "si_datasets.rds"))      # datasets table (5 M3 bundles)
 si_gamlss <- readRDS(here("paper", "cache", "si_gamlss.rds"))        # parametric vs GAMLSS overlay + per-child kappa
+si_set    <- readRDS(here("paper", "cache", "si_settings.rds"))      # robustness: 2+/3+/mega x 5 datasets
+si_pooled <- attr(si_set, "pooled")                                 # converged mega hyperparameters (or NULL)
 knitr::opts_chunk$set(
   echo = FALSE, message = FALSE, warning = FALSE,
   fig.align = "center", out.width = "100%", dpi = 300
@@ -233,20 +235,26 @@ mk(fanning,  "(B) diverging trajectories (slopes vary)")
 # analyses are cut (replaces the retired build_table1.R / table1_datasets.csv).
 # Citation column is plain text (kable can't render [@key]); bib keys live in the
 # YAML `nocite:`.
+# N column now reports BOTH the main-text analysis sample (>=3 administrations, the
+# subset where per-child acceleration is identified) and the full longitudinal sample
+# (>=2 administrations), as "n_3+ / n_2+". This makes the exclusion legible: it is a
+# modeling requirement, not a small dataset (Marchman is 162 of 2,136). n_kids_all
+# comes from the 2+ bundles (build_cache_short.R, si_datasets.rds).
 # [MCF: (a) Thal/Smith/Marchman citation years are 20XX placeholders (@smith/
-#  @marchman keys still missing from the bib). (b) the caption above still
-#  describes the OLD multi-analysis table -- rewrite for the 5 longitudinal
-#  datasets. (c) intro N_total says 3,135 but the a3 (3+-admin) analysis sample
-#  is 1,834 -- reconcile.]
+#  @marchman keys still missing from the bib). (b) the caption still describes the OLD
+#  multi-analysis table AND now needs to define the "N (3+/2+)" column -- rewrite for
+#  the 5 longitudinal datasets. (c) the both-N column addresses the earlier
+#  N-reconciliation note: the 3+ analysis total is 1,841; the 2+ total is 4,922.]
 si_ds |>
   transmute(citation, language,
-            n = format(n_kids, big.mark = ","),
+            n = sprintf("%s / %s", format(n_kids, big.mark = ","),
+                        format(n_kids_all, big.mark = ",")),
             n_admins = format(n_admins, big.mark = ","),
             mean_age = sprintf("%.1f", mean_age),
             min_age = as.character(min_age), max_age = as.character(max_age),
             med_admins = as.character(med_admins)) |>
   knitr::kable(
-    col.names = c("Citation", "Language", "N", "Admins",
+    col.names = c("Citation", "Language", "N (3+/2+)", "Admins",
                   "Mean", "Min", "Max", "Adm./kid"),
     align = "llrrrrrr") |>
   kableExtra::add_header_above(c(" " = 4, "Age (months)" = 3, " " = 1)) |>
@@ -268,18 +276,90 @@ mod_desc <- c(M0 = "M0. accumulator ($\\kappa=1$)",
 lang_order <- levels(si_loo$lang)
 cell <- function(m, e, s) ifelse(m == "M3", "0",
   sprintf("%s (%s)", format(round(e), big.mark = ","), format(round(s))))
+# Both thresholds are shown: the >=3-admin ladder (main text, where per-child slopes
+# are identified) and the full >=2-admin ladder. They are stacked with pack_rows --
+# 4 model rows per threshold, 5 dataset columns -- rather than doubling the columns.
+# M3 wins every rung at both thresholds. (Raw ELPD scales with n_obs, so the 2+ gaps
+# are larger mainly because the 2+ samples are larger; the per-observation comparison
+# lives in the settings table.)
+# [MCF: the caption should note the table now stacks both admin thresholds.]
 tab <- si_loo |>
   mutate(txt = cell(as.character(model), elpd_diff, se_diff)) |>
-  select(model, lang, txt) |>
+  arrange(threshold, model) |>
+  select(threshold, model, lang, txt) |>
   tidyr::pivot_wider(names_from = lang, values_from = txt) |>
-  arrange(model) |>
-  mutate(Model = mod_desc[as.character(model)]) |>
-  select(Model, all_of(lang_order))
-knitr::kable(tab, align = c("l", rep("r", length(lang_order))), escape = FALSE,
+  mutate(Model = mod_desc[as.character(model)])
+n3 <- sum(tab$threshold == "3+")
+knitr::kable(tab |> select(Model, all_of(lang_order)),
+             align = c("l", rep("r", length(lang_order))), escape = FALSE,
              col.names = c("Model", unname(short[lang_order]))) |>
   kableExtra::add_header_above(
     c(" " = 1, "$\\\\Delta$ELPD vs M3 (SE)" = length(lang_order)), escape = FALSE) |>
+  kableExtra::pack_rows("$\\geq$3 administrations (main text)", 1, n3, escape = FALSE) |>
+  kableExtra::pack_rows("$\\geq$2 administrations (full longitudinal)",
+                        n3 + 1, nrow(tab), escape = FALSE) |>
   kableExtra::kable_styling(latex_options = "scale_down", font_size = 8)
+```
+
+# Robustness Across Model and Data Settings
+
+```md
+## Robustness across model and data settings  [draft for promotion — MCF to review]
+
+The main text reports a single analysis: separate per-dataset fits of the full
+model (M3) to children with at least three administrations. That choice is
+deliberate. A child measured only twice yields a single trajectory slope with
+zero residual degrees of freedom, so their estimated acceleration $\kappa_i$ is
+confounded with measurement noise in their efficiency $\xi_i$; including
+two-administration children inflates the acceleration variance $\sigma_b$ with
+measurement error rather than genuine heterogeneity. This is visible in
+@tbl-settings: moving from the $\geq$2- to the $\geq$3-administration sample,
+$\sigma_b$ falls from 8.06 to 5.14 in Smith and from 7.63 to 5.65 in Norwegian,
+while the population acceleration $\kappa$ barely changes. A second, independent
+reason to prefer the $\geq$3 sample: the leave-one-out comparison holds out one
+item response at a time, and a two-administration child contributes hundreds of
+responses, so item-level LOO cannot by itself penalise an over-flexible per-child
+slope — it will reward a $\kappa_i$ that interpolates that child's two sittings
+whether or not the acceleration is real.
+
+The substantive conclusion does not depend on this choice. Across all three
+settings we can fit — separate per-dataset fits at each threshold, and a single
+cross-dataset model with partially-pooled scales ("pooled") — the population
+acceleration $\kappa$ is stable (it moves by at most 0.4), and the full model M3
+is preferred over M2 in every dataset. The pooled model reproduces every
+per-dataset $\sigma_b$ to within $\pm 1\%$ of the independent fits, and yields a
+single across-dataset acceleration SD of $\sigma_{b,\text{pop}} = 5.13$
+(90% CI $[3.90, 6.63]$). In the pooled model the per-dataset scale parameters mix
+slowly — a funnel geometry in the five-group hierarchy — so we report their point
+estimates, which the 5.2M observations pin precisely, but not their intervals;
+the affected rows are marked with an asterisk in @tbl-settings. The pooled
+hyperparameter itself is well mixed ($\hat R = 1.03$).
+```
+
+```{r tbl-settings}
+#| label: tbl-settings
+#| tbl-cap: "[DRAFT caption -- MCF to review] Robustness of the acceleration result across data and model settings. For each dataset and setting: number of children (N), population acceleration ($\\kappa$), between-child acceleration SD ($\\sigma_b$), and the per-observation LOO advantage of the full model M3 over M2 ($\\Delta$ELPD per item response; the pooled model has no M2 rung, shown as ---). Settings are separate per-dataset fits at the $\\geq$2- and $\\geq$3-administration thresholds and the pooled cross-dataset model; the $\\geq$3 separate fits are the main-text analysis. Asterisked rows are pooled-model estimates whose per-dataset scale parameters mix slowly (point estimates only; see text). Built from paper/build_cache_si_settings.R (si_settings.rds)."
+# Per-observation gap is the only cross-setting-comparable LOO quantity (raw ELPD
+# scales with n_obs). Mega rows carry no M2 rung -> gap is "---". The asterisk marks
+# pooled rows with slow per-dataset scale mixing (max_rhat > 1.1); see draft text.
+sset <- si_set |>
+  mutate(
+    Setting = dplyr::recode(as.character(setting),
+      "2+ separate" = "$\\geq$2 separate",
+      "3+ separate" = "$\\geq$3 separate (main text)",
+      "mega (3+)"   = "pooled ($\\geq$3)"),
+    Setting = ifelse(!is.na(max_rhat) & max_rhat > 1.1, paste0(Setting, "*"), Setting),
+    N   = format(n_kids, big.mark = ","),
+    kap = sprintf("%.1f", kappa),
+    sb  = sprintf("%.2f", sigma_b),
+    gap = ifelse(is.na(gap_per_obs), "---", sprintf("%.4f", gap_per_obs)))
+grp <- table(droplevels(si_set$dataset))                 # rows per dataset, factor order
+knitr::kable(sset |> select(Setting, N, kap, sb, gap),
+             col.names = c("Setting", "N", "$\\kappa$", "$\\sigma_b$",
+                           "$\\Delta$ELPD/obs (M2$\\to$M3)"),
+             align = c("l", "r", "r", "r", "r"), escape = FALSE) |>
+  kableExtra::pack_rows(index = setNames(as.integer(grp), names(grp)), escape = FALSE) |>
+  kableExtra::kable_styling(font_size = 9, latex_options = "hold_position")
 ```
 
 # Linear vs. Logistic Age

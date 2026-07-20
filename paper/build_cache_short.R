@@ -21,9 +21,14 @@ suppressPackageStartupMessages({
 CACHE <- here("paper", "cache")
 BL    <- here("fits", "bayes_long")
 SUMM  <- file.path(BL, "summaries")
-SFX   <- ""                                 # 2+-admin variant (base bundle/fit names; the 3+
-                                            # `_a3` filter was dropped -- see journal §41).
-                                            # NB: sample/QC numbers are in the self-contained
+## MAIN TEXT = 3+ (_a3): the ladder, the log-vs-linear comparison, and the mega-model
+## are all 3+, so the main-text figures/numbers use the same threshold. This matters most
+## for sigma_b: at 2+ the two-wave children inflate it (Smith 5.1->8.1, Marchman 6.6->6.9,
+## Norwegian 5.7->7.6) because a two-point slope can't separate acceleration from
+## trajectory shape. The SI reports BOTH ladders (see section 3).
+SFX   <- "_a3"
+SFX2  <- ""                                 # the 2+ (all-data) variant, for the SI dual ladder
+                                            # NB: sample/QC numbers live in the self-contained
                                             # paper/cache/bayes_long_sample.rds (built by
                                             # studies/bayes_long/qc_exclusion_report.R), which
                                             # only needs the bundles -- so the methods numbers
@@ -59,23 +64,23 @@ schematic <- variants |>
              age = ages_s, vocab = vocab_of(th)) })) }) |>
   ungroup()
 
-## ---- (B) per-dataset model-implied fan from the M3 scalar posteriors ----
-## Synthetic population (xi, kappa) ~ MVN + synthetic item difficulties; overlay
-## 10/25/50/75/90 vocab quantiles on empirical trajectories. Mirrors 03_fan.R.
-set.seed(1); N_SIM <- 500; N_SPAG <- 150; M_ITEM <- 500
+## ---- (B) per-dataset model-implied fan from the FITTED per-child posteriors ----
+## Quantiles over each child's fitted (xi_i, kappa_i) with the fitted item difficulties
+## -- NOT an MVN resample of the population variance. The fitted kappa distribution is
+## right-skewed (see supplement, fig-kappa-skew), so a Gaussian resample invents
+## low-acceleration children and over-disperses the lower tail at older ages.
+set.seed(1); N_SPAG <- 150
 fan_one <- function(slug, label) {
   sf <- file.path(SUMM, paste0(slug, SFX, "_m3.summary.rds"))
   bf <- file.path(BL,   paste0("bundle_", slug, SFX, ".rds"))
-  if (!file.exists(sf) || !file.exists(bf)) { cat("  skip", slug, "(no m3 fit)\n"); return(NULL) }
+  cf <- file.path(SUMM, paste0(slug, SFX, "_m3_child.csv"))
+  pf <- file.path(SUMM, paste0(slug, SFX, "_m3_psi.csv"))
+  if (!all(file.exists(c(sf, bf, cf, pf)))) { cat("  skip", slug, "(missing m3 fit/exports)\n"); return(NULL) }
   s  <- as.data.frame(readRDS(sf)); g <- function(v) s$median[s$variable == v]
-  sd <- readRDS(bf)$stan_data
-  mu_xi <- g("mu_xi"); delta <- g("delta"); sa <- g("sigma_a"); sb <- g("sigma_b")
-  rho <- g("rho_ab"); tau <- g("tau_delta"); log_H <- sd$log_H; a0 <- sd$a0
-
-  Sig <- matrix(c(sa^2, rho * sa * sb, rho * sa * sb, sb^2), 2)
-  Z <- matrix(rnorm(N_SIM * 2), N_SIM, 2) %*% chol(Sig)
-  xi <- mu_xi + Z[, 1]; kappa <- 1 + delta + Z[, 2]
-  base_j <- log_H - rnorm(M_ITEM, 0, tau)     # synthetic item difficulties
+  sd <- readRDS(bf)$stan_data; log_H <- sd$log_H; a0 <- sd$a0
+  sa <- g("sigma_a"); sb <- g("sigma_b"); rho <- g("rho_ab"); delta <- g("delta")
+  ch <- read.csv(cf); dj <- read.csv(pf)$delta_j      # fitted per-child (xi,kappa) + item difficulties
+  xi <- ch$xi_median; kappa <- ch$kappa_median; base_j <- log_H - dj
 
   emp <- tibble(aa = sd$aa, y = sd$y) |>
     group_by(aa) |> summarise(prop = mean(y), .groups = "drop") |>
@@ -220,20 +225,28 @@ cat(sprintf("Wrote %s (English pooled, %d items)\n\n",
 ## ============ 3. SI: LOO model-comparison ladder (M0-M3) =================
 ## Per dataset: loo_compare across the four rungs -> elpd_diff vs best (M3) + se.
 suppressPackageStartupMessages(library(loo))
+## Computed at BOTH thresholds: 3+ (the main-text analysis, where per-child slopes are
+## identifiable) and 2+ (the full longitudinal sample). The SI reports both; the main
+## text quotes the 3+ rows. `threshold` distinguishes them.
 LADDER <- c(M0 = "m0", M1 = "m1", M2 = "m2", M3 = "m3")
-loo_one <- function(slug, label) {
-  fs <- file.path(SUMM, paste0(slug, SFX, "_", LADDER, ".loo.rds"))
-  if (!all(file.exists(fs))) { cat("  skip", slug, "(missing loo rungs)\n"); return(NULL) }
+loo_one <- function(slug, label, sfx, thr) {
+  fs <- file.path(SUMM, paste0(slug, sfx, "_", LADDER, ".loo.rds"))
+  if (!all(file.exists(fs))) { cat("  skip", slug, " (", thr, ": missing loo rungs)\n", sep=""); return(NULL) }
   ls <- lapply(fs, readRDS); names(ls) <- names(LADDER)
   cmp <- loo::loo_compare(ls)
-  data.frame(slug = slug, lang = label, model = rownames(cmp),
+  data.frame(slug = slug, lang = label, threshold = thr, model = rownames(cmp),
              elpd_diff = cmp[, "elpd_diff"], se_diff = cmp[, "se_diff"],
              row.names = NULL)
 }
-cat("SI: LOO ladder (M0-M3)\n")
-si_loo <- bind_rows(Map(loo_one, names(DATASETS), DATASETS)) |>
+cat("SI: LOO ladder (M0-M3), both thresholds\n")
+## NB: unname() the Map results -- bind_rows() with two *named* lists binds them as
+## columns (thal/smith/...) instead of stacking rows.
+si_loo <- bind_rows(
+    unname(Map(function(s, l) loo_one(s, l, SFX,  "3+"), names(DATASETS), DATASETS)),
+    unname(Map(function(s, l) loo_one(s, l, SFX2, "2+"), names(DATASETS), DATASETS))) |>
   mutate(lang = factor(lang, levels = unname(DATASETS)),
-         model = factor(model, levels = names(LADDER)))
+         model = factor(model, levels = names(LADDER)),
+         threshold = factor(threshold, levels = c("3+", "2+")))
 saveRDS(si_loo, file.path(CACHE, "si_loo.rds"))
 cat(sprintf("Wrote %s (%d datasets)\n\n",
             file.path(CACHE, "si_loo.rds"), dplyr::n_distinct(si_loo$slug)))
@@ -241,10 +254,13 @@ cat(sprintf("Wrote %s (%d datasets)\n\n",
 ## ============ 4. SI: log-age vs linear-age (M3 vs M3-linear) =============
 ## Per dataset: loo_compare(M3-log, M3-linear). elpd_diff is the loser's deficit
 ## relative to the winner (log wins everywhere so far; Norwegian m3lin pending).
+## Log-vs-linear is a 3+ (_a3) analysis (m3lin was only fit there; the two-point kids
+## can't identify per-child slope curvature). So force the 3+ suffix here regardless
+## of the global SFX (which is "" / 2+ for the main ladder + Fig 1-2).
 loglin_one <- function(slug, label) {
-  f3 <- file.path(SUMM, paste0(slug, SFX, "_m3.loo.rds"))
-  fl <- file.path(SUMM, paste0(slug, SFX, "_m3lin.loo.rds"))
-  if (!file.exists(f3) || !file.exists(fl)) { cat("  skip", slug, "(no m3lin)\n"); return(NULL) }
+  f3 <- file.path(SUMM, paste0(slug, "_a3_m3.loo.rds"))
+  fl <- file.path(SUMM, paste0(slug, "_a3_m3lin.loo.rds"))
+  if (!file.exists(f3) || !file.exists(fl)) { cat("  skip", slug, "(no _a3 m3lin)\n"); return(NULL) }
   cmp <- loo::loo_compare(list(log = readRDS(f3), linear = readRDS(fl)))
   loser <- rownames(cmp)[2]
   data.frame(slug = slug, lang = label, winner = rownames(cmp)[1],
@@ -291,8 +307,14 @@ ds_one <- function(slug, label) {
   bf <- file.path(BL, paste0("bundle_", slug, SFX, ".rds"))
   if (!file.exists(bf)) return(NULL)
   b <- readRDS(bf); m <- b$meta; ag <- b$stan_data$admin_age
+  ## Pre-exclusion N: the full longitudinal sample (>=2 administrations, SFX2="").
+  ## The main-text analysis is the >=3-admin subset (n_kids); reporting both makes
+  ## the exclusion read as a modeling requirement (a two-admin child gives one slope
+  ## with zero residual df, so kappa_i is unidentified) rather than a small dataset.
+  bf2 <- file.path(BL, paste0("bundle_", slug, SFX2, ".rds"))
+  n_all <- if (file.exists(bf2)) readRDS(bf2)$stan_data$I else NA_integer_
   data.frame(citation = DS_CITE[[slug]], language = DS_LANG[[slug]],
-             n_kids = m$n_kids, n_admins = m$n_admins,
+             n_kids = m$n_kids, n_kids_all = n_all, n_admins = m$n_admins,
              min_age = min(ag), max_age = max(ag), mean_age = mean(ag),
              med_admins = m$med_admins_per_kid, stringsAsFactors = FALSE)
 }
@@ -323,7 +345,8 @@ kap_grp <- function(g) {
 en <- kap_grp("Children (English)"); no <- kap_grp("Children (Norwegian)")
 inline <- list(
   age_lo = min(si_datasets$min_age), age_hi = max(si_datasets$max_age),
-  loo_min = min(abs(si_loo$elpd_diff[si_loo$model == "M2"])),  # smallest M3-vs-next-best gap
+  # smallest M3-vs-next-best gap, from the MAIN-TEXT (3+) ladder only
+  loo_min = min(abs(si_loo$elpd_diff[si_loo$model == "M2" & si_loo$threshold == "3+"])),
   kappa_lo = klo$med, kappa_lo_q5 = klo$q5, kappa_lo_q95 = klo$q95,
   kappa_hi = khi$med, kappa_hi_q5 = khi$q5, kappa_hi_q95 = khi$q95,
   en_kappa = unname(en["median"]), no_kappa = unname(no["median"]),
