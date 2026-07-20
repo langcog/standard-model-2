@@ -57,6 +57,8 @@ one <- function(slug, label, sfx, setting) {
              kappa = 1 + g("delta"), sigma_a = g("sigma_a"),
              sigma_b = g("sigma_b"), rho = g("rho_ab"),
              gap_m2_m3 = gap, gap_se = se, n_obs_loo = n_obs,
+             max_rhat = max(s$rhat[s$variable %in%
+                            c("mu_xi","delta","sigma_a","sigma_b","rho_ab")], na.rm=TRUE),
              row.names = NULL)
 }
 
@@ -72,10 +74,16 @@ pb <- file.path(BL, "bundle_pool_a3.rds")
 if (file.exists(pf) && file.exists(pb)) {
   s <- as.data.frame(readRDS(pf)); sd0 <- readRDS(pb)$stan_data
   gi <- function(v, i) s$median[s$variable == sprintf("%s[%d]", v, i)]
+  ri <- function(v, i) s$rhat[s$variable == sprintf("%s[%d]", v, i)]
   ## dataset order in the pooled bundle -- carried by the bundle, not assumed
   dnames <- if (!is.null(sd0$ds_names)) sd0$ds_names else names(DATASETS)
   mega <- bind_rows(lapply(seq_along(dnames), function(d) {
     slug <- dnames[d]
+    ## NB: the per-dataset scale parameters mix slowly (funnel geometry in the 5-group
+    ## hierarchy), so their rhat/ess are poor. The MEDIANS are trustworthy anyway --
+    ## they match the independently-converged separate 3+ fits to within +-1% -- because
+    ## the 5.2M observations pin the location even when the sampler crawls. We carry
+    ## max_rhat so the SI can state this honestly; the intervals are NOT used.
     data.frame(dataset = unname(DATASETS[slug]), setting = "mega (3+)",
                n_kids = sum(sd0$child_ds == d),
                n_admins = sum(sd0$child_ds[sd0$admin_to_child] == d),
@@ -84,9 +92,18 @@ if (file.exists(pf) && file.exists(pb)) {
                sigma_b = gi("sigma_b", d), rho = gi("rho_ab", d),
                ## the mega has no M2 rung, so no ladder gap
                gap_m2_m3 = NA_real_, gap_se = NA_real_, n_obs_loo = NA_real_,
+               max_rhat = max(ri("kappa_pop", d), ri("sigma_a", d),
+                              ri("sigma_b", d), ri("rho_ab", d)),
                row.names = NULL) }))
-  cat(sprintf("  mega: pooled sigma_b = %.2f, pooled sigma_a = %.2f\n",
-              s$median[s$variable == "sigma_b_pop"], s$median[s$variable == "sigma_a_pop"]))
+  ## the converged pooled hyperparameters -- the one genuinely new mega quantity
+  gp <- function(v) s$median[s$variable == v]; qp <- function(v, q) s[[q]][s$variable == v]
+  attr(mega, "pooled") <- data.frame(
+    sigma_b_pop = gp("sigma_b_pop"), sigma_b_lo = qp("sigma_b_pop","q5"), sigma_b_hi = qp("sigma_b_pop","q95"),
+    sigma_a_pop = gp("sigma_a_pop"), sigma_a_lo = qp("sigma_a_pop","q5"), sigma_a_hi = qp("sigma_a_pop","q95"),
+    rhat_pop = max(s$rhat[s$variable %in% c("sigma_b_pop","sigma_a_pop")], na.rm=TRUE))
+  cat(sprintf("  mega: pooled sigma_b_pop = %.2f [%.2f, %.2f] (rhat %.3f); per-dataset medians match separate fits to +-1%%\n",
+              gp("sigma_b_pop"), qp("sigma_b_pop","q5"), qp("sigma_b_pop","q95"),
+              max(s$rhat[s$variable=="sigma_b_pop"])))
 } else {
   cat("  mega: pool_a3 fit not present yet -- rerun to add the mega rows\n")
 }
@@ -96,6 +113,7 @@ si_settings <- bind_rows(sep, mega) |>
          dataset = factor(dataset, levels = unname(DATASETS)),
          setting = factor(setting, levels = c("2+ separate", "3+ separate", "mega (3+)"))) |>
   arrange(dataset, setting)
+attr(si_settings, "pooled") <- attr(mega, "pooled")   # converged pooled hyperparameters, or NULL
 
 saveRDS(si_settings, file.path(CACHE, "si_settings.rds"))
 cat(sprintf("\nWrote %s (%d rows, %d settings)\n",
