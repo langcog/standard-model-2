@@ -307,8 +307,14 @@ ds_one <- function(slug, label) {
   bf <- file.path(BL, paste0("bundle_", slug, SFX, ".rds"))
   if (!file.exists(bf)) return(NULL)
   b <- readRDS(bf); m <- b$meta; ag <- b$stan_data$admin_age
+  ## Pre-exclusion N: the full longitudinal sample (>=2 administrations, SFX2="").
+  ## The main-text analysis is the >=3-admin subset (n_kids); reporting both makes
+  ## the exclusion read as a modeling requirement (a two-admin child gives one slope
+  ## with zero residual df, so kappa_i is unidentified) rather than a small dataset.
+  bf2 <- file.path(BL, paste0("bundle_", slug, SFX2, ".rds"))
+  n_all <- if (file.exists(bf2)) readRDS(bf2)$stan_data$I else NA_integer_
   data.frame(citation = DS_CITE[[slug]], language = DS_LANG[[slug]],
-             n_kids = m$n_kids, n_admins = m$n_admins,
+             n_kids = m$n_kids, n_kids_all = n_all, n_admins = m$n_admins,
              min_age = min(ag), max_age = max(ag), mean_age = mean(ag),
              med_admins = m$med_admins_per_kid, stringsAsFactors = FALSE)
 }
