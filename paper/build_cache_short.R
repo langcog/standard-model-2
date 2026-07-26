@@ -446,8 +446,11 @@ four_pl_sc <- function(x, y) tryCatch({
   c(sc = unname(coef(f)["sc"]), rng = unname(coef(f)["up"] - coef(f)["lo"]))
 }, error = function(e) c(sc = NA_real_, rng = NA_real_))
 ladder_kappa <- function(d, idcols) {   # per-word 4-PL over budgets -> per-ladder median
-  nb <- max(count(d, across(all_of(c(idcols, "word"))))$n)
-  d |> group_by(across(all_of(c(idcols, "word")))) |> filter(n() == nb) |>
+  # one row per (ladder, word, budget): collapses duplicate evals logged at the
+  # same final step (on_train_end + last scheduled step can coincide)
+  d <- d |> distinct(across(all_of(c(idcols, "word", "words"))), .keep_all = TRUE)
+  nb <- n_distinct(d$words)                       # full-ladder budget count
+  d |> group_by(across(all_of(c(idcols, "word")))) |> filter(n_distinct(words) == nb) |>
     group_modify(~{ p <- four_pl_sc(log10(.x$words), .x$surprisal)
                     tibble(sc = p["sc"], rng = p["rng"]) }) |> ungroup() |>
     filter(is.finite(sc), sc > 0.01, sc < 10, rng > 1) |>
