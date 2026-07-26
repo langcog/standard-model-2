@@ -243,16 +243,24 @@ To quantify this phenomenon, we combined our fitted model with corpus frequencie
 
 # Language models show no acceleration in their vocabulary growth
 
-```{r fig-llm-acceleration, fig.width=10, fig.height=4}
+```{r fig-llm-acceleration, fig.width=14, fig.height=4.2}
 #| label: fig-llm-acceleration
 #| fig-cap: "LMs decelerate where children accelerate. (A) Density of the acceleration exponent $\\kappa$ for both children (per child, English and Norwegian) and LMs (by word). LM parameters are extracted from Chang \\& Bergen (2022; four architectures), CHILDES-trained GPT-2, on both the training and development axes. (B) Fractional return on training (the ratio of decrease in loss to excess loss) for both children and LMs. Blue lines show model trajectories; red lines show fitted trajectories from children. Three children are highlighted in dark red with horizontal uncertainty bands indicating +/- 1 SD in calibration of their input (see text)."
 
-sl <- llm_slopes$slopes
+# Data cached by paper/build_cache.R §6 + build_cache_short.R §8:
+#   sl   -- per-instance kappa (children by child [_a3 M3 BLUPs], LMs by word);
+#           C&B architectures dropped here (SI: Acceleration in Other Architectures)
+#   f3   -- fractional-return curves (panel B)
+#   vy   -- per-learner developmental kappa for the variability panel (panel C):
+#           children (BLUPs) vs one point per LM training run (CHILDES / BabyLM /
+#           ClimbMix ladders)
+sl <- llm_slopes$slopes |>
+  dplyr::filter(group != "LMs: C&B 2022 (4 architectures)") |> droplevels()
 f3 <- llm_slopes$fig3; scaling_par <- llm_slopes$scaling_par
+vy <- llm_slopes$vary
 col_child <- "#c41e37"; col_ex <- "#7a0e1f"; col_lm <- "#2c7fb8"
 slope_pal <- c("Children (English)"="#c41e37","Children (Norwegian)"="#fb9a99",
-               "LMs: C&B 2022 (4 architectures)"="#8856a7","LMs: CHILDES (training)"="#2c7fb8",
-               "LMs: CHILDES (development)"="#41ab5d")
+               "LMs: CHILDES (training)"="#2c7fb8","LMs: CHILDES (development)"="#41ab5d")
 
 ## Panel A: acceleration (kappa) densities -- children high & variable, LMs near 1
 pA <- ggplot(sl, aes(slope_natural, fill=group, colour=group)) +
@@ -268,28 +276,13 @@ pA <- ggplot(sl, aes(slope_natural, fill=group, colour=group)) +
   theme(legend.position=c(0.66,0.62), legend.text=element_text(size=6.6), legend.key.height=unit(9,"pt"),
         legend.background=element_rect(fill="white",colour=NA), plot.subtitle=element_text(face="bold"))
 
-## Panel B: LM excess loss (L - E) as a power law; per-seed points show run variability
-# fitline <- data.frame(words=10^seq(log10(5e5), log10(2.4e7), length=100))
-# fitline$excess <- scaling_par$B * fitline$words^(-scaling_par$beta)
-# xb <- c(5e5,1e6,3e6,1e7,2.4e7); xl <- c("0.5M","1M","3M","10M","24M")
-# pB <- ggplot() +
-#   geom_point(data=f3$seed_excess, aes(words, excess), colour=col_lm, alpha=0.28, size=1.1) +
-#   geom_line(data=fitline, aes(words, excess), colour=col_lm, linewidth=1.0) +
-#   annotate("text", x=6e5, y=1.65, hjust=0, size=2.9, colour=col_lm, fontface="italic",
-#            label=sprintf("power law\nslope -β = -%.2f", scaling_par$beta)) +
-#   scale_x_log10(breaks=xb, labels=xl) + scale_y_log10() +
-#   labs(subtitle="B. LM excess loss follows a scaling law",
-#        x="training data (word tokens)", y="excess loss  (L - E, nats)") +
-#   theme_minimal(base_size=11) +
-#   theme(plot.subtitle=element_text(face="bold"), panel.grid.minor=element_blank())
-
-## Panel C: fractional return gamma = return / excess loss, at matched absolute input.
+## Panel B: fractional return gamma = return / excess loss, at matched absolute input.
 ## LMs: gamma = beta (flat). Children: gamma_i(t) -> kappa_i. All eligible English
 ## children (wash) + 3 exemplars (low/med/high kappa) with +/-1 SD input-rate ribbons.
 n_child <- dplyr::n_distinct(f3$child_bg$ckey)
 ex_lab <- f3$child_ex |> group_by(ckey) |> slice_max(tokens, n=1) |> ungroup() |>
   mutate(lab=sprintf("κ=%.0f", kappa))
-pC <- ggplot() +
+pB <- ggplot() +
   geom_hline(yintercept=1, linetype="dashed", colour="grey55", linewidth=0.4) +
   geom_line(data=f3$child_bg, aes(tokens, gamma, group=ckey), colour=col_child, alpha=0.04, linewidth=0.35) +
   geom_line(data=f3$lm_gamma, aes(words, gamma, group=seed), colour=col_lm, alpha=0.5, linewidth=0.5) +
@@ -310,7 +303,33 @@ pC <- ggplot() +
   theme_minimal(base_size=11) +
   theme(plot.subtitle=element_text(face="bold"), panel.grid.minor=element_blank())
 
-cowplot::plot_grid(pA, pC)
+## Panel C: between-learner VARIABILITY in developmental kappa. Each point = one
+## learner: a child (fitted kappa_i) or one LM training run (per-ladder median
+## per-word kappa; CHILDES = 10 seeds, BabyLM / ClimbMix = 3 disjoint subsets x
+## 8 seeds each -- the composition control). CV annotations quantify dispersion.
+vpal <- c("Children (English)"="#c41e37","Children (Norwegian)"="#fb9a99",
+          "LMs: CHILDES"="#2c7fb8","LMs: BabyLM"="#238b45","LMs: ClimbMix"="#e6550d")
+lab_cv <- vy |> group_by(population) |>
+  summarise(cv = 100*sd(kappa)/mean(kappa), .groups="drop") |>
+  mutate(lab = sprintf("CV %.0f%%", cv))
+# CV is computed on ALL learners; the log axis display drops the handful of
+# children whose posterior-median kappa_i is non-positive (8 of 1745).
+pC <- ggplot(vy |> dplyr::filter(kappa > 0),
+             aes(kappa, forcats::fct_rev(population), colour=population)) +
+  geom_jitter(position=position_jitter(height=0.22, seed=1), alpha=0.25, size=0.9) +
+  stat_summary(fun=median, geom="crossbar", width=0.5, linewidth=0.5, colour="grey20") +
+  geom_text(data=lab_cv, aes(x=60, y=forcats::fct_rev(population), label=lab),
+            inherit.aes=FALSE, size=2.9, hjust=1, colour="grey30") +
+  geom_vline(xintercept=1, linetype="dashed", colour="grey55", linewidth=0.4) +
+  scale_x_log10(breaks=c(0.5,1,2,5,10,20,50)) +
+  scale_colour_manual(values=vpal, guide="none") +
+  coord_cartesian(xlim=c(0.4,65)) +
+  labs(subtitle="Variability in acceleration: one point per learner",
+       x="developmental kappa (log scale)", y=NULL) +
+  theme_minimal(base_size=11) +
+  theme(plot.subtitle=element_text(face="bold"), panel.grid.minor=element_blank())
+
+cowplot::plot_grid(pA, pB, pC, nrow=1, labels=c("A","B","C"), label_size=11)
 ```
 
 Do LMs show the same signatures of acceleration and variability as children? T evaluate this question, we begin by building a bridge between the well-known "scaling laws" for large language models [@hoffmann2022;@kaplan2020] and the model we describe here for vocabulary growth. The form of one popular scaling law is that the loss $L$ of a neural network language model on a dataset size $D$ is $L = E + \frac{B}{D^\beta}$ (holding the size of the the network constant), where $B$ and $\beta$ are the free parameters of a power law and $E$ is the entropy of the text being modeled. @michaud2024 propose that this power law scaling behavior can emerge from a set of independently learned "quanta" that are themselves power-law distributed. The words of natural language follow such a power law and are potential quanta [@zipf1949]. 

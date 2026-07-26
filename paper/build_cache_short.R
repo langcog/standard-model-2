@@ -499,6 +499,49 @@ fig6$fig3 <- list(seed_excess = seed_excess, lm_gamma = lm_gamma,
                   child_bg = child_bg, child_ex = child_ex,
                   consts = list(rate_hr = rate_hr, sig_r = sig_r, tok_per_mo = tok_per_mo, f1 = f1,
                                 band_lo = 8 * tok_per_mo, band_hi = 30 * tok_per_mo))
+
+## (C) Panel C: between-learner variability in developmental kappa.
+## Per-learner acceleration on one axis: children = per-child kappa_i BLUPs (the
+## same _a3 M3 exports as panel A); LMs = per-LADDER median per-word 4-PL kappa
+## on the distinct-input axis -- CHILDES (10 seeds x 18 rungs,
+## ladder_bestval_finer.csv) and the composition control (register_bestval.csv;
+## experiments log L7): BabyLM-minus-CHILDES and ClimbMix, each 3 disjoint
+## subsets x 8 seeds x 12 rungs. ~35k nls fits, adds a few minutes to the build.
+four_pl_sc <- function(x, y) tryCatch({
+  f <- nls(y ~ lo + (up - lo) / (1 + exp((x - mid) / sc)),
+           start = list(up = max(y), lo = min(y), mid = mean(x), sc = 0.5),
+           lower = c(up = min(y)-5, lo = min(y)-5, mid = min(x)-3, sc = 1e-3),
+           upper = c(up = max(y)+5, lo = max(y)+5, mid = max(x)+3, sc = 50),
+           algorithm = "port", control = nls.control(maxiter = 200, warnOnly = TRUE))
+  c(sc = unname(coef(f)["sc"]), rng = unname(coef(f)["up"] - coef(f)["lo"]))
+}, error = function(e) c(sc = NA_real_, rng = NA_real_))
+ladder_kappa <- function(d, idcols) {   # per-word 4-PL over budgets -> per-ladder median
+  # one row per (ladder, word, budget): collapses duplicate evals logged at the
+  # same final step (on_train_end + last scheduled step can coincide)
+  d <- d |> distinct(across(all_of(c(idcols, "word", "words"))), .keep_all = TRUE)
+  nb <- n_distinct(d$words)                       # full-ladder budget count
+  d |> group_by(across(all_of(c(idcols, "word")))) |> filter(n_distinct(words) == nb) |>
+    group_modify(~{ p <- four_pl_sc(log10(.x$words), .x$surprisal)
+                    tibble(sc = p["sc"], rng = p["rng"]) }) |> ungroup() |>
+    filter(is.finite(sc), sc > 0.01, sc < 10, rng > 1) |>
+    mutate(kappa = 0.434 / sc) |>
+    group_by(across(all_of(idcols))) |> summarise(kappa = median(kappa), .groups = "drop")
+}
+reg <- read_csv(here("fits", "llm", "register_bestval.csv"), show_col_types = FALSE)
+k_chi <- ladder_kappa(ladder |> mutate(surprisal = as.numeric(surprisal)), "seed") |>
+  transmute(population = "LMs: CHILDES", id = paste0("s", seed), kappa)
+k_reg <- ladder_kappa(reg, c("corpus", "subset", "seed")) |>
+  transmute(population = ifelse(corpus == "babylm", "LMs: BabyLM", "LMs: ClimbMix"),
+            id = paste(subset, seed), kappa)
+k_kid <- fig6$slopes |>
+  filter(group %in% c("Children (English)", "Children (Norwegian)")) |>
+  transmute(population = as.character(group), id = paste0("c", row_number()),
+            kappa = slope_natural)
+fig6$vary <- bind_rows(k_kid, k_chi, k_reg) |>
+  mutate(population = factor(population, levels = c(
+    "Children (English)", "Children (Norwegian)",
+    "LMs: CHILDES", "LMs: BabyLM", "LMs: ClimbMix")))
+
 saveRDS(fig6, file.path(CACHE, "fig6_llm_slopes.rds"))
 cat(sprintf("Augmented fig6_llm_slopes.rds: scaling (beta=%.3f, E=%.2f) + fig3 (n_child=%d, exemplars kappa=%s)\n",
             scaling_par$beta, scaling_par$E, dplyr::n_distinct(child_bg$ckey),
