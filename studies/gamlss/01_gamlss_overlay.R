@@ -14,7 +14,7 @@ suppressPackageStartupMessages({
   library(dplyr); library(tidyr); library(ggplot2); library(here); library(gamlss)
 })
 set.seed(1)
-SFX   <- "_a3"
+SFX   <- Sys.getenv("SLUG_SUFFIX","_a3")
 N_SIM <- 500; N_SPAG <- 120; M_ITEM <- 500
 QS <- c(.1,.25,.5,.75,.9); PCT <- c(10,25,50,75,90)
 LANGS <- c(thal="English (Thal)", smith="English (Smith)", marchman="English (Marchman)",
@@ -87,6 +87,6 @@ p <- ggplot() +
   theme_minimal(base_size=10) +
   theme(strip.text=element_text(face="bold"), legend.position="bottom",
         panel.grid.minor=element_blank(), plot.title=element_text(size=11, face="bold"))
-out <- here("studies","gamlss","fig_gamlss_overlay.png")
+out <- here("studies","gamlss",paste0("fig_gamlss_overlay", if(SFX=="") "_2plus" else SFX, ".png"))
 ggsave(out, p, width=3.1*length(res)+0.6, height=3.8, dpi=150)
 cat("wrote", out, "\n")
