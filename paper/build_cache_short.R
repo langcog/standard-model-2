@@ -110,16 +110,30 @@ lvl <- unname(DATASETS)
 ## accelerating accumulator and the two dimensions of individual variation
 ## (efficiency xi = a level shift; acceleration kappa = a fan) in latent-ability
 ## (theta) space and projected into words-produced (CDI) space. Illustrative.
-a0c <- 8; ages_c <- seq(8, 36, length.out = 140); Lc <- log(ages_c / a0c)
-KA_C <- 3.6; DELTA_C <- qnorm(ppoints(150), 0, 1.5)
+## Tuned so the CDI (right) facet shows a FULL sigmoid inside the plotted window:
+## the Baseline accelerator sits at ~0 until it takes off at ~14 months and saturates
+## (~0.94) by 36, which makes it visually distinct from the concave log curve in the
+## theta facet. Narrowing the difficulty spread (sd 1.5 -> 0.8) sharpens the sweep
+## through the item distribution; starting at 9 months gives the flat pre-takeoff run.
+a0c <- 9; ages_c <- seq(9, 36, length.out = 200); Lc <- log(ages_c / a0c)
+XI_C <- -6; KA_C <- 6.5; SD_D <- 0.8
+DELTA_C <- qnorm(ppoints(400), 0, SD_D)
 vocab_c <- function(th) vapply(th, function(x) mean(plogis(x - DELTA_C)), numeric(1))
 qlab_c <- c(theta = "Latent Ability (θ)", cdi = "Words Produced (CDI)")
+## Pure (kappa=1) gets its own REFIT intercept rather than sharing the accelerator's
+## xi. Sharing xi buries it at ~0.01 (invisible); refitting by least squares against
+## the Baseline curve is the M0-vs-M3 ladder comparison in miniature -- the best a
+## pure accumulator can do -- and it makes the point harder: even at its optimum the
+## unit accumulator starts too high (~0.30) and ends too low (~0.59), never tracing
+## the S. Illustrative, not estimated.
+base_cdi_c <- vocab_c(XI_C + KA_C * Lc)
+XI_PURE <- optimize(function(xi) sum((vocab_c(xi + Lc) - base_cdi_c)^2), c(-8, 6))$minimum
 conceptual <- tribble(
-  ~scenario,        ~xi,   ~kappa,      ~kind,
-  "Pure (κ=1)",     -4.0,  1.0,         "pure",
-  "Baseline",       -4.0,  KA_C,        "accel",
-  "↑ Efficiency",   -1.8,  KA_C,        "accel",
-  "↑ Acceleration", -4.0,  KA_C + 1.8,  "accel") |>
+  ~scenario,        ~xi,          ~kappa,      ~kind,
+  "Pure (κ=1)",     XI_PURE,      1.0,         "pure",
+  "Baseline",       XI_C,         KA_C,        "accel",
+  "↑ Efficiency",   XI_C + 1.6,   KA_C,        "accel",
+  "↑ Acceleration", XI_C,         KA_C + 1.8,  "accel") |>
   mutate(scenario = factor(scenario, levels = scenario)) |>
   rowwise() |>
   mutate(d = list(tibble(age = ages_c, theta = xi + kappa * Lc, cdi = vocab_c(xi + kappa * Lc)))) |>
@@ -184,8 +198,31 @@ psi <- bind_rows(Map(function(p, w) mutate(p$psi, w = w), parts, W)) |>
 cat(sprintf("  pooled: n_kids=%.0f  mu_xi=%.2f kappa=%.2f  items=%d\n",
             wsum, mu_xi, kappa, nrow(psi)))
 
-## wordbankr metadata (word + lexical_class) + CHILDES frequency
-it   <- wordbankr::get_item_data(language = "English (American)", form = "WS") |> filter(item_kind == "word")
+## wordbankr metadata (word + lexical_class) + CHILDES frequency.
+## The WS item dictionary is a static instrument definition, but fetching it needs a
+## live Wordbank connection -- and an outage used to abort the whole script, blocking
+## every LATER section (LOO ladder, BLUPs, datasets, random effects) that needs no
+## network at all. So: fetch when reachable and mirror to paper/cache; fall back to
+## the mirror when not. Delete the mirror to force a refresh.
+WB_MIRROR <- file.path(CACHE, "wordbank_items_en_ws.rds")
+## NB: on a failed connection wordbankr::get_item_data() prints a message and returns
+## NULL rather than throwing, so tryCatch alone is not enough -- test the value.
+it <- tryCatch({
+  x <- wordbankr::get_item_data(language = "English (American)", form = "WS")
+  if (is.null(x) || !nrow(x)) stop("wordbank returned no rows")
+  saveRDS(x, WB_MIRROR); cat("  wordbank: live fetch (mirrored to cache)\n"); x
+}, error = function(e) {
+  if (file.exists(WB_MIRROR)) {
+    cat("  wordbank: UNREACHABLE -- using local mirror", basename(WB_MIRROR), "\n")
+    return(readRDS(WB_MIRROR))
+  }
+  cat("  wordbank: UNREACHABLE and no local mirror -- SKIPPING Fig 2,\n",
+      "    keeping the committed fig2_efficiency.rds. Rerun when Wordbank is up.\n", sep = "")
+  NULL
+})
+if (is.null(it)) fig2_skipped <- TRUE else {
+fig2_skipped <- FALSE
+it <- it |> filter(item_kind == "word")
 byul <- it |> filter(!is.na(uni_lemma)) |> distinct(uni_lemma, item_definition, lexical_category, category)
 byid <- it |> distinct(item_definition, lexical_category, category)
 m <- bind_rows(
@@ -221,6 +258,7 @@ fig2 <- list(items = items,
 saveRDS(fig2, file.path(CACHE, "fig2_efficiency.rds"))
 cat(sprintf("Wrote %s (English pooled, %d items)\n\n",
             file.path(CACHE, "fig2_efficiency.rds"), nrow(items)))
+}  # end if (!fig2_skipped)
 
 ## ============ 3. SI: LOO model-comparison ladder (M0-M3) =================
 ## Per dataset: loo_compare across the four rungs -> elpd_diff vs best (M3) + se.
@@ -343,6 +381,28 @@ kap_grp <- function(g) {
   c(median = median(v), sd = sd(v))
 }
 en <- kap_grp("Children (English)"); no <- kap_grp("Children (Norwegian)")
+## ---- random-effect parameters, for main-text reporting ------------------
+## Reviewers reasonably ask for the between-child SD of kappa (sigma_b), the
+## intercept-slope correlation (rho), their uncertainty, and the share of children
+## above the kappa = 1 null -- these are more informative than distributional-shape
+## claims. Assembled per dataset (si_ranef.rds) plus pooled scalars (inline).
+ranef <- bind_rows(lapply(names(DATASETS), function(slug) {
+  s <- as.data.frame(readRDS(file.path(SUMM, paste0(slug, SFX, "_m3.summary.rds"))))
+  g <- function(v, q) s[[q]][s$variable == v]
+  ch <- read.csv(file.path(SUMM, paste0(slug, SFX, "_m3_child.csv")))
+  data.frame(slug = slug, lang = DATASETS[[slug]], n_kids = nrow(ch),
+             kappa = g("kappa_pop","median"), kappa_q5 = g("kappa_pop","q5"), kappa_q95 = g("kappa_pop","q95"),
+             sigma_a = g("sigma_a","median"), sigma_a_q5 = g("sigma_a","q5"), sigma_a_q95 = g("sigma_a","q95"),
+             sigma_b = g("sigma_b","median"), sigma_b_q5 = g("sigma_b","q5"), sigma_b_q95 = g("sigma_b","q95"),
+             rho = g("rho_ab","median"), rho_q5 = g("rho_ab","q5"), rho_q95 = g("rho_ab","q95"),
+             pct_gt1 = 100 * mean(ch$kappa_median > 1),
+             n_neg = sum(ch$kappa_median < 0), row.names = NULL)
+})) |> mutate(lang = factor(lang, levels = unname(DATASETS)))
+saveRDS(ranef, file.path(CACHE, "si_ranef.rds"))
+cat(sprintf("  random effects: sigma_b %.2f-%.2f, rho %+.2f to %+.2f, %.1f%% of children kappa>1\n",
+            min(ranef$sigma_b), max(ranef$sigma_b), min(ranef$rho), max(ranef$rho),
+            100 * sum(ranef$pct_gt1/100 * ranef$n_kids) / sum(ranef$n_kids)))
+
 inline <- list(
   age_lo = min(si_datasets$min_age), age_hi = max(si_datasets$max_age),
   # smallest M3-vs-next-best gap, from the MAIN-TEXT (3+) ladder only
@@ -350,7 +410,17 @@ inline <- list(
   kappa_lo = klo$med, kappa_lo_q5 = klo$q5, kappa_lo_q95 = klo$q95,
   kappa_hi = khi$med, kappa_hi_q5 = khi$q5, kappa_hi_q95 = khi$q95,
   en_kappa = unname(en["median"]), no_kappa = unname(no["median"]),
-  en_sd = unname(en["sd"]), no_sd = unname(no["sd"]))
+  en_sd = unname(en["sd"]), no_sd = unname(no["sd"]),
+  ## random-effect summaries (pooled across the five 3+ fits)
+  sb_lo = min(ranef$sigma_b), sb_hi = max(ranef$sigma_b),
+  rho_lo = min(ranef$rho), rho_hi = max(ranef$rho),
+  pct_kappa_gt1 = 100 * sum(ranef$pct_gt1/100 * ranef$n_kids) / sum(ranef$n_kids),
+  n_kappa_neg = sum(ranef$n_neg), n_kids_tot = sum(ranef$n_kids),
+  ## between- vs within-dataset uncertainty in kappa: the honest scale of uncertainty
+  ## is the spread ACROSS samples, not the (model-conditional) within-sample interval,
+  ## because CDI items are not locally independent.
+  kappa_between_sd = sd(ranef$kappa),
+  kappa_ci_width_min = min(ranef$kappa_q95 - ranef$kappa_q5))
 saveRDS(inline, file.path(CACHE, "si_inline.rds"))
 cat(sprintf("Wrote %s\n", file.path(CACHE, "si_inline.rds")))
 
