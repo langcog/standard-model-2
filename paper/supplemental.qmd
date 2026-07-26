@@ -19,60 +19,60 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Generative Model
+<!-- # Generative Model -->
 
-*[Pending prose for the generative accumulator model. The figure below shows the latent-ability ($\theta$) buildup across the model rungs M0-M3.]*
+<!-- *[Pending prose for the generative accumulator model. The figure below shows the latent-ability ($\theta$) buildup across the model rungs M0-M3.]* -->
 
-```{r fig-schematic-theta, fig.width=8, fig.height=2.6}
-#| label: fig-schematic-theta
-#| fig-cap: ""
-# [MCF: caption on next pass.] Latent-ability (theta) version of the
-# main-text model buildup (M0->M3). The main text shows only the vocab-
-# space projection of these curves; here is theta_i(t) itself, before it
-# is pushed through the word-difficulty distribution. Illustrative
-# parameters, not estimated.
-ages <- seq(8, 30, length.out = 80)
-A0 <- 8; L <- log(ages / A0)
-qs <- c(0.1, 0.25, 0.5, 0.75, 0.9); z <- qnorm(qs)
-XI0 <- -2.0; KAPPA_A <- 2.5
-variants <- tibble::tribble(
-  ~name,                       ~kappa_pop, ~sigma_alpha, ~sigma_kappa, ~eq,
-  "(M0) accumulator",          1,           0,            0,            r"($\theta = \log(r) + \log(t)$)",
-  "(M1) + acceleration",       KAPPA_A,     0,            0,            r"($\theta = \log(r) + \kappa\,\log(t)$)",
-  "(M2) + efficiency var.",    KAPPA_A,     1.1,          0,            r"($\theta = \xi_i + \kappa\,\log(t)$)",
-  "(M3) + per-child accel.",   KAPPA_A,     1.1,          0.7,          r"($\theta = \xi_i + \kappa_i\,\log(t)$)"
-)
-sim <- variants |>
-  mutate(name = factor(name, levels = name)) |>
-  rowwise() |>
-  do({ v <- .
-    bind_rows(lapply(seq_along(qs), function(i) {
-      tibble(name = v$name,
-             qprob_f = factor(as.character(qs[i]),
-                              levels = c("0.1","0.25","0.5","0.75","0.9")),
-             age = ages,
-             theta = XI0 + z[i]*v$sigma_alpha + (v$kappa_pop + z[i]*v$sigma_kappa)*L,
-             eq = v$eq)
-    })) }) |>
-  ungroup()
-eq_lab <- variants |> mutate(name = factor(name, levels = name)) |> select(name, eq)
-lwidth <- function(qf) ifelse(as.character(qf) == "0.5", 0.95, 0.55)
-ggplot(sim, aes(age, theta, color = qprob_f, group = qprob_f)) +
-  geom_line(aes(linewidth = lwidth(qprob_f))) +
-  geom_label(data = eq_lab, aes(x = -Inf, y = Inf,
-             label = latex2exp::TeX(eq, output = "character")),
-             inherit.aes = FALSE, parse = TRUE, hjust = -0.05, vjust = 1.4,
-             size = 2.4, label.size = 0, fill = scales::alpha("white", 0.8)) +
-  facet_wrap(~ name, nrow = 1) +
-  scale_color_manual(values = WORDBANK_PALETTE, name = "Percentile",
-                     labels = c("10th","25th","50th","75th","90th"), drop = FALSE) +
-  scale_linewidth_identity() +
-  coord_cartesian(ylim = c(-3.5, 4.5)) +
-  labs(x = "age (months)", y = expression(theta[i](t))) +
-  theme_minimal(base_size = 9) +
-  theme(strip.text = element_text(face = "bold", size = 8),
-        legend.position = "bottom", panel.grid.minor = element_blank())
-```
+<!-- ```{r fig-schematic-theta, fig.width=8, fig.height=2.6} -->
+<!-- #| label: fig-schematic-theta -->
+<!-- #| fig-cap: "" -->
+<!-- # [MCF: caption on next pass.] Latent-ability (theta) version of the -->
+<!-- # main-text model buildup (M0->M3). The main text shows only the vocab- -->
+<!-- # space projection of these curves; here is theta_i(t) itself, before it -->
+<!-- # is pushed through the word-difficulty distribution. Illustrative -->
+<!-- # parameters, not estimated. -->
+<!-- ages <- seq(8, 30, length.out = 80) -->
+<!-- A0 <- 8; L <- log(ages / A0) -->
+<!-- qs <- c(0.1, 0.25, 0.5, 0.75, 0.9); z <- qnorm(qs) -->
+<!-- XI0 <- -2.0; KAPPA_A <- 2.5 -->
+<!-- variants <- tibble::tribble( -->
+<!--   ~name,                       ~kappa_pop, ~sigma_alpha, ~sigma_kappa, ~eq, -->
+<!--   "(M0) accumulator",          1,           0,            0,            r"($\theta = \log(r) + \log(t)$)", -->
+<!--   "(M1) + acceleration",       KAPPA_A,     0,            0,            r"($\theta = \log(r) + \kappa\,\log(t)$)", -->
+<!--   "(M2) + efficiency var.",    KAPPA_A,     1.1,          0,            r"($\theta = \xi_i + \kappa\,\log(t)$)", -->
+<!--   "(M3) + per-child accel.",   KAPPA_A,     1.1,          0.7,          r"($\theta = \xi_i + \kappa_i\,\log(t)$)" -->
+<!-- ) -->
+<!-- sim <- variants |> -->
+<!--   mutate(name = factor(name, levels = name)) |> -->
+<!--   rowwise() |> -->
+<!--   do({ v <- . -->
+<!--     bind_rows(lapply(seq_along(qs), function(i) { -->
+<!--       tibble(name = v$name, -->
+<!--              qprob_f = factor(as.character(qs[i]), -->
+<!--                               levels = c("0.1","0.25","0.5","0.75","0.9")), -->
+<!--              age = ages, -->
+<!--              theta = XI0 + z[i]*v$sigma_alpha + (v$kappa_pop + z[i]*v$sigma_kappa)*L, -->
+<!--              eq = v$eq) -->
+<!--     })) }) |> -->
+<!--   ungroup() -->
+<!-- eq_lab <- variants |> mutate(name = factor(name, levels = name)) |> select(name, eq) -->
+<!-- lwidth <- function(qf) ifelse(as.character(qf) == "0.5", 0.95, 0.55) -->
+<!-- ggplot(sim, aes(age, theta, color = qprob_f, group = qprob_f)) + -->
+<!--   geom_line(aes(linewidth = lwidth(qprob_f))) + -->
+<!--   geom_label(data = eq_lab, aes(x = -Inf, y = Inf, -->
+<!--              label = latex2exp::TeX(eq, output = "character")), -->
+<!--              inherit.aes = FALSE, parse = TRUE, hjust = -0.05, vjust = 1.4, -->
+<!--              size = 2.4, label.size = 0, fill = scales::alpha("white", 0.8)) + -->
+<!--   facet_wrap(~ name, nrow = 1) + -->
+<!--   scale_color_manual(values = WORDBANK_PALETTE, name = "Percentile", -->
+<!--                      labels = c("10th","25th","50th","75th","90th"), drop = FALSE) + -->
+<!--   scale_linewidth_identity() + -->
+<!--   coord_cartesian(ylim = c(-3.5, 4.5)) + -->
+<!--   labs(x = "age (months)", y = expression(theta[i](t))) + -->
+<!--   theme_minimal(base_size = 9) + -->
+<!--   theme(strip.text = element_text(face = "bold", size = 8), -->
+<!--         legend.position = "bottom", panel.grid.minor = element_blank()) -->
+<!-- ``` -->
 
 # Comparison with Prior Models
 
@@ -255,7 +255,7 @@ si_ds |>
             med_admins = as.character(med_admins)) |>
   knitr::kable(
     col.names = c("Citation", "Language", "N (3+/2+)", "Admins",
-                  "Mean", "Min", "Max", "Adm./kid"),
+                  "Mean", "Min", "Max", "Adm/Chi"),
     align = "llrrrrrr") |>
   kableExtra::add_header_above(c(" " = 4, "Age (months)" = 3, " " = 1)) |>
   kableExtra::kable_styling(font_size = 9, latex_options = "hold_position")
@@ -304,8 +304,6 @@ knitr::kable(tab |> select(Model, all_of(lang_order)),
 # Robustness Across Model and Data Settings
 
 ```md
-## Robustness across model and data settings  [draft for promotion — MCF to review]
-
 The main text reports a single analysis: separate per-dataset fits of the full
 model (M3) to children with at least three administrations. That choice is
 deliberate. A child measured only twice yields a single trajectory slope with
@@ -380,6 +378,102 @@ knitr::kable(tab, align = c("l", "r"), escape = FALSE,
   kableExtra::kable_styling(font_size = 9, latex_options = "hold_position")
 ```
 
+# Generating Quantiles
+
+```md
+## How the model-implied quantile bands are generated  [draft for promotion — MCF to review]
+
+The percentile bands ("fans") overlaid on the empirical trajectories in the model
+figure are not closed-form quantiles; for each dataset we generate them by
+Monte-Carlo simulation from the fitted M3 posterior — a synthetic population of
+children whose vocabulary percentiles we read off at each age.
+
+**Drawing a synthetic population.** From each dataset's M3 fit we take the
+posterior medians of the population parameters: mean efficiency $\mu_\xi$,
+population scaling $\kappa_{\text{pop}} = 1 + \delta$, the between-child SDs of
+efficiency and acceleration ($\sigma_a$, $\sigma_b$), their correlation $\rho$, and
+the item-difficulty SD $\tau_\delta$. We draw $N = 500$ synthetic children by
+sampling their (efficiency, acceleration) deviations from the fitted bivariate
+normal,
+$(a_i, b_i) \sim \mathcal{N}\!\big(\mathbf{0}, \Sigma(\sigma_a, \sigma_b, \rho)\big)$,
+so child $i$ has $\xi_i = \mu_\xi + a_i$ and $\kappa_i = \kappa_{\text{pop}} + b_i$;
+a fixed seed makes the bands reproducible. Because the Bayesian hierarchy estimates
+the population covariance $\Sigma$ directly (with partial pooling), sampling from it
+*is* the population draw — unlike a frequentist point-estimate fit, there are no
+unshrunken per-child BLUPs to resample.
+
+**Each child's expected vocabulary curve.** Ages run on a per-dataset grid spanning
+the full range of that dataset's observed ages, so the bands cover the plotted
+trajectories without extrapolating beyond the data. We draw $M$ synthetic item difficulties
+$\delta_j \sim \mathcal{N}(0, \tau_\delta)$ to stand in for a typical item set;
+child $i$'s expected productive vocabulary, as a proportion of items, at age $t$ is
+$$V_i(t) = \frac{1}{M}\sum_{j=1}^{M} \operatorname{logit}^{-1}\!\big(\xi_i + \kappa_i \log(t/a_0) + \log H - \delta_j\big),$$
+an *expected* proportion, so each simulated child's curve is smooth and the width
+of the fan reflects between-child variation alone.
+
+**Quantiles.** At each (dataset, age) the plotted bands are the 10th, 25th, 50th,
+75th, and 90th percentiles of $\{V_i(t)\}_{i=1}^{500}$. The simulation is
+implemented in `studies/bayes_long/03_fan.R` (mirrored in `paper/build_cache_short.R`).
+```
+
+# Comparison to a Non-Parametric Quantile Model
+
+```md
+[draft for promotion — MCF to review]
+
+To check that the accumulator model is not imposing its shape on the data, we compare
+its model-implied quantile fan to a *non-parametric* benchmark: a GAMLSS beta-regression
+of proportion-produced on age (a penalized spline on the mean and on the scale; the model
+used for the CDI norms), fit to the same per-administration sumscores. Across all five
+datasets the parametric fan (@fig-gamlss-overlay, blue) tracks both the non-parametric
+GAMLSS fit (orange) and the empirical quantiles (circles) — the accelerating accumulator
+is a faithful, low-dimensional compression of the data's quantile structure, not an
+artifact of its functional form.
+
+Two implementation notes. First, we let the GAMLSS choose its smoothing by marginal
+likelihood; over-smoothing the mean spline makes the non-parametric fit artificially
+tight at older ages. Second, we draw each simulated child's curve from the model's
+*fitted* per-child acceleration $\kappa_i$ rather than a fresh Gaussian resample of the
+population variance. This matters because the fitted acceleration distribution is
+right-skewed with a light lower tail (@fig-kappa-skew): a symmetric resample invents
+low-acceleration children who do not exist and over-disperses the lower tail at older
+ages, whereas the fitted-$\kappa$ fan matches the empirical quantiles at every age.
+```
+
+```{r fig-gamlss-overlay, fig.width=13, fig.height=3.5}
+#| label: fig-gamlss-overlay
+#| fig-cap: "[draft caption — MCF] Parametric accumulator fan (blue, drawn from fitted per-child acceleration) vs. a non-parametric GAMLSS beta-regression (orange), with empirical 10th/50th/90th percentiles (open circles). Lines are the 10/50/90 percentiles of each model. Color denotes model."
+ll <- si_gamlss$overlay$lines |> dplyr::filter(model != "M3 (MVN draw)") |>
+  tidyr::pivot_longer(c(q10, q50, q90), names_to = "pct", values_to = "v") |>
+  dplyr::mutate(dataset = factor(dataset, levels = si_gamlss$levels))
+empd <- si_gamlss$overlay$emp |> dplyr::mutate(dataset = factor(dataset, levels = si_gamlss$levels))
+ggplot() +
+  geom_point(data = empd, aes(age, v), shape = 1, size = 1.2, stroke = .6, color = "grey25") +
+  geom_line(data = ll, aes(age, v, color = model, group = interaction(model, pct)), linewidth = .7) +
+  facet_wrap(~dataset, nrow = 1) +
+  scale_color_manual(values = c("M3 (fitted-κ)" = "#2c7fb8", "GAMLSS (auto-λ)" = "#d95f02"), name = NULL) +
+  scale_y_continuous(limits = c(0, 1)) +
+  labs(x = "Age (months)", y = "Proportion of items produced") +
+  theme_minimal(base_size = 9) +
+  theme(legend.position = "bottom", panel.grid.minor = element_blank(), strip.text = element_text(face = "bold"))
+```
+
+```{r fig-kappa-skew, fig.width=13, fig.height=3}
+#| label: fig-kappa-skew
+#| fig-cap: "[draft caption — MCF] Distribution of fitted per-child acceleration (kappa) in each dataset (grey), with a matched Normal (red). Every dataset is right-skewed with a lighter lower tail than the Normal, so a Gaussian resample of the population variance would place too many children at low acceleration. Dotted line: kappa = 1 (pure accumulation, the LLM regime)."
+K <- si_gamlss$kappa |> dplyr::mutate(dataset = factor(dataset, levels = si_gamlss$levels))
+nrm <- K |> dplyr::group_by(dataset) |> dplyr::summarise(m = mean(kappa), s = sd(kappa), .groups = "drop") |>
+  dplyr::rowwise() |> dplyr::mutate(x = list(seq(-6, 35, .5))) |> tidyr::unnest(x) |> dplyr::mutate(dens = dnorm(x, m, s))
+ggplot(K, aes(kappa)) +
+  geom_histogram(aes(y = after_stat(density)), binwidth = 1.5, fill = "grey72", color = "white") +
+  geom_line(data = nrm, aes(x, dens), color = "#c41e37", linewidth = .7) +
+  geom_vline(xintercept = 1, linetype = "dotted") +
+  facet_wrap(~dataset, nrow = 1, scales = "free_y") + coord_cartesian(xlim = c(-6, 32)) +
+  labs(x = "Fitted per-child acceleration (κ)", y = "Density") +
+  theme_minimal(base_size = 9) +
+  theme(panel.grid.minor = element_blank(), strip.text = element_text(face = "bold"))
+```
+
 # Characterizing Variation in Efficiency and Acceleration
 
 ```{r blup-prep, include=FALSE}
@@ -396,38 +490,37 @@ bz <- si_blups |>
   rename(study = lang)
 ```
 
-```{r tbl-blup-dip}
-#| label: tbl-blup-dip
-#| tbl-cap: ""
-# Hartigan's dip test of unimodality on the per-child BLUPs, by dataset and
-# pooled. Large p is consistent with a single mode — i.e. continuous
-# between-child variation rather than discrete latent classes. Computed on
-# the within-dataset z-scored values from blup-prep.
-dip_row <- function(d, label) {
-  tibble::tibble(Dataset = label, N = nrow(d),
-                 eff = diptest::dip.test(d$xz)$p.value,
-                 acc = diptest::dip.test(d$zz)$p.value)
-}
-diptab <- bind_rows(
-  lapply(levels(bz$study), function(s)
-    dip_row(filter(bz, study == s), s)),
-  dip_row(bz, "Pooled"))
-pfmt <- function(p) ifelse(p >= 0.995, ">0.99", sprintf("%.2f", p))
-diptab |>
-  mutate(eff = pfmt(eff), acc = pfmt(acc)) |>
-  knitr::kable(align = c("l", "r", "r", "r"), escape = FALSE,
-               col.names = c("Dataset", "N",
-                             "Efficiency ($\\xi$)", "Acceleration ($\\kappa$)")) |>
-  kableExtra::kable_styling(font_size = 9, latex_options = "hold_position")
-```
+<!-- ```{r tbl-blup-dip} -->
+<!-- #| label: tbl-blup-dip -->
+<!-- #| tbl-cap: "" -->
+<!-- # Hartigan's dip test of unimodality on the per-child BLUPs, by dataset and -->
+<!-- # pooled. Large p is consistent with a single mode — i.e. continuous -->
+<!-- # between-child variation rather than discrete latent classes. Computed on -->
+<!-- # the within-dataset z-scored values from blup-prep. -->
+<!-- dip_row <- function(d, label) { -->
+<!--   tibble::tibble(Dataset = label, N = nrow(d), -->
+<!--                  eff = diptest::dip.test(d$xz)$p.value, -->
+<!--                  acc = diptest::dip.test(d$zz)$p.value) -->
+<!-- } -->
+<!-- diptab <- bind_rows( -->
+<!--   lapply(levels(bz$study), function(s) -->
+<!--     dip_row(filter(bz, study == s), s)), -->
+<!--   dip_row(bz, "Pooled")) -->
+<!-- pfmt <- function(p) ifelse(p >= 0.995, ">0.99", sprintf("%.2f", p)) -->
+<!-- diptab |> -->
+<!--   mutate(eff = pfmt(eff), acc = pfmt(acc)) |> -->
+<!--   knitr::kable(align = c("l", "r", "r", "r"), escape = FALSE, -->
+<!--                col.names = c("Dataset", "N", -->
+<!--                              "Efficiency ($\\xi$)", "Acceleration ($\\kappa$)")) |> -->
+<!--   kableExtra::kable_styling(font_size = 9, latex_options = "hold_position") -->
+<!-- ``` -->
 
 ```{r fig-blup-hist, fig.width=7, fig.height=6.5}
 #| label: fig-blup-hist
 #| fig-cap: ""
 # Histograms of the per-child BLUPs (within-dataset z-scored): efficiency
 # (xi) and acceleration (kappa), one row per dataset. Dashed curve is the
-# standard-normal reference. Distributions are single-moded (cf. dip-test
-# table), consistent with continuous between-child variation.
+# standard-normal reference. Distributions appear unimodal, consistent with continuous between-child variation.
 hist_df <- bz |>
   select(study, xz, zz) |>
   pivot_longer(c(xz, zz), names_to = "param", values_to = "z") |>
@@ -445,6 +538,7 @@ ggplot(hist_df, aes(z)) +
   theme(strip.text = element_text(size = 8, face = "bold"),
         panel.grid.minor = element_blank())
 ```
+
 
 # Changes in Word Efficiency
 
@@ -626,102 +720,4 @@ along the token axis without changing $\gamma$.
      these can be promoted to live @ markers. Fitted constants (E, B, beta, R^2)
      and the panel C series are from build_cache_short.R section 8 — wire to
      inline values on promotion rather than hard-coding. -->
-```
-
-# Generating the Model-Ladder Quantile Fans
-
-```md
-## How the model-implied quantile bands are generated  [draft for promotion — MCF to review]
-
-The percentile bands ("fans") overlaid on the empirical trajectories in the model
-figure are not closed-form quantiles; for each dataset we generate them by
-Monte-Carlo simulation from the fitted M3 posterior — a synthetic population of
-children whose vocabulary percentiles we read off at each age.
-
-**Drawing a synthetic population.** From each dataset's M3 fit we take the
-posterior medians of the population parameters: mean efficiency $\mu_\xi$,
-population scaling $\kappa_{\text{pop}} = 1 + \delta$, the between-child SDs of
-efficiency and acceleration ($\sigma_a$, $\sigma_b$), their correlation $\rho$, and
-the item-difficulty SD $\tau_\delta$. We draw $N = 500$ synthetic children by
-sampling their (efficiency, acceleration) deviations from the fitted bivariate
-normal,
-$(a_i, b_i) \sim \mathcal{N}\!\big(\mathbf{0}, \Sigma(\sigma_a, \sigma_b, \rho)\big)$,
-so child $i$ has $\xi_i = \mu_\xi + a_i$ and $\kappa_i = \kappa_{\text{pop}} + b_i$;
-a fixed seed makes the bands reproducible. Because the Bayesian hierarchy estimates
-the population covariance $\Sigma$ directly (with partial pooling), sampling from it
-*is* the population draw — unlike a frequentist point-estimate fit, there are no
-unshrunken per-child BLUPs to resample.
-
-**Each child's expected vocabulary curve.** Ages run on a per-dataset grid spanning
-the full range of that dataset's observed ages, so the bands cover the plotted
-trajectories without extrapolating beyond the data. We draw $M$ synthetic item difficulties
-$\delta_j \sim \mathcal{N}(0, \tau_\delta)$ to stand in for a typical item set;
-child $i$'s expected productive vocabulary, as a proportion of items, at age $t$ is
-$$V_i(t) = \frac{1}{M}\sum_{j=1}^{M} \operatorname{logit}^{-1}\!\big(\xi_i + \kappa_i \log(t/a_0) + \log H - \delta_j\big),$$
-an *expected* proportion, so each simulated child's curve is smooth and the width
-of the fan reflects between-child variation alone.
-
-**Quantiles.** At each (dataset, age) the plotted bands are the 10th, 25th, 50th,
-75th, and 90th percentiles of $\{V_i(t)\}_{i=1}^{500}$. The simulation is
-implemented in `studies/bayes_long/03_fan.R` (mirrored in `paper/build_cache_short.R`).
-```
-
-# Comparison to a Non-Parametric Quantile Model
-
-## The parametric fan reproduces the data's quantile structure  [draft for promotion — MCF to review]
-
-```md
-[draft for promotion — MCF to review]
-
-To check that the accumulator model is not imposing its shape on the data, we compare
-its model-implied quantile fan to a *non-parametric* benchmark: a GAMLSS beta-regression
-of proportion-produced on age (a penalized spline on the mean and on the scale; the model
-used for the CDI norms), fit to the same per-administration sumscores. Across all five
-datasets the parametric fan (@fig-gamlss-overlay, blue) tracks both the non-parametric
-GAMLSS fit (orange) and the empirical quantiles (circles) — the accelerating accumulator
-is a faithful, low-dimensional compression of the data's quantile structure, not an
-artifact of its functional form.
-
-Two implementation notes. First, we let the GAMLSS choose its smoothing by marginal
-likelihood; over-smoothing the mean spline makes the non-parametric fit artificially
-tight at older ages. Second, we draw each simulated child's curve from the model's
-*fitted* per-child acceleration $\kappa_i$ rather than a fresh Gaussian resample of the
-population variance. This matters because the fitted acceleration distribution is
-right-skewed with a light lower tail (@fig-kappa-skew): a symmetric resample invents
-low-acceleration children who do not exist and over-disperses the lower tail at older
-ages, whereas the fitted-$\kappa$ fan matches the empirical quantiles at every age.
-```
-
-```{r fig-gamlss-overlay, fig.width=13, fig.height=3.5}
-#| label: fig-gamlss-overlay
-#| fig-cap: "[draft caption — MCF] Parametric accumulator fan (blue, drawn from fitted per-child acceleration) vs. a non-parametric GAMLSS beta-regression (orange), with empirical 10th/50th/90th percentiles (open circles). Lines are the 10/50/90 percentiles of each model. Color denotes model."
-ll <- si_gamlss$overlay$lines |> dplyr::filter(model != "M3 (MVN draw)") |>
-  tidyr::pivot_longer(c(q10, q50, q90), names_to = "pct", values_to = "v") |>
-  dplyr::mutate(dataset = factor(dataset, levels = si_gamlss$levels))
-empd <- si_gamlss$overlay$emp |> dplyr::mutate(dataset = factor(dataset, levels = si_gamlss$levels))
-ggplot() +
-  geom_point(data = empd, aes(age, v), shape = 1, size = 1.2, stroke = .6, color = "grey25") +
-  geom_line(data = ll, aes(age, v, color = model, group = interaction(model, pct)), linewidth = .7) +
-  facet_wrap(~dataset, nrow = 1) +
-  scale_color_manual(values = c("M3 (fitted-κ)" = "#2c7fb8", "GAMLSS (auto-λ)" = "#d95f02"), name = NULL) +
-  scale_y_continuous(limits = c(0, 1)) +
-  labs(x = "Age (months)", y = "Proportion of items produced") +
-  theme_minimal(base_size = 9) +
-  theme(legend.position = "bottom", panel.grid.minor = element_blank(), strip.text = element_text(face = "bold"))
-```
-
-```{r fig-kappa-skew, fig.width=13, fig.height=3}
-#| label: fig-kappa-skew
-#| fig-cap: "[draft caption — MCF] Distribution of fitted per-child acceleration (kappa) in each dataset (grey), with a matched Normal (red). Every dataset is right-skewed with a lighter lower tail than the Normal, so a Gaussian resample of the population variance would place too many children at low acceleration. Dotted line: kappa = 1 (pure accumulation, the LLM regime)."
-K <- si_gamlss$kappa |> dplyr::mutate(dataset = factor(dataset, levels = si_gamlss$levels))
-nrm <- K |> dplyr::group_by(dataset) |> dplyr::summarise(m = mean(kappa), s = sd(kappa), .groups = "drop") |>
-  dplyr::rowwise() |> dplyr::mutate(x = list(seq(-6, 35, .5))) |> tidyr::unnest(x) |> dplyr::mutate(dens = dnorm(x, m, s))
-ggplot(K, aes(kappa)) +
-  geom_histogram(aes(y = after_stat(density)), binwidth = 1.5, fill = "grey72", color = "white") +
-  geom_line(data = nrm, aes(x, dens), color = "#c41e37", linewidth = .7) +
-  geom_vline(xintercept = 1, linetype = "dotted") +
-  facet_wrap(~dataset, nrow = 1, scales = "free_y") + coord_cartesian(xlim = c(-6, 32)) +
-  labs(x = "Fitted per-child acceleration (κ)", y = "Density") +
-  theme_minimal(base_size = 9) +
-  theme(panel.grid.minor = element_blank(), strip.text = element_text(face = "bold"))
 ```
