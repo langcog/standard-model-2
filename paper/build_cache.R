@@ -309,25 +309,20 @@ lm_slopes <- bind_rows(lapply(LMS, function(lm) {
          category = "LLMs (Chang & Bergen 2022)") |>
   select(label, category, slope_natural)
 
-as_num <- function(x) as.numeric(unlist(x))
-sample_kappa <- function(draws_path, label, N_kids = 5000, n_draws = 50) {
-  draws      <- as.data.frame(readRDS(draws_path))
-  delta      <- as_num(draws$delta)
-  sigma_zeta <- as_num(draws$sigma_zeta)
-  set.seed(2026)
-  idx <- sample.int(length(delta), size = n_draws)
-  bind_rows(lapply(idx, function(d) {
-    n <- ceiling(N_kids / n_draws)
-    data.frame(label = label, category = "Children (this work)",
-               slope_natural = 1 + delta[d] + rnorm(n, 0, sigma_zeta[d]))
-  }))
-}
+# Kids: per-child kappa_i BLUPs (posterior medians) from the CURRENT bayes_long
+# M3 fits, 3+-administrations (_a3) variant -- the same fits behind Figs 1-2 and
+# the SI BLUP analyses. English pools the three longitudinal datasets
+# (thal/smith/marchman); Norwegian is its own fit. (Replaces the retired
+# long_no_freq_slopes posterior simulation from the pre-bayes_long pipeline;
+# real per-child estimates rather than MVN draws from population parameters.)
+BL_SUMM <- here("fits", "bayes_long", "summaries")
+blup_kappa <- function(slugs, label) bind_rows(lapply(slugs, function(s)
+  read.csv(file.path(BL_SUMM, paste0(s, "_a3_m3_child.csv"))))) |>
+  transmute(label = label, category = "Children (this work)",
+            slope_natural = kappa_median)
 kid_slopes <- bind_rows(
-  sample_kappa(here("fits", "summaries", "long_no_freq_slopes.draws.rds"),
-               "Children (English)"),
-  sample_kappa(here("fits", "summaries",
-                    "long_no_freq_slopes_norwegian.draws.rds"),
-               "Children (Norwegian)"))
+  blup_kappa(c("thal", "smith", "marchman"), "Children (English)"),
+  blup_kappa("norwegian", "Children (Norwegian)"))
 
 # ---- Our CHILDES-trained GPT-2 (this work): two experience axes ----
 # Same per-word C&B slope statistic; category "LLMs (this work)".
@@ -386,7 +381,13 @@ slope_summary <- slopes |>
             q025   = quantile(slope_natural, 0.025),
             q975   = quantile(slope_natural, 0.975),
             n      = n(), .groups = "drop")
-saveRDS(list(slopes = slopes, summary = slope_summary),
+# Per-architecture C&B slopes, kept separately for SI: Acceleration in Other
+# Architectures (the pooled C&B group is no longer shown in the main figure).
+slopes_cb_arch <- slopes |>
+  filter(group == "LMs: C&B 2022 (4 architectures)") |>
+  transmute(arch = as.character(label), slope_natural)
+saveRDS(list(slopes = slopes, summary = slope_summary,
+             slopes_cb_arch = slopes_cb_arch),
         file.path(CACHE, "fig6_llm_slopes.rds"))
 cat(sprintf("Wrote %s (%d slope rows)\n",
             file.path(CACHE, "fig6_llm_slopes.rds"), nrow(slopes)))
