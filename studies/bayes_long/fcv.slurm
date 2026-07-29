@@ -15,7 +15,10 @@
 # Prereq (run once, locally or on the cluster):
 #   Rscript studies/bayes_long/00c_prepare_forward_cv.R _a3
 #
-# Usage: sbatch --job-name=fcv_<slug>_<model> studies/bayes_long/fcv.slurm <slug> <model>
+# Usage: sbatch --job-name=fcv_<slug>_<model> studies/bayes_long/fcv.slurm <slug> <model> [tag]
+#   tag defaults to "fcv" (>=3 admins). Pass "fcv4" for the >=4-admin bundles, which
+#   are the FAIR test: at >=3, holding out the last administration leaves only two in
+#   training, the regime that cannot identify a per-child slope.
 # Full campaign (owner node for the long pole, owners for the rest):
 #   sbatch -p mcfrank --cpus-per-task=24 --export=ALL,STAN_THREADS=6 \
 #          --job-name=fcv_norwegian_m3 studies/bayes_long/fcv.slurm norwegian m3
@@ -27,12 +30,12 @@
 # (24 cores -> --cpus-per-task=24 + STAN_THREADS=6); -p owners = preemptible, add
 # --requeue; -p normal = shared fairshare pool.
 set -euo pipefail
-SLUG="$1"; MODEL="$2"
+SLUG="$1"; MODEL="$2"; TAG="${3:-fcv}"   # TAG selects the bundle: fcv (>=3 admins) or fcv4 (>=4)
 cd "$HOME/standard_model_2"
 ml R
 export STAN_CHAINS="${STAN_CHAINS:-4}" STAN_WARMUP="${STAN_WARMUP:-1000}" STAN_ITER="${STAN_ITER:-1000}" STAN_ADAPT_DELTA="${STAN_ADAPT_DELTA:-0.9}"
 export STAN_THREADS="${STAN_THREADS:-8}"
 export CV_DRAWS="${CV_DRAWS:-400}"
-echo "===== job $SLURM_JOB_ID  fcv $SLUG/$MODEL  host $(hostname)  start $(date) ====="
-Rscript studies/bayes_long/01c_fit_forward_cv.R "$SLUG" "$MODEL"
+echo "===== job $SLURM_JOB_ID  $TAG $SLUG/$MODEL  host $(hostname)  start $(date) ====="
+Rscript studies/bayes_long/01c_fit_forward_cv.R "$SLUG" "$MODEL" "$TAG"
 echo "===== end $(date) ====="
