@@ -12,67 +12,12 @@ si_ds     <- readRDS(here("paper", "cache", "si_datasets.rds"))      # datasets 
 si_gamlss <- readRDS(here("paper", "cache", "si_gamlss.rds"))        # parametric vs GAMLSS overlay + per-child kappa
 si_set    <- readRDS(here("paper", "cache", "si_settings.rds"))      # robustness: 2+/3+/mega x 5 datasets
 si_pooled <- attr(si_set, "pooled")                                 # converged mega hyperparameters (or NULL)
+llm_slopes <- readRDS(here("paper", "cache", "fig6_llm_slopes.rds")) # kappa slopes incl. C&B per-arch (SI: other architectures)
 knitr::opts_chunk$set(
   echo = FALSE, message = FALSE, warning = FALSE,
   fig.align = "center", out.width = "100%", dpi = 300
 )
 ```
-
-# Generative Model
-
-*[Pending prose for the generative accumulator model. The figure below shows the latent-ability ($\theta$) buildup across the model rungs M0-M3.]*
-
-```{r fig-schematic-theta, fig.width=8, fig.height=2.6}
-#| label: fig-schematic-theta
-#| fig-cap: ""
-# [MCF: caption on next pass.] Latent-ability (theta) version of the
-# main-text model buildup (M0->M3). The main text shows only the vocab-
-# space projection of these curves; here is theta_i(t) itself, before it
-# is pushed through the word-difficulty distribution. Illustrative
-# parameters, not estimated.
-ages <- seq(8, 30, length.out = 80)
-A0 <- 8; L <- log(ages / A0)
-qs <- c(0.1, 0.25, 0.5, 0.75, 0.9); z <- qnorm(qs)
-XI0 <- -2.0; KAPPA_A <- 2.5
-variants <- tibble::tribble(
-  ~name,                       ~kappa_pop, ~sigma_alpha, ~sigma_kappa, ~eq,
-  "(M0) accumulator",          1,           0,            0,            r"($\theta = \log(r) + \log(t)$)",
-  "(M1) + acceleration",       KAPPA_A,     0,            0,            r"($\theta = \log(r) + \kappa\,\log(t)$)",
-  "(M2) + efficiency var.",    KAPPA_A,     1.1,          0,            r"($\theta = \xi_i + \kappa\,\log(t)$)",
-  "(M3) + per-child accel.",   KAPPA_A,     1.1,          0.7,          r"($\theta = \xi_i + \kappa_i\,\log(t)$)"
-)
-sim <- variants |>
-  mutate(name = factor(name, levels = name)) |>
-  rowwise() |>
-  do({ v <- .
-    bind_rows(lapply(seq_along(qs), function(i) {
-      tibble(name = v$name,
-             qprob_f = factor(as.character(qs[i]),
-                              levels = c("0.1","0.25","0.5","0.75","0.9")),
-             age = ages,
-             theta = XI0 + z[i]*v$sigma_alpha + (v$kappa_pop + z[i]*v$sigma_kappa)*L,
-             eq = v$eq)
-    })) }) |>
-  ungroup()
-eq_lab <- variants |> mutate(name = factor(name, levels = name)) |> select(name, eq)
-lwidth <- function(qf) ifelse(as.character(qf) == "0.5", 0.95, 0.55)
-ggplot(sim, aes(age, theta, color = qprob_f, group = qprob_f)) +
-  geom_line(aes(linewidth = lwidth(qprob_f))) +
-  geom_label(data = eq_lab, aes(x = -Inf, y = Inf,
-             label = latex2exp::TeX(eq, output = "character")),
-             inherit.aes = FALSE, parse = TRUE, hjust = -0.05, vjust = 1.4,
-             size = 2.4, label.size = 0, fill = scales::alpha("white", 0.8)) +
-  facet_wrap(~ name, nrow = 1) +
-  scale_color_manual(values = WORDBANK_PALETTE, name = "Percentile",
-                     labels = c("10th","25th","50th","75th","90th"), drop = FALSE) +
-  scale_linewidth_identity() +
-  coord_cartesian(ylim = c(-3.5, 4.5)) +
-  labs(x = "age (months)", y = expression(theta[i](t))) +
-  theme_minimal(base_size = 9) +
-  theme(strip.text = element_text(face = "bold", size = 8),
-        legend.position = "bottom", panel.grid.minor = element_blank())
-```
-
 # Comparison with Prior Models
 
 ```md
@@ -254,7 +199,7 @@ si_ds |>
             med_admins = as.character(med_admins)) |>
   knitr::kable(
     col.names = c("Citation", "Language", "N (3+/2+)", "Admins",
-                  "Mean", "Min", "Max", "Adm./kid"),
+                  "Mean", "Min", "Max", "Adm/Chi"),
     align = "llrrrrrr") |>
   kableExtra::add_header_above(c(" " = 4, "Age (months)" = 3, " " = 1)) |>
   kableExtra::kable_styling(font_size = 9, latex_options = "hold_position")
@@ -331,8 +276,6 @@ knitr::kable(tab |> select(Model, all_of(lang_order)),
 # Robustness Across Model and Data Settings
 
 ```md
-## Robustness across model and data settings  [draft for promotion — MCF to review]
-
 The main text reports a single analysis: separate per-dataset fits of the full
 model (M3) to children with at least three administrations. That choice is
 deliberate. A child measured only twice yields a single trajectory slope with
@@ -407,6 +350,44 @@ knitr::kable(tab, align = c("l", "r"), escape = FALSE,
   kableExtra::kable_styling(font_size = 9, latex_options = "hold_position")
 ```
 
+# Generating Quantiles
+
+```md
+## How the model-implied quantile bands are generated  [draft for promotion — MCF to review]
+
+The percentile bands ("fans") overlaid on the empirical trajectories in the model
+figure are not closed-form quantiles; for each dataset we generate them by
+Monte-Carlo simulation from the fitted M3 posterior — a synthetic population of
+children whose vocabulary percentiles we read off at each age.
+
+**Drawing a synthetic population.** From each dataset's M3 fit we take the
+posterior medians of the population parameters: mean efficiency $\mu_\xi$,
+population scaling $\kappa_{\text{pop}} = 1 + \delta$, the between-child SDs of
+efficiency and acceleration ($\sigma_a$, $\sigma_b$), their correlation $\rho$, and
+the item-difficulty SD $\tau_\delta$. We draw $N = 500$ synthetic children by
+sampling their (efficiency, acceleration) deviations from the fitted bivariate
+normal,
+$(a_i, b_i) \sim \mathcal{N}\!\big(\mathbf{0}, \Sigma(\sigma_a, \sigma_b, \rho)\big)$,
+so child $i$ has $\xi_i = \mu_\xi + a_i$ and $\kappa_i = \kappa_{\text{pop}} + b_i$;
+a fixed seed makes the bands reproducible. Because the Bayesian hierarchy estimates
+the population covariance $\Sigma$ directly (with partial pooling), sampling from it
+*is* the population draw — unlike a frequentist point-estimate fit, there are no
+unshrunken per-child BLUPs to resample.
+
+**Each child's expected vocabulary curve.** Ages run on a per-dataset grid spanning
+the full range of that dataset's observed ages, so the bands cover the plotted
+trajectories without extrapolating beyond the data. We draw $M$ synthetic item difficulties
+$\delta_j \sim \mathcal{N}(0, \tau_\delta)$ to stand in for a typical item set;
+child $i$'s expected productive vocabulary, as a proportion of items, at age $t$ is
+$$V_i(t) = \frac{1}{M}\sum_{j=1}^{M} \operatorname{logit}^{-1}\!\big(\xi_i + \kappa_i \log(t/a_0) + \log H - \delta_j\big),$$
+an *expected* proportion, so each simulated child's curve is smooth and the width
+of the fan reflects between-child variation alone.
+
+**Quantiles.** At each (dataset, age) the plotted bands are the 10th, 25th, 50th,
+75th, and 90th percentiles of $\{V_i(t)\}_{i=1}^{500}$. The simulation is
+implemented in `studies/bayes_long/03_fan.R` (mirrored in `paper/build_cache_short.R`).
+```
+
 # Characterizing Variation in Efficiency and Acceleration
 
 ```{r blup-prep, include=FALSE}
@@ -438,6 +419,7 @@ bz <- si_blups |>
 #| fig-cap: ""
 # Histograms of the per-child BLUPs (within-dataset z-scored): efficiency
 # (xi) and acceleration (kappa), one row per dataset. Dashed curve is the
+
 # standard-normal reference.
 # Framing note: these are shown as a DESCRIPTION of the spread, not as evidence of
 # unimodality (see the comment above the removed dip test). What is interpretable
@@ -460,6 +442,7 @@ ggplot(hist_df, aes(z)) +
   theme(strip.text = element_text(size = 8, face = "bold"),
         panel.grid.minor = element_blank())
 ```
+
 
 # Changes in Word Efficiency
 
@@ -632,15 +615,70 @@ $\gamma$ is the loss-currency reflection of a **constant** $\kappa_i$
 (production probability saturating), not of $\kappa$ increasing over
 development; the invariant claim is the constant-versus-rising exponent. The
 horizontal placement of the child curves carries the input-rate uncertainty
-($\pm 1$ SD $\approx \times 1.7$; panel C ribbons), which shifts children
-along the token axis without changing $\gamma$.
+($\pm 1$ SD $\approx \times 1.7$; exemplar ribbons in the fractional-return
+panel; see SI: Input Estimation), which shifts children along the token axis
+without changing $\gamma$.
 
 <!-- [BIB NEEDED] Hoffmann et al. (2022) / Chinchilla and Michaud et al. (2023)
-     are named in plain text (as in the block above). The main text already uses
-     @hoffmann2022 and @michaud2023 markers; if those bib entries are verified,
+     are named in plain text (as in the block above). The main text uses
+     @hoffmann2022 and @michaud2024 markers; if those bib entries are verified,
      these can be promoted to live @ markers. Fitted constants (E, B, beta, R^2)
-     and the panel C series are from build_cache_short.R section 8 — wire to
-     inline values on promotion rather than hard-coding. -->
+     and the fractional-return series are from build_cache_short.R section 8 —
+     wire to inline values on promotion rather than hard-coding. -->
+```
+
+# Acceleration in Other Architectures
+
+```{r fig-si-cb-arch, fig.width=6.5, fig.height=4}
+#| label: fig-si-cb-arch
+#| fig-cap: ""
+
+# Per-word acquisition slopes (same C&B 4-PL statistic as the main figure, on
+# the training axis) for the four architectures of Chang & Bergen (2022) --
+# BERT, GPT-2, BiLSTM, LSTM on BookCorpus + WikiText-103 -- previously pooled
+# into the main-text panel A, now shown here per architecture. Our
+# CHILDES-trained GPT-2 (training axis) overlaid in grey for reference.
+# Data: build_cache.R §6 (fig6_llm_slopes.rds: slopes_cb_arch + slopes).
+cb   <- llm_slopes$slopes_cb_arch
+ours <- llm_slopes$slopes |>
+  dplyr::filter(group == "LMs: CHILDES (training)") |>
+  dplyr::transmute(arch = "GPT-2 / CHILDES (this work)", slope_natural)
+arch_pal <- c("BERT"="#7b3294","GPT-2"="#c2a5cf","BiLSTM"="#a6dba0","LSTM"="#008837",
+              "GPT-2 / CHILDES (this work)"="grey35")
+ggplot(dplyr::bind_rows(cb, ours), aes(slope_natural, colour=arch, fill=arch)) +
+  geom_density(alpha=0.15, linewidth=0.6) +
+  geom_vline(xintercept=1, linetype="dashed", colour="grey55", linewidth=0.4) +
+  annotate("text", x=1.15, y=Inf, hjust=0, vjust=1.5, size=2.8, colour="grey45",
+           label="kappa = 1 (unit accumulator)") +
+  scale_colour_manual(values=arch_pal, name=NULL) +
+  scale_fill_manual(values=arch_pal, name=NULL) +
+  coord_cartesian(xlim=c(0,4)) +
+  labs(x="per-word kappa: sigmoid slope on log(experience)", y="density") +
+  theme_minimal(base_size=10) +
+  theme(legend.position=c(0.78,0.72), legend.text=element_text(size=7.5),
+        legend.background=element_rect(fill="white", colour=NA))
+```
+
+```md
+## Acceleration in other architectures  [draft for promotion — MCF to review]
+
+The main-text comparison uses GPT-2 trained on CHILDES. To check that the
+per-word acceleration result is not specific to that architecture, we
+re-analyzed the published per-word sigmoid fits of Chang and Bergen (2022),
+who traced the same statistic across training for four architectures — BERT,
+GPT-2, BiLSTM, and LSTM — trained on adult-written text (BookCorpus +
+WikiText-103). Converted to the shared natural-log experience axis, all four
+architectures produce per-word slope distributions clustered at the
+unit-accumulator value ($\kappa \approx 1$; medians 0.76–0.96), mutually
+overlapping and overlapping our CHILDES-trained GPT-2 (median 0.74). Neither
+architecture (autoregressive vs. masked; transformer vs. recurrent) nor
+training distribution (adult text vs. child-directed speech) moves language
+models off the unit-accumulator regime — the contrast with children's
+$\kappa \approx 10$ is not an artifact of our particular model choice.
+
+<!-- [MCF: medians hard-coded from fig6_llm_slopes.rds slopes_cb_arch
+     (BERT 0.76, GPT-2 0.81, BiLSTM 0.87, LSTM 0.96, ours 0.74); wire to
+     inline values on promotion if preferred.] -->
 ```
 
 # Generating the Model-Ladder Quantile Fans
@@ -682,8 +720,6 @@ implemented in `studies/bayes_long/03_fan.R` (mirrored in `paper/build_cache_sho
 ```
 
 # Comparison to a Non-Parametric Quantile Model
-
-## The parametric fan reproduces the data's quantile structure  [draft for promotion — MCF to review]
 
 ```md
 [draft for promotion — MCF to review]
@@ -739,4 +775,62 @@ ggplot(K, aes(kappa)) +
   labs(x = "Fitted per-child acceleration (κ)", y = "Density") +
   theme_minimal(base_size = 9) +
   theme(panel.grid.minor = element_blank(), strip.text = element_text(face = "bold"))
+```
+
+# Input Estimation
+
+```md
+## Aligning children's age to cumulative input tokens  [draft for promotion — MCF to review]
+
+The fractional-return panel of the LM figure places children and language
+models on a single absolute-input axis: cumulative word tokens received. For
+models this quantity is exact — the number of (whitespace) word tokens in the
+training sample. For children we observe age, not input, so ages are mapped to
+cumulative tokens using an external estimate of the rate of speech heard per
+unit time.
+
+**The rate.** We use the pooled per-child input-rate estimate assembled in the
+input-estimation study (`studies/input_estimation/`): per-child mean
+adult-to-child tokens per hour for the 42 children with manual transcript data
+in Sperry, Sperry, and Miller (2019) and Hart and Risley (1995 / 2003 reanalysis;
+per-dyad rates recomputed in `compute_local_rates.R` from the committed per-visit
+CSV). The pooled geometric mean is $\exp(7.338) \approx 1{,}537$ tokens per hour
+of child-directed (any-adult) speech, with between-child standard deviation of
+log rate $\sigma_r = 0.534$.
+
+**Hours to months.** Assuming 12 waking exposure-hours per day
+($12 \times 30.4 \approx 365$ input-hours per month) gives
+$1{,}537 \times 365 \approx 561\text{K}$ tokens per month. A child's cumulative
+input at age $t$ months is then $t \times 561\text{K}$ under a constant-rate
+assumption; the plotted 8–30-month span corresponds to roughly 4.5M–16.8M
+cumulative tokens, which is what places children alongside the 0.5M–24M-token
+model ladder.
+
+**Uncertainty band.** The exemplar-child ribbons show $\pm 1$ SD of the
+between-child log input rate: a child one standard deviation above (below) the
+median rate reaches the same age having heard $\times 1.71$ ($\div 1.71$) as
+many tokens, i.e. a horizontal shift of the child's curve along the log-token
+axis.
+
+**Sensitivity.** Three caveats bound the alignment. First, published mean rates
+vary across samples and measurement channels (mother-only CDS to all
+adult-to-child speech, roughly 460–1,540 tokens/hour across the studies
+tabulated in the input-rate supplement), and overheard speech is excluded;
+including it would raise totals by roughly 1.4× (Sperry et al.'s all-adult
+channel). Second, the constant-rate assumption ignores developmental change in
+input rate. Third, and most importantly, any global rescaling of the rate
+shifts all children *horizontally* by a constant amount on the log-token axis;
+it cannot create or remove the qualitative contrast in the figure — children's
+rising fractional return versus the models' flat one — which is invariant to
+the calibration. The $\pm 1$ SD band visualizes exactly this horizontal
+uncertainty for the exemplar children.
+
+<!-- [BIB NEEDED] Sperry, Sperry & Miller (2019) and Hart & Risley are named in
+     plain text; promote to @ markers once bib entries are verified. Constants
+     (1537 tok/hr, sigma_r = 0.534, x1.71, 561K tok/mo) are single-sourced from
+     the POOLED row of studies/input_estimation/validation_set.csv via
+     build_cache_short.R section 8 (fig3$consts) — wire to inline values on
+     promotion rather than hard-coding. Cross-study range and the 1.4x overheard
+     factor come from journal/results/input_rate_table.md /
+     paper/cache/input_rate_table.rds. -->
 ```
