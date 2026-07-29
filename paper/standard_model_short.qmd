@@ -437,7 +437,7 @@ All longitudinal datasets with three or more observations per child were include
 
 Bayesian models were fit independently to each dataset using Stan [@stan] using four independent chains, per the specification described in the text. The model was parameterized to capture individual children's variation from the population mean such that $\xi_i = \mu_\xi + a_i$ and $\kappa_i = \mu_\kappa + b_i$, where $(a_i, b_i) \sim \mathrm{MVN}(\mathbf 0, \Sigma)$. To facilitate interpretation of the accumulator mechanism, we included the constant $\log H = \log(365) \approx 5.90$ (waking hours/month) and the anchor age $a_0 = 18$ months (so $\log(t/a_0)=0$ at 18 months).
 
-We chose weakly informative priors throughout, including on the efficiency and acceleration parameters $\mu_\xi \sim \mathcal N(-6,\ 5)$ and $\mu_\kappa \sim \mathcal N(0,\ 5)$ as well as the individual child standard deviations $\sigma_a \sim \mathrm{Half\text{-}Normal}(0,\ 3)$ and 
+We chose weakly informative priors throughout, including on the efficiency and acceleration parameters $\mu_\xi \sim \mathcal N(-6,\ 5)$ and $\mu_\kappa \sim 1 +  \mathcal N(0,\ 5)$ (centered around the pure accumulator model) as well as the individual child standard deviations $\sigma_a \sim \mathrm{Half\text{-}Normal}(0,\ 3)$ and 
 $\sigma_b \sim \mathrm{Half\text{-}Normal}(0,\ 5)$ and the item difficulties $\tau_\delta \sim \mathrm{Half\text{-}Normal}(0,\ 5)$. We also chose a prior that mildly regularized the correlations between $a_i$ and $b_i$ ($\mathbf L \sim \mathrm{LKJ}(2)$).
 
 ### Language models
