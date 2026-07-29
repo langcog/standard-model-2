@@ -1,0 +1,32 @@
+{
+  "babylm_S1": {
+    "words": 23370475,
+    "docs": 1896480,
+    "file": "/data2/mcfrank/ladder/register_data/babylm_S1.txt"
+  },
+  "babylm_S2": {
+    "words": 23370468,
+    "docs": 1889626,
+    "file": "/data2/mcfrank/ladder/register_data/babylm_S2.txt"
+  },
+  "babylm_S3": {
+    "words": 23370469,
+    "docs": 1891440,
+    "file": "/data2/mcfrank/ladder/register_data/babylm_S3.txt"
+  },
+  "climbmix_C1": {
+    "words": 24000446,
+    "docs": 49258,
+    "file": "/data2/mcfrank/ladder/register_data/climbmix_C1.txt"
+  },
+  "climbmix_C2": {
+    "words": 24000018,
+    "docs": 50201,
+    "file": "/data2/mcfrank/ladder/register_data/climbmix_C2.txt"
+  },
+  "climbmix_C3": {
+    "words": 24000385,
+    "docs": 49914,
+    "file": "/data2/mcfrank/ladder/register_data/climbmix_C3.txt"
+  }
+}
