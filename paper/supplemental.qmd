@@ -19,62 +19,6 @@ knitr::opts_chunk$set(
   fig.align = "center", out.width = "100%", dpi = 300
 )
 ```
-
-<!-- # Generative Model -->
-
-<!-- *[Pending prose for the generative accumulator model. The figure below shows the latent-ability ($\theta$) buildup across the model rungs M0-M3.]* -->
-
-<!-- ```{r fig-schematic-theta, fig.width=8, fig.height=2.6} -->
-<!-- #| label: fig-schematic-theta -->
-<!-- #| fig-cap: "" -->
-<!-- # [MCF: caption on next pass.] Latent-ability (theta) version of the -->
-<!-- # main-text model buildup (M0->M3). The main text shows only the vocab- -->
-<!-- # space projection of these curves; here is theta_i(t) itself, before it -->
-<!-- # is pushed through the word-difficulty distribution. Illustrative -->
-<!-- # parameters, not estimated. -->
-<!-- ages <- seq(8, 30, length.out = 80) -->
-<!-- A0 <- 8; L <- log(ages / A0) -->
-<!-- qs <- c(0.1, 0.25, 0.5, 0.75, 0.9); z <- qnorm(qs) -->
-<!-- XI0 <- -2.0; KAPPA_A <- 2.5 -->
-<!-- variants <- tibble::tribble( -->
-<!--   ~name,                       ~kappa_pop, ~sigma_alpha, ~sigma_kappa, ~eq, -->
-<!--   "(M0) accumulator",          1,           0,            0,            r"($\theta = \log(r) + \log(t)$)", -->
-<!--   "(M1) + acceleration",       KAPPA_A,     0,            0,            r"($\theta = \log(r) + \kappa\,\log(t)$)", -->
-<!--   "(M2) + efficiency var.",    KAPPA_A,     1.1,          0,            r"($\theta = \xi_i + \kappa\,\log(t)$)", -->
-<!--   "(M3) + per-child accel.",   KAPPA_A,     1.1,          0.7,          r"($\theta = \xi_i + \kappa_i\,\log(t)$)" -->
-<!-- ) -->
-<!-- sim <- variants |> -->
-<!--   mutate(name = factor(name, levels = name)) |> -->
-<!--   rowwise() |> -->
-<!--   do({ v <- . -->
-<!--     bind_rows(lapply(seq_along(qs), function(i) { -->
-<!--       tibble(name = v$name, -->
-<!--              qprob_f = factor(as.character(qs[i]), -->
-<!--                               levels = c("0.1","0.25","0.5","0.75","0.9")), -->
-<!--              age = ages, -->
-<!--              theta = XI0 + z[i]*v$sigma_alpha + (v$kappa_pop + z[i]*v$sigma_kappa)*L, -->
-<!--              eq = v$eq) -->
-<!--     })) }) |> -->
-<!--   ungroup() -->
-<!-- eq_lab <- variants |> mutate(name = factor(name, levels = name)) |> select(name, eq) -->
-<!-- lwidth <- function(qf) ifelse(as.character(qf) == "0.5", 0.95, 0.55) -->
-<!-- ggplot(sim, aes(age, theta, color = qprob_f, group = qprob_f)) + -->
-<!--   geom_line(aes(linewidth = lwidth(qprob_f))) + -->
-<!--   geom_label(data = eq_lab, aes(x = -Inf, y = Inf, -->
-<!--              label = latex2exp::TeX(eq, output = "character")), -->
-<!--              inherit.aes = FALSE, parse = TRUE, hjust = -0.05, vjust = 1.4, -->
-<!--              size = 2.4, label.size = 0, fill = scales::alpha("white", 0.8)) + -->
-<!--   facet_wrap(~ name, nrow = 1) + -->
-<!--   scale_color_manual(values = WORDBANK_PALETTE, name = "Percentile", -->
-<!--                      labels = c("10th","25th","50th","75th","90th"), drop = FALSE) + -->
-<!--   scale_linewidth_identity() + -->
-<!--   coord_cartesian(ylim = c(-3.5, 4.5)) + -->
-<!--   labs(x = "age (months)", y = expression(theta[i](t))) + -->
-<!--   theme_minimal(base_size = 9) + -->
-<!--   theme(strip.text = element_text(face = "bold", size = 8), -->
-<!--         legend.position = "bottom", panel.grid.minor = element_blank()) -->
-<!-- ``` -->
-
 # Comparison with Prior Models
 
 ```md
@@ -415,64 +359,6 @@ of the fan reflects between-child variation alone.
 **Quantiles.** At each (dataset, age) the plotted bands are the 10th, 25th, 50th,
 75th, and 90th percentiles of $\{V_i(t)\}_{i=1}^{500}$. The simulation is
 implemented in `studies/bayes_long/03_fan.R` (mirrored in `paper/build_cache_short.R`).
-```
-
-# Comparison to a Non-Parametric Quantile Model
-
-```md
-[draft for promotion — MCF to review]
-
-To check that the accumulator model is not imposing its shape on the data, we compare
-its model-implied quantile fan to a *non-parametric* benchmark: a GAMLSS beta-regression
-of proportion-produced on age (a penalized spline on the mean and on the scale; the model
-used for the CDI norms), fit to the same per-administration sumscores. Across all five
-datasets the parametric fan (@fig-gamlss-overlay, blue) tracks both the non-parametric
-GAMLSS fit (orange) and the empirical quantiles (circles) — the accelerating accumulator
-is a faithful, low-dimensional compression of the data's quantile structure, not an
-artifact of its functional form.
-
-Two implementation notes. First, we let the GAMLSS choose its smoothing by marginal
-likelihood; over-smoothing the mean spline makes the non-parametric fit artificially
-tight at older ages. Second, we draw each simulated child's curve from the model's
-*fitted* per-child acceleration $\kappa_i$ rather than a fresh Gaussian resample of the
-population variance. This matters because the fitted acceleration distribution is
-right-skewed with a light lower tail (@fig-kappa-skew): a symmetric resample invents
-low-acceleration children who do not exist and over-disperses the lower tail at older
-ages, whereas the fitted-$\kappa$ fan matches the empirical quantiles at every age.
-```
-
-```{r fig-gamlss-overlay, fig.width=13, fig.height=3.5}
-#| label: fig-gamlss-overlay
-#| fig-cap: "[draft caption — MCF] Parametric accumulator fan (blue, drawn from fitted per-child acceleration) vs. a non-parametric GAMLSS beta-regression (orange), with empirical 10th/50th/90th percentiles (open circles). Lines are the 10/50/90 percentiles of each model. Color denotes model."
-ll <- si_gamlss$overlay$lines |> dplyr::filter(model != "M3 (MVN draw)") |>
-  tidyr::pivot_longer(c(q10, q50, q90), names_to = "pct", values_to = "v") |>
-  dplyr::mutate(dataset = factor(dataset, levels = si_gamlss$levels))
-empd <- si_gamlss$overlay$emp |> dplyr::mutate(dataset = factor(dataset, levels = si_gamlss$levels))
-ggplot() +
-  geom_point(data = empd, aes(age, v), shape = 1, size = 1.2, stroke = .6, color = "grey25") +
-  geom_line(data = ll, aes(age, v, color = model, group = interaction(model, pct)), linewidth = .7) +
-  facet_wrap(~dataset, nrow = 1) +
-  scale_color_manual(values = c("M3 (fitted-κ)" = "#2c7fb8", "GAMLSS (auto-λ)" = "#d95f02"), name = NULL) +
-  scale_y_continuous(limits = c(0, 1)) +
-  labs(x = "Age (months)", y = "Proportion of items produced") +
-  theme_minimal(base_size = 9) +
-  theme(legend.position = "bottom", panel.grid.minor = element_blank(), strip.text = element_text(face = "bold"))
-```
-
-```{r fig-kappa-skew, fig.width=13, fig.height=3}
-#| label: fig-kappa-skew
-#| fig-cap: "[draft caption — MCF] Distribution of fitted per-child acceleration (kappa) in each dataset (grey), with a matched Normal (red). Every dataset is right-skewed with a lighter lower tail than the Normal, so a Gaussian resample of the population variance would place too many children at low acceleration. Dotted line: kappa = 1 (pure accumulation, the LLM regime)."
-K <- si_gamlss$kappa |> dplyr::mutate(dataset = factor(dataset, levels = si_gamlss$levels))
-nrm <- K |> dplyr::group_by(dataset) |> dplyr::summarise(m = mean(kappa), s = sd(kappa), .groups = "drop") |>
-  dplyr::rowwise() |> dplyr::mutate(x = list(seq(-6, 35, .5))) |> tidyr::unnest(x) |> dplyr::mutate(dens = dnorm(x, m, s))
-ggplot(K, aes(kappa)) +
-  geom_histogram(aes(y = after_stat(density)), binwidth = 1.5, fill = "grey72", color = "white") +
-  geom_line(data = nrm, aes(x, dens), color = "#c41e37", linewidth = .7) +
-  geom_vline(xintercept = 1, linetype = "dotted") +
-  facet_wrap(~dataset, nrow = 1, scales = "free_y") + coord_cartesian(xlim = c(-6, 32)) +
-  labs(x = "Fitted per-child acceleration (κ)", y = "Density") +
-  theme_minimal(base_size = 9) +
-  theme(panel.grid.minor = element_blank(), strip.text = element_text(face = "bold"))
 ```
 
 # Characterizing Variation in Efficiency and Acceleration
@@ -817,8 +703,6 @@ implemented in `studies/bayes_long/03_fan.R` (mirrored in `paper/build_cache_sho
 ```
 
 # Comparison to a Non-Parametric Quantile Model
-
-## The parametric fan reproduces the data's quantile structure  [draft for promotion — MCF to review]
 
 ```md
 [draft for promotion — MCF to review]

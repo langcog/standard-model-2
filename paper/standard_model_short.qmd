@@ -45,8 +45,6 @@ suppressPackageStartupMessages({
 })
 source(here("paper", "_helpers.R"))
 
-# QC cache
-TR <- readRDS(file.path(CACHE, "qc_spaghetti_data.rds"))
 
 
 # Cached data for the three main-text figures — produced by
@@ -55,6 +53,9 @@ CACHE <- here("paper", "cache")
 fig1_fan   <- readRDS(file.path(CACHE, "fig1_fan.rds"))        # Fig 1: M0-M3 schematic + per-dataset M3 fan
 fig2       <- readRDS(file.path(CACHE, "fig2_efficiency.rds")) # Fig 2: per-word exposures-to-learn (M3)
 llm_slopes <- readRDS(file.path(CACHE, "fig6_llm_slopes.rds")) # Fig 3: child vs LLM acceleration
+# QC cache
+TR <- readRDS(file.path(CACHE, "qc_spaghetti_data.rds"))
+
 
 # Inline text values (raw numbers in si_inline.rds, built by build_cache_short
 # section 7); formatted here to the precision they render at in the text.
@@ -374,13 +375,15 @@ Bayesian models were fit independently to each dataset using Stan [@stan] using 
 We chose weakly informative priors throughout, including on the efficiency and acceleration parameters $\mu_\xi \sim \mathcal N(-6,\ 5)$ and $\mu_\kappa \sim \mathcal N(0,\ 5)$ as well as the individual child standard deviations $\sigma_a \sim \mathrm{Half\text{-}Normal}(0,\ 3)$ and 
 $\sigma_b \sim \mathrm{Half\text{-}Normal}(0,\ 5)$ and the item difficulties $\tau_\delta \sim \mathrm{Half\text{-}Normal}(0,\ 5)$. We also chose a prior that mildly regularized the correlations between $a_i$ and $b_i$ ($\mathbf L \sim \mathrm{LKJ}(2)$).
 
-### Neural network language models
+### Language models
 
-Following @feng2024, we fit randomly-initialized \texttt{GPT-2-small} (124M parameters) models, using the 24M word (~47M token) preparation of English-language CHILDES data from that study. Data were tokenized using a standard BPE tokenizer, trained on the full dataset. Surprisal was computed as mean per-word negative log likelihood over ~50 held-out validation contexts (last 128 tokens each) for the 609 CDI words that were used in @chang2022 and that appeared in the training data with sufficient frequency in the held-out contexts. Surprisal values for sigmoid fits were read out from the epoch with lowest validation loss.
+Following @feng2024, we fit randomly-initialized \texttt{GPT-2-small} (124M parameters) models, using the 24M word (~47M token) preparation of English-language CHILDES data from that study. We also fit models to the 2nd BabyLM challenge dataset (downloaded from [osf.io/ad7qg](), with CHILDES data removed) [@hu2024], split into three disjoint subsets of 24M words and the ClimbMix dataset (available at [https://huggingface.co/datasets/karpathy/climbmix-400b-shuffle]()) [@diao2025]. 
 
-For the computation of surprisal across training runs ("training"), we trained models using 3 random seeds on the full dataset. For the computation across different dataset sizes ("development"), the data were segmented into 18 nested datasets ranging in size from .5M to the full 24M. We then chose 10 random seed values and trained 10 models on each dataset for a total of 180 models. 
+Data were tokenized using a standard BPE tokenizer, trained on the full dataset. Surprisal was computed as mean per-word negative log likelihood over ~50 held-out validation contexts (last 128 tokens each) for the 609 CDI words that were used in @chang2022 and that appeared in the training data with sufficient frequency in the held-out contexts. Surprisal values for sigmoid fits were read out from the epoch with lowest validation loss.
 
-Models were trained for a total of 20 epochs with sequence length 1024 and batch size 8, using AdamW for optimization and learning rate of 1e-4 with a linear decay, no warmup, weight decay of 0, and no in-epoch shuffling. Training was performed on NVIDIA A40 GPUs. 
+For the computation of surprisal across CHILDES training runs ("training"), we trained models using 3 random seeds on the full dataset. For the computation across different dataset sizes ("development"), the data were segmented into 18 nested datasets ranging in size from .5M to the full 24M. We then chose 10 random seed values and trained 10 models on each dataset for a total of 180 models. For the computation of variability across model runs, we ran 8 random seed values across 12 nested dataset sizes for three disjoint subsets of both BabyLM and ClimbMix, resulting in 8 (seeds) x 12 (sizes) x 3 (subsets) x 2 (datasets) = 576 distinct models.
+
+Models were trained for a total of 20 epochs with sequence length 1024 and batch size 8, using AdamW for optimization and learning rate of 1e-4 with a linear decay, no warmup, weight decay of 0, and no in-epoch shuffling. Training was performed on NVIDIA A40 GPUs. All trained models are available at [https://huggingface.co/mcxfrank/childes-gpt2-ladder]() and [https://huggingface.co/mcxfrank/gpt2-composition-control]().
 
 
 # Acknowledgements
