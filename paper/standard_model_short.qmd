@@ -69,6 +69,16 @@ kap_hi   <- .k1(inl$kappa_hi); kap_hi_q5 <- .k1(inl$kappa_hi_q5); kap_hi_q95 <- 
 en_kappa <- .k1(inl$en_kappa); no_kappa <- .k1(inl$no_kappa)
 en_sd    <- .k1(inl$en_sd);    no_sd    <- .k1(inl$no_sd)
 
+# Random-effect summaries for main-text reporting (see tbl-ranef). sigma_b = between-
+# child SD of acceleration; rho = efficiency-acceleration correlation; pct_gt1 = share
+# of children above the pure-accumulator value kappa = 1; kappa_between_sd = SD of
+# kappa ACROSS the five samples, the honest uncertainty scale given that CDI items are
+# not locally independent (it is ~13x the narrowest within-sample interval).
+sb_lo    <- .k1(inl$sb_lo);  sb_hi  <- .k1(inl$sb_hi)
+rho_lo   <- sprintf("%+.2f", inl$rho_lo); rho_hi <- sprintf("%+.2f", inl$rho_hi)
+pct_gt1  <- sprintf("%.1f", inl$pct_kappa_gt1)
+kappa_between_sd <- .k1(inl$kappa_between_sd)
+
 # Longitudinal sample + QC exclusions (bayes_long_sample.rds; built from the bundles by
 # studies/bayes_long/qc_exclusion_report.R, so it renders independently of the fit caches).
 bl_samp  <- readRDS(file.path(CACHE, "bayes_long_sample.rds"))
@@ -129,6 +139,49 @@ Our model describes growth in ability in the logarithm of age. Linear growth wit
 
 Beyond the high levels of acceleration we measured, a second notable feature of the data is the high levels of variability across children. This variability is a ubiquitous feature of early language across a vast array of phenomena and a wide range of languages [@frank2021;@kidd2020]. Variation appeared unimodal across samples, but the increasing spread of children's trajectories with age was especially noticeable for low-vocabulary older children [who may be classified as "late talkers"; @fernald2012; @rescorla2011; @pinstock2026;@singletary2025] (see SI: Characterizing Variation in Efficiency and Acceleration).
 
+```md
+[draft for promotion — MCF to review. Reports the random-effect parameters in the MAIN
+ text, per reviewer request; the numbers come from @tbl-ranef, which is new below.
+ NOTE this paragraph is written to REPLACE the unimodality sentence in the paragraph
+ above ("Variation was unimodal across all samples") — the reviewer's objection to that
+ claim is well taken and I agree with it: the model assumes MVN random effects, so
+ partially-pooled per-child estimates are shrunk toward normality and cannot themselves
+ establish the absence of latent groups. The dip-test table has been removed from the SI.]
+
+Children differed substantially in both parameters. The between-child standard deviation
+in acceleration ($\sigma_b$) ranged from `r sb_lo` to `r sb_hi` across the five samples,
+against a population acceleration of roughly `r kap_lo`--`r kap_hi`; `r pct_gt1`% of
+children were estimated above the pure-accumulator value of $\kappa = 1$. The correlation
+between efficiency and acceleration ($\rho$) was not consistent in sign across samples,
+ranging from `r rho_lo` in Norwegian to `r rho_hi` in Japanese, so we do not interpret it.
+Because CDI items are not locally independent, the within-sample intervals below are
+model-conditional and understate true uncertainty; the spread across the five samples
+(standard deviation of `r kappa_between_sd` in $\kappa$) is a more honest guide than any
+single interval (see SI: Robustness Across Model and Data Settings).
+```
+
+```{r tbl-ranef}
+#| label: tbl-ranef
+#| tbl-cap: "[draft caption — MCF to review] Random-effect parameters of the accelerating accumulator (M3), by dataset: population acceleration $\\kappa$, between-child SD in efficiency ($\\sigma_a$) and acceleration ($\\sigma_b$), their correlation ($\\rho$), and the percentage of children estimated above the pure-accumulator value $\\kappa = 1$. Brackets give 90% posterior intervals."
+## Reviewer-requested main-text reporting of the random effects (SD of kappa across
+## children, intercept-slope correlation, their uncertainty, and the share above
+## kappa = 1). Values from paper/cache/si_ranef.rds (build_cache_short.R section 7).
+ranef <- readRDS(file.path(CACHE, "si_ranef.rds"))
+ci <- function(m, lo, hi, d = 2)
+  sprintf(paste0("%.", d, "f [%.", d, "f, %.", d, "f]"), m, lo, hi)
+ranef |>
+  transmute(Dataset = as.character(lang), N = format(n_kids, big.mark = ","),
+            kappa   = ci(kappa,  kappa_q5,  kappa_q95,  1),
+            sigma_a = ci(sigma_a, sigma_a_q5, sigma_a_q95),
+            sigma_b = ci(sigma_b, sigma_b_q5, sigma_b_q95),
+            rho     = sprintf("%+.2f [%+.2f, %+.2f]", rho, rho_q5, rho_q95),
+            gt1     = sprintf("%.1f", pct_gt1)) |>
+  knitr::kable(align = c("l", "r", "r", "r", "r", "r", "r"), escape = FALSE,
+               col.names = c("Dataset", "N", "$\\kappa$", "$\\sigma_a$", "$\\sigma_b$",
+                             "$\\rho$", "\\% $\\kappa_i>1$")) |>
+  kableExtra::kable_styling(font_size = 8, latex_options = c("hold_position", "scale_down"))
+```
+
 
 ```{r fig-schematic, fig.width=11, fig.height=8}
 #| label: fig-schematic
@@ -144,30 +197,42 @@ col_scn <- c("Pure (κ=1)" = "grey55", "Baseline" = "#222222",
              "↑ Efficiency" = "#0072B2", "↑ Acceleration" = "#D55E00")
 lty_scn <- c("pure" = "21", "accel" = "solid")
 
-## Block B: conceptual theta -> CDI (two facets, shared axes, direct line labels)
-## force the CDI (right) facet to span the full proportion range [0, 1] while
-## leaving the free-y theta facet untouched
-cdi_facet <- levels(fig1_fan$conceptual$quantity)[2]
-pB <- ggplot(fig1_fan$conceptual,
-             aes(age, value, color = scenario, linetype = kind, group = scenario)) +
-  geom_blank(data = data.frame(
-               quantity = factor(cdi_facet, levels = levels(fig1_fan$conceptual$quantity)),
-               age = 8, value = c(0, 1)),
-             aes(age, value), inherit.aes = FALSE) +
-  geom_line(linewidth = 0.8) +
-  ggrepel::geom_text_repel(data = fig1_fan$conceptual_lab, aes(label = scenario),
-                           size = 2.3, hjust = 0, direction = "y", nudge_x = 1,
-                           segment.size = 0.2, xlim = c(36, NA)) +
-  facet_wrap(~ quantity, scales = "free_y") +
-  scale_color_manual(values = col_scn, guide = "none") +
-  scale_linetype_manual(values = lty_scn, guide = "none") +
-  scale_x_continuous(breaks = c(12, 24, 36)) +
-  coord_cartesian(xlim = c(0, 46), clip = "off") +
-  labs(x = "Age (Months)", y = NULL) +
-  theme_minimal(base_size = 9) +
-  theme(strip.text = element_text(face = "bold", size = 9),
-        panel.grid.minor = element_blank(), panel.spacing = unit(1, "lines"),
-        plot.margin = margin(16, 8, 4, 6))
+## Block B: conceptual theta -> CDI mechanism.
+## Built as TWO single-facet plots stitched side by side rather than one two-facet
+## facet_wrap. facet_wrap shares one y-axis title across its panels, but these panels
+## are in different units (logits vs proportion) and each needs its own. Keeping a real
+## facet_wrap(~quantity) inside each plot preserves the bold strip headers and the
+## grouped appearance; patchwork only supplies the independent y titles.
+## [MCF: the two y-axis titles below are agent-set -- reword if you'd prefer others.]
+## NB: name this `qsel`, NOT `q` -- fig1_fan$conceptual carries a column called `q`
+## (pivot_longer names_to), and dplyr data-masking would resolve `quantity == q`
+## against that column instead of the local variable, silently yielding zero rows.
+panelB <- function(i, ylab, ylim = NULL) {
+  qsel <- levels(fig1_fan$conceptual$quantity)[i]
+  d <- dplyr::filter(fig1_fan$conceptual, quantity == .env$qsel)
+  ggplot(d, aes(age, value, color = scenario, linetype = kind, group = scenario)) +
+    (if (is.null(ylim)) NULL else
+       geom_blank(data = data.frame(age = 9, value = ylim),
+                  aes(age, value), inherit.aes = FALSE)) +
+    geom_line(linewidth = 0.8) +
+    ggrepel::geom_text_repel(
+      data = dplyr::filter(fig1_fan$conceptual_lab, quantity == .env$qsel), aes(label = scenario),
+      size = 2.3, hjust = 0, direction = "y", nudge_x = 1,
+      segment.size = 0.2, xlim = c(36, NA)) +
+    facet_wrap(~ quantity) +
+    scale_color_manual(values = col_scn, guide = "none") +
+    scale_linetype_manual(values = lty_scn, guide = "none") +
+    scale_x_continuous(breaks = c(12, 24, 36)) +
+    coord_cartesian(xlim = c(9, 46), clip = "off") +
+    labs(x = "Age (Months)", y = ylab) +
+    theme_minimal(base_size = 9) +
+    theme(strip.text = element_text(face = "bold", size = 9),
+          panel.grid.minor = element_blank(),
+          plot.margin = margin(16, 10, 4, 6))
+}
+## left = latent ability (free y); right = CDI proportion pinned to the full [0, 1]
+pB <- panelB(1, "Latent ability (logits)") |
+      panelB(2, "Proportion of items produced", ylim = c(0, 1))
 
 ## Block C: per-dataset fits (one faceted plot; legend flush in the empty 6th cell)
 pC <- ggplot() +

@@ -2,7 +2,6 @@
 suppressPackageStartupMessages({
   library(here); library(dplyr); library(tidyr); library(ggplot2)
   library(patchwork); library(latex2exp); library(knitr); library(kableExtra)
-  library(diptest)
 })
 source(here("paper", "_helpers.R"))
 si_blups  <- readRDS(here("paper", "cache", "si_blups.rds"))   # per-child BLUPs (M3): xi, kappa
@@ -206,6 +205,34 @@ si_ds |>
   kableExtra::kable_styling(font_size = 9, latex_options = "hold_position")
 ```
 
+```{r fig-qc}
+#| label: fig-qc
+#| fig-width: 11
+#| fig-height: 3.6
+#| fig-cap: "[draft caption — MCF to review] Data-quality exclusions. Red lines are the children dropped from the analysis entirely, with red dots marking the administrations the filter flagged; grey lines are a random sample of retained children, shown for reference. Exclusions are concentrated in the English (Marchman) dataset and are negligible elsewhere."
+# MOVED here from the main-text Methods section, per MCF. Renders from the
+# bundles-only cache paper/cache/qc_spaghetti_data.rds (no fits needed).
+# Appended to "# Datasets" rather than given its own header so the agent does not
+# invent a section title. [MCF: promote to its own section, e.g. "Data-Quality
+# Exclusions", if you'd prefer it stand alone.]
+#
+# What the colours mean (checked against studies/bayes_long/qc_exclusion_report.R):
+#   red  = `bad`, i.e. children with FEWER THAN TWO administrations surviving the
+#          filter, so they leave the analysis altogether (62 of 4,984 = 1.2%);
+#   grey = a random SAMPLE of retained children (N_SPAG per dataset), not all of them.
+# So this figure shows the dropped children, NOT all 140 removed administrations --
+# administrations flagged inside a child who still survives are not drawn.
+TR <- readRDS(here("paper", "cache", "qc_spaghetti_data.rds"))
+ggplot() +
+  geom_line(data = subset(TR, !bad), aes(age, v, group = ckey), color = "grey70", alpha = 0.20, linewidth = 0.25) +
+  geom_line(data = subset(TR,  bad), aes(age, v, group = ckey), color = "#d7191c", alpha = 0.70, linewidth = 0.40) +
+  geom_point(data = subset(TR, bad & !keep), aes(age, v), color = "#d7191c", size = 0.7) +
+  facet_wrap(~dataset, nrow = 1) + scale_y_continuous(limits = c(0, 1)) +
+  labs(x = "Age (months)", y = "Proportion of items produced") +
+  theme_minimal(base_size = 9) +
+  theme(strip.text = element_text(face = "bold"), panel.grid.minor = element_blank())
+```
+
 # Full Model Comparison Results
 
 ```{r tbl-loo}
@@ -377,37 +404,27 @@ bz <- si_blups |>
   rename(study = lang)
 ```
 
-<!-- ```{r tbl-blup-dip} -->
-<!-- #| label: tbl-blup-dip -->
-<!-- #| tbl-cap: "" -->
-<!-- # Hartigan's dip test of unimodality on the per-child BLUPs, by dataset and -->
-<!-- # pooled. Large p is consistent with a single mode — i.e. continuous -->
-<!-- # between-child variation rather than discrete latent classes. Computed on -->
-<!-- # the within-dataset z-scored values from blup-prep. -->
-<!-- dip_row <- function(d, label) { -->
-<!--   tibble::tibble(Dataset = label, N = nrow(d), -->
-<!--                  eff = diptest::dip.test(d$xz)$p.value, -->
-<!--                  acc = diptest::dip.test(d$zz)$p.value) -->
-<!-- } -->
-<!-- diptab <- bind_rows( -->
-<!--   lapply(levels(bz$study), function(s) -->
-<!--     dip_row(filter(bz, study == s), s)), -->
-<!--   dip_row(bz, "Pooled")) -->
-<!-- pfmt <- function(p) ifelse(p >= 0.995, ">0.99", sprintf("%.2f", p)) -->
-<!-- diptab |> -->
-<!--   mutate(eff = pfmt(eff), acc = pfmt(acc)) |> -->
-<!--   knitr::kable(align = c("l", "r", "r", "r"), escape = FALSE, -->
-<!--                col.names = c("Dataset", "N", -->
-<!--                              "Efficiency ($\\xi$)", "Acceleration ($\\kappa$)")) |> -->
-<!--   kableExtra::kable_styling(font_size = 9, latex_options = "hold_position") -->
-<!-- ``` -->
+<!-- The Hartigan dip-test table that stood here has been REMOVED, per MCF.
+     The model assumes MVN random effects, so partially-pooled per-child estimates are
+     shrunk toward a normal and a dip test on them cannot independently establish the
+     absence of latent groups — the test largely recovers the prior. The corresponding
+     main-text sentence ("Variation was unimodal across all samples") is flagged for
+     removal in the draft block accompanying tbl-ranef.
+     Note the SKEW result below survives this critique in the opposite direction:
+     the prior pushes toward symmetry, so residual right-skew in the fitted values is
+     evidence against the prior (data-driven), whereas normality would not be. -->
 
 ```{r fig-blup-hist, fig.width=7, fig.height=6.5}
 #| label: fig-blup-hist
 #| fig-cap: ""
 # Histograms of the per-child BLUPs (within-dataset z-scored): efficiency
 # (xi) and acceleration (kappa), one row per dataset. Dashed curve is the
-# standard-normal reference. Distributions appear unimodal, consistent with continuous between-child variation.
+
+# standard-normal reference.
+# Framing note: these are shown as a DESCRIPTION of the spread, not as evidence of
+# unimodality (see the comment above the removed dip test). What is interpretable
+# here is the departure from the reference curve -- acceleration is right-skewed in
+# every sample despite a symmetric MVN prior pulling against it.
 hist_df <- bz |>
   select(study, xz, zz) |>
   pivot_longer(c(xz, zz), names_to = "param", values_to = "z") |>
