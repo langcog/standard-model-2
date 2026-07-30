@@ -11,7 +11,7 @@ suppressPackageStartupMessages({
 
 args  <- commandArgs(trailingOnly = TRUE)
 slug  <- args[1]; model <- args[2]
-stopifnot(model %in% c("m0","m1","m2","m3","m3lin"))
+stopifnot(model %in% c("m0","m1","m2","m3","m3lin","m32pl"))
 
 CHAINS  <- as.integer(Sys.getenv("STAN_CHAINS",      "4"))
 WARMUP  <- as.integer(Sys.getenv("STAN_WARMUP",      "1000"))
@@ -24,10 +24,14 @@ LOO_MAXOBS <- as.integer(Sys.getenv("LOO_MAXOBS", "500000"))  # subsample obs fo
 PRI <- list(mu_xi_prior_mean=-6, mu_xi_prior_sd=5,
             delta_prior_mean=0,  delta_prior_sd=5,
             sigma_a_prior_sd=3,  sigma_b_prior_sd=5,
+            ## SD of log discrimination (m32pl only). Half-N(0,0.5) keeps lambda mostly
+            ## in ~0.4-2.5 while still allowing the 1PL (sigma_lambda -> 0) comfortably.
+            sigma_lambda_prior_sd=0.5,
             tau_delta_prior_sd=5)
 
 STAN_FILE <- c(m0="m0_accumulator", m1="m1_acceleration",
-               m2="m2_efficiency",  m3="m3_full", m3lin="m3_full_lin")[model]
+               m2="m2_efficiency",  m3="m3_full", m3lin="m3_full_lin",
+               m32pl="m3_2pl")[model]
 
 b   <- readRDS(file.path("fits","bayes_long", sprintf("bundle_%s.rds", slug)))
 sd0 <- b$stan_data
@@ -39,9 +43,10 @@ dat <- list(N=sd0$N, grainsize=grainsize, A=sd0$A, J=sd0$J,
             log_H=sd0$log_H, a0=sd0$a0,
             mu_xi_prior_mean=PRI$mu_xi_prior_mean, mu_xi_prior_sd=PRI$mu_xi_prior_sd,
             tau_delta_prior_sd=PRI$tau_delta_prior_sd)
-if (model %in% c("m1","m2","m3","m3lin")) { dat$delta_prior_mean<-PRI$delta_prior_mean; dat$delta_prior_sd<-PRI$delta_prior_sd }
-if (model %in% c("m2","m3","m3lin"))      { dat$I<-sd0$I; dat$admin_to_child<-sd0$admin_to_child; dat$sigma_a_prior_sd<-PRI$sigma_a_prior_sd }
-if (model %in% c("m3","m3lin"))           { dat$sigma_b_prior_sd<-PRI$sigma_b_prior_sd }
+if (model %in% c("m1","m2","m3","m3lin","m32pl")) { dat$delta_prior_mean<-PRI$delta_prior_mean; dat$delta_prior_sd<-PRI$delta_prior_sd }
+if (model %in% c("m2","m3","m3lin","m32pl"))      { dat$I<-sd0$I; dat$admin_to_child<-sd0$admin_to_child; dat$sigma_a_prior_sd<-PRI$sigma_a_prior_sd }
+if (model %in% c("m3","m3lin","m32pl"))    { dat$sigma_b_prior_sd<-PRI$sigma_b_prior_sd }
+if (model == "m32pl") dat$sigma_lambda_prior_sd <- PRI$sigma_lambda_prior_sd
 
 cat(sprintf("=== %s / %s ===  N=%d A=%d I=%d J=%d  grainsize=%d  (%d chains x %d+%d, %d threads)\n",
             slug, model, sd0$N, sd0$A, sd0$I, sd0$J, grainsize, CHAINS, WARMUP, ITER, THREADS))
@@ -59,7 +64,12 @@ dg <- fit$diagnostic_summary()
 cat(sprintf("divergences: %d | max_treedepth hits: %d\n",
             sum(dg$num_divergent), sum(dg$num_max_treedepth)))
 
-SCALARS <- intersect(c("mu_xi","delta","kappa_pop","beta_pop","sigma_a","sigma_b","rho_ab","tau_delta"),
+## m32pl adds: sigma_lambda (spread of log discrimination; 0 recovers the 1PL),
+## lambda_sd/p10/p90 (discrimination spread on the natural scale) and
+## cor_lambda_delta (does discrimination covary with difficulty -- the pattern a 1PL
+## would have to absorb into kappa).
+SCALARS <- intersect(c("mu_xi","delta","kappa_pop","beta_pop","sigma_a","sigma_b","rho_ab","tau_delta",
+                       "sigma_lambda","lambda_sd","lambda_p10","lambda_p90","cor_lambda_delta"),
                      fit$metadata()$stan_variables)
 summ <- fit$summary(SCALARS); print(summ)
 
@@ -110,6 +120,14 @@ if (!is.null(dj)) {
                     delta_j=dj$median, delta_j_q5=dj$q5, delta_j_q95=dj$q95,
                     delta_j_rhat=dj$rhat, delta_j_ess=dj$ess_bulk,
                     emp_prod=emp_prod[dj$idx], n_obs=n_obs[dj$idx])
+  ## m32pl also has a per-item discrimination; carry it in the same file so the SI can
+  ## plot lambda_j against delta_j (the covariance is what a 1PL would absorb into kappa).
+  lam <- vec_df("lambda")
+  if (!is.null(lam)) {
+    psi$lambda    <- lam$median[match(dj$idx, lam$idx)]
+    psi$lambda_q5 <- lam$q5[match(dj$idx, lam$idx)]
+    psi$lambda_q95<- lam$q95[match(dj$idx, lam$idx)]
+  }
   write.csv(psi, file.path(OUT, paste0(tag,"_psi.csv")), row.names=FALSE)
   cat(sprintf("saved %s_psi.csv (%d items)\n", tag, nrow(psi)))
 }
