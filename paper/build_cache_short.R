@@ -114,8 +114,15 @@ lvl <- unname(DATASETS)
 ## the Baseline accelerator sits at ~0 until it takes off at ~14 months and saturates
 ## (~0.94) by 36, which makes it visually distinct from the concave log curve in the
 ## theta facet. Narrowing the difficulty spread (sd 1.5 -> 0.8) sharpens the sweep
-## through the item distribution; starting at 9 months gives the flat pre-takeoff run.
-a0c <- 9; ages_c <- seq(9, 36, length.out = 200); Lc <- log(ages_c / a0c)
+## through the item distribution.
+## Plotted range starts at 8 months to match the DATA range in block C (Marchman and
+## Norwegian both begin at 8), so panels B and C share an x-origin. Note a0c stays 9:
+## it is only the internal anchor where log(t/a0c)=0, and moving it would shift the
+## whole curve up by kappa*log(9/8) ~ 0.77 and pull the takeoff earlier, undoing the
+## tuning. Extending further left is not useful -- the curve is already at 0.002 by 8mo
+## (visually zero, so the bottom of the S is fully shown), and t=0 is a log singularity
+## (theta -> -Inf) so it cannot be plotted at all.
+a0c <- 9; ages_c <- seq(8, 36, length.out = 200); Lc <- log(ages_c / a0c)
 XI_C <- -6; KA_C <- 6.5; SD_D <- 0.8
 DELTA_C <- qnorm(ppoints(400), 0, SD_D)
 vocab_c <- function(th) vapply(th, function(x) mean(plogis(x - DELTA_C)), numeric(1))

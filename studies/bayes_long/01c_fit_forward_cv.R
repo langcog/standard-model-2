@@ -11,13 +11,15 @@
 ## averaged over posterior draws of (xi_i, kappa_i, delta_j). A plug-in estimate would
 ## ignore posterior spread and flatter the more flexible model.
 ##
-## Usage:  Rscript studies/bayes_long/01c_fit_forward_cv.R <slug> <m2|m3>
-## Env:    STAN_CHAINS/WARMUP/ITER/THREADS/ADAPT_DELTA, CV_DRAWS (default 400)
-## Output: fits/bayes_long/summaries/<slug>_fcv_<model>.rds
+## Usage:  Rscript studies/bayes_long/01c_fit_forward_cv.R <slug> <m2|m3> [tag]
+##   tag defaults to "fcv"; pass e.g. "fcv4" for the >=4-administration bundles.
+## Env:    STAN_CHAINS/WARMUP/ITER/THREADS/ADAPT_DELTA, STAN_INIT, CV_DRAWS (default 400)
+## Output: fits/bayes_long/summaries/<slug>_<tag>_<model>.rds
 
 suppressPackageStartupMessages({library(cmdstanr); library(posterior)})
 args  <- commandArgs(trailingOnly = TRUE)
 slug  <- args[1]; model <- args[2]
+TAG   <- if (length(args) >= 3) args[3] else "fcv"
 stopifnot(model %in% c("m2", "m3"))
 
 CHAINS  <- as.integer(Sys.getenv("STAN_CHAINS",      "4"))
@@ -33,7 +35,7 @@ PRI <- list(mu_xi_prior_mean=-6, mu_xi_prior_sd=5,
             tau_delta_prior_sd=5)
 STAN_FILE <- c(m2 = "m2_efficiency", m3 = "m3_full")[model]
 
-b  <- readRDS(file.path("fits", "bayes_long", sprintf("bundle_%s_fcv.rds", slug)))
+b  <- readRDS(file.path("fits", "bayes_long", sprintf("bundle_%s_%s.rds", slug, TAG)))
 tr <- b$stan_data; te <- b$test
 grainsize <- max(1L, tr$N %/% (2L * THREADS))
 
@@ -47,19 +49,42 @@ dat <- list(N=tr$N, grainsize=grainsize, A=tr$A, I=tr$I, J=tr$J,
             tau_delta_prior_sd=PRI$tau_delta_prior_sd)
 if (model == "m3") dat$sigma_b_prior_sd <- PRI$sigma_b_prior_sd
 
-SEED <- as.integer(sum(utf8ToInt(paste0(slug, "_fcv_", model))) %% 2147483647L)
-cat(sprintf("=== %s fcv %s ===  train N=%d A=%d I=%d J=%d | test N=%d A=%d  (%d x %d+%d, %d thr)\n",
-            slug, model, tr$N, tr$A, tr$I, tr$J, te$N, te$A, CHAINS, WARMUP, ITER, THREADS))
+SEED <- as.integer(sum(utf8ToInt(paste0(slug, "_", TAG, "_", model))) %% 2147483647L)
+INIT <- Sys.getenv("STAN_INIT", "")
+cat(sprintf("=== %s %s %s ===  train N=%d A=%d I=%d J=%d | test N=%d A=%d  (%d x %d+%d, %d thr, ad=%.2f%s)\n",
+            slug, TAG, model, tr$N, tr$A, tr$I, tr$J, te$N, te$A,
+            CHAINS, WARMUP, ITER, THREADS, ADELTA,
+            if (nzchar(INIT)) sprintf(", init=%s", INIT) else ""))
 
 mod <- cmdstan_model(file.path("studies", "bayes_long", "stan", paste0(STAN_FILE, ".stan")),
                      cpp_options = list(stan_threads = TRUE))
-fit <- mod$sample(data = dat, seed = SEED, chains = CHAINS, parallel_chains = CHAINS,
+samp_args <- list(data = dat, seed = SEED, chains = CHAINS, parallel_chains = CHAINS,
                   threads_per_chain = THREADS, iter_warmup = WARMUP, iter_sampling = ITER,
                   adapt_delta = ADELTA, refresh = 100)
+if (nzchar(INIT)) samp_args$init <- as.numeric(INIT)
+fit <- do.call(mod$sample, samp_args)
 dg <- fit$diagnostic_summary(quiet = TRUE)
-cat(sprintf("divergences: %d | max_treedepth: %d | max rhat: %.3f\n",
-            sum(dg$num_divergent), sum(dg$num_max_treedepth),
-            max(fit$summary()$rhat, na.rm = TRUE)))
+
+## ---- convergence, split by what the parameter is FOR ---------------------
+## A single max-rhat over every parameter is not actionable: in these fits the laggard
+## is typically tau_delta (the item-difficulty SD -- a nuisance hyperparameter), while
+## the quantities that actually enter forward scoring (xi_i, kappa_i, delta_j) mix fine.
+## Since only xi/kappa/delta_j are used to predict the held-out administration, report
+## them separately so a nuisance hyperparameter cannot silently condemn a usable fit --
+## or hide a real problem in the parameters we rely on.
+sm      <- fit$summary()
+SCORING <- c("^xi\\[", "^kappa\\[", "^delta_j\\[")
+is_score <- Reduce(`|`, lapply(SCORING, function(p) grepl(p, sm$variable)))
+POP     <- c("mu_xi", "delta", "sigma_a", "sigma_b", "rho_ab", "kappa_pop", "tau_delta")
+diag_of <- function(ix) if (!any(ix)) c(NA, NA) else
+  c(max(sm$rhat[ix], na.rm = TRUE), min(sm$ess_bulk[ix], na.rm = TRUE))
+d_score <- diag_of(is_score); d_all <- diag_of(rep(TRUE, nrow(sm)))
+cat(sprintf("divergences: %d | max_treedepth: %d\n", sum(dg$num_divergent), sum(dg$num_max_treedepth)))
+cat(sprintf("rhat/ess  SCORING params (xi,kappa,delta_j): %.3f / %.0f\n", d_score[1], d_score[2]))
+cat(sprintf("rhat/ess  all params:                        %.3f / %.0f\n", d_all[1], d_all[2]))
+worst <- sm[order(-sm$rhat), c("variable", "rhat", "ess_bulk")]
+cat("worst-mixing parameters:\n"); print(utils::head(as.data.frame(worst), 5), row.names = FALSE)
+pop_diag <- sm[sm$variable %in% POP, c("variable", "median", "rhat", "ess_bulk")]
 
 ## ---- posterior draws needed for forward scoring -------------------------
 ## Child indices were preserved by the split, so xi[i]/kappa[i] line up with the test
@@ -120,12 +145,16 @@ res <- list(
   elpd_by_child = as.numeric(elpd_by_child),
   child_of_adm  = as.integer(child_of_adm[as.integer(names(elpd_by_adm))]),
   test_age      = te$admin_age,
-  max_rhat = max(fit$summary()$rhat, na.rm = TRUE),
+  ## keep BOTH: max_rhat over everything (comparable to earlier runs) and the
+  ## scoring-parameter-only diagnostics, which are what the prediction depends on.
+  max_rhat = d_all[1], min_ess = d_all[2],
+  rhat_scoring = d_score[1], ess_scoring = d_score[2],
+  pop_diag = as.data.frame(pop_diag),
   divergences = sum(dg$num_divergent), draws_used = S, meta = b$meta)
 
 OUT <- file.path("fits", "bayes_long", "summaries")
 dir.create(OUT, recursive = TRUE, showWarnings = FALSE)
-saveRDS(res, file.path(OUT, sprintf("%s_fcv_%s.rds", slug, model)))
+saveRDS(res, file.path(OUT, sprintf("%s_%s_%s.rds", slug, TAG, model)))
 cat(sprintf("elpd_test=%.1f | per obs=%.5f | per held-out admin=%.2f | %d admins, %d children\n",
             res$elpd_total, res$elpd_per_obs, res$elpd_per_adm, te$A, res$n_child))
-cat("wrote", file.path(OUT, sprintf("%s_fcv_%s.rds", slug, model)), "\n")
+cat("wrote", file.path(OUT, sprintf("%s_%s_%s.rds", slug, TAG, model)), "\n")
