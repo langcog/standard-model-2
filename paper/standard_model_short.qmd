@@ -89,9 +89,14 @@ n_total  <- format(.bl("total")$n_kids, big.mark = ",")      # kids retained, al
 n_excl   <- .bl("total")$kids_excluded                       # kids excluded, all datasets
 pct_excl <- .pct(.bl("total")$pct_kids_excluded)
 
+# dev = "cairo_pdf": the default pdf() device cannot encode non-ASCII glyphs. It fails
+# with an mbcsToSbcs conversion error and substitutes ".", so theta, kappa and the
+# up-arrow were rendering as "Latent Ability (.)", "Pure (.=1)" and ". Efficiency" in
+# Fig 1B (and kappa/gamma in the LM figure). cairo_pdf handles UTF-8; it needs XQuartz
+# for its X11 libraries, which is now installed. Verify with capabilities("cairo").
 knitr::opts_chunk$set(
   echo = FALSE, message = FALSE, warning = FALSE, cache=TRUE,
-  fig.align = "center", out.width = "100%", dpi = 300
+  fig.align = "center", out.width = "100%", dpi = 300, dev = "cairo_pdf"
 )
 ```
 
@@ -222,8 +227,10 @@ panelB <- function(i, ylab, ylim = NULL) {
     facet_wrap(~ quantity) +
     scale_color_manual(values = col_scn, guide = "none") +
     scale_linetype_manual(values = lty_scn, guide = "none") +
+    ## lower limit 8 to match the DATA range in block C (Marchman and Norwegian both
+    ## start at 8), so B and C share an x-origin. Curve data now spans 8-36 (cache).
     scale_x_continuous(breaks = c(12, 24, 36)) +
-    coord_cartesian(xlim = c(9, 46), clip = "off") +
+    coord_cartesian(xlim = c(8, 46), clip = "off") +
     labs(x = "Age (Months)", y = ylab) +
     theme_minimal(base_size = 9) +
     theme(strip.text = element_text(face = "bold", size = 9),
