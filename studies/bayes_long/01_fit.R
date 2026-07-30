@@ -73,19 +73,31 @@ SCALARS <- intersect(c("mu_xi","delta","kappa_pop","beta_pop","sigma_a","sigma_b
                      fit$metadata()$stan_variables)
 summ <- fit$summary(SCALARS); print(summ)
 
-## ---- LOO: reconstruct per-obs log_lik in R from admin_base + item_offset ----
+## ---- LOO: reconstruct per-obs log_lik in R from the fitted linear predictor ----
+## 1PL models expose admin_base + item_offset, so eta = admin_base[a] + item_offset[j].
+## The 2PL (m32pl) has no item_offset -- discrimination multiplies the ability side --
+## so it is reconstructed as eta = lambda[j]*admin_base[a] + item_neg[j]. Without this
+## branch LOO silently failed for m32pl ("can't find item_offset"), which would have left
+## the 1PL-vs-2PL comparison with nothing to compare.
 loo_res <- tryCatch({
   ab <- posterior::as_draws_matrix(fit$draws("admin_base"))   # draws x A
-  io <- posterior::as_draws_matrix(fit$draws("item_offset"))  # draws x J
+  is2pl <- "lambda" %in% fit$metadata()$stan_variables
+  if (is2pl) {
+    lam <- posterior::as_draws_matrix(fit$draws("lambda"))    # draws x J
+    io  <- posterior::as_draws_matrix(fit$draws("item_neg"))  # draws x J
+  } else {
+    io  <- posterior::as_draws_matrix(fit$draws("item_offset"))
+  }
   di <- round(seq(1, nrow(ab), length.out=min(LOO_DRAWS, nrow(ab))))
   ab <- ab[di,,drop=FALSE]; io <- io[di,,drop=FALSE]
+  if (is2pl) lam <- lam[di,,drop=FALSE]
   # deterministic per-dataset obs subsample -> SAME obs across M0-M3 (comparable ELPD)
   set.seed(sum(utf8ToInt(slug)))
   oi <- if (sd0$N > LOO_MAXOBS) sort(sample.int(sd0$N, LOO_MAXOBS)) else seq_len(sd0$N)
   aa <- sd0$aa[oi]; jj <- sd0$jj[oi]; yy <- sd0$y[oi]
   ll <- matrix(0, nrow(ab), length(oi))
   for (d in seq_len(nrow(ab))) {
-    eta <- ab[d, aa] + io[d, jj]
+    eta <- if (is2pl) lam[d, jj] * ab[d, aa] + io[d, jj] else ab[d, aa] + io[d, jj]
     ll[d, ] <- yy*eta - (pmax(eta,0) + log1p(exp(-abs(eta))))   # stable bernoulli_logit lpmf
   }
   res <- loo::loo(ll, r_eff = loo::relative_eff(exp(ll), chain_id=rep(1L, nrow(ll))))
