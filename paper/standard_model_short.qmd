@@ -181,7 +181,7 @@ ranef |>
             sigma_b = ci(sigma_b, sigma_b_q5, sigma_b_q95),
             rho     = sprintf("%+.2f [%+.2f, %+.2f]", rho, rho_q5, rho_q95),
             gt1     = sprintf("%.1f", pct_gt1)) |>
-  knitr::kable(align = c("l", "r", "r", "r", "r", "r", "r"), escape = FALSE,
+  knitr::kable(format = "latex", align = c("l", "r", "r", "r", "r", "r", "r"), escape = FALSE,
                col.names = c("Dataset", "N", "$\\kappa$", "$\\sigma_a$", "$\\sigma_b$",
                              "$\\rho$", "\\% $\\kappa_i>1$")) |>
   kableExtra::kable_styling(font_size = 8, latex_options = c("hold_position", "scale_down"))
