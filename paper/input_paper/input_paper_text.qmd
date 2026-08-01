@@ -1,0 +1,269 @@
+---
+title: "Untitled"
+format: html
+---
+
+
+
+The growth has theoretical, practical, and methodological importance. From a theoretical perspective, growth mechanisms shed light on children’s fundamental learning mechanisms and how they change across childhood [@mcmurray2007;@bloom2002;@frank2021]. From a practical perspective, early vocabulary is an important precursor -- and predictor -- of academic achievement [@marchman2008;@catts2002;@muter2004]. From a methodological perspective, vocabulary also affords a unique psychometric opportunity to study human variation because, unlike nearly all important human psychological metrics, there is a true zero point -- a time before which children know no words. Thus, absolute levels of variability can be calculated. 
+
+
+
+A naïve interpretation of the accumulator view would suggest that substantial  variance in vocabulary growth should be related to input -- either via quantity (number of drops) or quality (size of each drop). Two recent meta-analyses complicate this view, however. @anderson2021 showed that only a modest proportion of the variance in vocabulary outcomes is related to input quantity ($r^2 = .11$) and quality ($r^2 = 04$). A newer meta-analysis of quantity confirms and extends the proportion of variance due to quantity to 4--7% of total variation in vocabulary [@coffey2026]. Thus -- as we might have supposed based on other research on human variation -- not all variation in vocabulary between children can be attributed to input differences. 
+
+Further, work on children's word recognition suggests that children become faster and more accurate at matching words to their referent across early childhood [@bergelson2020;@fernald1998;@fernald2006;@peter2019;@frank2026]. Much of this work relies on the "looking while listening" (LWL) paradigm, in which children see two pictures (e.g. a book and a car) and their eye movements are recorded as they hear a sentence that refers to one of the pictures (e.g., "look at the book"). Children's reaction time to shift their eyes to the target (the book) provides an index of their speed of word recognition that decreases logarithmically across early childhood  [@fernald2008;@frank2026] and relates to their vocabulary and other language outcomes [@fernald2006;@marchman2008;@fernald2012;@fernald2013;@peter2019;@frank2026]. One hypothesis proposed in this work is that greater language input leads to more rapid processing, in a virtuous cycle in which faster processing in turn leads to greater word learning  [@weisleder2013]. In the accumulator metaphor, one way to describe this proposal would be that individual children's buckets can be bigger or smaller based on their prior input and their processing efficiency, but to our knowledge this suggestion has not been fleshed out. 
+
+As this discussion indicates, despite the promise of accumulator models, they have largely not been used to understand variation between individuals. Instead, the majority of applications have focused on variation between words [@hidaka2013;@kachergis2022]. Further, the rapidity of children's early word learning stands as a rebuke to a naive accumulator view. Sometimes exposure to a small number of examples of a word in the lab is enough for a child to form a lasting  [@markson1997;@woodward1994]. In some cases, it seems only a small number of high-quality instances is sufficient for learning [@trueswell2013;@mollica2017], but if so, why do some words take much longer to learn?
+
+
+To address questions about the relationship between language input, language processing, and growth, we fit a Bayesian version of our growth model. We make use of new data resources to estimate the magnitude of linkages between input  and vocabulary growth. First, we estimate plausible population values based on independent estimates of population variation in language input [@coffey2024]. In addition, we use measures of individual children’s language input from egocentric videos [@long2024] and day-long home recordings [@egan2025;@adams2018;@fernald2013] to estimate the input-uptake relationship more precisely for a subsample of children, and measures of LWL word recognition from Peekbank [@zettersten2023], a large scale repository of LWL data.
+
+
+The accumulator view has been especially influential because it connects with a viewpoint in which the quantity of language that children hear plays a strong causal role in the speed of their learning [@fernald2012]. Indeed, there is systematic evidence that variation in children's input -- both its *quantity* and its *quality* --  is related to variation in vocabulary [@hart1995;@fernald2012;@weisleder2013;@anderson2021;@rowe2012;@hirsh2015;@coffey2026]. While input quantity is relatively easy to measure, measuring what makes input high quality has been challenging. One influential framework suggests that high quality input is interactionally rich, linguistically appropriate for the level of the child, and conceptually complex [@rowe2020].  
+
+
+### Efficiency and acceleration relate to separate demographic predictors
+
+
+```{r fig-demographics, fig.width=7.5, fig.height=13}
+#| label: fig-demographics
+#| fig-cap: "Regression coefficients predicting individual children's efficiency and acceleration as a function of gender and maternal education. Panels A and B show data from individual languages (both longitudinal and cross-sectional); blue regions show meta-analytic estimates from a random-effects meta analysis. Error bars show 95\\% confidence intervals. Panel C shows a meta-analytic summary for cross-sectional and longitudinal datasets."
+
+# studies/cross_sectional_demographics/composite_figure.R from that directory's
+# committed cache (cache/fits.rds <- 00_build.R): sex and maternal-ed effects
+# on efficiency and acceleration, per language with a meta-analysis (Panel C).
+# [MCF: the caption and the two surrounding paragraphs describe the OLD
+#  longitudinal-only figure and need rewriting for the composite.]
+source(here("studies", "cross_sectional_demographics", "composite_figure.R"))
+xsec_fits <- readRDS(here("studies", "cross_sectional_demographics", "cache", "fits.rds"))
+
+# Inline beta/p values in the text below read from meta_summary, which is now
+# the CROSS-SECTIONAL meta-analytic main effects plotted in Panel C, ordered to
+# match the inline indices: [1] maternal-ed efficiency, [2] sex efficiency,
+# [3] maternal-ed acceleration, [4] sex acceleration.
+meta_summary <- panelC_meta(xsec_fits)
+meta_summary <- meta_summary[c(
+  which(meta_summary$predictor == "matEd" & meta_summary$component == "efficiency"),
+  which(meta_summary$predictor == "sex"   & meta_summary$component == "efficiency"),
+  which(meta_summary$predictor == "matEd" & meta_summary$component == "acceleration"),
+  which(meta_summary$predictor == "sex"   & meta_summary$component == "acceleration")), ]
+
+make_demographics_composite(xsec_fits)
+```
+
+Children's vocabulary is related to a number of sociodemographic factors. Female children show consistently larger vocabularies than male children across dozens of languages and countries [@eriksson2012;@frank2021]. Similarly, children of more educated mothers tend to show larger vocabularies, though this effect is somewhat more heterogeneous across countries and languages [@frank2021].
+
+Our model offers a summary of children's growth in terms of both their efficiency (intercept) and their acceleration (slope). This decomposition allows us to ask whether these two demographics effects -- sex and maternal education -- are seen in efficiency, acceleration, or both. For each child in our analysis, we extracted the best linear unbiased prediction (BLUP) from our models. We then regressed intercept and slope terms against each demographic predictor separately for each language. Although we cannot fit individual children's growth trajectories in cross-sectional data, we can also in principle apply the same model to recover *population* parameters, so we did so for an additional group of datasets from Wordbank for which children's sex (N=`r XYZ`) and maternal education (N=`r XYZ`) were available. 
+
+@fig-demographics shows the per-language coefficients from this analysis, along with a cross-language meta-analytic estimate for both the cross-sectional and longitudinal data (which largely agree). Examining the cross-sectional data since this analysis includes more datasets, the female advantage is apparent across all datasets, but this effect manifests itself more substantially efficiency  ($\beta = `r round(meta_summary$estimate[2],2)`$, $p = `r papaja::apa_p(meta_summary$p)[2]`$) than acceleration ($\beta = `r round(meta_summary$estimate[4],2)`$, $p = `r papaja::apa_p(meta_summary$p)[4]`$). In contrast, maternal education effects were present in both measures, but stronger in acceleration ( efficiency: $\beta = `r round(meta_summary$estimate[1],2)`$, $p = `r papaja::apa_p(meta_summary$p)[1]`$; acceleration: $\beta = `r round(meta_summary$estimate[3],2)`$, $p = `r papaja::apa_p(meta_summary$p)[3]`$). One interpretation of these findings is that sex effects reflect a small constant offset in average ability. In contrast, socioeconomic differences -- as reflected in maternal education -- might continue to compound across development [@fernald2013;@hart2003].
+
+# Quantifying effects of language input 
+
+## Model 
+
+Up to this point, we have fit our models with efficiency and acceleration as free parameters derived from longitudinal growth. Now we ask whether we can estimate the relationship of these parameters to children's language input and processing efficiency. In particular, we use Bayesian data analysis to link within-child longitudinal measures of both input and processing to children's efficiency and acceleration.
+
+For both input and processing measures, we establish a measurement model in which multiple noisy observations are pooled to estimate an individual's deviation from the population (see SI: Joint Input-Processing Model). In the case of input, the words heard per hour is quite stable across development, so we estimate each child's deviation from the mean across families ($d_i$). In the case of processing speed, log reaction time declines linearly in the log of age [@frank2026], so we estimate each child's deviation from this linear trend ($w_i$). 
+
+We then estimate the relationship of each of these predictors to each child's efficiency ($\xi_i$) and acceleration ($\kappa_i$), respectively:
+
+\begin{align}
+\xi_i   &=& \mu_\xi + d_i + \beta_w\,w_i + \epsilon^\xi_i \\
+\kappa_i &=& \mu_\kappa + \beta_d\,d_i + \beta'_w\,w_i + \epsilon^\kappa_i
+\end{align}
+
+\noindent where $\mu_\xi$ and $\mu_\kappa$ represent the population means respectively, the $\beta$ values act as regression coefficients estimating the strength of the coupling between an individual's input and processing and the parameters of their vocabulary growth.^[There is no coefficient on $d_i$ as this term enters the accumulator model directly as part of the overall rate of language accumulation.] 
+
+Taken together, this model essentially creates a set of linked measurement models that define a principled, parametric relationship between language input, measures of in-the-moment processing, and the growth of vocabulary over time. 
+
+
+
+<!-- % --- Latent child-level traits (child i) --- -->
+<!-- % input level d_i, processing level w_i, efficiency xi_i, acceleration kappa_i -->
+<!-- $$d_i \sim \mathcal N(0,\sigma_r^2), \qquad w_i \sim \mathcal N(0,\sigma_w^2)$$ -->
+<!-- % (both centered within study; study-level location lives in the measurement intercepts) -->
+
+<!-- % --- Latent ability trajectory --- -->
+<!-- $$\theta_i(t) = \xi_i + \kappa_i \,\log(t/a_0)$$ -->
+
+<!-- % === Measurement model 1: vocabulary (CDI items) -> ability === -->
+<!-- $$y_{ijt} \sim \mathrm{Bernoulli}\!\big(\sigma(\theta_i(t) + \log H - \delta_j)\big)$$ -->
+<!-- % Rasch: common discrimination, no frequency term. delta_j = item difficulty; -->
+<!-- % sigma = logistic; a_0, H fix the time/scale origin. -->
+
+
+## Results
+
+### Input predicts both efficiency and acceleration, while processing speed relates only to efficiency
+
+
+```{r fig-io-partition, fig.width=11, fig.height=9}
+#| label: fig-io-partition
+#| fig-cap: ""
+# THREE-panel io figure:
+# (A) schematic of the input/processing dissociation (top row), parameterized by the
+#     EN+count +proc fit (joint_io_proc_lean_d2_enct);
+# (B) io-proc joint variance partition (bottom-left, "fit coefficients");
+# (C) io-imputed sigma_r sensitivity vs the meta-analytic range (bottom-right).
+# Panels B/C come from paper/build_fig_io_cache.R -> io_fig (panelB now the EN+count +proc fit).
+
+## ---- (A) schematic: per-SD input vs processing perturbations ----
+# Drawn from the SAME EN+count +proc fit as panel B (io_fig$schem, built by build_fig_io_cache.R)
+# -- not example values. INPUT loads on efficiency (=sigma_r) AND acceleration (=eff_input_k);
+# PROCESSING(faster) loads on efficiency (=|eff_proc_xi|) AND acceleration (=|eff_proc_k|).
+sc <- io_fig$schem
+a0 <- sc$a0; logH <- sc$log_H; mu_r <- sc$mu_r; kpop <- sc$kpop; sig_xi <- sc$sigma_xi
+SEP <- 1.35; SD <- 2
+d_in_xi <- sc$d_in_xi * SD; d_in_k <- sc$d_in_k * SD     # input: level AND slope
+d_pr_xi <- sc$d_pr_xi * SD; d_pr_k <- sc$d_pr_k * SD     # processing (faster): level (+ small slope)
+mu_d <- 15; sc <- 2.5; Nitems <- 680
+A_of  <- function(xi, k, age) xi + logH + k * log(age / a0)
+vocab <- function(A) Nitems * plogis((A - mu_d) / sc)
+ages  <- seq(12, 36, length.out = 120)
+QL <- c("latent ability (θ)", "words produced")
+kids  <- tibble(kid = c("lower-ability child", "higher-ability child"),
+                xi0 = c(mu_r - SEP * sig_xi, mu_r + SEP * sig_xi))
+conds <- tibble(
+  cond = c("base", "input +2SD", "input -2SD", "processing +2SD", "processing -2SD"),
+  chan = c("base", "input", "input", "processing", "processing"),
+  dxi  = c(0, d_in_xi, -d_in_xi, d_pr_xi, -d_pr_xi),
+  dk   = c(0, d_in_k,  -d_in_k,  d_pr_k,  -d_pr_k))
+dfS <- tidyr::expand_grid(kids, conds) |> rowwise() |>
+  mutate(d = list(tibble(age = ages,
+                         th = A_of(xi0 + dxi, kpop + dk, ages),
+                         wd = vocab(A_of(xi0 + dxi, kpop + dk, ages))))) |>
+  ungroup() |> tidyr::unnest(d) |>
+  tidyr::pivot_longer(c(th, wd), names_to = "quantity", values_to = "value") |>
+  mutate(chan = factor(chan, levels = c("base", "input", "processing")),
+         quantity = factor(ifelse(quantity == "th", QL[1], QL[2]), levels = QL))
+pSch <- ggplot(dfS, aes(age, value, color = kid, linetype = chan,
+               group = interaction(kid, cond, quantity))) +
+  geom_line(linewidth = 0.72) +
+  facet_wrap(~ quantity, scales = "free_y") +
+  scale_linetype_manual(values = c(base = "solid", input = "dashed", processing = "dotted"),
+                        labels = c("base", "±2 SD input", "±2 SD processing"), name = NULL) +
+  scale_color_manual(values = c("lower-ability child" = "#1b9e77",
+                                "higher-ability child" = "#7570b3"), name = NULL) +
+  labs(x = "age (months)", y = NULL,
+       title = "(A) how a ±SD change in input vs processing moves a child's trajectory") +
+  theme_bw(base_size = 11) +
+  theme(legend.position = "right", panel.grid.minor = element_blank(),
+        strip.text = element_text(face = "bold"), plot.title = element_text(face = "bold", size = 11))
+
+## ---- (B) io-proc partition + (C) io-imputed meta ----
+a   <- io_fig$panelA
+pct <- scales::percent_format(accuracy = 1)
+MODEL_PAL  <- c("English (D)" = "#E69F00", "Norwegian (D)" = "#56B4E9")
+FACTOR_PAL <- c("Input" = "#009E73", "Processing" = "#CC79A7")
+
+pA <- ggplot() +
+  annotate("rect", xmin = a$sr_band[1], xmax = a$sr_band[2], ymin = -Inf, ymax = Inf,
+           fill = "grey80", alpha = 0.45) +
+  annotate("rect", xmin = -Inf, xmax = Inf, ymin = a$meta[1], ymax = a$meta[2],
+           fill = "grey80", alpha = 0.45) +
+  geom_vline(xintercept = a$sr_main, linetype = "dashed", color = "grey35", linewidth = 0.4) +
+  geom_line(data = a$curves, aes(sigma_r, share, color = model), linewidth = 1) +
+  geom_pointrange(data = a$anchors, aes(sigma_r, share, ymin = lo, ymax = hi, color = model),
+                  fatten = 2.6, linewidth = 0.8, shape = 21, fill = "white", stroke = 1) +
+  annotate("text", x = 0.255, y = mean(a$meta), label = "meta\n4-7%",
+           hjust = 0, size = 2.7, color = "grey30", lineheight = 0.85) +
+  scale_color_manual(values = MODEL_PAL, name = NULL) +
+  scale_y_continuous(labels = pct, limits = c(0, 0.22), expand = expansion(mult = c(0, 0.02))) +
+  scale_x_continuous(breaks = seq(0.3, 0.8, 0.1)) +
+  labs(x = expression(sigma[r] ~ "(population input SD, log tokens)"),
+       y = "implied input share of efficiency", title = "(C) io-imputed") +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = c(0.02, 0.98), legend.justification = c(0, 1),
+        legend.background = element_rect(fill = alpha("white", 0.7), color = NA),
+        panel.grid.minor = element_blank(), plot.title = element_text(face = "bold", size = 11))
+
+# Panel B holds per-SD COEFFICIENTS (the same numbers the schematic draws). The acceleration
+# row is rescaled x log(30/21)=0.357 to level-equivalent theta units (effect by 30 mo), so the
+# two traits sit on one log-odds axis. (Variance-explained shares are reported in the text.)
+KACC <- log(30 / 21)
+pbd <- io_fig$panelB |>
+  mutate(acc  = channel == "Acceleration",
+         e = ifelse(acc, med * KACC, med), l = ifelse(acc, lo * KACC, lo), h = ifelse(acc, hi * KACC, hi),
+         term = factor(channel, levels = c("Efficiency", "Acceleration"),
+                       labels = c("efficiency (ξ)", "acceleration (κ,\nby 30 mo)")))
+pB <- ggplot(pbd, aes(term, e, color = factor, group = factor)) +
+  geom_hline(yintercept = 0, linewidth = 0.3, color = "grey70") +
+  geom_pointrange(aes(ymin = l, ymax = h), position = position_dodge(width = 0.55),
+                  fatten = 3, linewidth = 0.9) +
+  scale_color_manual(values = FACTOR_PAL, name = NULL) +
+  labs(x = NULL, y = "per-SD effect (θ units, log-odds)", title = "(B) io-proc coefficients") +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = c(0.02, 0.98), legend.justification = c(0, 1),
+        legend.background = element_rect(fill = alpha("white", 0.7), color = NA),
+        panel.grid.minor = element_blank(), plot.title = element_text(face = "bold", size = 11))
+
+pSch / ((pB | pA) + plot_layout(widths = c(1, 1.25))) + plot_layout(heights = c(1.05, 1))
+```
+
+```{r fig-io-data-panels, fig.width=14, fig.height=5}
+#| label: fig-io-data-panels
+#| fig-cap: "Observed data entering the io-proc analysis, one colour per dataset (constant across panels). (A) CDI vocabulary: each line is a child's words-produced count across administrations (no points), with a per-dataset loess trend. (B) Looking-while-listening reaction time (log scale): per-child session-mean RT with a per-dataset trend; RT declines with age in every dataset. (C) Observed input rate (log; study-specific units, so absolute levels are not comparable across datasets — only the age trends): per-child trajectories with a per-dataset trend, with BabyView head-cam recordings averaged to monthly means so they do not swamp the sparser LENA datasets. *[Draft caption — MCF to review.]*"
+# Reproducible standalone script; defines io_panels_fig() (reads the analysis bundle +
+# raw CDI/RT/input sources) and returns the 3-panel patchwork. Run directly to also
+# write figs/data_checks/io_panels.png.
+source(here("model", "scripts", "data_check_io_panels.R"))
+io_panels_fig()
+```
+
+
+To estimate the separate contributions of language input and language processing to efficiency and acceleration, we turn to a set of six longitudinal English datasets (described in SI: Datasets) that include either dense home recordings, longitudinal LWL processing data, or both. Four include recordings from day-long audio recordings using LENA (Language Environment Analysis) recorders, which offers an automated adult word count estimate that has been validated by transcription studies [@cristia2021]. One includes short video recordings of egocentric video recorded in children's homes, with word counts estimated from automated transcripts [@long2024]. Each of these metrics provides a noisy proxy for total home input, but nevertheless allows us to estimate models that include individual input. Further, five of the six include multiple LWL sessions per individual, offering data on children's reaction time in word recognition.
+
+<!-- @fig-io-partition (A -->
+
+<!-- a version of Model 4 to this dataset, with modifications to allow input and acceleration to contribute to both acceleration and efficiency. We then fit this model to the joint dataset but with observations of $r_i$ and $w_i$ for individual children. -->
+
+@fig-io-partition (B) shows the coefficients of the dual measurement model fit to this dataset. The model shows a strong relationship between observed word recognition speed and efficiency, but a much smaller, non-significant relationship to acceleration. In contrast, input was more balanced between channels. 
+<!-- small  reliable effects of language input on both efficiency and acceleration. These effects are also in the range of the meta-analyses, but they suggest that input-related differences -- though small -- could compound through their effect on acceleration. In contrast, processing predicted *only* efficiency and not acceleration.   -->
+
+### Population input-related variation corresponds to meta-analytic estimates
+
+In the prior model, we fit population variation in efficiency and acceleration on the individual level. We next consider whether this relationship can be estimated at a population level. We ask how much variation in vocabulary in the longitudinal data above could be explained by a range of possible levels of variation in input quantity. 
+
+In particular, we fit a version of model 4 with a linkage between efficiency and input rate such that $\xi_i = \log(r_i) + \log(\alpha_i)$, where $r_i$ is not known but we assume that there is a population variation in language input rate: $\sigma_r$. This model -- which does not include individual child-level input data -- can not distinguish whether input contributes to efficiency or instead to acceleration. Instead, because the accumulator model makes predictions about links between the actual amount of input children receive and what they learn, this model can ask what proportion of observed variation between children is plausibly due to input-related variation. 
+
+Fitting this model requires a guess about the range of input variation present in the populations for which we have dense longitudinal data (English-learning children in the US and Norwegian-learning children in Norway). Leaving aside the question of the specific sampling processes that led to our data, estimating children's input range is notoriously tricky: The rate of language that children hear varies across cultures, families, activities, and measurement occasions [@coffey2024]. Thus, we consider the share of variation due to input across a range of plausible values, anchored via a range of estimates in the published literature  (see SI: Population Input Range Estimation). 
+
+<!-- In our main simulations we set $\sigma_r=.53$, a value drawn from @sperry2019, who estimated a mean of 419k tokens per month (\pm1 SD: 329k -- 957k). We provide sensitivity analysis for alternative values based on an analytic computation of the relationship between $\sigma_r$ and $\pi_\alpha$ (see SI: $\sigma_r$ Sensitivity Analysis). -->
+
+@fig-io-partition (panel C) shows the results models fit with three values for each language, interpolated with an analytic estimate of the relationship between $\sigma_r$ and the total proportion of variance in efficiency that could be attributed to input. Within the range of plausible input values from the literature, we observed a strong congruence between the model estimates of input variance (EN: `r io_share("English (D)")`, NO: `r io_share("Norwegian (D)")`) and the meta-analytic range reported by @coffey2026 (4--7%). This consistency both supports the overall plausibility of the model and provides a second route for estimating the significant but modest contribution of input quantity to variation in children's outcomes. 
+
+
+
+Our work here has a number of limitations that suggest avenues for new work. First, while we analyzed a range of cross-linguistic data where it was available, most of the open data on children's input and processing are available only in English, and for convenience samples. Thus, the specific numerical estimates that we were able to derive are at best approximations and do not represent estimates for broader populations of interest. Systematic representative sampling would be required for generalization. Further, the studies we included here focused exclusively on monolingual, typically-developing children. Though we have reason to expect that these mechanisms would apply in multilingual acquisition, significant work will be necessary to adapt and test our proposal in multilingual datasets [@gomezdiaz2024;@tan2024].
+
+In addition, we focused on the role of input quantity as a key first-order factor influencing the accumulation of language. However, a rich tradition describes quantity-related variation as well [e.g., @anderson2021;@rowe2012;@hirsh2015]. While individual studies have identified a wide variety of indicators of quality, they are still challenging to compute at scale from audio and video recordings. Extracting these and connecting them to growth over time is an exciting prospect for future work. 
+
+Finally, our study is a computational analysis of observational data; it provides at best hypotheses about causal structure. Our hope is that by providing signatures of longitudinal variation, we can inspire further work using both dense measurement and intervention that can gain causal traction on the mechanisms of vocabulary growth.
+
+Too often, psychology and cognitive science focus either only on universal mechanisms or variability between individuals. Word learning is a unique case study in cognitive science because it describes a basic process of knowledge acquisition that also captures large, meaningful individual variation. As such, it becomes possible to link mechanistic models of learning (such as accumulators) to the signatures that form the locus of variation in human learners. 
+
+The accumulator idea that forms the basis of our model is extremely simple, but it is potentially compatible with a wide range of more elaborated computational models of early language learning [@frank2009;@mcmurray2012;@trueswell2013;@kachergis2012]. One important direction for future work is to survey and analyze models from the literature to understand which of these show learning dynamics congruent with the statistical signatures we have identified in actual children's vocabulary growth. We have shown that one class of models does not show these signatures, however. 
+
+# Discussion
+
+
+These two parameters provide a set of measures with which to distinguish a number of important factors that are related to overall vocabulary size in prior work. Factors that load on efficiency alone relate to children's overall learning trajectory, creating a constant offset in language ability. In contrast, those that load on acceleration create an increasing fan, such that older children are more different from one another than younger ones. On the side of demographics, we found evidence that while sex differences manifest as differences in efficiency, socioeconomic differences show up in acceleration as well. Evidence about language input and processing suggest that while language processing relates primarily to differences in efficiency, language input variation appears to affect both Thus, our model identifies a channel by which experience might compound across development.
+
+# Methods
+
+
+, and peekbank version 2026.1 using `peekbankr` [@zettersten2023]. BabyView data are from release 2025.2, specifically those used by @tan2026. SEEDLings data are downloaded from the materials provided by @egan2025.
+### Input and processing models
+
+<!-- ```{md} -->
+<!-- $$\xi_i = \mu_r + \sigma_r z_{r,i} + \beta_\xi\, \mathrm{rt0}_i + \log\alpha_i$$ -->
+<!-- $$\kappa_i = (1+\delta) + \gamma_{\text{in}}\,\sigma_r z_{r,i} + \beta_{k0}\,\mathrm{rt0}_i + \beta_{k1}\,\mathrm{rt1}_i + \zeta_i$$ -->
+<!-- $$\theta_i(t) = \xi_i + \kappa_i \log\!\big((t-s)/a_0\big) + \text{item terms}$$ -->
+
+<!-- with two measurement channels feeding the latent predictors: -->
+
+<!-- Processing (LWL): $\text{lwl_log_rt}_n \sim \mathcal N\big(\tau_s + \mathrm{rt0}_i + (\psi_s + \mathrm{rt1}i),\ell z_n,\ \sigma{\text{lwl}}\big)$ — each child's RT level (rt0) and age-slope (rt1) are latent traits read off their looking-while-listening trials. -->
+<!-- Input (LENA/headcam): $z_{\text{lena},v} \sim \mathcal N(z_{r,i},\ \sigma_{\text{lena}})$ — standardized within-study log input rate is a noisy read of the child's input position. -->
+<!-- ``` -->
+
+### Input
