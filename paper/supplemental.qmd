@@ -13,6 +13,7 @@ si_gamlss <- readRDS(here("paper", "cache", "si_gamlss.rds"))        # parametri
 si_set    <- readRDS(here("paper", "cache", "si_settings.rds"))      # robustness: 2+/3+/mega x 5 datasets
 si_pooled <- attr(si_set, "pooled")                                 # converged mega hyperparameters (or NULL)
 llm_slopes <- readRDS(here("paper", "cache", "fig6_llm_slopes.rds")) # kappa slopes incl. C&B per-arch (SI: other architectures)
+si_2pl    <- readRDS(here("paper", "cache", "si_2pl.rds"))           # 1PL vs 2PL: discrimination, kappa, AoA, LOO
 knitr::opts_chunk$set(
   echo = FALSE, message = FALSE, warning = FALSE,
   fig.align = "center", out.width = "100%", dpi = 300
@@ -202,7 +203,7 @@ tab <- si_loo |>
   tidyr::pivot_wider(names_from = lang, values_from = txt) |>
   mutate(Model = mod_desc[as.character(model)])
 n3 <- sum(tab$threshold == "3+")
-knitr::kable(tab |> select(Model, all_of(lang_order)),
+knitr::kable(tab |> select(Model, all_of(lang_order)), format = "latex",
              align = c("l", rep("r", length(lang_order))), escape = FALSE,
              col.names = c("Model", unname(short[lang_order]))) |>
   kableExtra::add_header_above(
@@ -264,7 +265,7 @@ sset <- si_set |>
     sb  = sprintf("%.2f", sigma_b),
     gap = ifelse(is.na(gap_per_obs), "---", sprintf("%.4f", gap_per_obs)))
 grp <- table(droplevels(si_set$dataset))                 # rows per dataset, factor order
-knitr::kable(sset |> select(Setting, N, kap, sb, gap),
+knitr::kable(sset |> select(Setting, N, kap, sb, gap), format = "latex",
              col.names = c("Setting", "N", "$\\kappa$", "$\\sigma_b$",
                            "$\\Delta$ELPD/obs (M2$\\to$M3)"),
              align = c("l", "r", "r", "r", "r"), escape = FALSE) |>
@@ -287,9 +288,67 @@ tab <- si_loglin |>
          adv = sprintf("%s (%s)", format(round(-elpd_diff), big.mark = ","),
                        format(round(se_diff)))) |>
   select(Dataset, adv)
-knitr::kable(tab, align = c("l", "r"), escape = FALSE,
+knitr::kable(tab, format = "latex", align = c("l", "r"), escape = FALSE,
              col.names = c("Dataset", "$\\Delta$ELPD (log $-$ linear)")) |>
   kableExtra::kable_styling(font_size = 9, latex_options = "hold_position")
+```
+
+# 2PL Model Comparison
+
+In the main analysis we use a Rasch (1PL) item model, in which every word has a difficulty but all words have equal discrimination between children. @kachergis2022b found that a 2PL model, which adds a per-word discrimination $\lambda_j$, was preferred over the 1PL for CDI data. We therefore refit M3 with a per-word discrimination parameter.
+
+@tbl-2pl shows the results of this comparison. The 2PL does genuinely fit better, with substantial differences in LOO ELPD for every language. However, model results are otherwise unchanged. Estimates of $\kappa$ increase somewhat, but they are not directly comparable across item models. In normal IRT models, ability scores are constrained to a standard normal distribution, but in our model, abilities grow over time so there is no single standard scale, and the addition of the discrimination parameter can change the overall scale. For this reason, we report $\log \kappa$, since a pure change of units would be a constant shift. In addition, across individual words, we find that the predicted age of acquisition (the age at which the word is predicted to have a 50% probability of being known) is almost identical, suggesting that the models are highly comparable. 
+
+Critically, $\delta$ (difficulty) and $lambda$ (discrimination) have a very low correlation. If harder words were substantially more discriminating, this correlation could inflate estimates of $\kappa$ in the 1PL model; in practice we find little support for this hypothesis.
+
+```{r tbl-2pl}
+#| label: tbl-2pl
+#| tbl-cap: "Rasch (1PL) versus two-parameter logistic (2PL) item models, M3 refit on the same data. Discrimination: SD of $\\log \\lambda_j$, its 10th-90th percentile range on the natural scale, and its correlation with item difficulty (90% interval). Acceleration: population $\\kappa$ under each item model and the difference in $\\log \\kappa$. Age of acquisition: correlation and median absolute difference in per-word $t_{50}$, which is invariant to the discrimination scale. LOO: expected log predictive density of the 1PL relative to the 2PL, with SE; negative favours the 2PL."
+## Everything comes from paper/cache/si_2pl.rds (studies/bayes_long/03_compare_1pl_2pl.R).
+## The table renders whatever datasets have BOTH fits; rerun that script to fill in any
+## still pending. [MCF: Norwegian's 2PL was still running when this was written.]
+##
+## Column choices worth knowing:
+##  - d log kappa, not the kappa ratio: a pure change of units is one multiplicative
+##    factor, i.e. a CONSTANT additive shift in log kappa. Constancy across datasets is
+##    therefore the diagnostic for "units" vs "the 2PL revises the growth story".
+##  - t_50 rather than kappa for the substantive comparison: solving theta(t) = delta_j
+##    gives log(t_50/a0) = (delta_j - log_H - mu_xi)/kappa, in which lambda_j does not
+##    appear at all, and which is invariant under the lambda rescaling. It is also the
+##    quantity Fig 2 is built from.
+##  - LOO sign: elpd_diff is the loser's deficit, and the 2PL wins everywhere so far,
+##    so the printed value is the 1PL's deficit (negative).
+s2 <- si_2pl$summary
+tab2 <- s2 |>
+  transmute(
+    Dataset  = as.character(lang),
+    sig_lam  = sprintf("%.2f", sigma_lambda),
+    lam_rng  = sprintf("%.2f--%.2f", lambda_p10, lambda_p90),
+    cor_ld   = sprintf("%+.2f [%+.2f, %+.2f]", cor_lambda_delta,
+                       cor_lambda_delta_q5, cor_lambda_delta_q95),
+    k1       = sprintf("%.1f", kappa_1pl),
+    k2       = sprintf("%.1f", kappa_2pl),
+    dlk      = sprintf("%+.3f", d_log_kappa),
+    aoa_r    = sprintf("%.3f", aoa_cor),
+    aoa_d    = sprintf("%.2f", aoa_mad),
+    loo      = ifelse(is.na(loo_elpd_diff), "---",
+                      sprintf("%s (%s)", format(round(loo_elpd_diff), big.mark = ","),
+                              format(round(loo_se_diff)))))
+## format="latex" is REQUIRED whenever a kable is piped into kableExtra here. Under
+## Quarto, knitr::opts_knit$get("out.format") is "markdown", so kable() emits a pipe
+## table and kable_styling() converts it to LaTeX -- escaping as it goes and discarding
+## escape=FALSE. Without it, math in col.names/cells renders as the literal source
+## ("\$\textbackslash{}kappa\$"). Setting the format explicitly makes escape=FALSE stick.
+
+knitr::kable(tab2, format = "latex", align = c("l", rep("r", 9)), escape = FALSE,
+             col.names = c("Dataset",
+                           "SD $\\log\\lambda$", "$\\lambda$ p10--p90", "$r(\\lambda,\\delta)$",
+                           "1PL", "2PL", "$\\Delta\\log\\kappa$",
+                           "$r(t_{50})$", "med.\\ $|\\Delta t_{50}|$",
+                           "$\\Delta$ELPD (SE)")) |>
+  kableExtra::add_header_above(c(" " = 1, "Discrimination" = 3, "Acceleration $\\\\kappa$" = 3,
+                                 "Age of acquisition" = 2, "LOO" = 1), escape = FALSE) |>
+  kableExtra::kable_styling(font_size = 7, latex_options = c("hold_position", "scale_down"))
 ```
 
 # Generating Quantiles
