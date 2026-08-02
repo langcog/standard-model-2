@@ -35,12 +35,20 @@ MIN_ITEM_OBS <- 100                               # per-unit item filter
 MIN_ADMINS   <- as.integer(Sys.getenv("MIN_ADMINS", "2"))  # min administrations per child
 # Unified local-outlier QC (see clean_child below). A true production trajectory is
 # monotone non-decreasing (can't un-produce words) and rises at a plausible rate.
-QC_REL_TOL   <- 0.25    # CRATER: an admin >25% below the running peak is a low outlier
-QC_PEAK      <- 0.10    #   ...counted only when the running peak reached at least this
-QC_DROP      <- 0.05    #   ...and the absolute drop is at least this (ignore report noise)
-QC_RATE_MAX  <- 0.40    # JUMP: a rise faster than this (proportion of items / month)...
-QC_JUMP_BASE <- 0.10    #   ...launched from a base below this is a high outlier (impossible;
+# All five are env-overridable so the SI exclusion-sensitivity analysis can rebuild the
+# bundles at several filter strengths (and with the filter off entirely) without editing
+# this file. QC_OFF=1 disables the filter completely -- the "no exclusions" condition a
+# reviewer asked for. QC_TAG appends a suffix to the bundle name so variants never
+# overwrite the main bundles; leave it empty for the canonical build.
+.qc <- function(v, d) as.numeric(Sys.getenv(v, as.character(d)))
+QC_REL_TOL   <- .qc("QC_REL_TOL",   0.25)  # CRATER: an admin >25% below the running peak is a low outlier
+QC_PEAK      <- .qc("QC_PEAK",      0.10)  #   ...counted only when the running peak reached at least this
+QC_DROP      <- .qc("QC_DROP",      0.05)  #   ...and the absolute drop is at least this (ignore report noise)
+QC_RATE_MAX  <- .qc("QC_RATE_MAX",  0.40)  # JUMP: a rise faster than this (proportion of items / month)...
+QC_JUMP_BASE <- .qc("QC_JUMP_BASE", 0.10)  #   ...launched from a base below this is a high outlier (impossible;
                         #   real fast risers climb from a non-trivial base, so they're spared)
+QC_OFF       <- nzchar(Sys.getenv("QC_OFF", ""))   # TRUE -> keep every administration
+QC_TAG       <- Sys.getenv("QC_TAG", "")           # e.g. "_qcnone"; appended to the bundle name
 
 OUT_DIR <- here("fits","bayes_long"); dir.create(OUT_DIR, recursive=TRUE, showWarnings=FALSE)
 
@@ -99,6 +107,7 @@ harmonize_items <- function(it) {
 ##                   -> the HIGH point is the artifact (impossible speed) -> remove it.
 clean_child <- function(age, prop) {
   keep <- rep(TRUE, length(prop))
+  if (QC_OFF) return(keep)          # "no exclusions" sensitivity condition
   repeat {
     ix <- which(keep); if (length(ix) < 2) break
     a <- age[ix]; p <- prop[ix]; peak <- cummax(p)
@@ -175,7 +184,7 @@ build_bundle <- function(it_unit, slug, label) {
     log_H = LOG_H, a0 = A0)
 
   ## reporting (>=3-admin bundles get an _a<N> suffix so they don't clobber the base)
-  out_slug <- if (MIN_ADMINS > 2) sprintf("%s_a%d", slug, MIN_ADMINS) else slug
+  out_slug <- paste0(if (MIN_ADMINS > 2) sprintf("%s_a%d", slug, MIN_ADMINS) else slug, QC_TAG)
   ad_per_kid <- admin_ix |> count(ii) |> pull(n)
   meta <- list(slug=out_slug, label=label,
                n_kids=nrow(child_ix), n_admins=nrow(admin_ix), n_items=nrow(item_ix),
