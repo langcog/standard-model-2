@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.25">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>standard_model</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="standard_model_files/libs/clipboard/clipboard.min.js"></script>
+<script src="standard_model_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="standard_model_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="standard_model_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="standard_model_files/libs/quarto-html/popper.min.js"></script>
+<script src="standard_model_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="standard_model_files/libs/quarto-html/anchor.min.js"></script>
+<link href="standard_model_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="standard_model_files/libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="standard_model_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="standard_model_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="standard_model_files/libs/bootstrap/bootstrap-d6a003b94517c951b2d65075d42fb01b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="standard_model_files/libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="standard_model_files/libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="fullcontent quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+
+
+
+<p>author: - name: Michael C. Frank affiliations: - name: Department of Psychology, Stanford University</p>
+<p>title: Efficiency and acceleration in the accumulation of children’s early vocabulary title-short: Efficiency and acceleration keywords: Early word learning; Bayesian data analysis; Large language models abstract: | Children learn hundreds of words over the first few years of their life. This process begins slowly but increases until only a few exposures to a word are necessary for a child to learn it. Yet there are also wide variations between children, and the distribution across children has not been accurately characterized. Here we present a statistical model describing this process as accelerating accumulation, with children varying in both the slope and intercept of their accumulation. Using data from three languages, this model provides a good characterization of longitudinal growth and provides insights into the sources of age and socioeconomic variation. Using dense observations of children’s early language environment, the model also can be used to estimate how much variation between children is due to differences in language input, finding estimates that converge with recent meta-analyses. In contrast to children, large language models are not well-described by this model: they show standard accumulator dynamics and very limited variability.</p>
+<p>bibliography: standard_model.bib format: pdf: documentclass: article geometry: margin=1in fontsize: 11pt linestretch: 1.05 colorlinks: true keep-tex: true —</p>
+<p>Children’s early vocabulary grows very rapidly during early childhood, with large variation between children <span class="citation" data-cites="fenson1994 fenson2007 frank2021">[@fenson1994;@fenson2007;@frank2021]</span>. The growth has theoretical, practical, and methodological importance. From a theoretical perspective, growth mechanisms shed light on children’s fundamental learning mechanisms and how they change across childhood <span class="citation" data-cites="mcmurray2007 bloom2002 frank2021">[@mcmurray2007;@bloom2002;@frank2021]</span>. From a practical perspective, early vocabulary is an important precursor – and predictor – of academic achievement [<span class="citation" data-cites="marchman2008">@marchman2008</span>;CITES]. From a methodological perspective, vocabulary also affords a unique psychometric opportunity to study human variation because, unlike nearly all important human psychological metrics, there is a true zero point – a time before which children know no words. Thus, absolute levels of variability can be calculated.</p>
+<p>One dominant viewpoint is that children’s vocabulary growth can be characterized as a process of accumulation <span class="citation" data-cites="mcmurray2007 mitchell2009 hidaka2013 mollica2017 kachergis2022">[@mcmurray2007; @mitchell2009; @hidaka2013; @mollica2017; @kachergis2022]</span>. Each distinct word (type) can be conceptualized as a “bucket,” and every token of language input then is a “drop” that falls into its respective bucket. When each bucket is full, the word is learned <span class="citation" data-cites="mcmurray2007 kachergis2022">[@mcmurray2007;@kachergis2022]</span>. These models have been used to recover interpretable differences in “bucket size,” often based on word properties including concreteness and syntactic category <span class="citation" data-cites="hidaka2013 kachergis2022">[@hidaka2013;@kachergis2022]</span>.</p>
+<p>The accumulator view connects with a viewpoint in which the quantity of language that children hear plays a strong causal role in the speed of their learning <span class="citation" data-cites="fernald2012">[@fernald2012]</span>. Indeed, there is systematic evidence that variation in children’s input is related to variation in vocabulary [<span class="citation" data-cites="fernald2012">@fernald2012</span>;<span class="citation" data-cites="weisleder2013">@weisleder2013</span>;CITES]. Studies of input have identified systematic variation in <em>quantity</em> in terms of sheer amount of tokens as well as variation in <em>quality</em>. Measuring what makes input high quality has been challenging, but higher quality input likely has higher lexical diversity, longer sentences, more declarative and interrogative content relative to imperatives, and more elaborated discourse [LOTS OF CITES].</p>
+<p>A naïve interpretation of the accumulator view would suggest that most of the variance in vocabulary growth should be related to input. Two recent meta-analyses complicate this view, however. <span class="citation" data-cites="anderson2021">@anderson2021</span> showed that only a modest proportion of the variance in vocabulary outcomes is related to input quantity (XYZ) and quality (XYZ). A newer meta-analysis of quantity specifically confirms and extends the proportion of variance due to quantity to 4–7% of total variation in vocabulary <span class="citation" data-cites="coffey2026">[@coffey2026]</span>. Thus – as we might have supposed based on other research on human variation – not all variation in vocabulary between children can be attributed to input differences.</p>
+<p>As this discussion indicates, despite the promise of the accumulator viewpoint, it has not been used successfully to understand variation between individuals. Instead, the majority of applications have focused on variation between words. Further, the rapidity of children’s early word learning stands as a rebuke to this view. Sometimes a small number of examples is enough to form a lasting representation <span class="citation" data-cites="markson1997 woodward1994">[@markson1997;@woodward1994]</span>. Perhaps only a small number of high-quality instances is sufficient for learning <span class="citation" data-cites="trueswell2013 mollica2017">[@trueswell2013;@mollica2017]</span>, but if so, why do some words take much longer to learn?</p>
+<p>The goal of this work is to address these puzzles through systematic investigation and extension of accumulator models. All models start with the observation that the overall size of children’s vocabulary increases supra-linearly. But does this growth imply changes in the underlying process?</p>
+<p>Following previous work, we start with the idea that children’s <em>internal learning ability</em> (not just their observed vocabulary growth) accelerates across development <span class="citation" data-cites="hidaka2013">[@hidaka2013]</span>. In the bucket metaphor, the drops get bigger as children get older. We begin by extending the psychometric accumulator model of <span class="citation" data-cites="kachergis2022">@kachergis2022</span>: our key addition is to describe variation between individual children by modeling both their individual learning efficiency and the acceleration of their learning. This extension defines a longitudinal growth model that can be fit to data, and that provides a simple reconciliation between slow accumulation and fast mapping: the number of examples of a word necessary for learning declines by multiple orders of magnitude from age one to age three.</p>
+<p>To constrain our model, we use data from the MacArthur-Bates Communicative Development Inventories [MB-CDI; <span class="citation" data-cites="fenson1994">@fenson1994</span>;<span class="citation" data-cites="marchman2021">@marchman2021</span>], a popular parent report instrument in which parents are asked to indicate which words their child produces and understands. Here we focus exclusively on production, which is used with older children and which tends to be a more reliable measure <span class="citation" data-cites="frank2021">[@frank2021]</span>. We make use of longitudinal data from Wordbank <span class="citation" data-cites="frank2017">[@frank2017]</span>, an open repository of data from the MB-CDI.</p>
+<p>To address questions about the relationship between language input and growth, we fit a Bayesian version of our growth model. We make use of new data resources to estimate the magnitude of linkages between input and vocabulary growth. First, we estimate plausible population values based on independent estimates of population variation in language input <span class="citation" data-cites="coffey2024">[@coffey2024]</span>. In addition, we use measures of individual children’s language input from egocentric videos <span class="citation" data-cites="long2024">[@long2024]</span> and day-long home recordings <span class="citation" data-cites="egan2025 adams2018 fernald2013">[@egan2025;@adams2018;@fernald2013]</span> to estimate the input-uptake relationship more precisely for a subsample of children.</p>
+<p>Overall, our analysis supports a view in which children’s vocabulary growth is not a pure process of accumulation but rather one that accelerates rapidly over time. We end by comparing the fit of our models on human data to their fit on large-language models. Making use of GPT-2 models trained on human developmental data, we show that – in contrast to children – these models do appear to function as pure accumulators. This analysis exposes a critical disanalogy between LLMs and human learners and suggests a potential route for understanding the vast “data gap” between children and large language models <span class="citation" data-cites="frank2023 warstadt2023">[@frank2023;@warstadt2023]</span>.</p>
+<section id="model" class="level1">
+<h1>Model</h1>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div id="fig-schematic" class="quarto-float quarto-figure quarto-figure-center anchored" width="100%" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-schematic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="standard_model_files/figure-html/fig-schematic-1.png" id="fig-schematic" class="img-fluid quarto-figure quarto-figure-center anchored figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-schematic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>We present a nested set of accumulator-type models, many of which have been presented in the literature. As we show below, each refinement of the model contributes to its ability to describe the variability between children. We start with the Rasch model from psychometrics <span class="citation" data-cites="rasch1960 bond2013">[@rasch1960;@bond2013]</span>, which assumes that each child <span class="math inline">\(i\)</span> has a learning ability <span class="math inline">\(\theta_i\)</span> and each word <span class="math inline">\(j\)</span> has a difficulty <span class="math inline">\(\delta_j\)</span>. The probability that child <span class="math inline">\(i\)</span> produces word <span class="math inline">\(j\)</span> is</p>
+<p><span class="math display">\[P(w_{i,j}=1 \mid \theta_i, \delta_j) =\frac{\exp(\theta_i - \delta_j)}{1 + \exp(\theta_i - \delta_j)}\]</span></p>
+<p>Following <span class="citation" data-cites="kachergis2022">@kachergis2022</span>, we can write our first model as a Rasch-style accumulator model (Model 1), specifying that <span class="math inline">\(\theta_i\)</span> is not a single parameter but instead a function of accumulation over time. In the simplest form:</p>
+<p><span class="math display">\[\text{M1: }\theta_i(t)  = \log(r_i) + \log(t/a_0)\]</span></p>
+<p>where <span class="math inline">\(r_i\)</span> is the child’s rate of language input (in tokens per month) and <span class="math inline">\(t\)</span> is the child’s age (in months, anchored at <span class="math inline">\(a_0\)</span>); note that we use log age to simulate linear accumulation because <span class="math inline">\(\exp(\theta) = r \cdot t\)</span>. This form instantiates the basic hypothesis that the only thing that changes over time is more input, and the only source of variation between children is variation in rate.</p>
+<p>We compare this model to an accelerating accumulator model (Model 2), in which the amount learned from each exposure increases with time by an exponent <span class="math inline">\(\kappa\)</span>.</p>
+<p><span class="math display">\[\text{M2: }\theta_i(t)  = \log(r_i) + \kappa ~ \log(t/a_0)\]</span> When <span class="math inline">\(\kappa&gt;1\)</span>, each successive month yields more accumulation than the last.</p>
+<p>Neither of these models has any way to capture variation across children beyond variation in input rate. Thus, we augment the basic accelerating accumulator, rewriting it as the sum of either one or two individually variable quantities:</p>
+<p><span class="math display">\[\text{M3: }\theta_i(t) = \xi_i + \kappa ~ \log(t/a_0)\]</span></p>
+<p><span class="math display">\[\text{M4: }\theta_i(t) = \xi_i + \kappa_i ~ \log(t/a_0)\]</span></p>
+<p>The intercept term in both models <span class="math inline">\(\xi_i = \log(r_i) + \log(\alpha_i)\)</span> can then decompose individual variation into both input rate-related and other variation in children’s efficiency. Similarly, in M4, the slope term <span class="math inline">\(\kappa_i = \kappa + \gamma \log r_i + \zeta_i\)</span> adds <em>individual variation in acceleration</em>, decomposing acceleration into a population term, input-related acceleration, and a child‑specific residual acceleration <span class="math inline">\(\zeta_i\)</span> (the part not explained by input). The coefficient <span class="math inline">\(\gamma\)</span> then captures the strength of the relationship between input and acceleration.</p>
+<p>Model 4 instantiates the idea that children vary in their base rate of efficiency and their acceleration, creating variant of a standard longitudinal growth model in which children vary on their slope and intercept <span class="citation" data-cites="grimm2016">[@grimm2016]</span>. Note that, while we define the relationship of <span class="math inline">\(\xi_i\)</span> and <span class="math inline">\(\kappa_i\)</span> to a child’s input <span class="math inline">\(r_i\)</span>, we can nevertheless fit the simplest form of the model by just allowing these parameters to vary as random child-level slopes and intercepts.</p>
+<p>As we will show, this model provides a good description of variation in children’s longitudinal growth trajectories. <a href="#fig-schematic" class="quarto-xref">Figure&nbsp;1</a> (top) shows schematic predictions from a pure accumulator model (M1), an accelerating accumulator (M2) in comparison to models including child-level variation in efficiency (M3) and both efficiency and acceleration (M4). Each model’s predictions are represented as ability scores (<span class="math inline">\(\theta\)</span>) across age and then also projected into proportion correct scores on a discrete set of vocabulary items, representing an observed accuracy score that is subject to compression at floor and ceiling.</p>
+<p>A variety of previous work has focused on estimating the properties of individual words <span class="citation" data-cites="goodman2008 hidaka2013 roy2015 braginsky2019 kachergis2022 kachergis2022b">[@goodman2008;@hidaka2013;@roy2015;@braginsky2019;@kachergis2022;@kachergis2022b]</span>. These analyses reveal that there is predictable word-level difficulty information but that only a modest portion of the variation between words is carried by frequency information. Words can be hard for a child to acquire because they vary also in the complexity and concreteness of their meanings, their syntactic category and syntactic context, their phonology, and many other factors. In the current work, we estimate word difficulty as a free parameter, and focus instead on variation between children.</p>
+<p>Our analysis generally depends on the availability of longitudinal data at the item level. The different models described above are not distinguishable from the cross-sectional, aggregate data that are typically considered in many analyses of early vocabulary. First, aggregate data do not allow for the estimation of individual word difficulties, thus the distribution of difficulties remains latent and different difficulty distributions can be posited to explain the accelerating shape of vocabulary growth <span class="citation" data-cites="mcmurray2007 mitchell2009">[@mcmurray2007; @mitchell2009]</span>. Second, cross-sectional data do not allow for accurate estimation of whether variation is due to differences in efficiency (intercept) or acceleration (slope) (see Supplemental Figure 1).</p>
+</section>
+<section id="results" class="level1">
+<h1>Results</h1>
+<section id="childrens-longitudinal-growth-reflects-differences-in-both-efficiency-and-acceleration" class="level2">
+<h2 class="anchored" data-anchor-id="childrens-longitudinal-growth-reflects-differences-in-both-efficiency-and-acceleration">Children’s longitudinal growth reflects differences in both efficiency and acceleration</h2>
+<p>We first retrieved longitudinal data on monolingual, typically-developing children’s vocabulary from Wordbank <span class="citation" data-cites="frank2017">[@frank2017]</span>, an open archive of data from the MacArthur-Bates Communicative Development Inventory and its international adaptations. <a href="#tbl-datasets" class="quarto-xref">Table&nbsp;1</a> shows the four longitudinal datasets in Wordbank that contained more than <span class="math inline">\(&gt;100\)</span> children with multiple observations.</p>
+<div class="cell" data-layout-align="center">
+<div id="tbl-datasets" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-datasets-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1: Characteristics of the datasets.
+</figcaption>
+<div aria-describedby="tbl-datasets-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="table do-not-create-environment cell caption-top table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Dataset</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Citation</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">N</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Admins (mean)</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Ages</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Recordings</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Norwegian</td>
+<td style="text-align: left;">@simonsen2014</td>
+<td style="text-align: left;">1,676</td>
+<td style="text-align: right;">1.6</td>
+<td style="text-align: left;">8–36 mo</td>
+<td style="text-align: left;">—</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Japanese</td>
+<td style="text-align: left;">@hagihara2023</td>
+<td style="text-align: left;">178</td>
+<td style="text-align: right;">1.3</td>
+<td style="text-align: left;">8–36 mo</td>
+<td style="text-align: left;">—</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">BabyView</td>
+<td style="text-align: left;">@long2024</td>
+<td style="text-align: left;">22</td>
+<td style="text-align: right;">5.0</td>
+<td style="text-align: left;">6–32 mo</td>
+<td style="text-align: left;">Headcam (n = 5,739 videos)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">SEEDLingS</td>
+<td style="text-align: left;">@egan2025</td>
+<td style="text-align: left;">44</td>
+<td style="text-align: right;">12.0</td>
+<td style="text-align: left;">6–17 mo</td>
+<td style="text-align: left;">LENA (n = 525 recordings)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">AM2018</td>
+<td style="text-align: left;">@adams2018</td>
+<td style="text-align: left;">66</td>
+<td style="text-align: right;">3.0</td>
+<td style="text-align: left;">16–24 mo</td>
+<td style="text-align: left;">LENA (n = 126 recordings)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">FMW2013</td>
+<td style="text-align: left;">@fernald2013</td>
+<td style="text-align: left;">51</td>
+<td style="text-align: right;">3.0</td>
+<td style="text-align: left;">18–30 mo</td>
+<td style="text-align: left;">LENA (n = 51 recordings)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>Taking advantage of the equivalence of Rasch models to generalized linear mixed effects models <span class="citation" data-cites="deboeck2011">[@deboeck2011]</span>, we fit the set of models shown in <a href="#fig-schematic" class="quarto-xref">Figure&nbsp;1</a> as a series of logistic regressions. As described above, this initial set of fits do not attempt to estimate the relationship with input but instead simply attempt to describe the distribution of vocabulary growth curves. Each model predicted the probability of an individual child producing a particular word as a function of age (either unmodified in M1 or multiplied by a constant in M2) and a random effect of word difficulty. Successive models add random intercepts (M3) and slopes (M4) by child.</p>
+<p>Model 4, which incorporated variation in acceleration and efficiency, was the best fitting model across all datasets, with AIC and BIC differences shown in <a href="#tbl-aic" class="quarto-xref">Table&nbsp;2</a>. <a href="#fig-schematic" class="quarto-xref">Figure&nbsp;1</a> (bottom) shows the fit of the four model variants; the increasing spread of children’s trajectories with age is especially noticeable for low-vocabulary older children [who may be classified as “late talkers”; <span class="citation" data-cites="fernald2012">@fernald2012</span>; <span class="citation" data-cites="rescorla2011">@rescorla2011</span>].<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
+<div class="cell" data-layout-align="center">
+<div id="tbl-aic" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl quarto-uncaptioned" id="tbl-aic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2
+</figcaption>
+<div aria-describedby="tbl-aic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="table do-not-create-environment caption-top table-sm table-striped small">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th colspan="2" data-quarto-table-cell-role="th" style="text-align: left; empty-cells: hide; border-bottom: hidden;"></th>
+<th colspan="5" data-quarto-table-cell-role="th" style="text-align: center; border-bottom: hidden; padding-bottom: 0; padding-left: 3px; padding-right: 3px;"><div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+$\\Delta$AIC
+</div></th>
+</tr>
+<tr class="even">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Model</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Age</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Thal</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Smith</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Marchman</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Norwegian</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Japanese</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">M1. accumulator</td>
+<td style="text-align: left;">—</td>
+<td style="text-align: right;">703,220</td>
+<td style="text-align: right;">273,732</td>
+<td style="text-align: right;">251,211</td>
+<td style="text-align: right;">2,281,606</td>
+<td style="text-align: right;">94,503</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">M2. + acceleration</td>
+<td style="text-align: left;">linear</td>
+<td style="text-align: right;">206,553</td>
+<td style="text-align: right;">179,872</td>
+<td style="text-align: right;">134,596</td>
+<td style="text-align: right;">1,377,615</td>
+<td style="text-align: right;">41,169</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">M2. + acceleration</td>
+<td style="text-align: left;">log</td>
+<td style="text-align: right;">204,930</td>
+<td style="text-align: right;">178,471</td>
+<td style="text-align: right;">133,877</td>
+<td style="text-align: right;">1,348,013</td>
+<td style="text-align: right;">39,054</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">M3. + efficiency var.</td>
+<td style="text-align: left;">linear</td>
+<td style="text-align: right;">35,856</td>
+<td style="text-align: right;">17,418</td>
+<td style="text-align: right;">13,752</td>
+<td style="text-align: right;">130,625</td>
+<td style="text-align: right;">3,850</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">M3. + efficiency var.</td>
+<td style="text-align: left;">log</td>
+<td style="text-align: right;">34,219</td>
+<td style="text-align: right;">15,356</td>
+<td style="text-align: right;">13,135</td>
+<td style="text-align: right;">115,116</td>
+<td style="text-align: right;">3,227</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">M4. + acceleration var.</td>
+<td style="text-align: left;">linear</td>
+<td style="text-align: right;">1,134</td>
+<td style="text-align: right;">553</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">4,301</td>
+<td style="text-align: right;">169</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">M4. + acceleration var.</td>
+<td style="text-align: left;">log</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</section>
+<section id="efficiency-and-acceleration-relate-to-separate-demographic-predictors" class="level2">
+<h2 class="anchored" data-anchor-id="efficiency-and-acceleration-relate-to-separate-demographic-predictors">Efficiency and acceleration relate to separate demographic predictors</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div id="fig-demographics" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-demographics-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="standard_model_files/figure-html/fig-demographics-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-demographics-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Regression coefficients predicting individual children’s efficiency and acceleration as a function of gender and maternal education. Black dots show meta-analytic estimates from a random-effects meta analysis. Error bars show 95% confidence intervals.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Children’s vocabulary is known to be related to a number of sociodemographic predictors, including sex and maternal education (which is interpreted as a proxy for socioeconomic status). In particular, female children show consistently larger vocabularies than male children across dozens of languages and countries <span class="citation" data-cites="eriksson2012 frank2021">[@eriksson2012;@frank2021]</span>. Similarly, children of more educated mothers tend to show larger vocabularies, though this effect is somewhat more heterogeneous across countries and languages <span class="citation" data-cites="frank2021">[@frank2021]</span>.</p>
+<p>Our longitudinal model offers a summary of individual children’s growth in terms of both their efficiency (intercept) and their acceleration (slope). This decomposition allows us to ask whether these two demographics effects – sex and maternal education – are seen in efficiency, acceleration, or both. For each child in our analysis, we extracted the best linear unbiased prediction (BLUP) from our models. We then regressed intercept and slope terms against each demographic predictor separately for each language. <a href="#fig-demographics" class="quarto-xref">Figure&nbsp;2</a> shows the coefficients from this analysis, along with a cross-language meta-analytic estimate.</p>
+<p>Sex effects show the predicted female advantage across all four languages, but this effect manifests itself only in efficiency (<span class="math inline">\(\beta = -0.33\)</span>, <span class="math inline">\(p = &lt; .001\)</span>) not acceleration (<span class="math inline">\(\beta = 0\)</span>, <span class="math inline">\(p = .939\)</span>). In contrast, though maternal education data were only available for three languages, effects were numerically present in both measures, though stronger in acceleration (<span class="math inline">\(\beta = 0.03\)</span>, <span class="math inline">\(p = .096\)</span>) than in efficiency (<span class="math inline">\(\beta = 0.06\)</span>, <span class="math inline">\(p = .157\)</span>). One interpretation of these findings is that sex effects reflect a small constant offset in average ability. In contrast, socioeconomic differences as reflected in maternal education might continue to compound across development <span class="citation" data-cites="fernald2013 hart2003">[@fernald2013;@hart2003]</span>.</p>
+</section>
+<section id="growth-in-ability-leads-to-rapid-changes-in-learning-times-for-individual-words" class="level2">
+<h2 class="anchored" data-anchor-id="growth-in-ability-leads-to-rapid-changes-in-learning-times-for-individual-words">Growth in ability leads to rapid changes in learning times for individual words</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div id="fig-efficiency" class="quarto-float quarto-figure quarto-figure-center anchored" width="100%" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-efficiency-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="standard_model_files/figure-html/fig-efficiency-1.png" id="fig-efficiency" class="img-fluid quarto-figure quarto-figure-center anchored figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-efficiency-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>As an illustration of this change in efficiency, Figure 2 shows a model-derived estimate of the average number of times a child would need to hear a word before producing it (See SI: Changes in Word Efficiency), using frequency estimates from the CHILDES Corpus <span class="citation" data-cites="mcwhinney2020 sanchez2019">[@mcwhinney2020;@sanchez2019]</span>. Across different word classes (e.g., nouns, verbs, closed class words), efficiency increases exponentially, such that early-learned words such as “ball” may be heard tens of thousands of times before they are produced, while later learned words such as “vitamin” might only be heard tens of times before being produced.</p>
+</section>
+<section id="estimating-input" class="level2">
+<h2 class="anchored" data-anchor-id="estimating-input">Estimating input</h2>
+<p>Under a range of plausible assumptions about variation in input, all children show supra-linear scaling of growth, even accounting for accumulation dynamics.</p>
+<p>As discussed above, one important question is how much of variance is due to variance in rate. We explore this by asking about the parameter <span class="math inline">\(\pi\)</span>,</p>
+<p><span class="math display">\[\pi = \frac{\sigma_\alpha^2}{\sigma_\alpha^2 + \sigma_r^2}\]</span></p>
+<p>If <span class="math inline">\(\pi\)</span> &gt; .5, then the majority of variation between individuals is not due to pure accumulation rate.</p>
+<p>In addition, 80-90% of between-child variation remains unexplained by input quantity. These conclusions are supported by analysis of longitudinal input data from BabyView (N=20) and SEEDLings (N=44) datasets, which contain child-specific estimates of input, and Peekbank (N=XYZ), which contains child-specific estimates of processing speed.</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div id="fig-io-partition" class="quarto-float quarto-figure quarto-figure-center anchored" width="100%" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-io-partition-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="standard_model_files/figure-html/fig-io-partition-1.png" id="fig-io-partition" class="img-fluid quarto-figure quarto-figure-center anchored figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-io-partition-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Thus, modeling human learning requires positing other sources of variability and acceleration. Sources of variability could include from variation in interactional input quality, genetic variation between children, environmental richness not captured by input, etc. Sources of acceleration could include increases in processing efficiency, learning-to-learn including mutual exclusivity, shape bias, syntactic bootstrapping, as well as domain general changes in perception, processing speed, memory, attention or other aspects of cognition. The key to understanding children’s data efficiency may thus lie in better understanding when and how children’s learning accelerates with maturation and experience.</p>
+<p>We end by providing a quantitative comparison between within-child human learning and LLM scaling laws, showing that children’s early language learning is strikingly different from LLM scaling: it shows both steeper scaling and greater variance in growth rate.</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div id="fig-llm-acceleration" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-llm-acceleration-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="standard_model_files/figure-html/fig-llm-acceleration-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-llm-acceleration-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Comparison of acceleration slopes (kappa) estimated in our experiments for children in English and Norwegian, vs.&nbsp;LLM slopes per model estimated by Chang &amp; Bergen (2022) and in our experiments.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="discussion" class="level1">
+<h1>Discussion</h1>
+<p>What we did</p>
+<p>Longitudinal growth models efficiency and acceleration. Two different paramters.</p>
+<p>Where does acceleration come from? Could come from a variety of sources, including general maturation of memory and attention, specific changes in word recognition or processing <span class="citation" data-cites="fernald1998 frank2026">[@fernald1998;@frank2026]</span>, the increasing sophistication of inferential strategies for word learning [<span class="citation" data-cites="smith2002">@smith2002</span>;<span class="citation" data-cites="markman1988">@markman1988</span>;etc], or other sources.</p>
+<p><span class="citation" data-cites="mitchell2009">@mitchell2009</span> prove that acceleration does not result from simply leverage of vocabulary –</p>
+<p>Role of input: Coffey 2026 variance decomposition</p>
+<!-- Children’s early word learning is alternatively portrayed as either a process of gradual accumulation or as an inferential process that results in rapid mapping. How can these two views be rectified?  -->
+<!-- Children’s early language learning is often portrayed as a process of accumulation and gradual learning, with statistical learning, mutual exclusivity and input viewpoints highlighting the accumulation nature. In contrast, studies of processing and word mapping highlight the increases in efficiency that happen over the same  period. How can these two views be rectified? One clue comes from examining the two key signatures of early vocabulary growth: variability and acceleration. What is the shape of this acceleration? And what is the source of variability, from children’s input or otherwise?? We present a quantitative model that unify these views while explaining both the variability and acceleration of children’s early language growth. The resulting model provides a good quantitative explanation for longitude vocabulary growth across large population of children. It also shows that by their increasing efficiency, and their ability of children, learning fundamentally different ways than large language, models, which show classic accumulator dynamics. -->
+<p>Furthermore, how does the accumulation process relate to the rapid growth of vocabulary? On some models, accumulation by itself can produce an exponential “vocabulary explosion” while the child’s own learning abilities remain constant. On other accounts, however, the child’s own abilities change over development. These changes could be due to the accumulation of language allowing bootstrapping (e.g., via mutual excusivity or the shape bias), they could be through faster processing (Fernald rich get richer), or they could be via general maturation (e.g., better memory, faster processing). Or all of these.</p>
+<!-- Blingualism  -->
+<!-- International adoption -->
+<!-- https://bergelsonlab.fas.harvard.edu/sites/g/files/omnuum3941/files/2025-01/meylan_bergelson_2021_ARL.pdf   -->
+</section>
+<section id="references" class="level1">
+<h1>References</h1>
+<div class="acknowledgement">
+<p>Claude Code was used for literature review, code generation, visualization, and simulation infrastructure. All writing is original to the author.</p>
+</div>
+<!-- :::{.suppinfo} -->
+<!-- ::: -->
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Following the literature, we primarily investigate linear accumulator models, which show power-law growth of ability over time because <span class="math inline">\(\theta\)</span> is a function of <span class="math inline">\(\log(t)\)</span>. However, it is also possible that ability grows linearly in time, which would lead to exponential increases in the probability of word production. We fit linear-time models, but found that they were dispreferred statistically, though differences were relatively small within the restricted age range for which we have data (<span class="math inline">\(\delta\)</span>AIC 0–4,301; see Supplemental Figure 2 for model fits).<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
