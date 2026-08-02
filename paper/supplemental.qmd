@@ -406,12 +406,6 @@ knitr::kable(tab2, format = "latex", align = c("l", rep("r", 9)), escape = FALSE
   kableExtra::kable_styling(font_size = 7, latex_options = c("HOLD_position", "scale_down"))
 ```
 
-# Generating Quantiles
-
-@fig-schematic C in the main text shows quantile bands derived from the fitted M3 models. We create these bands by posterior simulation. We do so by drawing 500 children from a synthetic population generated using the model's fitted mean efficiency $\mu_\xi$,
-population scaling $\kappa_{\text{pop}} = 1 + \delta$, between-child SDs ($\sigma_a$, $\sigma_b$), their correlation $\rho$, and
-the fitted item-difficulties $\delta$. We then compute empirical quantiles over this synthetic population at each age.  
-
 # Variation in Acceleration
 
 ```{r blup-prep, include=FALSE}

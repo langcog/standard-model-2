@@ -159,9 +159,9 @@ Critically, for all datasets, estimates of acceleration were high, robustly reje
 
 Variability is a ubiquitous feature of early language across a vast array of phenomena and a wide range of languages [@frank2021;@kidd2020]. The between-child standard deviation in acceleration ($\sigma_b$) ranged from `r sb_lo` to `r sb_hi` across the five samples; `r pct_gt1`% of children were estimated above the pure-accumulator value of $\kappa = 1$. The distribution appeared unimodal across samples, but the increasing spread of children's trajectories with age was especially noticeable for low-vocabulary older children [who may be classified as "late talkers"; @fernald2012; @rescorla2011; @pinstock2026;@singletary2025] (see SI: Variation in Acceleration).
 
-```{r fig-schematic, fig.width=11, fig.height=8}
+```{r fig-schematic, fig.width=7.5, fig.height=8.6}
 #| label: fig-schematic
-#| fig-cap: "(A) Generative model: each child $i$ has an efficiency $\\xi_i$ and an acceleration $\\kappa_i$ that set their latent ability; whether child $i$ produces word $j$ depends on $\\theta_i(t)$ relative to the word's difficulty $\\delta_j$. (B) Model predictions in latent-ability ($\\theta$) space and, projected through the logistic item response model, in words-produced (CDI) space. Both pure accumulator ($\\kappa = 1$, dashed) and accelerating accumulator predictions are plotted. Greater efficiency ($\\xi$) lifts the curve's level, while greater acceleration ($\\kappa$) fans it open. (C) Individual children's observed trajectories (gray) for each of the five longitudinal datasets, with fitted models superimpowed (colored percentile bands). See SI: Generating Quantiles for details."
+#| fig-cap: "(A) Generative model: each child $i$ has an efficiency $\\xi_i$ and an acceleration $\\kappa_i$ that set their latent ability; whether child $i$ produces word $j$ depends on $\\theta_i(t)$ relative to the word's difficulty $\\delta_j$. (B) Model predictions in latent-ability ($\\theta$) space and, projected through the logistic item response model, in words-produced (CDI) space. Both pure accumulator ($\\kappa = 1$, dashed) and accelerating accumulator predictions are plotted. Greater efficiency ($\\xi$) lifts the curve's level, while greater acceleration ($\\kappa$) fans it open. (C) Individual children's observed trajectories (gray) for each of the five longitudinal datasets, with quantiles computed across the per-child parameters of the fitted models (colored percentile bands)."
 
 ## Fig 1 precomputed in paper/build_cache_short.R (fig1_fan.rds). Three-block
 ## composite via cowplot: (A) graphical model image; (B) conceptual theta -> CDI
@@ -183,28 +183,39 @@ lty_scn <- c("pure" = "21", "accel" = "solid")
 ## NB: name this `qsel`, NOT `q` -- fig1_fan$conceptual carries a column called `q`
 ## (pivot_longer names_to), and dplyr data-masking would resolve `quantity == q`
 ## against that column instead of the local variable, silently yielding zero rows.
+## Display-only short strip titles. At 7.5in the two block-B panels are ~1.4in wide and
+## the cached labels ("Latent Ability (θ)", "Words Produced (CDI)") are wider than that,
+## so they were being clipped mid-word. The y-axis titles already say which units each
+## panel is in, so the strips can be terse. [MCF: reword if you prefer.]
+STRIP_B <- c("Latent ability", "Words produced")
 panelB <- function(i, ylab, ylim = NULL) {
   qsel <- levels(fig1_fan$conceptual$quantity)[i]
-  d <- dplyr::filter(fig1_fan$conceptual, quantity == .env$qsel)
+  d <- dplyr::filter(fig1_fan$conceptual, quantity == .env$qsel) |>
+    dplyr::mutate(quantity = factor(STRIP_B[i], levels = STRIP_B[i]))
   ggplot(d, aes(age, value, color = scenario, linetype = kind, group = scenario)) +
     (if (is.null(ylim)) NULL else
        geom_blank(data = data.frame(age = 9, value = ylim),
                   aes(age, value), inherit.aes = FALSE)) +
     geom_line(linewidth = 0.8) +
-    ggrepel::geom_text_repel(
-      data = dplyr::filter(fig1_fan$conceptual_lab, quantity == .env$qsel), aes(label = scenario),
-      size = 2.3, hjust = 0, direction = "y", nudge_x = 1,
-      segment.size = 0.2, xlim = c(36, NA)) +
+    ## Direct labels on the LEFT panel only. The two panels share a colour scale, and in
+    ## words-produced space the accelerating curves converge near 1.0, so their end labels
+    ## collided there however they were repelled. Labelling once keeps the right panel clean.
+    (if (i != 1) NULL else ggrepel::geom_text_repel(
+      data = dplyr::filter(fig1_fan$conceptual_lab, quantity == .env$qsel) |>
+              dplyr::mutate(quantity = factor(STRIP_B[i], levels = STRIP_B[i])),
+      aes(label = scenario),
+      size = 2.7, hjust = 0, direction = "y", nudge_x = 0.8,
+      segment.size = 0.2, xlim = c(36, NA), box.padding = 0.3, min.segment.length = 0)) +
     facet_wrap(~ quantity) +
     scale_color_manual(values = col_scn, guide = "none") +
     scale_linetype_manual(values = lty_scn, guide = "none") +
     ## lower limit 8 to match the DATA range in block C (Marchman and Norwegian both
     ## start at 8), so B and C share an x-origin. Curve data now spans 8-36 (cache).
     scale_x_continuous(breaks = c(12, 24, 36)) +
-    coord_cartesian(xlim = c(8, 46), clip = "off") +
+    coord_cartesian(xlim = c(8, if (i == 1) 49 else 38), clip = "off") +
     labs(x = "Age (Months)", y = ylab) +
-    theme_minimal(base_size = 9) +
-    theme(strip.text = element_text(face = "bold", size = 9),
+    theme_minimal(base_size = 11) +
+    theme(strip.text = element_text(face = "bold", size = 11),
           panel.grid.minor = element_blank(),
           plot.margin = margin(16, 10, 4, 6))
 }
@@ -224,12 +235,12 @@ pC <- ggplot() +
   scale_y_continuous(limits = c(0, 1), breaks = c(0, 0.5, 1)) +
   labs(x = "Age (Months)", y = "Proportion of Items Produced") +
   guides(color = guide_legend(override.aes = list(linewidth = 1.1))) +
-  theme_minimal(base_size = 9) +
-  theme(strip.text = element_text(face = "bold", size = 9),
+  theme_minimal(base_size = 11) +
+  theme(strip.text = element_text(face = "bold", size = 11),
         panel.grid.minor = element_blank(), panel.spacing = unit(1, "lines"),
         plot.margin = margin(16, 8, 4, 6),
         legend.position = c(0.70, 0.26), legend.justification = c(0, 0.5),
-        legend.key.width = unit(15, "pt"), legend.title = element_text(size = 8.5),
+        legend.key.width = unit(15, "pt"), legend.title = element_text(size = 10.5),
         legend.background = element_rect(fill = "white", color = NA))
 
 ## Block A: graphical model (title-less asset built from paper/mockups/fig1_gm_notitle.tex)
@@ -238,10 +249,12 @@ gm <- cowplot::ggdraw() +
                                       interpolate = TRUE, width = grid::unit(0.98, "npc")))
 
 ## compose: [A | B B] over [C C C], only block-level A/B/C labels
-top <- cowplot::plot_grid(gm, pB, ncol = 2, rel_widths = c(1, 2),
-                          labels = c("A", "B"), label_size = 15, vjust = 1.1)
+## rel_widths: block A is a RASTER image whose internal text does not scale with
+## base_size, so at 1/3 of a 7.5in row it became unreadable. Give it a larger share.
+top <- cowplot::plot_grid(gm, pB, ncol = 2, rel_widths = c(1, 1.55),
+                          labels = c("A", "B"), label_size = 13, vjust = 1.1)
 cowplot::plot_grid(top, pC, ncol = 1, rel_heights = c(1, 1.85),
-                   labels = c("", "C"), label_size = 15, vjust = 1.1)
+                   labels = c("", "C"), label_size = 13, vjust = 1.1)
 ```
 
 
@@ -287,9 +300,17 @@ To quantify this phenomenon, we combined our fitted model with corpus frequencie
 
 # Language models show no acceleration in their vocabulary growth
 
-```{r fig-llm-acceleration, fig.width=14, fig.height=4.2}
+```{r fig-llm-acceleration, fig.width=7.5, fig.height=6.6}
 #| label: fig-llm-acceleration
 #| fig-cap: "LMs decelerate where children accelerate. (A) Density of the acceleration exponent $\\kappa$ for both children (per child, English and Norwegian) and LMs (by word). LM parameters are extracted from Chang \\& Bergen (2022; four architectures), CHILDES-trained GPT-2, on both the training and development axes. (B) Fractional return on training (the ratio of decrease in loss to excess loss) for both children and LMs. Blue lines show model trajectories; red lines show fitted trajectories from children. Three children are highlighted in dark red with horizontal uncertainty bands indicating +/- 1 SD in calibration of their input (see text)."
+## LAYOUT/FONT SIZING. out.width="100%" scales every figure to the 6.5in text width, so
+## the on-page font size is base_size * 6.5/fig.width. At the old fig.width=14 that made
+## base_size 11 render at 5.1pt. Dropping to 7.5 (scale 0.87) puts base_size 11 at ~9.5pt
+## and inline annotations at ~9pt once their sizes are bumped to match (geom_text size is
+## in mm: rendered_pt = size * 2.845 * 0.87, so size 3.6 ~ 9pt).
+## Three panels no longer fit side by side at that width, so A and B share the top row and
+## C -- a horizontal dotplot with five population rows that benefits from width -- spans
+## the bottom. Panel letters keep their A/B/C order so the text references still hold.
 
 # Data cached by paper/build_cache.R §6 + build_cache_short.R §8:
 #   sl   -- per-instance kappa (children by child [_a3 M3 BLUPs], LMs by word);
@@ -310,14 +331,14 @@ slope_pal <- c("Children (English)"="#c41e37","Children (Norwegian)"="#fb9a99",
 pA <- ggplot(sl, aes(slope_natural, fill=group, colour=group)) +
   geom_density(alpha=0.32, linewidth=0.5) +
   geom_vline(xintercept=1, linetype="dashed", colour="grey55", linewidth=0.4) +
-  annotate("text", x=1.6, y=0.92, hjust=0, vjust=1, size=2.8, colour="grey45",
+  annotate("text", x=1.6, y=0.92, hjust=0, vjust=1, size=3.6, colour="grey45",
            label="kappa = 1\nunit accumulator") +
   scale_fill_manual(values=slope_pal, name=NULL) + scale_colour_manual(values=slope_pal, name=NULL) +
   coord_cartesian(xlim=c(0,22)) +
-  labs(subtitle="Acceleration (kappa): children by child, LMs by word",
+  labs(subtitle="Acceleration: children vs. LMs",
        x="kappa: slope on log(experience)", y="density") +
   theme_minimal(base_size=11) +
-  theme(legend.position=c(0.66,0.62), legend.text=element_text(size=6.6), legend.key.height=unit(9,"pt"),
+  theme(legend.position=c(0.66,0.62), legend.text=element_text(size=8.5), legend.key.height=unit(11,"pt"),
         legend.background=element_rect(fill="white",colour=NA), plot.subtitle=element_text(face="bold"))
 
 ## Panel B: fractional return gamma = return / excess loss, at matched absolute input.
@@ -333,16 +354,16 @@ pB <- ggplot() +
   geom_ribbon(data=f3$child_ex, aes(y=gamma, xmin=lo, xmax=hi, group=ckey),
               fill=col_ex, alpha=0.15, orientation="y") +
   geom_line(data=f3$child_ex, aes(tokens, gamma, group=ckey), colour=col_ex, linewidth=0.85) +
-  ggrepel::geom_text_repel(data=ex_lab, aes(tokens, gamma, label=lab), colour=col_ex, size=2.6,
+  ggrepel::geom_text_repel(data=ex_lab, aes(tokens, gamma, label=lab), colour=col_ex, size=3.4,
                            nudge_x=0.12, direction="y", segment.size=0.2, min.segment.length=0) +
-  annotate("text", x=3.3e6, y=0.60, hjust=0, size=2.7, colour=col_lm, fontface="italic", label="LMs (10 seeds)") +
-  annotate("text", x=3.3e6, y=1.22, hjust=0, size=2.5, colour="grey45", label="unit accumulator") +
-  annotate("text", x=3.3e6, y=16, hjust=0, size=2.7, colour=col_child, fontface="italic",
+  annotate("text", x=3.3e6, y=0.60, hjust=0, size=3.5, colour=col_lm, fontface="italic", label="LMs (10 seeds)") +
+  annotate("text", x=3.3e6, y=1.22, hjust=0, size=3.2, colour="grey45", label="unit accumulator") +
+  annotate("text", x=3.3e6, y=16, hjust=0, size=3.5, colour=col_child, fontface="italic",
            label=sprintf("all children (n=%d);\n3 exemplars ± input SD", n_child)) +
   scale_x_log10(breaks=c(3e6,5e6,1e7,2.4e7), labels=c("3M","5M","10M","24M")) +
   scale_y_log10(breaks=c(0.2,0.3,0.5,1,2,5,10,20)) +
   coord_cartesian(xlim=c(3e6,2.6e7), ylim=c(0.2,25)) +
-  labs(subtitle="Fractional return at matched absolute input",
+  labs(subtitle="Fractional return at matched input",
        x="cumulative word tokens of input", y="fractional return  γ") +
   theme_minimal(base_size=11) +
   theme(plot.subtitle=element_text(face="bold"), panel.grid.minor=element_blank())
@@ -363,7 +384,7 @@ pC <- ggplot(vy |> dplyr::filter(kappa > 0),
   geom_jitter(position=position_jitter(height=0.22, seed=1), alpha=0.25, size=0.9) +
   stat_summary(fun=median, geom="crossbar", width=0.5, linewidth=0.5, colour="grey20") +
   geom_text(data=lab_cv, aes(x=60, y=forcats::fct_rev(population), label=lab),
-            inherit.aes=FALSE, size=2.9, hjust=1, colour="grey30") +
+            inherit.aes=FALSE, size=3.8, hjust=1, colour="grey30") +
   geom_vline(xintercept=1, linetype="dashed", colour="grey55", linewidth=0.4) +
   scale_x_log10(breaks=c(0.5,1,2,5,10,20,50)) +
   scale_colour_manual(values=vpal, guide="none") +
@@ -373,7 +394,10 @@ pC <- ggplot(vy |> dplyr::filter(kappa > 0),
   theme_minimal(base_size=11) +
   theme(plot.subtitle=element_text(face="bold"), panel.grid.minor=element_blank())
 
-cowplot::plot_grid(pA, pB, pC, nrow=1, labels=c("A","B","C"), label_size=11)
+cowplot::plot_grid(
+  cowplot::plot_grid(pA, pB, nrow = 1, labels = c("A", "B"), label_size = 12),
+  cowplot::plot_grid(pC, nrow = 1, labels = "C", label_size = 12),
+  nrow = 2, rel_heights = c(1, 0.82))
 ```
 
 Do LMs show the same signatures of acceleration and variability as children? To evaluate this question, we begin by building a bridge between the well-known "scaling laws" for large language models [@hoffmann2022;@kaplan2020] and the model we describe here for vocabulary growth. The form of one popular scaling law is that the loss $L$ of a neural network language model on a dataset size $D$ is $L = E + \frac{B}{D^\beta}$ (holding the size of the the network constant), where $B$ and $\beta$ are the free parameters of a power law and $E$ is the entropy of the text being modeled. This power law scaling behavior can emerge from a set of independently learned "quanta" that are themselves power-law distributed [@michaud2024]; the words of natural language follow such a power law and are potential quanta of this type [@zipf1949]. 
@@ -393,7 +417,7 @@ Children were highly variable in their trajectories, but we observed almost no v
 
 # Discussion
 
-How does children's vocabulary grow over early childhood? We proposed that this process is characterized by accelerating accumulation, in which variation between children is produced by differences in the efficiency of the accumulation process and the rate of acceleration. This cognitive process leads to a simple growth model that nevertheless provides a good description of cross-linguistic longitudinal data. In contrast to children, LMs follow neural scaling laws, meaning that they decelerate across training rather than accelerating. A consequence of this deceleration is that LMs require vastly more data than children. 
+How does children's vocabulary grow over early childhood? We proposed that this process is characterized by accelerating accumulation, in which variation between children is produced by differences in the efficiency of the accumulation process and the rate of acceleration. This cognitive process leads to a simple growth model that nevertheless provides a good description of cross-linguistic longitudinal data. In contrast to children, LMs follow neural scaling laws, meaning that they decelerate across training rather than accelerating. This difference in returns offers one candidate contributor to the data gap: children increasingly capitalize on each additional unit of experience, whereas conventional LMs do not.
 
 Where does the acceleration in children's learning come from? Some may come from developmental maturation of general abilities such as learning, memory, or attention. In the language of our model, these changes would mean that children's "buckets" require fewer drops to fill them. However, the degree of acceleration we show means that word learning becomes more efficient by several orders of magnitude, seemingly beyond measured changes in domain general cognitive processes [@hartshorn1998;@bauer2000]. 
 
@@ -444,21 +468,21 @@ Bayesian models were fit separately to each dataset using Stan [@stan] using fou
 We chose weakly informative priors throughout, including on the efficiency and acceleration parameters $\mu_\xi \sim \mathcal N(-6,\ 5)$ and $\mu_\kappa \sim 1 +  \mathcal N(0,\ 5)$ (centered around the pure accumulator model) as well as the individual child standard deviations $\sigma_a \sim \mathrm{Half\text{-}Normal}(0,\ 3)$ and 
 $\sigma_b \sim \mathrm{Half\text{-}Normal}(0,\ 5)$ and the item difficulties $\tau_\delta \sim \mathrm{Half\text{-}Normal}(0,\ 5)$. We also chose a prior that mildly regularized the correlations between $a_i$ and $b_i$ ($\mathbf L \sim \mathrm{LKJ}(2)$).
 
-### Learning efficiency
+## Learning efficiency
 
-Age of acquisition for each word was computed based on average word difficulties $\delta_j$ from the three fitted M3 models for English. For the population level of $\xi$ and $\kappa$, we computed the earliest age at which there was at least a .5 probability of producing the word. Average exposures per month to each word were computed as $N_j = R \cdot t_{50}(j) \cdot p_j$, where $R$ is the rate of input (words/month), $t_{50}(j)$ is the word level age of acquisition computed above, and $p_j$ is the word's corpus probability. We used average input estimates derived from @sperry2019 and @hart1995 for our estimate of $R$ (see SI: Input Estimation), and computed $p_j$ from empirical word frequencies in all North American English corpora in childes-db release 2021.1. 
+Age of acquisition for each word was computed based on the weighted average of word difficulties $\delta_j$ from the three fitted M3 models for English. For the population level of $\xi$ and $\kappa$, we computed the earliest age at which there was at least a .5 probability of producing the word. Average exposures per month to each word were computed as $N_j = R \cdot t_{50}(j) \cdot p_j$, where $R$ is the rate of input (words/month), $t_{50}(j)$ is the word level age of acquisition computed above, and $p_j$ is the word's corpus probability. We used average input estimates derived from @sperry2019 and @hart1995 for our estimate of $R$ (see SI: Input Estimation), and computed $p_j$ from empirical word frequencies in all North American English corpora in childes-db release 2021.1. 
 
-### Language model training
+## Language model training
 
 Following @feng2024, we fit randomly-initialized \texttt{GPT-2-small} (124M parameters) models, using the 24M word (~47M token) preparation of English-language CHILDES data from that study. We also fit models to the 2nd BabyLM challenge dataset (downloaded from [osf.io/ad7qg](), with CHILDES data removed) [@hu2024] and the ClimbMix dataset (available at [https://huggingface.co/datasets/karpathy/climbmix-400b-shuffle]()) [@diao2025]. We constructed three disjoint subsets of 24M words from each.
 
-Data were tokenized using a standard BPE tokenizer trained on the full dataset (all 24M). Surprisal was computed as mean per-word negative log likelihood over ~50 held-out validation contexts (last 128 tokens each) for the 609 CDI words that were used in @chang2022 and that appeared in the training data with sufficient frequency in the CHILDES held-out contexts. Surprisal values for sigmoid fits were read out from the epoch with lowest validation loss.
+For comparability, all data were tokenized using a standard BPE tokenizer trained on the full CHILDES dataset (all 24M). Surprisal was computed as mean per-word negative log likelihood over ~50 held-out validation contexts (last 128 tokens each) for the 609 CDI words that were used in @chang2022 and that appeared in the training data with sufficient frequency in the CHILDES held-out contexts. Surprisal values for sigmoid fits were read out from the epoch with lowest validation loss.
 
 For the computation of surprisal across training runs ("training"), we trained models using 3 random seeds on the full dataset. For the computation across different dataset sizes ("development"), the data were segmented into 18 nested datasets ranging in size from .5M to the full 24M. We then chose 10 random seed values and trained 10 models on each dataset for a total of 180 models. For the computation of variability across model runs ("composition"), we ran 8 random seed values across 12 nested dataset sizes for three disjoint subsets of both BabyLM and ClimbMix, resulting in 8 (seeds) x 12 (sizes) x 3 (subsets) x 2 (datasets) = 576 distinct models.
 
 Models were trained for a total of 20 epochs with sequence length 1024 and batch size 8, using AdamW for optimization and learning rate of 1e-4 with a linear decay, no warmup, weight decay of 0, and no in-epoch shuffling. Training was performed on NVIDIA A40 GPUs. All trained models are available at [https://huggingface.co/mcxfrank/childes-gpt2-ladder]() and [https://huggingface.co/mcxfrank/gpt2-composition-control]().
 
-### Fractional return on input
+## Fractional return on input
 
 Fractional return on input was computed for models based on mean surprisal $L(D)$ of the CDI words after training on
 $D$ word tokens of input. This follows the form from @hoffman2022 of $L(D) = E + B\,D^{-\beta}$, with $E$ the irreducible entropy floor and $B, \beta$ fit across budgets (here $E \approx 2.94$ nats, $B \approx 312$, $\beta \approx 0.32$,
