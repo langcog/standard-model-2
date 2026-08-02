@@ -26,13 +26,30 @@ format:
     linestretch: 1.05
     colorlinks: true
     keep-tex: true
+    # Pin figures where they appear in the source instead of letting LaTeX float
+    # them to a later page. Needs BOTH halves: fig-pos puts [H] on every figure,
+    # and the float package below is what defines [H].
+    fig-pos: 'H'
     # pdflscape: needed by kableExtra::landscape() (Table 1). Declared
     # explicitly because kableExtra's automatic dependency injection is
     # unreliable in Quarto (dropped on cached-chunk replay), which makes
     # the compile fail with "Environment landscape undefined."
+    # float: defines the [H] specifier used by fig-pos above and by the tables'
+    # kableExtra latex_options = "HOLD_position". The capitals matter: the
+    # lowercase spelling of that option only emits [!h], which still permits
+    # floating, whereas the uppercase one emits a true [H].
     include-in-header:
       text: |
         \usepackage{pdflscape}
+        \usepackage{float}
+        % Tables need this as well as the kableExtra option. When a chunk has a
+        % tbl-cap, Quarto emits its OWN \begin{table} wrapper around the kable
+        % output and kableExtra's placement is discarded, so the float came out
+        % with no specifier at all (i.e. default [tbp], free to drift).
+        % \floatplacement sets the default for every table float regardless of
+        % who emits it. Long tables rendered as `longtable` are unaffected,
+        % since longtable is not a float.
+        \floatplacement{table}{H}
 ---
 
 ```{r setup, include=FALSE}
@@ -380,7 +397,36 @@ How does children's vocabulary grow over early childhood? We proposed that this 
 
 Where does the acceleration in children's learning come from? Some may come from developmental maturation of general abilities such as learning, memory, or attention. In the language of our model, these changes would mean that children's "buckets" require fewer drops to fill them. However, the degree of acceleration we show means that word learning becomes more efficient by several orders of magnitude, seemingly beyond measured changes in domain general cognitive processes [@hartshorn1998;@bauer2000]. 
 
-A second potential source of acceleration is that children "learn to learn": their increasingly sophisticated inferential abilities allow them to extract progressively more information from the linguistic signal [@smith2002;@markman1988;@bohn2019;@meylan2022]. They learn "overhypotheses" that guide their inferences based on general regularities in how their language works -- for example, that many nouns are organized by shape [@kemp2007;@smith2002]. They also use the language they already know in the moment to extract more information from new utterances -- leveraging word meanings [@markman1988;@clark1988], syntactic knowledge [@gleitman1990], and pragmatic inference [@bohn2019] to make sophisticated inferences about gaps in their knowledge [@frank2009;@bloom2002]. Indeed, formally, these sorts of "leverage" mechanisms can change the slope of acceleration in accumulator models [@mitchell2009]. 
+A second potential source of acceleration is that children "learn to learn": their increasingly sophisticated inferential abilities allow them to extract progressively more information from the linguistic signal [@smith2002;@markman1988;@bohn2019;@meylan2022]. They learn "overhypotheses" that guide their inferences based on general regularities in how their language works -- for example, that many nouns are organized by shape [@kemp2007;@smith2002]. They also use the language they already know in the moment to extract more information from new utterances -- leveraging word meanings [@markman1988;@clark1988], syntactic knowledge [@gleitman1990], and pragmatic inference [@bohn2019] to make sophisticated inferences about gaps in their knowledge [@frank2009;@bloom2002]. Indeed, formally, these sorts of "leverage" mechanisms can change the slope of acceleration in accumulator models [@mitchell2009].
+
+```md
+[draft for promotion — MCF to review. Proposed replacement for the FINAL SENTENCE of the
+ paragraph above ("Indeed, formally, these sorts of 'leverage' mechanisms can change the
+ slope of acceleration in accumulator models [@mitchell2009].")
+
+ That sentence reverses @mitchell2009's central finding. Verified against the PDF: their
+ abstract states leverage "cannot create acceleration if it did not exist in the
+ corresponding model without leveraging", and their Zipf analysis "confirm[s] that
+ leveraging does not create acceleration"; §1.1 adds that leveraged learning "has little
+ to do with the presence or absence of acceleration". Their Fig 1A plots "Words Known"
+ from the MCDI long form, so their acceleration is in observed vocabulary count, not
+ latent ability -- the very distinction drawn earlier in this manuscript.
+
+ Their negative result arguably strengthens the paper: it rules out the most obvious
+ alternative mechanism, so the acceleration we estimate still requires an explanation.
+ Two options, from strongest to most minimal:]
+
+(a) Formally, however, leverage of this kind is not by itself sufficient: @mitchell2009
+show that although leveraged learning changes the shape and timing of vocabulary growth,
+it cannot create acceleration that is not already present in the underlying distribution
+of word difficulties. Their analysis concerns acceleration in observed vocabulary counts;
+the acceleration we estimate is in latent ability, and is precisely the quantity such a
+mechanism would need to produce.
+
+(b) Formally, @mitchell2009 show that such leverage changes the shape and timing of
+vocabulary growth but cannot by itself create acceleration, so a mechanism of this kind
+must act on the rate of accumulation rather than on the order in which words are acquired.
+``` 
 
 In sum, our study suggests that the presence of acceleration is a fundamental difference between children and LMs that may be responsible for the "data gap" between the two. Characterizing the nature of this acceleration and understanding the circumstances under which it can arise in artificial systems should thus be a focus for future investigation.
 
