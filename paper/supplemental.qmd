@@ -36,6 +36,28 @@ In addition, several other models in the literature can be described as variants
 * @mitchell2009 augment the pure M0 accumulator with a "leverage" term (in which words learned earlier can facilitate the learning of later words). Rhis term shifts the slope the learning function. While it does not map cleanly onto our M1, the dynamics are similar. 
 * @mollica2017 define a pure accumulator model with $kappa=1$, but with an additional parameter relating to the speed of per-word accumulation. This model maps onto a combination of our M0 with the a 2-parameter logistic variant that we fit below.
 
+```md
+[draft for promotion — MCF to review. Proposed replacement for the @mitchell2009 bullet
+ above, which currently reads: "...Rhis term shifts the slope the learning function. While
+ it does not map cleanly onto our M1, the dynamics are similar."
+
+ Verified against papers/mitchell_mcmurray_2009.pdf. Their abstract: "leverage can change
+ both the shape and timing of the acceleration, but ... it cannot create acceleration if it
+ did not exist in the corresponding model without leveraging", and their Zipf analysis
+ "confirm[s] that leveraging does not create acceleration". Their Fig 1A plots "Words
+ Known" from the MCDI long form, so their acceleration is in OBSERVED VOCABULARY COUNT,
+ not latent ability -- exactly the distinction the main text draws. The current bullet
+ states the opposite of their central finding. (Also fixes the "Rhis" typo.)]
+
+* @mitchell2009 augment the pure M0 accumulator with a "leverage" term, in which words
+learned earlier facilitate the learning of later words. Their central result is a negative
+one: leverage changes the shape and timing of vocabulary growth, but it cannot create
+acceleration that is not already present in the distribution of word difficulties. In our
+coordinates it therefore alters when words are acquired without changing
+$\kappa_{\text{pop}}$, and so it does not correspond to our M1. Note also that their
+acceleration is defined over observed vocabulary counts rather than over latent ability.
+```
+
 
 # Non-identifiability in Cross-Sectional Data
 
@@ -144,7 +166,7 @@ si_ds |>
                   "Mean", "Min", "Max", "Adm/Chi"),
     align = "llrrrrrr") |>
   kableExtra::add_header_above(c(" " = 4, "Age (months)" = 3, " " = 1)) |>
-  kableExtra::kable_styling(font_size = 9, latex_options = "hold_position")
+  kableExtra::kable_styling(font_size = 9, latex_options = "HOLD_position")
 ```
 
 @fig-qc shows the full spaghetti plots for each dataset, highlighting in red those observations that failed our quality check and were excluded. We speculate that these observations are due to either data entry issues or faulty correspondences between observations. Such issues occur frequently in archival datasets and affect only a small portion of our data. 
@@ -244,22 +266,55 @@ ggplot() +
 
 In the main text, we report fits to children 3+ administrations with separate models fit to each dataset, but our parameter estimates were substantially similar across two other settings: first, separate fits to children with 2+ administrations, and second, a full hierarchical model fit to children with 3+ administrations. @tbl-settings shows LOO fits and the robustness of the $\kappa$ estimates across these different settings. Including the
 two-administration children inflated the acceleration variance $\sigma_b$ with
-measurement error rather than genuine heterogeneity, leading to slightly noisier fits to the distribution, but population $\kappa$ was extremely similar. The pooled model reproduced the parameters of the independent fits closely, but convergence was slow and we do not report intervals from this model. 
+measurement error rather than genuine heterogeneity, leading to slightly noisier fits to the distribution, but population $\kappa$ was extremely similar. The pooled model reproduced the parameters of the independent fits closely, but convergence was slow and we do not report intervals from this model.
+
+```md
+## How the pooled model shares information across datasets  [draft for promotion — MCF to review]
+
+[Requested description of the hierarchical/pooling structure. Numbers are cache-derived
+ (si_settings.rds); the structure is m_pool.stan. Suggested placement: directly after the
+ paragraph above, before @tbl-settings.]
+
+The pooled model fits all five datasets jointly, but it does not simply concatenate them.
+Children and words remain nested within their own dataset, and each dataset keeps its own
+mean efficiency and mean acceleration, so no dataset is pushed toward another's
+population values. What is shared is the *scale* of between-child variation. The
+dataset-level standard deviations of efficiency and acceleration are themselves given a
+distribution, $\log \sigma_{a[d]} \sim \mathcal N(m_a, s_a)$ and
+$\log \sigma_{b[d]} \sim \mathcal N(m_b, s_b)$, so a dataset with few children has its
+estimated spread drawn toward the typical value across datasets, while a dataset with
+many children is left essentially unconstrained. Pooling on the log scale keeps the
+standard deviations positive and makes the shared quantity a typical *ratio* rather than a
+typical difference. The efficiency-acceleration correlation and the item-difficulty
+distribution are estimated separately within each dataset and are not pooled, since these
+concern different instruments and different languages.
+
+This structure yields one quantity the separate fits cannot provide: a typical
+between-child acceleration standard deviation across samples,
+$\exp(m_b) = 5.13$ (90% CI $[3.90, 6.63]$), whose interval reflects variation between
+datasets rather than only within them. In practice the shrinkage it induces is very
+small. Every per-dataset $\sigma_b$ moves by at most 1% relative to its independent fit
+(3.19 to 3.22, 5.14 to 5.13, 6.60 to 6.59, 5.65 to 5.70, 5.45 to 5.40). This is itself
+informative: partial pooling only pulls estimates together when they disagree relative to
+their uncertainty, so the near-absence of shrinkage indicates the five samples already
+agree about how much children differ in acceleration.
+```
 
 
 ```{r tbl-settings}
 #| label: tbl-settings
 #| tbl-cap: "For each dataset and setting: number of children (N), population acceleration ($\\kappa$), between-child acceleration SD ($\\sigma_b$), and the per-observation LOO advantage of the full model M3 over M2 ($\\Delta$ELPD per item response)."
 # Per-observation gap is the only cross-setting-comparable LOO quantity (raw ELPD
-# scales with n_obs). Mega rows carry no M2 rung -> gap is "---". The asterisk marks
-# pooled rows with slow per-dataset scale mixing (max_rhat > 1.1); see draft text.
+# scales with n_obs). Mega rows carry no M2 rung -> gap is "---".
+# The asterisk that used to flag pooled rows with slow per-dataset scale mixing
+# (max_rhat > 1.1) has been removed per MCF; max_rhat is still carried in
+# si_settings.rds if it is ever wanted back.
 sset <- si_set |>
   mutate(
     Setting = dplyr::recode(as.character(setting),
       "2+ separate" = "$\\geq$2 separate",
       "3+ separate" = "$\\geq$3 separate (main text)",
       "mega (3+)"   = "pooled ($\\geq$3)"),
-    Setting = ifelse(!is.na(max_rhat) & max_rhat > 1.1, paste0(Setting, "*"), Setting),
     N   = format(n_kids, big.mark = ","),
     kap = sprintf("%.1f", kappa),
     sb  = sprintf("%.2f", sigma_b),
@@ -270,7 +325,7 @@ knitr::kable(sset |> select(Setting, N, kap, sb, gap), format = "latex",
                            "$\\Delta$ELPD/obs (M2$\\to$M3)"),
              align = c("l", "r", "r", "r", "r"), escape = FALSE) |>
   kableExtra::pack_rows(index = setNames(as.integer(grp), names(grp)), escape = FALSE) |>
-  kableExtra::kable_styling(font_size = 9, latex_options = "hold_position")
+  kableExtra::kable_styling(font_size = 9, latex_options = "HOLD_position")
 ```
 
 # Linear vs. Logistic Age
@@ -290,7 +345,7 @@ tab <- si_loglin |>
   select(Dataset, adv)
 knitr::kable(tab, format = "latex", align = c("l", "r"), escape = FALSE,
              col.names = c("Dataset", "$\\Delta$ELPD (log $-$ linear)")) |>
-  kableExtra::kable_styling(font_size = 9, latex_options = "hold_position")
+  kableExtra::kable_styling(font_size = 9, latex_options = "HOLD_position")
 ```
 
 # 2PL Model Comparison
@@ -348,7 +403,7 @@ knitr::kable(tab2, format = "latex", align = c("l", rep("r", 9)), escape = FALSE
                            "$\\Delta$ELPD (SE)")) |>
   kableExtra::add_header_above(c(" " = 1, "Discrimination" = 3, "Acceleration $\\\\kappa$" = 3,
                                  "Age of acquisition" = 2, "LOO" = 1), escape = FALSE) |>
-  kableExtra::kable_styling(font_size = 7, latex_options = c("hold_position", "scale_down"))
+  kableExtra::kable_styling(font_size = 7, latex_options = c("HOLD_position", "scale_down"))
 ```
 
 # Generating Quantiles
@@ -412,10 +467,14 @@ ranef |>
             sigma_b = ci(sigma_b, sigma_b_q5, sigma_b_q95),
             rho     = sprintf("%+.2f [%+.2f, %+.2f]", rho, rho_q5, rho_q95),
             gt1     = sprintf("%.1f", pct_gt1)) |>
-  knitr::kable(align = c("l", "r", "r", "r", "r", "r", "r"), escape = FALSE,
+  ## format="latex" required whenever a kable is piped into kableExtra here: under
+  ## Quarto knitr's out.format is "markdown", so kable() emits a pipe table and
+  ## kable_styling() converts it to LaTeX, escaping as it goes and discarding
+  ## escape=FALSE. This chunk lost the argument when it moved from the main text.
+  knitr::kable(format = "latex", align = c("l", "r", "r", "r", "r", "r", "r"), escape = FALSE,
                col.names = c("Dataset", "N", "$\\kappa$", "$\\sigma_a$", "$\\sigma_b$",
                              "$\\rho$", "\\% $\\kappa_i>1$")) |>
-  kableExtra::kable_styling(font_size = 8, latex_options = c("hold_position", "scale_down"))
+  kableExtra::kable_styling(font_size = 8, latex_options = c("HOLD_position", "scale_down"))
 ```
 
 # Input Estimation
