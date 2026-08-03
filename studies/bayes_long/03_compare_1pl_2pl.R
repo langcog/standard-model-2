@@ -76,6 +76,33 @@ one <- function(slug, label) {
            p2pl = mean(plogis(lam * (m2 + k2 * L + lH - dd2)))) |>
     ungroup() |> mutate(slug = slug, lang = label)
 
+  ## ---- word-level acquisition slopes lambda_j * kappa_i ----
+  ## Requested by a reviewer as the quantity the child-LM comparison actually rests on.
+  ## In the 2PL the linear predictor is lambda_j * (theta_i(t) - delta_j) with
+  ## theta_i(t) = xi_i + kappa_i log(t/a0) + log_H, so d eta / d log(t) = lambda_j * kappa_i:
+  ## the per-WORD, per-CHILD slope in logits per e-fold of age. The 1PL is the lambda == 1
+  ## special case, where this collapses to kappa_i. What matters for the LM comparison is
+  ## whether allowing discrimination to vary moves this distribution off its 1PL location,
+  ## and what share of word-child pairs still exceeds the pure-accumulator value of 1.
+  cf <- file.path(SUMM, sprintf("%s_a3_m32pl_child.csv", slug))
+  lk <- NULL
+  if (file.exists(cf)) {
+    kap_i <- read.csv(cf)$kappa_median
+    lam_j <- d2$lambda[is.finite(d2$lambda)]
+    pr <- as.numeric(outer(lam_j, kap_i))          # every word x child pair
+    ## NB name this kap_1pl, NOT k1 -- k1 already holds the 1PL POPULATION kappa above,
+    ## and overwriting it with the per-child vector silently turned the summary block's
+    ## scalar d_log_kappa into a vector, expanding the table from 5 rows to 1,050.
+    kap_1pl <- read.csv(file.path(SUMM, sprintf("%s_a3_m3_child.csv", slug)))$kappa_median
+    lk <- data.frame(
+      slug = slug, lang = label, n_pairs = length(pr),
+      lk_med = median(pr), lk_q10 = quantile(pr, .10, names = FALSE),
+      lk_q90 = quantile(pr, .90, names = FALSE),
+      lk_pct_gt1 = 100 * mean(pr > 1),
+      ## 1PL reference: kappa_i alone, same children
+      k1_med = median(kap_1pl), k1_pct_gt1 = 100 * mean(kap_1pl > 1), row.names = NULL)
+  }
+
   ## ---- (3) LOO ----
   l1 <- file.path(SUMM, sprintf("%s_a3_m3.loo.rds", slug))
   l2 <- file.path(SUMM, sprintf("%s_a3_m32pl.loo.rds", slug))
@@ -110,7 +137,7 @@ one <- function(slug, label) {
       rhat_2pl = max(s2$rhat, na.rm = TRUE),
       loo_winner = winner, loo_elpd_diff = elpd_diff, loo_se_diff = se_diff,
       row.names = NULL),
-    aoa = mutate(aoa, slug = slug, lang = label), traj = traj)
+    aoa = mutate(aoa, slug = slug, lang = label), traj = traj, lk = lk)
 }
 
 cat("1PL vs 2PL comparison (M3 on the _a3 data)\n")
@@ -118,9 +145,11 @@ R <- Filter(Negate(is.null), Map(one, names(DATASETS), DATASETS))
 if (!length(R)) { cat("no dataset has both fits yet\n"); quit(save = "no") }
 S <- bind_rows(lapply(R, `[[`, "summary")) |>
   mutate(lang = factor(lang, levels = unname(DATASETS))) |> arrange(lang)
+LK <- bind_rows(lapply(R, `[[`, "lk"))
 out <- list(summary = S,
             aoa  = bind_rows(lapply(R, `[[`, "aoa")),
-            traj = bind_rows(lapply(R, `[[`, "traj")))
+            traj = bind_rows(lapply(R, `[[`, "traj")),
+            word_slopes = LK)
 dir.create(CACHE, recursive = TRUE, showWarnings = FALSE)
 saveRDS(out, file.path(CACHE, "si_2pl.rds"))
 
@@ -157,4 +186,13 @@ print(S |> transmute(Dataset = lang, winner = loo_winner,
   `dELPD (loser)` = ifelse(is.na(loo_elpd_diff), "pending",
                            sprintf("%.0f (%.0f)", loo_elpd_diff, loo_se_diff)),
   `max rhat 2PL` = sprintf("%.3f", rhat_2pl)) |> as.data.frame(), row.names = FALSE)
+if (nrow(LK)) {
+  cat("\n=== implied word-level slopes lambda_j * kappa_i (2PL) vs kappa_i (1PL) ===\n")
+  print(LK |> transmute(Dataset = lang,
+    `2PL median` = sprintf("%.1f", lk_med),
+    `2PL p10-p90` = sprintf("%.1f-%.1f", lk_q10, lk_q90),
+    `2PL %>1` = sprintf("%.1f", lk_pct_gt1),
+    `1PL median` = sprintf("%.1f", k1_med),
+    `1PL %>1` = sprintf("%.1f", k1_pct_gt1)) |> as.data.frame(), row.names = FALSE)
+}
 cat("\nwrote", file.path(CACHE, "si_2pl.rds"), "\n")

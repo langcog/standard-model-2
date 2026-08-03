@@ -3,6 +3,11 @@
 ## Usage:  Rscript studies/bayes_long/01b_fit_pool.R [suffix]   (default "_a3")
 suppressPackageStartupMessages({ library(cmdstanr); library(posterior); library(loo) })
 SFX <- if (length(commandArgs(TRUE))) commandArgs(TRUE)[1] else "_a3"
+## POOL_VARIANT="c" selects m_pool_c.stan, the CENTRED scale hierarchy (see that file:
+## the non-centred original funnelled, rhat 2.15 / ess ~5). Outputs are tagged
+## pool<SFX>_c so they never overwrite the original run.
+VARIANT <- Sys.getenv("POOL_VARIANT", "")
+STAN_POOL <- if (nzchar(VARIANT)) sprintf("m_pool_%s.stan", VARIANT) else "m_pool.stan"
 
 CHAINS  <- as.integer(Sys.getenv("STAN_CHAINS",      "4"))
 WARMUP  <- as.integer(Sys.getenv("STAN_WARMUP",      "1000"))
@@ -27,9 +32,9 @@ dat <- list(
   s_scale_prior_sd=0.5,                                # how much datasets vary (log scale)
   tau_delta_prior_sd=5)
 
-cat(sprintf("=== m_pool%s ===  N=%d A=%d I=%d J=%d D=%d  grainsize=%d  (%d x %d+%d, %d thr)\n",
-            SFX, sd0$N, sd0$A, sd0$I, sd0$J, sd0$D, grainsize, CHAINS, WARMUP, ITER, THREADS))
-mod <- cmdstan_model(file.path("studies","bayes_long","stan","m_pool.stan"),
+cat(sprintf("=== %s %s ===  N=%d A=%d I=%d J=%d D=%d  grainsize=%d  (%d x %d+%d, %d thr)\n",
+            STAN_POOL, SFX, sd0$N, sd0$A, sd0$I, sd0$J, sd0$D, grainsize, CHAINS, WARMUP, ITER, THREADS))
+mod <- cmdstan_model(file.path("studies","bayes_long","stan", STAN_POOL),
                      cpp_options=list(stan_threads=TRUE))
 SEED <- as.integer(sum(utf8ToInt(paste0("pool",SFX))) %% 2147483647L)
 sargs <- list(data=dat, seed=SEED, chains=CHAINS, parallel_chains=CHAINS, threads_per_chain=THREADS,
@@ -61,7 +66,7 @@ loo_res <- tryCatch({
 }, error=function(e){ cat("LOO failed:", conditionMessage(e), "\n"); NULL })
 
 OUT <- file.path("fits","bayes_long","summaries"); dir.create(OUT, recursive=TRUE, showWarnings=FALSE)
-tag <- sprintf("pool%s", SFX)
+tag <- sprintf("pool%s%s", SFX, if (nzchar(VARIANT)) paste0("_", VARIANT) else "")
 saveRDS(summ, file.path(OUT, paste0(tag,".summary.rds")))
 saveRDS(fit$draws(intersect(SCALARS, fit$metadata()$stan_variables), format="df"), file.path(OUT, paste0(tag,".draws.rds")))
 if (!is.null(loo_res)) saveRDS(loo_res, file.path(OUT, paste0(tag,".loo.rds")))

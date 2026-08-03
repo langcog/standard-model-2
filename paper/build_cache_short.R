@@ -549,6 +549,28 @@ fig6$vary <- bind_rows(k_kid, k_chi, k_reg) |>
     "Children (English)", "Children (Norwegian)",
     "LMs: CHILDES", "LMs: BabyLM", "LMs: ClimbMix")))
 
+## ---- bootstrap CIs on the coefficient of variation (Fig 3C) --------------
+## A reviewer noted that a CV computed from 8-10 seeds -- with BOTH the mean and the
+## variance estimated from fitted kappa values -- can be unstable, and asked for
+## intervals. We resample learners within population with replacement. The child
+## populations have hundreds of learners so their CIs are tight; the LM populations have
+## 8-30 and theirs are correspondingly wide, which is exactly the point to display
+## honestly rather than to hide behind a point estimate.
+set.seed(20260802); NBOOT <- 4000
+fig6$vary_cv <- fig6$vary |>
+  group_by(population) |>
+  group_modify(~ {
+    k <- .x$kappa; n <- length(k)
+    cv <- function(v) 100 * sd(v) / mean(v)
+    bs <- replicate(NBOOT, cv(sample(k, n, replace = TRUE)))
+    bs <- bs[is.finite(bs)]
+    tibble(n_learners = n, cv = cv(k),
+           cv_lo = unname(quantile(bs, 0.025)), cv_hi = unname(quantile(bs, 0.975)))
+  }) |> ungroup()
+cat("Fig 3C: bootstrap CIs on the CV of kappa (2.5-97.5%)\n")
+for (i in seq_len(nrow(fig6$vary_cv))) with(fig6$vary_cv[i, ],
+  cat(sprintf("  %-22s n=%4d  CV %5.1f%% [%.1f, %.1f]\n", population, n_learners, cv, cv_lo, cv_hi)))
+
 saveRDS(fig6, file.path(CACHE, "fig6_llm_slopes.rds"))
 cat(sprintf("Augmented fig6_llm_slopes.rds: scaling (beta=%.3f, E=%.2f) + fig3 (n_child=%d, exemplars kappa=%s)\n",
             scaling_par$beta, scaling_par$E, dplyr::n_distinct(child_bg$ckey),
