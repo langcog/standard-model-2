@@ -32,8 +32,18 @@
 ## test set, so every child in the model has an identifiable slope. Child indices are
 ## therefore renumbered, and the test set carries the NEW indices.
 ##
+## TRAIN_K (env, optional) -- use only each child's FIRST k administrations for training,
+## still predicting their last. This is the "does acceleration help more when we can
+## actually estimate it?" ladder. Simply raising MIN_ELIG would confound the answer,
+## because the sample changes at every step (Norwegian: 602 children at >=4, 495 at >=5,
+## 371 at >=6, 259 at >=7), so a trend could reflect who is in the sample rather than how
+## much information there is per child. Holding the sample fixed at MIN_ELIG and varying
+## TRAIN_K isolates the information. The residual confound is that the extrapolation gap
+## shrinks as k grows, but that applies to M2 and M3 alike and we track their difference.
+##
 ## Usage:  Rscript studies/bayes_long/00c_prepare_forward_cv.R [suffix] [min_elig] [slug...]
 ##   e.g.  Rscript studies/bayes_long/00c_prepare_forward_cv.R _a3 4 norwegian
+##   e.g.  TRAIN_K=3 Rscript ... _a3 6 norwegian   -> bundle_norwegian_fcv6k3.rds
 ## Output: bundle_<slug>_fcv.rds (min_elig 3) or bundle_<slug>_fcv<N>.rds (min_elig N>3)
 
 suppressPackageStartupMessages({library(dplyr)})
@@ -43,7 +53,9 @@ MIN_ELIG <- if (length(.args) >= 2) as.integer(.args[2]) else 3L
 BL    <- file.path("fits", "bayes_long")
 SLUGS <- if (length(.args) >= 3) .args[-(1:2)] else
          c("thal", "smith", "marchman", "norwegian", "japanese")
-TAG   <- if (MIN_ELIG > 3L) sprintf("_fcv%d", MIN_ELIG) else "_fcv"
+TRAIN_K <- as.integer(Sys.getenv("TRAIN_K", "0"))    # 0 = use every non-test administration
+TAG   <- paste0(if (MIN_ELIG > 3L) sprintf("_fcv%d", MIN_ELIG) else "_fcv",
+                if (TRAIN_K > 0L) sprintf("k%d", TRAIN_K) else "")
 
 one <- function(slug) {
   f <- file.path(BL, sprintf("bundle_%s%s.rds", slug, SFX))
@@ -63,8 +75,14 @@ one <- function(slug) {
   test_a <- adm |> filter(child %in% eligible) |>
     group_by(child) |> slice_max(age, n = 1, with_ties = FALSE) |> ungroup() |> pull(a)
   is_test <- seq_len(sd0$A) %in% test_a
-  ## an admin is TRAIN if its child is kept and it is not the held-out one
+  ## an admin is TRAIN if its child is kept and it is not the held-out one;
+  ## with TRAIN_K set, only that child's EARLIEST k such administrations are used
   is_train <- adm_keep & !is_test
+  if (TRAIN_K > 0L) {
+    tr_sel <- adm |> filter(child %in% eligible, !(a %in% test_a)) |>
+      group_by(child) |> slice_min(age, n = TRAIN_K, with_ties = FALSE) |> ungroup() |> pull(a)
+    is_train <- seq_len(sd0$A) %in% tr_sel
+  }
   sd0$admin_to_child <- cmap[sd0$admin_to_child]          # renumbered child index per admin
   sd0$I <- length(eligible)
 
@@ -92,11 +110,11 @@ one <- function(slug) {
   tr_per_child <- tabulate(train$admin_to_child, nbins = sd0$I)
   stopifnot(max(train$aa) == train$A, max(test$aa) == test$A,
             all(train$admin_to_child >= 1), all(train$admin_to_child <= sd0$I),
-            all(tr_per_child >= MIN_ELIG - 1L),
+            all(tr_per_child >= (if (TRAIN_K > 0L) TRAIN_K else MIN_ELIG - 1L)),
             length(te_a) == sd0$I,                       # exactly one held-out admin per child
             !any(is_train & is_test))
 
-  meta <- list(slug = slug, sfx = SFX, min_elig = MIN_ELIG,
+  meta <- list(slug = slug, sfx = SFX, min_elig = MIN_ELIG, train_k = TRAIN_K,
                n_kids = sd0$I, n_kids_tested = length(eligible),
                A_train = train$A, A_test = test$A, N_train = train$N, N_test = test$N,
                train_adm_per_child = mean(tr_per_child),
@@ -111,6 +129,6 @@ one <- function(slug) {
 }
 
 cat(sprintf("Forward-CV bundles from '%s' bundles: hold out each child's LAST administration,\n", SFX))
-cat(sprintf("  eligibility >= %d administrations (training retains >= %d) -> tag '%s'\n",
-            MIN_ELIG, MIN_ELIG - 1L, TAG))
+cat(sprintf("  eligibility >= %d administrations; training uses %s -> tag '%s'\n", MIN_ELIG,
+            if (TRAIN_K > 0L) sprintf("the first %d", TRAIN_K) else sprintf(">= %d", MIN_ELIG - 1L), TAG))
 invisible(lapply(SLUGS, one))
