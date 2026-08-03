@@ -374,30 +374,60 @@ pB <- ggplot() +
 ## 8 seeds each -- the composition control). CV annotations quantify dispersion.
 vpal <- c("Children (English)"="#c41e37","Children (Norwegian)"="#fb9a99",
           "LMs: CHILDES"="#2c7fb8","LMs: BabyLM"="#238b45","LMs: ClimbMix"="#e6550d")
-lab_cv <- vy |> group_by(population) |>
-  summarise(cv = 100*sd(kappa)/mean(kappa), .groups="drop") |>
-  mutate(lab = sprintf("CV %.0f%%", cv))
+## Use the cached bootstrap CIs (build_cache_short.R) rather than recomputing the bare
+## point estimate: a CV from 8-10 seeds, with both mean and variance estimated from fitted
+## kappa, is unstable, so the interval is the honest summary. Resampled over learners
+## within population. Kept terse -- this panel is now half-width.
+## Labels are right-aligned in a gutter beyond every row's data: the children's clouds
+## reach ~55 while the LM rows stop near 3, so the axis is extended to leave clear space
+## on the right. A log axis absorbs the extra decade cheaply, and one shared alignment
+## reads better than five ragged ones.
+lab_cv <- llm_slopes$vary_cv |>
+  mutate(lab = sprintf("%.0f%% [%.0f-%.0f]", cv, cv_lo, cv_hi))
 # CV is computed on ALL learners; the log axis display drops the handful of
 # children whose posterior-median kappa_i is non-positive (8 of 1745).
 pC <- ggplot(vy |> dplyr::filter(kappa > 0),
              aes(kappa, forcats::fct_rev(population), colour=population)) +
   geom_jitter(position=position_jitter(height=0.22, seed=1), alpha=0.25, size=0.9) +
   stat_summary(fun=median, geom="crossbar", width=0.5, linewidth=0.5, colour="grey20") +
-  geom_text(data=lab_cv, aes(x=60, y=forcats::fct_rev(population), label=lab),
-            inherit.aes=FALSE, size=3.8, hjust=1, colour="grey30") +
+  geom_text(data=lab_cv, aes(x=380, y=forcats::fct_rev(population), label=lab),
+            inherit.aes=FALSE, size=3.0, hjust=1, colour="grey30") +
   geom_vline(xintercept=1, linetype="dashed", colour="grey55", linewidth=0.4) +
   scale_x_log10(breaks=c(0.5,1,2,5,10,20,50)) +
   scale_colour_manual(values=vpal, guide="none") +
-  coord_cartesian(xlim=c(0.4,65)) +
-  labs(subtitle="Variability in acceleration: one point per learner",
+  coord_cartesian(xlim=c(0.4,400)) +
+  labs(subtitle="Variability in acceleration",
        x="developmental kappa (log scale)", y=NULL) +
   theme_minimal(base_size=11) +
   theme(plot.subtitle=element_text(face="bold"), panel.grid.minor=element_blank())
 
+## Fractional return takes the full-width bottom row, per MCF: it is the paper's most
+## original child-LM comparison, so it gets the space. The kappa density and the
+## learner-variability dotplot share the top row.
+##
+## [MCF: panel LETTERS follow POSITION, keeping the usual A-B-C reading order, so the
+##  content behind B and C has swapped. The fig-cap above still describes the OLD order
+##  and needs its (B) and (C) clauses exchanged -- a corrected version is drafted in the
+##  fenced block just below this chunk. Also worth grepping the main text for any
+##  reference to Fig 3 panels by letter.]
 cowplot::plot_grid(
-  cowplot::plot_grid(pA, pB, nrow = 1, labels = c("A", "B"), label_size = 12),
-  cowplot::plot_grid(pC, nrow = 1, labels = "C", label_size = 12),
+  cowplot::plot_grid(pA, pC, nrow = 1, labels = c("A", "B"), label_size = 12),
+  cowplot::plot_grid(pB, nrow = 1, labels = "C", label_size = 12),
   nrow = 2, rel_heights = c(1, 0.82))
+```
+
+```md
+[draft for promotion — MCF to review. Replacement fig-cap for @fig-llm-acceleration after
+ the panel swap: B and C have exchanged content, everything else is your existing wording.]
+
+(A) Density of the acceleration exponent $\kappa$ for both children (per child, English
+and Norwegian) and LMs (by word). (B) Variation in acceleration ($\kappa$) across
+individual children and independently trained LMs; the bracketed values are coefficients
+of variation with bootstrap 95% intervals. (C) Fractional return on training (the ratio of
+decrease in loss to excess loss) for both children and LMs. Blue lines show model
+trajectories; red lines show fitted trajectories from children. Three children are
+highlighted in dark red with horizontal uncertainty bands indicating +/- 1 SD in
+calibration of their input.
 ```
 
 Do LMs show the same signatures of acceleration and variability as children? To evaluate this question, we begin by building a bridge between the well-known "scaling laws" for large language models [@hoffmann2022;@kaplan2020] and the model we describe here for vocabulary growth. The form of one popular scaling law is that the loss $L$ of a neural network language model on a dataset size $D$ is $L = E + \frac{B}{D^\beta}$ (holding the size of the the network constant), where $B$ and $\beta$ are the free parameters of a power law and $E$ is the entropy of the text being modeled. This power law scaling behavior can emerge from a set of independently learned "quanta" that are themselves power-law distributed [@michaud2024]; the words of natural language follow such a power law and are potential quanta of this type [@zipf1949]. 
