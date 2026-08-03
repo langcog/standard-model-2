@@ -13,7 +13,8 @@ si_gamlss <- readRDS(here("paper", "cache", "si_gamlss.rds"))        # parametri
 si_set    <- readRDS(here("paper", "cache", "si_settings.rds"))      # robustness: 2+/3+/mega x 5 datasets
 si_pooled <- attr(si_set, "pooled")                                 # converged mega hyperparameters (or NULL)
 llm_slopes <- readRDS(here("paper", "cache", "fig6_llm_slopes.rds")) # kappa slopes incl. C&B per-arch (SI: other architectures)
-si_2pl    <- readRDS(here("paper", "cache", "si_2pl.rds"))           # 1PL vs 2PL: discrimination, kappa, AoA, LOO
+si_2pl    <- readRDS(here("paper", "cache", "si_2pl.rds"))
+si_f2m0   <- readRDS(here("paper", "cache", "si_fig2_m0.rds"))     # Fig 2 under fitted M0           # 1PL vs 2PL: discrimination, kappa, AoA, LOO
 knitr::opts_chunk$set(
   echo = FALSE, message = FALSE, warning = FALSE,
   fig.align = "center", out.width = "100%", dpi = 300
@@ -160,7 +161,9 @@ si_ds |>
             mean_age = sprintf("%.1f", mean_age),
             min_age = as.character(min_age), max_age = as.character(max_age),
             med_admins = as.character(med_admins)) |>
+  ## format/booktabs as for the other tables: APA rules, no vertical or per-row lines.
   knitr::kable(
+    format = "latex", booktabs = TRUE,
     col.names = c("Citation", "Language", "N (3+/2+)", "Admins",
                   "Mean", "Min", "Max", "Adm/Chi"),
     align = "llrrrrrr") |>
@@ -224,7 +227,7 @@ tab <- si_loo |>
   tidyr::pivot_wider(names_from = lang, values_from = txt) |>
   mutate(Model = mod_desc[as.character(model)])
 n3 <- sum(tab$threshold == "3+")
-knitr::kable(tab |> select(Model, all_of(lang_order)), format = "latex",
+knitr::kable(tab |> select(Model, all_of(lang_order)), format = "latex", booktabs = TRUE,
              align = c("l", rep("r", length(lang_order))), escape = FALSE,
              col.names = c("Model", unname(short[lang_order]))) |>
   kableExtra::add_header_above(
@@ -319,7 +322,7 @@ sset <- si_set |>
     sb  = sprintf("%.2f", sigma_b),
     gap = ifelse(is.na(gap_per_obs), "---", sprintf("%.4f", gap_per_obs)))
 grp <- table(droplevels(si_set$dataset))                 # rows per dataset, factor order
-knitr::kable(sset |> select(Setting, N, kap, sb, gap), format = "latex",
+knitr::kable(sset |> select(Setting, N, kap, sb, gap), format = "latex", booktabs = TRUE,
              col.names = c("Setting", "N", "$\\kappa$", "$\\sigma_b$",
                            "$\\Delta$ELPD/obs (M2$\\to$M3)"),
              align = c("l", "r", "r", "r", "r"), escape = FALSE) |>
@@ -342,7 +345,7 @@ tab <- si_loglin |>
          adv = sprintf("%s (%s)", format(round(-elpd_diff), big.mark = ","),
                        format(round(se_diff)))) |>
   select(Dataset, adv)
-knitr::kable(tab, format = "latex", align = c("l", "r"), escape = FALSE,
+knitr::kable(tab, format = "latex", booktabs = TRUE, align = c("l", "r"), escape = FALSE,
              col.names = c("Dataset", "$\\Delta$ELPD (log $-$ linear)")) |>
   kableExtra::kable_styling(font_size = 9, latex_options = "HOLD_position")
 ```
@@ -372,7 +375,12 @@ Critically, $\delta$ (difficulty) and $lambda$ (discrimination) have a very low 
 ##    quantity Fig 2 is built from.
 ##  - LOO sign: elpd_diff is the loser's deficit, and the 2PL wins everywhere so far,
 ##    so the printed value is the 1PL's deficit (negative).
-s2 <- si_2pl$summary
+## Word-level acquisition slopes lambda_j * kappa_i, added at reviewer request: in the
+## 2PL, d eta / d log(t) = lambda_j * kappa_i, so this is the per-word, per-child slope
+## that the child-LM comparison actually rests on. The 1PL is the lambda == 1 case where
+## it collapses to kappa_i. Reported as the median over every word x child pair and the
+## share of pairs still above the pure-accumulator value of 1.
+s2 <- si_2pl$summary |> dplyr::left_join(si_2pl$word_slopes, by = c("slug", "lang"))
 tab2 <- s2 |>
   transmute(
     Dataset  = as.character(lang),
@@ -383,6 +391,8 @@ tab2 <- s2 |>
     k1       = sprintf("%.1f", kappa_1pl),
     k2       = sprintf("%.1f", kappa_2pl),
     dlk      = sprintf("%+.3f", d_log_kappa),
+    lk_med   = ifelse(is.na(lk_med), "---", sprintf("%.1f", lk_med)),
+    lk_gt1   = ifelse(is.na(lk_pct_gt1), "---", sprintf("%.1f", lk_pct_gt1)),
     aoa_r    = sprintf("%.3f", aoa_cor),
     aoa_d    = sprintf("%.2f", aoa_mad),
     loo      = ifelse(is.na(loo_elpd_diff), "---",
@@ -394,13 +404,15 @@ tab2 <- s2 |>
 ## escape=FALSE. Without it, math in col.names/cells renders as the literal source
 ## ("\$\textbackslash{}kappa\$"). Setting the format explicitly makes escape=FALSE stick.
 
-knitr::kable(tab2, format = "latex", align = c("l", rep("r", 9)), escape = FALSE,
+knitr::kable(tab2, format = "latex", booktabs = TRUE, align = c("l", rep("r", 11)), escape = FALSE,
              col.names = c("Dataset",
                            "SD $\\log\\lambda$", "$\\lambda$ p10--p90", "$r(\\lambda,\\delta)$",
                            "1PL", "2PL", "$\\Delta\\log\\kappa$",
+                           "med.", "\\% $>1$",
                            "$r(t_{50})$", "med.\\ $|\\Delta t_{50}|$",
                            "$\\Delta$ELPD (SE)")) |>
   kableExtra::add_header_above(c(" " = 1, "Discrimination" = 3, "Acceleration $\\\\kappa$" = 3,
+                                 "Word slopes $\\\\lambda_j\\\\kappa_i$" = 2,
                                  "Age of acquisition" = 2, "LOO" = 1), escape = FALSE) |>
   kableExtra::kable_styling(font_size = 7, latex_options = c("HOLD_position", "scale_down"))
 ```
@@ -464,7 +476,7 @@ ranef |>
   ## Quarto knitr's out.format is "markdown", so kable() emits a pipe table and
   ## kable_styling() converts it to LaTeX, escaping as it goes and discarding
   ## escape=FALSE. This chunk lost the argument when it moved from the main text.
-  knitr::kable(format = "latex", align = c("l", "r", "r", "r", "r", "r", "r"), escape = FALSE,
+  knitr::kable(format = "latex", booktabs = TRUE, align = c("l", "r", "r", "r", "r", "r", "r"), escape = FALSE,
                col.names = c("Dataset", "N", "$\\kappa$", "$\\sigma_a$", "$\\sigma_b$",
                              "$\\rho$", "\\% $\\kappa_i>1$")) |>
   kableExtra::kable_styling(font_size = 8, latex_options = c("HOLD_position", "scale_down"))
@@ -482,6 +494,82 @@ In @fig-llm-acceleration, panel C, we give uncertainty bands on representative c
 between-child log input rate. A child one standard deviation above (below) the
 median rate reaches the same age having heard $\times 1.71$ ($\div 1.71$) as
 many tokens. This results in a horizontal shift of the child's curve along the log-token axis.
+
+# Age of Acquisition in the Accelerator Model
+
+```md
+## What Figure 2 does and does not show  [draft for promotion — MCF to review]
+
+Figure 2 in the main text converts each word's fitted difficulty into an estimated number
+of cumulative exposures at the age it is acquired,
+$N_j = R \, t_{50,j} \, p_j$, where $t_{50,j} = a_0\exp((\delta_j - \log H - \mu_\xi)/\kappa)$
+is the age at which half of children produce the word and $p_j$ is its corpus frequency.
+It is reasonable to ask whether the decline in $N_j$ with age of acquisition reflects
+anything about the learner, since later-acquired words are also rarer, and rarity alone
+moves $N_j$ through $p_j$.
+
+The comparison that settles this is the same figure built from the fitted pure accumulator
+(M0), which fixes $\kappa = 1$ but leaves word difficulties free. Both models are given the
+identical frequency estimates, so any difference between them is a property of the item
+model rather than of the corpus. Because the two models imply very different spans of
+acquisition ages, we compare the scale-free elasticity, the proportional change in
+exposures per proportional change in age of acquisition, rather than a slope per month.
+
+Two things follow (@fig-aoa-m0). First, the pure accumulator does not reproduce the
+decline: within every word class its elasticity is between five and seven times shallower
+than the accelerating model's, and for descriptive words it is positive, meaning that
+model expects *more* exposures for later-acquired words. Second, the pure accumulator does
+not reproduce the observed range of acquisition ages at all. Fixing $\kappa=1$ forces the
+fitted difficulties to spread acquisition across 5 to 254 months, against 14 to 35 months
+for the accelerating model and 8 to 36 months of actual observation.
+
+We note two limits on the figure. The relationship holds *within* word class; pooling all
+words the relationship is flat, because the classes differ in both frequency and typical
+age of acquisition in ways that cancel. And the exposure counts inherit every assumption
+of the input estimate above, so they should be read as an order-of-magnitude translation
+of the fitted difficulties rather than as measured counts.
+```
+
+```{r fig-aoa-m0, fig.width=7.5, fig.height=4.2}
+#| label: fig-aoa-m0
+#| fig-cap: "[draft caption — MCF to review] Estimated cumulative exposures at age of acquisition under the accelerating accumulator (M3, left) and the fitted pure accumulator (M0, right), using identical corpus frequencies. Points are words, coloured by class, with per-class linear fits. The pure accumulator produces a much shallower relationship, and spreads acquisition over a far wider and less plausible span of ages; note the differing x-axes."
+## Built from paper/cache/si_fig2_m0.rds (studies/bayes_long/04_fig2_m0_counterfactual.R).
+## Free x scales are deliberate: the whole point is that M0 implies acquisition ages out to
+## ~254 months, so forcing a shared axis would either hide that or crush the M3 panel.
+d <- bind_rows(si_f2m0$m3, si_f2m0$m0) |>
+  mutate(model = factor(model, levels = c("M3 (accelerating)", "M0 (pure accumulator)")))
+ggplot(d, aes(t_50, N_word, colour = lexical_class)) +
+  geom_point(alpha = 0.35, size = 0.8) +
+  geom_smooth(method = "lm", se = FALSE, linewidth = 0.8, formula = y ~ x) +
+  facet_wrap(~ model, scales = "free_x") +
+  scale_y_log10(labels = scales::label_number(big.mark = ",")) +
+  scale_colour_brewer(palette = "Dark2", name = NULL,
+                      labels = c("Nouns", "Action words", "Descriptive words", "Function words")) +
+  labs(x = "Age (months) when 50% of children produce word",
+       y = "Cumulative exposures at acquisition") +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom", panel.grid.minor = element_blank(),
+        strip.text = element_text(face = "bold"))
+```
+
+```{r tbl-aoa-m0}
+#| label: tbl-aoa-m0
+#| tbl-cap: "[draft caption — MCF to review] Elasticity of estimated cumulative exposures with respect to age of acquisition, by word class, under each item model. Negative values mean fewer exposures are needed for later-acquired words. The pure accumulator is far shallower throughout and positive for descriptive words."
+si_f2m0$slopes |>
+  select(model, lexical_class, n, elasticity, r2_ela) |>
+  tidyr::pivot_wider(names_from = model, values_from = c(elasticity, r2_ela)) |>
+  transmute(Class = as.character(lexical_class), n,
+            m3 = sprintf("%+.2f", `elasticity_M3 (accelerating)`),
+            m3r = sprintf("%.2f", `r2_ela_M3 (accelerating)`),
+            m0 = sprintf("%+.2f", `elasticity_M0 (pure accumulator)`),
+            m0r = sprintf("%.2f", `r2_ela_M0 (pure accumulator)`)) |>
+  knitr::kable(format = "latex", booktabs = TRUE, escape = FALSE,
+               align = c("l", "r", "r", "r", "r", "r"),
+               col.names = c("Word class", "$n$", "elasticity", "$R^2$", "elasticity", "$R^2$")) |>
+  kableExtra::add_header_above(c(" " = 2, "M3 (accelerating)" = 2,
+                                 "M0 (pure accumulator)" = 2)) |>
+  kableExtra::kable_styling(font_size = 9, latex_options = "HOLD_position")
+```
 
 # Computing Acceleration in LMs
 
