@@ -14,7 +14,9 @@ si_set    <- readRDS(here("paper", "cache", "si_settings.rds"))      # robustnes
 si_pooled <- attr(si_set, "pooled")                                 # converged mega hyperparameters (or NULL)
 llm_slopes <- readRDS(here("paper", "cache", "fig6_llm_slopes.rds")) # kappa slopes incl. C&B per-arch (SI: other architectures)
 si_2pl    <- readRDS(here("paper", "cache", "si_2pl.rds"))
-si_f2m0   <- readRDS(here("paper", "cache", "si_fig2_m0.rds"))     # Fig 2 under fitted M0           # 1PL vs 2PL: discrimination, kappa, AoA, LOO
+si_f2m0   <- readRDS(here("paper", "cache", "si_fig2_m0.rds"))     # Fig 2 under fitted M0
+si_cvd    <- readRDS(here("paper", "cache", "si_cv_depth.rds"))    # forward-CV depth ladder
+si_qcs    <- readRDS(here("paper", "cache", "si_qc_sensitivity.rds"))  # exclusion sensitivity
 knitr::opts_chunk$set(
   echo = FALSE, message = FALSE, warning = FALSE,
   fig.align = "center", out.width = "100%", dpi = 300
@@ -238,6 +240,81 @@ knitr::kable(tab |> select(Model, all_of(lang_order)), format = "latex", booktab
   kableExtra::kable_styling(latex_options = "scale_down", font_size = 8)
 ```
 
+# Prospective Cross-Validation
+
+```md
+## Predicting a child's later vocabulary  [draft for promotion — MCF to review]
+
+The model comparison above holds out one item response at a time. A child contributes
+several hundred responses per administration, so a held-out response remains highly
+predictable from that same child's other words, from that word's responses in other
+children, and often from the same sitting. That comparison therefore measures how well the
+model interpolates within observed data, and it cannot by construction penalise a
+per-child slope that is more flexible than the data warrant: a $\kappa_i$ that merely
+threads a child's own administrations still scores well.
+
+We therefore ran a prospective test. Holding out each child's *final* administration, we
+fit the model to their earlier ones and scored the held-out sitting, which lies at an age
+the model never saw for that child. Because the amount of information available to
+estimate a per-child slope is itself in question, we varied it: among Norwegian children
+with at least six administrations ($n = 371$), we used only the $k$ administrations
+immediately preceding the held-out one, for $k$ from two to five. The sample and the target
+are identical throughout, and taking the *most recent* $k$ holds the gap between the last
+training point and the target fixed at three months, so that only the precision of
+$\kappa_i$ varies.
+
+The result is a clean gradient (@tbl-cv-depth). With two training administrations the
+accelerating model predicts the held-out sitting substantially *worse* than the model with
+a shared slope, and the penalty falls monotonically as more history is supplied, reaching
+zero at five. The mechanism is visible in the fitted variance: the between-child
+acceleration standard deviation is inflated more than twofold at $k=2$ relative to its
+full-data value, and converges to that value as $k$ grows. With two points a per-child
+slope has no residual degrees of freedom, so it absorbs measurement noise, and projecting
+those noisy slopes forward is actively costly. The full model does not collapse onto the
+simpler one as information accumulates; the between-child variation remains, but it stops
+being overestimated.
+
+Two conclusions follow, and they are different. Children do differ in acceleration: the
+variance component is well identified, and the model comparison prefers the full model
+throughout. But a child's *estimated* acceleration does not forecast their own later
+vocabulary better than the population value does, even when it is estimated as well as
+these data allow. A variance component can be identifiable in aggregate while individual
+estimates remain too noisy to be predictively useful, and that is what we find. It also
+explains why the two model comparisons disagree: interpolation never extrapolates, so the
+extra flexibility only ever helps there.
+
+For completeness, the same ladder built from each child's *earliest* $k$ administrations
+shows the same gradient but remains strongly negative throughout, because that design
+also shortens the forecast horizon from twelve months to seven as $k$ grows. Comparing the
+two makes the point that extrapolation distance, rather than model flexibility alone,
+drives most of the cost.
+```
+
+```{r tbl-cv-depth}
+#| label: tbl-cv-depth
+#| tbl-cap: "[draft caption — MCF to review] Prospective cross-validation for Norwegian children with at least six administrations (n = 371). Each row fits the model to k administrations and scores the child's held-out final sitting. dELPD/child is the per-child difference in expected log predictive density, full model minus shared-slope model; negative favours the shared slope. sigma_b is the between-child acceleration SD in the training fit, against a full-data value of 5.65. In the 'recent' ladder the forecast horizon is fixed at three months so only estimation precision varies; in the 'earliest' ladder the horizon also shrinks from twelve months to seven."
+## Both ladders, stacked. The 'recent' (last-k) one is the interpretable test; 'earliest'
+## (first-k) is shown because the contrast isolates how much of the cost is extrapolation
+## distance rather than flexibility.
+lab <- c(last = "recent k (horizon fixed)", first = "earliest k (horizon shrinks)")
+cvt <- si_cvd |>
+  mutate(mode = factor(lab[as.character(mode)], levels = unname(lab))) |>
+  arrange(mode, k) |>
+  transmute(mode, k = as.character(k),
+            horizon = sprintf("%.0f", horizon),
+            d = sprintf("%+.2f", diff_per_child), se = sprintf("%.2f", diff_se),
+            z = sprintf("%+.1f", diff_z), pct = sprintf("%.0f", pct_better),
+            sb = sprintf("%.2f", sigma_b))
+n_last <- sum(cvt$mode == lab[["last"]])
+knitr::kable(cvt |> select(-mode), format = "latex", booktabs = TRUE, escape = FALSE,
+             align = c("r", "r", "r", "r", "r", "r", "r"),
+             col.names = c("$k$", "horizon (mo)", "$\\Delta$ELPD/child", "SE", "$z$",
+                           "\\% children better", "$\\sigma_b$")) |>
+  kableExtra::pack_rows(lab[["last"]], 1, n_last) |>
+  kableExtra::pack_rows(lab[["first"]], n_last + 1, nrow(cvt)) |>
+  kableExtra::kable_styling(font_size = 9, latex_options = "HOLD_position")
+```
+
 # Comparison to a Non-Parametric Quantile Model
 
 To test whether the accelerating accumulator appropriately fits the distribution of growth curves across children, we compared against a strong baseline: the flexible non-parametric GAMLSS family that is used to produce normative curves for the CDI [@marchman2021]. Specifically, for each dataset we fit a GAMLSS beta-regression of the proportion of words produced by the child's age. We used a a penalized spline function on the mean and on the scales.
@@ -327,6 +404,58 @@ knitr::kable(sset |> select(Setting, N, kap, sb, gap), format = "latex", booktab
                            "$\\Delta$ELPD/obs (M2$\\to$M3)"),
              align = c("l", "r", "r", "r", "r"), escape = FALSE) |>
   kableExtra::pack_rows(index = setNames(as.integer(grp), names(grp)), escape = FALSE) |>
+  kableExtra::kable_styling(font_size = 9, latex_options = "HOLD_position")
+```
+
+# Sensitivity to Data-Quality Exclusions
+
+```md
+## How much the quality filter matters  [draft for promotion — MCF to review]
+
+The filter described in the Methods removes individual administrations that fall far below
+a child's running peak or rise implausibly fast from a near-zero base. Because such a
+filter could in principle remove exactly the noisy, non-monotonic trajectories that a
+monotone accelerating model fits poorly, and so inflate the estimated acceleration, we
+refit the model at four settings: with the filter disabled entirely, at a loose threshold,
+at the reported threshold, and at a tight one (@tbl-qc-sensitivity).
+
+It is worth being explicit about where this test has any purchase. The filter never fires
+at all in the Japanese data, and at the tightest setting removes one administration from
+Thal and two from Smith. For those three samples an unchanged estimate is not evidence of
+robustness so much as the absence of anything to be robust to. The informative cases are
+Marchman, where the filter removes the most, and Norwegian.
+
+In Marchman, disabling the filter moves the population acceleration to 9.4 from the
+reported 10.7, and raises the between-child acceleration standard deviation to 8.3 from
+6.6. The direction of the first is worth noting: filtering does raise the estimate in this
+sample. Three things bound how much that matters. The movement is not a dose-response,
+since the loosest setting gives the highest estimate rather than the lowest; the unfiltered
+value still falls inside the range spanned by the five samples; and the change in the
+variance is what the filter is designed to produce, since the administrations it removes
+are precisely those that would otherwise be absorbed into an extreme per-child slope. In
+Norwegian, the sample with the next most removals, acceleration varies by 0.2 across all
+four settings.
+
+Two cells are excluded from interpretation because they did not mix acceptably: Thal at
+the tight setting and Norwegian at the loose setting.
+```
+
+```{r tbl-qc-sensitivity}
+#| label: tbl-qc-sensitivity
+#| tbl-cap: "[draft caption — MCF to review] Population acceleration and between-child acceleration SD by data-quality filter setting. Crater and jump give the thresholds defining an implausible decline and an implausible rise; 'none' disables the filter. 'Removed' is the number of administrations the filter discards, which shows where the comparison has any purchase at all. Cells marked with a dagger did not mix acceptably and are not interpreted."
+## Administrations removed is deliberately alongside the estimates: without it a reader
+## cannot tell that three of the five rows are a null operation.
+qct <- si_qcs |>
+  mutate(flag = ifelse(max_rhat > 1.2, "$^\\dagger$", ""),
+         kap = paste0(sprintf("%.2f", kappa), flag),
+         sb  = paste0(sprintf("%.2f", sigma_b), flag),
+         rem = as.character(admins_removed)) |>
+  arrange(lang, setting)
+grp <- table(droplevels(qct$lang))
+knitr::kable(qct |> select(setting, rem, kap, sb), format = "latex", booktabs = TRUE,
+             escape = FALSE, align = c("l", "r", "r", "r"),
+             col.names = c("Filter", "Removed", "$\\kappa$", "$\\sigma_b$")) |>
+  kableExtra::pack_rows(index = setNames(as.integer(grp), names(grp))) |>
   kableExtra::kable_styling(font_size = 9, latex_options = "HOLD_position")
 ```
 
