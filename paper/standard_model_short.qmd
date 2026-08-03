@@ -319,7 +319,7 @@ To quantify this phenomenon, we combined our fitted model with corpus frequencie
 
 ```{r fig-llm-acceleration, fig.width=7.5, fig.height=7.8}
 #| label: fig-llm-acceleration
-#| fig-cap: "(A) Density of the acceleration exponent $\\kappa$ for both children (per child, English and Norwegian) and LMs (by word). (B) Fractional return on training (the ratio of decrease in loss to excess loss) for both children and LMs. Blue lines show model trajectories; red lines show fitted trajectories from children. Three children are highlighted in dark red with horizontal uncertainty bands indicating +/- 1 SD in calibration of their input. (C) Variation in acceleration (kappa) across children and LMs."
+#| fig-cap: "(A) Density of the acceleration exponent $\\kappa$ for both children (per child, English and Norwegian) and LMs (by word). (B) Variation in acceleration (kappa) across children and LMs. (C) Fractional return on training (the ratio of decrease in loss to excess loss) for both children and LMs. Blue lines show model trajectories; red lines show fitted trajectories from children. Three children are highlighted in dark red with horizontal uncertainty bands indicating +/- 1 SD in calibration of their input."
 ## LAYOUT/FONT SIZING. out.width="100%" scales every figure to the 6.5in text width, so
 ## the on-page font size is base_size * 6.5/fig.width. At the old fig.width=14 that made
 ## base_size 11 render at 5.1pt. Dropping to 7.5 (scale 0.87) puts base_size 11 at ~9.5pt
@@ -437,33 +437,18 @@ cowplot::plot_grid(
   nrow = 2, rel_heights = c(1, 1.15))
 ```
 
-```md
-[draft for promotion — MCF to review. Replacement fig-cap for @fig-llm-acceleration after
- the panel swap: B and C have exchanged content, everything else is your existing wording.]
-
-(A) Density of the acceleration exponent $\kappa$ for both children (per child, English
-and Norwegian) and LMs (by word). (B) Variation in acceleration ($\kappa$) across
-individual children and independently trained LMs; the bracketed values are coefficients
-of variation with bootstrap 95% intervals. (C) Fractional return on training (the ratio of
-decrease in loss to excess loss) for both children and LMs. Blue lines show model
-trajectories; red lines show fitted trajectories from children. Three children are
-highlighted in dark red with horizontal uncertainty bands indicating +/- 1 SD in
-calibration of their input.
-```
-
 Do LMs show the same signatures of acceleration and variability as children? To evaluate this question, we begin by building a bridge between the well-known "scaling laws" for large language models [@hoffmann2022;@kaplan2020] and the model we describe here for vocabulary growth. The form of one popular scaling law is that the loss $L$ of a neural network language model on a dataset size $D$ is $L = E + \frac{B}{D^\beta}$ (holding the size of the the network constant), where $B$ and $\beta$ are the free parameters of a power law and $E$ is the entropy of the text being modeled. This power law scaling behavior can emerge from a set of independently learned "quanta" that are themselves power-law distributed [@michaud2024]; the words of natural language follow such a power law and are potential quanta of this type [@zipf1949]. 
 
 Following this idea, we explore the emergence of individual words in neural language models. If their emergence indeed follows power-law dynamics, then it would follow that their accumulation *decelerates* rather than accelerating (as we have shown in children). In particular, each further order of magnitude of data should produce a smaller gain in word knowledge. To trace the emergence of individual words in language models, we fit sigmoidal curves to the trajectory of surprisal values (negative log probability of individual words) across training [following @chang2022]. These sigmoids provide a link to the logistic curves in the Rasch model we used with children. The slope of the sigmoid for each word is analogous to our acceleration parameter $\kappa$ -- it captures how fast evidence for that particular word accumulates with training data (see SI: Computing Acceleration in LMs). By computing the distribution of these slopes, we can compare the average speed of evidence accumulation in LMs to that of children.
-
 
 We used GPT-2 for this analysis [@radford2019] as it has become the preferred model system for such investigations [@feng2024;@misra2024;@evanson2023;@choshen2022] (see SI: Acceleration in Other Architectures). Matching training data between models and children is critical for a valid comparison. Thus, we trained models on a corpus of 24M words of English child-directed speech from the CHILDES archive [@macwhinney2000;@feng2024;@huebner2021], approximating a three-year-old child's total language input. We first computed per-word surprisal across training checkpoints. $\kappa$ estimates from these clustered around 1 (see @fig-llm-acceleration A): knowledge about individual words accumulated gradually.
 <!-- In contrast, across all five of our samples, children's $\kappa$ values were both high and highly variable.  -->
 
 This analysis treats learning as the result of multiple training passes through the same dataset, however, an approach that is fundamentally different from learning in children. Word surprisal changes as a function of total training data experienced (rather than total passes through the same dataset) provide a better analogue. We thus trained "developmental" sequences of GPT-2 models. Each model in a sequence was trained to convergence on an increasingly larger subsample of the CHILDES data, ranging from .5M words to 24M words, and we trained 10 such sequences with different random seeds. $\kappa$ values computed across these runs also showed no evidence of acceleration.
 
-Next, to make a direct comparison between the growth of individual models (rather than words) and individual children, we computed learners' fractional return on receiving new data. Scaling law analyses describe the change in a model's loss $L$ with respect to the fundamental entropy $E$ of the training data. These can be manipulated to compute a *fractional return* on training data, describing the total amount of remaining possible loss that has been removed by a particular amount of data: $\gamma(D) = \frac{-,dL/d\ln D}{L - E}$. To compute this quantity in children, we computed the child's "loss" as the summed surprisal across all words in the child's vocabulary and took the derivative across time; this revealed a function that converges to $\kappa$. We aligned these to children's estimated input rate over time (see SI: Input Estimation). As predicted by neural scaling laws, LMs were precisely constant (flat) in their fractional returns, while individual children's trajectories showed positive acceleration (@fig-llm-acceleration B).
+Next, to make a direct comparison between the growth of individual models (rather than words) and individual children, we computed learners' fractional return on receiving new data. Scaling law analyses describe the change in a model's loss $L$ with respect to the fundamental entropy $E$ of the training data. These can be manipulated to compute a *fractional return* on training data, describing the total amount of remaining possible loss that has been removed by a particular amount of data: $\gamma(D) = \frac{-,dL/d\ln D}{L - E}$. To compute this quantity in children, we computed the child's "loss" as the summed surprisal across all words in the child's vocabulary and took the derivative across time; this revealed a function that converges to $\kappa$. We aligned these to children's estimated input rate over time (see SI: Input Estimation). As predicted by neural scaling laws, LMs were precisely constant (flat) in their fractional returns, while individual children's trajectories showed positive acceleration (@fig-llm-acceleration C).
 
-Children were highly variable in their trajectories, but we observed almost no variation in acceleration between model runs with different random seeds. We investigated whether this lower level of variability is a fundamental feature of standard LM training regimes or instead reflects the use of a single training dataset that was shared across all models. Because sufficient child-directed training data was not available, we trained new developmental sequences of models on disjoint samples of either the BabyLM mix (a varied dataset designed to mimic the varied registers heard by children) or a standard LM training dataset (ClimbMix). Across all datasets, cross-model variation in acceleration was far more limited than for children  (@fig-llm-acceleration C).
+Children were highly variable in their trajectories, but we observed almost no variation in acceleration between model runs with different random seeds. We investigated whether this lower level of variability is a fundamental feature of standard LM training regimes or instead reflects the use of a single training dataset that was shared across all models. Because sufficient child-directed training data was not available, we trained new developmental sequences of models on disjoint samples of either the BabyLM mix (a varied dataset designed to mimic the varied registers heard by children) or a standard LM training dataset (ClimbMix). Across all datasets, cross-model variation in acceleration was far more limited than for children  (@fig-llm-acceleration B).
 
 
 # Discussion
@@ -472,36 +457,9 @@ How does children's vocabulary grow over early childhood? We proposed that this 
 
 Where does the acceleration in children's learning come from? Some may come from developmental maturation of general abilities such as learning, memory, or attention. In the language of our model, these changes would mean that children's "buckets" require fewer drops to fill them. However, the degree of acceleration we show means that word learning becomes more efficient by several orders of magnitude, seemingly beyond measured changes in domain general cognitive processes [@hartshorn1998;@bauer2000]. 
 
-A second potential source of acceleration is that children "learn to learn": their increasingly sophisticated inferential abilities allow them to extract progressively more information from the linguistic signal [@smith2002;@markman1988;@bohn2019;@meylan2022]. They learn "overhypotheses" that guide their inferences based on general regularities in how their language works -- for example, that many nouns are organized by shape [@kemp2007;@smith2002]. They also use the language they already know in the moment to extract more information from new utterances -- leveraging word meanings [@markman1988;@clark1988], syntactic knowledge [@gleitman1990], and pragmatic inference [@bohn2019] to make sophisticated inferences about gaps in their knowledge [@frank2009;@bloom2002]. Indeed, formally, these sorts of "leverage" mechanisms can change the slope of acceleration in accumulator models [@mitchell2009].
+A second potential source of acceleration is that children "learn to learn": their increasingly sophisticated inferential abilities allow them to extract progressively more information from the linguistic signal [@smith2002;@markman1988;@bohn2019;@meylan2022]. They learn "overhypotheses" that guide their inferences based on general regularities in how their language works -- for example, that many nouns are organized by shape [@kemp2007;@smith2002]. They also use the language they already know in the moment to extract more information from new utterances -- leveraging word meanings [@markman1988;@clark1988], syntactic knowledge [@gleitman1990], and pragmatic inference [@bohn2019] to make sophisticated inferences about gaps in their knowledge [@frank2009;@bloom2002]. Indeed, formally, these sorts of "leverage" mechanisms can change the slope of acceleration in accumulator models [though they cannot create it; @mitchell2009].
 
-```md
-[draft for promotion — MCF to review. Proposed replacement for the FINAL SENTENCE of the
- paragraph above ("Indeed, formally, these sorts of 'leverage' mechanisms can change the
- slope of acceleration in accumulator models [@mitchell2009].")
-
- That sentence reverses @mitchell2009's central finding. Verified against the PDF: their
- abstract states leverage "cannot create acceleration if it did not exist in the
- corresponding model without leveraging", and their Zipf analysis "confirm[s] that
- leveraging does not create acceleration"; §1.1 adds that leveraged learning "has little
- to do with the presence or absence of acceleration". Their Fig 1A plots "Words Known"
- from the MCDI long form, so their acceleration is in observed vocabulary count, not
- latent ability -- the very distinction drawn earlier in this manuscript.
-
- Their negative result arguably strengthens the paper: it rules out the most obvious
- alternative mechanism, so the acceleration we estimate still requires an explanation.
- Two options, from strongest to most minimal:]
-
-(a) Formally, however, leverage of this kind is not by itself sufficient: @mitchell2009
-show that although leveraged learning changes the shape and timing of vocabulary growth,
-it cannot create acceleration that is not already present in the underlying distribution
-of word difficulties. Their analysis concerns acceleration in observed vocabulary counts;
-the acceleration we estimate is in latent ability, and is precisely the quantity such a
-mechanism would need to produce.
-
-(b) Formally, @mitchell2009 show that such leverage changes the shape and timing of
-vocabulary growth but cannot by itself create acceleration, so a mechanism of this kind
-must act on the rate of accumulation rather than on the order in which words are acquired.
-``` 
+The accelerating accumulator is a parsimonious, low-dimensional description of variation in children's vocabulary growth that accords with the structure of the learning problem faced by children. But our evidence is based only on statistical fit and model comparison, rather than focused causal study. Further work is required to test the accumulator as a mechanistic account. 
 
 In sum, our study suggests that the presence of acceleration is a fundamental difference between children and LMs that may be responsible for the "data gap" between the two. Characterizing the nature of this acceleration and understanding the circumstances under which it can arise in artificial systems should thus be a focus for future investigation.
 
