@@ -57,7 +57,9 @@ suppressPackageStartupMessages({
   library(here); library(dplyr); library(tidyr); library(readr)
   library(ggplot2); library(patchwork); library(latex2exp)
   library(knitr); library(scales); library(stringr); library(forcats)
-  library(broom); library(png); library(grid); library(gridExtra)
+  # png/grid dropped: they were used only by the plate-diagram raster removed from Fig 1.
+  # [MCF: gridExtra appears unused too, but it predates this change so it is left alone.]
+  library(broom); library(gridExtra)
   library(ggrepel)
 })
 source(here("paper", "_helpers.R"))
@@ -159,7 +161,7 @@ Critically, for all datasets, estimates of acceleration were high, robustly reje
 
 Variability is a ubiquitous feature of early language across a vast array of phenomena and a wide range of languages [@frank2021;@kidd2020]. The between-child standard deviation in acceleration ($\sigma_b$) ranged from `r sb_lo` to `r sb_hi` across the five samples; `r pct_gt1`% of children were estimated above the pure-accumulator value of $\kappa = 1$. The distribution appeared unimodal across samples, but the increasing spread of children's trajectories with age was especially noticeable for low-vocabulary older children [who may be classified as "late talkers"; @fernald2012; @rescorla2011; @pinstock2026;@singletary2025] (see SI: Variation in Acceleration).
 
-```{r fig-schematic, fig.width=7.5, fig.height=8.6}
+```{r fig-schematic, fig.width=7.5, fig.height=7.6}
 #| label: fig-schematic
 #| fig-cap: "(A) Generative model: each child $i$ has an efficiency $\\xi_i$ and an acceleration $\\kappa_i$ that set their latent ability; whether child $i$ produces word $j$ depends on $\\theta_i(t)$ relative to the word's difficulty $\\delta_j$. (B) Model predictions in latent-ability ($\\theta$) space and, projected through the logistic item response model, in words-produced (CDI) space. Both pure accumulator ($\\kappa = 1$, dashed) and accelerating accumulator predictions are plotted. Greater efficiency ($\\xi$) lifts the curve's level, while greater acceleration ($\\kappa$) fans it open. (C) Individual children's observed trajectories (gray) for each of the five longitudinal datasets, with quantiles computed across the per-child parameters of the fitted models (colored percentile bands)."
 
@@ -187,7 +189,9 @@ lty_scn <- c("pure" = "21", "accel" = "solid")
 ## the cached labels ("Latent Ability (θ)", "Words Produced (CDI)") are wider than that,
 ## so they were being clipped mid-word. The y-axis titles already say which units each
 ## panel is in, so the strips can be terse. [MCF: reword if you prefer.]
-STRIP_B <- c("Latent ability", "Words produced")
+## Full titles restored: with the plate diagram gone each panel is ~3.6in wide, so the
+## longer cached labels no longer clip.
+STRIP_B <- c("Latent Ability (\u03b8)", "Words Produced (CDI)")
 panelB <- function(i, ylab, ylim = NULL) {
   qsel <- levels(fig1_fan$conceptual$quantity)[i]
   d <- dplyr::filter(fig1_fan$conceptual, quantity == .env$qsel) |>
@@ -197,10 +201,9 @@ panelB <- function(i, ylab, ylim = NULL) {
        geom_blank(data = data.frame(age = 9, value = ylim),
                   aes(age, value), inherit.aes = FALSE)) +
     geom_line(linewidth = 0.8) +
-    ## Direct labels on the LEFT panel only. The two panels share a colour scale, and in
-    ## words-produced space the accelerating curves converge near 1.0, so their end labels
-    ## collided there however they were repelled. Labelling once keeps the right panel clean.
-    (if (i != 1) NULL else ggrepel::geom_text_repel(
+    ## Both panels are labelled again now that they are ~3.6in wide; at 1.4in the
+    ## accelerating curves' end labels collided in words-produced space.
+    (ggrepel::geom_text_repel(
       data = dplyr::filter(fig1_fan$conceptual_lab, quantity == .env$qsel) |>
               dplyr::mutate(quantity = factor(STRIP_B[i], levels = STRIP_B[i])),
       aes(label = scenario),
@@ -212,7 +215,7 @@ panelB <- function(i, ylab, ylim = NULL) {
     ## lower limit 8 to match the DATA range in block C (Marchman and Norwegian both
     ## start at 8), so B and C share an x-origin. Curve data now spans 8-36 (cache).
     scale_x_continuous(breaks = c(12, 24, 36)) +
-    coord_cartesian(xlim = c(8, if (i == 1) 49 else 38), clip = "off") +
+    coord_cartesian(xlim = c(8, 49), clip = "off") +
     labs(x = "Age (Months)", y = ylab) +
     theme_minimal(base_size = 11) +
     theme(strip.text = element_text(face = "bold", size = 11),
@@ -243,18 +246,32 @@ pC <- ggplot() +
         legend.key.width = unit(15, "pt"), legend.title = element_text(size = 10.5),
         legend.background = element_rect(fill = "white", color = NA))
 
-## Block A: graphical model (title-less asset built from paper/mockups/fig1_gm_notitle.tex)
-gm <- cowplot::ggdraw() +
-  cowplot::draw_grob(grid::rasterGrob(png::readPNG(here("paper", "mockups", "fig1_gm_notitle.png")),
-                                      interpolate = TRUE, width = grid::unit(0.98, "npc")))
+## The plate/graphical-model block that used to occupy the top-left has been REMOVED per
+## MCF. It was a raster whose internal text could not scale with base_size, plate notation
+## is specialist for a broad readership, and it restated an equation the text already
+## gives. It was also the direct cause of the crowding in this figure: it consumed ~40% of
+## the top row, which is why the strip titles clipped and the right-hand panel had to give
+## up its direct labels. The asset survives at paper/mockups/fig1_gm_notitle.png if it is
+## ever wanted in the SI.
+##
+## compose: [A A] over [B B B] -- the two conceptual panels now span the full row, so each
+## is ~3.6in rather than ~1.4in.
+cowplot::plot_grid(pB, pC, ncol = 1, rel_heights = c(1, 1.65),
+                   labels = c("A", "B"), label_size = 13, vjust = 1.1)
+```
 
-## compose: [A | B B] over [C C C], only block-level A/B/C labels
-## rel_widths: block A is a RASTER image whose internal text does not scale with
-## base_size, so at 1/3 of a 7.5in row it became unreadable. Give it a larger share.
-top <- cowplot::plot_grid(gm, pB, ncol = 2, rel_widths = c(1, 1.55),
-                          labels = c("A", "B"), label_size = 13, vjust = 1.1)
-cowplot::plot_grid(top, pC, ncol = 1, rel_heights = c(1, 1.85),
-                   labels = c("", "C"), label_size = 13, vjust = 1.1)
+```md
+[draft for promotion — MCF to review. Replacement fig-cap for @fig-schematic now that the
+ generative-model panel is gone: the old (A) clause is dropped and (B)/(C) become (A)/(B).
+ Wording is otherwise yours, unchanged.]
+
+(A) Model predictions in latent-ability ($\theta$) space and, projected through the
+logistic item response model, in words-produced (CDI) space. Both pure accumulator
+($\kappa = 1$, dashed) and accelerating accumulator predictions are plotted. Greater
+efficiency ($\xi$) lifts the curve's level, while greater acceleration ($\kappa$) fans it
+open. (B) Individual children's observed trajectories (gray) for each of the five
+longitudinal datasets, with quantiles computed across the per-child parameters of the
+fitted models (colored percentile bands).
 ```
 
 
@@ -300,7 +317,7 @@ To quantify this phenomenon, we combined our fitted model with corpus frequencie
 
 # Language models show no acceleration in their vocabulary growth
 
-```{r fig-llm-acceleration, fig.width=7.5, fig.height=6.6}
+```{r fig-llm-acceleration, fig.width=7.5, fig.height=7.8}
 #| label: fig-llm-acceleration
 #| fig-cap: "(A) Density of the acceleration exponent $\\kappa$ for both children (per child, English and Norwegian) and LMs (by word). (B) Variation in acceleration (kappa) across children and LMs. (C) Fractional return on training (the ratio of decrease in loss to excess loss) for both children and LMs. Blue lines show model trajectories; red lines show fitted trajectories from children. Three children are highlighted in dark red with horizontal uncertainty bands indicating +/- 1 SD in calibration of their input."
 ## LAYOUT/FONT SIZING. out.width="100%" scales every figure to the 6.5in text width, so
@@ -413,7 +430,11 @@ pC <- ggplot(vy |> dplyr::filter(kappa > 0),
 cowplot::plot_grid(
   cowplot::plot_grid(pA, pC, nrow = 1, labels = c("A", "B"), label_size = 12),
   cowplot::plot_grid(pB, nrow = 1, labels = "C", label_size = 12),
-  nrow = 2, rel_heights = c(1, 0.82))
+  ## rel_heights favours the bottom row: at the old 0.82 the fractional-return panel was
+  ## 7.5 x 2.97in, about 2.5:1. On a log-log panel that aspect flattens the child curves --
+  ## i.e. it visually understates the rise that is the whole finding. At 1.15 the panel is
+  ## ~4.2in tall, about 1.8:1, and the slopes read at closer to their true steepness.
+  nrow = 2, rel_heights = c(1, 1.15))
 ```
 
 Do LMs show the same signatures of acceleration and variability as children? To evaluate this question, we begin by building a bridge between the well-known "scaling laws" for large language models [@hoffmann2022;@kaplan2020] and the model we describe here for vocabulary growth. The form of one popular scaling law is that the loss $L$ of a neural network language model on a dataset size $D$ is $L = E + \frac{B}{D^\beta}$ (holding the size of the the network constant), where $B$ and $\beta$ are the free parameters of a power law and $E$ is the entropy of the text being modeled. This power law scaling behavior can emerge from a set of independently learned "quanta" that are themselves power-law distributed [@michaud2024]; the words of natural language follow such a power law and are potential quanta of this type [@zipf1949]. 
