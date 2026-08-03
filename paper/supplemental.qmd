@@ -33,7 +33,7 @@ where $r_i$ and $\alpha_i$ decompose the term $\xi_i$ in our model: $r_i$ is the
 
 In addition, several other models in the literature can be described as variants of this framework:
 
-* @mitchell2009 augment the pure M0 accumulator with a "leverage" term (in which words learned earlier can facilitate the learning of later words). Rhis term shifts the slope the learning function. While it does not map cleanly onto our M1, the dynamics are similar. 
+* @mitchell2009 augment the pure M0 accumulator with a "leverage" term (in which words learned earlier can facilitate the learning of later words). This term shifts the slope the learning function. While it does not map cleanly onto our M1, the dynamics are similar. 
 * @mollica2017 define a pure accumulator model with $kappa=1$, but with an additional parameter relating to the speed of per-word accumulation. This model maps onto a combination of our M0 with the a 2-parameter logistic variant that we fit below.
 
 ```md
@@ -58,10 +58,9 @@ $\kappa_{\text{pop}}$, and so it does not correspond to our M1. Note also that t
 acceleration is defined over observed vocabulary counts rather than over latent ability.
 ```
 
-
 # Non-identifiability in Cross-Sectional Data
 
-Since acceleration is a property of change over time. A single cross-sectional observation from an individual child cannot identify the child's acceleration. As @fig-cross-sectional-confound shows, a single observation from a child could be accounted for by variation in either $\xi_i$ (efficiency) or $\kappa_i$ (acceleration). 
+Since acceleration is a property of change over time, a single cross-sectional observation from an individual child cannot identify the child's acceleration. As @fig-cross-sectional-confound shows, a single observation from a child could be accounted for by variation in either $\xi_i$ (efficiency) or $\kappa_i$ (acceleration). 
 
 ```{r fig-cross-sectional-confound, fig.width=9, fig.height=4}
 #| label: fig-cross-sectional-confound
@@ -491,7 +490,7 @@ the logit-probability that a child produces a word rises linearly in
 log-age with slope equal to the child's scaling exponent. Thus, the per-child
 sigmoid slope *is* $\kappa_i$, by construction.
 
-Next, to estimate the slope of acquisition of individual words, @chang2022 compute surprisal for each word across LM training checkpoints and then fit a four-parameter logistic curve expressing how surprisal decreasess. Expressed as the fraction of a word's surprisal reduction achieved so far, their fit is a sigmoid in
+Next, to estimate the slope of acquisition of individual words, @chang2022 compute surprisal for each word across LM training checkpoints and then fit a four-parameter logistic curve expressing how surprisal decreases. Expressed as the fraction of a word's surprisal reduction achieved so far, their fit is a sigmoid in
 $\log_{10}(\text{training steps})$ with slope $1/\text{scale}_w$.
 Dividing by $\ln 10$ converts this to natural-log units — the same units
 as $\kappa_i$ — so the two slopes can be read off the same axis.
