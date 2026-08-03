@@ -54,8 +54,22 @@ BL    <- file.path("fits", "bayes_long")
 SLUGS <- if (length(.args) >= 3) .args[-(1:2)] else
          c("thal", "smith", "marchman", "norwegian", "japanese")
 TRAIN_K <- as.integer(Sys.getenv("TRAIN_K", "0"))    # 0 = use every non-test administration
+## TRAIN_MODE picks WHICH k administrations to keep, and it matters more than it looks.
+##   "first" -- the earliest k. Both the count AND the span grow with k, but so does the
+##             proximity of the last training point to the target, so the extrapolation
+##             horizon SHRINKS as k rises. That confound is directional: a shorter horizon
+##             helps M3 more than M2, because M3's per-child slope error is amplified by
+##             how far it is extrapolated. A rising M3 advantage would then be
+##             uninterpretable -- better kappa_i, or just less extrapolation?
+##   "last"  -- the k immediately BEFORE the held-out one. The final training
+##             administration is always the child's second-to-last, so the horizon is
+##             FIXED and only the history (count and span, hence kappa_i precision) grows.
+## "last" is the clean test of MCF's question; "first" additionally answers the practical
+## "what if we had followed these children for less time?", so both are worth having.
+TRAIN_MODE <- Sys.getenv("TRAIN_MODE", "first")
+stopifnot(TRAIN_MODE %in% c("first", "last"))
 TAG   <- paste0(if (MIN_ELIG > 3L) sprintf("_fcv%d", MIN_ELIG) else "_fcv",
-                if (TRAIN_K > 0L) sprintf("k%d", TRAIN_K) else "")
+                if (TRAIN_K > 0L) sprintf("%sk%d", substr(TRAIN_MODE, 1, 1), TRAIN_K) else "")
 
 one <- function(slug) {
   f <- file.path(BL, sprintf("bundle_%s%s.rds", slug, SFX))
@@ -79,8 +93,10 @@ one <- function(slug) {
   ## with TRAIN_K set, only that child's EARLIEST k such administrations are used
   is_train <- adm_keep & !is_test
   if (TRAIN_K > 0L) {
-    tr_sel <- adm |> filter(child %in% eligible, !(a %in% test_a)) |>
-      group_by(child) |> slice_min(age, n = TRAIN_K, with_ties = FALSE) |> ungroup() |> pull(a)
+    pool <- adm |> filter(child %in% eligible, !(a %in% test_a)) |> group_by(child)
+    tr_sel <- (if (TRAIN_MODE == "last") slice_max(pool, age, n = TRAIN_K, with_ties = FALSE)
+               else                      slice_min(pool, age, n = TRAIN_K, with_ties = FALSE)) |>
+      ungroup() |> pull(a)
     is_train <- seq_len(sd0$A) %in% tr_sel
   }
   sd0$admin_to_child <- cmap[sd0$admin_to_child]          # renumbered child index per admin
@@ -115,6 +131,11 @@ one <- function(slug) {
             !any(is_train & is_test))
 
   meta <- list(slug = slug, sfx = SFX, min_elig = MIN_ELIG, train_k = TRAIN_K,
+               train_mode = TRAIN_MODE,
+               ## horizon = months from the last TRAINING administration to the target
+               horizon_med = median(sd0$admin_age[te_a] -
+                 vapply(seq_len(sd0$I), function(i)
+                   max(sd0$admin_age[tr_a][sd0$admin_to_child[tr_a] == i]), 0.0)),
                n_kids = sd0$I, n_kids_tested = length(eligible),
                A_train = train$A, A_test = test$A, N_train = train$N, N_test = test$N,
                train_adm_per_child = mean(tr_per_child),
