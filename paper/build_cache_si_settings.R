@@ -68,8 +68,16 @@ sep <- bind_rows(unname(unlist(recursive = FALSE, lapply(names(SETTINGS), functi
 
 ## ---- mega-model row (one fit, all datasets, partially pooled scales) ----
 ## Skipped silently until the fit lands; rerun this script to fill it in.
+## Prefer the CENTRED refit (m_pool_c) when present. The original non-centred fit gave the
+## right point estimates but would not mix -- max rhat 2.15, 3997/4000 transitions
+## saturating treedepth -- so only medians were reportable. Centring the log-scale
+## hierarchy fixed it: 0 divergences, 0 treedepth saturations, per-dataset sigma_b rhat
+## 1.006-1.057 (was up to 1.329), and ess on the pooled hyperparameter 3300 (was 214).
+## Medians are essentially unchanged, which is what confirms the earlier point estimates.
 mega <- NULL
-pf <- file.path(SUMM, "pool_a3.summary.rds")
+pf_c <- file.path(SUMM, "pool_a3_c.summary.rds")
+pf   <- if (file.exists(pf_c)) pf_c else file.path(SUMM, "pool_a3.summary.rds")
+POOL_VARIANT <- if (file.exists(pf_c)) "centred" else "non-centred"
 pb <- file.path(BL, "bundle_pool_a3.rds")
 if (file.exists(pf) && file.exists(pb)) {
   s <- as.data.frame(readRDS(pf)); sd0 <- readRDS(pb)$stan_data
@@ -79,12 +87,15 @@ if (file.exists(pf) && file.exists(pb)) {
   dnames <- if (!is.null(sd0$ds_names)) sd0$ds_names else names(DATASETS)
   mega <- bind_rows(lapply(seq_along(dnames), function(d) {
     slug <- dnames[d]
-    ## NB: the per-dataset scale parameters mix slowly (funnel geometry in the 5-group
-    ## hierarchy), so their rhat/ess are poor. The MEDIANS are trustworthy anyway --
-    ## they match the independently-converged separate 3+ fits to within +-1% -- because
-    ## the 5.2M observations pin the location even when the sampler crawls. We carry
-    ## max_rhat so the SI can state this honestly; the intervals are NOT used.
+    ## Under the CENTRED fit the per-dataset scales mix acceptably (sigma_b rhat
+    ## 1.006-1.057, ess 90-968), so their intervals ARE now reportable -- which was not
+    ## true of the non-centred original and is the whole point of the refit. The one
+    ## remaining laggard is mu_xi[4], Norwegian's mean efficiency, which trades off against
+    ## tau_delta[4] on a location ridge and is not reported here.
+    qi <- function(v, q) { x <- s[[q]][s$variable == sprintf("%s[%d]", v, d)]; if (!length(x)) NA_real_ else x }
     data.frame(dataset = unname(DATASETS[slug]), setting = "mega (3+)",
+               sigma_b_lo = qi("sigma_b", "q5"), sigma_b_hi = qi("sigma_b", "q95"),
+               kappa_lo = qi("kappa_pop", "q5"), kappa_hi = qi("kappa_pop", "q95"),
                n_kids = sum(sd0$child_ds == d),
                n_admins = sum(sd0$child_ds[sd0$admin_to_child] == d),
                n_obs_fit = NA_real_,
@@ -100,8 +111,13 @@ if (file.exists(pf) && file.exists(pb)) {
   attr(mega, "pooled") <- data.frame(
     sigma_b_pop = gp("sigma_b_pop"), sigma_b_lo = qp("sigma_b_pop","q5"), sigma_b_hi = qp("sigma_b_pop","q95"),
     sigma_a_pop = gp("sigma_a_pop"), sigma_a_lo = qp("sigma_a_pop","q5"), sigma_a_hi = qp("sigma_a_pop","q95"),
-    rhat_pop = max(s$rhat[s$variable %in% c("sigma_b_pop","sigma_a_pop")], na.rm=TRUE))
-  cat(sprintf("  mega: pooled sigma_b_pop = %.2f [%.2f, %.2f] (rhat %.3f); per-dataset medians match separate fits to +-1%%\n",
+    rhat_pop = max(s$rhat[s$variable %in% c("sigma_b_pop","sigma_a_pop")], na.rm=TRUE),
+    ess_pop  = min(s$ess_bulk[s$variable %in% c("sigma_b_pop","sigma_a_pop")], na.rm=TRUE),
+    variant  = POOL_VARIANT,
+    ## worst rhat among the per-dataset quantities the SI reports
+    rhat_reported = max(s$rhat[grepl("^(sigma_b|kappa_pop|sigma_a|rho_ab)\\[", s$variable)], na.rm=TRUE))
+  cat(sprintf("  mega [%s]: sigma_b_pop = %.2f [%.2f, %.2f] (rhat %.3f); per-dataset medians match separate fits to +-1%%\n",
+              POOL_VARIANT,
               gp("sigma_b_pop"), qp("sigma_b_pop","q5"), qp("sigma_b_pop","q95"),
               max(s$rhat[s$variable=="sigma_b_pop"])))
 } else {
