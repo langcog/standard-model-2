@@ -560,14 +560,20 @@ Figure 2 in the main text converts each word's fitted difficulty into an estimat
 #| label: fig-aoa-m0
 #| fig-cap: "Estimated cumulative exposures at age of acquisition under the accelerating accumulator (M3, left, reproduced from main text) and the fitted pure accumulator (M0, right), using identical corpus frequencies. Points are words, coloured by class, with per-class linear fits."
 ## Built from paper/cache/si_fig2_m0.rds (studies/bayes_long/04_fig2_m0_counterfactual.R).
-## Free x scales are deliberate: the whole point is that M0 implies acquisition ages out to
-## ~254 months, so forcing a shared axis would either hide that or crush the M3 panel.
+## BOTH axes are logarithmic, so the fitted lines drawn here ARE the slopes reported in
+## @tbl-aoa-m0. With a linear x-axis they were not: the table's slopes are fitted in
+## log-log, and drawing them against linear age produced lines a reader could not read off
+## the table. A log x-axis is also the fairer geometry, since M0 spreads acquisition over
+## 5-254 months against M3's 14-35 and a linear axis flattens its slope mechanically.
+## Scales are shared rather than free: on a log axis the difference in implied range is
+## legible without crushing the M3 panel, and that difference is itself part of the point.
 d <- bind_rows(si_f2m0$m3, si_f2m0$m0) |>
   mutate(model = factor(model, levels = c("M3 (accelerating)", "M0 (pure accumulator)")))
 ggplot(d, aes(t_50, N_word, colour = lexical_class)) +
   geom_point(alpha = 0.35, size = 0.8) +
   geom_smooth(method = "lm", se = FALSE, linewidth = 0.8, formula = y ~ x) +
   facet_wrap(~ model) +
+  scale_x_log10(breaks = c(5, 10, 20, 40, 80, 160, 320)) +
   scale_y_log10(labels = scales::label_number(big.mark = ",")) +
   scale_colour_brewer(palette = "Dark2", name = NULL,
                       labels = c("Nouns", "Action words", "Descriptive words", "Function words")) +
