@@ -348,11 +348,31 @@ two-administration children inflated the acceleration variance $\sigma_b$ with
 measurement error rather than genuine heterogeneity, leading to slightly noisier fits to the distribution, but population $\kappa$ was extremely similar. The pooled model reproduced the parameters of the independent fits closely, but convergence was slow and we do not report intervals from this model.
 
 ```md
+[draft for promotion — MCF to review. Replaces the FINAL SENTENCE of the paragraph above,
+ which is now out of date: "The pooled model reproduced the parameters of the independent
+ fits closely, but convergence was slow and we do not report intervals from this model."
+
+ That sentence described the first pooled fit, which would not mix. Re-expressing the
+ hierarchy over the dataset-level scales in its centred form fixed it -- non-centring is
+ the right choice when groups are weakly informed, but every dataset here contributes
+ between 96 and 792 children, which is the regime where the centred form samples better.
+ The refit has no divergences and no saturated trajectories, against 3,997 of 4,000
+ saturated in the original, and the estimates themselves barely move.]
+
+The pooled model reproduced the parameters of the independent fits closely. Sampling was
+adequate for the quantities reported here: no divergent transitions, and $\hat R \le 1.08$
+with effective sample sizes above 90 for every dataset-level acceleration, efficiency and
+correlation. The one poorly-mixed parameter is the Norwegian mean efficiency, which trades
+off against that sample's item-difficulty scale along a ridge; neither is reported here and
+neither enters the estimates below.
+```
+
+```md
 ## How the pooled model shares information across datasets  [draft for promotion — MCF to review]
 
 [Requested description of the hierarchical/pooling structure. Numbers are cache-derived
- (si_settings.rds); the structure is m_pool.stan. Suggested placement: directly after the
- paragraph above, before @tbl-settings.]
+ (si_settings.rds) and now come from the CENTRED refit, m_pool_c.stan, whose intervals are
+ trustworthy. Suggested placement: directly after the paragraph above, before @tbl-settings.]
 
 The pooled model fits all five datasets jointly, but it does not simply concatenate them.
 Children and words remain nested within their own dataset, and each dataset keeps its own
@@ -370,13 +390,18 @@ concern different instruments and different languages.
 
 This structure yields one quantity the separate fits cannot provide: a typical
 between-child acceleration standard deviation across samples,
-$\exp(m_b) = 5.13$ (90% CI $[3.90, 6.63]$), whose interval reflects variation between
-datasets rather than only within them. In practice the shrinkage it induces is very
-small. Every per-dataset $\sigma_b$ moves by at most 1% relative to its independent fit
-(3.19 to 3.22, 5.14 to 5.13, 6.60 to 6.59, 5.65 to 5.70, 5.45 to 5.40). This is itself
-informative: partial pooling only pulls estimates together when they disagree relative to
-their uncertainty, so the near-absence of shrinkage indicates the five samples already
-agree about how much children differ in acceleration.
+$\exp(m_b) = 5.04$ (90% CI $[3.92, 6.66]$), whose interval reflects variation between
+datasets rather than only within them. The corresponding efficiency scale is
+$\exp(m_a) = 1.98$ ($[1.59, 2.45]$).
+
+In practice the shrinkage this induces is very small. Every per-dataset $\sigma_b$ moves by
+at most 1.5% relative to its independent fit (3.19 to 3.22, 5.14 to 5.13, 6.60 to 6.51,
+5.65 to 5.65, 5.45 to 5.40). This is itself informative: partial pooling only pulls
+estimates together when they disagree relative to their uncertainty, so the near-absence of
+shrinkage indicates the five samples already agree about how much children differ in
+acceleration. It also means the pooled fit is a check on the separate ones rather than a
+replacement for them: it reaches the same conclusions while borrowing strength, which is
+the useful thing for it to do.
 ```
 
 
@@ -396,7 +421,12 @@ sset <- si_set |>
       "mega (3+)"   = "pooled ($\\geq$3)"),
     N   = format(n_kids, big.mark = ","),
     kap = sprintf("%.1f", kappa),
-    sb  = sprintf("%.2f", sigma_b),
+    ## The pooled rows now carry intervals: the centred refit mixes well enough to report
+    ## them (sigma_b rhat 1.006-1.057), which the non-centred original did not. Separate
+    ## fits show the point estimate alone, as before, so the added interval marks exactly
+    ## where the extra information comes from.
+    sb  = ifelse(is.na(sigma_b_lo), sprintf("%.2f", sigma_b),
+                 sprintf("%.2f [%.2f, %.2f]", sigma_b, sigma_b_lo, sigma_b_hi)),
     gap = ifelse(is.na(gap_per_obs), "---", sprintf("%.4f", gap_per_obs)))
 grp <- table(droplevels(si_set$dataset))                 # rows per dataset, factor order
 knitr::kable(sset |> select(Setting, N, kap, sb, gap), format = "latex", booktabs = TRUE,
