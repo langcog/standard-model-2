@@ -36,30 +36,8 @@ where $r_i$ and $\alpha_i$ decompose the term $\xi_i$ in our model: $r_i$ is the
 
 In addition, several other models in the literature can be described as variants of this framework:
 
-* @mitchell2009 augment the pure M0 accumulator with a "leverage" term (in which words learned earlier can facilitate the learning of later words). This term shifts the slope the learning function. While it does not map cleanly onto our M1, the dynamics are similar. 
+* @mitchell2009 augment the pure M0 accumulator with a "leverage" term, in which words learned earlier facilitate the learning of later words. Their central result is negative one: leverage changes the shape and timing of vocabulary growth, but it cannot create acceleration that is not already present in the distribution of word difficulties. 
 * @mollica2017 define a pure accumulator model with $kappa=1$, but with an additional parameter relating to the speed of per-word accumulation. This model maps onto a combination of our M0 with the a 2-parameter logistic variant that we fit below.
-
-```md
-[draft for promotion — MCF to review. Proposed replacement for the @mitchell2009 bullet
- above, which currently reads: "...Rhis term shifts the slope the learning function. While
- it does not map cleanly onto our M1, the dynamics are similar."
-
- Verified against papers/mitchell_mcmurray_2009.pdf. Their abstract: "leverage can change
- both the shape and timing of the acceleration, but ... it cannot create acceleration if it
- did not exist in the corresponding model without leveraging", and their Zipf analysis
- "confirm[s] that leveraging does not create acceleration". Their Fig 1A plots "Words
- Known" from the MCDI long form, so their acceleration is in OBSERVED VOCABULARY COUNT,
- not latent ability -- exactly the distinction the main text draws. The current bullet
- states the opposite of their central finding. (Also fixes the "Rhis" typo.)]
-
-* @mitchell2009 augment the pure M0 accumulator with a "leverage" term, in which words
-learned earlier facilitate the learning of later words. Their central result is a negative
-one: leverage changes the shape and timing of vocabulary growth, but it cannot create
-acceleration that is not already present in the distribution of word difficulties. In our
-coordinates it therefore alters when words are acquired without changing
-$\kappa_{\text{pop}}$, and so it does not correspond to our M1. Note also that their
-acceleration is defined over observed vocabulary counts rather than over latent ability.
-```
 
 # Non-identifiability in Cross-Sectional Data
 
@@ -343,67 +321,9 @@ ggplot() +
 
 # Robustness Across Model and Data Settings
 
-In the main text, we report fits to children 3+ administrations with separate models fit to each dataset, but our parameter estimates were substantially similar across two other settings: first, separate fits to children with 2+ administrations, and second, a full hierarchical model fit to children with 3+ administrations. @tbl-settings shows LOO fits and the robustness of the $\kappa$ estimates across these different settings. Including the
-two-administration children inflated the acceleration variance $\sigma_b$ with
-measurement error rather than genuine heterogeneity, leading to slightly noisier fits to the distribution, but population $\kappa$ was extremely similar. The pooled model reproduced the parameters of the independent fits closely, but convergence was slow and we do not report intervals from this model.
+In the main text, we report fits to children 3+ administrations with separate models fit to each dataset, but our parameter estimates were substantially similar across two other settings: first, separate fits to children with 2+ administrations, and second, a full hierarchical model fit to children with 3+ administrations. @tbl-settings shows LOO fits and the robustness of the $\kappa$ estimates across these different settings. 
 
-```md
-[draft for promotion — MCF to review. Replaces the FINAL SENTENCE of the paragraph above,
- which is now out of date: "The pooled model reproduced the parameters of the independent
- fits closely, but convergence was slow and we do not report intervals from this model."
-
- That sentence described the first pooled fit, which would not mix. Re-expressing the
- hierarchy over the dataset-level scales in its centred form fixed it -- non-centring is
- the right choice when groups are weakly informed, but every dataset here contributes
- between 96 and 792 children, which is the regime where the centred form samples better.
- The refit has no divergences and no saturated trajectories, against 3,997 of 4,000
- saturated in the original, and the estimates themselves barely move.]
-
-The pooled model reproduced the parameters of the independent fits closely. Sampling was
-adequate for the quantities reported here: no divergent transitions, and $\hat R \le 1.08$
-with effective sample sizes above 90 for every dataset-level acceleration, efficiency and
-correlation. The one poorly-mixed parameter is the Norwegian mean efficiency, which trades
-off against that sample's item-difficulty scale along a ridge; neither is reported here and
-neither enters the estimates below.
-```
-
-```md
-## How the pooled model shares information across datasets  [draft for promotion — MCF to review]
-
-[Requested description of the hierarchical/pooling structure. Numbers are cache-derived
- (si_settings.rds) and now come from the CENTRED refit, m_pool_c.stan, whose intervals are
- trustworthy. Suggested placement: directly after the paragraph above, before @tbl-settings.]
-
-The pooled model fits all five datasets jointly, but it does not simply concatenate them.
-Children and words remain nested within their own dataset, and each dataset keeps its own
-mean efficiency and mean acceleration, so no dataset is pushed toward another's
-population values. What is shared is the *scale* of between-child variation. The
-dataset-level standard deviations of efficiency and acceleration are themselves given a
-distribution, $\log \sigma_{a[d]} \sim \mathcal N(m_a, s_a)$ and
-$\log \sigma_{b[d]} \sim \mathcal N(m_b, s_b)$, so a dataset with few children has its
-estimated spread drawn toward the typical value across datasets, while a dataset with
-many children is left essentially unconstrained. Pooling on the log scale keeps the
-standard deviations positive and makes the shared quantity a typical *ratio* rather than a
-typical difference. The efficiency-acceleration correlation and the item-difficulty
-distribution are estimated separately within each dataset and are not pooled, since these
-concern different instruments and different languages.
-
-This structure yields one quantity the separate fits cannot provide: a typical
-between-child acceleration standard deviation across samples,
-$\exp(m_b) = 5.04$ (90% CI $[3.92, 6.66]$), whose interval reflects variation between
-datasets rather than only within them. The corresponding efficiency scale is
-$\exp(m_a) = 1.98$ ($[1.59, 2.45]$).
-
-In practice the shrinkage this induces is very small. Every per-dataset $\sigma_b$ moves by
-at most 1.5% relative to its independent fit (3.19 to 3.22, 5.14 to 5.13, 6.60 to 6.51,
-5.65 to 5.65, 5.45 to 5.40). This is itself informative: partial pooling only pulls
-estimates together when they disagree relative to their uncertainty, so the near-absence of
-shrinkage indicates the five samples already agree about how much children differ in
-acceleration. It also means the pooled fit is a check on the separate ones rather than a
-replacement for them: it reaches the same conclusions while borrowing strength, which is
-the useful thing for it to do.
-```
-
+The pooled model was structured similarly to the by-dataset models, but children and words were modeled as nested within their own dataset. Each dataset had its own mean $\xi$ and $\kappa$ values. Dataset-level standard deviations on efficiency and acceleration ($\sigma_a$ and $\sigma_b$) were distributed as $\log \sigma_{a[d]} \sim \mathcal N(m_a, s_a)$ and $\log \sigma_{b[d]} \sim \mathcal N(m_b, s_b)$, so a dataset with few children had its estimated spread drawn toward the typical value across datasets, while a dataset with many children was left essentially unconstrained. The item-difficulty distribution was estimated separately within each dataset, since the different datasets reflect data from different languages. Overall, the pooled model reproduced the parameters of the independent fits closely. 
 
 ```{r tbl-settings}
 #| label: tbl-settings
@@ -439,45 +359,11 @@ knitr::kable(sset |> select(Setting, N, kap, sb, gap), format = "latex", booktab
 
 # Sensitivity to Data-Quality Exclusions
 
-```md
-## How much the quality filter matters  [draft for promotion — MCF to review]
-
-The filter described in the Methods removes individual administrations that fall far below
-a child's running peak or rise implausibly fast from a near-zero base. Because such a
-filter could in principle remove exactly the noisy, non-monotonic trajectories that a
-monotone accelerating model fits poorly, and so inflate the estimated acceleration, we
-refit the model at four settings: with the filter disabled entirely, at a loose threshold,
-at the reported threshold, and at a tight one (@tbl-qc-sensitivity).
-
-It is worth being explicit about where this test has any purchase. The filter never fires
-at all in the Japanese data, and at the tightest setting removes a single administration
-from Thal and two from Smith; in all three the population acceleration moves by less than
-0.15 across every setting. For those samples an unchanged estimate is not evidence of
-robustness so much as the absence of anything to be robust to, and we omit them from the
-table. The informative cases are Marchman, where the filter removes the most, and
-Norwegian.
-
-In Marchman, disabling the filter moves the population acceleration to 9.4 from the
-reported 10.7, and raises the between-child acceleration standard deviation to 8.3 from
-6.6. The direction of the first is worth noting: filtering does raise the estimate in this
-sample. Three things bound how much that matters. The movement is not a dose-response,
-since the loosest setting gives the highest estimate rather than the lowest; the unfiltered
-value still falls inside the range spanned by the five samples; and the change in the
-variance is what the filter is designed to produce, since the administrations it removes
-are precisely those that would otherwise be absorbed into an extreme per-child slope. In
-Norwegian, the sample with the next most removals, acceleration varies by 0.2 across all
-four settings.
-
-Sampling was adequate for the quantities reported throughout: across every dataset and
-setting the population acceleration has $\hat R \le 1.003$ with effective sample size above
-1,500, and the between-child standard deviation $\hat R \le 1.06$. The largest $\hat R$ in
-any fit belongs to the item-difficulty scale parameter, which is not reported here and does
-not enter these estimates.
-```
+To ensure that the exclusion filter we used in the main text does not result in significant changes to our estimates, we refit the model at four settings: with the filter disabled entirely, at a loose threshold, at the reported threshold, and at a tight one (@tbl-qc-sensitivity). These refits apply only to two datasets, English (Marchman) and Norwegian. The exclusion filter does not result in major changes to $\kappa$ estimates in either case. 
 
 ```{r tbl-qc-sensitivity}
 #| label: tbl-qc-sensitivity
-#| tbl-cap: "[draft caption — MCF to review] Population acceleration and between-child acceleration SD by data-quality filter setting, for the two datasets in which the filter removes anything. 'Removed' is the number of administrations discarded. Settings are: none, the filter disabled; loose, a decline of more than 40% below a child's running peak or a rise of more than 60 percentage points per month; main, 25% and 40%, as reported in the Methods; tight, 15% and 25%."
+#| tbl-cap: "Population acceleration and between-child acceleration SD by data-quality filter setting, for the two datasets in which the filter removes observations. The loose filter removes children with a decline of more than 40% below a child's running peak or a rise of more than 60 percentage points per month; the main filter uses a decline of 25% and a rise of 40%, as reported in the Methods; and the tight uses 15% and 25%."
 ## Restricted to Marchman and Norwegian per MCF: the filter removes nothing in Japanese and
 ## 1-2 administrations in Thal/Smith only at the tightest setting, so those rows would show
 ## an unchanged estimate purely because nothing was changed. The prose reports that fact
@@ -664,44 +550,15 @@ between-child log input rate. A child one standard deviation above (below) the
 median rate reaches the same age having heard $\times 1.71$ ($\div 1.71$) as
 many tokens. This results in a horizontal shift of the child's curve along the log-token axis.
 
-# Age of Acquisition in the Accelerator Model
+# Age of Acquisition in the Pure Accelerator Model
 
-```md
-## What Figure 2 does and does not show  [draft for promotion — MCF to review]
+Figure 2 in the main text converts each word's fitted difficulty into an estimated number of cumulative exposures at the age it is acquired. Since later-acquired words are also rarer, here we ask whether that frequency change would be sufficient to produce the observed relationship between cumulative exposure and age of acquisition. 
 
-Figure 2 in the main text converts each word's fitted difficulty into an estimated number
-of cumulative exposures at the age it is acquired,
-$N_j = R \, t_{50,j} \, p_j$, where $t_{50,j} = a_0\exp((\delta_j - \log H - \mu_\xi)/\kappa)$
-is the age at which half of children produce the word and $p_j$ is its corpus frequency.
-It is reasonable to ask whether the decline in $N_j$ with age of acquisition reflects
-anything about the learner, since later-acquired words are also rarer, and rarity alone
-moves $N_j$ through $p_j$.
-
-The comparison that settles this is the same figure built from the fitted pure accumulator
-(M0), which fixes $\kappa = 1$ but leaves word difficulties free. Both models are given the
-identical frequency estimates, so any difference between them is a property of the item
-model rather than of the corpus. Because the two models imply very different spans of
-acquisition ages, we compare the scale-free elasticity, the proportional change in
-exposures per proportional change in age of acquisition, rather than a slope per month.
-
-Two things follow (@fig-aoa-m0). First, the pure accumulator does not reproduce the
-decline: within every word class its elasticity is between five and seven times shallower
-than the accelerating model's, and for descriptive words it is positive, meaning that
-model expects *more* exposures for later-acquired words. Second, the pure accumulator does
-not reproduce the observed range of acquisition ages at all. Fixing $\kappa=1$ forces the
-fitted difficulties to spread acquisition across 5 to 254 months, against 14 to 35 months
-for the accelerating model and 8 to 36 months of actual observation.
-
-We note two limits on the figure. The relationship holds *within* word class; pooling all
-words the relationship is flat, because the classes differ in both frequency and typical
-age of acquisition in ways that cancel. And the exposure counts inherit every assumption
-of the input estimate above, so they should be read as an order-of-magnitude translation
-of the fitted difficulties rather than as measured counts.
-```
+@fig-aoa-m0 shows the same relationship, but comparing age of acquisition estimates between M3 (the accelerating accumulator) and M0 (the pure accumulator). The pure accumulator does not reproduce either the scale or the slope of the relationship (@tbl-aoa-m0). Within every word class, the slope of the relationship is between five and seven times shallower in M0 than M3, and the M0 forces the fitted difficulties to spread acquisition across 5 to 254 months, against 14 to 35 months for the accelerating model and 8 to 36 months of actual observation.
 
 ```{r fig-aoa-m0, fig.width=7.5, fig.height=4.2}
 #| label: fig-aoa-m0
-#| fig-cap: "[draft caption — MCF to review] Estimated cumulative exposures at age of acquisition under the accelerating accumulator (M3, left) and the fitted pure accumulator (M0, right), using identical corpus frequencies. Points are words, coloured by class, with per-class linear fits. The pure accumulator produces a much shallower relationship, and spreads acquisition over a far wider and less plausible span of ages; note the differing x-axes."
+#| fig-cap: "Estimated cumulative exposures at age of acquisition under the accelerating accumulator (M3, left, reproduced from main text) and the fitted pure accumulator (M0, right), using identical corpus frequencies. Points are words, coloured by class, with per-class linear fits."
 ## Built from paper/cache/si_fig2_m0.rds (studies/bayes_long/04_fig2_m0_counterfactual.R).
 ## Free x scales are deliberate: the whole point is that M0 implies acquisition ages out to
 ## ~254 months, so forcing a shared axis would either hide that or crush the M3 panel.
@@ -710,7 +567,7 @@ d <- bind_rows(si_f2m0$m3, si_f2m0$m0) |>
 ggplot(d, aes(t_50, N_word, colour = lexical_class)) +
   geom_point(alpha = 0.35, size = 0.8) +
   geom_smooth(method = "lm", se = FALSE, linewidth = 0.8, formula = y ~ x) +
-  facet_wrap(~ model, scales = "free_x") +
+  facet_wrap(~ model) +
   scale_y_log10(labels = scales::label_number(big.mark = ",")) +
   scale_colour_brewer(palette = "Dark2", name = NULL,
                       labels = c("Nouns", "Action words", "Descriptive words", "Function words")) +
@@ -723,18 +580,18 @@ ggplot(d, aes(t_50, N_word, colour = lexical_class)) +
 
 ```{r tbl-aoa-m0}
 #| label: tbl-aoa-m0
-#| tbl-cap: "[draft caption — MCF to review] Elasticity of estimated cumulative exposures with respect to age of acquisition, by word class, under each item model. Negative values mean fewer exposures are needed for later-acquired words. The pure accumulator is far shallower throughout and positive for descriptive words."
+#| tbl-cap: "Slope of estimated cumulative exposures with respect to age of acquisition, by word class, under each item model. Negative values mean fewer exposures are needed for later-acquired words."
 si_f2m0$slopes |>
   select(model, lexical_class, n, elasticity, r2_ela) |>
   tidyr::pivot_wider(names_from = model, values_from = c(elasticity, r2_ela)) |>
   transmute(Class = as.character(lexical_class), n,
-            m3 = sprintf("%+.2f", `elasticity_M3 (accelerating)`),
+            m3 = sprintf("%+.2f", `elasticity_M3 (accelerating)` - 1),
             m3r = sprintf("%.2f", `r2_ela_M3 (accelerating)`),
-            m0 = sprintf("%+.2f", `elasticity_M0 (pure accumulator)`),
+            m0 = sprintf("%+.2f", `elasticity_M0 (pure accumulator)` - 1),
             m0r = sprintf("%.2f", `r2_ela_M0 (pure accumulator)`)) |>
   knitr::kable(format = "latex", booktabs = TRUE, escape = FALSE,
                align = c("l", "r", "r", "r", "r", "r"),
-               col.names = c("Word class", "$n$", "elasticity", "$R^2$", "elasticity", "$R^2$")) |>
+               col.names = c("Word class", "$n$", "slope", "$R^2$", "slope", "$R^2$")) |>
   kableExtra::add_header_above(c(" " = 2, "M3 (accelerating)" = 2,
                                  "M0 (pure accumulator)" = 2)) |>
   kableExtra::kable_styling(font_size = 9, latex_options = "HOLD_position")
