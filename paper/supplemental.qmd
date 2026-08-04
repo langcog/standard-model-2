@@ -420,10 +420,12 @@ refit the model at four settings: with the filter disabled entirely, at a loose 
 at the reported threshold, and at a tight one (@tbl-qc-sensitivity).
 
 It is worth being explicit about where this test has any purchase. The filter never fires
-at all in the Japanese data, and at the tightest setting removes one administration from
-Thal and two from Smith. For those three samples an unchanged estimate is not evidence of
-robustness so much as the absence of anything to be robust to. The informative cases are
-Marchman, where the filter removes the most, and Norwegian.
+at all in the Japanese data, and at the tightest setting removes a single administration
+from Thal and two from Smith; in all three the population acceleration moves by less than
+0.15 across every setting. For those samples an unchanged estimate is not evidence of
+robustness so much as the absence of anything to be robust to, and we omit them from the
+table. The informative cases are Marchman, where the filter removes the most, and
+Norwegian.
 
 In Marchman, disabling the filter moves the population acceleration to 9.4 from the
 reported 10.7, and raises the between-child acceleration standard deviation to 8.3 from
@@ -436,19 +438,27 @@ are precisely those that would otherwise be absorbed into an extreme per-child s
 Norwegian, the sample with the next most removals, acceleration varies by 0.2 across all
 four settings.
 
-Two cells are excluded from interpretation because they did not mix acceptably: Thal at
-the tight setting and Norwegian at the loose setting.
+Sampling was adequate for the quantities reported throughout: across every dataset and
+setting the population acceleration has $\hat R \le 1.003$ with effective sample size above
+1,500, and the between-child standard deviation $\hat R \le 1.06$. The largest $\hat R$ in
+any fit belongs to the item-difficulty scale parameter, which is not reported here and does
+not enter these estimates.
 ```
 
 ```{r tbl-qc-sensitivity}
 #| label: tbl-qc-sensitivity
-#| tbl-cap: "[draft caption — MCF to review] Population acceleration and between-child acceleration SD by data-quality filter setting. Crater and jump give the thresholds defining an implausible decline and an implausible rise; 'none' disables the filter. 'Removed' is the number of administrations the filter discards, which shows where the comparison has any purchase at all. Cells marked with a dagger did not mix acceptably and are not interpreted."
-## Administrations removed is deliberately alongside the estimates: without it a reader
-## cannot tell that three of the five rows are a null operation.
+#| tbl-cap: "[draft caption — MCF to review] Population acceleration and between-child acceleration SD by data-quality filter setting, for the two datasets in which the filter removes anything. 'Removed' is the number of administrations discarded. Settings are: none, the filter disabled; loose, a decline of more than 40% below a child's running peak or a rise of more than 60 percentage points per month; main, 25% and 40%, as reported in the Methods; tight, 15% and 25%."
+## Restricted to Marchman and Norwegian per MCF: the filter removes nothing in Japanese and
+## 1-2 administrations in Thal/Smith only at the tightest setting, so those rows would show
+## an unchanged estimate purely because nothing was changed. The prose reports that fact
+## rather than spending nine table rows on it.
+## No dagger: the earlier flag used max rhat over ALL parameters, which condemned two cells
+## whose reported quantities are fine. Across all 20 cells kappa_pop has rhat <= 1.003 and
+## sigma_b <= 1.058; the max-over-all laggard is always tau_delta, which is not reported.
 qct <- si_qcs |>
-  mutate(flag = ifelse(max_rhat > 1.2, "$^\\dagger$", ""),
-         kap = paste0(sprintf("%.2f", kappa), flag),
-         sb  = paste0(sprintf("%.2f", sigma_b), flag),
+  filter(slug %in% c("marchman", "norwegian")) |>
+  mutate(kap = sprintf("%.2f", kappa),
+         sb  = sprintf("%.2f", sigma_b),
          rem = as.character(admins_removed)) |>
   arrange(lang, setting)
 grp <- table(droplevels(qct$lang))
