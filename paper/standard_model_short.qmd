@@ -156,7 +156,7 @@ Our analysis depends on the availability of longitudinal data at the individual 
 
 We analyze five longitudinal datasets of monolingual, typically-developing children ages `r age_lo`--`r age_hi` (three from American English and one each from Norwegian and Japanese, $N_{total} = `r sum(fig1_fan$meta$n_kids)`$; see SI: Datasets). We fit the accelerating accumulator model (M3) to each dataset using Bayesian inference in Stan [@stancite]. To test whether each model component was necessary, we additionally fit three model ablations, removing individual variation in acceleration (removing $\kappa_i$; M2), removing individual variation in efficiency (removing $\xi_i$; M1), and finally removing acceleration entirely (removing $\kappa$; M0). Our primary results come from children with three or more longitudinal administrations, but all results hold on the larger dataset including children with two administrations. 
 
-The accelerating accumulator provided the best fit to children's growth trajectories (@fig-schematic B, see SI: Full Model Comparison Results), with substantial differences in reliable improvements in item-level expected log predictive density between the accelerating accumulator and the next best model (LOO ELPD $>`r loo_min`$ for all five datasets). Indeed, fits from M3 corresponded closely to curves derived from a non-parametric GAMLSS beta regression, a flexible model class used to produce percentile norms for the CDI instruments [@marchman2021] (see SI: Comparison to a Non-Parametric Quantile Model).
+The accelerating accumulator provided the best fit to children's growth trajectories (@fig-schematic B, see SI: Full Model Comparison Results), with substantial differences in reliable improvements in item-level expected log predictive density between the accelerating accumulator and the next best model (LOO ELPD $>`r loo_min`$ for all five datasets). Indeed, fits from M3 corresponded closely to curves derived from a non-parametric GAMLSS beta regression, a flexible model class used to produce percentile norms for the CDI instruments [@marchman2021] (see SI: Comparison to a Non-Parametric Quantile Model). 
 
 Critically, for all datasets, estimates of acceleration were high, robustly rejecting the pure accumulator ($\kappa=1$) in every case :`r kap_lo` [`r kap_lo_q5`, `r kap_lo_q95`] -- `r kap_hi` [`r kap_hi_q5`, `r kap_hi_q95`].  $\kappa$ estimates were robust across model and dataset variants, including a 2PL IRT model and a hierarchical model fit to all datasets simultaneously (SI: 2PL Model Comparison and SI: Robustness Across Model and Data Settings). Linear (rather than logarithmic) growth models did not provide better fit (see SI: Linear vs. Logistic Age). 
 
@@ -305,7 +305,7 @@ To quantify this phenomenon, we combined our fitted model with corpus frequencie
 
 ```{r fig-llm-acceleration, fig.width=7.5, fig.height=7.8}
 #| label: fig-llm-acceleration
-#| fig-cap: "(A) Density of the acceleration exponent $\\kappa$ for both children (per child, English and Norwegian) and LMs (by word). (B) Variation in acceleration (kappa) across children and LMs. (C) Fractional return on training (the ratio of decrease in loss to excess loss) for both children and LMs. Blue lines show model trajectories; red lines show fitted trajectories from children. Three children are highlighted in dark red with horizontal uncertainty bands indicating +/- 1 SD in calibration of their input."
+#| fig-cap: "(A) Density of the acceleration exponent $\\kappa$ for both children (per child, English and Norwegian) and LMs (by word). (B) Variation in acceleration (kappa) across children and LMs. (C) Fractional return on training (the ratio of decrease in loss to excess loss) for both children and LMs. Blue lines show model trajectories; red lines show fitted trajectories from children. Three children are highlighted in dark red with horizontal uncertainty bands indicating +/- 1 SD in calibration of their input. The unit accumulator ceiling shows the maximal possible fractional return for a pure accumulator model."
 ## LAYOUT/FONT SIZING. out.width="100%" scales every figure to the 6.5in text width, so
 ## the on-page font size is base_size * 6.5/fig.width. At the old fig.width=14 that made
 ## base_size 11 render at 5.1pt. Dropping to 7.5 (scale 0.87) puts base_size 11 at ~9.5pt
@@ -360,7 +360,7 @@ pB <- ggplot() +
   ggrepel::geom_text_repel(data=ex_lab, aes(tokens, gamma, label=lab), colour=col_ex, size=3.4,
                            nudge_x=0.12, direction="y", segment.size=0.2, min.segment.length=0) +
   annotate("text", x=3.3e6, y=0.60, hjust=0, size=3.5, colour=col_lm, fontface="italic", label="LMs (10 seeds)") +
-  annotate("text", x=3.3e6, y=1.22, hjust=0, size=3.2, colour="grey45", label="unit accumulator") +
+  annotate("text", x=3.3e6, y=1.22, hjust=0, size=3.2, colour="grey45", label="unit accumulator ceiling") +
   annotate("text", x=3.3e6, y=16, hjust=0, size=3.5, colour=col_child, fontface="italic",
            label=sprintf("all children (n=%d);\n3 exemplars ± input SD", n_child)) +
   scale_x_log10(breaks=c(3e6,5e6,1e7,2.4e7), labels=c("3M","5M","10M","24M")) +
@@ -440,7 +440,7 @@ Children were highly variable in their trajectories, but we observed almost no v
 
 # Discussion
 
-How does children's vocabulary grow over early childhood? We proposed that this process is characterized by accelerating accumulation, in which variation between children is produced by differences in the efficiency of the accumulation process and the rate of acceleration. This cognitive process leads to a simple growth model that provides a good description of cross-linguistic longitudinal data. In contrast to children, who accelerate, LMs decelerate across training. Children learn more from each additional unit of experience, whereas conventional LMs do not.
+How does children's vocabulary grow over early childhood? We proposed that this process is characterized by accelerating accumulation, in which variation between children is produced by differences in the efficiency of the accumulation process and the rate of acceleration. This cognitive process leads to a simple growth model that provides a good description of cross-linguistic longitudinal data. In contrast to children, who accelerate, LMs decelerate. Children learn more from each additional unit of experience, whereas conventional LMs do not.
 
 What explains the acceleration in children's word learning? During the first three years, children  
 
@@ -453,58 +453,6 @@ Contribution of knowledge vs. process might change with age
 The accelerating accumulator is a parsimonious description of variation in children's vocabulary growth that accords with the structure of the learning problem faced by children. But our evidence is based on statistical fit and model comparison, rather than a causal manipulation. More work is required to test the accumulator as a mechanistic account. 
 
 In sum, our study suggests that the rate of return on training data is a fundamental difference in word learning between children and LMs. Characterizing the nature of children's accelerating returns and understanding the circumstances under which it can arise in artificial systems should thus be a focus for future investigation.
-
-# Methods
-
-## Data and code
-
-Reproducible code for this paper is available at \href{}{http://github.com/langcog/standard-model-2}. Data were retrieved from Wordbank using the `wordbankr` package [@frank2017] and CHILDES using the `childesr` package [@sanchez2019].
-
-All longitudinal datasets with three or more observations per child were included. We applied a quality filter to exclude administrations that showed either decreases of more than 25% of productive vocabulary or increases that exceeded 40% of total vocabulary per month. This excluded `r n_excl` children in total (`r pct_excl`%), nearly all from the English (Marchman) dataset (`r qc_mar`%; Norwegian `r qc_nor`%, none from the others) (See SI: Data Exclusions). 
-
-## Bayesian models
-
-Bayesian models were fit separately to each dataset using Stan [@stan] using four independent chains, per the specification described in the text. The model was parameterized to capture individual children's variation from the population mean such that $\xi_i = \mu_\xi + a_i$ and $\kappa_i = \mu_\kappa + b_i$, where $(a_i, b_i) \sim \mathrm{MVN}(\mathbf 0, \Sigma)$. To facilitate interpretation of the accumulator mechanism, we included the constant $\log H = \log(365) \approx 5.90$ (waking hours/month) and the anchor age $a_0 = 18$ months (so $\log(t/a_0)=0$ at 18 months).
-
-We chose weakly informative priors throughout, including on the efficiency and acceleration parameters $\mu_\xi \sim \mathcal N(-6,\ 5)$ and $\mu_\kappa \sim 1 +  \mathcal N(0,\ 5)$ (centered around the pure accumulator model) as well as the individual child standard deviations $\sigma_a \sim \mathrm{Half\text{-}Normal}(0,\ 3)$ and 
-$\sigma_b \sim \mathrm{Half\text{-}Normal}(0,\ 5)$ and the item difficulties $\tau_\delta \sim \mathrm{Half\text{-}Normal}(0,\ 5)$. We also chose a prior that mildly regularized the correlations between $a_i$ and $b_i$ ($\mathbf L \sim \mathrm{LKJ}(2)$).
-
-## Learning efficiency
-
-Age of acquisition for each word was computed based on the weighted average of word difficulties $\delta_j$ from the three fitted M3 models for English. For the population level of $\xi$ and $\kappa$, we computed the earliest age at which there was at least a .5 probability of producing the word. Average exposures per month to each word were computed as $N_j = R \cdot t_{50}(j) \cdot p_j$, where $R$ is the rate of input (words/month), $t_{50}(j)$ is the word level age of acquisition computed above, and $p_j$ is the word's corpus probability. We used average input estimates derived from @sperry2019 and @hart1995 for our estimate of $R$ (see SI: Input Estimation), and computed $p_j$ from empirical word frequencies in all North American English corpora in childes-db release 2021.1. 
-
-## Language model training
-
-Following @feng2024, we fit randomly-initialized \texttt{GPT-2-small} (124M parameters) models, using the 24M word (~47M token) preparation of English-language CHILDES data from that study. We also fit models to the 2nd BabyLM challenge dataset (downloaded from [osf.io/ad7qg](), with CHILDES data removed) [@hu2024] and the ClimbMix dataset (available at [https://huggingface.co/datasets/karpathy/climbmix-400b-shuffle]()) [@diao2025]. We constructed three disjoint subsets of 24M words from each.
-
-For comparability, all data were tokenized using a standard BPE tokenizer trained on the full CHILDES dataset (all 24M). Surprisal was computed as mean per-word negative log likelihood over ~50 held-out validation contexts (last 128 tokens each) for the 609 CDI words that were used in @chang2022 and that appeared in the training data with sufficient frequency in the CHILDES held-out contexts. Surprisal values for sigmoid fits were read out from the epoch with lowest validation loss.
-
-For the computation of surprisal across training runs ("training"), we trained models using 3 random seeds on the full dataset. For the computation across different dataset sizes ("development"), the data were segmented into 18 nested datasets ranging in size from .5M to the full 24M. We then chose 10 random seed values and trained 10 models on each dataset for a total of 180 models. For the computation of variability across model runs ("composition"), we ran 8 random seed values across 12 nested dataset sizes for three disjoint subsets of both BabyLM and ClimbMix, resulting in 8 (seeds) x 12 (sizes) x 3 (subsets) x 2 (datasets) = 576 distinct models.
-
-Models were trained for a total of 20 epochs with sequence length 1024 and batch size 8, using AdamW for optimization and learning rate of 1e-4 with a linear decay, no warmup, weight decay of 0, and no in-epoch shuffling. Training was performed on NVIDIA A40 GPUs. All trained models are available at [https://huggingface.co/mcxfrank/childes-gpt2-ladder]() and [https://huggingface.co/mcxfrank/gpt2-composition-control]().
-
-## Fractional return on input
-
-Fractional return on input was computed for models based on mean surprisal $L(D)$ of the CDI words after training on
-$D$ word tokens of input. This follows the form from @hoffmann2022 of $L(D) = E + B\,D^{-\beta}$, with $E$ the irreducible entropy floor and $B, \beta$ fit across budgets (here $E \approx 2.94$ nats, $B \approx 312$, $\beta \approx 0.32$,
-$R^2 = 0.998$). The excess loss $L(D) - E = B\,D^{-\beta}$ is the reducible
-part that training removes; it falls as a power law of slope $-\beta$. Marginal return is the loss removed per $e$-fold of data, 
-
-$$R(D) = -\frac{\mathrm{d}L}{\mathrm{d}\ln D} = \beta\,\big(L(D) - E\big),$$
-
-\noindent obtained by differentiating the scaling law. We compute the ratio of this quantity to the excess loss, obtaining the fractional return: the share of the remaining reducible loss removed
-per $e$-fold, $\gamma_{\text{LM}}(D) = \frac{R(D)}{L(D) - E} = \beta.$
-For a power law, this is constant: $\gamma_{\text{LM}} = \beta \approx 0.32$
-at every budget, recapitulating the scaling law.
-
-We can compute the same quantity for children. We define a vocabulary production
-loss, $L_i(t) = \operatorname{mean}_j[-\log p_{ij}(t)]$, whose floor is zero
-(a known word is produced, $p \to 1$). Its marginal return is
-$R_i(t) = -\mathrm{d}L_i/\mathrm{d}\log t = \kappa_i\,\operatorname{mean}_j(1 - p_{ij})$,
-so the fractional return is
-$$\gamma_i(t) = \frac{R_i(t)}{L_i(t)}
- = \kappa_i\,\frac{\operatorname{mean}_j(1 - p_{ij})}{\operatorname{mean}_j(-\log p_{ij})},$$
-which rises toward the child's own $\kappa_i$ as the vocabulary saturates.
 
 # Acknowledgements
 

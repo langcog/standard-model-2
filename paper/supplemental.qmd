@@ -23,6 +23,59 @@ knitr::opts_chunk$set(
 )
 ```
 
+# Materials and Methods
+
+## Data and code
+
+Reproducible code for this paper is available at \href{}{http://github.com/langcog/standard-model-2}. Data were retrieved from Wordbank using the `wordbankr` package [@frank2017] and CHILDES using the `childesr` package [@sanchez2019].
+
+All longitudinal datasets with three or more observations per child were included. We applied a quality filter to exclude administrations that showed either decreases of more than 25% of productive vocabulary or increases that exceeded 40% of total vocabulary per month. This excluded `r n_excl` children in total (`r pct_excl`%), nearly all from the English (Marchman) dataset (`r qc_mar`%; Norwegian `r qc_nor`%, none from the others) (See SI: Data Exclusions).
+
+## Bayesian models
+
+Bayesian models were fit separately to each dataset using Stan [@stan] using four independent chains, per the specification described in the text. The model was parameterized to capture individual children's variation from the population mean such that $\xi_i = \mu_\xi + a_i$ and $\kappa_i = \mu_\kappa + b_i$, where $(a_i, b_i) \sim \mathrm{MVN}(\mathbf 0, \Sigma)$. To facilitate interpretation of the accumulator mechanism, we included the constant $\log H = \log(365) \approx 5.90$ (waking hours/month) and the anchor age $a_0 = 18$ months (so $\log(t/a_0)=0$ at 18 months).
+
+We chose weakly informative priors throughout, including on the efficiency and acceleration parameters $\mu_\xi \sim \mathcal N(-6,\ 5)$ and $\mu_\kappa \sim 1 +  \mathcal N(0,\ 5)$ (centered around the pure accumulator model) as well as the individual child standard deviations $\sigma_a \sim \mathrm{Half\text{-}Normal}(0,\ 3)$ and 
+$\sigma_b \sim \mathrm{Half\text{-}Normal}(0,\ 5)$ and the item difficulties $\tau_\delta \sim \mathrm{Half\text{-}Normal}(0,\ 5)$. We also chose a prior that mildly regularized the correlations between $a_i$ and $b_i$ ($\mathbf L \sim \mathrm{LKJ}(2)$).
+
+## Learning efficiency
+
+Age of acquisition for each word was computed based on the weighted average of word difficulties $\delta_j$ from the three fitted M3 models for English. For the population level of $\xi$ and $\kappa$, we computed the earliest age at which there was at least a .5 probability of producing the word. Average exposures per month to each word were computed as $N_j = R \cdot t_{50}(j) \cdot p_j$, where $R$ is the rate of input (words/month), $t_{50}(j)$ is the word level age of acquisition computed above, and $p_j$ is the word's corpus probability. We used average input estimates derived from @sperry2019 and @hart1995 for our estimate of $R$ (see SI: Input Estimation), and computed $p_j$ from empirical word frequencies in all North American English corpora in childes-db release 2021.1. 
+
+## Language model training
+
+Following @feng2024, we fit randomly-initialized \texttt{GPT-2-small} (124M parameters) models, using the 24M word (~47M token) preparation of English-language CHILDES data from that study. We also fit models to the 2nd BabyLM challenge dataset (downloaded from [osf.io/ad7qg](), with CHILDES data removed) [@hu2024] and the ClimbMix dataset (available at [https://huggingface.co/datasets/karpathy/climbmix-400b-shuffle]()) [@diao2025]. We constructed three disjoint subsets of 24M words from each.
+
+For comparability, all data were tokenized using a standard BPE tokenizer trained on the full CHILDES dataset (all 24M). Surprisal was computed as mean per-word negative log likelihood over ~50 held-out validation contexts (last 128 tokens each) for the 609 CDI words that were used in @chang2022 and that appeared in the training data with sufficient frequency in the CHILDES held-out contexts. Surprisal values for sigmoid fits were read out from the epoch with lowest validation loss.
+
+For the computation of surprisal across training runs ("training"), we trained models using 3 random seeds on the full dataset. For the computation across different dataset sizes ("development"), the data were segmented into 18 nested datasets ranging in size from .5M to the full 24M. We then chose 10 random seed values and trained 10 models on each dataset for a total of 180 models. For the computation of variability across model runs ("composition"), we ran 8 random seed values across 12 nested dataset sizes for three disjoint subsets of both BabyLM and ClimbMix, resulting in 8 (seeds) x 12 (sizes) x 3 (subsets) x 2 (datasets) = 576 distinct models.
+
+Models were trained for a total of 20 epochs with sequence length 1024 and batch size 8, using AdamW for optimization and learning rate of 1e-4 with a linear decay, no warmup, weight decay of 0, and no in-epoch shuffling. Training was performed on NVIDIA A40 GPUs. All trained models are available at [https://huggingface.co/mcxfrank/childes-gpt2-ladder]() and [https://huggingface.co/mcxfrank/gpt2-composition-control]().
+
+## Fractional return on input
+
+Fractional return on input was computed for models based on mean surprisal $L(D)$ of the CDI words after training on
+$D$ word tokens of input. This follows the form from @hoffmann2022 of $L(D) = E + B\,D^{-\beta}$, with $E$ the irreducible entropy floor and $B, \beta$ fit across budgets (here $E \approx 2.94$ nats, $B \approx 312$, $\beta \approx 0.32$,
+$R^2 = 0.998$). The excess loss $L(D) - E = B\,D^{-\beta}$ is the reducible
+part that training removes; it falls as a power law of slope $-\beta$. Marginal return is the loss removed per $e$-fold of data, 
+
+$$R(D) = -\frac{\mathrm{d}L}{\mathrm{d}\ln D} = \beta\,\big(L(D) - E\big),$$
+
+\noindent obtained by differentiating the scaling law. We compute the ratio of this quantity to the excess loss, obtaining the fractional return: the share of the remaining reducible loss removed
+per $e$-fold, $\gamma_{\text{LM}}(D) = \frac{R(D)}{L(D) - E} = \beta.$
+For a power law, this is constant: $\gamma_{\text{LM}} = \beta \approx 0.32$
+at every budget, recapitulating the scaling law.
+
+We can compute the same quantity for children. We define a vocabulary production
+loss, $L_i(t) = \operatorname{mean}_j[-\log p_{ij}(t)]$, whose floor is zero
+(a known word is produced, $p \to 1$). Its marginal return is
+$R_i(t) = -\mathrm{d}L_i/\mathrm{d}\log t = \kappa_i\,\operatorname{mean}_j(1 - p_{ij})$,
+so the fractional return is
+$$\gamma_i(t) = \frac{R_i(t)}{L_i(t)}
+ = \kappa_i\,\frac{\operatorname{mean}_j(1 - p_{ij})}{\operatorname{mean}_j(-\log p_{ij})},$$
+which rises toward the child's own $\kappa_i$ as the vocabulary saturates.
+
+
 # Comparison with Prior Models
 
 Our accelerating accumulator model has not been described in the literature in the exact form we use, but it is closely related to other models. Here we describe these models as special cases of our model. We write the latent ability of child $i$ on word $j$ at age $t$ as
@@ -178,6 +231,8 @@ ggplot() +
 
 # Full Model Comparison Results
 
+## Robustness across datasets
+
 @tbl-loo gives the full leave-one-out model comparison results across models for both the dataset with 3+ administrations/child and the larger dataset with 2+ administrations/child. 
 
 ```{r tbl-loo}
@@ -218,59 +273,15 @@ knitr::kable(tab |> select(Model, all_of(lang_order)), format = "latex", booktab
   kableExtra::kable_styling(latex_options = "scale_down", font_size = 8)
 ```
 
-# Prospective Cross-Validation
+## Individual-level cross-validation
 
-```md
-## Predicting a child's later vocabulary  [draft for promotion — MCF to review]
+The model comparisons above report ELPD LOO values for held-out data from individual item-responses, which are nested within children. To assess the value of M3 (the accelerating accumulator) in making fully out-of-sample predictions, we designed a prospective test. As our data, we selected a subset of the Norwegian sample that included 371 children with $> 6$ longitudinal CDIs. We then fit models to the child's most recent $k$ observations and used these to predict the child's next administration (3 months later). This design avoids confounding data density with the gap between the fitted and predicted observations. 
 
-The model comparison above holds out one item response at a time. A child contributes
-several hundred responses per administration, so a held-out response remains highly
-predictable from that same child's other words, from that word's responses in other
-children, and often from the same sitting. That comparison therefore measures how well the
-model interpolates within observed data, and it cannot by construction penalise a
-per-child slope that is more flexible than the data warrant: a $\kappa_i$ that merely
-threads a child's own administrations still scores well.
-
-We therefore ran a prospective test. Holding out each child's *final* administration, we
-fit the model to their earlier ones and scored the held-out sitting, which lies at an age
-the model never saw for that child. Because the amount of information available to
-estimate a per-child slope is itself in question, we varied it: among Norwegian children
-with at least six administrations ($n = 371$), we used only the $k$ administrations
-immediately preceding the held-out one, for $k$ from two to five. The sample and the target
-are identical throughout, and taking the *most recent* $k$ holds the gap between the last
-training point and the target fixed at three months, so that only the precision of
-$\kappa_i$ varies.
-
-The result is a clean gradient (@tbl-cv-depth). With two training administrations the
-accelerating model predicts the held-out sitting substantially *worse* than the model with
-a shared slope, and the penalty falls monotonically as more history is supplied, reaching
-zero at five. The mechanism is visible in the fitted variance: the between-child
-acceleration standard deviation is inflated more than twofold at $k=2$ relative to its
-full-data value, and converges to that value as $k$ grows. With two points a per-child
-slope has no residual degrees of freedom, so it absorbs measurement noise, and projecting
-those noisy slopes forward is actively costly. The full model does not collapse onto the
-simpler one as information accumulates; the between-child variation remains, but it stops
-being overestimated.
-
-Two conclusions follow, and they are different. Children do differ in acceleration: the
-variance component is well identified, and the model comparison prefers the full model
-throughout. But a child's *estimated* acceleration does not forecast their own later
-vocabulary better than the population value does, even when it is estimated as well as
-these data allow. A variance component can be identifiable in aggregate while individual
-estimates remain too noisy to be predictively useful, and that is what we find. It also
-explains why the two model comparisons disagree: interpolation never extrapolates, so the
-extra flexibility only ever helps there.
-
-For completeness, the same ladder built from each child's *earliest* $k$ administrations
-shows the same gradient but remains strongly negative throughout, because that design
-also shortens the forecast horizon from twelve months to seven as $k$ grows. Comparing the
-two makes the point that extrapolation distance, rather than model flexibility alone,
-drives most of the cost.
-```
+Results from this analysis are shown in @tbl-cv-depth. The result is very sensitive to the value of $k$ used. With $k=2$, the fixed slope model (M2) clearly predicts better because the per-child slope model (M3) fully parameterizes the two observations per child and absorbs measurement error as a result. This effect decreases as $k$ increases until the two models are tied by $k=5$. We expect that with even denser data, a separate slope parameter would lead to individually better fits, but in practice the single slope model makes acceptable predictions. Importantly, this result still supports the presence of acceleration for each child, but it suggests that measuring the precise amount of acceleration each child is undergoing requires substantial measurement effort. 
 
 ```{r tbl-cv-depth}
 #| label: tbl-cv-depth
-#| tbl-cap: "[draft caption — MCF to review] Prospective cross-validation for Norwegian children with at least six administrations (n = 371). Each row fits the model to k administrations and scores the child's held-out final sitting. dELPD/child is the per-child difference in expected log predictive density, full model minus shared-slope model; negative favours the shared slope. sigma_b is the between-child acceleration SD in the training fit, against a full-data value of 5.65. In the 'recent' ladder the forecast horizon is fixed at three months so only estimation precision varies; in the 'earliest' ladder the horizon also shrinks from twelve months to seven."
+#| tbl-cap: "Prospective cross-validation for Norwegian children with at least six administrations (n = 371). Each row describes a model fit to k administrations and scored on the child's held-out final sitting. dELPD/child is the per-child difference in expected log predictive density, full model minus shared-slope model; negative favours the shared slope. sigma_b is the between-child acceleration SD in the training fit, against a full-data value of 5.65."
 ## Both ladders, stacked. The 'recent' (last-k) one is the interpretable test; 'earliest'
 ## (first-k) is shown because the contrast isolates how much of the cost is extrapolation
 ## distance rather than flexibility.
@@ -289,7 +300,7 @@ knitr::kable(cvt |> select(-mode), format = "latex", booktabs = TRUE, escape = F
              col.names = c("$k$", "horizon (mo)", "$\\Delta$ELPD/child", "SE", "$z$",
                            "\\% children better", "$\\sigma_b$")) |>
   kableExtra::pack_rows(lab[["last"]], 1, n_last) |>
-  kableExtra::pack_rows(lab[["first"]], n_last + 1, nrow(cvt)) |>
+  # kableExtra::pack_rows(lab[["first"]], n_last + 1, nrow(cvt)) |>
   kableExtra::kable_styling(font_size = 9, latex_options = "HOLD_position")
 ```
 
@@ -591,9 +602,9 @@ si_f2m0$slopes |>
   select(model, lexical_class, n, elasticity, r2_ela) |>
   tidyr::pivot_wider(names_from = model, values_from = c(elasticity, r2_ela)) |>
   transmute(Class = as.character(lexical_class), n,
-            m3 = sprintf("%+.2f", `elasticity_M3 (accelerating)` - 1),
+            m3 = sprintf("%+.2f", `elasticity_M3 (accelerating)`),
             m3r = sprintf("%.2f", `r2_ela_M3 (accelerating)`),
-            m0 = sprintf("%+.2f", `elasticity_M0 (pure accumulator)` - 1),
+            m0 = sprintf("%+.2f", `elasticity_M0 (pure accumulator)`),
             m0r = sprintf("%.2f", `r2_ela_M0 (pure accumulator)`)) |>
   knitr::kable(format = "latex", booktabs = TRUE, escape = FALSE,
                align = c("l", "r", "r", "r", "r", "r"),
