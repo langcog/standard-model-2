@@ -11,8 +11,15 @@
 ## averaged over posterior draws of (xi_i, kappa_i, delta_j). A plug-in estimate would
 ## ignore posterior spread and flatter the more flexible model.
 ##
-## Usage:  Rscript studies/bayes_long/01c_fit_forward_cv.R <slug> <m2|m3> [tag]
+## Usage:  Rscript studies/bayes_long/01c_fit_forward_cv.R <slug> <m2k1|m2|m3> [tag]
 ##   tag defaults to "fcv"; pass e.g. "fcv4" for the >=4-administration bundles.
+##
+## m2k1 is M2 with the acceleration exponent pinned to 1 ("M2_0"). Pairing m2k1 vs m2
+## tests the paper's HEADLINE claim prospectively -- both carry xi_i, so each child is
+## anchored at their own level and only within-child growth SHAPE is at stake -- whereas
+## m2 vs m3 tests whether per-child acceleration VARIANCE forecasts. Neither M0 nor M1
+## would serve, since without xi_i the comparison is dominated by between-child level
+## variance and rewards a kappa fitted to cross-sectional age structure.
 ## Env:    STAN_CHAINS/WARMUP/ITER/THREADS/ADAPT_DELTA, STAN_INIT, CV_DRAWS (default 400)
 ## Output: fits/bayes_long/summaries/<slug>_<tag>_<model>.rds
 
@@ -20,7 +27,7 @@ suppressPackageStartupMessages({library(cmdstanr); library(posterior)})
 args  <- commandArgs(trailingOnly = TRUE)
 slug  <- args[1]; model <- args[2]
 TAG   <- if (length(args) >= 3) args[3] else "fcv"
-stopifnot(model %in% c("m2", "m3"))
+stopifnot(model %in% c("m2k1", "m2", "m3"))
 
 CHAINS  <- as.integer(Sys.getenv("STAN_CHAINS",      "4"))
 WARMUP  <- as.integer(Sys.getenv("STAN_WARMUP",      "1000"))
@@ -33,7 +40,7 @@ PRI <- list(mu_xi_prior_mean=-6, mu_xi_prior_sd=5,
             delta_prior_mean=0,  delta_prior_sd=5,
             sigma_a_prior_sd=3,  sigma_b_prior_sd=5,
             tau_delta_prior_sd=5)
-STAN_FILE <- c(m2 = "m2_efficiency", m3 = "m3_full")[model]
+STAN_FILE <- c(m2k1 = "m2_efficiency_k1", m2 = "m2_efficiency", m3 = "m3_full")[model]
 
 b  <- readRDS(file.path("fits", "bayes_long", sprintf("bundle_%s_%s.rds", slug, TAG)))
 tr <- b$stan_data; te <- b$test
@@ -92,7 +99,8 @@ pop_diag <- sm[sm$variable %in% POP, c("variable", "median", "rhat", "ess_bulk")
 gd <- function(v) posterior::as_draws_matrix(fit$draws(v))
 xi_d <- gd("xi"); dj_d <- gd("delta_j")
 kap_d <- if (model == "m3") gd("kappa") else {
-  ## m2 has a single population kappa: broadcast it to every child
+  ## m2 and m2k1 have a single population kappa: broadcast it to every child
+  ## (for m2k1 it is the constant 1, emitted by that model's generated quantities)
   kp <- as.numeric(posterior::as_draws_matrix(fit$draws("kappa_pop")))
   matrix(kp, nrow = length(kp), ncol = tr$I)
 }
