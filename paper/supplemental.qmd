@@ -82,7 +82,7 @@ which rises toward the child's own $\kappa_i$ as the vocabulary saturates.
 Our accelerating accumulator model has not been described in the literature in the exact form we use, but it is closely related to other models. Here we describe these models as special cases of our model. We write the latent ability of child $i$ on word $j$ at age $t$ as
 
 $$\eta_{i,j}(t) = \log r_i + \log \alpha_i + \kappa_i \log t - \delta_j,$$
-where $r_i$ and $\alpha_i$ decompose the term $\xi_i$ in our model: $r_i$ is the input rate for the child and $alpha_i$ is their learning efficiency. Several prior accumulator models can then be seen as special cases in which one or more of these components is fixed:
+where $r_i$ and $\alpha_i$ decompose the term $\xi_i$ in our model: $r_i$ is the input rate for the child and $\alpha_i$ is their learning efficiency. Several prior accumulator models can then be seen as special cases in which one or more of these components is fixed:
 
 * @mcmurray2007 is a pure accumulator in which $\kappa=1$ and children do not differ from one another ($\sigma_{\alpha}=\sigma_{\kappa}=0$), so both input rate and efficiency reduce to a constant, corresponding to our M0. 
 * @hidaka2013 introduce a model in which ability grows as $t^{D+1}$, creating acceleration. This exponent is exactly our $\kappa$, and this model is equivalent to our M1.
@@ -90,8 +90,8 @@ where $r_i$ and $\alpha_i$ decompose the term $\xi_i$ in our model: $r_i$ is the
 
 In addition, several other models in the literature can be described as variants of this framework:
 
-* @mitchell2009 augment the pure M0 accumulator with a "leverage" term, in which words learned earlier facilitate the learning of later words. Their central result is negative one: leverage changes the shape and timing of vocabulary growth, but it cannot create acceleration that is not already present in the distribution of word difficulties. 
-* @mollica2017 define a pure accumulator model with $kappa=1$, but with an additional parameter relating to the speed of per-word accumulation. This model maps onto a combination of our M0 with the a 2-parameter logistic variant that we fit below.
+* @mitchell2009 augment the pure M0 accumulator with a "leverage" term, in which words learned earlier facilitate the learning of later words. Their central result is a negative one: leverage changes the shape and timing of vocabulary growth, but it cannot create acceleration that is not already present in the distribution of word difficulties. 
+* @mollica2017 define a pure accumulator model with $\kappa=1$, but with an additional parameter relating to the speed of per-word accumulation. This model maps onto a combination of our M0 with the a 2-parameter logistic variant that we fit below.
 
 # Non-identifiability in Cross-Sectional Data
 
@@ -166,7 +166,7 @@ mk(fanning,  "(B) diverging trajectories (slopes vary)")
 
 # Datasets
 
-@tbl-datasets gives the characteristics of each dataset used. In the main text we focus on children with three or more administrations (for more precise estimates of $\kappa$), but below we also confirm the robustness of our claims including children wtih two or more administrations. 
+@tbl-datasets gives the characteristics of each dataset used. In the main text we focus on children with three or more administrations (for more precise estimates of $\kappa$), but below we also confirm the robustness of our claims including children with two or more administrations. 
 
 ```{r tbl-datasets}
 #| label: tbl-datasets
@@ -187,14 +187,18 @@ mk(fanning,  "(B) diverging trajectories (slopes vary)")
 #  multi-analysis table AND now needs to define the "N (3+/2+)" column -- rewrite for
 #  the 5 longitudinal datasets. (c) the both-N column addresses the earlier
 #  N-reconciliation note: the 3+ analysis total is 1,841; the 2+ total is 4,922.]
-si_ds |>
+si_ds <- si_ds |>
   transmute(citation, language,
             n = sprintf("%s / %s", format(n_kids, big.mark = ","),
                         format(n_kids_all, big.mark = ",")),
             n_admins = format(n_admins, big.mark = ","),
             mean_age = sprintf("%.1f", mean_age),
             min_age = as.character(min_age), max_age = as.character(max_age),
-            med_admins = as.character(med_admins)) |>
+            med_admins = as.character(med_admins)) 
+
+si_ds$citation[1:3] <- c("Thal (Wordbank)", "Smith (Wordbank)", "Marchman (Wordbank)")
+
+si_ds |>
   ## format/booktabs as for the other tables: APA rules, no vertical or per-row lines.
   knitr::kable(
     format = "latex", booktabs = TRUE,
@@ -423,7 +427,7 @@ In the main analysis we use a Rasch (1PL) item model, in which every word has a 
 
 @tbl-2pl shows the results of this comparison. The 2PL does genuinely fit better, with substantial differences in LOO ELPD for every language. However, model results are otherwise unchanged. Estimates of $\kappa$ increase somewhat, but they are not directly comparable across item models. In normal IRT models, ability scores are constrained to a standard normal distribution, but in our model, abilities grow over time so there is no single standard scale, and the addition of the discrimination parameter can change the overall scale. For this reason, we report $\log \kappa$, since a pure change of units would be a constant shift. In addition, across individual words, we find that the predicted age of acquisition (the age at which the word is predicted to have a 50% probability of being known) is almost identical, suggesting that the models are highly comparable. 
 
-Critically, $\delta$ (difficulty) and $lambda$ (discrimination) have a very low correlation. If harder words were substantially more discriminating, this correlation could inflate estimates of $\kappa$ in the 1PL model; in practice we find little support for this hypothesis.
+Critically, $\delta$ (difficulty) and $\lambda$ (discrimination) have a very low correlation. If harder words were substantially more discriminating, this correlation could inflate estimates of $\kappa$ in the 1PL model; in practice we find little support for this hypothesis.
 
 ```{r tbl-2pl}
 #| label: tbl-2pl
@@ -566,7 +570,7 @@ Our calibration computations assume that input is constant across age. To provid
 
 ```{r fig-input-age, fig.width=7.5, fig.height=5}
 #| label: fig-input-age
-#| fig-cap: "Input rate does not change appreciably across development. Each panel is one longitudinal dataset: log adult input rate against child age, with one point per recording, faint grey lines joining recordings from the same child, and the fitted within-child trend (black) with its 95% confidence band. The dashed line is the constant-rate null, the same mean rate with the age term set to zero; where it lies inside the band, the data do not distinguish that dataset from constant input. Annotations give the fitted slope in log units per month and the change it implies across the ages that dataset observes. Trends are fitted over 8-36 months (shaded), the range over which the constant-rate assumption is applied; grey points fall outside that window and are excluded from the fit. The age axis is shared across panels so that slopes are directly comparable, while the vertical axis is free because the three LENA datasets are in adult words per hour and BabyView is a study-specific token rate."
+#| fig-cap: "Input rate does not change appreciably across development. Each panel plots log adult input rate against child age, with one point per recording, faint grey lines joining recordings from the same child, and the fitted within-child trend (black) with its 95% confidence band. Dashed lines show zero slope.Trends are fitted over 8-36 months (shaded), the range over which the constant-rate assumption is applied; grey points fall outside that window and are excluded from the fit."
 ## Built from paper/cache/si_input_stability.rds (studies/bayes_long/07_input_stability.R).
 ##
 ## SHARED x, FREE y. The age axis has to be shared: AM2018 spans six months and BabyView
@@ -619,7 +623,7 @@ ggplot(pts, aes(age, log_input)) +
         strip.text = element_text(face = "bold", size = 9))
 ```
 
-# Age of Acquisition in the Pure Accelerator Model
+# Age of Acquisition in the Pure Accumulator Model
 
 Figure 2 in the main text converts each word's fitted difficulty into an estimated number of cumulative exposures at the age it is acquired. Since later-acquired words are also rarer, here we ask whether that frequency change would be sufficient to produce the observed relationship between cumulative exposure and age of acquisition. 
 
