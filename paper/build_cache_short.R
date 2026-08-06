@@ -258,10 +258,52 @@ r <- cor(items$delta_j, items$emp_prod)                     # §34 validation
 cat(sprintf("  items=%d  cor(delta_j,emp_prod)=%.2f\n", nrow(items), r))
 if (is.na(r) || r > -0.5)
   stop(sprintf("Fig 2: cor(delta_j, emp_prod)=%.2f -- expected strongly negative (§34)", r))
+## Plotted age range. Stored rather than hard-coded in both places, because the M0
+## overlay lines below are evaluated over it and would silently disagree with the
+## figure if the two drifted.
+FIG2_XLIM <- c(10, 42)
 fig2 <- list(items = items,
              meta  = data.frame(lang = "English", n_kids = wsum, mu_xi = mu_xi,
                                 kappa = kappa, cor_dj_prod = r, n_items = nrow(items)),
-             anchor = list(lo = R_LO, mid = R_MID, hi = R_HI))  # tokens/month input-rate anchor
+             anchor = list(lo = R_LO, mid = R_MID, hi = R_HI),  # tokens/month input-rate anchor
+             xlim = FIG2_XLIM)
+
+## ---- M0 overlay for Fig 2 ------------------------------------------------
+## Fig 2 draws M3's per-class fits; the accompanying text claims the fitted PURE
+## accumulator predicts a far shallower decline. These are the M0 fits that back that
+## sentence, so a reader can see the contrast rather than take it on faith.
+##
+## The coefficients come from the SAME M0 counterfactual the SI reports
+## (studies/bayes_long/04_fig2_m0_counterfactual.R -> si_fig2_m0.rds), so the main-text
+## overlay and SI: Age of Acquisition in the Pure Accumulator Model cannot drift apart.
+##
+## GEOMETRY. Fig 2 has LINEAR age on x and log10 exposures on y, so the line to draw is
+## the semi-log fit lm(log10(N) ~ t_50) -- NOT the log-log elasticity the SI table
+## reports, which belongs to that section's log-x figure. Fitted over all of M0's points
+## (its AoAs run to 254 months) and evaluated over each class's plotted span, so each
+## dashed line covers the same ages as the solid one it is being compared against.
+m0f <- file.path(CACHE, "si_fig2_m0.rds")
+fig2$m0_lines <- if (!file.exists(m0f)) {
+  cat("  note: si_fig2_m0.rds absent -- Fig 2 M0 overlay skipped\n"); NULL
+} else {
+  span <- items |> filter(t_50 >= FIG2_XLIM[1], t_50 <= FIG2_XLIM[2]) |>
+    group_by(lexical_class) |> summarise(x1 = min(t_50), x2 = max(t_50), .groups = "drop")
+  readRDS(m0f)$m0 |> group_by(lexical_class) |>
+    group_modify(~ tibble::tibble(b0 = coef(lm(log10(N_word) ~ t_50, data = .x))[1],
+                                  b1 = coef(lm(log10(N_word) ~ t_50, data = .x))[2])) |>
+    ungroup() |> left_join(span, by = "lexical_class") |> rowwise() |>
+    reframe(lexical_class = lexical_class, t_50 = c(x1, x2),
+            N_word = 10^(b0 + b1 * c(x1, x2)), slope_per_month = b1)
+}
+if (!is.null(fig2$m0_lines)) {
+  cat("  M0 overlay slopes (log10 exposures per month), M3 for comparison:\n")
+  m3s <- items |> group_by(lexical_class) |>
+    summarise(m3 = coef(lm(log10(N_word) ~ t_50))[2], .groups = "drop")
+  print(fig2$m0_lines |> distinct(lexical_class, slope_per_month) |>
+        left_join(m3s, by = "lexical_class") |>
+        transmute(class = lexical_class, M3 = round(m3, 4),
+                  M0 = round(slope_per_month, 4)) |> as.data.frame(), row.names = FALSE)
+}
 saveRDS(fig2, file.path(CACHE, "fig2_efficiency.rds"))
 cat(sprintf("Wrote %s (English pooled, %d items)\n\n",
             file.path(CACHE, "fig2_efficiency.rds"), nrow(items)))
@@ -514,30 +556,58 @@ fig6$fig3 <- list(seed_excess = seed_excess, lm_gamma = lm_gamma,
 ## ladder_bestval_finer.csv) and the composition control (register_bestval.csv;
 ## experiments log L7): BabyLM-minus-CHILDES and ClimbMix, each 3 disjoint
 ## subsets x 8 seeds x 12 rungs. ~35k nls fits, adds a few minutes to the build.
-four_pl_sc <- function(x, y) tryCatch({
+##
+## CONVERGENCE WARNINGS. Many of these fits fail to converge and say so, which used to
+## bury the build log under thousands of "singular convergence (7)" messages. The
+## individual warnings are suppressed here, but NOT silently: `warnOnly = TRUE` already
+## meant a failed fit returned its current parameter values rather than erroring, and the
+## sc/rng filter below discards the degenerate ones, so the number that actually matters
+## is how many words survive to contribute to a ladder's median. ladder_kappa() reports
+## that retention rate per population instead.
+##
+## The rate is not incidental. CHILDES retains ~95% of words, but the register-control
+## ladders retain only ~60%: about a third of their fits have sc pinned at the lower
+## bound, meaning the word's surprisal drops between two adjacent rungs and a 4-PL scale
+## is not identified over 12 budgets. Those ladder medians are therefore taken over a
+## thinner set of words than the CHILDES ones, which is worth seeing in the log.
+four_pl_sc <- function(x, y) tryCatch(suppressWarnings({
   f <- nls(y ~ lo + (up - lo) / (1 + exp((x - mid) / sc)),
            start = list(up = max(y), lo = min(y), mid = mean(x), sc = 0.5),
            lower = c(up = min(y)-5, lo = min(y)-5, mid = min(x)-3, sc = 1e-3),
            upper = c(up = max(y)+5, lo = max(y)+5, mid = max(x)+3, sc = 50),
            algorithm = "port", control = nls.control(maxiter = 200, warnOnly = TRUE))
   c(sc = unname(coef(f)["sc"]), rng = unname(coef(f)["up"] - coef(f)["lo"]))
-}, error = function(e) c(sc = NA_real_, rng = NA_real_))
-ladder_kappa <- function(d, idcols) {   # per-word 4-PL over budgets -> per-ladder median
+}), error = function(e) c(sc = NA_real_, rng = NA_real_))
+ladder_kappa <- function(d, idcols, label = "") {  # per-word 4-PL over budgets -> per-ladder median
   # one row per (ladder, word, budget): collapses duplicate evals logged at the
   # same final step (on_train_end + last scheduled step can coincide)
   d <- d |> distinct(across(all_of(c(idcols, "word", "words"))), .keep_all = TRUE)
   nb <- n_distinct(d$words)                       # full-ladder budget count
-  d |> group_by(across(all_of(c(idcols, "word")))) |> filter(n_distinct(words) == nb) |>
+  raw <- d |> group_by(across(all_of(c(idcols, "word")))) |> filter(n_distinct(words) == nb) |>
     group_modify(~{ p <- four_pl_sc(log10(.x$words), .x$surprisal)
-                    tibble(sc = p["sc"], rng = p["rng"]) }) |> ungroup() |>
-    filter(is.finite(sc), sc > 0.01, sc < 10, rng > 1) |>
-    mutate(kappa = 0.434 / sc) |>
+                    tibble(sc = p["sc"], rng = p["rng"]) }) |> ungroup()
+  kept <- raw |> filter(is.finite(sc), sc > 0.01, sc < 10, rng > 1)
+  ## Stands in for the thousands of suppressed nls warnings: how many words actually
+  ## reach each ladder's median, and why the rest did not. Reasons are assigned in the
+  ## order the filter applies, so they are disjoint and sum to the number dropped -- a
+  ## word with both an unidentified scale and a flat curve is counted once, as the former.
+  RSN <- c("unidentified scale", "flat curve", "error")   # factor levels, so a zero-count
+  why <- factor(with(raw,                                 # reason still prints as 0
+           ifelse(!is.finite(sc), "error",
+           ifelse(sc <= 0.01 | sc >= 10, "unidentified scale",
+           ifelse(rng <= 1, "flat curve", "kept")))), levels = c(RSN, "kept"))
+  cat(sprintf("  %-22s %d/%d words fitted (%.1f%%)  [dropped: %s]\n",
+              label, nrow(kept), nrow(raw), 100 * nrow(kept) / max(nrow(raw), 1),
+              paste(sprintf("%d %s", table(why)[RSN], RSN), collapse = ", ")))
+  kept |> mutate(kappa = 0.434 / sc) |>
     group_by(across(all_of(idcols))) |> summarise(kappa = median(kappa), .groups = "drop")
 }
+cat("\n  per-word 4-PL fits for Fig 3C (nls warnings suppressed; retention reported):\n")
 reg <- read_csv(here("fits", "llm", "register_bestval.csv"), show_col_types = FALSE)
-k_chi <- ladder_kappa(ladder |> mutate(surprisal = as.numeric(surprisal)), "seed") |>
+k_chi <- ladder_kappa(ladder |> mutate(surprisal = as.numeric(surprisal)), "seed",
+                      "CHILDES") |>
   transmute(population = "LMs: CHILDES", id = paste0("s", seed), kappa)
-k_reg <- ladder_kappa(reg, c("corpus", "subset", "seed")) |>
+k_reg <- ladder_kappa(reg, c("corpus", "subset", "seed"), "register control") |>
   transmute(population = ifelse(corpus == "babylm", "LMs: BabyLM", "LMs: ClimbMix"),
             id = paste(subset, seed), kappa)
 k_kid <- fig6$slopes |>

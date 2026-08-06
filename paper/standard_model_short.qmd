@@ -276,9 +276,16 @@ labels_df <- bind_rows(
   slice_min(.vis, N_word, n = k),   # bottom    (fewest exposures)
   slice_max(.vis, N_word, n = k)) |># top       (most exposures)
   distinct(item, .keep_all = TRUE)
+## Dashed lines are the FITTED PURE ACCUMULATOR (M0), from the same counterfactual the SI
+## reports (fig2$m0_lines, built in paper/build_cache_short.R from si_fig2_m0.rds), so the
+## two sections cannot drift apart. They are semi-log fits because that is this figure's
+## geometry -- linear age, log10 exposures -- not the log-log elasticities in the SI table.
+## Each dashed line spans the same ages as the solid line it is compared against.
 ggplot(items, aes(t_50, N_word, colour = lexical_class)) +
   geom_point(alpha = 0.5, size = 1.1) +
-  geom_smooth(method = "lm", se = FALSE, linewidth = 0.8, formula = y ~ x) +
+  geom_smooth(aes(linetype = "Accelerating (M3)"),
+              method = "lm", se = FALSE, linewidth = 0.8, formula = y ~ x) +
+  geom_line(data = fig2$m0_lines, aes(linetype = "Pure accumulator (M0)"), linewidth = 0.8) +
   ggrepel::geom_text_repel(data = labels_df,
                            aes(label = sub("[ ]*\\(.*\\)$", "", word)), size = 2.7,
                            max.overlaps = Inf, min.segment.length = 0,
@@ -286,13 +293,20 @@ ggplot(items, aes(t_50, N_word, colour = lexical_class)) +
   scale_y_log10(labels = scales::label_number(big.mark = ","),
                 breaks = c(100, 1000, 10000, 100000),
                 limits = c(50, 1000000)) +
-  scale_x_continuous(limits = c(10, 42)) +
+  scale_x_continuous(limits = fig2$xlim) +
   scale_colour_brewer(palette = "Dark2", name = NULL,
                       labels = c("Nouns", "Action Words", "Descriptive Words", "Function Words")) +
+  scale_linetype_manual(values = c("Accelerating (M3)" = "solid",
+                                   "Pure accumulator (M0)" = "dashed"), name = NULL) +
+  ## colour keys show points (they identify word classes, not fits); the linetype legend
+  ## carries the model contrast in neutral grey so it is not read as a fifth word class
+  guides(colour = guide_legend(order = 1, override.aes = list(linetype = 0, size = 2)),
+         linetype = guide_legend(order = 2, override.aes = list(colour = "grey30"))) +
   labs(x = "Age (months) when 50% of children produce word",
        y = "Cumulative exposures at age of acquisition") +
   theme_minimal(base_size = 11) +
-  theme(legend.position = "bottom", panel.grid.minor = element_blank())
+  theme(legend.position = "bottom", panel.grid.minor = element_blank(),
+        legend.box = "vertical", legend.spacing.y = unit(0, "pt"))
 ```
 
 The accelerating accumulator model captures a salient fact about language acquisition: the number of exposures necessary to learn a word decreases dramatically over childhood. A toddler may have heard a word like "book" thousands of times before they say it; a few years later a preschooler may hear "ibex" a handful of times on a trip to the zoo and repeat it the next day. 
