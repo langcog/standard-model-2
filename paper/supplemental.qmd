@@ -17,6 +17,7 @@ si_2pl    <- readRDS(here("paper", "cache", "si_2pl.rds"))
 si_f2m0   <- readRDS(here("paper", "cache", "si_fig2_m0.rds"))     # Fig 2 under fitted M0
 si_cvd    <- readRDS(here("paper", "cache", "si_cv_depth.rds"))    # forward-CV depth ladder
 si_qcs    <- readRDS(here("paper", "cache", "si_qc_sensitivity.rds"))  # exclusion sensitivity
+si_inp    <- readRDS(here("paper", "cache", "si_input_stability.rds")) # input rate vs age (4 datasets)
 knitr::opts_chunk$set(
   echo = FALSE, message = FALSE, warning = FALSE,
   fig.align = "center", out.width = "100%", dpi = 300
@@ -561,7 +562,62 @@ between-child log input rate. A child one standard deviation above (below) the
 median rate reaches the same age having heard $\times 1.71$ ($\div 1.71$) as
 many tokens. This results in a horizontal shift of the child's curve along the log-token axis.
 
-Our calibration computations assume that input is constant across age. To provide empirical verification, we used data from four pre-existing datasets: @adams2018, @long2025 (BabyView), @fernald2013, @egan2025 (SEEDLings). These studies measured children's input using either LENA recorders or head-mounted cameras; we computed total words heard per hour in each dataset for each recording. @fig-input-age shows speech rate per hour in these datasets. Slopes over age for each were shallow and non-significant. 
+Our calibration computations assume that input is constant across age. To provide empirical verification, we used data from four pre-existing datasets: @adams2018, @long2025 (BabyView), @fernald2013, @egan2025 (SEEDLings). These studies measured children's input using either LENA recorders or head-mounted cameras; we computed total words heard per hour in each dataset for each recording. @fig-input-age shows speech rate per hour in these datasets. Slopes over age for each were shallow and non-significant.
+
+```{r fig-input-age, fig.width=7.5, fig.height=5}
+#| label: fig-input-age
+#| fig-cap: "Input rate does not change appreciably across development. Each panel is one longitudinal dataset: log adult input rate against child age, with one point per recording, faint grey lines joining recordings from the same child, and the fitted within-child trend (black) with its 95% confidence band. The dashed line is the constant-rate null, the same mean rate with the age term set to zero; where it lies inside the band, the data do not distinguish that dataset from constant input. Annotations give the fitted slope in log units per month and the change it implies across the ages that dataset observes. Trends are fitted over 8-36 months (shaded), the range over which the constant-rate assumption is applied; grey points fall outside that window and are excluded from the fit. The age axis is shared across panels so that slopes are directly comparable, while the vertical axis is free because the three LENA datasets are in adult words per hour and BabyView is a study-specific token rate."
+## Built from paper/cache/si_input_stability.rds (studies/bayes_long/07_input_stability.R).
+##
+## SHARED x, FREE y. The age axis has to be shared: AM2018 spans six months and BabyView
+## thirty, so on free x a slope estimated from a narrow window would be drawn at the same
+## visual steepness as one estimated across the whole of development. The vertical axis
+## cannot be shared, because BabyView's head-cam rate is in study-specific units while the
+## other three are LENA adult words per hour.
+##
+## The 8-36 month window is doing real work in exactly one panel. SEEDLingS is measured
+## monthly from 6-17 months and then once more at 54 months; fitted over its full range it
+## returns +0.0035 log units/mo with a CI excluding zero, but that slope is a line drawn
+## across a 37-month gap containing no observations. Plotting the excluded points in grey
+## rather than dropping them keeps that visible.
+AW  <- si_inp$age_window
+pal <- setNames(STUDY_PAL, c("BabyView (head-cam)", "SEEDLingS (LENA)",
+                             "AM2018 (LENA)", "FMW2013 (LENA)"))
+pts <- si_inp$points |> mutate(in_win = age >= AW[1] & age <= AW[2])
+## Headroom for the annotation, scaled to the BULK of each panel rather than its full
+## range: BabyView's near-silent recordings stretch its raw range to 7.8 log units and
+## would otherwise open a large empty gap above the data.
+rng <- pts |> group_by(lang) |>
+  summarise(lo_y = min(log_input), hi_y = max(log_input),
+            bulk = diff(quantile(log_input, c(0.01, 0.99))), .groups = "drop") |>
+  mutate(pad = 0.30 * bulk)
+ann <- si_inp$stats |> left_join(rng, by = "lang") |>
+  mutate(x = 4, y = hi_y + pad,
+         lab = sprintf("%+.4f log units/mo [%+.4f, %+.4f]\n%+.0f%% over %.0f-%.0f mo [%+.0f, %+.0f]",
+                       slope, lo, hi, pct_change, age_lo, age_hi, pct_lo, pct_hi))
+## geom_blank only ever expands a scale, so this adds the headroom without clipping data
+blank <- rng |> transmute(lang, lo_y, hi_y = hi_y + pad) |>
+  tidyr::pivot_longer(-lang, values_to = "log_input") |> mutate(age = AW[1])
+
+ggplot(pts, aes(age, log_input)) +
+  annotate("rect", xmin = AW[1], xmax = AW[2], ymin = -Inf, ymax = Inf,
+           fill = "grey50", alpha = 0.08) +
+  geom_line(aes(group = child_id), colour = "grey65", linewidth = 0.2, alpha = 0.35) +
+  geom_point(aes(colour = ifelse(in_win, as.character(lang), "out")), size = 0.55, alpha = 0.3) +
+  geom_line(data = si_inp$fitted, aes(y = flat), linetype = "22", colour = "grey20", linewidth = 0.5) +
+  geom_ribbon(data = si_inp$fitted, aes(ymin = lo, ymax = hi), fill = "black", alpha = 0.2) +
+  geom_line(data = si_inp$fitted, linewidth = 0.8, colour = "black") +
+  geom_blank(data = blank) +
+  geom_text(data = ann, aes(x, y, label = lab), hjust = 0, vjust = 1,
+            size = 2.4, lineheight = 0.95, colour = "grey20") +
+  facet_wrap(~ lang, scales = "free_y") +
+  scale_colour_manual(values = c(pal, out = "grey70"), guide = "none") +
+  scale_x_continuous(breaks = c(6, AW, 44, 54)) +
+  labs(x = "Age (months)", y = "Log input rate") +
+  theme_minimal(base_size = 10) +
+  theme(panel.grid.minor = element_blank(),
+        strip.text = element_text(face = "bold", size = 9))
+```
 
 # Age of Acquisition in the Pure Accelerator Model
 
