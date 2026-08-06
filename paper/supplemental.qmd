@@ -561,6 +561,8 @@ between-child log input rate. A child one standard deviation above (below) the
 median rate reaches the same age having heard $\times 1.71$ ($\div 1.71$) as
 many tokens. This results in a horizontal shift of the child's curve along the log-token axis.
 
+Our calibration computations assume that input is constant across age. To provide empirical verification, we used data from four pre-existing datasets: @adams2018, @long2025 (BabyView), @fernald2013, @egan2025 (SEEDLings). These studies measured children's input using either LENA recorders or head-mounted cameras; we computed total words heard per hour in each dataset for each recording. @fig-input-age shows speech rate per hour in these datasets. Slopes over age for each were shallow and non-significant. 
+
 # Age of Acquisition in the Pure Accelerator Model
 
 Figure 2 in the main text converts each word's fitted difficulty into an estimated number of cumulative exposures at the age it is acquired. Since later-acquired words are also rarer, here we ask whether that frequency change would be sufficient to produce the observed relationship between cumulative exposure and age of acquisition. 

@@ -144,9 +144,9 @@ $$P(w_{i,j}=1 \mid \theta_i, \delta_j) =\frac{\exp(\theta_i - \delta_j)}{1 + \ex
 We then describe the child's ability as
 
   $$\theta_i(t) = \xi_i + \kappa_i ~ \log(t/a_0) + \log(H),$$
-\noindent which contains three terms: an intercept $\xi_i$ describing the child's overall learning efficiency, an acceleration term, $\kappa_i ~ \log(t/a_0)$ that describes the rate of accumulation growing exponentially in the log of the child's age, and a constant offset $H$ for the number of hours over which accumulation occurs. 
+\noindent which contains three terms: an intercept $\xi_i$ describing the child's baseline learning efficiency, an acceleration term, $\kappa_i ~ \log(t/a_0)$ that describes the rate of accumulation, and a constant offset $H$ for the number of hours over which accumulation occurs. 
 
-This set of terms describes an "accelerating accumulator" model, in which accumulating language "counts for more" later in development. Children vary on both their efficiency of accumulation $\xi_i$ and their acceleration $\kappa_i$, creating a variant of a standard longitudinal growth model in which children vary on their slope and intercept [@grimm2016]. Our model is close to the formulations of @hidaka2013 and @kachergis2022, but has not yet been proposed (see SI: Comparison with Prior Models).
+This model is an "accelerating accumulator" model, in which accumulating language "counts for more" later in development; $\kappa$ is the key exponent describing developmental scaling. $\kappa=1$ yields linear returns on experience -- a pure accumulator -- while $\kappa>1$ shows acceleration. Children vary on both their efficiency of accumulation $\xi_i$ and their acceleration $\kappa_i$, creating a variant of a standard longitudinal growth model in which children vary on their slope and intercept [@grimm2016]. Our model is close to the formulations of @hidaka2013 and @kachergis2022, but has not yet been proposed (see SI: Comparison with Prior Models).
 
 Under this model, we can use the mean value of $\kappa$ to distinguish pure accumulator behavior ($\kappa \approx 1$) from accelerating accumulator behavior ($\kappa > 1$). It is critical to distinguish between supra-linear growth in children's *actual vocabulary* (in terms of count) -- a pattern that is robustly observed across children worldwide [@frank2021;@fenson1994] -- and the idea that children's *internal learning ability* accelerates across development. The latter is the substantive claim we test here (see @fig-schematic A for an illustration of model predictions in both latent space and vocabulary space).
 
@@ -164,7 +164,7 @@ Variability is a ubiquitous feature of early language across a vast array of phe
 
 ```{r fig-schematic, fig.width=7.5, fig.height=7.6}
 #| label: fig-schematic
-#| fig-cap: "(A) Model predictions in latent-ability ($\\theta$) space and, projected through the logistic item response model, in words-produced (CDI) space. Both pure accumulator ($\\kappa = 1$, dashed) and accelerating accumulator predictions are plotted. Greater efficiency ($\\xi$) lifts the curve's level, while greater acceleration ($\\kappa$) fans it open. (B) Individual children's observed trajectories (gray) for each of the five longitudinal datasets, with quantiles computed across the per-child parameters of the fitted models (colored percentile bands)."
+#| fig-cap: "The accelerating accumulator provides a psychometric model of vocabulary growth, describing the children's word learning across datasets and languages. (A) Model predictions in latent-ability ($\\theta$) space and, projected through the logistic item response model, in words-produced (CDI) space. Both pure accumulator ($\\kappa = 1$, dashed) and accelerating accumulator predictions are plotted. Greater efficiency ($\\xi$) lifts the curve's level, while greater acceleration ($\\kappa$) fans it open. (B) Individual children's observed trajectories (gray) for each of the five longitudinal datasets, with quantiles computed across the per-child parameters of the fitted models (colored percentile bands)."
 
 ## Fig 1 precomputed in paper/build_cache_short.R (fig1_fan.rds). Three-block
 ## composite via cowplot: (A) graphical model image; (B) conceptual theta -> CDI
@@ -265,7 +265,7 @@ cowplot::plot_grid(pB, pC, ncol = 1, rel_heights = c(1, 1.65),
 
 ```{r fig-efficiency, fig.width=7, fig.height=5}
 #| label: fig-efficiency
-#| fig-cap: "Estimated cumulative exposures to a word plotted by the age at which 50% of the children in our three English-language datasets were estimated to produce the word. Colors show different word classes, and lines show simple linear fits."
+#| fig-cap: "Under the accelerating accumulator model, the number of exposures needed to learn a word decreases with age. Plot shows estimated cumulative exposures to a word plotted by the age at which 50% of the children in our three English-language datasets were estimated to produce the word. Colors show different word classes, and lines show simple linear fits."
 
 items <- fig2$items
 k <- 8
@@ -301,11 +301,11 @@ To quantify this phenomenon, we combined our fitted model with corpus frequencie
 
 @fig-efficiency shows the relationship between cumulative exposures and age of acquisition for the accelerating accumulator. In contrast, the fitted pure accumulator predicts a far shallower decline, and cannot reproduce the observed range of acquisition ages (see SI: Age of acquisition in the accelerator model). Instead, within each word class (e.g., nouns, verbs, and function words), the number of examples needed for learning drops exponentially with development.^[Indeed, this analysis likely understates the degree of change in efficiency as it assumes that each exposure to a word is equally meaningful. In fact, individual exposures vary widely in how much information they give. Sometimes words are overheard rather than directed to the child, or lack physical context to allow for clear inference [@cartmill2013;@trueswell2013;@mollica2017].] Thus, in line with both intuition and experiments, the total number of exposures required on average to learn a new noun might indeed be only a small handful by age three [@markson1997;@bloom2002].
 
-# Language models show no acceleration in their vocabulary growth
+# Language models do not accelerate
 
 ```{r fig-llm-acceleration, fig.width=7.5, fig.height=7.8}
 #| label: fig-llm-acceleration
-#| fig-cap: "(A) Density of the acceleration exponent $\\kappa$ for both children (per child, English and Norwegian) and LMs (by word). (B) Variation in acceleration (kappa) across children and LMs. (C) Fractional return on training (the ratio of decrease in loss to excess loss) for both children and LMs. Blue lines show model trajectories; red lines show fitted trajectories from children. Three children are highlighted in dark red with horizontal uncertainty bands indicating +/- 1 SD in calibration of their input. The unit accumulator ceiling shows the maximal possible fractional return for a pure accumulator model."
+#| fig-cap: "Language models (LMs) show no acceleration in their vocabulary growth.  (A) Density of the acceleration exponent $\\kappa$ for both children (per child, English and Norwegian) and LMs (by word). (B) Variation in acceleration (kappa) across children and LMs. (C) Fractional return on training (the ratio of decrease in loss to excess loss) for both children and LMs. Blue lines show model trajectories; red lines show fitted trajectories from children. Three children are highlighted in dark red with horizontal uncertainty bands indicating +/- 1 SD in calibration of their input. The unit accumulator ceiling shows the maximal possible fractional return for a pure accumulator model."
 ## LAYOUT/FONT SIZING. out.width="100%" scales every figure to the 6.5in text width, so
 ## the on-page font size is base_size * 6.5/fig.width. At the old fig.width=14 that made
 ## base_size 11 render at 5.1pt. Dropping to 7.5 (scale 0.87) puts base_size 11 at ~9.5pt
