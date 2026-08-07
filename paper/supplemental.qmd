@@ -18,6 +18,7 @@ si_f2m0   <- readRDS(here("paper", "cache", "si_fig2_m0.rds"))     # Fig 2 under
 si_cvd    <- readRDS(here("paper", "cache", "si_cv_depth.rds"))    # forward-CV depth ladder
 si_qcs    <- readRDS(here("paper", "cache", "si_qc_sensitivity.rds"))  # exclusion sensitivity
 si_inp    <- readRDS(here("paper", "cache", "si_input_stability.rds")) # input rate vs age (4 datasets)
+si_cvh    <- readRDS(here("paper", "cache", "si_cv_headline.rds"))  # forward CV: M2 vs kappa=1
 knitr::opts_chunk$set(
   echo = FALSE, message = FALSE, warning = FALSE,
   fig.align = "center", out.width = "100%", dpi = 300
@@ -306,6 +307,79 @@ knitr::kable(cvt |> select(-mode), format = "latex", booktabs = TRUE, escape = F
                            "\\% children better", "$\\sigma_b$")) |>
   kableExtra::pack_rows(lab[["last"]], 1, n_last) |>
   # kableExtra::pack_rows(lab[["first"]], n_last + 1, nrow(cvt)) |>
+  kableExtra::kable_styling(font_size = 9, latex_options = "HOLD_position")
+```
+
+```md
+[draft for promotion — MCF to review]
+
+That gap can be closed with the same design. Because M2 and M3 share a population
+acceleration parameter, neither can speak to whether acceleration is present at all; to
+test that prospectively we need a rung in which the exponent itself is switched off. We
+therefore fit M2$_0$, which is M2 with the acceleration exponent pinned to the pure
+accumulator value ($\kappa = 1$) while retaining the per-child efficiency term $\xi_i$,
+and scored it on the identical held-out administrations.
+
+Pinning $\kappa$ rather than removing $\xi_i$ matters. M0 and M1, where the population
+acceleration parameter formally enters the ladder, contain no per-child term, so both
+must predict every child's held-out sitting from population values alone; that
+comparison is dominated by between-child differences in level, and the $\kappa$ it
+rewards is fitted largely to cross-sectional age structure. With $\xi_i$ present in both
+models each child is anchored to their own level using their own training
+administrations, so the only quantity left for the exponent to explain is the shape of
+that child's growth. M2$_0$ also estimates no per-child slope, so none of the
+identification problems that limit M3 apply here.
+
+@tbl-cv-headline shows the result. The accelerating model predicts the held-out
+administration better at every depth, by margins at least three times the largest
+difference ever recorded between M2 and M3 and, at $k=5$, some four orders of magnitude
+larger. It does so for `r sprintf("%.0f", min(dplyr::filter(si_cvh, comparison == "m2 - m2k1", grepl("^fcv6lk", tag))$pct_child_better))` to `r sprintf("%.0f", max(dplyr::filter(si_cvh, comparison == "m2 - m2k1", grepl("^fcv6lk", tag))$pct_child_better))`% of individual children. The same comparison on the
+larger sample of children with at least four administrations
+(n = `r dplyr::filter(si_cvh, comparison == "m2 - m2k1", tag == "fcv4")$n_child`) gives `r sprintf("%+.0f", dplyr::filter(si_cvh, comparison == "m2 - m2k1", tag == "fcv4")$diff_per_child)` per child.
+
+The two comparisons also behave differently as $k$ grows, and the contrast is
+informative. Both improve with more training data, but the advantage of acceleration
+grows away from zero while the advantage of a per-child slope only climbs up to it. The
+reason is visible in the design: fixing the horizon at three months while increasing $k$
+extends each child's training window further back in age, from a mean earliest
+observation of `r sprintf("%.1f", dplyr::filter(si_cvh, comparison == "m2 - m2k1", tag == "fcv6lk2")$train_first_age_mean)` months at $k=2$ to `r sprintf("%.1f", dplyr::filter(si_cvh, comparison == "m2 - m2k1", tag == "fcv6lk5")$train_first_age_mean)` at $k=5$. With only two training points a
+free $\xi_i$ can sit wherever best splits the difference and partly disguise a wrong
+exponent; across five observations reaching back into the second year, no single
+intercept can reconcile a $\kappa = 1$ trajectory with the growth actually
+observed. A model that is merely less flexible does not predict progressively worse as
+it is given more data. That pattern is the signature of a misspecified functional form,
+and it is the stronger form of the evidence: acceleration is not simply a better fit in
+sample, it is required to forecast an individual child's vocabulary three months out.
+```
+
+```{r tbl-cv-headline}
+#| label: tbl-cv-headline
+#| tbl-cap: "Prospective cross-validation of acceleration itself, on the same Norwegian children and held-out administrations as @tbl-cv-depth. M2 retains a free population acceleration exponent; M2-zero pins it to the pure-accumulator value of one. Both models carry a per-child efficiency term, so each child is anchored to their own level and only the shape of their growth is at stake. dELPD/child is the per-child difference in expected log predictive density, M2 minus M2-zero; positive favours acceleration."
+## Built from paper/cache/si_cv_headline.rds (studies/bayes_long/08_cv_headline_report.R).
+##
+## Deliberately parallel to tbl-cv-depth above: same children, same held-out sittings,
+## same k rungs and fixed 3-month horizon, so the two tables can be read against each
+## other directly. sigma_b is omitted because neither model here has a per-child slope
+## for it to describe.
+##
+## The fcv4 setting is NOT a row: it uses a different sample (>=4 administrations,
+## n = 602) and does not hold the horizon fixed, so stacking it into a depth ladder
+## would invite a comparison across rows that the design does not support. It is
+## reported in the surrounding text instead.
+cvh <- si_cvh |>
+  dplyr::filter(comparison == "m2 - m2k1", grepl("^fcv6lk", tag)) |>
+  dplyr::mutate(k = as.integer(sub("^fcv6lk", "", tag))) |>
+  dplyr::arrange(k) |>
+  dplyr::transmute(k = as.character(k),
+                   horizon = sprintf("%.0f", horizon_med),
+                   d = sprintf("%+.2f", diff_per_child),
+                   se = sprintf("%.2f", diff_se),
+                   z = sprintf("%+.1f", diff_z),
+                   pct = sprintf("%.0f", pct_child_better))
+knitr::kable(cvh, format = "latex", booktabs = TRUE, escape = FALSE,
+             align = c("r", "r", "r", "r", "r", "r"),
+             col.names = c("$k$", "horizon (mo)", "$\\Delta$ELPD/child", "SE", "$z$",
+                           "\\% children better")) |>
   kableExtra::kable_styling(font_size = 9, latex_options = "HOLD_position")
 ```
 
