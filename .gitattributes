@@ -1,0 +1,5 @@
+# Vendored Science submission template -- upstream, not ours to reformat.
+# readme.txt and science_template.bib ship with CRLF line endings, and this repo's
+# checkout config would rewrite them to LF on `git add`, which fails outright. Science
+# expects the template as distributed, so keep every byte exactly as shipped.
+paper/science_template_v1.1/** -text

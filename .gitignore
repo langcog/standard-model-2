@@ -153,6 +153,17 @@ studies/llm/llm_experiments.html
 studies/llm/llm_experiments_files/
 # cmdstan per-chain draw CSVs (regenerable Stan sampler output)
 fits/csvs_*/
+# Rendered short-paper outputs. The existing rules above cover standard_model.* and
+# supplemental.*, but not the _short variants, so every render left four untracked
+# entries in git status. Sources are tracked; these are all regenerable by
+# `quarto render paper/standard_model_short.qmd`.
+paper/standard_model_short.pdf
+paper/standard_model_short.tex
+paper/standard_model_short_cache/
+paper/standard_model_short_files/
+# Editor/script backups (*.rds.*bak is covered below; this catches script .bak/.bak2)
+*.bak
+*.bak[0-9]
 # Stray dated .rds backups
 *.rds.*bak
 
