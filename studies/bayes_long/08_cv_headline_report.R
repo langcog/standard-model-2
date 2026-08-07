@@ -59,9 +59,21 @@ pair <- function(tag, hi, lo) {
   d <- rh$elpd_by_child - rl$elpd_by_child
   n <- length(d); se <- sd(d) / sqrt(n)
   hz <- rh$meta$horizon_med
+  ## How far back each child's training window reaches, as the MEAN over children of
+  ## their earliest training administration. Recorded because it is the mechanism behind
+  ## the depth trend and is easy to get wrong: the sample-wide minimum runs 12.0 -> 8.0
+  ## months across the ladder, but that is one extreme child, and the per-child mean --
+  ## the quantity that describes the typical training window -- runs 26.5 -> 21.1.
+  bf <- file.path("fits", "bayes_long", sprintf("bundle_norwegian_%s.rds", tag))
+  first_age <- NA_real_
+  if (file.exists(bf)) {
+    sd0 <- readRDS(bf)$stan_data
+    first_age <- mean(tapply(sd0$admin_age, sd0$admin_to_child, min))
+  }
   data.frame(tag = tag, comparison = sprintf("%s - %s", hi, lo),
              n_child = n, n_test_obs = rh$n_test_obs,
              horizon_med = if (is.null(hz)) NA_real_ else hz,
+             train_first_age_mean = first_age,
              diff_per_child = mean(d), diff_se = se, diff_z = mean(d) / se,
              diff_per_obs = sum(d) / rh$n_test_obs,
              pct_child_better = 100 * mean(d > 0),
