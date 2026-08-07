@@ -236,7 +236,6 @@ ggplot() +
 
 # Full Model Comparison Results
 
-## Robustness across datasets
 
 @tbl-loo gives the full leave-one-out model comparison results across models for both the dataset with 3+ administrations/child and the larger dataset with 2+ administrations/child. 
 
@@ -278,11 +277,13 @@ knitr::kable(tab |> select(Model, all_of(lang_order)), format = "latex", booktab
   kableExtra::kable_styling(latex_options = "scale_down", font_size = 8)
 ```
 
-## Individual-level cross-validation
+# Individual-level Cross-validation
 
 The model comparisons above report ELPD LOO values for held-out data from individual item-responses, which are nested within children. To assess the value of M3 (the accelerating accumulator) in making fully out-of-sample predictions, we designed a prospective test. As our data, we selected a subset of the Norwegian sample that included 371 children with $> 6$ longitudinal CDIs. We then fit models to the child's most recent $k$ observations and used these to predict the child's next administration (3 months later). This design avoids confounding data density with the gap between the fitted and predicted observations. 
 
-Results from this analysis are shown in @tbl-cv-depth. The result is very sensitive to the value of $k$ used. With $k=2$, the fixed slope model (M2) clearly predicts better because the per-child slope model (M3) fully parameterizes the two observations per child and absorbs measurement error as a result. This effect decreases as $k$ increases until the two models are tied by $k=5$. We expect that with even denser data, a separate slope parameter would lead to individually better fits, but in practice the single slope model makes acceptable predictions. Importantly, this result still supports the presence of acceleration for each child, but it suggests that measuring the precise amount of acceleration each child is undergoing requires substantial measurement effort. 
+Results from this analysis are shown in @tbl-cv-depth. The result is very sensitive to the value of $k$ used. With $k=2$, the fixed slope model (M2) clearly predicts better because the per-child slope model (M3) fully parameterizes the two observations per child and absorbs measurement error as a result. This effect decreases as $k$ increases until the two models are tied by $k=5$. We expect that with even denser data, a separate slope parameter would lead to individually better fits, but in practice the single slope model makes acceptable predictions. 
+
+Importantly, because both M2 and M3 contain a population acceleration parameter, this analysis does not test for the presence of acceleration. Instead it suggests that measuring the precise amount of acceleration each child is undergoing requires sustained, precise longitudinal measurement. 
 
 ```{r tbl-cv-depth}
 #| label: tbl-cv-depth
@@ -425,9 +426,9 @@ knitr::kable(tab, format = "latex", booktabs = TRUE, align = c("l", "r"), escape
 
 In the main analysis we use a Rasch (1PL) item model, in which every word has a difficulty but all words have equal discrimination between children. @kachergis2022b found that a 2PL model, which adds a per-word discrimination $\lambda_j$, was preferred over the 1PL for CDI data. We therefore refit M3 with a per-word discrimination parameter.
 
-@tbl-2pl shows the results of this comparison. The 2PL does genuinely fit better, with substantial differences in LOO ELPD for every language. However, model results are otherwise unchanged. Estimates of $\kappa$ increase somewhat, but they are not directly comparable across item models. In normal IRT models, ability scores are constrained to a standard normal distribution, but in our model, abilities grow over time so there is no single standard scale, and the addition of the discrimination parameter can change the overall scale. For this reason, we report $\log \kappa$, since a pure change of units would be a constant shift. In addition, across individual words, we find that the predicted age of acquisition (the age at which the word is predicted to have a 50% probability of being known) is almost identical, suggesting that the models are highly comparable. 
+@tbl-2pl shows the results of this comparison. The 2PL does genuinely fit better, with substantial differences in LOO ELPD for every language. However, model results are otherwise unchanged. Estimates of $\kappa$ increase somewhat, but they are not directly comparable across item models. In normal IRT models, ability scores are constrained to a standard normal distribution, but in our model, abilities grow over time so there is no single standard scale, and the addition of the discrimination parameter can change the overall scale. For this reason, we report $\log \kappa$, since a pure change of units would be a constant shift. In addition, across individual words, we find that the predicted age of acquisition (the age at which the word is predicted to have a 50% probability of being known) is closely aligned, suggesting that the models are highly comparable. 
 
-Critically, $\delta$ (difficulty) and $\lambda$ (discrimination) have a very low correlation. If harder words were substantially more discriminating, this correlation could inflate estimates of $\kappa$ in the 1PL model; in practice we find little support for this hypothesis.
+Critically, $\delta$ (difficulty) and $\lambda$ (discrimination) were small to modest. If harder words were substantially more discriminating, this correlation could inflate estimates of $\kappa$ in the 1PL model; in practice we find little support for this hypothesis.
 
 ```{r tbl-2pl}
 #| label: tbl-2pl
@@ -627,7 +628,7 @@ ggplot(pts, aes(age, log_input)) +
 
 Figure 2 in the main text converts each word's fitted difficulty into an estimated number of cumulative exposures at the age it is acquired. Since later-acquired words are also rarer, here we ask whether that frequency change would be sufficient to produce the observed relationship between cumulative exposure and age of acquisition. 
 
-@fig-aoa-m0 shows the same relationship, but comparing age of acquisition estimates between M3 (the accelerating accumulator) and M0 (the pure accumulator). The pure accumulator does not reproduce either the scale or the slope of the relationship (@tbl-aoa-m0). Within every word class, the slope of the relationship is between five and seven times shallower in M0 than M3, and the M0 forces the fitted difficulties to spread acquisition across 5 to 254 months, against 14 to 35 months for the accelerating model and 8 to 36 months of actual observation.
+@fig-aoa-m0 shows the same relationship, but comparing age of acquisition estimates between M3 (the accelerating accumulator) and M0 (the pure accumulator). The pure accumulator does not reproduce either the scale or the slope of the relationship (@tbl-aoa-m0). Within every word class, the slope of the relationship is substantially shallower in M0 than M3, and the M0 forces the fitted difficulties to spread acquisition across 5 to 254 months, against 14 to 35 months for the accelerating model and 8 to 36 months of actual observation.
 
 ```{r fig-aoa-m0, fig.width=7.5, fig.height=4.2}
 #| label: fig-aoa-m0
