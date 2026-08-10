@@ -66,7 +66,12 @@ loo_res <- tryCatch({
 }, error=function(e){ cat("LOO failed:", conditionMessage(e), "\n"); NULL })
 
 OUT <- file.path("fits","bayes_long","summaries"); dir.create(OUT, recursive=TRUE, showWarnings=FALSE)
-tag <- sprintf("pool%s%s", SFX, if (nzchar(VARIANT)) paste0("_", VARIANT) else "")
+## STAN_TAG_SFX appends to the output name so a convergence refit lands beside the fit it
+## is being compared against instead of replacing it. The VARIANT suffix already separates
+## centred from non-centred, but a rerun of the SAME variant would otherwise overwrite the
+## fit the SI currently reports. Matches 01_fit.R.
+tag <- paste0(sprintf("pool%s%s", SFX, if (nzchar(VARIANT)) paste0("_", VARIANT) else ""),
+              Sys.getenv("STAN_TAG_SFX", ""))
 saveRDS(summ, file.path(OUT, paste0(tag,".summary.rds")))
 saveRDS(fit$draws(intersect(SCALARS, fit$metadata()$stan_variables), format="df"), file.path(OUT, paste0(tag,".draws.rds")))
 if (!is.null(loo_res)) saveRDS(loo_res, file.path(OUT, paste0(tag,".loo.rds")))
