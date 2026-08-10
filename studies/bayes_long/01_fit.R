@@ -60,9 +60,15 @@ sargs <- list(data=dat, seed=SEED, chains=CHAINS, parallel_chains=CHAINS, thread
 if (INIT != "") sargs$init <- as.numeric(INIT)   # unset -> cmdstanr default (main ladder unchanged)
 fit <- do.call(mod$sample, sargs)
 
+## Sampler diagnostics were previously printed and then lost with the SLURM log, so no
+## fit on disk could say whether it had divergences. Persisted below alongside the summary.
 dg <- fit$diagnostic_summary()
 cat(sprintf("divergences: %d | max_treedepth hits: %d\n",
             sum(dg$num_divergent), sum(dg$num_max_treedepth)))
+DIAG <- list(num_divergent = dg$num_divergent, num_max_treedepth = dg$num_max_treedepth,
+             ebfmi = dg$ebfmi, chains = CHAINS, warmup = WARMUP, iter = ITER,
+             adapt_delta = ADELTA, seed = SEED,
+             cmdstan_version = tryCatch(cmdstanr::cmdstan_version(), error = function(e) NA_character_))
 
 ## m32pl adds: sigma_lambda (spread of log discrimination; 0 recovers the 1PL),
 ## lambda_sd/p10/p90 (discrimination spread on the natural scale) and
@@ -106,8 +112,13 @@ loo_res <- tryCatch({
 }, error=function(e){ cat("LOO failed:", conditionMessage(e), "\n"); NULL })
 
 OUT <- file.path("fits","bayes_long","summaries"); dir.create(OUT, recursive=TRUE, showWarnings=FALSE)
-tag <- sprintf("%s_%s", slug, model)
+## STAN_TAG_SFX appends to the output name so a rerun does not overwrite the fit it is
+## being compared against -- e.g. STAN_TAG_SFX=_c2 for a longer convergence refit, which
+## must be validated against the original before anything is promoted. Same convention as
+## model/scripts/fit_joint_io_proc_lean.R.
+tag <- paste0(sprintf("%s_%s", slug, model), Sys.getenv("STAN_TAG_SFX", ""))
 saveRDS(summ, file.path(OUT, paste0(tag,".summary.rds")))
+saveRDS(DIAG, file.path(OUT, paste0(tag,".diag.rds")))
 saveRDS(fit$draws(SCALARS, format="df"), file.path(OUT, paste0(tag,".draws.rds")))
 if (!is.null(loo_res)) saveRDS(loo_res, file.path(OUT, paste0(tag,".loo.rds")))
 
