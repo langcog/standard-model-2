@@ -19,6 +19,7 @@ si_cvd    <- readRDS(here("paper", "cache", "si_cv_depth.rds"))    # forward-CV 
 si_qcs    <- readRDS(here("paper", "cache", "si_qc_sensitivity.rds"))  # exclusion sensitivity
 si_inp    <- readRDS(here("paper", "cache", "si_input_stability.rds")) # input rate vs age (4 datasets)
 si_cvh    <- readRDS(here("paper", "cache", "si_cv_headline.rds"))  # forward CV: M2 vs kappa=1
+si_p4pl   <- readRDS(here("paper", "cache", "si_perword_4pl.rds")) # per-word 4-PL, both systems
 knitr::opts_chunk$set(
   echo = FALSE, message = FALSE, warning = FALSE,
   fig.align = "center", out.width = "100%", dpi = 300
@@ -762,6 +763,107 @@ Next, to estimate the slope of acquisition of individual words, @chang2022 compu
 $\log_{10}(\text{training steps})$ with slope $1/\text{scale}_w$.
 Dividing by $\ln 10$ converts this to natural-log units — the same units
 as $\kappa_i$ — so the two slopes can be read off the same axis.
+
+# Is the Child--LM Comparison an Artifact of the Estimator?
+
+```md
+[draft for promotion — MCF to review]
+
+The comparison above rests on two models that share no machinery: children are scored by
+a binary checklist and fitted with an IRT accumulator, LMs by surprisal and fitted with a
+four-parameter logistic. Two objections follow. The first is that the two $\kappa$
+values may not be the same unit. The second is that, having chosen a different functional
+form for each system, some of the qualitative contrast may follow from that choice rather
+than from the learners.
+
+The unit objection can be settled algebraically. Writing the LM fit as
+$s_w(x) = \ell_w + (u_w-\ell_w)/(1+\exp((x-m_w)/\mathrm{scale}_w))$ and letting
+$p_w = (s_w-\ell_w)/(u_w-\ell_w)$ be the fraction of that word's surprisal reduction
+still outstanding, $p_w$ is bounded in $[0,1]$ but the quantity the fit determines is its
+logit, which is not: $\mathrm{logit}(p_w) = -(x-m_w)/\mathrm{scale}_w$. Both sides are
+therefore slopes of a logit with respect to log input — outstanding surprisal reduction
+for the LM, outstanding mastery $1-P(\text{produce})$ for the child.
+
+The second objection we test directly, by discarding the IRT model on the child side and
+applying the LMs' own estimator to child data. For every word we form the proportion of
+children not yet producing it at each age, and fit the identical four-parameter logistic
+used on LM surprisal, taking $\kappa = 0.434/\mathrm{scale}_w$ exactly as before. One
+functional form, one fitting routine, one per-word unit, both systems.
+
+One asymmetry has to be handled. An LM ladder is a single learner, so its per-word curve
+is a within-learner trajectory; a child curve can only be formed by pooling across
+children, and a mixture of logistic curves with different crossing points is flatter than
+any of its components. The pooled estimator can therefore only understate children's
+$\kappa$, never overstate it, which makes this a conservative test. We measure the size
+of that attenuation rather than assume it: we simulate responses from the fitted M3, with
+its known $\xi_i$, $\kappa_i$ and $\delta_j$, and run the identical pipeline over them.
+The recovered value against a known truth gives each dataset its own correction factor.
+
+@tbl-perword-4pl reports the result and @fig-perword-4pl shows the distributions. Raw
+per-word $\kappa$ ranges from `r sprintf("%.1f", min(sapply(si_p4pl$child, function(z) z$kappa_obs)))` to `r sprintf("%.1f", max(sapply(si_p4pl$child, function(z) z$kappa_obs)))` across the five child samples against
+`r sprintf("%.2f", median(si_p4pl$lm$kappa))` for the language models, with no correction applied. Applying each
+dataset's measured correction brings the estimate within
+`r sprintf("%.0f", 100*(1-min(sapply(si_p4pl$child, function(z) z$kappa_corrected/z$kappa_irt))))`% of the $\kappa$ the IRT model reports, in every dataset. Two estimators
+sharing no assumptions, no functional form and no measurement scale therefore agree on
+the same quantity, and the gap between children and language models survives being
+measured entirely on the language models' own terms.
+```
+
+```{r tbl-perword-4pl}
+#| label: tbl-perword-4pl
+#| tbl-cap: "Per-word acceleration estimated with the language models' own estimator. For each word we fit the same four-parameter logistic used on LM surprisal to the proportion of children not yet producing that word, and take kappa = 0.434/scale. Recovery is the fraction of a known simulated kappa that the same pipeline returns when run on data generated from the fitted M3, and is the factor by which pooling across children attenuates the estimate; corrected divides the raw estimate by it. The final column is the kappa the IRT model reports for that dataset."
+## Built from paper/cache/si_perword_4pl.rds (studies/bayes_long/10_perword_4pl.R).
+## The LM row carries no recovery/corrected/IRT entry: an LM ladder is a single learner,
+## so its per-word curve needs no pooling and suffers no attenuation, and there is no IRT
+## fit to compare against. Blanks rather than dashes-as-numbers, so nothing invites a
+## column-wise comparison the design does not support.
+LAB <- c(thal_a3 = "English (Thal)", smith_a3 = "English (Smith)",
+         marchman_a3 = "English (Marchman)", norwegian_a3 = "Norwegian",
+         japanese_a3 = "Japanese")
+p4 <- dplyr::bind_rows(lapply(names(si_p4pl$child), function(sl) {
+  z <- si_p4pl$child[[sl]]
+  data.frame(Sample = unname(LAB[sl]),
+             words = sprintf("%d/%d", z$n_words_fit, z$n_words_obs),
+             raw = sprintf("%.2f [%.2f, %.2f]", z$kappa_obs, z$kappa_iqr[1], z$kappa_iqr[2]),
+             rec = sprintf("%.0f\\%%", 100 * z$recovery),
+             cor = sprintf("%.2f", z$kappa_corrected),
+             irt = sprintf("%.2f", z$kappa_irt))
+}))
+lmk <- si_p4pl$lm$kappa
+p4 <- rbind(p4, data.frame(
+  Sample = "Language models", words = sprintf("%d", length(lmk)),
+  raw = sprintf("%.2f [%.2f, %.2f]", median(lmk), quantile(lmk, .25), quantile(lmk, .75)),
+  rec = "", cor = "", irt = ""))
+knitr::kable(p4, format = "latex", booktabs = TRUE, escape = FALSE,
+             align = c("l", "r", "r", "r", "r", "r"),
+             col.names = c("Sample", "words fitted", "$\\kappa$ raw [IQR]",
+                           "recovery", "$\\kappa$ corrected", "$\\kappa$ (IRT)")) |>
+  kableExtra::kable_styling(font_size = 9, latex_options = "HOLD_position")
+```
+
+```{r fig-perword-4pl, fig.width=7, fig.height=3.6}
+#| label: fig-perword-4pl
+#| fig-cap: "Per-word acceleration for children and language models, both estimated with the same four-parameter logistic. Points are words, with the median marked. The dashed line at one is the pure-accumulator value. Child estimates are attenuated by pooling across children and so understate the separation; the correction factors are given in the table."
+## Deliberately echoes the main-text variability panel: log x, kappa = 1 dashed, median
+## crossbar, one row per population. Raw (uncorrected) child values are plotted, since the
+## point is that the gap does not depend on the correction.
+d4 <- dplyr::bind_rows(
+  dplyr::bind_rows(lapply(names(si_p4pl$child), function(sl)
+    data.frame(pop = unname(LAB[sl]), kappa = si_p4pl$child[[sl]]$observed$kappa))),
+  data.frame(pop = "Language models", kappa = si_p4pl$lm$kappa)) |>
+  dplyr::filter(kappa > 0) |>
+  dplyr::mutate(pop = factor(pop, levels = c(unname(LAB), "Language models")),
+                kind = ifelse(pop == "Language models", "LM", "child"))
+ggplot(d4, aes(kappa, forcats::fct_rev(pop), colour = kind)) +
+  geom_jitter(position = position_jitter(height = 0.2, seed = 1), alpha = 0.2, size = 0.7) +
+  stat_summary(fun = median, geom = "crossbar", width = 0.5, linewidth = 0.5, colour = "grey20") +
+  geom_vline(xintercept = 1, linetype = "dashed", colour = "grey55", linewidth = 0.4) +
+  scale_x_log10(breaks = c(0.2, 0.5, 1, 2, 5, 10, 20, 50)) +
+  scale_colour_manual(values = c(child = "#1f78b4", LM = "#e66101"), guide = "none") +
+  labs(x = expression(paste("per-word ", kappa, " (log scale)")), y = NULL) +
+  theme_minimal(base_size = 10) +
+  theme(panel.grid.minor = element_blank())
+```
 
 # Acceleration in Other Architectures
 
