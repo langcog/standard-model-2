@@ -103,8 +103,16 @@ for (slug in slugs) {
   ko  <- perword_kappa(obs, RNG_MIN_CHILD)
   sim <- simulate_curves(slug)
   ks  <- perword_kappa(sim$curves, RNG_MIN_CHILD)
+  ## the IRT kappa this dataset reports, for the head-to-head
+  irt <- as.data.frame(readRDS(file.path(SUMM, sprintf("%s_m3.summary.rds", slug))))
   res[[slug]] <- list(observed = ko, simulated = ks, truth = sim$truth,
-                      n_words_obs = n_distinct(obs$word))
+                      n_words_obs = n_distinct(obs$word), n_words_fit = nrow(ko),
+                      kappa_obs = median(ko$kappa),
+                      kappa_iqr = unname(quantile(ko$kappa, c(.25, .75))),
+                      recovery  = median(ks$kappa) / sim$truth,
+                      kappa_corrected = median(ko$kappa) / (median(ks$kappa) / sim$truth),
+                      kappa_irt = irt$median[irt$variable == "kappa_pop"],
+                      age_lo = min(obs$age), age_hi = max(obs$age))
   cat(sprintf("\n=== %s ===\n", slug))
   cat(sprintf("  observed   : median kappa %6.2f  [IQR %5.2f-%5.2f]  (%d/%d words fitted)\n",
               median(ko$kappa), quantile(ko$kappa,.25), quantile(ko$kappa,.75),
@@ -132,6 +140,15 @@ for (slug in names(res)) cat(sprintf("  %-14s child per-word kappa %6.2f   (atte
     slug, median(res[[slug]]$observed$kappa),
     100 * median(res[[slug]]$simulated$kappa) / res[[slug]]$truth))
 cat(sprintf("  %-14s LM per-word kappa    %6.2f\n", "CHILDES LMs", median(lm_k$kappa)))
+
+## Does the independent estimator land where the IRT model says it should? This is the
+## check that matters: two entirely different machineries on the same data.
+cat("\n=== attenuation-corrected per-word kappa vs the IRT kappa ===\n")
+cat(sprintf("  %-13s %8s %9s %10s %9s %7s\n","dataset","raw","recovery","corrected","IRT","ratio"))
+for (slug in names(res)) with(res[[slug]],
+  cat(sprintf("  %-13s %8.2f %8.0f%% %10.2f %9.2f %7.2f\n",
+              slug, kappa_obs, 100*recovery, kappa_corrected, kappa_irt,
+              kappa_corrected / kappa_irt)))
 
 dir.create(CACHE, recursive = TRUE, showWarnings = FALSE)
 saveRDS(list(child = res, lm = lm_k, rng_min_child = RNG_MIN_CHILD),
