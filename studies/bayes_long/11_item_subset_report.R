@@ -16,7 +16,11 @@
 suppressPackageStartupMessages({library(dplyr)})
 BL <- file.path("fits","bayes_long"); SUMM <- file.path(BL, "summaries")
 CACHE <- file.path("paper","cache")
-DS <- c(thal_a3 = "English (Thal)", marchman_a3 = "English (Marchman)")
+## All five; get1() returns NULL for cells whose fit has not landed yet, so the report
+## fills in as jobs complete rather than needing to be edited each time.
+DS <- c(thal_a3 = "English (Thal)", smith_a3 = "English (Smith)",
+        marchman_a3 = "English (Marchman)", norwegian_a3 = "Norwegian",
+        japanese_a3 = "Japanese")
 CONDS <- c("mid50","mid25","easy50","hard50","rand50","rand25")
 NARROWED <- c("mid50","mid25","easy50","hard50")
 
