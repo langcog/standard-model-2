@@ -783,6 +783,13 @@ In sum, even with a completely matched estimator, acceleration diverges substant
 ## Deliberately echoes the main-text variability panel: log x, kappa = 1 dashed, median
 ## crossbar, one row per population. Raw (uncorrected) child values are plotted, since the
 ## point is that the gap does not depend on the correction.
+##
+## LAB is defined here as well as in the table chunk below. The figure now precedes the
+## table, so relying on the table to define it makes the render order-dependent -- which
+## is exactly how it broke when the two were reordered.
+LAB <- c(thal_a3 = "English (Thal)", smith_a3 = "English (Smith)",
+         marchman_a3 = "English (Marchman)", norwegian_a3 = "Norwegian",
+         japanese_a3 = "Japanese")
 d4 <- dplyr::bind_rows(
   dplyr::bind_rows(lapply(names(si_p4pl$child), function(sl)
     data.frame(pop = unname(LAB[sl]), kappa = si_p4pl$child[[sl]]$observed$kappa))),
@@ -822,9 +829,12 @@ p4 <- dplyr::bind_rows(lapply(names(si_p4pl$child), function(sl) {
              cor = sprintf("%.2f", z$kappa_corrected),
              irt = sprintf("%.2f", z$kappa_irt))
 }))
+## si_p4pl$lm now carries ONE ROW PER WORD (median across the ten seeds), so this row
+## counts the same thing as the child rows above. Every word yielded a usable fit in at
+## least one seed, hence n/n. The per-(seed,word) fits remain in si_p4pl$lm_fits.
 lmk <- si_p4pl$lm$kappa
 p4 <- rbind(p4, data.frame(
-  Sample = "Language models", words = sprintf("%d", length(lmk)),
+  Sample = "Language models", words = sprintf("%d/%d", length(lmk), length(lmk)),
   raw = sprintf("%.2f [%.2f, %.2f]", median(lmk), quantile(lmk, .25), quantile(lmk, .75)),
   rec = "", cor = "", irt = ""))
 knitr::kable(p4, format = "latex", booktabs = TRUE, escape = FALSE,

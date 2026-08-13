@@ -86,7 +86,15 @@ simulate_curves <- function(slug) {
   age_obs   <- sd0$admin_age[sd0$aa]
   eta <- xi[ch_of_obs] + sd0$log_H + kap[ch_of_obs] * log(age_obs / sd0$a0) - dj[sd0$jj]
   ysim <- rbinom(length(eta), 1, plogis(eta))
-  list(truth = median(kap),
+  ## The calibration target is the POPULATION kappa the M3 fit reports, not the median
+  ## over children of the per-child kappa_i. Both describe the same simulation, but the
+  ## recovered value is a median over WORDS, so dividing it by a median over CHILDREN
+  ## mixes two different populations in one ratio. kappa_pop is a single population
+  ## parameter and makes the correction a clean statement: what fraction of the
+  ## population kappa does this pipeline return?
+  irt0 <- as.data.frame(readRDS(file.path(SUMM, sprintf("%s_m3.summary.rds", slug))))
+  list(truth = irt0$median[irt0$variable == "kappa_pop"],
+       truth_med_child = median(kap),
        curves = data.frame(word = sd0$jj, age = round(age_obs), y01 = ysim) |>
          group_by(word, age) |>
          summarise(n = n(), p = mean(y01), .groups = "drop") |>
@@ -131,15 +139,26 @@ lm_k <- lad |> group_by(seed, word) |> filter(n_distinct(words) == nb) |>
   group_modify(~{ p <- four_pl_sc(log10(.x$words), .x$surprisal)
                   tibble(sc = p["sc"], rng = p["rng"]) }) |> ungroup() |>
   filter(keep_ok(sc, rng, 1)) |> mutate(kappa = 0.434 / sc)
+## Aggregate to ONE VALUE PER WORD, so the LM row means the same thing as the child rows.
+## The LM ladder is fitted per (seed, word) and there are ten seeds, so the raw fits are a
+## 10x denser sample of the same 609 words -- reporting that count beside the children's
+## word counts compares fits with words, and plotting it puts ten times as many points on
+## the LM row. Taking the median across seeds within each word fixes both. Per-(seed,word)
+## variability is not lost to the paper; it is what the main-text variability panel shows.
+lm_word <- lm_k |> group_by(word) |>
+  summarise(kappa = median(kappa), n_seeds = n(), .groups = "drop")
 cat(sprintf("\n=== LMs (CHILDES ladder, same routine) ===\n"))
-cat(sprintf("  per-word kappa: median %6.2f  [IQR %5.2f-%5.2f]  (%d fits)\n",
-            median(lm_k$kappa), quantile(lm_k$kappa,.25), quantile(lm_k$kappa,.75), nrow(lm_k)))
+cat(sprintf("  per-(seed,word) fits : %d over %d words x %d seeds\n",
+            nrow(lm_k), n_distinct(lm_k$word), n_distinct(lm_k$seed)))
+cat(sprintf("  per-word kappa (median across seeds): %6.2f  [IQR %5.2f-%5.2f]  (%d words)\n",
+            median(lm_word$kappa), quantile(lm_word$kappa,.25), quantile(lm_word$kappa,.75),
+            nrow(lm_word)))
 
 cat("\n=== HEADLINE: one estimator, one unit, both systems ===\n")
 for (slug in names(res)) cat(sprintf("  %-14s child per-word kappa %6.2f   (attenuated estimator; truth recovers at %.0f%%)\n",
     slug, median(res[[slug]]$observed$kappa),
     100 * median(res[[slug]]$simulated$kappa) / res[[slug]]$truth))
-cat(sprintf("  %-14s LM per-word kappa    %6.2f\n", "CHILDES LMs", median(lm_k$kappa)))
+cat(sprintf("  %-14s LM per-word kappa    %6.2f\n", "CHILDES LMs", median(lm_word$kappa)))
 
 ## Does the independent estimator land where the IRT model says it should? This is the
 ## check that matters: two entirely different machineries on the same data.
@@ -151,6 +170,6 @@ for (slug in names(res)) with(res[[slug]],
               kappa_corrected / kappa_irt)))
 
 dir.create(CACHE, recursive = TRUE, showWarnings = FALSE)
-saveRDS(list(child = res, lm = lm_k, rng_min_child = RNG_MIN_CHILD),
+saveRDS(list(child = res, lm = lm_word, lm_fits = lm_k, rng_min_child = RNG_MIN_CHILD),
         file.path(CACHE, "si_perword_4pl.rds"))
 cat("\nwrote", file.path(CACHE, "si_perword_4pl.rds"), "\n")
