@@ -531,43 +531,9 @@ knitr::kable(tab2, format = "latex", booktabs = TRUE, align = c("l", rep("r", 11
   kableExtra::kable_styling(font_size = 7, latex_options = c("HOLD_position", "scale_down"))
 ```
 
-# Is $\kappa$ a Property of the Instrument?
+# Sensitivity to Item Selection
 
-```md
-[draft for promotion — MCF to review]
-
-A related concern is that $\kappa$ may be a property of the checklist rather than of the
-child. On this view the observed value is roughly the spread of item difficulties divided
-by the width of the observation window, in which case narrowing the checklist's
-difficulty spread should shrink $\kappa$ in proportion, and the comparison against
-language models compares instruments rather than learners.
-
-The hypothesis is directional, so it is testable. We refit the model on the same children
-and the same administrations with only the item set narrowed, cutting on the fitted
-difficulties of the full-data fit. Two conditions retain the middle 50% and middle 25% of
-items by difficulty; two retain the easiest and hardest halves separately, preserving
-spread while shifting location; and two retain random subsets of matched size. The random
-controls are essential, because narrowing by difficulty both compresses the retained
-spread and discards items, and only a subset of equal size separates the effect of
-interest from the loss of precision.
-
-The two hypotheses make quantitative predictions fixed in advance. If $\kappa$ rescales
-with the instrument, each condition should return $\kappa_{\text{all}} \times
-s_{\text{cond}}/s_{\text{all}}$, where $s$ is the retained difficulty SD. If $\kappa$ is a
-property of the children, every condition should return $\kappa_{\text{all}}$.
-
-@fig-item-subset shows the outcome and @tbl-item-subset gives the extreme cells.
-Compressing the retained difficulty spread roughly sixfold leaves $\kappa$ essentially
-where it started, and the residual movement is upward rather than downward — the
-opposite of the direction the objection requires. Across the narrowed conditions the
-invariance prediction outperforms the proportional one by roughly a factor of five to
-nine in root-mean-square error. The size-matched random controls sit within a few percent
-of baseline, so discarding half or three-quarters of the items costs almost nothing on
-its own, which is what allows the small movement in the narrowed conditions to be
-attributed to the narrowing rather than to reduced precision. The easiest and hardest
-halves each recover the full-data value, where the proportional account predicts that
-each should return about half of it.
-```
+One potential concern about our $\kappa$ estimates is that they could be influenced by the composition of the CDI instrument. Could a broader spread of item difficulties result in a larger $\kappa$ estimate? To address this issue, we refit M3 on the same children and same administrations, but with the item set narrowed. We fit models under three sets of conditions: refitting the middle 50% and middle 25% of items (to narrow the width of the distribution),  refitting the easiest and hardest halves separately (to shift the difficulty distribution), and subsetting randomly to 50% and 25% of items. If $\kappa$ scales as a function of the difficulty distribution ($\sigma_\delta$), recovered $\kappa$ values should scale with the standard deviation of the retained items; if not, $\kappa$ should be relatively invariant. @fig-item-subset shows the results of this analysis. Overall, $\kappa$ values were invariant to retained item variability.
 
 ```{r fig-item-subset, fig.width=6.5, fig.height=4.2}
 #| label: fig-item-subset
@@ -603,35 +569,6 @@ ggplot(d, aes(sd_ratio, kappa_ratio, colour = lang, shape = kind)) +
         legend.spacing.y = unit(0, "pt"), panel.grid.minor = element_blank())
 ```
 
-```{r tbl-item-subset}
-#| label: tbl-item-subset
-#| tbl-cap: "The strongest narrowing condition, in which only the middle quarter of items by difficulty is retained, against its size-matched random control. The proportional column is what acceleration would be if it rescaled with the retained difficulty spread. RMSE columns compare the two predictions across all four narrowed conditions."
-## Only the decisive cells: the full grid is 35 rows and the figure already carries it.
-NARROWED <- c("mid50", "mid25", "easy50", "hard50")
-rmse <- si_isub |> dplyr::filter(cond %in% NARROWED) |>
-  dplyr::group_by(lang) |>
-  dplyr::summarise(e_ruler = sqrt(mean((kappa - pred_ruler)^2)),
-                   e_learn = sqrt(mean((kappa - pred_learn)^2)), .groups = "drop")
-tb <- si_isub |> dplyr::filter(cond %in% c("mid25", "rand25")) |>
-  dplyr::select(lang, cond, d_sd, kappa, pred_ruler) |>
-  tidyr::pivot_wider(names_from = cond, values_from = c(d_sd, kappa, pred_ruler)) |>
-  dplyr::left_join(rmse, by = "lang") |>
-  dplyr::transmute(
-    Sample = as.character(lang),
-    sd25 = sprintf("%.2f", d_sd_mid25),
-    k25  = sprintf("%.2f", kappa_mid25),
-    p25  = sprintf("%.2f", pred_ruler_mid25),
-    kr25 = sprintf("%.2f", kappa_rand25),
-    er   = sprintf("%.2f", e_ruler),
-    el   = sprintf("%.2f", e_learn))
-knitr::kable(tb, format = "latex", booktabs = TRUE, escape = FALSE,
-             align = c("l", "r", "r", "r", "r", "r", "r"),
-             col.names = c("Sample", "retained SD", "$\\kappa$", "proportional",
-                           "$\\kappa$ (random)", "RMSE prop.", "RMSE invar.")) |>
-  kableExtra::add_header_above(c(" " = 1, "middle 25% of items" = 3,
-                                 "control" = 1, "across narrowed" = 2)) |>
-  kableExtra::kable_styling(font_size = 9, latex_options = "HOLD_position")
-```
 # Variation in Acceleration
 
 ```{r blup-prep, include=FALSE}
@@ -829,50 +766,41 @@ sigmoid slope *is* $\kappa_i$, by construction.
 
 Next, to estimate the slope of acquisition of individual words, @chang2022 compute surprisal for each word across LM training checkpoints and then fit a four-parameter logistic, $s_w(x) = \ell_w + (u_w-\ell_w)/(1+\exp((x-m_w)/\mathrm{scale}_w))$, in $x = \log_{10}$ training data. Let $p_w = (s_w-\ell_w)/(u_w-\ell_w)$ be the fraction of that word's surprisal reduction still outstanding. The LM slope is therefore $d\,\mathrm{logit}(p_w)/d\ln D = 1/(\mathrm{scale}_w \ln 10)$ — a logit per unit of natural-log input. That is the same as  $\kappa_i$ for children, where the logit probability of producing a word rises in log-age with slope $\kappa_i$ and the outstanding fraction is $1-P(\text{produce})$. 
 
-# Is the Child--LM Comparison an Artifact of the Estimator?
+# Matched Estimation of Acceleration
 
-```md
-[draft for promotion — MCF to review]
+One potential objection to the comparison of children and LMs in the main text is that the estimators are different in two ways. First, the estimator for children is Rasch-based, while the 4 parameter model from @chang2022 is a four-parameter logistic Second, and perhaps more saliently, the child estimator is for $\kappa$ across children, while the LM estimator is across words. 
 
-The comparison above rests on two models that share no machinery: children are scored by
-a binary checklist and fitted with an IRT accumulator, LMs by surprisal and fitted with a
-four-parameter logistic. Two objections follow. The first is that the two $\kappa$
-values may not be the same unit. The second is that, having chosen a different functional
-form for each system, some of the qualitative contrast may follow from that choice rather
-than from the learners.
+To address these issues, we fit the LM four-parameter estimator directly to data on children's word acquisition, averaging across children to produce a proportion of children producing each word at each age. (The Thal and Japanese datasets had fewer children and less age diversity, so not all words produced a viable curve estimate, but most words could be estimated for the Smith, Marchman, and Norwegian datasets). @fig-perword-4pl shows the results. Across all datasets, $\kappa$ estimates were robustly higher than LMs, though somewhat attenuated relative to the M3 fits. 
 
-The unit objection can be settled algebraically. Writing the LM fit as
-$s_w(x) = \ell_w + (u_w-\ell_w)/(1+\exp((x-m_w)/\mathrm{scale}_w))$ and letting
-$p_w = (s_w-\ell_w)/(u_w-\ell_w)$ be the fraction of that word's surprisal reduction
-still outstanding, $p_w$ is bounded in $[0,1]$ but the quantity the fit determines is its
-logit, which is not: $\mathrm{logit}(p_w) = -(x-m_w)/\mathrm{scale}_w$. Both sides are
-therefore slopes of a logit with respect to log input — outstanding surprisal reduction
-for the LM, outstanding mastery $1-P(\text{produce})$ for the child.
+One possible source of this attenuation is the averaging of many different acquisition curves across children. To estimate this attenuation, we sampled from the fitted M3 parameters for $\xi_i$, $\kappa_i$ and $\delta_j$, and ran the identical pipeline over the data to recover a correction factor (the ratio of the estimated by-word $\kappa$ to the "true" $\kappa$). We then applied this correction factor to our empirical estimates. @tbl-perword-4pl shows these corrected estimates, which match very closely to the M3 values. 
 
-The second objection we test directly, by discarding the IRT model on the child side and
-applying the LMs' own estimator to child data. For every word we form the proportion of
-children not yet producing it at each age, and fit the identical four-parameter logistic
-used on LM surprisal, taking $\kappa = 0.434/\mathrm{scale}_w$ exactly as before. One
-functional form, one fitting routine, one per-word unit, both systems.
+In sum, even with a completely matched estimator, acceleration diverges substantially between children and LMs. 
 
-One asymmetry has to be handled. An LM ladder is a single learner, so its per-word curve
-is a within-learner trajectory; a child curve can only be formed by pooling across
-children, and a mixture of logistic curves with different crossing points is flatter than
-any of its components. The pooled estimator can therefore only understate children's
-$\kappa$, never overstate it, which makes this a conservative test. We measure the size
-of that attenuation rather than assume it: we simulate responses from the fitted M3, with
-its known $\xi_i$, $\kappa_i$ and $\delta_j$, and run the identical pipeline over them.
-The recovered value against a known truth gives each dataset its own correction factor.
 
-@tbl-perword-4pl reports the result and @fig-perword-4pl shows the distributions. Raw
-per-word $\kappa$ ranges from `r sprintf("%.1f", min(sapply(si_p4pl$child, function(z) z$kappa_obs)))` to `r sprintf("%.1f", max(sapply(si_p4pl$child, function(z) z$kappa_obs)))` across the five child samples against
-`r sprintf("%.2f", median(si_p4pl$lm$kappa))` for the language models, with no correction applied. Applying each
-dataset's measured correction brings the estimate within
-`r sprintf("%.0f", 100*(1-min(sapply(si_p4pl$child, function(z) z$kappa_corrected/z$kappa_irt))))`% of the $\kappa$ the IRT model reports, in every dataset. Two estimators
-sharing no assumptions, no functional form and no measurement scale therefore agree on
-the same quantity, and the gap between children and language models survives being
-measured entirely on the language models' own terms.
+```{r fig-perword-4pl, fig.width=7, fig.height=3.6}
+#| label: fig-perword-4pl
+#| fig-cap: "Per-word acceleration for children and language models, both estimated with the same four-parameter logistic. Points are words, with the median marked. The dashed line at one is the pure-accumulator value. Child estimates are attenuated by pooling across children and so understate the separation; the correction factors are given in the table."
+## Deliberately echoes the main-text variability panel: log x, kappa = 1 dashed, median
+## crossbar, one row per population. Raw (uncorrected) child values are plotted, since the
+## point is that the gap does not depend on the correction.
+d4 <- dplyr::bind_rows(
+  dplyr::bind_rows(lapply(names(si_p4pl$child), function(sl)
+    data.frame(pop = unname(LAB[sl]), kappa = si_p4pl$child[[sl]]$observed$kappa))),
+  data.frame(pop = "Language models", kappa = si_p4pl$lm$kappa)) |>
+  dplyr::filter(kappa > 0) |>
+  dplyr::mutate(pop = factor(pop, levels = c(unname(LAB), "Language models")),
+                kind = ifelse(pop == "Language models", "LM", "child"))
+ggplot(d4, aes(kappa, forcats::fct_rev(pop), colour = kind)) +
+  geom_jitter(position = position_jitter(height = 0.2, seed = 1), alpha = 0.2, size = 0.7) +
+  stat_summary(fun = median, geom = "crossbar", width = 0.5, linewidth = 0.5, colour = "grey20") +
+  geom_vline(xintercept = 1, linetype = "dashed", colour = "grey55", linewidth = 0.4) +
+  scale_x_log10(breaks = c(0.2, 0.5, 1, 2, 5, 10, 20, 50)) +
+  scale_colour_manual(values = c(child = "#1f78b4", LM = "#e66101"), guide = "none") +
+  labs(x = expression(paste("per-word ", kappa, " (log scale)")), y = NULL) +
+  theme_minimal(base_size = 10) +
+  theme(panel.grid.minor = element_blank())
 ```
+
 
 ```{r tbl-perword-4pl}
 #| label: tbl-perword-4pl
@@ -902,32 +830,8 @@ p4 <- rbind(p4, data.frame(
 knitr::kable(p4, format = "latex", booktabs = TRUE, escape = FALSE,
              align = c("l", "r", "r", "r", "r", "r"),
              col.names = c("Sample", "words fitted", "$\\kappa$ raw [IQR]",
-                           "recovery", "$\\kappa$ corrected", "$\\kappa$ (IRT)")) |>
+                           "recovery", "$\\kappa$ corrected", "$\\kappa$ (M3)")) |>
   kableExtra::kable_styling(font_size = 9, latex_options = "HOLD_position")
-```
-
-```{r fig-perword-4pl, fig.width=7, fig.height=3.6}
-#| label: fig-perword-4pl
-#| fig-cap: "Per-word acceleration for children and language models, both estimated with the same four-parameter logistic. Points are words, with the median marked. The dashed line at one is the pure-accumulator value. Child estimates are attenuated by pooling across children and so understate the separation; the correction factors are given in the table."
-## Deliberately echoes the main-text variability panel: log x, kappa = 1 dashed, median
-## crossbar, one row per population. Raw (uncorrected) child values are plotted, since the
-## point is that the gap does not depend on the correction.
-d4 <- dplyr::bind_rows(
-  dplyr::bind_rows(lapply(names(si_p4pl$child), function(sl)
-    data.frame(pop = unname(LAB[sl]), kappa = si_p4pl$child[[sl]]$observed$kappa))),
-  data.frame(pop = "Language models", kappa = si_p4pl$lm$kappa)) |>
-  dplyr::filter(kappa > 0) |>
-  dplyr::mutate(pop = factor(pop, levels = c(unname(LAB), "Language models")),
-                kind = ifelse(pop == "Language models", "LM", "child"))
-ggplot(d4, aes(kappa, forcats::fct_rev(pop), colour = kind)) +
-  geom_jitter(position = position_jitter(height = 0.2, seed = 1), alpha = 0.2, size = 0.7) +
-  stat_summary(fun = median, geom = "crossbar", width = 0.5, linewidth = 0.5, colour = "grey20") +
-  geom_vline(xintercept = 1, linetype = "dashed", colour = "grey55", linewidth = 0.4) +
-  scale_x_log10(breaks = c(0.2, 0.5, 1, 2, 5, 10, 20, 50)) +
-  scale_colour_manual(values = c(child = "#1f78b4", LM = "#e66101"), guide = "none") +
-  labs(x = expression(paste("per-word ", kappa, " (log scale)")), y = NULL) +
-  theme_minimal(base_size = 10) +
-  theme(panel.grid.minor = element_blank())
 ```
 
 # Other Architectures
