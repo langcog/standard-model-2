@@ -531,6 +531,107 @@ knitr::kable(tab2, format = "latex", booktabs = TRUE, align = c("l", rep("r", 11
   kableExtra::kable_styling(font_size = 7, latex_options = c("HOLD_position", "scale_down"))
 ```
 
+# Is $\kappa$ a Property of the Instrument?
+
+```md
+[draft for promotion — MCF to review]
+
+A related concern is that $\kappa$ may be a property of the checklist rather than of the
+child. On this view the observed value is roughly the spread of item difficulties divided
+by the width of the observation window, in which case narrowing the checklist's
+difficulty spread should shrink $\kappa$ in proportion, and the comparison against
+language models compares instruments rather than learners.
+
+The hypothesis is directional, so it is testable. We refit the model on the same children
+and the same administrations with only the item set narrowed, cutting on the fitted
+difficulties of the full-data fit. Two conditions retain the middle 50% and middle 25% of
+items by difficulty; two retain the easiest and hardest halves separately, preserving
+spread while shifting location; and two retain random subsets of matched size. The random
+controls are essential, because narrowing by difficulty both compresses the retained
+spread and discards items, and only a subset of equal size separates the effect of
+interest from the loss of precision.
+
+The two hypotheses make quantitative predictions fixed in advance. If $\kappa$ rescales
+with the instrument, each condition should return $\kappa_{\text{all}} \times
+s_{\text{cond}}/s_{\text{all}}$, where $s$ is the retained difficulty SD. If $\kappa$ is a
+property of the children, every condition should return $\kappa_{\text{all}}$.
+
+@fig-item-subset shows the outcome and @tbl-item-subset gives the extreme cells.
+Compressing the retained difficulty spread roughly sixfold leaves $\kappa$ essentially
+where it started, and the residual movement is upward rather than downward — the
+opposite of the direction the objection requires. Across the narrowed conditions the
+invariance prediction outperforms the proportional one by roughly a factor of five to
+nine in root-mean-square error. The size-matched random controls sit within a few percent
+of baseline, so discarding half or three-quarters of the items costs almost nothing on
+its own, which is what allows the small movement in the narrowed conditions to be
+attributed to the narrowing rather than to reduced precision. The easiest and hardest
+halves each recover the full-data value, where the proportional account predicts that
+each should return about half of it.
+```
+
+```{r fig-item-subset, fig.width=6.5, fig.height=4.2}
+#| label: fig-item-subset
+#| fig-cap: "Acceleration under deliberately narrowed item sets, plotted as the ratio to the full-data fit against the ratio of retained item-difficulty spread. Each point is one refit on the same children and administrations. If acceleration rescaled with the instrument, points would fall on the diagonal; if it is a property of the children, they fall on the horizontal line at one. Open points are random subsets of matched size, which discard the same number of items without narrowing the spread."
+## Built from paper/cache/si_item_subset.rds (studies/bayes_long/11_item_subset_report.R).
+##
+## The plot is in RATIOS rather than raw units so all datasets share one panel and the two
+## competing predictions become fixed reference lines rather than per-dataset curves:
+## proportional-to-instrument is the identity diagonal, invariant-to-instrument is y = 1.
+## This is the display the objection itself proposed, which is why it is drawn this way.
+d <- si_isub |> dplyr::filter(cond != "all") |>
+  dplyr::mutate(kind = ifelse(grepl("^rand", cond), "random (size-matched)", "narrowed"))
+ggplot(d, aes(sd_ratio, kappa_ratio, colour = lang, shape = kind)) +
+  geom_abline(slope = 1, intercept = 0, linetype = "22", colour = "grey45", linewidth = 0.5) +
+  geom_hline(yintercept = 1, colour = "grey45", linewidth = 0.5) +
+  geom_point(size = 2.6, stroke = 0.8) +
+  ggrepel::geom_text_repel(aes(label = cond), size = 2.5, show.legend = FALSE,
+                           min.segment.length = 0, segment.size = 0.2, max.overlaps = Inf) +
+  annotate("text", x = 0.16, y = 0.22, label = "proportional to instrument",
+           hjust = 0, size = 2.7, colour = "grey35", angle = 26) +
+  ## placed high and right: the top-left is where the strongest narrowing conditions
+  ## land, and the label collided with their point labels there
+  annotate("text", x = 0.98, y = 1.28, label = "invariant (property of the child)",
+           hjust = 1, size = 2.7, colour = "grey35") +
+  scale_shape_manual(values = c("narrowed" = 16, "random (size-matched)" = 1), name = NULL) +
+  scale_colour_brewer(palette = "Dark2", name = NULL) +
+  scale_x_continuous(limits = c(0.1, 1.1)) +
+  scale_y_continuous(limits = c(0, 1.35)) +
+  labs(x = "retained item-difficulty SD, relative to full data",
+       y = expression(paste(kappa, ", relative to full data"))) +
+  theme_minimal(base_size = 10) +
+  theme(legend.position = "bottom", legend.box = "vertical",
+        legend.spacing.y = unit(0, "pt"), panel.grid.minor = element_blank())
+```
+
+```{r tbl-item-subset}
+#| label: tbl-item-subset
+#| tbl-cap: "The strongest narrowing condition, in which only the middle quarter of items by difficulty is retained, against its size-matched random control. The proportional column is what acceleration would be if it rescaled with the retained difficulty spread. RMSE columns compare the two predictions across all four narrowed conditions."
+## Only the decisive cells: the full grid is 35 rows and the figure already carries it.
+NARROWED <- c("mid50", "mid25", "easy50", "hard50")
+rmse <- si_isub |> dplyr::filter(cond %in% NARROWED) |>
+  dplyr::group_by(lang) |>
+  dplyr::summarise(e_ruler = sqrt(mean((kappa - pred_ruler)^2)),
+                   e_learn = sqrt(mean((kappa - pred_learn)^2)), .groups = "drop")
+tb <- si_isub |> dplyr::filter(cond %in% c("mid25", "rand25")) |>
+  dplyr::select(lang, cond, d_sd, kappa, pred_ruler) |>
+  tidyr::pivot_wider(names_from = cond, values_from = c(d_sd, kappa, pred_ruler)) |>
+  dplyr::left_join(rmse, by = "lang") |>
+  dplyr::transmute(
+    Sample = as.character(lang),
+    sd25 = sprintf("%.2f", d_sd_mid25),
+    k25  = sprintf("%.2f", kappa_mid25),
+    p25  = sprintf("%.2f", pred_ruler_mid25),
+    kr25 = sprintf("%.2f", kappa_rand25),
+    er   = sprintf("%.2f", e_ruler),
+    el   = sprintf("%.2f", e_learn))
+knitr::kable(tb, format = "latex", booktabs = TRUE, escape = FALSE,
+             align = c("l", "r", "r", "r", "r", "r", "r"),
+             col.names = c("Sample", "retained SD", "$\\kappa$", "proportional",
+                           "$\\kappa$ (random)", "RMSE prop.", "RMSE invar.")) |>
+  kableExtra::add_header_above(c(" " = 1, "middle 25% of items" = 3,
+                                 "control" = 1, "across narrowed" = 2)) |>
+  kableExtra::kable_styling(font_size = 9, latex_options = "HOLD_position")
+```
 # Variation in Acceleration
 
 ```{r blup-prep, include=FALSE}
@@ -827,108 +928,6 @@ ggplot(d4, aes(kappa, forcats::fct_rev(pop), colour = kind)) +
   labs(x = expression(paste("per-word ", kappa, " (log scale)")), y = NULL) +
   theme_minimal(base_size = 10) +
   theme(panel.grid.minor = element_blank())
-```
-
-# Is $\kappa$ a Property of the Instrument?
-
-```md
-[draft for promotion — MCF to review]
-
-A related concern is that $\kappa$ may be a property of the checklist rather than of the
-child. On this view the observed value is roughly the spread of item difficulties divided
-by the width of the observation window, in which case narrowing the checklist's
-difficulty spread should shrink $\kappa$ in proportion, and the comparison against
-language models compares instruments rather than learners.
-
-The hypothesis is directional, so it is testable. We refit the model on the same children
-and the same administrations with only the item set narrowed, cutting on the fitted
-difficulties of the full-data fit. Two conditions retain the middle 50% and middle 25% of
-items by difficulty; two retain the easiest and hardest halves separately, preserving
-spread while shifting location; and two retain random subsets of matched size. The random
-controls are essential, because narrowing by difficulty both compresses the retained
-spread and discards items, and only a subset of equal size separates the effect of
-interest from the loss of precision.
-
-The two hypotheses make quantitative predictions fixed in advance. If $\kappa$ rescales
-with the instrument, each condition should return $\kappa_{\text{all}} \times
-s_{\text{cond}}/s_{\text{all}}$, where $s$ is the retained difficulty SD. If $\kappa$ is a
-property of the children, every condition should return $\kappa_{\text{all}}$.
-
-@fig-item-subset shows the outcome and @tbl-item-subset gives the extreme cells.
-Compressing the retained difficulty spread roughly sixfold leaves $\kappa$ essentially
-where it started, and the residual movement is upward rather than downward — the
-opposite of the direction the objection requires. Across the narrowed conditions the
-invariance prediction outperforms the proportional one by roughly a factor of five to
-nine in root-mean-square error. The size-matched random controls sit within a few percent
-of baseline, so discarding half or three-quarters of the items costs almost nothing on
-its own, which is what allows the small movement in the narrowed conditions to be
-attributed to the narrowing rather than to reduced precision. The easiest and hardest
-halves each recover the full-data value, where the proportional account predicts that
-each should return about half of it.
-```
-
-```{r fig-item-subset, fig.width=6.5, fig.height=4.2}
-#| label: fig-item-subset
-#| fig-cap: "Acceleration under deliberately narrowed item sets, plotted as the ratio to the full-data fit against the ratio of retained item-difficulty spread. Each point is one refit on the same children and administrations. If acceleration rescaled with the instrument, points would fall on the diagonal; if it is a property of the children, they fall on the horizontal line at one. Open points are random subsets of matched size, which discard the same number of items without narrowing the spread."
-## Built from paper/cache/si_item_subset.rds (studies/bayes_long/11_item_subset_report.R).
-##
-## The plot is in RATIOS rather than raw units so all datasets share one panel and the two
-## competing predictions become fixed reference lines rather than per-dataset curves:
-## proportional-to-instrument is the identity diagonal, invariant-to-instrument is y = 1.
-## This is the display the objection itself proposed, which is why it is drawn this way.
-d <- si_isub |> dplyr::filter(cond != "all") |>
-  dplyr::mutate(kind = ifelse(grepl("^rand", cond), "random (size-matched)", "narrowed"))
-ggplot(d, aes(sd_ratio, kappa_ratio, colour = lang, shape = kind)) +
-  geom_abline(slope = 1, intercept = 0, linetype = "22", colour = "grey45", linewidth = 0.5) +
-  geom_hline(yintercept = 1, colour = "grey45", linewidth = 0.5) +
-  geom_point(size = 2.6, stroke = 0.8) +
-  ggrepel::geom_text_repel(aes(label = cond), size = 2.5, show.legend = FALSE,
-                           min.segment.length = 0, segment.size = 0.2, max.overlaps = Inf) +
-  annotate("text", x = 0.16, y = 0.22, label = "proportional to instrument",
-           hjust = 0, size = 2.7, colour = "grey35", angle = 26) +
-  ## placed high and right: the top-left is where the strongest narrowing conditions
-  ## land, and the label collided with their point labels there
-  annotate("text", x = 0.98, y = 1.28, label = "invariant (property of the child)",
-           hjust = 1, size = 2.7, colour = "grey35") +
-  scale_shape_manual(values = c("narrowed" = 16, "random (size-matched)" = 1), name = NULL) +
-  scale_colour_brewer(palette = "Dark2", name = NULL) +
-  scale_x_continuous(limits = c(0.1, 1.1)) +
-  scale_y_continuous(limits = c(0, 1.35)) +
-  labs(x = "retained item-difficulty SD, relative to full data",
-       y = expression(paste(kappa, ", relative to full data"))) +
-  theme_minimal(base_size = 10) +
-  theme(legend.position = "bottom", legend.box = "vertical",
-        legend.spacing.y = unit(0, "pt"), panel.grid.minor = element_blank())
-```
-
-```{r tbl-item-subset}
-#| label: tbl-item-subset
-#| tbl-cap: "The strongest narrowing condition, in which only the middle quarter of items by difficulty is retained, against its size-matched random control. The proportional column is what acceleration would be if it rescaled with the retained difficulty spread. RMSE columns compare the two predictions across all four narrowed conditions."
-## Only the decisive cells: the full grid is 35 rows and the figure already carries it.
-NARROWED <- c("mid50", "mid25", "easy50", "hard50")
-rmse <- si_isub |> dplyr::filter(cond %in% NARROWED) |>
-  dplyr::group_by(lang) |>
-  dplyr::summarise(e_ruler = sqrt(mean((kappa - pred_ruler)^2)),
-                   e_learn = sqrt(mean((kappa - pred_learn)^2)), .groups = "drop")
-tb <- si_isub |> dplyr::filter(cond %in% c("mid25", "rand25")) |>
-  dplyr::select(lang, cond, d_sd, kappa, pred_ruler) |>
-  tidyr::pivot_wider(names_from = cond, values_from = c(d_sd, kappa, pred_ruler)) |>
-  dplyr::left_join(rmse, by = "lang") |>
-  dplyr::transmute(
-    Sample = as.character(lang),
-    sd25 = sprintf("%.2f", d_sd_mid25),
-    k25  = sprintf("%.2f", kappa_mid25),
-    p25  = sprintf("%.2f", pred_ruler_mid25),
-    kr25 = sprintf("%.2f", kappa_rand25),
-    er   = sprintf("%.2f", e_ruler),
-    el   = sprintf("%.2f", e_learn))
-knitr::kable(tb, format = "latex", booktabs = TRUE, escape = FALSE,
-             align = c("l", "r", "r", "r", "r", "r", "r"),
-             col.names = c("Sample", "retained SD", "$\\kappa$", "proportional",
-                           "$\\kappa$ (random)", "RMSE prop.", "RMSE invar.")) |>
-  kableExtra::add_header_above(c(" " = 1, "middle 25% of items" = 3,
-                                 "control" = 1, "across narrowed" = 2)) |>
-  kableExtra::kable_styling(font_size = 9, latex_options = "HOLD_position")
 ```
 
 # Other Architectures
