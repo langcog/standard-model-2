@@ -772,14 +772,14 @@ One potential objection to the comparison of children and LMs in the main text i
 
 To address these issues, we fit the LM four-parameter estimator directly to data on children's word acquisition, averaging across children to produce a proportion of children producing each word at each age. (The Thal and Japanese datasets had fewer children and less age diversity, so not all words produced a viable curve estimate, but most words could be estimated for the Smith, Marchman, and Norwegian datasets). @fig-perword-4pl shows the results. Across all datasets, $\kappa$ estimates were robustly higher than LMs, though somewhat attenuated relative to the M3 fits. 
 
-One possible source of this attenuation is the averaging of many different acquisition curves across children. To estimate this attenuation, we sampled from the fitted M3 parameters for $\xi_i$, $\kappa_i$ and $\delta_j$, and ran the identical pipeline over the data to recover a correction factor (the ratio of the estimated by-word $\kappa$ to the "true" $\kappa$). We then applied this correction factor to our empirical estimates. @tbl-perword-4pl shows these corrected estimates, which match very closely to the M3 values. 
+One possible source of this attenuation is the averaging of many different acquisition curves across children. To estimate this attenuation, we sampled from the fitted M3 parameters for $\xi_i$, $\kappa_i$ and $\delta_j$, and ran the identical pipeline over the data to recover a correction factor (the ratio of the estimated by-word $\kappa$ to the population $\kappa$ used to generate the data). We then applied this correction factor to our empirical estimates. @tbl-perword-4pl shows these corrected estimates, which match very closely to the M3 values. 
 
 In sum, even with a completely matched estimator, acceleration diverges substantially between children and LMs. 
 
 
 ```{r fig-perword-4pl, fig.width=7, fig.height=3.6}
 #| label: fig-perword-4pl
-#| fig-cap: "Per-word acceleration for children and language models, both estimated with the same four-parameter logistic. Points are words, with the median marked. The dashed line at one is the pure-accumulator value. Child estimates are attenuated by pooling across children and so understate the separation; the correction factors are given in the table."
+#| fig-cap: "Per-word acceleration for children and language models, both estimated with the same four-parameter logistic. Points are words, with the median marked; language model values are medians across the ten training seeds. The dashed line at one is the pure-accumulator value. Child estimates are attenuated by pooling across children and so understate the separation; the correction factors are given in the table."
 ## Deliberately echoes the main-text variability panel: log x, kappa = 1 dashed, median
 ## crossbar, one row per population. Raw (uncorrected) child values are plotted, since the
 ## point is that the gap does not depend on the correction.
@@ -804,7 +804,7 @@ ggplot(d4, aes(kappa, forcats::fct_rev(pop), colour = kind)) +
 
 ```{r tbl-perword-4pl}
 #| label: tbl-perword-4pl
-#| tbl-cap: "Per-word acceleration estimated with the language models' own estimator. For each word we fit the same four-parameter logistic used on LM surprisal to the proportion of children not yet producing that word, and take kappa = 0.434/scale. Recovery is the fraction of a known simulated kappa that the same pipeline returns when run on data generated from the fitted M3, and is the factor by which pooling across children attenuates the estimate; corrected divides the raw estimate by it. The final column is the kappa the IRT model reports for that dataset."
+#| tbl-cap: "Per-word acceleration estimated with the language models' own estimator. For each word we fit the same four-parameter logistic used on LM surprisal to the proportion of children not yet producing that word, and take kappa = 0.434/scale. Recovery is the fraction the population kappa that the same pipeline returns when run on data generated from the fitted M3, and is the factor by which pooling across children attenuates the estimate; corrected divides the raw estimate by it. The final column is the kappa M3 model reports for that dataset."
 ## Built from paper/cache/si_perword_4pl.rds (studies/bayes_long/10_perword_4pl.R).
 ## The LM row carries no recovery/corrected/IRT entry: an LM ladder is a single learner,
 ## so its per-word curve needs no pooling and suffers no attenuation, and there is no IRT
