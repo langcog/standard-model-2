@@ -33,7 +33,9 @@ knitr::opts_chunk$set(
 
 Reproducible code for this paper is available at \href{}{http://github.com/langcog/standard-model-2}. Data were retrieved from Wordbank using the `wordbankr` package [@frank2017] and CHILDES using the `childesr` package [@sanchez2019].
 
-All longitudinal datasets with three or more observations per child were included. We applied a quality filter to exclude administrations that showed either decreases of more than 25% of productive vocabulary or increases that exceeded 40% of total vocabulary per month. This excluded `r n_excl` children in total (`r pct_excl`%), nearly all from the English (Marchman) dataset (`r qc_mar`%; Norwegian `r qc_nor`%, none from the others) (SI: Data Exclusions).
+All longitudinal datasets with three or more observations per child were included. English (Thal) data are from @thal2013, Norwegian is from @simonsen2014, and Japanese is from @hagihara2023; English (Marchman) and English (Smith) are unpublished datasets available through Wordbank [@frank2017]. 
+
+This excluded `r n_excl` children in total (`r pct_excl`%), nearly all from the English (Marchman) dataset (`r qc_mar`%; Norwegian `r qc_nor`%, none from the others) (SI: Data Exclusions).
 
 ## Bayesian models
 
