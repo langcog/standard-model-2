@@ -29,13 +29,9 @@ knitr::opts_chunk$set(
 
 # Materials and Methods
 
-## Data and code
+## Vocabulary data 
 
-Reproducible code for this paper is available at \href{}{http://github.com/langcog/standard-model-2}. Data were retrieved from Wordbank using the `wordbankr` package [@frank2017] and CHILDES using the `childesr` package [@sanchez2019].
-
-All longitudinal datasets with three or more observations per child were included. English (Thal) data are from @thal2013, Norwegian is from @simonsen2014, and Japanese is from @hagihara2023; English (Marchman) and English (Smith) are unpublished datasets available through Wordbank [@frank2017]. 
-
-This excluded `r n_excl` children in total (`r pct_excl`%), nearly all from the English (Marchman) dataset (`r qc_mar`%; Norwegian `r qc_nor`%, none from the others) (SI: Data Exclusions).
+All longitudinal datasets with three or more observations per child were included. English (Thal) data are from @thal2013, Norwegian is from @simonsen2014, and Japanese is from @hagihara2023; English (Marchman) and English (Smith) are unpublished datasets available through Wordbank [@frank2017]. We applied a quality filter to exclude administrations that showed either decreases of more than 25% of productive vocabulary or increases that exceeded 40% of total vocabulary per month. This excluded `r n_excl` children in total (`r pct_excl`%), nearly all from the English (Marchman) dataset (`r qc_mar`%; Norwegian `r qc_nor`%, none from the others) (SI: Data Exclusions).
 
 ## Bayesian models
 
@@ -60,7 +56,7 @@ For comparability, all data were tokenized using a standard BPE tokenizer traine
 
 For the computation of surprisal across training runs ("training"), we trained models using 3 random seeds on the full dataset. For the computation across different dataset sizes ("development"), the data were segmented into 18 nested datasets ranging in size from .5M to the full 24M. We then chose 10 random seed values and trained 10 models on each dataset for a total of 180 models. For the computation of variability across model runs ("composition"), we ran 8 random seed values across 12 nested dataset sizes for three disjoint subsets of both BabyLM and ClimbMix, resulting in 8 (seeds) x 12 (sizes) x 3 (subsets) x 2 (datasets) = 576 distinct models.
 
-Models were trained for a total of 20 epochs with sequence length 1024 and batch size 8, using AdamW for optimization and learning rate of 1e-4 with a linear decay, no warmup, weight decay of 0, and no in-epoch shuffling. Training was performed on NVIDIA A40 GPUs. All trained models are available at [https://huggingface.co/mcxfrank/childes-gpt2-ladder]() and [https://huggingface.co/mcxfrank/gpt2-composition-control]().
+Models were trained for a total of 20 epochs with sequence length 1024 and batch size 8, using AdamW for optimization and learning rate of 1e-4 with a linear decay, no warmup, weight decay of 0, and no in-epoch shuffling. Training was performed on NVIDIA A40 GPUs.
 
 ## Proportional Return on Input
 
