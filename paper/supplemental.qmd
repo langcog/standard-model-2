@@ -43,7 +43,7 @@ We chose weakly informative priors throughout, including on the efficiency and a
 $\sigma_b \sim \mathrm{Half\text{-}Normal}(0,\ 5)$ and the item difficulties $\tau_\delta \sim \mathrm{Half\text{-}Normal}(0,\ 5)$. We also chose a prior that mildly regularized the correlations between $a_i$ and $b_i$ ($\mathbf L \sim \mathrm{LKJ}(2)$).
 
 All models were fit using cmdstanr, with four independent chains of
-1,000 warmup and 1,000 sampling iterations each (4,000 post-warmup draws) and a target acceptance rate of 0.9. The primary series of models was additionally refit using 2,000 warmup and 8,000 sampling iterations. We assessed convergence using rank-normalised split-$\hat{R}$ and bulk effective sample size. For parameters we interpret (primarily $\kappa$, $\sigma_a$, $\sigma_b$), we required $\hat{R} < 1.01$ and bulk ESS above 400.
+1,000 warmup and 1,000 sampling iterations each (4,000 post-warmup draws) and a target acceptance rate of 0.9. The primary series of models was additionally refit using 2,000 warmup and 8,000 sampling iterations. We assessed convergence using rank-normalized split-$\hat{R}$ and bulk effective sample size. For parameters we interpret (primarily $\kappa$, $\sigma_a$, $\sigma_b$), we required $\hat{R} < 1.01$ and bulk ESS above 400.
 
 
 ## Learning efficiency
@@ -60,16 +60,16 @@ For the computation of surprisal across training runs ("training"), we trained m
 
 Models were trained for a total of 20 epochs with sequence length 1024 and batch size 8, using AdamW for optimization and learning rate of 1e-4 with a linear decay, no warmup, weight decay of 0, and no in-epoch shuffling. Training was performed on NVIDIA A40 GPUs. All trained models are available at [https://huggingface.co/mcxfrank/childes-gpt2-ladder]() and [https://huggingface.co/mcxfrank/gpt2-composition-control]().
 
-## Fractional return on input
+## Proportional return on input
 
-Fractional return on input was computed for models based on mean surprisal $L(D)$ of the CDI words after training on
+Proportional return on input was computed for models based on mean surprisal $L(D)$ of the CDI words after training on
 $D$ word tokens of input. This follows the form from @hoffmann2022 of $L(D) = E + B\,D^{-\beta}$, with $E$ the irreducible entropy floor and $B, \beta$ fit across budgets (here $E \approx 2.94$ nats, $B \approx 312$, $\beta \approx 0.32$,
 $R^2 = 0.998$). The excess loss $L(D) - E = B\,D^{-\beta}$ is the reducible
 part that training removes; it falls as a power law of slope $-\beta$. Marginal return is the loss removed per $e$-fold of data, 
 
 $$R(D) = -\frac{\mathrm{d}L}{\mathrm{d}\ln D} = \beta\,\big(L(D) - E\big),$$
 
-\noindent obtained by differentiating the scaling law. We compute the ratio of this quantity to the excess loss, obtaining the fractional return: the share of the remaining reducible loss removed
+\noindent obtained by differentiating the scaling law. We compute the ratio of this quantity to the excess loss, obtaining the proportional return: the share of the remaining reducible loss removed
 per $e$-fold, $\gamma_{\text{LM}}(D) = \frac{R(D)}{L(D) - E} = \beta.$
 For a power law, this is constant: $\gamma_{\text{LM}} = \beta \approx 0.32$
 at every budget, recapitulating the scaling law.
@@ -78,7 +78,7 @@ We can compute the same quantity for children. We define a vocabulary production
 loss, $L_i(t) = \operatorname{mean}_j[-\log p_{ij}(t)]$, whose floor is zero
 (a known word is produced, $p \to 1$). Its marginal return is
 $R_i(t) = -\mathrm{d}L_i/\mathrm{d}\log t = \kappa_i\,\operatorname{mean}_j(1 - p_{ij})$,
-so the fractional return is
+so the proportional return is
 $$\gamma_i(t) = \frac{R_i(t)}{L_i(t)}
  = \kappa_i\,\frac{\operatorname{mean}_j(1 - p_{ij})}{\operatorname{mean}_j(-\log p_{ij})},$$
 which rises toward the child's own $\kappa_i$ as the vocabulary saturates.
@@ -285,7 +285,7 @@ knitr::kable(tab |> select(Model, all_of(lang_order)), format = "latex", booktab
 
 # Individual-level Cross-validation
 
-The model comparisons above report ELPD LOO values for held-out data from individual item-responses, which are nested within children. To assess the value of M3 (the accelerating accumulator) in making fully out-of-sample predictions, we designed a prospective test. As our data, we selected a subset of the Norwegian sample that included 371 children with $>= 6$ longitudinal CDIs. We then fit models to the child's most recent $k$ observations and used these to predict the child's next administration (3 months later). This design avoids confounding data density with the gap between the fitted and predicted observations. 
+The model comparisons above report ELPD LOO values for held-out data from individual item-responses, which are nested within children. To assess the value of M3 (the accelerating accumulator) in making fully out-of-sample predictions, we designed a prospective test. As our data, we selected a subset of the Norwegian sample that included 371 children with $\geq 6$ longitudinal CDIs. We then fit models to the child's most recent $k$ observations and used these to predict the child's next administration (3 months later). This design avoids confounding data density with the gap between the fitted and predicted observations. 
 
 Results from this analysis are shown in @tbl-cv-depth. The result is very sensitive to the value of $k$ used. With $k=2$, the fixed slope model (M2) clearly predicts better because the per-child slope model (M3) fully parameterizes the two observations per child and absorbs measurement error as a result. This effect decreases as $k$ increases until the two models are tied by $k=5$. We expect that with even denser data, a separate slope parameter would lead to individually better fits, but in practice the single slope model makes acceptable predictions. 
 
@@ -768,7 +768,7 @@ Next, to estimate the slope of acquisition of individual words, @chang2022 compu
 
 # Matched Estimation of Acceleration
 
-One potential objection to the comparison of children and LMs in the main text is that the estimators are different in two ways. First, the estimator for children is Rasch-based, while the 4 parameter model from @chang2022 is a four-parameter logistic Second, and perhaps more saliently, the child estimator is for $\kappa$ across children, while the LM estimator is across words. 
+One potential objection to the comparison of children and LMs in the main text is that the estimators are different in two ways. First, the estimator for children is Rasch-based, while the model from @chang2022 is a four-parameter logistic. Second, and perhaps more saliently, the child estimator is for $\kappa$ across children, while the LM estimator is across words. 
 
 To address these issues, we fit the LM four-parameter estimator directly to data on children's word acquisition, averaging across children to produce a proportion of children producing each word at each age. (The Thal and Japanese datasets had fewer children and less age diversity, so not all words produced a viable curve estimate, but most words could be estimated for the Smith, Marchman, and Norwegian datasets). @fig-perword-4pl shows the results. Across all datasets, $\kappa$ estimates were robustly higher than LMs, though somewhat attenuated relative to the M3 fits. 
 
@@ -811,7 +811,7 @@ ggplot(d4, aes(kappa, forcats::fct_rev(pop), colour = kind)) +
 
 ```{r tbl-perword-4pl}
 #| label: tbl-perword-4pl
-#| tbl-cap: "Per-word acceleration estimated with the language models' own estimator. For each word we fit the same four-parameter logistic used on LM surprisal to the proportion of children not yet producing that word, and take kappa = 0.434/scale. Recovery is the fraction the population kappa that the same pipeline returns when run on data generated from the fitted M3, and is the factor by which pooling across children attenuates the estimate; corrected divides the raw estimate by it. The final column is the kappa M3 model reports for that dataset."
+#| tbl-cap: "Per-word acceleration estimated with the language models' own estimator. For each word we fit the same four-parameter logistic used on LM surprisal to the proportion of children not yet producing that word, and take kappa = 0.434/scale. Recovery is the fraction of the population kappa that the same pipeline returns when run on data generated from the fitted M3, and is the factor by which pooling across children attenuates the estimate; the corrected estimate is the raw estimate divided by this factor. The final column is the kappa M3 model reports for that dataset."
 ## Built from paper/cache/si_perword_4pl.rds (studies/bayes_long/10_perword_4pl.R).
 ## The LM row carries no recovery/corrected/IRT entry: an LM ladder is a single learner,
 ## so its per-word curve needs no pooling and suffers no attenuation, and there is no IRT
@@ -850,7 +850,7 @@ The acceleration results we report in the main text are not specific to our choi
 
 ```{r fig-si-cb-arch, fig.width=6.5, fig.height=4}
 #| label: fig-si-cb-arch
-#| fig-cap: "Per-word acquisition slopes for the four architectures studied in Chang & Bergen (2022) -- BERT, GPT-2, BiLSTM, LSTM -- trained on BookCorpus + WikiText-103. CHILDES-trained GPT-2 models (training axis) are overlaid in grey."
+#| fig-cap: "Per-word acquisition slopes for the four architectures studied in Chang & Bergen (2022) -- BERT, GPT-2, BiLSTM, LSTM -- trained on BookCorpus + WikiText-103. CHILDES-trained GPT-2 models (training axis) are overlaid in gray."
 
 # Data: build_cache.R §6 (fig6_llm_slopes.rds: slopes_cb_arch + slopes).
 cb   <- llm_slopes$slopes_cb_arch
