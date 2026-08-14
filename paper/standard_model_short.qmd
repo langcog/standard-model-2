@@ -19,7 +19,15 @@ bibliography: standard_model.bib
 # References. Add @marchman / @smith dataset keys once they exist in the bib.
 nocite: |
   @thal2013, @simonsen2014, @hagihara2023
+csl: science.csl
 format:
+  # Science wants a single .docx for the main text, with figures embedded and the
+  # supplementary materials as a separate file: "If you are using LaTeX, please convert
+  # your paper into .docx format." The PDF target below is unchanged and remains what we
+  # render for internal review; `quarto render --to docx` produces the submission file.
+  docx:
+    fig-dpi: 300
+    fig-width: 7.24     # 18.4 cm, Science's 3-column width
   pdf:
     documentclass: article
     geometry: margin=1in
@@ -54,72 +62,8 @@ format:
 ---
 
 ```{r setup, include=FALSE}
-suppressPackageStartupMessages({
-  library(here); library(dplyr); library(tidyr); library(readr)
-  library(ggplot2); library(patchwork); library(latex2exp)
-  library(knitr); library(scales); library(stringr); library(forcats)
-  # png/grid dropped: they were used only by the plate-diagram raster removed from Fig 1.
-  # [MCF: gridExtra appears unused too, but it predates this change so it is left alone.]
-  library(broom); library(gridExtra)
-  library(ggrepel)
-})
-source(here("paper", "_helpers.R"))
-
-
-
-# Cached data for the three main-text figures — produced by
-# `Rscript paper/build_cache_short.R`.
-CACHE <- here("paper", "cache")
-fig1_fan   <- readRDS(file.path(CACHE, "fig1_fan.rds"))        # Fig 1: M0-M3 schematic + per-dataset M3 fan
-fig2       <- readRDS(file.path(CACHE, "fig2_efficiency.rds")) # Fig 2: per-word exposures-to-learn (M3)
-llm_slopes <- readRDS(file.path(CACHE, "fig6_llm_slopes.rds")) # Fig 3: child vs LLM acceleration
-# QC cache
-TR <- readRDS(file.path(CACHE, "qc_spaghetti_data.rds"))
-# for percent CV 
-si_cvh    <- readRDS(here("paper", "cache", "si_cv_headline.rds"))  # forward CV: M2 vs kappa=1
-
-
-# Inline text values (raw numbers in si_inline.rds, built by build_cache_short
-# section 7); formatted here to the precision they render at in the text.
-inl <- readRDS(file.path(CACHE, "si_inline.rds"))
-.k1  <- function(x) sprintf("%.1f", x)                        # kappa: one decimal
-.pct <- function(x) if (x >= 10) sprintf("%.0f", x) else sprintf("%.1f", x)
-age_lo   <- inl$age_lo; age_hi <- inl$age_hi                  # integer months
-loo_min  <- format(signif(inl$loo_min, 2), big.mark = ",")   # 2 sig figs
-kap_lo   <- .k1(inl$kappa_lo); kap_lo_q5 <- .k1(inl$kappa_lo_q5); kap_lo_q95 <- .k1(inl$kappa_lo_q95)
-kap_hi   <- .k1(inl$kappa_hi); kap_hi_q5 <- .k1(inl$kappa_hi_q5); kap_hi_q95 <- .k1(inl$kappa_hi_q95)
-en_kappa <- .k1(inl$en_kappa); no_kappa <- .k1(inl$no_kappa)
-en_sd    <- .k1(inl$en_sd);    no_sd    <- .k1(inl$no_sd)
-
-# Random-effect summaries for main-text reporting (see tbl-ranef). sigma_b = between-
-# child SD of acceleration; rho = efficiency-acceleration correlation; pct_gt1 = share
-# of children above the pure-accumulator value kappa = 1; kappa_between_sd = SD of
-# kappa ACROSS the five samples, the honest uncertainty scale given that CDI items are
-# not locally independent (it is ~13x the narrowest within-sample interval).
-sb_lo    <- .k1(inl$sb_lo);  sb_hi  <- .k1(inl$sb_hi)
-rho_lo   <- sprintf("%+.2f", inl$rho_lo); rho_hi <- sprintf("%+.2f", inl$rho_hi)
-pct_gt1  <- sprintf("%.1f", inl$pct_kappa_gt1)
-kappa_between_sd <- .k1(inl$kappa_between_sd)
-
-# Longitudinal sample + QC exclusions (bayes_long_sample.rds; built from the bundles by
-# studies/bayes_long/qc_exclusion_report.R, so it renders independently of the fit caches).
-bl_samp  <- readRDS(file.path(CACHE, "bayes_long_sample.rds"))
-.bl      <- function(s) bl_samp$sample[bl_samp$sample$dataset == s, ]
-qc_mar   <- .pct(.bl("marchman")$pct_kids_excluded)   # % children excluded, Marchman
-qc_nor   <- .pct(.bl("norwegian")$pct_kids_excluded)  # % children excluded, Norwegian
-n_total  <- format(.bl("total")$n_kids, big.mark = ",")      # kids retained, all datasets
-n_excl   <- .bl("total")$kids_excluded                       # kids excluded, all datasets
-pct_excl <- .pct(.bl("total")$pct_kids_excluded)
-
-# dev = "cairo_pdf": the default pdf() device cannot encode non-ASCII glyphs. It fails
-# with an mbcsToSbcs conversion error and substitutes ".", so theta, kappa and the
-# up-arrow were rendering as "Latent Ability (.)", "Pure (.=1)" and ". Efficiency" in
-# Fig 1B (and kappa/gamma in the LM figure). cairo_pdf handles UTF-8; it needs XQuartz
-# for its X11 libraries, which is now installed. Verify with capabilities("cairo").
-knitr::opts_chunk$set(
-  echo = FALSE, message = FALSE, warning = FALSE, cache=TRUE,
-  fig.align = "center", out.width = "100%", dpi = 300, dev = "cairo_pdf"
-)
+## Shared with paper/science/supplement.qmd -- see paper/_setup_shared.R
+source("_setup_shared.R")
 ```
 
 Children’s language grows rapidly during early childhood [@frank2021;@kidd2020;@fenson1994], and the "explosion" of expressive vocabulary is a signature human cognitive achievement [@bloom2002;@spelke2003]. Providing a quantitative characterization of this process is an important scientific goal [@frank2009;@mcmurray2012;@trueswell2013;@kachergis2012;@jones2017;@goodman2008;@hidaka2013;@roy2015;@braginsky2019;@kachergis2022;@kachergis2022b], but until recently, language acquisition could only be studied in human learners. Language models (LMs) show increasing linguistic sophistication, however, allowing them to become a model system for the study of human language [@huebner2021;@futrell2025;@frank2025;@evanson2023;@misra2024].
@@ -536,4 +480,10 @@ Some of the computing for this project was performed on the Sherlock and Marlowe
 \end{center}
 ```
 
+::: {.content-visible when-format="pdf"}
+<!-- The SI is folded into the PDF for internal review, but Science requires it as a
+     SEPARATE file (docx or PDF are both accepted), so it is excluded from the docx
+     render. paper/science/supplement.qmd builds the standalone SI PDF from the same
+     source, so there is one copy of the SI, not two. -->
 {{< include supplemental.qmd >}}
+:::
