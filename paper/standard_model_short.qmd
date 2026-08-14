@@ -224,7 +224,10 @@ pC <- ggplot() +
   scale_linewidth_identity() +
   scale_y_continuous(limits = c(0, 1), breaks = c(0, 0.5, 1)) +
   labs(x = "Age (Months)", y = "Proportion of Items Produced") +
-  guides(color    = guide_legend(order = 1, override.aes = list(linewidth = 1.1, linetype = "solid")),
+  ## reverse = TRUE so the legend runs 90th -> 10th, matching the top-to-bottom order the
+  ## bands actually appear in; ascending order made the reader invert it mentally
+  guides(color    = guide_legend(order = 1, reverse = TRUE,
+                                 override.aes = list(linewidth = 1.1, linetype = "solid")),
          linetype = guide_legend(order = 2, override.aes = list(colour = "black", linewidth = 0.6))) +
   theme_minimal(base_size = 11) +
   theme(strip.text = element_text(face = "bold", size = 11),
@@ -284,7 +287,11 @@ ggplot(items, aes(t_50, N_word, colour = lexical_class)) +
                 breaks = c(100, 1000, 10000, 100000),
                 limits = c(50, 1000000)) +
   scale_x_continuous(limits = fig2$xlim) +
-  scale_colour_brewer(palette = "Dark2", name = NULL,
+  # Okabe-Ito rather than Dark2: under simulated deuteranopia Dark2 put nouns and
+  # function words at dE 5.9 -- effectively the same colour, and they are the largest
+  # class and the top line. This lifts the worst pair to 20.7 with every colour
+  # still dark enough to read on white (L* 46-70).
+  scale_colour_manual(values = c("#0072B2", "#D55E00", "#56B4E9", "#CC79A7"), name = NULL,
                       labels = c("Nouns", "Action Words", "Descriptive Words", "Function Words")) +
   scale_linetype_manual(values = c("Accelerating (M3)" = "solid",
                                    "Pure accumulator (M0)" = "dashed"), name = NULL) +
@@ -330,9 +337,15 @@ sl <- llm_slopes$slopes |>
   dplyr::filter(group != "LMs: C&B 2022 (4 architectures)") |> droplevels()
 f3 <- llm_slopes$fig3; scaling_par <- llm_slopes$scaling_par
 vy <- llm_slopes$vary
-col_child <- "#c41e37"; col_ex <- "#7a0e1f"; col_lm <- "#2c7fb8"
-slope_pal <- c("Children (English)"="#c41e37","Children (Norwegian)"="#fb9a99",
-               "LMs: CHILDES (training)"="#2c7fb8","LMs: CHILDES (development)"="#41ab5d")
+## Panel C, matched to the warm=children / cool=LMs split used in panels A and B.
+## col_ex is a darkened vermillion for the three highlighted exemplars, so they read
+## as the same population as the background ribbons rather than a fourth series.
+col_child <- "#D55E00"; col_ex <- "#8C3D00"; col_lm <- "#0072B2"
+## Okabe-Ito, warm = children, cool = language models, so the two populations read as
+## groups before any individual colour is decoded. Replaces a red/pink + blue/green set
+## that paired red with green and measured dE 16.1; this is 18.4.
+slope_pal <- c("Children (English)"="#D55E00","Children (Norwegian)"="#E69F00",
+               "LMs: CHILDES (training)"="#0072B2","LMs: CHILDES (development)"="#56B4E9")
 
 ## Panel A: acceleration (kappa) densities -- children high & variable, LMs near 1
 pA <- ggplot(sl, aes(slope_natural, fill=group, colour=group)) +
@@ -379,8 +392,10 @@ pB <- ggplot() +
 ## learner: a child (fitted kappa_i) or one LM training run (per-ladder median
 ## per-word kappa; CHILDES = 10 seeds, BabyLM / ClimbMix = 3 disjoint subsets x
 ## 8 seeds each -- the composition control). CV annotations quantify dispersion.
-vpal <- c("Children (English)"="#c41e37","Children (Norwegian)"="#fb9a99",
-          "LMs: CHILDES"="#2c7fb8","LMs: BabyLM"="#238b45","LMs: ClimbMix"="#e6550d")
+## Same warm/cool split as slope_pal. The previous set measured dE 11.1 under simulated
+## deuteranopia -- its worst pair was genuinely confusable -- against 17.6 here.
+vpal <- c("Children (English)"="#D55E00","Children (Norwegian)"="#E69F00",
+          "LMs: CHILDES"="#0072B2","LMs: BabyLM"="#56B4E9","LMs: ClimbMix"="#CC79A7")
 ## Use the cached bootstrap CIs (build_cache_short.R) rather than recomputing the bare
 ## point estimate: a CV from 8-10 seeds, with both mean and variance estimated from fitted
 ## kappa, is unstable, so the interval is the honest summary. Resampled over learners

@@ -34,11 +34,18 @@ STUDY_PAL <- c("BabyView"  = "#E69F00",
 # Wordbank quantile palette (matches glmer_ladder/04b_plot.R) — used in
 # Fig 1 schematic + Fig 2 model ladder so the 10/25/50/75/90 quantile
 # fans line up visually across the manuscript.
-WORDBANK_PALETTE <- c("0.1"  = "#1f78b4",   # dark blue
-                      "0.25" = "#a6cee3",   # light blue
-                      "0.5"  = "#33a02c",   # green
-                      "0.75" = "#fdbf6f",   # gold
-                      "0.9"  = "#e31a1c")   # red
+# Okabe-Ito. The previous ramp paired green (50th) with red (90th), which Science
+# prohibits outright ("avoid using red and green together") and which measured as the
+# worst pair in the figure: under simulated deuteranopia those two sat at dE 13.8 in CIE
+# Lab, where anything under ~15 starts to be confusable. This ordering keeps the same
+# low-to-high blue-to-warm direction and lifts the worst case to 17.6 with no green.
+# Ordered ramps that score higher (RdYlBu 28.4, viridis 18.2) all place a near-white
+# colour at one end -- in RdYlBu that lands on the emphasised median.
+WORDBANK_PALETTE <- c("0.1"  = "#0072B2",   # blue
+                      "0.25" = "#56B4E9",   # sky blue
+                      "0.5"  = "#CC79A7",   # reddish purple
+                      "0.75" = "#E69F00",   # orange
+                      "0.9"  = "#D55E00")   # vermillion
 
 # The five main-text by-study units (English split into its 3 datasets)
 PAPER_LANGS <- c("thal", "smith", "marchman", "norwegian", "japanese")
