@@ -1,0 +1,73 @@
+---
+title: "Supplementary Materials for *Children, but not language models, show accelerating returns in word learning*"
+bibliography: ../standard_model.bib
+csl: ../science.csl
+# Science numbers supplementary items from 1 with a lowercase S prefix: "fig. S1",
+# "table S1". The S belongs to the NUMBER, not the label -- putting it in fig-title
+# yields "fig. S 1", because Quarto joins label and number with a hardcoded space and
+# in PDF that join happens inside LaTeX's caption machinery, out of reach of a Lua
+# filter on the Pandoc AST. Redefining \thefigure / \thetable below puts the S in the
+# counter itself, so captions and \ref both render "S1" with no stray space.
+crossref:
+  fig-title: "fig."
+  tbl-title: "table"
+  fig-prefix: "fig."
+  tbl-prefix: "table"
+format:
+  pdf:
+    documentclass: article
+    geometry: margin=1in
+    fontsize: 11pt
+    linestretch: 1.05
+    colorlinks: true
+    keep-tex: false
+    include-in-header:
+      text: |
+        \usepackage{booktabs}
+        \usepackage{longtable}
+        \usepackage{array}
+        \usepackage{multirow}
+        \usepackage{wrapfig}
+        \usepackage{float}
+        \usepackage{colortbl}
+        \usepackage{pdflscape}
+        \usepackage{tabu}
+        \usepackage{threeparttable}
+        \usepackage{threeparttablex}
+        \usepackage[normalem]{ulem}
+        \usepackage{makecell}
+        \usepackage{xcolor}
+        % Supplementary numbering: S1, S2, ... (see the crossref note above)
+        \renewcommand{\thefigure}{S\arabic{figure}}
+        \renewcommand{\thetable}{S\arabic{table}}
+        \floatplacement{table}{H}
+        \floatplacement{figure}{H}
+---
+
+<!--
+Standalone supplement, for Science submission.
+
+WHY THIS FILE EXISTS. Science requires the supplementary materials as a separate file
+("The supplementary materials should be submitted as a single separate file in .docx or
+PDF format"), while the working PDF folds them into the main document for review. This
+builds the SI on its own from the SAME source -- paper/supplemental.qmd -- so there is one
+copy of the supplement, not two that can drift apart.
+
+PDF rather than docx is deliberate and permitted. The SI carries thirteen kableExtra
+tables using pack_rows, add_header_above and landscape, none of which survive a Word
+conversion; the main text carries no tables at all, so it converts cleanly. Keeping the SI
+as PDF avoids rewriting all thirteen for no gain.
+
+The preamble above is what kableExtra injects into the main document; it has to be
+declared here because this file does not inherit the main .qmd's header-includes.
+
+Render:  quarto render paper/science/supplement.qmd
+-->
+
+```{r si-standalone-setup, include=FALSE}
+## Same setup the main manuscript uses. Sourced, not duplicated, so the inline values
+## quoted in the SI cannot drift from the ones quoted in the main text.
+source(here::here("paper", "_setup_shared.R"))
+```
+
+{{< include ../supplemental.qmd >}}
