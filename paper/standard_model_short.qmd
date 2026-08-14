@@ -230,24 +230,68 @@ panelB <- function(i, ylab, ylim = NULL) {
 pB <- panelB(1, "Latent ability (logits)") |
       panelB(2, "Proportion of items produced", ylim = c(0, 1))
 
-## Block C: per-dataset fits (one faceted plot; legend flush in the empty 6th cell)
+## Block C: per-dataset fits, with the ablation rungs on the same axes.
+##
+## The ladder was previously described only in the text, so a reader could not see what
+## the ablations fail to do. All four rungs are drawn the same way -- quantiles across
+## children of predicted vocabulary proportion -- from fig1_fan$ablations, built in
+## paper/build_cache_short.R with each rung using its OWN fitted item difficulties.
+##
+## M2 is kept even though it tracks M3 closely in three of five panels. It is the model
+## the LOO ladder and the forward-CV section are argued against, and showing the two rungs
+## that lose easily while dropping the one that is close would be a selective picture. The
+## closeness is also consistent with what those analyses report: the difference between M2
+## and M3 lives in per-child trajectories, which a quantile fan across children averages
+## over. Toggling it off is a one-line change here; the cache carries it regardless.
+##
+## SPAGHETTI. fig1_fan$spag_all is every child, not the 150-child sample in $spag, with a
+## per-dataset alpha carried in the data. Samples run 96 to 792 children, so one alpha
+## cannot serve both -- the alpha column holds n * alpha roughly constant so the grey reads
+## as a density of where children are rather than as recruitment size.
+##
+## LEGENDS. Both are mapped scales rather than hand-drawn keys, so they stay correct if the
+## data change, and both sit in the empty sixth facet cell -- nothing is drawn inside a
+## data panel. They answer different questions and are titled to say so: colour is WHICH
+## CHILD (percentile), linetype is WHICH MODEL. Percentile applies only to M2/M3; M0 and M1
+## have no per-child parameters and can only produce a single curve, which is the point
+## those rungs make.
+MLAB <- c(M3 = "M3: full model", M2 = "M2: no per-child acceleration",
+          M1 = "M1: no individual variation", M0 = "M0: no acceleration")
+MLT  <- setNames(c("solid", "22", "11", "42"), MLAB)
+.abl <- function(m) dplyr::filter(fig1_fan$ablations, model == m) |>
+  dplyr::mutate(model_lab = factor(MLAB[[m]], levels = unname(MLAB)))
+.m3  <- dplyr::mutate(fig1_fan$fan, model_lab = factor(MLAB[["M3"]], levels = unname(MLAB)))
 pC <- ggplot() +
-  geom_line(data = fig1_fan$spag, aes(age, prop, group = interaction(lang, child)),
-            color = "grey30", alpha = 0.14, linewidth = 0.22) +
-  geom_line(data = fig1_fan$fan, aes(age, vocab, color = qf, group = qf,
-            linewidth = ifelse(qf == "50th", 0.9, 0.5))) +
+  geom_line(data = fig1_fan$spag_all,
+            aes(age, prop, group = interaction(lang, child), alpha = alpha),
+            colour = "grey25", linewidth = 0.16) +
+  scale_alpha_identity() +
+  ## the two no-variation rungs: same black, different dash, so they read as a pair
+  geom_line(data = dplyr::filter(.abl("M0"), qf == "50th"),
+            aes(age, vocab, linetype = model_lab), colour = "black", linewidth = 0.6) +
+  geom_line(data = dplyr::filter(.abl("M1"), qf == "50th"),
+            aes(age, vocab, linetype = model_lab), colour = "black", linewidth = 0.6) +
+  geom_line(data = .abl("M2"), aes(age, vocab, color = qf, group = qf, linetype = model_lab),
+            linewidth = 0.4, alpha = 0.85) +
+  geom_line(data = .m3, aes(age, vocab, color = qf, group = qf, linetype = model_lab,
+            linewidth = ifelse(qf == "50th", 0.95, 0.6))) +
   facet_wrap(~ lang, scales = "free_x", nrow = 2) +
-  scale_color_manual(values = pal, name = "Child\nPercentile", drop = FALSE) +
+  scale_color_manual(values = pal, name = "Child percentile", drop = FALSE) +
+  scale_linetype_manual(values = MLT, name = "Model", drop = FALSE, limits = unname(MLAB)) +
   scale_linewidth_identity() +
   scale_y_continuous(limits = c(0, 1), breaks = c(0, 0.5, 1)) +
   labs(x = "Age (Months)", y = "Proportion of Items Produced") +
-  guides(color = guide_legend(override.aes = list(linewidth = 1.1))) +
+  guides(color    = guide_legend(order = 1, override.aes = list(linewidth = 1.1, linetype = "solid")),
+         linetype = guide_legend(order = 2, override.aes = list(colour = "black", linewidth = 0.6))) +
   theme_minimal(base_size = 11) +
   theme(strip.text = element_text(face = "bold", size = 11),
         panel.grid.minor = element_blank(), panel.spacing = unit(1, "lines"),
         plot.margin = margin(16, 8, 4, 6),
-        legend.position = c(0.70, 0.26), legend.justification = c(0, 0.5),
-        legend.key.width = unit(15, "pt"), legend.title = element_text(size = 10.5),
+        legend.position = c(0.685, 0.245), legend.justification = c(0, 0.5),
+        legend.box = "vertical", legend.box.just = "left",
+        legend.spacing.y = unit(2, "pt"), legend.margin = margin(1, 1, 1, 1),
+        legend.key.width = unit(20, "pt"), legend.key.height = unit(11, "pt"),
+        legend.title = element_text(size = 9.5), legend.text = element_text(size = 8.4),
         legend.background = element_rect(fill = "white", color = NA))
 
 ## The plate/graphical-model block that used to occupy the top-left has been REMOVED per
