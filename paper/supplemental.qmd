@@ -81,7 +81,18 @@ $$\gamma_i(t) = \frac{R_i(t)}{L_i(t)}
  = \kappa_i\,\frac{\operatorname{mean}_j(1 - p_{ij})}{\operatorname{mean}_j(-\log p_{ij})},$$
 which rises toward the child's own $\kappa_i$ as the vocabulary saturates.
 
-# Comparison with Prior Models
+## Computing Acceleration in LMs
+
+To compare acceleration in LMs and children, we link the $\kappa$ parameter from our accelerating accumulator model to the word-by-word learning performance of LMs. We first focus on the slope for individual words rather than individual children. Starting with the M3, differentiating $\eta_{ij}(t)$ (the probability of producing a particular word) with respect to $\log t$ gives $\kappa_i$:
+the logit-probability that a child produces a word rises linearly in
+log-age with slope equal to the child's scaling exponent. Thus, the per-child
+sigmoid slope *is* $\kappa_i$, by construction.
+
+Next, to estimate the slope of acquisition of individual words, @chang2022 compute surprisal for each word across LM training checkpoints and then fit a four-parameter logistic, $s_w(x) = \ell_w + (u_w-\ell_w)/(1+\exp((x-m_w)/\mathrm{scale}_w))$, in $x = \log_{10}$ training data. Let $p_w = (s_w-\ell_w)/(u_w-\ell_w)$ be the fraction of that word's surprisal reduction still outstanding. The LM slope is therefore $d\,\mathrm{logit}(p_w)/d\ln D = 1/(\mathrm{scale}_w \ln 10)$ — a logit per unit of natural-log input. That is the same as  $\kappa_i$ for children, where the logit probability of producing a word rises in log-age with slope $\kappa_i$ and the outstanding fraction is $1-P(\text{produce})$. 
+
+# Supplementary Text
+
+## Comparison with Prior Models
 
 Our accelerating accumulator model has not been described in the literature in the exact form we use, but it is closely related to other models. Here we describe these models as special cases of our model. We write the latent ability of child $i$ on word $j$ at age $t$ as
 
@@ -97,7 +108,7 @@ In addition, several other models in the literature can be described as variants
 * @mitchell2009 augment the pure M0 accumulator with a "leverage" term, in which words learned earlier facilitate the learning of later words. Their central result is a negative one: leverage changes the shape and timing of vocabulary growth, but it cannot create acceleration that is not already present in the distribution of word difficulties. 
 * @mollica2017 define a pure accumulator model with $\kappa=1$, but with an additional parameter relating to the speed of per-word accumulation. This model maps onto a combination of our M0 and the 2-parameter logistic variant that we fit below.
 
-# Non-identifiability in Cross-Sectional Data
+## Non-identifiability in Cross-Sectional Data
 
 Since acceleration is a property of change over time, a single cross-sectional observation from an individual child cannot identify the child's acceleration. As @fig-cross-sectional-confound shows, a single observation from a child could be accounted for by variation in either $\xi_i$ (efficiency) or $\kappa_i$ (acceleration). 
 
@@ -168,7 +179,7 @@ mk(parallel, "(A) stable between-child differences (intercepts vary)") +
 mk(fanning,  "(B) diverging trajectories (slopes vary)")
 ```
 
-# Datasets
+## Datasets
 
 @tbl-datasets gives the characteristics of each dataset used. In the main text we focus on children with three or more administrations (for more precise estimates of $\kappa$), but below we also confirm the robustness of our claims including children with two or more administrations. 
 
@@ -238,7 +249,7 @@ ggplot() +
   theme(strip.text = element_text(face = "bold"), panel.grid.minor = element_blank())
 ```
 
-# Full Model Comparison Results
+## Full Model Comparison Results
 
 
 @tbl-loo gives the full leave-one-out model comparison results across models for both the dataset with 3+ administrations/child and the larger dataset with 2+ administrations/child. 
@@ -281,7 +292,7 @@ knitr::kable(tab |> select(Model, all_of(lang_order)), format = "latex", booktab
   kableExtra::kable_styling(latex_options = "scale_down", font_size = 8)
 ```
 
-# Individual-level Cross-validation
+## Individual-level Cross-validation
 
 The model comparisons above report ELPD LOO values for held-out data from individual item-responses, which are nested within children. To assess the value of M3 (the accelerating accumulator) in making fully out-of-sample predictions, we designed a prospective test. As our data, we selected a subset of the Norwegian sample that included 371 children with $\geq 6$ longitudinal CDIs. We then fit models to the child's most recent $k$ observations and used these to predict the child's next administration (3 months later). This design avoids confounding data density with the gap between the fitted and predicted observations. 
 
@@ -350,7 +361,7 @@ knitr::kable(cvh, format = "latex", booktabs = TRUE, escape = FALSE,
   kableExtra::kable_styling(font_size = 9, latex_options = "HOLD_position")
 ```
 
-# Comparison to a Non-Parametric Quantile Model
+## Comparison to a Non-Parametric Quantile Model
 
 To test whether the accelerating accumulator appropriately fits the distribution of growth curves across children, we compared against a strong baseline: the flexible non-parametric GAMLSS family that is used to produce normative curves for the CDI [@marchman2021]. Specifically, for each dataset we fit a GAMLSS beta-regression of the proportion of words produced by the child's age. We used a penalized spline function on the mean and on the scales.
 
@@ -376,7 +387,7 @@ ggplot() +
   theme(legend.position = "bottom", panel.grid.minor = element_blank(), strip.text = element_text(face = "bold"))
 ```
 
-# Robustness Across Model and Data Settings
+## Robustness Across Model and Data Settings
 
 In the main text, we report fits to children with 3+ administrations with separate models fit to each dataset, but our parameter estimates were substantially similar across two other settings: first, separate fits to children with 2+ administrations, and second, a full hierarchical model fit to children with 3+ administrations. @tbl-settings shows LOO fits and the robustness of the $\kappa$ estimates across these different settings. 
 
@@ -414,7 +425,7 @@ knitr::kable(sset |> select(Setting, N, kap, sb, gap), format = "latex", booktab
   kableExtra::kable_styling(font_size = 9, latex_options = "HOLD_position")
 ```
 
-# Sensitivity to Data-Quality Exclusions
+## Sensitivity to Data-Quality Exclusions
 
 To ensure that the exclusion filter we used in the main text does not result in significant changes to our estimates, we refit the model at four settings: with the filter disabled entirely, at a loose threshold, at the reported threshold, and at a tight one (@tbl-qc-sensitivity). These refits apply only to two datasets, English (Marchman) and Norwegian. The exclusion filter does not result in major changes to $\kappa$ estimates in either case. 
 
@@ -442,7 +453,7 @@ knitr::kable(qct |> select(setting, rem, kap, sb), format = "latex", booktabs = 
   kableExtra::kable_styling(font_size = 9, latex_options = "HOLD_position")
 ```
 
-# Linear vs. Logarithmic Age
+## Linear vs. Logarithmic Age
 
 We additionally fit M3 variants with linear, rather than logarithmic, growth in acceleration over time. @tbl-loglin shows that the linear model was dispreferred across all five datasets. 
 
@@ -462,7 +473,7 @@ knitr::kable(tab, format = "latex", booktabs = TRUE, align = c("l", "r"), escape
   kableExtra::kable_styling(font_size = 9, latex_options = "HOLD_position")
 ```
 
-# 2PL Model Comparison
+## 2PL Model Comparison
 
 In the main analysis we use a Rasch (1PL) item model, in which every word has a difficulty but all words have equal discrimination between children. @kachergis2022b found that a 2PL model, which adds a per-word discrimination $\lambda_j$, was preferred over the 1PL for CDI data. We therefore refit M3 with a per-word discrimination parameter.
 
@@ -529,7 +540,7 @@ knitr::kable(tab2, format = "latex", booktabs = TRUE, align = c("l", rep("r", 11
   kableExtra::kable_styling(font_size = 7, latex_options = c("HOLD_position", "scale_down"))
 ```
 
-# Sensitivity to Item Selection
+## Sensitivity to Item Selection
 
 One potential concern about our $\kappa$ estimates is that they could be influenced by the composition of the CDI instrument. Could a broader spread of item difficulties result in a larger $\kappa$ estimate? To address this issue, we refit M3 on the same children and same administrations, but with the item set narrowed. We fit models under three sets of conditions: refitting the middle 50% and middle 25% of items (to narrow the width of the distribution),  refitting the easiest and hardest halves separately (to shift the difficulty distribution), and subsetting randomly to 50% and 25% of items. If $\kappa$ scales as a function of the difficulty distribution ($\sigma_\delta$), recovered $\kappa$ values should scale with the standard deviation of the retained items; if not, $\kappa$ should be relatively invariant. @fig-item-subset shows the results of this analysis. Overall, $\kappa$ values were invariant to retained item variability.
 
@@ -567,7 +578,7 @@ ggplot(d, aes(sd_ratio, kappa_ratio, colour = lang, shape = kind)) +
         legend.spacing.y = unit(0, "pt"), panel.grid.minor = element_blank())
 ```
 
-# Variation in Acceleration
+## Variation in Acceleration
 
 ```{r blup-prep, include=FALSE}
 # Per-child BLUP distributions (efficiency xi, acceleration kappa) from the
@@ -632,7 +643,7 @@ ranef |>
   kableExtra::kable_styling(font_size = 8, latex_options = c("HOLD_position", "scale_down"))
 ```
 
-# Input Estimation
+## Input Estimation
 
 We make use of estimates of children's language input in both @fig-efficiency and @fig-llm-acceleration, panel C. We calculate average language input per month by estimating words per hour and multiply by an estimated number of waking hours per month. Word tokens per hour estimates come from 42 children with manually transcribed data
 in two prior studies [@sperry2019;@hart1995; estimates used also in @kachergis2022]. Across these studies, the pooled geometric mean is $\exp(7.338) \approx 1{,}537$ word tokens per hour
@@ -702,7 +713,7 @@ ggplot(pts, aes(age, log_input)) +
         strip.text = element_text(face = "bold", size = 9))
 ```
 
-# Age of Acquisition in the Pure Accumulator Model
+## Age of Acquisition in the Pure Accumulator Model
 
 Figure 2 in the main text converts each word's fitted difficulty into an estimated number of cumulative exposures at the age it is acquired. Since later-acquired words are also rarer, here we ask whether that frequency change would be sufficient to produce the observed relationship between cumulative exposure and age of acquisition. 
 
@@ -755,16 +766,7 @@ si_f2m0$slopes |>
   kableExtra::kable_styling(font_size = 9, latex_options = "HOLD_position")
 ```
 
-# Computing Acceleration in LMs
-
-To compare acceleration in LMs and children, we link the $\kappa$ parameter from our accelerating accumulator model to the word-by-word learning performance of LMs. We first focus on the slope for individual words rather than individual children. Starting with the M3, differentiating $\eta_{ij}(t)$ (the probability of producing a particular word) with respect to $\log t$ gives $\kappa_i$:
-the logit-probability that a child produces a word rises linearly in
-log-age with slope equal to the child's scaling exponent. Thus, the per-child
-sigmoid slope *is* $\kappa_i$, by construction.
-
-Next, to estimate the slope of acquisition of individual words, @chang2022 compute surprisal for each word across LM training checkpoints and then fit a four-parameter logistic, $s_w(x) = \ell_w + (u_w-\ell_w)/(1+\exp((x-m_w)/\mathrm{scale}_w))$, in $x = \log_{10}$ training data. Let $p_w = (s_w-\ell_w)/(u_w-\ell_w)$ be the fraction of that word's surprisal reduction still outstanding. The LM slope is therefore $d\,\mathrm{logit}(p_w)/d\ln D = 1/(\mathrm{scale}_w \ln 10)$ — a logit per unit of natural-log input. That is the same as  $\kappa_i$ for children, where the logit probability of producing a word rises in log-age with slope $\kappa_i$ and the outstanding fraction is $1-P(\text{produce})$. 
-
-# Matched Estimation of Acceleration
+## Matched Estimation of Acceleration
 
 One potential objection to the comparison of children and LMs in the main text is that the estimators are different in two ways. First, the estimator for children is Rasch-based, while the model from @chang2022 is a four-parameter logistic. Second, and perhaps more saliently, the child estimator is for $\kappa$ across children, while the LM estimator is across words. 
 
@@ -842,7 +844,7 @@ knitr::kable(p4, format = "latex", booktabs = TRUE, escape = FALSE,
   kableExtra::kable_styling(font_size = 9, latex_options = "HOLD_position")
 ```
 
-# Other Architectures
+## Other Architectures
 
 The acceleration results we report in the main text are not specific to our choice of the GPT-2 architecture. We re-analyze the published fits of @chang2022. @fig-si-cb-arch shows a similar distribution of per-word $\kappa$ values for the four different architectures reported in that study, which were trained on standard LM corpora rather than child-directed input. 
 
