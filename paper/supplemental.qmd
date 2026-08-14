@@ -60,7 +60,7 @@ For the computation of surprisal across training runs ("training"), we trained m
 
 Models were trained for a total of 20 epochs with sequence length 1024 and batch size 8, using AdamW for optimization and learning rate of 1e-4 with a linear decay, no warmup, weight decay of 0, and no in-epoch shuffling. Training was performed on NVIDIA A40 GPUs. All trained models are available at [https://huggingface.co/mcxfrank/childes-gpt2-ladder]() and [https://huggingface.co/mcxfrank/gpt2-composition-control]().
 
-## Proportional return on input
+## Proportional Return on Input
 
 Proportional return on input was computed for models based on mean surprisal $L(D)$ of the CDI words after training on
 $D$ word tokens of input. This follows the form from @hoffmann2022 of $L(D) = E + B\,D^{-\beta}$, with $E$ the irreducible entropy floor and $B, \beta$ fit across budgets (here $E \approx 2.94$ nats, $B \approx 312$, $\beta \approx 0.32$,
