@@ -105,6 +105,74 @@ cat("Fig 1: per-dataset M3 fan\n")
 res <- Filter(Negate(is.null), Map(fan_one, names(DATASETS), DATASETS))
 lvl <- unname(DATASETS)
 
+## ---- (B2) the ablation rungs, on the same axes ----------------------------------
+## Fig 1B shows the fitted model against the data; the ladder is only described in text,
+## so a reader cannot see what the ablations actually fail to do. These are the M0/M1/M2
+## curves drawn the same way as the M3 fan: quantiles across children of predicted
+## vocabulary proportion at each age.
+##
+## What each rung CAN produce is itself the result:
+##   M0  kappa pinned to 1, no per-child terms -> one curve, and a nearly flat one. Over
+##       the observed range theta moves only log(30/13) ~ 0.84 logits, and the fit
+##       compensates by crushing item difficulties (tau_delta ~ 0.57 against M3's ~2.05),
+##       so every word sits at nearly the same difficulty and the curve cannot take an
+##       S shape at all.
+##   M1  kappa free but still no per-child terms -> one curve, tracking the population
+##       mean well and having no spread whatever.
+##   M2  per-child xi_i, one shared kappa -> a fan of fixed width in logits, which in
+##       proportion space narrows only as it nears the ceiling.
+##   M3  per-child xi_i AND kappa_i -> a fan whose width in logits grows with age.
+##
+## Each rung uses ITS OWN fitted delta_j. Borrowing M3's item difficulties would hand the
+## ablations a better item model than they actually estimated and flatter them -- most of
+## all M0, whose compressed tau_delta is part of how its failure shows up.
+band_one <- function(xi, kappa, dj, log_H, a0, ages, model) {
+  base_j <- log_H - dj
+  lapply(ages, function(t) {
+    v <- rowMeans(plogis(outer(xi + kappa * log(t / a0), base_j, "+")))
+    tibble(age = t, q = QS, vocab = quantile(v, QS, names = FALSE), model = model)
+  }) |> bind_rows()
+}
+abl_one <- function(slug, label) {
+  bf <- file.path(BL, paste0("bundle_", slug, SFX, ".rds"))
+  need <- c(bf, file.path(SUMM, paste0(slug, SFX, "_", c("m0","m1","m2"), ".summary.rds")),
+            file.path(SUMM, paste0(slug, SFX, "_", c("m0","m1","m2"), "_psi.csv")),
+            file.path(SUMM, paste0(slug, SFX, "_m2_child.csv")))
+  if (!all(file.exists(need))) { cat("  skip ablations", slug, "(missing m0/m1/m2 exports)\n"); return(NULL) }
+  sd0 <- readRDS(bf)$stan_data
+  ages <- seq(floor(min(sd0$admin_age)), ceiling(max(sd0$admin_age)), by = 0.5)
+  gm <- function(m, v) { x <- as.data.frame(readRDS(file.path(SUMM, paste0(slug, SFX, "_", m, ".summary.rds"))))
+                         x$median[x$variable == v] }
+  djf <- function(m) read.csv(file.path(SUMM, paste0(slug, SFX, "_", m, "_psi.csv")))$delta_j
+  ch2 <- read.csv(file.path(SUMM, paste0(slug, SFX, "_m2_child.csv")))
+  bind_rows(
+    ## M0 has no kappa_pop in its summary -- the exponent is fixed at 1 by construction
+    band_one(gm("m0","mu_xi"), 1, djf("m0"), sd0$log_H, sd0$a0, ages, "M0"),
+    band_one(gm("m1","mu_xi"), gm("m1","kappa_pop"), djf("m1"), sd0$log_H, sd0$a0, ages, "M1"),
+    band_one(ch2$xi_median, gm("m2","kappa_pop"), djf("m2"), sd0$log_H, sd0$a0, ages, "M2")
+  ) |> mutate(lang = label, qf = factor(q, levels = QS, labels = QLAB))
+}
+cat("Fig 1: ablation rungs (M0/M1/M2)\n")
+abl <- bind_rows(Map(abl_one, names(DATASETS), DATASETS))
+
+## ---- (B3) every child's observed trajectory, with per-dataset alpha ---------------
+## The shipped spaghetti is a 150-child sample. Plotting all of them turns the grey into a
+## density rather than a scatter of exemplars, but the samples span 96 to 792 children, so
+## a single alpha cannot serve both -- what reads as density in Norwegian is invisible in
+## Japanese. Overplotted ink goes roughly as n * alpha, so alpha is set to hold that
+## product near constant and the grey then encodes where children ARE rather than how many
+## happened to be recruited.
+SPAG_INK <- 30
+spag_all <- bind_rows(lapply(names(DATASETS), function(slug) {
+  bf <- file.path(BL, paste0("bundle_", slug, SFX, ".rds"))
+  if (!file.exists(bf)) return(NULL)
+  sd0 <- readRDS(bf)$stan_data
+  tibble(aa = sd0$aa, y = sd0$y) |> group_by(aa) |> summarise(prop = mean(y), .groups = "drop") |>
+    transmute(lang = DATASETS[[slug]], child = sd0$admin_to_child[aa],
+              age = sd0$admin_age[aa], prop)
+})) |> group_by(lang) |>
+  mutate(alpha = pmin(0.35, pmax(0.04, SPAG_INK / n_distinct(child)))) |> ungroup()
+
 ## ---- (A2) conceptual theta -> CDI mechanism (short-paper Fig 1, block B) ----
 ## Replaces the old M0-M3 schematic in the short paper: shows the pure vs
 ## accelerating accumulator and the two dimensions of individual variation
@@ -153,6 +221,8 @@ fig1 <- list(
   schematic  = schematic,          # retained (unused by short-paper Fig 1; kept for compatibility)
   conceptual = conceptual, conceptual_lab = conceptual_lab,
   fan  = bind_rows(lapply(res, `[[`, "fan"))  |> mutate(lang = factor(lang, levels = lvl)),
+  ablations = if (nrow(abl)) mutate(abl, lang = factor(lang, levels = lvl)) else NULL,
+  spag_all  = mutate(spag_all, lang = factor(lang, levels = lvl)),
   spag = bind_rows(lapply(res, `[[`, "spag")) |> mutate(lang = factor(lang, levels = lvl)),
   meta = bind_rows(lapply(res, `[[`, "meta")))
 saveRDS(fig1, file.path(CACHE, "fig1_fan.rds"))
