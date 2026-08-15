@@ -2,7 +2,7 @@
 #SBATCH --job-name=ladder
 #SBATCH --output=logs/ladder_%A_%a.out
 #SBATCH --error=logs/ladder_%A_%a.err
-#SBATCH --time=12:00:00
+#SBATCH --time=24:00:00
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
 #SBATCH --partition=normal
@@ -14,9 +14,9 @@
 # 8 cores but the partition has capacity.
 #
 # Model-ladder array. One task per (language, model_id) cell. The
-# manifest below is read in by SLURM_ARRAY_TASK_ID (1-indexed line).
+# manifest below (cluster/sherlock/) is read in by SLURM_ARRAY_TASK_ID (1-indexed line).
 #
-# Submit with:   sbatch --array=1-N sherlock/glmer_ladder.slurm
+# Submit with:   sbatch --array=1-N cluster/sherlock/glmer_ladder.slurm
 #                where N = number of rows in sherlock/glmer_ladder_manifest.csv
 #                (excluding the header).
 #
@@ -46,7 +46,7 @@ for f in "$HOME/standard_model_2/fits/glmer_ladder"/data_*.rds; do
 done
 
 # read the manifest line for this array task
-MANIFEST="$HOME/standard_model_2/sherlock/glmer_ladder_manifest.csv"
+MANIFEST="$HOME/standard_model_2/cluster/sherlock/glmer_ladder_manifest.csv"
 if [ ! -f "$MANIFEST" ]; then
   echo "ERROR: missing $MANIFEST"
   exit 1
@@ -76,7 +76,7 @@ export OMP_NUM_THREADS="$SLURM_CPUS_PER_TASK"
 export MKL_NUM_THREADS="$SLURM_CPUS_PER_TASK"
 echo "Threads: $SLURM_CPUS_PER_TASK"
 
-Rscript glmer_ladder/02_fit_one.R "$LANG_SLUG" "$MODEL_ID"
+Rscript studies/glmer_ladder/02_fit_one.R "$LANG_SLUG" "$MODEL_ID"
 
 echo
 echo "End: $(date)"

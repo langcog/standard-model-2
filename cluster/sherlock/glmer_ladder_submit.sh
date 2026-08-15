@@ -2,16 +2,18 @@
 ## Build the glmer_ladder manifest and submit a SLURM array.
 ##
 ## Usage:
-##   bash sherlock/glmer_ladder_submit.sh            # just build the manifest, print sbatch lines
-##   bash sherlock/glmer_ladder_submit.sh smoke      # submit ONE small task (Japanese B_log)
-##   bash sherlock/glmer_ladder_submit.sh nor_big    # submit Norwegian D_log alone (timing test)
-##   bash sherlock/glmer_ladder_submit.sh all        # submit the full array (35 cells)
+##   bash cluster/sherlock/glmer_ladder_submit.sh            # just build the manifest, print sbatch lines
+##   bash cluster/sherlock/glmer_ladder_submit.sh smoke      # submit ONE small task (Japanese B_log)
+##   bash cluster/sherlock/glmer_ladder_submit.sh nor_big    # submit Norwegian D_log alone (timing test)
+##   bash cluster/sherlock/glmer_ladder_submit.sh all        # submit the full array (35 cells)
 ##
 ## Manifest at sherlock/glmer_ladder_manifest.csv, one row per (lang, model).
 
 set -euo pipefail
 
-cd "$(dirname "$0")/.."
+# Repo root (post-2026-06 reorg this script lives in cluster/sherlock/).
+cd "$(dirname "$0")/../.."
+mkdir -p logs   # #SBATCH --output=logs/... is submission-cwd-relative
 
 # By-study units: English fans into its three datasets (Thal/Smith/
 # Marchman); Norwegian (Kristoffersen) and Japanese (Tsuji+Hagihara,
@@ -21,7 +23,7 @@ cd "$(dirname "$0")/.."
 LANGS=(thal smith marchman norwegian japanese)
 MODELS=(A B_log B_lin C_log C_lin D_log D_lin)
 
-MANIFEST="sherlock/glmer_ladder_manifest.csv"
+MANIFEST="cluster/sherlock/glmer_ladder_manifest.csv"
 echo "task_id,lang_slug,model_id" > "$MANIFEST"
 
 i=1
@@ -47,21 +49,21 @@ ACTION="${1:-}"
 case "$ACTION" in
   smoke)
     echo "Submitting infrastructure smoke test (Japanese B_log)..."
-    sbatch --array="$SMOKE_TASK" sherlock/glmer_ladder.slurm
+    sbatch --array="$SMOKE_TASK" cluster/sherlock/glmer_ladder.slurm
     ;;
   nor_big)
     echo "Submitting Norwegian D_log timing/size test..."
-    sbatch --array="$NOR_BIG_TASK" sherlock/glmer_ladder.slurm
+    sbatch --array="$NOR_BIG_TASK" cluster/sherlock/glmer_ladder.slurm
     ;;
   all)
     echo "Submitting full array (35 cells)..."
-    sbatch --array="1-$N" sherlock/glmer_ladder.slurm
+    sbatch --array="1-$N" cluster/sherlock/glmer_ladder.slurm
     ;;
   "")
     echo "No action; manifest built only. Submit options:"
-    echo "  bash sherlock/glmer_ladder_submit.sh smoke      # task $SMOKE_TASK"
-    echo "  bash sherlock/glmer_ladder_submit.sh nor_big    # task $NOR_BIG_TASK"
-    echo "  bash sherlock/glmer_ladder_submit.sh all        # full 1-$N"
+    echo "  bash cluster/sherlock/glmer_ladder_submit.sh smoke      # task $SMOKE_TASK"
+    echo "  bash cluster/sherlock/glmer_ladder_submit.sh nor_big    # task $NOR_BIG_TASK"
+    echo "  bash cluster/sherlock/glmer_ladder_submit.sh all        # full 1-$N"
     ;;
   *)
     echo "Unknown action: $ACTION"

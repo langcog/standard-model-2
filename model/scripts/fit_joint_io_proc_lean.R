@@ -41,7 +41,7 @@ sd$delta_prior_sd <- as.numeric(Sys.getenv("STAN_DELTA_SD", unset = "10"))
 tau_sfx <- if (TAU_SLOPE != 1) sprintf("_tau%g", TAU_SLOPE) else ""
 b_sfx   <- if (grepl("inputmulti", BUNDLE)) "_imulti" else if (grepl("bilingual", BUNDLE)) "_bi" else if (grepl("english_count", BUNDLE)) "_enct" else ""
 STAN_MODEL <- Sys.getenv("STAN_MODEL", unset = "model/stan/log_irt_long_proc_dp_joint_lean.stan")
-m_sfx   <- if (grepl("rasch", STAN_MODEL)) "_rasch" else if (grepl("io_count", STAN_MODEL)) "_io" else ""
+m_sfx   <- if (grepl("rasch", STAN_MODEL)) "_rasch" else if (grepl("io_count", STAN_MODEL)) "_io" else if (grepl("proc_count", STAN_MODEL)) "_proc" else ""
 sub_sfx <- if (grepl("sub[0-9]", BUNDLE)) paste0("_", sub(".*(sub[0-9][^.]*)\\.rds$", "\\1", BUNDLE)) else ""
 TAG <- sprintf("joint_io_proc_lean%s_d%d%s%s%s", m_sfx, rung, b_sfx, tau_sfx, sub_sfx)
 TAG <- paste0(TAG, Sys.getenv("STAN_TAG_SFX", ""))   # optional suffix (e.g. convergence refit)

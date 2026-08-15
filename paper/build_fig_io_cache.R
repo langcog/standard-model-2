@@ -16,12 +16,16 @@ SUMM <- here("fits", "summaries")
 CACHE <- here("paper", "cache")
 
 ## ---- Panel A: io-imputed sigma_r sensitivity ----
+## sigma_xi (total efficiency SD) is data-identified and stable across the
+## sigma_r pins, so read it from the 0.44-pin fits; the un-suffixed baseline
+## (bundle pin 0.53, Sperry-era) is retired -- do NOT reference it, or a
+## stale pre-cleanup summary on disk will silently feed the curves.
 sx <- function(tag) {
   s <- as.data.frame(readRDS(file.path(SUMM, paste0(tag, ".summary.rds"))))
   s$mean[s$variable == "sigma_xi"]
 }
-sigma_xi <- c(`English (D)` = sx("long_no_freq_slopes"),
-              `Norwegian (D)` = sx("long_no_freq_slopes_norwegian"))
+sigma_xi <- c(`English (D)` = sx("long_no_freq_slopes_sigmaR_0p44"),
+              `Norwegian (D)` = sx("long_no_freq_slopes_norwegian_sigmaR_0p44"))
 sr_grid <- seq(0.25, 0.80, by = 0.005)
 panelA_curves <- bind_rows(lapply(names(sigma_xi), function(m)
   data.frame(model = m, sigma_r = sr_grid, share = sr_grid^2 / sigma_xi[[m]]^2)))
@@ -35,17 +39,24 @@ anchor <- function(tag, sr, model) {
   data.frame(model = model, sigma_r = sr,
              share = 1 - r$mean, lo = 1 - r$q975, hi = 1 - r$q025)
 }
+## Anchor set (2026-08-15 decision): {0.35, 0.44, 0.58}.
+##   0.35 = the DIRECT joint/io fits' own sigma_r estimate on observed
+##          recordings (enct/io_count: 0.35 [0.32, 0.39]; study-centered, so
+##          a lower bound on population sigma_r);
+##   0.44 = channel-matched all-adult population re-anchor (main pin);
+##   0.58 = literature upper. 0.53 (Sperry CDS) retired as legacy.
 panelA_anchors <- bind_rows(
+  anchor("long_no_freq_slopes_sigmaR_0p35", 0.35, "English (D)"),
   anchor("long_no_freq_slopes_sigmaR_0p44", 0.44, "English (D)"),
-  anchor("long_no_freq_slopes",             0.53, "English (D)"),
   anchor("long_no_freq_slopes_sigmaR_0p58", 0.58, "English (D)"),
+  anchor("long_no_freq_slopes_norwegian_sigmaR_0p35", 0.35, "Norwegian (D)"),
   anchor("long_no_freq_slopes_norwegian_sigmaR_0p44", 0.44, "Norwegian (D)"),
-  anchor("long_no_freq_slopes_norwegian",             0.53, "Norwegian (D)"),
   anchor("long_no_freq_slopes_norwegian_sigmaR_0p58", 0.58, "Norwegian (D)"))
 
-## sigma_r band = channel-matched apples-to-apples per-sample range; dashed at 0.44.
+## sigma_r band: lower edge = the direct estimate's 95% low (0.32), upper =
+## literature (0.58); anchors now span the band. Dashed main pin at 0.44.
 panelA <- list(curves = panelA_curves, anchors = panelA_anchors,
-               sr_band = c(0.36, 0.58), sr_main = 0.44, meta = c(0.04, 0.07))
+               sr_band = c(0.32, 0.58), sr_main = 0.44, meta = c(0.04, 0.07))
 
 ## ---- Panel B: joint io-proc COEFFICIENTS (per-SD effects, EN+count +proc fit) ----
 ## The four channel x trait per-SD effects (log-odds), same numbers the schematic draws:

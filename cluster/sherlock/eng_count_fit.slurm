@@ -10,6 +10,7 @@
 # English-only + sumscore count branch stability checks. Usage:
 #   sbatch sherlock/eng_count_fit.slurm 2 proc      (WITH processing: bi-lean model, rung D'2)
 #   sbatch sherlock/eng_count_fit.slurm 0 noproc    (NO processing: io+count model)
+#   sbatch sherlock/eng_count_fit.slurm 2 proconly  (NO input: proc+count model, mirror of noproc)
 # Needs fits/joint_io_proc_english_count_subset_data.rds (scp'd; gitignored).
 set -euo pipefail
 RUNG="${1:-2}"; VARIANT="${2:-proc}"
@@ -27,6 +28,8 @@ export STANDARD_MODEL_FITS_DIR="$RESULTS_DIR/fits"
 
 if [ "$VARIANT" = "noproc" ]; then
   export STAN_MODEL=model/stan/log_irt_long_io_count.stan
+elif [ "$VARIANT" = "proconly" ]; then
+  export STAN_MODEL=model/stan/log_irt_long_proc_count.stan
 else
   export STAN_MODEL=model/stan/log_irt_long_proc_bilingual.stan
 fi

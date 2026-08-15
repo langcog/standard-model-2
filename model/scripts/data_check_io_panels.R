@@ -11,7 +11,10 @@ suppressPackageStartupMessages({
 })
 
 io_panels_fig <- function() {
-  b <- readRDS(here("fits/joint_io_proc_mm_subset_data.rds"))
+  ## english_count = the bundle the wired fit (joint_io_proc_lean_d2_enct_2k)
+  ## was trained on; was the mm-era bundle until 2026-08-15 (figure/fit sample
+  ## mismatch — only b$lwl is read here, but keep them pointed at one bundle).
+  b <- readRDS(here("fits/joint_io_proc_english_count_subset_data.rds"))
   DSORD <- c("BabyView","SEEDLingS","AM2018","FM2012","FMW2013","fernald_totlot")
   PAL <- setNames(c("#1b9e77","#d95f02","#7570b3","#e7298a","#66a61e","#a6761d"), DSORD)
   fct <- function(x) factor(x, levels = DSORD)
