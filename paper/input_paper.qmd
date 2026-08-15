@@ -7,21 +7,18 @@ author:
     affiliations: 
       - name: Department of Psychology, Stanford University
 
-title: Dissociating efficiency and acceleration 
+title: Dissociating efficiency and acceleration in the growth of children's early vocabulary
 
-#Children but not language models learn vocabulary via accelerating accumulation
-#Efficiency and acceleration in the accumulation of children’s early vocabulary
 title-short: Accelerating accumulator models
 keywords: Early word learning; Bayesian data analysis; Large language models
 abstract: |
-  \noindent Children learn hundreds of words over the first few years of their life, in a process that begins slowly but quickly picks up speed. Prior models of word learning describe vocabulary growth as a process of accumulation of evidence over time. Here we show that the process is best characterized as *accelerating* accumulation, with children varying widely in both the overall efficiency with which they accumulate vocabulary and their acceleration rate. In contrast to children, language models (LMs) -- even those trained on child-directed speech -- show *deceleration* in their rate of learning and very limited variability, consistent with known laws governing LM scaling. Children learn using orders of magnitude less training data than language models do; acceleration is a candidate explanation. Creating acceleration in LMs -- perhaps by instilling children's ability to "learn to learn" -- is thus an open challenge. 
-
+  \noindent TODO 
+  
 bibliography: standard_model.bib
 # Dataset citations appear as plain text in Table 1 (kable can't render
 # [@key] markers); list their bib keys here so they still appear in the
 # References. Add @marchman / @smith dataset keys once they exist in the bib.
-nocite: |
-  @thal2013, @simonsen2014, @hagihara2023
+nocite: 
 format:
   pdf:
     documentclass: article
@@ -50,17 +47,45 @@ suppressPackageStartupMessages({
 source(here("paper", "_helpers.R"))
 
 
+XYZ <- "VALUE NOT SPECIFIED"
 
-# Cached data for the three main-text figures — produced by
-# `Rscript paper/build_cache_short.R`.
+# load cached data — produced by `Rscript paper/build_cache.R`
+# (Table 1 is built inline in its own chunk, not cached.)
 CACHE <- here("paper", "cache")
-fig1_fan   <- readRDS(file.path(CACHE, "fig1_fan.rds"))        # Fig 1: M0-M3 schematic + per-dataset M3 fan
-fig2       <- readRDS(file.path(CACHE, "fig2_efficiency.rds")) # Fig 2: per-word exposures-to-learn (M3)
-llm_slopes <- readRDS(file.path(CACHE, "fig6_llm_slopes.rds")) # Fig 3: child vs LLM acceleration
-# QC cache
-TR <- readRDS(file.path(CACHE, "qc_spaghetti_data.rds"))
+ladder     <- readRDS(file.path(CACHE, "fig2_glmer_ladder.rds"))
+demo_blups <- readRDS(file.path(CACHE, "blups_demographics.rds"))
+io_summary <- readRDS(file.path(CACHE, "fig5_io_summary.rds"))
+input3     <- readRDS(file.path(CACHE, "fig3_input.rds"))
+aic        <- readRDS(file.path(CACHE, "aic_summary.rds"))
+exposure   <- readRDS(file.path(CACHE, "fig4_exposure.rds"))
+llm_slopes <- readRDS(file.path(CACHE, "fig6_llm_slopes.rds"))
+io_part    <- readRDS(file.path(CACHE, "io_partition.rds"))
+io_fig     <- readRDS(file.path(CACHE, "fig_io_imputed_proc.rds"))
 
+# implied input-efficiency share for a language as a RANGE over the plausible
+# sigma_r band (io figure vertical band, [0.32, 0.58]: lower edge = the direct
+# joint fits' own sigma_r estimate, upper = literature); = sigma_r^2/sigma_xi^2
+# read off the analytic curve at the band edges.
+io_share <- function(model) {
+  cur <- io_fig$panelA$curves; b <- io_fig$panelA$sr_band
+  cur <- cur[cur$model == model, ]
+  lo <- cur$share[which.min(abs(cur$sigma_r - b[1]))]
+  hi <- cur$share[which.min(abs(cur$sigma_r - b[2]))]
+  sprintf("%.1f--%.1f%%", 100 * lo, 100 * hi)
+}
 
+# Inline range: how much worse the best (D) model becomes when age enters
+# linearly rather than as log-age, across the four languages (dAIC of
+# D_lin relative to the best model, D_log).
+.dlin <- aic |> filter(model == "D_lin") |> pull(dAIC)
+aic_loglin_range <- sprintf("%s--%s",
+  format(round(min(.dlin)), big.mark = ","),
+  format(round(max(.dlin)), big.mark = ","))
+
+knitr::opts_chunk$set(
+  echo = FALSE, message = FALSE, warning = FALSE, cache=TRUE,
+  fig.align = "center", out.width = "100%", dpi = 300
+)
 # Inline text values (raw numbers in si_inline.rds, built by build_cache_short
 # section 7); formatted here to the precision they render at in the text.
 inl <- readRDS(file.path(CACHE, "si_inline.rds"))
@@ -102,13 +127,12 @@ knitr::opts_chunk$set(
   echo = FALSE, message = FALSE, warning = FALSE, cache=TRUE,
   fig.align = "center", out.width = "100%", dpi = 300, dev = "cairo_pdf"
 )
+
+XYZ <- "value missing"
 ```
 
 
-
 The growth has theoretical, practical, and methodological importance. From a theoretical perspective, growth mechanisms shed light on children’s fundamental learning mechanisms and how they change across childhood [@mcmurray2007;@bloom2002;@frank2021]. From a practical perspective, early vocabulary is an important precursor -- and predictor -- of academic achievement [@marchman2008;@catts2002;@muter2004]. From a methodological perspective, vocabulary also affords a unique psychometric opportunity to study human variation because, unlike nearly all important human psychological metrics, there is a true zero point -- a time before which children know no words. Thus, absolute levels of variability can be calculated. 
-
-
 
 A naïve interpretation of the accumulator view would suggest that substantial  variance in vocabulary growth should be related to input -- either via quantity (number of drops) or quality (size of each drop). Two recent meta-analyses complicate this view, however. @anderson2021 showed that only a modest proportion of the variance in vocabulary outcomes is related to input quantity ($r^2 = .11$) and quality ($r^2 = 04$). A newer meta-analysis of quantity confirms and extends the proportion of variance due to quantity to 4--7% of total variation in vocabulary [@coffey2026]. Thus -- as we might have supposed based on other research on human variation -- not all variation in vocabulary between children can be attributed to input differences. 
 
@@ -127,7 +151,6 @@ The accumulator view has been especially influential because it connects with a 
 
 
 ```{r fig-demographics, fig.width=7.5, fig.height=13}
-#| label: fig-demographics
 #| fig-cap: "Regression coefficients predicting individual children's efficiency and acceleration as a function of gender and maternal education. Panels A and B show data from individual languages (both longitudinal and cross-sectional); blue regions show meta-analytic estimates from a random-effects meta analysis. Error bars show 95\\% confidence intervals. Panel C shows a meta-analytic summary for cross-sectional and longitudinal datasets."
 
 # studies/cross_sectional_demographics/composite_figure.R from that directory's
@@ -198,8 +221,8 @@ Taken together, this model essentially creates a set of linked measurement model
 ### Input predicts both efficiency and acceleration, while processing speed relates only to efficiency
 
 
-```{r fig-io-partition, fig.width=11, fig.height=9}
-#| label: fig-io-partition
+```{r fig.width=11, fig.height=9}
+#| label: fig-io-partition 
 #| fig-cap: ""
 # THREE-panel io figure:
 # (A) schematic of the input/processing dissociation (top row), parameterized by the
@@ -301,7 +324,7 @@ pB <- ggplot(pbd, aes(term, e, color = factor, group = factor)) +
 pSch / ((pB | pA) + plot_layout(widths = c(1, 1.25))) + plot_layout(heights = c(1.05, 1))
 ```
 
-```{r fig-io-data-panels, fig.width=14, fig.height=5}
+```{r fig.width=14, fig.height=5}
 #| label: fig-io-data-panels
 #| fig-cap: "Observed data entering the io-proc analysis, one colour per dataset (constant across panels). (A) CDI vocabulary: each line is a child's words-produced count across administrations (no points), with a per-dataset loess trend. (B) Looking-while-listening reaction time (log scale): per-child session-mean RT with a per-dataset trend; RT declines with age in every dataset. (C) Observed input rate (log; study-specific units, so absolute levels are not comparable across datasets — only the age trends): per-child trajectories with a per-dataset trend, with BabyView head-cam recordings averaged to monthly means so they do not swamp the sparser LENA datasets. *[Draft caption — MCF to review.]*"
 # Reproducible standalone script; defines io_panels_fig() (reads the analysis bundle +
