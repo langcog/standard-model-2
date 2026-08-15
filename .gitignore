@@ -170,3 +170,10 @@ paper/standard_model_short_files/
 # Harmonized CDI union (47MB; regenerable via model/scripts/build_harmonized_cdi.R;
 # duplicates the tracked per-study *_cdi_items_long.csv). Small harmonized artifacts ARE tracked.
 data/harmonized/cdi_item_level.csv
+
+# --- Credentials: never commit ---
+# Redivis API token and any other per-repo secrets. `secrets/` (a directory) was already
+# ignored; `.secrets` (a file) was not, so an `git add -A` would have swept the token in.
+.secrets
+.secrets.*
+*.token
