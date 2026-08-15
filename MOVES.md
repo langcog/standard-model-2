@@ -49,3 +49,28 @@ are *indexed* from `studies/<name>/README.md`, not moved).
 - `model/scripts/*` — various scripts write to `outputs/...`; repoint to `figs/`,
   `fits/`, or `journal/results/` as appropriate when you re-run them.
 - `paper/_helpers.R` — a comment references `glmer_ladder/04b_plot.R` (now `studies/…`).
+
+---
+
+# Paper folder reorganization — 2026-08-15
+
+After the acceleration paper moved to its own repo (`~/Projects/acceleration`),
+`paper/` was reorganized around the **input paper**, now the only live
+manuscript here. Retired material went to `paper/old/` (tracked history
+preserved via `git mv`; new render artifacts in `old/` are gitignored).
+
+| Old | New | Notes |
+|---|---|---|
+| `paper/input_paper/input_paper_text.qmd` | `paper/input_paper.qmd` | **the manuscript** (renamed) |
+| `paper/input_paper/full_supplemental.qmd` | `paper/full_supplemental.qmd` | SI; move fixes its relative `figs/` refs |
+| `paper/input_paper/build_*.R` | `paper/build_*.R` | 4 cache builders promoted |
+| `paper/standard_model_short.*`, `supplemental.qmd`, `science/`, `science.csl`, `science_template_v1.1/`, `build_cache_short.R`, `build_cache_si_{gamlss,settings}.R`, `_setup_shared.R`, `mockups/` | `paper/old/short_paper/` | acceleration paper — canonical copies in `~/Projects/acceleration` |
+| `si_clippings.qmd` (repo root) | `paper/old/short_paper/` | **only copy** — not in acceleration repo |
+| `paper/input_paper/standard_model.{qmd,pdf,tex,html}`, `supplemental.{pdf,tex}`, PNAS `.sty/.cls/.bst`, `paper/_extensions/`, `jabbrv*`, `widetext.sty`, `achemso.bst`, `acs-standard_model.bib` | `paper/old/long_paper/` | the original combined PNAS paper + format scaffolding |
+| `paper/Standard Model 2.0 BUCLD abstract.pdf` | `paper/old/` | |
+| `paper/bucld/` | *(deleted)* | was empty |
+
+Path fixes made: `input_paper.qmd` bibliography `../standard_model.bib` →
+`standard_model.bib`; `build_cache.R` header comment; `.gitignore` render
+rules repointed to `input_paper*` / `full_supplemental*` / `old/`. Render
+verified post-move (`quarto render paper/input_paper.qmd` → 10 pp PDF).

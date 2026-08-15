@@ -127,7 +127,18 @@ reports/**/*.out
 cluster/sherlock/glmer_ladder_manifest.csv
 
 # Quarto auto-generated render artifacts
-paper/standard_model_files/
+paper/input_paper.pdf
+paper/input_paper.tex
+paper/input_paper_cache/
+paper/input_paper_files/
+paper/full_supplemental.pdf
+paper/full_supplemental.tex
+paper/full_supplemental.html
+paper/full_supplemental_cache/
+paper/full_supplemental_files/
+# Retired papers archive: tracked files stay tracked; hide the archived
+# untracked render debris (old knitr caches, .docx renders) it absorbed.
+paper/old/
 
 # Stray default R plot dumps
 Rplots.pdf
@@ -141,26 +152,12 @@ data/raw/seedlings/raw_eyetracking_data/
 data/raw/babyview/data_june_2026-*.zip
 # Local run logs
 logs/
-# Rendered Quarto/doc outputs (sources tracked; deliverable PDFs tracked explicitly)
-paper/standard_model.html
-paper/standard_model_cache/
-paper/supplemental.html
-paper/supplemental.pdf
-paper/supplemental.tex
-paper/supplemental.rmarkdown
-paper/supplemental_files/
+# Rendered Quarto/doc outputs (sources tracked; render artifacts ignored —
+# see the paper/input_paper* block above)
 studies/llm/llm_experiments.html
 studies/llm/llm_experiments_files/
 # cmdstan per-chain draw CSVs (regenerable Stan sampler output)
 fits/csvs_*/
-# Rendered short-paper outputs. The existing rules above cover standard_model.* and
-# supplemental.*, but not the _short variants, so every render left four untracked
-# entries in git status. Sources are tracked; these are all regenerable by
-# `quarto render paper/standard_model_short.qmd`.
-paper/standard_model_short.pdf
-paper/standard_model_short.tex
-paper/standard_model_short_cache/
-paper/standard_model_short_files/
 # Editor/script backups (*.rds.*bak is covered below; this catches script .bak/.bak2)
 *.bak
 *.bak[0-9]

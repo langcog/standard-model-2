@@ -1,8 +1,8 @@
-## build_cache.R — populates outputs/paper/cache/ with the small RDS
-## summaries that standard_model.qmd loads in its setup chunk.
+## build_cache.R — populates paper/cache/ with the small RDS
+## summaries that input_paper.qmd loads in its setup chunk.
 ##
 ## Run from project root:
-##   Rscript outputs/paper/build_cache.R
+##   Rscript paper/build_cache.R
 ##
 ## Re-run when:
 ##   - underlying fits change
