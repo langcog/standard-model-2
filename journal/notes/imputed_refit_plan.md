@@ -42,9 +42,9 @@ with the WG arm restored); NO a0 = 25 unchanged.
 
 ## Launch pattern (already run 08-15; kept for resubmission)
 
-Bundles + scripts were rsynced to `$HOME/standard_model_2` on Sherlock
-(the clone's git state is old/dirty by design — nothing was committed;
-resync with rsync, not git pull, until the reorg is committed):
+2026-08-15 (later): everything is now committed and pushed
+(`0562376` on master) and the Sherlock clone fast-forwarded to it with a
+clean tree — **normal `git pull` is the sync path again**. Launch pattern:
 
 ```bash
 for v in 0.35 0.44 0.58; do for d in english norwegian; do
