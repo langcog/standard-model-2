@@ -181,7 +181,7 @@ mk(fanning,  "(B) diverging trajectories (slopes vary)")
 
 ## Datasets
 
-@tbl-datasets gives the characteristics of each dataset used. In the main text we focus on children with three or more administrations (for more precise estimates of $\kappa$), but below we also confirm the robustness of our claims including children with two or more administrations. 
+Table -@tbl-datasets gives the characteristics of each dataset used. In the main text we focus on children with three or more administrations (for more precise estimates of $\kappa$), but below we also confirm the robustness of our claims including children with two or more administrations. 
 
 ```{r tbl-datasets}
 #| label: tbl-datasets
@@ -224,7 +224,7 @@ si_ds |>
   kableExtra::kable_styling(font_size = 9, latex_options = "HOLD_position")
 ```
 
-@fig-qc shows the full spaghetti plots for each dataset, highlighting in red those observations that failed our quality check and were excluded. We speculate that these observations are due to either data entry issues or faulty correspondences between observations. Such issues occur frequently in archival datasets and affect only a small portion of our data. 
+Fig. -@fig-qc shows the full spaghetti plots for each dataset, highlighting in red those observations that failed our quality check and were excluded. We speculate that these observations are due to either data entry issues or faulty correspondences between observations. Such issues occur frequently in archival datasets and affect only a small portion of our data. 
 
 ```{r fig-qc}
 #| label: fig-qc
@@ -252,7 +252,7 @@ ggplot() +
 ## Full Model Comparison Results
 
 
-@tbl-loo gives the full leave-one-out model comparison results across models for both the dataset with 3+ administrations/child and the larger dataset with 2+ administrations/child. 
+Table -@tbl-loo gives the full leave-one-out model comparison results across models for both the dataset with 3+ administrations/child and the larger dataset with 2+ administrations/child. 
 
 ```{r tbl-loo}
 #| label: tbl-loo
@@ -327,7 +327,7 @@ knitr::kable(cvt |> select(-mode), format = "latex", booktabs = TRUE, escape = F
 ```
 
 We next tested whether acceleration plays an identifiable role in predicting individual children's trajectories at all. We therefore fit M2$_0$, a variant of M2 with the acceleration exponent constrained to the pure
-accumulator value ($\kappa = 1$) --- rather than the population acceleration rate -- while retaining the per-child efficiency term $\xi_i$. The comparison of M2 and M2$_0$ thus tests the hypothesis that acceleration is predictive of individual trajectories. @tbl-cv-headline shows the results of this comparison. M2, the accelerating model, predicted held-out administrations better at every depth. 
+accumulator value ($\kappa = 1$) --- rather than the population acceleration rate -- while retaining the per-child efficiency term $\xi_i$. The comparison of M2 and M2$_0$ thus tests the hypothesis that acceleration is predictive of individual trajectories. Table -@tbl-cv-headline shows the results of this comparison. M2, the accelerating model, predicted held-out administrations better at every depth. 
 
 
 ```{r tbl-cv-headline}
@@ -365,7 +365,7 @@ knitr::kable(cvh, format = "latex", booktabs = TRUE, escape = FALSE,
 
 To test whether the accelerating accumulator appropriately fits the distribution of growth curves across children, we compared against a strong baseline: the flexible non-parametric GAMLSS family that is used to produce normative curves for the CDI [@marchman2021]. Specifically, for each dataset we fit a GAMLSS beta-regression of the proportion of words produced by the child's age. We used a penalized spline function on the mean and on the scales.
 
-@fig-gamlss-overlay shows that across all five datasets the M3 fit (blue) tracks both the non-parametric GAMLSS fit (orange) and the empirical quantiles (circles). Thus, the accelerating accumulator
+Fig. -@fig-gamlss-overlay shows that across all five datasets the M3 fit (blue) tracks both the non-parametric GAMLSS fit (orange) and the empirical quantiles (circles). Thus, the accelerating accumulator
 is a faithful, low-dimensional compression of the data's quantile structure.
 
 ```{r fig-gamlss-overlay, fig.width=13, fig.height=3.5}
@@ -389,7 +389,7 @@ ggplot() +
 
 ## Robustness Across Model and Data Settings
 
-In the main text, we report fits to children with 3+ administrations with separate models fit to each dataset, but our parameter estimates were substantially similar across two other settings: first, separate fits to children with 2+ administrations, and second, a full hierarchical model fit to children with 3+ administrations. @tbl-settings shows LOO fits and the robustness of the $\kappa$ estimates across these different settings. 
+In the main text, we report fits to children with 3+ administrations with separate models fit to each dataset, but our parameter estimates were substantially similar across two other settings: first, separate fits to children with 2+ administrations, and second, a full hierarchical model fit to children with 3+ administrations. Table -@tbl-settings shows LOO fits and the robustness of the $\kappa$ estimates across these different settings. 
 
 The pooled model was structured similarly to the by-dataset models, but children and words were modeled as nested within their own dataset. Each dataset had its own mean $\xi$ and $\kappa$ values. Dataset-level standard deviations on efficiency and acceleration ($\sigma_a$ and $\sigma_b$) were distributed as $\log \sigma_{a[d]} \sim \mathcal N(m_a, s_a)$ and $\log \sigma_{b[d]} \sim \mathcal N(m_b, s_b)$, so a dataset with few children had its estimated spread drawn toward the typical value across datasets, while a dataset with many children was left essentially unconstrained. The item-difficulty distribution was estimated separately within each dataset, since the different datasets reflect data from different languages. Overall, the pooled model reproduced the parameters of the independent fits closely. 
 
@@ -455,7 +455,7 @@ knitr::kable(qct |> select(setting, rem, kap, sb), format = "latex", booktabs = 
 
 ## Linear vs. Logarithmic Age
 
-We additionally fit M3 variants with linear, rather than logarithmic, growth in acceleration over time. @tbl-loglin shows that the linear model was dispreferred across all five datasets. 
+We additionally fit M3 variants with linear, rather than logarithmic, growth in acceleration over time. Table -@tbl-loglin shows that the linear model was dispreferred across all five datasets. 
 
 ```{r tbl-loglin}
 #| label: tbl-loglin
@@ -477,7 +477,7 @@ knitr::kable(tab, format = "latex", booktabs = TRUE, align = c("l", "r"), escape
 
 In the main analysis we use a Rasch (1PL) item model, in which every word has a difficulty but all words have equal discrimination between children. @kachergis2022b found that a 2PL model, which adds a per-word discrimination $\lambda_j$, was preferred over the 1PL for CDI data. We therefore refit M3 with a per-word discrimination parameter.
 
-@tbl-2pl shows the results of this comparison. The 2PL does genuinely fit better, with substantial differences in LOO ELPD for every language. However, model results are otherwise unchanged. Estimates of $\kappa$ increase somewhat, but they are not directly comparable across item models. In normal IRT models, ability scores are constrained to a standard normal distribution, but in our model, abilities grow over time so there is no single standard scale, and the addition of the discrimination parameter can change the overall scale. For this reason, we report $\log \kappa$, since a pure change of units would be a constant shift. In addition, across individual words, we find that the predicted age of acquisition (the age at which the word is predicted to have a 50% probability of being known) is closely aligned, suggesting that the models are highly comparable. 
+Table -@tbl-2pl shows the results of this comparison. The 2PL does genuinely fit better, with substantial differences in LOO ELPD for every language. However, model results are otherwise unchanged. Estimates of $\kappa$ increase somewhat, but they are not directly comparable across item models. In normal IRT models, ability scores are constrained to a standard normal distribution, but in our model, abilities grow over time so there is no single standard scale, and the addition of the discrimination parameter can change the overall scale. For this reason, we report $\log \kappa$, since a pure change of units would be a constant shift. In addition, across individual words, we find that the predicted age of acquisition (the age at which the word is predicted to have a 50% probability of being known) is closely aligned, suggesting that the models are highly comparable. 
 
 Critically, $\delta$ (difficulty) and $\lambda$ (discrimination) correlations were small to modest. If harder words were substantially more discriminating, this correlation could inflate estimates of $\kappa$ in the 1PL model; in practice we find little support for this hypothesis.
 
@@ -542,7 +542,7 @@ knitr::kable(tab2, format = "latex", booktabs = TRUE, align = c("l", rep("r", 11
 
 ## Sensitivity to Item Selection
 
-One potential concern about our $\kappa$ estimates is that they could be influenced by the composition of the CDI instrument. Could a broader spread of item difficulties result in a larger $\kappa$ estimate? To address this issue, we refit M3 on the same children and same administrations, but with the item set narrowed. We fit models under three sets of conditions: refitting the middle 50% and middle 25% of items (to narrow the width of the distribution),  refitting the easiest and hardest halves separately (to shift the difficulty distribution), and subsetting randomly to 50% and 25% of items. If $\kappa$ scales as a function of the difficulty distribution ($\sigma_\delta$), recovered $\kappa$ values should scale with the standard deviation of the retained items; if not, $\kappa$ should be relatively invariant. @fig-item-subset shows the results of this analysis. Overall, $\kappa$ values were invariant to retained item variability.
+One potential concern about our $\kappa$ estimates is that they could be influenced by the composition of the CDI instrument. Could a broader spread of item difficulties result in a larger $\kappa$ estimate? To address this issue, we refit M3 on the same children and same administrations, but with the item set narrowed. We fit models under three sets of conditions: refitting the middle 50% and middle 25% of items (to narrow the width of the distribution),  refitting the easiest and hardest halves separately (to shift the difficulty distribution), and subsetting randomly to 50% and 25% of items. If $\kappa$ scales as a function of the difficulty distribution ($\sigma_\delta$), recovered $\kappa$ values should scale with the standard deviation of the retained items; if not, $\kappa$ should be relatively invariant. Fig. -@fig-item-subset shows the results of this analysis. Overall, $\kappa$ values were invariant to retained item variability.
 
 ```{r fig-item-subset, fig.width=6.5, fig.height=4.2}
 #| label: fig-item-subset
@@ -656,7 +656,7 @@ between-child log input rate. A child one standard deviation above (below) the
 median rate reaches the same age having heard $\times 1.71$ ($\div 1.71$) as
 many tokens. This results in a horizontal shift of the child's curve along the log-token axis.
 
-Our calibration computations assume that input is constant across age. To provide empirical verification, we used data from four pre-existing datasets: @adams2018, @long2025 (BabyView), @fernald2013, @egan2025 (SEEDLings). These studies measured children's input using either LENA recorders or head-mounted cameras; we computed total words heard per hour in each dataset for each recording. @fig-input-age shows speech rate per hour in these datasets. Slopes over age for each were shallow and non-significant.
+Our calibration computations assume that input is constant across age. To provide empirical verification, we used data from four pre-existing datasets: @adams2018, @long2025 (BabyView), @fernald2013, @egan2025 (SEEDLings). These studies measured children's input using either LENA recorders or head-mounted cameras; we computed total words heard per hour in each dataset for each recording. Fig. -@fig-input-age shows speech rate per hour in these datasets. Slopes over age for each were shallow and non-significant.
 
 ```{r fig-input-age, fig.width=7.5, fig.height=5}
 #| label: fig-input-age
@@ -717,7 +717,7 @@ ggplot(pts, aes(age, log_input)) +
 
 Figure 2 in the main text converts each word's fitted difficulty into an estimated number of cumulative exposures at the age it is acquired. Since later-acquired words are also rarer, here we ask whether that frequency change would be sufficient to produce the observed relationship between cumulative exposure and age of acquisition. 
 
-@fig-aoa-m0 shows the same relationship, but comparing age of acquisition estimates between M3 (the accelerating accumulator) and M0 (the pure accumulator). The pure accumulator does not reproduce either the scale or the slope of the relationship (@tbl-aoa-m0). Within every word class, the slope of the relationship is substantially shallower in M0 than M3, and the M0 forces the fitted difficulties to spread acquisition across 5 to 254 months, against 14 to 35 months for the accelerating model and 8 to 36 months of actual observation.
+Fig. -@fig-aoa-m0 shows the same relationship, but comparing age of acquisition estimates between M3 (the accelerating accumulator) and M0 (the pure accumulator). The pure accumulator does not reproduce either the scale or the slope of the relationship (@tbl-aoa-m0). Within every word class, the slope of the relationship is substantially shallower in M0 than M3, and the M0 forces the fitted difficulties to spread acquisition across 5 to 254 months, against 14 to 35 months for the accelerating model and 8 to 36 months of actual observation.
 
 ```{r fig-aoa-m0, fig.width=7.5, fig.height=4.2}
 #| label: fig-aoa-m0
@@ -770,9 +770,9 @@ si_f2m0$slopes |>
 
 One potential objection to the comparison of children and LMs in the main text is that the estimators are different in two ways. First, the estimator for children is Rasch-based, while the model from @chang2022 is a four-parameter logistic. Second, and perhaps more saliently, the child estimator is for $\kappa$ across children, while the LM estimator is across words. 
 
-To address these issues, we fit the LM four-parameter estimator directly to data on children's word acquisition, averaging across children to produce a proportion of children producing each word at each age. (The Thal and Japanese datasets had fewer children and less age diversity, so not all words produced a viable curve estimate, but most words could be estimated for the Smith, Marchman, and Norwegian datasets). @fig-perword-4pl shows the results. Across all datasets, $\kappa$ estimates were robustly higher than LMs, though somewhat attenuated relative to the M3 fits. 
+To address these issues, we fit the LM four-parameter estimator directly to data on children's word acquisition, averaging across children to produce a proportion of children producing each word at each age. (The Thal and Japanese datasets had fewer children and less age diversity, so not all words produced a viable curve estimate, but most words could be estimated for the Smith, Marchman, and Norwegian datasets). Fig. -@fig-perword-4pl shows the results. Across all datasets, $\kappa$ estimates were robustly higher than LMs, though somewhat attenuated relative to the M3 fits. 
 
-One possible source of this attenuation is the averaging of many different acquisition curves across children. To estimate this attenuation, we sampled from the fitted M3 parameters for $\xi_i$, $\kappa_i$ and $\delta_j$, and ran the identical pipeline over the data to recover a correction factor (the ratio of the estimated by-word $\kappa$ to the population $\kappa$ used to generate the data). We then applied this correction factor to our empirical estimates. @tbl-perword-4pl shows these corrected estimates, which match very closely to the M3 values. 
+One possible source of this attenuation is the averaging of many different acquisition curves across children. To estimate this attenuation, we sampled from the fitted M3 parameters for $\xi_i$, $\kappa_i$ and $\delta_j$, and ran the identical pipeline over the data to recover a correction factor (the ratio of the estimated by-word $\kappa$ to the population $\kappa$ used to generate the data). We then applied this correction factor to our empirical estimates. Table -@tbl-perword-4pl shows these corrected estimates, which match very closely to the M3 values. 
 
 In sum, even with a completely matched estimator, acceleration diverges substantially between children and LMs. 
 
@@ -846,7 +846,7 @@ knitr::kable(p4, format = "latex", booktabs = TRUE, escape = FALSE,
 
 ## Other Architectures
 
-The acceleration results we report in the main text are not specific to our choice of the GPT-2 architecture. We re-analyze the published fits of @chang2022. @fig-si-cb-arch shows a similar distribution of per-word $\kappa$ values for the four different architectures reported in that study, which were trained on standard LM corpora rather than child-directed input. 
+The acceleration results we report in the main text are not specific to our choice of the GPT-2 architecture. We re-analyze the published fits of @chang2022. Fig. -@fig-si-cb-arch shows a similar distribution of per-word $\kappa$ values for the four different architectures reported in that study, which were trained on standard LM corpora rather than child-directed input. 
 
 ```{r fig-si-cb-arch, fig.width=6.5, fig.height=4}
 #| label: fig-si-cb-arch
