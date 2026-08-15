@@ -80,3 +80,46 @@ knitr::opts_chunk$set(
   fig.align = "center", out.width = "100%", dpi = 300,
   dev = if (knitr::is_latex_output()) "cairo_pdf" else "ragg_png"
 )
+
+# ---- cross-references from the MAIN TEXT into the supplement -------------------
+# Science wants the main text and the supplement as separate files, so the main text is
+# rendered without the SI. Quarto therefore has no target for @fig-input-age and emits a
+# broken "?@fig-input-age" into the .docx -- silently, with the render reporting success.
+#
+# These resolve the number from supplemental.qmd itself and emit plain text, which
+# survives any output format. The scan reads chunk labels outside code fences in source
+# order, which is exactly what Quarto's own numbering follows, so the two agree by
+# construction and stay agreeing if the SI is reordered.
+.si_labels <- local({
+  src <- readLines(here::here("paper", "supplemental.qmd"))
+  inchunk <- FALSE; figs <- character(); tbls <- character()
+  for (l in src) {
+    if (grepl("^```\\{", l)) { inchunk <- TRUE; next }
+    if (identical(trimws(l), "```")) { inchunk <- FALSE; next }
+    m <- regmatches(l, regexpr("(?<=^#\\| label: )(fig|tbl)-[A-Za-z0-9-]+", l, perl = TRUE))
+    if (length(m)) if (startsWith(m, "fig-")) figs <- c(figs, m) else tbls <- c(tbls, m)
+  }
+  c(setNames(paste0("S", seq_along(figs)), figs),
+    setNames(paste0("S", seq_along(tbls)), tbls))
+})
+
+# Comma-and-"and" series, as Science's own examples use ("Figs. S1 to S4").
+.si_series <- function(ns) if (length(ns) == 1) ns else
+  paste0(paste(ns[-length(ns)], collapse = ", "), " and ", ns[length(ns)])
+
+# si_ref("fig-input-age")                      -> "fig. S6"
+# si_ref("fig-aoa-m0", "tbl-aoa-m0")           -> "fig. S7 and table S10"
+# si_ref("tbl-cv-depth", "tbl-cv-headline")    -> "tables S3 and S4"
+# si_ref("fig-qc", cap = TRUE)                 -> "Fig. S2"   (sentence-initial)
+si_ref <- function(..., cap = FALSE) {
+  lab <- c(...)
+  unknown <- setdiff(lab, names(.si_labels))
+  if (length(unknown)) stop("unknown SI label(s): ", paste(unknown, collapse = ", "),
+                            " -- check the chunk label in supplemental.qmd")
+  f <- unname(.si_labels[lab[startsWith(lab, "fig-")]])
+  t <- unname(.si_labels[lab[startsWith(lab, "tbl-")]])
+  parts <- c(if (length(f)) paste0(if (length(f) > 1) "figs. " else "fig. ", .si_series(f)),
+             if (length(t)) paste0(if (length(t) > 1) "tables " else "table ", .si_series(t)))
+  out <- paste(parts, collapse = " and ")
+  if (cap) sub("^(f|t)", "\\U\\1", out, perl = TRUE) else out
+}
