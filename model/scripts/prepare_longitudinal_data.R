@@ -37,26 +37,23 @@ d <- long %>%
   filter(language == !!language, !is.na(produces)) %>%
   select(-any_of("prob"))
 
-# Restrict to monolingual, typically-developing children (matching the
-# glmer-ladder extraction): exclude bilingual studies (dataset_origin_name
-# contains "Bilingual") and the Edgin Down-syndrome clinical sample. For
-# monolingual-TD languages (e.g. Norwegian) this removes nothing.
-suppressPackageStartupMessages(library(wordbankr))
-.adm <- tryCatch(get_administration_data(language = language),
-                 error = function(e) NULL)
-if (!is.null(.adm)) {
-  .excl <- .adm %>%
-    filter(grepl("Bilingual", dataset_origin_name, ignore.case = TRUE) |
-             dataset_name %in% c("Edgin", "Byers")) %>%
-    pull(child_id) %>% unique()
-  n0 <- length(unique(d$child_id))
-  d  <- d %>% filter(!child_id %in% .excl)
-  message(sprintf("  monolingual-TD filter: excluded %d children (%d -> %d)",
-                  n0 - length(unique(d$child_id)), n0,
-                  length(unique(d$child_id))))
-} else {
-  message("  monolingual-TD filter: wordbankr unavailable, skipped")
-}
+# Monolingual-TD exclusions (Bilingual origins, Edgin, Byers) are applied
+# upstream in pull_longitudinal.R since 2026-08-15.
+#
+# Child key: `ckey` = dataset::study_internal_id -- the key that actually
+# links a child's WG and WS administrations. Wordbank child_id does not in
+# some datasets (it silently split cross-form kids into fake single-form
+# kids; cost Marchman's WG arm + ~178 Norwegian kids). Overwrite child_id
+# locally so all downstream grouping/indexing links correctly.
+d <- d %>% mutate(child_id = ckey)
+
+# Cross-form item harmonization (option a, shared with the acceleration
+# repo): a WG and a WS item sharing an unambiguous uni_lemma are one latent
+# item ("ul:..."); everything else stays form-specific ("id:...").
+n_ids0 <- n_distinct(d$item)
+d <- harmonize_cdi_items(d, form_col = "form_type")
+message(sprintf("  harmonization: %d item_definitions -> %d item ids",
+                n_ids0, n_distinct(d$item_h)))
 
 # Collapse to one administration per (child, age): merge WG+WS taken at
 # the same age and any repeat same-form administrations into a single
@@ -66,9 +63,12 @@ if (!is.null(.adm)) {
 # inflating N and the apparent precision.
 n_rows0 <- nrow(d)
 d <- d %>%
+  mutate(item_definition = item, item = item_h) %>%
   group_by(child_id, age, item) %>%
   summarise(produces = max(produces),
             lexical_category = dplyr::first(lexical_category),
+            item_definition = dplyr::first(item_definition),
+            dataset_name = dplyr::first(dataset_name),
             .groups = "drop")
 message(sprintf("  collapse to one admin per (child,age): %d -> %d rows",
                 n_rows0, nrow(d)))
@@ -82,7 +82,7 @@ normalize <- function(x) {
     gsub("\\s+", " ", .) %>% trimws()
 }
 
-d <- d %>% mutate(item_norm = normalize(item))
+d <- d %>% mutate(item_norm = normalize(item_definition))
 freq_lookup <- freq %>%
   mutate(w_norm = normalize(w)) %>%
   group_by(w_norm) %>%
@@ -107,6 +107,30 @@ if (sum(is.na(d$prob)) > 0) {
 }
 
 d <- d %>% filter(prob > 0)
+
+## Longitudinal QC (shared with the acceleration repo): greedily drop
+## administrations that violate monotone, rate-bounded growth (craters and
+## jumps -- data-entry / mis-keyed-form artifacts). Proportions are over the
+## FULL item universe J, so a WG->WS form transition is not a fake crater.
+## QC_OFF=1 disables (no-exclusions sensitivity). Children left with fewer
+## than MIN_ADMINS waves are dropped by the admin-count filter below.
+J_qc <- n_distinct(d$item)
+adm_prop <- d %>%
+  group_by(child_id, age) %>%
+  summarise(v = sum(produces) / J_qc, .groups = "drop") %>%
+  arrange(child_id, age)
+keep_adm <- adm_prop %>%
+  group_by(child_id) %>%
+  group_modify(~ mutate(.x, keep = qc_clean_child(.x$age, .x$v,
+                                                  min_admins = MIN_ADMINS))) %>%
+  ungroup()
+message(sprintf("  QC local-outlier filter: removed %d / %d administrations",
+                sum(!keep_adm$keep), nrow(keep_adm)))
+d <- d %>% semi_join(keep_adm %>% filter(keep) %>% select(child_id, age),
+                     by = c("child_id", "age"))
+
+message("  children by dataset:")
+print(d %>% distinct(child_id, dataset_name) %>% count(dataset_name), n = 30)
 
 message(sprintf("  input: %d rows, %d children, %d items",
                 nrow(d), length(unique(d$child_id)),
@@ -200,7 +224,8 @@ admin_info <- d %>% distinct(aa, ii, age, admin_key) %>% arrange(aa)
 # slightly different prob or lexical_category, keep the first occurrence
 # so length(cc) == J.
 word_info  <- d %>% group_by(jj) %>%
-  summarise(item = first(item), prob = first(prob), cc = first(cc),
+  summarise(item = first(item), item_definition = first(item_definition),
+            prob = first(prob), cc = first(cc),
             .groups = "drop") %>%
   arrange(jj)
 class_levels <- levels(factor(d$lexical_category))

@@ -8,6 +8,10 @@ when, and where its outputs are stored.
 **Last audited:** 2026-06-13 (dates below are file mtimes + the cited
 `journal/experiments.md` entries; treat them as "as of this audit").
 
+**Path note (2026-08-15):** the manuscript is now `paper/input_paper.qmd`
+(successor to `paper/standard_model.qmd`, later `paper/input_paper/input_paper_text.qmd`);
+retired papers moved to `paper/old/`. The cache chain below is unchanged.
+
 **The dependency chain.** manuscript chunk → `paper/cache/<x>.rds` → a build script
 (`paper/build_cache.R` or `paper/build_input_cache.R`) → one or more **fit outputs**
 in `fits/` → trained by a **fit driver** on a **cluster**. A fit is "stale" when a
@@ -19,6 +23,76 @@ been superseded.
 only (no cluster access needed).
 
 ---
+
+## ⚠️ Currency flags (2026-08-15 audit, post-split outline: demographics → direct io-proc → imputed; no LM/ladder/exposures)
+
+The io-proc thread's terminal state is 2026-06-29; nothing on it moved during the
+July acceleration push, so "current" = the entry-39 finale.
+
+1. **Direct joint fit CURRENT.** `joint_io_proc_lean_d2_enct_2k.summary.rds` (06-29,
+   converged; entry 39) on `joint_io_proc_english_count_subset_data.rds` (06-28);
+   `fig_io_imputed_proc.rds` (06-29) reads it. But `data_check_io_panels.R` (the
+   observed-data figure) still reads the mm-era bundle (`joint_io_proc_mm_subset_data.rds`,
+   06-16), not the english_count bundle the fit uses — repoint before submission.
+2. **Separate INPUT model exists and is current-era but not wired.** The no-proc
+   isolation fit (`log_irt_long_io_count.stan`, Sherlock job 31764182, 06-28, same
+   bundle; input→accel 0.76 [.08,1.41], best-converged of the four) has no
+   draws/summary in `fits/summaries/` — numbers live only in entry 39's table.
+   Re-extract from Sherlock (or refit) and cache before it can go in main text.
+3. **Separate PROC model STALE.** `proc_dp*_all` (06-10) predates the all-items
+   switch (06-13), SEEDLings RT wiring (06-14), and its own rebuilt bundle (06-16).
+   No proc-only fit exists in the lean/enct era; main-text use needs a refit
+   (mirror of io_count: lean model with the input channel stripped).
+4. **Old io-pooled STALE/superseded.** `io_pooled_widedelta` (06-02) vs bundle
+   rebuilt 06-16; its `fig5_io_summary` headline is superseded by the joint +
+   no-proc fits. Cut or refit.
+5. **Demographics longitudinal arm: Marchman BLUPs are from the broken
+   child_id extraction** (WG↔WS unlinked → WG arm lost; see
+   `journal/notes/marchman_data_issue.md`). Clean re-extract exists
+   (`01b_extract_marchman_clean.R`, 2060 kids) but **clean D_log was never fit**
+   (needs Sherlock). With demographics now leading the results: refit on Sherlock
+   and rebuild `blups_demographics.rds`, or drop Marchman from that arm.
+   Cross-sectional arm (06-10 uncapped refit) is fine.
+6. **Imputed panel: PRE-CLEANUP — bundles REBUILT clean 2026-08-15, refits pending.**
+   The extraction port is done and the committed `long_subset_data[_nor].rds`
+   now match the acceleration repo's clean bundles exactly (EN I=3105/N=4.25M
+   = thal+smith+marchman summed; NO I=1630/N=4.44M; see
+   `journal/notes/imputed_refit_plan.md` for validation + the six Sherlock
+   launch lines). The six fits in `fits/summaries/long_no_freq_slopes*` are
+   still the old-data ones until those refits land. Original defect record:
+   (Upgraded 08-15 after comparing against the acceleration repo's
+   `studies/bayes_long/00_prepare_bundles.R`, which corrects three defects this
+   repo's `pull_longitudinal.R` → `prepare_longitudinal_{data,norwegian}.R`
+   pipeline still has: (a) child key = Wordbank `child_id`, which fails to link
+   WG↔WS — costs **Marchman's entire WG arm and ~178 Norwegian cross-form kids**,
+   selectively the long-span, slope-informative trajectories; (b) no uni_lemma
+   cross-form item harmonization; (c) no crater/jump QC filter.) The EN and NO
+   D fits + all four σ_r anchors (6 GCP fits) sit on these bundles. Redo: port
+   the clean extraction (key `dataset::study_internal_id` via
+   `include_study_internal_id=TRUE`, uni_lemma option-a harmonization, clean_child
+   QC), rebuild `long_subset_data[_nor].rds`, refit. QC alone moved acceleration's
+   fits little (their SI sensitivity analysis), but the key fix is a
+   sample-composition change — and the two companion papers cannot describe the
+   same named datasets with different Ns and cleaning.
+7. **Tables stale vs the enct bundle:** `table1_datasets.csv` (06-10) and
+   `si_io_data_table.csv` (06-14, mm-era) both predate the english_count bundle;
+   re-run their build scripts once the section list settles.
+8. **Wordbank moved to Redivis (discovered 08-15).** The old MySQL connection
+   endpoint (`wordbank.stanford.edu/db_args`) is gone — wordbankr ≤ 1.0.3
+   cannot pull at all. Fix: `redivis` ≥ 0.12.12 (langcog r-universe) +
+   `wordbankr` 2.0.0 (GitHub), which reads the versioned Redivis dataset
+   `datapages.wordbank:627v` (current = **v2.0**; pass `version=` to pin) and
+   needs `REDIVIS_API_TOKEN` (repo `.secrets`). ⚠️ Dataset v2.0 changed the
+   instrument `value` column to raw responses ("yes"/"never"/…) — any script
+   testing `value == "produces"` silently gets all-zeros; use the logical
+   `produces` column. Fixed in `pull_longitudinal.R`; still latent in
+   `precursor_variability_plot.R` / `precursor_irt_crosslang.R` (dormant), and
+   `studies/glmer_ladder/01_extract_one.R`, `01b_extract_marchman_clean.R`,
+   `studies/cross_sectional_demographics/00_build.R`, `paper/build_cache.R`
+   pull Wordbank at runtime and need a 2.0 compatibility pass before their
+   next rerun. Data-release drift caution: v2.0 contents ≠ the June MySQL
+   snapshot the acceleration bundles were built from — per-dataset Ns may
+   differ beyond the key-fix effect.
 
 ## ⚠️ Currency flags (open as of 2026-06-13)
 

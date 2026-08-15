@@ -824,3 +824,65 @@ plot_posterior_density <- function(fit, param, save_path = NULL,
   if (!is.null(save_path)) ggsave(save_path, p, width = 6, height = 4, dpi = 150)
   invisible(p)
 }
+
+## ---- Cross-form harmonization + longitudinal QC ------------------------
+## Ported 2026-08-15 from the acceleration repo's
+## studies/bayes_long/00_prepare_bundles.R so the two companion papers share
+## one data standard (see journal/paper_models_provenance.md, 08-15 flags).
+
+## Option-a harmonized item id: a uni_lemma cross-links items iff it maps to
+## <=1 item_definition WITHIN EACH form type (so in[WG] + inside/in[WS] merge;
+## chicken-animal/chicken-food[WS] stay distinct). Adds `item_h` to df; needs
+## columns `item` (the item_definition), `uni_lemma`, and a form-type column.
+harmonize_cdi_items <- function(df, form_col = "form_type") {
+  amb <- df %>%
+    distinct(.data[[form_col]], item, uni_lemma) %>%
+    filter(!is.na(uni_lemma)) %>%
+    count(.data[[form_col]], uni_lemma, name = "n_defs") %>%
+    filter(n_defs > 1) %>%
+    pull(uni_lemma) %>% unique()
+  df %>% mutate(item_h = if_else(!is.na(uni_lemma) & !(uni_lemma %in% amb),
+                                 paste0("ul:", uni_lemma),
+                                 paste0("id:", item)))
+}
+
+## Unified local-outlier cleaner (per child). A true production trajectory is
+## monotone non-decreasing (a child cannot un-produce words) and rate-bounded
+## (cannot learn ~half the CDI in a month). Greedily remove the single most
+## severe outlier admin and re-check until clean; jumps first (a spike inflates
+## the running peak, faking craters downstream of it). `prop` must be the
+## production proportion over the FULL item universe J -- the /J puts WG and
+## WS admins on one scale, so a form transition is not a fake crater.
+## Constants = the acceleration repo's canonical values; QC_OFF=1 disables
+## (the "no exclusions" sensitivity condition).
+QC_REL_TOL   <- 0.25  # CRATER: admin >25% below the running peak...
+QC_PEAK      <- 0.10  #   ...counted only once the peak reached this
+QC_DROP      <- 0.05  #   ...and the absolute drop is at least this
+QC_RATE_MAX  <- 0.40  # JUMP: rise faster than this (prop of items/month)...
+QC_JUMP_BASE <- 0.10  #   ...launched from a base below this
+
+qc_clean_child <- function(age, prop, min_admins = 2,
+                           qc_off = nzchar(Sys.getenv("QC_OFF", ""))) {
+  keep <- rep(TRUE, length(prop))
+  if (qc_off) return(keep)
+  repeat {
+    ix <- which(keep); if (length(ix) < 2) break
+    a <- age[ix]; p <- prop[ix]; peak <- cummax(p)
+    jp <- integer(0); js <- numeric(0); cp <- integer(0); cs <- numeric(0)
+    for (j in 2:length(p)) {
+      drop_amt <- peak[j - 1] - p[j]
+      rate     <- (p[j] - p[j - 1]) / (a[j] - a[j - 1])
+      if (rate > QC_RATE_MAX && p[j - 1] < QC_JUMP_BASE) {
+        jp <- c(jp, ix[j]); js <- c(js, rate)
+      } else if (peak[j - 1] >= QC_PEAK && drop_amt > QC_REL_TOL * peak[j - 1] &&
+                 drop_amt >= QC_DROP) {
+        cp <- c(cp, ix[j]); cs <- c(cs, drop_amt / peak[j - 1])
+      }
+    }
+    if (length(jp))      keep[jp[which.max(js)]] <- FALSE
+    else if (length(cp)) keep[cp[which.max(cs)]] <- FALSE
+    else break
+    if (sum(keep) < min_admins) break
+  }
+  keep
+}

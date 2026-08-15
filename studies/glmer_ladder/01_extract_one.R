@@ -1,211 +1,123 @@
-## Pull longitudinal CDI data for a given language and save a tidy
-## per-(kid, age, item) production data frame for glmer fitting.
+## Build tidy per-(kid, age, item) production data frames for glmer fitting.
 ##
-## We combine WG + WS (and minor form variants) at the item level: the
-## same word (e.g., "dog") gets the same item identity regardless of
-## which form it was scored on. This means a kid measured at WG (14 mo)
-## and WS (24 mo) contributes to both ages on items present on both
-## form's checklists.
+## 2026-08-15 REBASE: this script no longer pulls Wordbank itself — it reads
+## `fits/long_items.rds`, the single clean extraction produced by
+## model/scripts/pull_longitudinal.R, so the glmer ladder and the Bayesian
+## bundles share one data standard (see journal/paper_models_provenance.md,
+## 08-15 flags). That standard, ported from the acceleration repo:
+##   1. child key = dataset::study_internal_id (`ckey`) — links WG<->WS admins
+##      that Wordbank child_id fails to (Marchman's WG arm, ~178 NO kids);
+##   2. uni_lemma cross-form item harmonization (option a);
+##   3. crater/jump local-outlier QC on /J production proportions;
+##   4. monolingual-TD exclusions + wordbankr 2.0 (Redivis) compatibility,
+##      all handled upstream in the pull.
+## The old in-script Wordbank pull keyed on child_id and tested
+## `value == "produces"`, both now wrong (see the provenance flags). The
+## one-off 01b_extract_marchman_clean.R is superseded by this rebase.
 ##
 ## Usage:
-##   Rscript glmer_ladder/01_extract_one.R "English (American)"
-##   Rscript glmer_ladder/01_extract_one.R "English (American)" --by-dataset
-##   Rscript glmer_ladder/01_extract_one.R Norwegian
-##   Rscript glmer_ladder/01_extract_one.R Japanese
+##   Rscript studies/glmer_ladder/01_extract_one.R "English (American)" --by-dataset
+##   Rscript studies/glmer_ladder/01_extract_one.R Norwegian
+##   Rscript studies/glmer_ladder/01_extract_one.R Japanese
 ##
-## Output: fits/glmer_ladder/data_<slug>.rds
-##   contains: df (kid, age, item, produces), language, dataset,
-##              forms_kept, n_kids, n_admins, n_items, n_obs
+## (The language must be in pull_longitudinal.R's LANGUAGES and the pull
+##  re-run first if long_items.rds predates it.)
 ##
-## With --by-dataset the language is split into its constituent Wordbank
-## datasets, one file per dataset (slug = lowercased dataset_name), so the
-## ladder can be fit as by-study replicates rather than one pooled model.
-## Used for English (Thal / Smith / Marchman); Norwegian (single dataset)
-## and Japanese (Tsuji+Hagihara, contributed as one bundle) are left whole.
+## Output (contract unchanged, consumed by 02_fit_one.R):
+##   fits/glmer_ladder/data_<slug>.rds — list(
+##     df = tibble(child_id, age, item, produces), language, dataset,
+##     forms_kept, n_kids, n_admins, n_items, n_obs
+##   ) plus new fields: qc_admins_removed, ckey_map (ckey <-> wordbank
+##   child_ids, for the demographics join in paper/build_cache.R).
 
 source("model/R/config.R")
-suppressPackageStartupMessages({
-  library(wordbankr); library(dplyr); library(tidyr); library(readr)
-})
+source("model/R/helpers.R")
+suppressPackageStartupMessages({ library(dplyr); library(tidyr) })
 
 args <- commandArgs(trailingOnly = TRUE)
 BY_DATASET <- "--by-dataset" %in% args
 args <- args[args != "--by-dataset"]
 LANG <- if (length(args) >= 1) args[1] else "Japanese"
 
-# Form variants we treat as "WG-equivalent" or "WS-equivalent". A few
-# languages have minor variants (WGProd, WGShort, WSShort etc.).
-# Anything else we drop with a warning — adding new forms here is a
-# one-line change.
-FORM_KEEP <- c("WG", "WGProd", "WGProdShort", "WGShort",
-                "WS", "WSShort")
+MIN_ADMINS   <- 2
+MIN_ITEM_OBS <- 100
 
 slug <- gsub("[^A-Za-z0-9]+", "_", tolower(LANG))
-slug <- gsub("^_+|_+$", "", slug)   # strip leading/trailing underscores
+slug <- gsub("^_+|_+$", "", slug)
 out_dir <- file.path(PATHS$fits_dir, "glmer_ladder")
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
-out_rds <- file.path(out_dir, sprintf("data_%s.rds", slug))
 
-cat(sprintf("=== Extracting longitudinal data for %s ===\n", LANG))
+cat(sprintf("=== Extracting longitudinal data for %s (from long_items.rds) ===\n", LANG))
 
-## ---- Step 1: admin table; identify longitudinal kids ----
-ad <- get_administration_data(language = LANG)
+long <- readRDS(file.path(PATHS$fits_dir, "long_items.rds"))
+stopifnot(LANG %in% unique(long$language))
+d <- long %>% filter(language == LANG)
+forms_in_lang <- sort(unique(d$form))
+cat(sprintf("Forms present: %s\n", paste(forms_in_lang, collapse = ", ")))
 
-# Restrict to monolingual, typically-developing children. Wordbank stores
-# bilingual studies with "Bilingual" in dataset_origin_name; we also drop
-# the Edgin dataset (a Down-syndrome clinical sample). For monolingual TD
-# languages (e.g. Norwegian, Japanese) this removes nothing.
-EXCLUDE_DATASETS <- c("Edgin", "Byers")
-n_before <- nrow(ad)
-ad <- ad |>
-  filter(!grepl("Bilingual", dataset_origin_name, ignore.case = TRUE),
-         !(dataset_name %in% EXCLUDE_DATASETS))
-if (nrow(ad) < n_before) {
-  cat(sprintf("Excluded %d admins from bilingual / clinical datasets (monolingual-TD filter)\n",
-              n_before - nrow(ad)))
-}
+## ckey <-> wordbank child_id map (a clean child can span several wb ids);
+## saved per unit for the demographics join downstream.
+ckey_map_all <- d %>% distinct(ckey, wb_child_id = child_id, dataset_name)
 
-ad_kept <- ad |> filter(form %in% FORM_KEEP)
-cat(sprintf("Forms in language: %s\n  Kept: %s\n",
-            paste(sort(unique(ad$form)), collapse = ", "),
-            paste(sort(unique(ad_kept$form)), collapse = ", ")))
-dropped <- setdiff(unique(ad$form), FORM_KEEP)
-if (length(dropped) > 0) {
-  cat(sprintf("  Dropped (non-standard forms): %s\n",
-              paste(dropped, collapse = ", ")))
-}
+## Clean child key + cross-form item harmonization (shared helpers).
+d <- d %>% mutate(child_id = ckey)
+n_ids0 <- n_distinct(d$item)
+d <- harmonize_cdi_items(d, form_col = "form_type")
+cat(sprintf("Harmonization: %d item_definitions -> %d item ids\n",
+            n_ids0, n_distinct(d$item_h)))
 
-long_kids <- ad_kept |>
-  count(child_id) |>
-  filter(n >= 2) |>
-  pull(child_id)
-cat(sprintf("Kids with ≥2 admins (on kept forms): %d\n", length(long_kids)))
+## Collapse to one administration per (child, age): WG+WS at the same age and
+## same-form retests merge; produced if produced in any admin that month.
+df_all <- d %>%
+  mutate(item = item_h) %>%
+  group_by(child_id, age, item) %>%
+  summarise(produces = max(produces), .groups = "drop") %>%
+  left_join(d %>% distinct(child_id, dataset_name), by = "child_id")
 
-ad_long <- ad_kept |> filter(child_id %in% long_kids)
-cat(sprintf("Admins from these kids: %d\n", nrow(ad_long)))
-cat(sprintf("Age range: [%d, %d] mo\n",
-            min(ad_long$age, na.rm = TRUE),
-            max(ad_long$age, na.rm = TRUE)))
+## Per-unit finishing, mirroring the acceleration prep's order:
+## >=MIN_ADMINS -> item filter -> QC local-outlier cleaner -> re->=MIN_ADMINS.
+write_unit <- function(du, unit_slug, unit_label) {
+  keep <- du %>% distinct(child_id, age) %>% count(child_id) %>%
+    filter(n >= MIN_ADMINS) %>% pull(child_id)
+  du <- du %>% filter(child_id %in% keep)
 
-## ---- Step 2: pull item-level production data ----
-## get_instrument_data with administration_info=TRUE attaches age etc.
-## We loop over the kept forms because get_instrument_data takes one
-## form at a time.
-forms_in_lang <- intersect(FORM_KEEP, unique(ad_long$form))
-cat(sprintf("Pulling item-level data for forms: %s\n",
-            paste(forms_in_lang, collapse = ", ")))
+  item_keep <- du %>% count(item) %>% filter(n >= MIN_ITEM_OBS) %>% pull(item)
+  du <- du %>% filter(item %in% item_keep)
 
-pull_form <- function(f) {
-  cat(sprintf("  %s ... ", f))
-  t0 <- Sys.time()
-  d <- tryCatch(
-    get_instrument_data(language = LANG, form = f,
-                         administration_info = TRUE,
-                         item_info = TRUE),
-    error = function(e) { cat(sprintf("ERROR: %s\n", e$message)); NULL }
-  )
-  if (is.null(d)) return(NULL)
-  cat(sprintf("%d rows (%.1f s)\n", nrow(d),
-              as.numeric(difftime(Sys.time(), t0, units = "secs"))))
-  d
-}
-items_by_form <- lapply(forms_in_lang, pull_form)
-items_by_form <- items_by_form[!sapply(items_by_form, is.null)]
+  J_qc <- n_distinct(du$item)
+  adm_prop <- du %>% group_by(child_id, age) %>%
+    summarise(v = sum(produces) / J_qc, .groups = "drop") %>%
+    arrange(child_id, age)
+  keep_adm <- adm_prop %>% group_by(child_id) %>%
+    group_modify(~ mutate(.x, keep = qc_clean_child(.x$age, .x$v,
+                                                    min_admins = MIN_ADMINS))) %>%
+    ungroup()
+  n_out <- sum(!keep_adm$keep)
+  du <- du %>% semi_join(keep_adm %>% filter(keep) %>% select(child_id, age),
+                         by = c("child_id", "age"))
+  keep2 <- du %>% distinct(child_id, age) %>% count(child_id) %>%
+    filter(n >= MIN_ADMINS) %>% pull(child_id)
+  du <- du %>% filter(child_id %in% keep2)
 
-## standardize column set: child_id, age, form, item_definition, item_kind, value (raw)
-combine_one <- function(d, form_label) {
-  cols <- names(d)
-  # column names vary slightly across wordbankr versions: handle both
-  child_col <- if ("child_id" %in% cols) "child_id" else "subject_id"
-  age_col   <- if ("age" %in% cols) "age" else stop("age column missing")
-  item_col  <- if ("item_definition" %in% cols) "item_definition" else "definition"
-  uni_col   <- if ("uni_lemma" %in% cols) "uni_lemma" else NA_character_
-  kind_col  <- if ("item_kind" %in% cols) "item_kind"
-              else if ("type" %in% cols) "type" else NA_character_
-  val_col   <- if ("value" %in% cols) "value"
-              else if ("response" %in% cols) "response" else NA_character_
-  out <- tibble(
-    child_id        = d[[child_col]],
-    age             = d[[age_col]],
-    form            = form_label,
-    item_definition = d[[item_col]],
-    uni_lemma       = if (!is.na(uni_col)) d[[uni_col]] else NA_character_,
-    item_kind       = if (!is.na(kind_col)) d[[kind_col]] else NA_character_,
-    value           = if (!is.na(val_col)) d[[val_col]] else NA
-  )
-  out
-}
+  n_kids   <- length(unique(du$child_id))
+  n_admins <- du %>% distinct(child_id, age) %>% nrow()
+  n_items  <- length(unique(du$item))
+  n_obs    <- nrow(du)
+  cat(sprintf("\n=== %s ===\n  kids=%d  admins=%d  items=%d  obs=%d  (QC removed %d admins)\n",
+              unit_label, n_kids, n_admins, n_items, n_obs, n_out))
 
-raw_long <- bind_rows(
-  Map(function(d, f) combine_one(d, f),
-      items_by_form, forms_in_lang)
-)
-cat(sprintf("Raw item-level rows: %d\n", nrow(raw_long)))
-
-## ---- Step 3: restrict to production items, score as binary ----
-## Production: item_kind == "word" and value indicates "produces".
-## value coding varies: in WS, "produces" / NA; in WG, "produces" / "understands" / NA.
-## We treat anything matching "produces" (case-insensitive) as 1, else 0.
-prod <- raw_long |>
-  filter(child_id %in% long_kids) |>
-  filter(item_kind == "word" | is.na(item_kind)) |>
-  mutate(produces = as.integer(!is.na(value) &
-                                tolower(value) == "produces"))
-
-## Some kids may have only WG admins after the merge (since WG comp items dropped) —
-## re-check ≥2 admins on production-eligible data. An administration is a
-## (child, age) occasion (WG+WS at the same age count once), matching the
-## one-admin-per-(child,age) collapse below and the Stan bundle.
-admins_per_kid_prod <- prod |>
-  distinct(child_id, age) |>
-  count(child_id)
-keep_kids <- admins_per_kid_prod |> filter(n >= 2) |> pull(child_id)
-prod <- prod |> filter(child_id %in% keep_kids)
-cat(sprintf("After production filter, kids retained: %d / %d\n",
-            length(keep_kids), length(long_kids)))
-
-## ---- Step 4: build clean df ----
-## Collapse to one administration per (child, age): merge WG+WS taken at
-## the same age and any same-form retests that month into a single
-## observation per word (produced if produced in any admin that month),
-## mirroring the Stan bundle prepare scripts. Without this, words on both
-## checklists (e.g. Thal's both-forms design) and repeat administrations
-## (Smith retests) are double-counted as independent observations.
-## Attach dataset_name (one per child) so the language can optionally be
-## split into its constituent datasets (--by-dataset).
-child_dataset <- ad_long |> distinct(child_id, dataset_name)
-
-df_all <- prod |>
-  transmute(child_id, age,
-             item = item_definition,
-             produces) |>
-  filter(!is.na(produces), !is.na(item), !is.na(age)) |>
-  group_by(child_id, age, item) |>
-  summarise(produces = max(produces), .groups = "drop") |>
-  left_join(child_dataset, by = "child_id")
-
-## Apply the >=100-obs item filter (within the unit), summarise, and save
-## one unit (a whole language, or one dataset). The filter is per-unit so
-## a per-dataset extract keeps items with >=100 obs *in that dataset*.
-write_unit <- function(d, unit_slug, unit_label) {
-  item_keep <- d |> count(item) |> filter(n >= 100) |> pull(item)
-  d <- d |> filter(item %in% item_keep)
-  n_kids   <- length(unique(d$child_id))
-  n_admins <- d |> distinct(child_id, age) |> nrow()
-  n_items  <- length(unique(d$item))
-  n_obs    <- nrow(d)
-  cat(sprintf("\n=== %s ===\n  kids=%d  admins=%d  items=%d  obs=%d\n",
-              unit_label, n_kids, n_admins, n_items, n_obs))
   out_rds <- file.path(out_dir, sprintf("data_%s.rds", unit_slug))
   saveRDS(list(
-    df         = d |> select(child_id, age, item, produces),
+    df         = du %>% select(child_id, age, item, produces),
     language   = LANG,
     dataset    = unit_label,
     forms_kept = forms_in_lang,
     n_kids     = n_kids,
     n_admins   = n_admins,
     n_items    = n_items,
-    n_obs      = n_obs
+    n_obs      = n_obs,
+    qc_admins_removed = n_out,
+    ckey_map   = ckey_map_all %>% filter(ckey %in% unique(du$child_id))
   ), out_rds)
   cat(sprintf("Wrote %s\n", out_rds))
 }
@@ -214,7 +126,7 @@ if (BY_DATASET) {
   for (ds in sort(unique(df_all$dataset_name))) {
     ds_slug <- gsub("[^A-Za-z0-9]+", "_", tolower(ds))
     ds_slug <- gsub("^_+|_+$", "", ds_slug)
-    write_unit(df_all |> filter(dataset_name == ds), ds_slug, ds)
+    write_unit(df_all %>% filter(dataset_name == ds), ds_slug, ds)
   }
 } else {
   write_unit(df_all, slug, LANG)

@@ -26,15 +26,29 @@ d <- long %>%
          !is.na(produces)) %>%
   select(-any_of("prob"))
 
+# Child key: `ckey` = dataset::study_internal_id -- links a child's WG and
+# WS administrations, which Wordbank child_id fails to do (~178 Norwegian
+# cross-form kids lost / double-counted under the old key). See
+# prepare_longitudinal_data.R and journal/paper_models_provenance.md (08-15).
+d <- d %>% mutate(child_id = ckey)
+
+# Cross-form item harmonization (option a, shared with the acceleration repo).
+n_ids0 <- n_distinct(d$item)
+d <- harmonize_cdi_items(d, form_col = "form_type")
+message(sprintf("  harmonization: %d item_definitions -> %d item ids",
+                n_ids0, n_distinct(d$item_h)))
+
 # Collapse to one administration per (child, age): merge WG+WS taken at
 # the same age into a single observation per word (produced if produced
 # in any admin that month). Mirrors prepare_longitudinal_data.R; without
 # it, kids measured on both forms at one age double-count shared words.
 n_rows0 <- nrow(d)
 d <- d %>%
+  mutate(item_definition = item, item = item_h) %>%
   group_by(child_id, age, item) %>%
   summarise(produces = max(produces),
             lexical_category = dplyr::first(lexical_category),
+            item_definition = dplyr::first(item_definition),
             .groups = "drop")
 message(sprintf("  collapse to one admin per (child,age): %d -> %d rows",
                 n_rows0, nrow(d)))
@@ -52,7 +66,7 @@ normalize <- function(x) {
     gsub("\\s+", " ", .) %>% trimws()
 }
 
-d <- d %>% mutate(item_norm = normalize(item))
+d <- d %>% mutate(item_norm = normalize(item_definition))
 freq_lookup <- freq %>%
   mutate(w_norm = normalize(w)) %>%
   group_by(w_norm) %>%
@@ -77,6 +91,24 @@ if (sum(is.na(d$prob)) > 0) {
 
 # Drop items without freq (prob = 0 / NA) before stratification
 d <- d %>% filter(prob > 0)
+
+## Longitudinal QC (shared with the acceleration repo): drop administrations
+## violating monotone, rate-bounded growth; proportions over the FULL item
+## universe J so WG->WS transitions are not fake craters. QC_OFF=1 disables.
+J_qc <- n_distinct(d$item)
+adm_prop <- d %>%
+  group_by(child_id, age) %>%
+  summarise(v = sum(produces) / J_qc, .groups = "drop") %>%
+  arrange(child_id, age)
+keep_adm <- adm_prop %>%
+  group_by(child_id) %>%
+  group_modify(~ mutate(.x, keep = qc_clean_child(.x$age, .x$v,
+                                                  min_admins = MIN_ADMINS))) %>%
+  ungroup()
+message(sprintf("  QC local-outlier filter: removed %d / %d administrations",
+                sum(!keep_adm$keep), nrow(keep_adm)))
+d <- d %>% semi_join(keep_adm %>% filter(keep) %>% select(child_id, age),
+                     by = c("child_id", "age"))
 
 ## Stratified sampling: kids x age, items x (class x difficulty quartile).
 set.seed(SEED)
@@ -151,7 +183,8 @@ admin_info <- d %>% distinct(aa, ii, age, admin_key) %>% arrange(aa)
 # Force one row per jj: if an item appears with multiple lexical_category
 # labels in the raw data, take the first.
 word_info  <- d %>% group_by(jj) %>%
-  summarise(item = first(item), prob = first(prob), cc = first(cc),
+  summarise(item = first(item), item_definition = first(item_definition),
+            prob = first(prob), cc = first(cc),
             .groups = "drop") %>%
   arrange(jj)
 class_levels <- levels(factor(d$lexical_category))
