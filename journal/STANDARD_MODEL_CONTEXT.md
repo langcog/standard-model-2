@@ -107,8 +107,11 @@ see the header of each log for which repo is authoritative for new entries.
 - **Cluster work**: Sherlock (`-p mcfrank` owned node, `-p owners` preemptible with
   `--requeue`) for Stan; ccn2 A40s and Marlowe for GPU. See
   `~/.claude/skills/sherlock-stan-fitting.md`.
-- **Fits are gitignored**; small text exports (`summaries/*.csv`) and `paper/cache/*.rds`
-  are committed so the manuscript builds without cluster access.
+- **Fits are gitignored**, and `paper/cache/*.rds` is committed so the manuscript builds
+  without cluster access. The two repos differ below that: `standard_model_2` also commits
+  the small `summaries/*.csv` exports, while `acceleration` commits no fit output at all —
+  its whole fit archive is public on Redivis at
+  <https://redivis.com/datasets/datapages.acceleration:a1c7> instead.
 
 ## Primary sources
 
