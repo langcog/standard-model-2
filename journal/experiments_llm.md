@@ -1,5 +1,15 @@
 # LLM / GPU experiments log
 
+> **COPY — shared history.** Entries below up to and including the split of the
+> `standard_model_2` repository (experiments 1–41, L1–L7) are a frozen shared record,
+> copied verbatim into both `acceleration` and `standard_model_2`. They are the history of
+> one research program that produced two papers, so neither repo owns them alone.
+>
+> **New entries go in whichever repo the work happens in**, and are not back-copied. If you
+> need the other repo's later entries, read them there.
+>
+> Orientation for a cold start: [`STANDARD_MODEL_CONTEXT.md`](STANDARD_MODEL_CONTEXT.md).
+
 A running record of the **language-model word-acquisition** experiments —
 the LM side of the children-vs-LMs comparison. Kept separate from
 [`experiments.md`](experiments.md) (the Stan / CDI psychometric-model log)
