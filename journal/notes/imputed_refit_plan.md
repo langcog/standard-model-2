@@ -88,6 +88,78 @@ Expected outputs: `fits/summaries/<tag>.{summary,draws}.rds` per tag; pull
 home with `scp sherlock:'$SCRATCH/standard_model_2/fits/summaries/long_no_freq_slopes*sigmaR*' fits/summaries/`.
 Then delete the ~500 GB of CSVs on scratch (`csvs_no_freq_slopes*0p*`).
 
+## 2026-08-17 — collection status + two findings
+
+**Recovered so far** (pulled to local `fits/summaries/`; NB the tag lacks
+the `long_` prefix — launched as variant `no_freq_slopes`, June's GCP runs
+were `long_no_freq_slopes`, same Stan model; `build_fig_io_cache.R` expects
+`long_`-prefixed tags → rename on the final collection):
+- `no_freq_slopes_sigmaR_0p35` (EN 0.35): π_α 0.964, σ_ξ 1.85, δ 9.89,
+  **σ_ζ 6.25** — but **σ_ξ/π_α ESS ≈ 22, r̂ 1.13: NOT converged.**
+- `no_freq_slopes_norwegian_sigmaR_0p44` (NO 0.44): π_α 0.969, σ_ξ 2.49,
+  δ 11.80, σ_ζ 7.48 — ESS 40, r̂ 1.10: marginal.
+- NO 0.58: recovery v2 running on the 4 complete chains (the CSV dir held
+  3 attempts' files; the stubs of preempted attempts broke the glob).
+- EN 0.44 (39218380): chains at 60–90% sampling as of 08:20; expect the
+  OOM-then-watcher-recovery path.
+- EN 0.58 (39218382): **preempted three times on owners** (21 min, 13.6 h,
+  then a 26 h attempt that OOM'd at the finish); now on attempt 4 from
+  zero. NO 0.35 (39218379): OUT_OF_MEMORY at 19.75 h — but its 28 GB
+  chains look complete; watcher should have recovered it (check log).
+
+**Finding 1 — the clean data moved the numbers, in the expected
+direction.** π_α EN 0.947 → 0.964 (input share of efficiency variance
+5.3% → 3.6% at these pins); NO 0.974 → 0.969. **σ_ζ jumped a lot** (EN
+4.41 → 6.25; NO 8.32 → 7.48): restoring the WG arm / long-span
+cross-form kids adds real slope information — this is the sample-
+composition effect predicted on 08-15. δ EN 10.67 → 9.89.
+
+**Finding 2 — the imputed model mixes badly on the clean bundles.** ESS
+≈ 20–40 on the headline scalars at 1000 sampling iterations. Options:
+(a) accept as-is with honest r̂ reporting; (b) refit at 2000/2000 +
+adapt_delta 0.97 (as was done for the enct joint fit); (c) treat these
+as pilot values and rethink whether the imputed panel needs six full-size
+fits at all (the analytic curve share = σ_r²/σ_ξ² only needs σ_ξ, which
+IS well-determined in every arm — the pinned refits only add the anchor
+CIs). Decision for MCF.
+
+**Operational lesson: owners + 25 h chains + `--requeue` = restart
+roulette.** cmdstan has no checkpointing; each preemption discards the
+run. For any further imputed refits: `-p mcfrank` (owned node, no
+preemption; walltimes generous per the cluster memory) or `-p normal
+--qos=long`. Never owners for >~12 h fits.
+
+## 2026-08-17 — DECISION (MCF): do the convergence refits. Plan + queue
+
+All six imputed anchors get a **2000/1000, adapt_delta 0.97** refit
+(`STAN_TAG_SFX=_2k`), warm-started via `STAN_INIT_FROM=<1000-iter tag>`
+where a recovered summary exists. **All on `-p mcfrank`** (the owned node:
+24 cores/192 GB, no preemption, no walltime cap) — `owners` preempts 25 h
+chains into restart roulette, `normal` is hard-capped at 48 h and this
+account has no `long` QOS (only `normal`, `high_p`). One 16-core fit at a
+time → serial, ~40–50 h each → **allow ~1 week for the set**. No one needs
+to babysit: `long_fit.slurm` now skips save_object and recovers the slim
+summary from the CSVs inline.
+
+| tag (`_2k`) | job | init |
+|---|---|---|
+| `no_freq_slopes_sigmaR_0p35_2k` | 39400957 (running 08-17 ~09:00) | warm from 0p35 |
+| `no_freq_slopes_sigmaR_0p58_2k` | 39400960 | cold |
+| `no_freq_slopes_norwegian_sigmaR_0p44_2k` | 39401017 | warm from NO 0p44 |
+| `no_freq_slopes_norwegian_sigmaR_0p35_2k` | 39401019 | cold |
+| `no_freq_slopes_norwegian_sigmaR_0p58_2k` | 39401025 | cold |
+| `no_freq_slopes_sigmaR_0p44_2k` | auto-submitted by `cluster/sherlock/queue_en044_refit_20260817.sh` (nohup, login node) once the 1000-iter 39218380 finishes + recovers | warm if summary lands |
+
+`fit_longitudinal.R` now honors `STAN_TAG_SFX` (it didn't; the first `_2k`
+launch would have silently overwritten the 1000-iter CSV dir — caught and
+relaunched). Two 1000-iter cold NO recoveries (0.35, 0.58) are also still
+streaming on the login node — useful as sanity comparisons, not for the paper.
+
+**Collection, when done:** pull `fits/summaries/no_freq_slopes*_2k.*`,
+rename to the `long_`-prefixed tags `build_fig_io_cache.R` expects (or drop
+the prefix there — simpler), rebuild `fig_io_imputed_proc.rds` + §8
+`io_partition`, delete ~600 GB of `csvs_*` on scratch, re-render.
+
 ## After the fits land
 
 1. Extract with the existing `cluster/sherlock/extract_summaries.R` flow →

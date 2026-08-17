@@ -65,6 +65,10 @@ if (nzchar(sigma_r_override)) {
   out_tag <- sprintf("%s_sigmaR_%s", out_tag,
                      sub("\\.", "p", sprintf("%.2f", sr)))
 }
+# Optional free-form tag suffix (e.g. STAN_TAG_SFX=_2k for a longer
+# convergence refit), so a rerun never clobbers the CSV dir / summary of
+# an earlier run at other settings. Mirrors fit_joint_io_proc_lean.R.
+out_tag <- paste0(out_tag, Sys.getenv("STAN_TAG_SFX", unset = ""))
 
 cat(sprintf("\n===== Fitting %s on %s =====\n", variant, dataset))
 cat("Hyperprior overrides:\n"); str(overrides)

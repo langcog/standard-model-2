@@ -83,6 +83,7 @@ if [ "$DATASET" != "english" ]; then TAG="${TAG}_${DATASET}"; fi
 if [ -n "${STAN_SIGMA_R_OVERRIDE:-}" ]; then
   TAG="${TAG}_sigmaR_$(printf '%.2f' "$STAN_SIGMA_R_OVERRIDE" | sed 's/\./p/')"
 fi
+TAG="${TAG}${STAN_TAG_SFX:-}"
 echo "Recovering summary from CSVs for tag: $TAG"
 Rscript cluster/sherlock/recover_from_csvs.R "$TAG"
 
