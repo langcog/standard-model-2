@@ -64,7 +64,27 @@ export STANDARD_MODEL_FITS_DIR="$RESULTS_DIR/fits"
 export STAN_THREADS_PER_CHAIN="${STAN_THREADS_PER_CHAIN:-$((SLURM_CPUS_PER_TASK / 4))}"
 echo "Threads per chain: $STAN_THREADS_PER_CHAIN"
 
+# Big longitudinal fits (post-2026-08 clean bundles: EN I=3105, NO I=1630,
+# ~4.4M obs each) OOM at 48G in the post-sampling save_object() step --
+# it reads every log_lik draw into memory. Sampling itself is fine and the
+# per-chain CSVs land in $STANDARD_MODEL_FITS_DIR/csvs_<tag>/ regardless.
+# So: skip save_object (STAN_SKIP_SAVE_OBJECT=1) and stream the scalar
+# summary + draws straight from the CSVs with recover_from_csvs.R (RAM stays
+# tiny at any fit size). This is what the retired GCP runner did
+# (cluster/gcp/run_fit_noloo.sh). Job 39218381 (NO sigma_r 0.44) died this
+# way on 2026-08-16 after 20h of clean sampling; recovered from its CSVs.
+export STAN_SKIP_SAVE_OBJECT=1
 Rscript model/scripts/fit_longitudinal.R "$VARIANT" "$DATASET"
+
+# Recover slim summary/draws from the CSVs. Tag = variant[_dataset][_sigmaR_x]
+# mirroring fit_longitudinal.R's naming.
+TAG="$VARIANT"
+if [ "$DATASET" != "english" ]; then TAG="${TAG}_${DATASET}"; fi
+if [ -n "${STAN_SIGMA_R_OVERRIDE:-}" ]; then
+  TAG="${TAG}_sigmaR_$(printf '%.2f' "$STAN_SIGMA_R_OVERRIDE" | sed 's/\./p/')"
+fi
+echo "Recovering summary from CSVs for tag: $TAG"
+Rscript cluster/sherlock/recover_from_csvs.R "$TAG"
 
 echo
 echo "End: $(date)"
