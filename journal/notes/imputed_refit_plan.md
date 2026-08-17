@@ -59,6 +59,35 @@ fits; normal QOS caps at 48h, `--qos=long` beyond). The clean EN bundle is
 ~2× the old one (Marchman WG arm restored) — expect the EN fits to run
 closer to the old Norwegian times than the old English times.
 
+## ⚠️ 2026-08-16 — the OOM-at-the-finish-line problem, and the fix
+
+Job **39218381 (NO σ_r 0.44)** sampled cleanly for 20h (all 4 chains
+finished) and then was **OOM-killed at 48G in the post-sampling
+`save_object()`** step, which reads every log_lik draw into memory. The
+per-chain CSVs (4 × 28 GB) survived in `$SCRATCH/.../fits/csvs_<tag>/`.
+Root cause: the Sherlock `long_fit.slurm` never set `STAN_SKIP_SAVE_OBJECT=1`
+(the retired GCP runner did); with the clean bundles both languages are
+"big" now. **The other five in-flight jobs will die the same way** — but
+harmlessly, since the CSVs hold everything.
+
+Fixes applied:
+- `long_fit.slurm` now sets `STAN_SKIP_SAVE_OBJECT=1` and runs
+  `recover_from_csvs.R <tag>` after the fit (streams `pi_alpha`, `sigma_xi`,
+  etc. from the CSVs by column name — tiny RAM). Future launches are safe.
+- NO 0.44: `recover_from_csvs.R` run manually on the login node
+  (`logs/recover_no_0p44.log`).
+- The five in-flight jobs: a Sherlock-side watcher
+  (`cluster/sherlock/auto_recover_imputed_20260815.sh`, nohup on the login
+  node, `logs/auto_recover.log`) polls squeue every 10 min and runs recovery
+  for each job as it leaves the queue. Nothing depends on a local session.
+- Recovery reads the CSV headers, so a partial/incomplete run would recover
+  garbage — the watcher only fires after squeue drop, and `sacct` state is
+  logged next to each recovery for a sanity check.
+
+Expected outputs: `fits/summaries/<tag>.{summary,draws}.rds` per tag; pull
+home with `scp sherlock:'$SCRATCH/standard_model_2/fits/summaries/long_no_freq_slopes*sigmaR*' fits/summaries/`.
+Then delete the ~500 GB of CSVs on scratch (`csvs_no_freq_slopes*0p*`).
+
 ## After the fits land
 
 1. Extract with the existing `cluster/sherlock/extract_summaries.R` flow →
