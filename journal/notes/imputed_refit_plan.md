@@ -160,6 +160,34 @@ rename to the `long_`-prefixed tags `build_fig_io_cache.R` expects (or drop
 the prefix there — simpler), rebuild `fig_io_imputed_proc.rds` + §8
 `io_partition`, delete ~600 GB of `csvs_*` on scratch, re-render.
 
+## 2026-09-03 — post-mortem: all six _2k refits SAMPLED, all six died after
+
+Checked in after 2.5 weeks: sacct shows every `_2k` job OUT_OF_MEMORY. But
+every `csvs_*_2k/` dir has 4 chains with cmdstan's "Elapsed Time" footer
+and "All 4 chains finished successfully" in the logs (EN ~2d16h, NO
+~1d14h each, serial on the owned node). **The sampling is done and safe
+(1.2 TB on scratch).** They died in `fit_longitudinal.R`'s in-R
+`summarize_fit()` — which loads every draw incl. log_lik — because
+`STAN_SKIP_SAVE_OBJECT=1` skipped `save_object()` but not that step; then
+`set -e` aborted the slurm before its inline recovery. Separately, the
+08-17 login-node auto-recoveries of the 1000-iter fits failed because
+cancelled mis-tagged relaunches had left empty partial CSVs in those dirs
+("no lines available in input").
+
+Fixed (commit on master, 09-03): flag also skips `summarize_fit`; slurm
+recovers even when R exits non-zero; `recover_from_csvs.R` skips CSVs
+without the footer and picks the latest complete run per dir; new
+`recover_csvs.slurm` streams recovery on a compute node. **Recovery jobs
+submitted 09-03 ~21:30 PT** (normal partition, 2 cores/16G/12h each):
+41960236 EN .35 · 41960238 EN .44 · 41960240 EN .58 ·
+41960299 NO .35 · 41960300 NO .44 · 41960305 NO .58. Expect
+`fits/summaries/<tag>_2k.{summary,draws}.rds` within hours. Then: pull
+home, reconcile the `long_` prefix in `build_fig_io_cache.R`, rebuild
+caches, **delete ~1.9 TB of `csvs_*` on scratch**, re-render.
+
+Lesson for the runbook: on these bundles nothing in R may touch the full
+draws — every post-sampling path must stream from the CSVs by column.
+
 ## After the fits land
 
 1. Extract with the existing `cluster/sherlock/extract_summaries.R` flow →
