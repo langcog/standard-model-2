@@ -2734,3 +2734,115 @@ mega-model (shared/partially-pooled child variance across datasets; items nested
 dataset) as the unified best-estimate model, with the ladder kept as independent
 replication. Report σ_b *magnitude* from the mega-model, not per-dataset (2+ per-dataset
 σ_b is inflated for sparse data — the motivation for pooling).
+
+---
+
+## 🟢 42. Clean-extraction port: both papers on one Wordbank data standard; wordbankr 2.0 (2026-08-15)
+
+**Goal (MCF).** The acceleration repo's `bayes_long/00_prepare_bundles.R` had fixed three
+extraction defects this repo's Wordbank pipeline still had: (1) child key = Wordbank
+`child_id`, which fails to link a child's WG and WS admins in some datasets — silently
+splitting cross-form kids into fake single-form kids (cost **Marchman's entire WG arm**
+and **~178 Norwegian kids**, selectively the long-span slope-informative trajectories);
+(2) no uni_lemma cross-form item harmonization; (3) no crater/jump QC (entry 41). Every
+Wordbank-longitudinal artifact of the input paper — the imputed EN/NO D fits + σ_r
+anchors, and the glmer D_log BLUPs behind the demographics figure — sat on the old
+extraction. Companion papers cannot describe the same named datasets with different Ns.
+
+**Setup.** Ported into `pull_longitudinal.R` → `prepare_longitudinal_{data,norwegian}.R`
+(shared `harmonize_cdi_items()` / `qc_clean_child()` in `model/R/helpers.R`): key
+`dataset::study_internal_id`, uni_lemma option-a harmonization, /J-proportion local-outlier
+QC, cross-form ≥2-distinct-age longitudinal rule, TD exclusions upstream. **Wordbank had
+moved to Redivis** (old MySQL endpoint gone; wordbankr ≤1.0.3 cannot pull): now wordbankr
+2.0.0 + redivis 0.12.12, dataset **v2.0**. Trap: v2.0's instrument `value` column holds raw
+responses ("yes"/"never"), so `value == "produces"` silently yields all zeros — use the
+logical `produces` column (fixed here; still latent in the precursor_* scripts,
+`cross_sectional_demographics/00_build.R`, `paper/build_cache.R`).
+
+**Result — exact match to the acceleration bundles, observation-for-observation.**
+Rebuilt EN bundle I 1,281 → **3,105** / A 7,329 / J 681 / N 4,253,076 = thal (653) +
+smith (316) + marchman (**2,136**, post-QC; QC removed 90 admins) summed; NO I 1,676 →
+**1,630** / N 4,442,722 (QC 50) — the old NO count was *inflated* by double-counting
+multi-admin cross-form kids as two people. Norwegian cross-form linkage recovers exactly
+178 kids. EN a0 (median admin age) 19 → 18. The v2.0 Redivis release has zero content
+drift vs the June MySQL snapshot for these datasets. `long_items.rds` now also carries
+Japanese (187 longitudinal kids); `studies/glmer_ladder/01_extract_one.R` rebased onto it
+(one extraction feeding both pipelines; supersedes 01b). Full audit + flags:
+`journal/paper_models_provenance.md` (08-15 section).
+
+## 🟢 43. Three-arm io / proc factorization on one bundle — the arms compose (2026-08-15/16)
+
+**Goal (MCF).** Separate AND joint input/processing models for the main text, on
+identical samples. Stan review vs the acceleration paper's M3 (`m3_full.stan`): the
+bi-lean core is identical (η = ξ + log H + κ·log(age/a₀) − δ_j, Rasch, κ = 1+δ centering,
+non-centered, reduce_sum) plus the three measurement channels; documented phase-0
+removals (λ, onset s, freq term). Two deliberate divergences: no LKJ residual (α,ζ)
+correlation (D′ design — the channels carry the ξ–κ covariance) and the lexical-class
+δ_j hierarchy (C=1 verified equivalent).
+
+**Setup.** New `log_irt_long_proc_count.stan` = bi-lean minus the input channel, the
+mirror of `log_irt_long_io_count.stan` (minus proc; diff shows only proc elements
+removed). All three arms fit the `english_count` bundle (I=413). Proc-only: Sherlock
+39216615, rung D′2. The io_count (no-proc) summary from entry 39's job 31764182 was
+recovered from scratch (it was never extracted).
+
+**Result.**
+
+| | joint (io+proc) `_2k` | io only | proc only |
+|---|---|---|---|
+| input → acceleration | 0.72 [0.13, 1.32] | 0.76 [0.08, 1.41] | — |
+| processing → efficiency | −0.76 [−0.99, −0.51] | — | −0.82 [−1.05, −0.57] |
+| processing → acceleration | −0.38 [−0.89, 0.14] | — | −0.50 [−0.99, 0.07] |
+| σ_r (observed input) | 0.35 [0.32, 0.39] | 0.35 [0.32, 0.39] | — |
+| δ / σ_ξ | 10.29 / 2.02 | 10.30 / 2.02 | 10.28 / 2.02 |
+
+Each channel's marginal barely moves when the other enters; proc→accel null in both arms;
+population parameters identical to two decimals. The predictors carry near-orthogonal
+information — neither channel is manufactured by the other's presence, and the virtuous
+cycle (input → faster processing → cascade) is not the compounding route. Proc-only max
+r̂ 1.039, min ESS 112. **For the paper:** report joint as the figure, separates as the
+main-text consistency check.
+
+## 🟢 44. Clean-data glmer ladder refit (35 cells) — Marchman rejoins the κ band (2026-08-15/16)
+
+**Setup.** Full 5-dataset × 7-model array on the entry-42 extraction (Sherlock 39216878,
+owners; the slurm/submit paths still pointed at the pre-June-reorg layout — fixed).
+
+**Result.** Clean D_log fixed age-slopes: Thal 11.45 (653 kids), Smith 12.77 (316),
+**Marchman 10.26 (2,136; was 8.08 on the broken key, ~314 usable kids)**, Norwegian
+12.83 (1,630), Japanese 11.46 (187) — all inside the acceleration paper's κ band
+(10.6–13.3); Marchman is no longer the outlier. sd_slope 3.2 (Thal) to 8.1 (Smith);
+Marchman D_log took 597 min. Summaries + ranefs committed (`fits/glmer_ladder/`). Next:
+`paper/build_cache.R` §3 must join demographics via the saved `ckey_map` (a clean child
+key is no longer a Wordbank child_id) + its wordbankr-2.0 pass, then rebuild
+`blups_demographics.rds`.
+
+## 🟡 45. Imputed-panel σ_r anchors on the clean bundles: {0.35, 0.44, 0.58} (2026-08-15 → 09-03)
+
+**Decision (MCF, 08-15).** The old anchors {0.44, 0.53 (Sperry), 0.58} sat entirely to
+the right of the direct fits' own σ_r estimate (entry 43: 0.35 [0.32, 0.39], study-centered
+→ a population lower bound) and did not span the plotted band. New set: **0.35** (direct
+estimate) / **0.44** (channel-matched population re-anchor, main dashed pin) / **0.58**
+(literature upper); 0.53 retired; band [0.32, 0.58]. `build_fig_io_cache.R` reads σ_ξ from
+the 0.44 fits and asserts all six anchors are present (errors rather than silently reusing
+pre-cleanup baselines). Variant `no_freq_slopes` = June's `long_no_freq_slopes`
+(`variant_hyperpriors()` strips the prefix).
+
+**Round 1 (1000/500, owners, 08-15).** Sampling 20–32 h per fit; every job then died
+OUT_OF_MEMORY at 48G in `save_object()` (the Sherlock slurm lacked the GCP runner's
+`STAN_SKIP_SAVE_OBJECT=1`). CSVs intact; recovered by `recover_from_csvs.R`. Norwegian
+anchors sit exactly on the analytic curve — σ_ξ ≈ 2.49 in all three, π_α 0.980 / 0.969 /
+0.946 at 0.35 / 0.44 / 0.58 — but ESS 11–54, r̂ up to 1.31: **refit needed** (MCF: do it).
+
+**Round 2 (`_2k`: 2000/1000, adapt_delta 0.97, warm-started where a round-1 summary
+existed; serial on `-p mcfrank`, 08-17 → 08-20).** All six sampled to completion (EN
+~2d16h, NO ~1d14h; 1.2 TB of CSVs with cmdstan footers) — and all six died *again*
+post-sampling, this time in `fit_longitudinal.R`'s in-R `summarize_fit()` (loads all
+draws incl. log_lik; the skip flag had missed it), with `set -e` aborting the slurm before
+its inline recovery. Discovered 09-03. Fixes: the flag now skips `summarize_fit`; the
+slurm recovers even on R failure; `recover_from_csvs.R` ignores CSVs without the
+"Elapsed Time" footer (cancelled mis-tagged relaunches had left empty partials that broke
+the 08-17 auto-recoveries) and picks the latest complete run per dir; new
+`recover_csvs.slurm`. **Recovery of all six `_2k` fits running on the owned node
+(09-03).** Rule: on these bundles nothing in R may touch the full draws. Then: rebuild
+`fig_io_imputed_proc.rds` + §8 `io_partition`, delete ~1.9 TB of scratch CSVs, re-render.

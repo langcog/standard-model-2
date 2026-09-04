@@ -188,6 +188,12 @@ caches, **delete ~1.9 TB of `csvs_*` on scratch**, re-render.
 Lesson for the runbook: on these bundles nothing in R may touch the full
 draws — every post-sampling path must stream from the CSVs by column.
 
+Tag note: June's `long_no_freq_slopes*` and the new `no_freq_slopes*_2k`
+are the same variant — `variant_hyperpriors()` strips the `long_` prefix
+(`sub("^(long_proc_|long_|io_)", "", name)`); the June GCP runner just
+passed the prefixed name. `build_fig_io_cache.R` now reads the `_2k` tags
+directly (and asserts all six anchors are present).
+
 ## After the fits land
 
 1. Extract with the existing `cluster/sherlock/extract_summaries.R` flow →

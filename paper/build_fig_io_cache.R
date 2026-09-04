@@ -24,8 +24,15 @@ sx <- function(tag) {
   s <- as.data.frame(readRDS(file.path(SUMM, paste0(tag, ".summary.rds"))))
   s$mean[s$variable == "sigma_xi"]
 }
-sigma_xi <- c(`English (D)` = sx("long_no_freq_slopes_sigmaR_0p44"),
-              `Norwegian (D)` = sx("long_no_freq_slopes_norwegian_sigmaR_0p44"))
+## Tag lineage: the June anchors were tagged long_no_freq_slopes_* (the GCP
+## runner passed the variant with its long_ prefix); the 2026-08/09 clean-data
+## convergence refits are the SAME variant (variant_hyperpriors() strips the
+## prefix) run as no_freq_slopes with STAN_TAG_SFX=_2k, 2000/1000 iters,
+## adapt_delta 0.97. Read those; the long_* files on disk are pre-cleanup.
+tag2k <- function(lang, sr) sprintf("no_freq_slopes%s_sigmaR_%s_2k",
+                                    if (lang == "no") "_norwegian" else "", sr)
+sigma_xi <- c(`English (D)` = sx(tag2k("en", "0p44")),
+              `Norwegian (D)` = sx(tag2k("no", "0p44")))
 sr_grid <- seq(0.25, 0.80, by = 0.005)
 panelA_curves <- bind_rows(lapply(names(sigma_xi), function(m)
   data.frame(model = m, sigma_r = sr_grid, share = sr_grid^2 / sigma_xi[[m]]^2)))
@@ -46,12 +53,13 @@ anchor <- function(tag, sr, model) {
 ##   0.44 = channel-matched all-adult population re-anchor (main pin);
 ##   0.58 = literature upper. 0.53 (Sperry CDS) retired as legacy.
 panelA_anchors <- bind_rows(
-  anchor("long_no_freq_slopes_sigmaR_0p35", 0.35, "English (D)"),
-  anchor("long_no_freq_slopes_sigmaR_0p44", 0.44, "English (D)"),
-  anchor("long_no_freq_slopes_sigmaR_0p58", 0.58, "English (D)"),
-  anchor("long_no_freq_slopes_norwegian_sigmaR_0p35", 0.35, "Norwegian (D)"),
-  anchor("long_no_freq_slopes_norwegian_sigmaR_0p44", 0.44, "Norwegian (D)"),
-  anchor("long_no_freq_slopes_norwegian_sigmaR_0p58", 0.58, "Norwegian (D)"))
+  anchor(tag2k("en", "0p35"), 0.35, "English (D)"),
+  anchor(tag2k("en", "0p44"), 0.44, "English (D)"),
+  anchor(tag2k("en", "0p58"), 0.58, "English (D)"),
+  anchor(tag2k("no", "0p35"), 0.35, "Norwegian (D)"),
+  anchor(tag2k("no", "0p44"), 0.44, "Norwegian (D)"),
+  anchor(tag2k("no", "0p58"), 0.58, "Norwegian (D)"))
+stopifnot(nrow(panelA_anchors) == 6)   # all six _2k summaries must be present
 
 ## sigma_r band: lower edge = the direct estimate's 95% low (0.32), upper =
 ## literature (0.58); anchors now span the band. Dashed main pin at 0.44.
