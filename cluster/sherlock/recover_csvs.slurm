@@ -25,5 +25,9 @@ export STANDARD_MODEL_FITS_DIR="$SCRATCH/standard_model_2/fits"
 ml R
 
 echo "===== recover $TAG  host $(hostname)  $(date) ====="
+# idempotent: several recovery routes may be queued for the same tag
+if [ -s "$STANDARD_MODEL_FITS_DIR/summaries/$TAG.summary.rds" ]; then
+  echo "SKIP: summary already exists"; exit 0
+fi
 Rscript cluster/sherlock/recover_from_csvs.R "$TAG"
 echo "End: $(date)"

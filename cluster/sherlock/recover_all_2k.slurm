@@ -3,10 +3,13 @@
 #SBATCH --output=logs/recover6_%j.out
 #SBATCH --error=logs/recover6_%j.err
 #SBATCH --time=12:00:00
-#SBATCH --cpus-per-task=24
-#SBATCH --mem=120G
-#SBATCH --exclusive
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=64G
 #SBATCH --partition=mcfrank
+# 16 CPUs / 64G, NOT --exclusive: this is the exact request the 08-17 refits
+# used, and it preempted the node's owners jobs within ~90 s. A 24-CPU
+# --exclusive / 120G version sat PENDING (Priority) indefinitely on 09-03 --
+# Slurm would not preempt a multi-node owners allocation to grant exclusivity.
 #
 # Recover all six imputed _2k refits from their cmdstan CSVs in parallel on
 # the owned node. Why one whole-node job instead of six small ones: small
@@ -31,6 +34,10 @@ TAGS=(no_freq_slopes_sigmaR_0p35_2k no_freq_slopes_sigmaR_0p44_2k no_freq_slopes
 
 echo "===== recover6  host $(hostname)  $(date) ====="
 for t in "${TAGS[@]}"; do
+  # idempotent: skip tags already recovered (e.g. by a parallel dev-partition hedge)
+  if [ -s "$STANDARD_MODEL_FITS_DIR/summaries/$t.summary.rds" ]; then
+    echo "$(date '+%T') SKIP $t (summary exists)"; continue
+  fi
   ( Rscript cluster/sherlock/recover_from_csvs.R "$t" > "logs/recover_${t}.log" 2>&1 \
       && echo "$(date '+%T') DONE $t" || echo "$(date '+%T') FAILED $t (see logs/recover_${t}.log)" ) &
 done
