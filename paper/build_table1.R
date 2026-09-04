@@ -37,50 +37,40 @@ long_rows <- bind_rows(lapply(seq_len(nrow(LONG)), function(i) {
 }))
 
 ## ---- Input / processing datasets ----
-iob <- readRDS(here("fits", "io_pooled_subset_data.rds"))
-pb  <- readRDS(here("fits", "proc_dp_all_subset_data.rds"))
-io_adm <- iob$df |> distinct(study, ckey, age)
-pr_adm <- pb$df  |> distinct(dataset_name, id = as.character(lab_subject_id), age)
-n_rec  <- iob$recordings |> count(study)
-n_lwl  <- pb$lwl |> count(dataset_name)
-
-## AM2018/FMW2013: union of the io + proc subsamples, keyed on the original
-## lab_subject_id (the pooled io ckey is an internal index; recover ids from
-## the per-dataset io bundles).
-io_ids <- function(bundle, study) {
-  readRDS(here("fits", bundle))$df |>
-    distinct(id = as.character(subject_id), age) |> mutate(study = study)
-}
-union_stats <- function(io_df, proc_ds) {
-  u <- bind_rows(io_df |> select(id, age),
-                 pr_adm |> filter(dataset_name == proc_ds) |> select(id, age)) |> distinct()
-  tibble::tibble(n = n_distinct(u$id), n_admins = nrow(u),
-                 mean_age = mean(u$age), min_age = min(u$age), max_age = max(u$age))
-}
-io_only_stats <- function(study) {
-  a <- io_adm |> filter(study == !!study)
-  tibble::tibble(n = n_distinct(a$ckey), n_admins = nrow(a),
-                 mean_age = mean(a$age), min_age = min(a$age), max_age = max(a$age))
-}
+## 2026-09: read straight from the bundle the wired io-proc fit trained on
+## (joint_io_proc_lean_d2_enct_2k <- joint_io_proc_english_count bundle), so
+## Table 1 is the analysis sample by construction. Replaces the old stitch of
+## the io_pooled + proc_dp bundles, which predates fernald_totlot, the
+## SEEDLingS RT wiring, the all-items switch and the ELENA count kids.
+## Study index -> dataset (b$datasets order); the 95 ELENA-WS sumscore
+## admins belong to fmw_2013 and are counted as administrations there.
+jb <- readRDS(here("fits", "joint_io_proc_english_count_subset_data.rds")); jsd <- jb$stan_data
+ci <- jb$child_info
+adm <- bind_rows(
+  tibble::tibble(ii = jsd$admin_to_child, age = jsd$admin_age),                       # item-level CDI admins
+  tibble::tibble(ii = jsd$sum_child,      age = exp(jsd$sum_log_age) * jsd$a0)) |>    # sumscore (count) admins
+  left_join(ci |> select(ii, study), by = "ii")
+n_rec <- tibble::tibble(ii = jsd$rec_to_child) |> left_join(ci |> select(ii, study), by = "ii") |> count(study, name = "n_recordings")
+n_lwl <- tibble::tibble(ii = jsd$lwl_to_child) |> left_join(ci |> select(ii, study), by = "ii") |> count(study, name = "n_lwl")
 IOPROC <- tibble::tribble(
-  ~citation,                        ~language,            ~input,     ~rec_study, ~lwl_ds,
-  "Long et al. (2024)",             "English (American)", "headcam",  "BabyView",  NA,
-  "Egan-Dailey & Bergelson (2025)", "English (American)", "LENA",     "SEEDLingS", NA,
-  "Adams et al. (2018)",            "English (American)", "LENA",     "AM2018",    "adams_marchman_2018",
-  "Fernald et al. (2013)",          "English (American)", "LENA",     "FMW2013",   "fmw_2013",
-  "Fernald & Marchman (2012)",      "English (American)", "",         NA,          "fernald_marchman_2012"
+  ~study, ~citation,                           ~language,            ~input,
+  5L,     "Long et al. (2024)",                "English (American)", "headcam",
+  6L,     "Egan-Dailey & Bergelson (2025)",    "English (American)", "LENA",
+  1L,     "Adams et al. (2018)",               "English (American)", "LENA",
+  3L,     "Fernald et al. (2013)",             "English (American)", "LENA",
+  2L,     "Fernald & Marchman (2012)",         "English (American)", "",
+  4L,     "Fernald, Perfors & Marchman (2006)","English (American)", ""
 )
-io_rows <- bind_rows(
-  io_only_stats("BabyView"), io_only_stats("SEEDLingS"),
-  union_stats(io_ids("io_am2018_subset_data.rds",  "AM2018"),  "adams_marchman_2018"),
-  union_stats(io_ids("io_fmw2013_subset_data.rds", "FMW2013"), "fmw_2013"),
-  pr_adm |> filter(dataset_name == "fernald_marchman_2012") |>
-    summarise(n = n_distinct(id), n_admins = n(), mean_age = mean(age),
-              min_age = min(age), max_age = max(age))
-) |>
-  bind_cols(IOPROC |> select(citation, language, input, rec_study, lwl_ds)) |>
-  left_join(n_rec, by = c(rec_study = "study")) |> rename(n_recordings = n.y, n = n.x) |>
-  left_join(n_lwl, by = c(lwl_ds = "dataset_name")) |> rename(n_lwl = n.y, n = n.x) |>
+io_rows <- IOPROC |>
+  rowwise() |>
+  mutate(n = sum(ci$study == study),
+         n_admins = sum(adm$study == study),
+         mean_age = mean(adm$age[adm$study == study]),
+         min_age  = min(adm$age[adm$study == study]),
+         max_age  = max(adm$age[adm$study == study])) |>
+  ungroup() |>
+  left_join(n_rec, by = "study") |>
+  left_join(n_lwl, by = "study") |>
   mutate(group = "Input / processing", longitudinal = "yes") |>
   select(group, citation, language, n, n_admins, mean_age, min_age, max_age,
          longitudinal, input, n_recordings, n_lwl)

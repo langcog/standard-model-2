@@ -4,7 +4,8 @@
 ## RUN LOCALLY.
 suppressPackageStartupMessages({ library(dplyr); library(here) })
 
-b  <- readRDS(here("fits", "joint_io_proc_mm_subset_data.rds")); sd <- b$stan_data
+## 2026-09: the bundle the wired fit (joint_io_proc_lean_d2_enct_2k) trained on.
+b  <- readRDS(here("fits", "joint_io_proc_english_count_subset_data.rds")); sd <- b$stan_data
 ci <- b$child_info
 adm <- tibble(ii = sd$admin_to_child, age = sd$admin_age)
 rt_ii  <- unique(sd$lwl_to_child)

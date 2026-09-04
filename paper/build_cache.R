@@ -69,19 +69,21 @@ cat(sprintf("Wrote %s (%d rows)\n",
             file.path(CACHE, "aic_summary.rds"), nrow(aic_summary)))
 
 ## ---- 3. BLUPs from D_log fits + Wordbank demographics ----------
+# 2026-09: BLUPs come from the committed ranef CSVs written by
+# studies/glmer_ladder/02_fit_one.R (the fit objects live only on Sherlock
+# scratch), keyed by the CLEAN child key `dataset::study_internal_id` --
+# the 2026-08-15 extraction rebase (experiments.md #42/#44). The old
+# as.integer(rownames(ranef(m))) + Wordbank child_id join is gone: a clean
+# child spans several Wordbank child_ids, so demographics are joined by the
+# same ckey, rebuilt here from the admin table with the pull's formula.
 extract_blups <- function(lang_slug) {
-  fp <- here("fits", "glmer_ladder",
-             sprintf("fit_%s_D_log.rds", lang_slug))
+  fp <- here("fits", "glmer_ladder", sprintf("ranef_%s_D_log.csv", lang_slug))
   if (!file.exists(fp)) return(NULL)
-  m  <- readRDS(fp)
-  re <- ranef(m)$child
-  if (is.null(re)) re <- ranef(m)[[grep("child|kid", names(ranef(m)),
-                                         ignore.case = TRUE)[1]]]
-  slope_col <- intersect(c("log_age", "la"), colnames(re))[1]
+  re <- read.csv(fp, stringsAsFactors = FALSE)
   tibble::tibble(
-    child_id = as.integer(rownames(re)),
-    xi       = re[, "(Intercept)"],
-    zeta     = re[, slope_col],
+    child_id  = as.character(re$child_id),   # ckey, e.g. "Thal::E0002"
+    xi        = re$intercept_blup,
+    zeta      = re$slope_blup,
     lang_slug = lang_slug
   )
 }
@@ -97,17 +99,22 @@ cat(sprintf("  total BLUPs: %d kids across %d languages\n",
 cat("Pulling Wordbank demographics ...\n")
 # Pull each unique language once (keeping dataset_name), then assign to
 # units. English's three datasets share one pull, split by dataset_name.
+# wordbankr 2.0 (Redivis): one call returns all forms; demographics come
+# with include_demographic_info/include_birth_info. Key by the clean ckey
+# (dataset::study_internal_id, wb-child_id fallback) -- the same formula as
+# model/scripts/pull_longitudinal.R, so it matches the ranef CSVs exactly.
 get_demo_lang <- function(lang_label) {
-  forms <- c("WS", "WG")
-  ad <- bind_rows(lapply(forms, function(f) {
-    tryCatch(
-      get_administration_data(language = lang_label, form = f,
-                              include_demographic_info = TRUE,
-                              include_birth_info = TRUE),
-      error = function(e) NULL)
-  }))
+  ad <- tryCatch(
+    get_administration_data(language = lang_label,
+                            include_demographic_info = TRUE,
+                            include_birth_info = TRUE,
+                            include_study_internal_id = TRUE),
+    error = function(e) NULL)
   if (is.null(ad) || nrow(ad) == 0) return(NULL)
   ad |>
+    mutate(child_id = if_else(is.na(study_internal_id) | study_internal_id == "",
+                              paste(dataset_name, "wb", child_id, sep = "::"),
+                              paste(dataset_name, study_internal_id, sep = "::"))) |>
     group_by(child_id, dataset_name) |>
     summarise(
       sex          = sex[!is.na(sex)][1],

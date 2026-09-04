@@ -2817,6 +2817,21 @@ Marchman D_log took 597 min. Summaries + ranefs committed (`fits/glmer_ladder/`)
 key is no longer a Wordbank child_id) + its wordbankr-2.0 pass, then rebuild
 `blups_demographics.rds`.
 
+**Addendum (2026-09-04) — demographics BLUP arm + tables rebuilt on the clean data.**
+`build_cache.R` §3 now reads the committed ranef CSVs (keyed by the clean child key)
+and joins demographics rebuilt from the wordbankr-2.0 admin table with the same key
+formula: 4,922 BLUPs; coverage sex / maternal ed = Marchman 2136 / **2135** (was 314 /
+313 on the broken key), Norwegian 1630 / 1628, Thal 653 / 0, Japanese 187 / 0, Smith 0 / 0
+— Wordbank carries no demographics for Smith and no education for Thal/Japanese (same
+as before; not a join failure). Table 1 (`build_table1.R`) now takes its six io/proc
+rows straight from the fitted `english_count` bundle (totlot added; FMW 276 admins =
+181 item-level + 95 ELENA counts) and its Wordbank rows from the clean extracts; the SI
+io data table likewise (413 kids, 166 both-channel). Gotcha fixed on the way: knitr's
+`cache=TRUE` keys on chunk code, so rebuilt caches were silently replaying Aug-15
+figures — `cache.extra = tools::md5sum(<cache files>)` in the setup chunk now
+invalidates chunks whenever a cache file changes. Note for the abstract: the six
+io/proc studies span ages 6–32 months (SEEDLingS from 6, BabyView to 32), not 8–30.
+
 ## 🟢 45. Imputed-panel σ_r anchors on the clean bundles: {0.35, 0.44, 0.58} (2026-08-15 → 09-03)
 
 **Decision (MCF, 08-15).** The old anchors {0.44, 0.53 (Sperry), 0.58} sat entirely to
