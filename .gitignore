@@ -174,3 +174,9 @@ data/harmonized/cdi_item_level.csv
 .secrets
 .secrets.*
 *.token
+
+# paper/figures/out: rendered figure PDFs are committed (they go to Overleaf);
+# PNG previews are regenerable and ignored.
+paper/figures/out/*.png
+paper/figures/*.aux
+paper/figures/*.log

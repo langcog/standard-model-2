@@ -49,3 +49,17 @@ a fit changes (requires local fits in `fits/`; see `journal/`):
 - `figs/` — static figures (graphical models, TikZ sources)
 - `old/` — retired papers (tracked history preserved; new render artifacts
   in there are gitignored)
+
+## 2026-09: manuscript moved to Overleaf; figures built standalone
+
+The manuscript is now on Overleaf (PNAS two-column, with a collaborator), so
+`input_paper.qmd` is frozen as the pre-Overleaf source. Figures are built one
+script per figure in **`paper/figures/`** (see its README) and uploaded as
+vector PDFs from `paper/figures/out/`:
+
+```bash
+bash paper/figures/render_all.sh
+```
+
+The cache chain is unchanged (`build_cache.R`, `build_fig_io_cache.R` → `cache/`);
+the figure scripts read only those committed caches.

@@ -73,7 +73,7 @@ io_panels_fig <- function() {
     geom_line(aes(group = child), alpha = 0.3, linewidth = 0.25) +
     geom_smooth(aes(group = ds), method = "loess", se = FALSE, linewidth = 1, span = 1) +
     scale_color_manual(values = PAL, drop = FALSE, guide = "none") +
-    labs(x = "age (months)", y = "log input rate (study-specific units)", title = "C. Observed input") +
+    labs(x = "age (months)", y = "log input rate", title = "C. Observed input") +
     theme_bw(base_size = 10) + theme(panel.grid.minor = element_blank())
 
   (p1 | p2 | p3) + plot_layout(guides = "collect") & theme(legend.position = "bottom")

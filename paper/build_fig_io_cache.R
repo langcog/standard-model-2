@@ -83,6 +83,26 @@ panelB <- tibble::tribble(
   mutate(channel = factor(channel, levels = c("Efficiency", "Acceleration")),
          factor  = factor(factor,  levels = c("Input", "Processing")))
 
+## ---- Panel B, all three arms (for the paired separate-vs-joint figure) ----
+## The io-only (io_count, no processing channel) and proc-only (proc_count, no
+## input channel) arms fit the SAME english_count bundle as the joint fit, so
+## each channel's coefficient can be shown fit alone vs jointly (experiments.md
+## #43). Same per-SD conventions as panelB above.
+arm <- function(tag) as.data.frame(readRDS(file.path(SUMM, paste0(tag, ".summary.rds"))))
+io_arm <- arm("joint_io_proc_lean_io_d0_enct"); pr_arm <- arm("joint_io_proc_lean_proc_d2_enct")
+ga <- function(d, v) d[d$variable == v, ]
+panelB_arms <- bind_rows(
+  panelB |> mutate(model = "Joint model"),
+  tibble::tribble(
+    ~channel,       ~factor,      ~med,                           ~lo,                            ~hi,
+    "Efficiency",   "Input",       ga(io_arm, "sigma_r")$mean,     ga(io_arm, "sigma_r")$q5,       ga(io_arm, "sigma_r")$q95,
+    "Acceleration", "Input",       ga(io_arm, "eff_input_k")$mean, ga(io_arm, "eff_input_k")$q5,   ga(io_arm, "eff_input_k")$q95,
+    "Efficiency",   "Processing", -ga(pr_arm, "eff_proc_xi")$mean, -ga(pr_arm, "eff_proc_xi")$q95, -ga(pr_arm, "eff_proc_xi")$q5,
+    "Acceleration", "Processing", -ga(pr_arm, "eff_proc_k")$mean,  -ga(pr_arm, "eff_proc_k")$q95,  -ga(pr_arm, "eff_proc_k")$q5) |>
+    mutate(channel = factor(channel, levels = c("Efficiency", "Acceleration")),
+           factor  = factor(factor,  levels = c("Input", "Processing")),
+           model   = "Separate model"))
+
 ## ---- schematic params (panel A): the SAME EN+count +proc fit, so the trajectories are
 ## drawn from the estimates rather than hand-set example values. a0/log_H/mu_r are data
 ## constants from the bundle; everything else is read from the fit summary above.
@@ -95,7 +115,7 @@ schem <- list(
   d_pr_xi  = -gv("eff_proc_xi")$mean,     # processing(faster) -> efficiency
   d_pr_k   = -gv("eff_proc_k")$mean)      # processing(faster) -> acceleration
 
-saveRDS(list(panelA = panelA, panelB = panelB, schem = schem),
+saveRDS(list(panelA = panelA, panelB = panelB, panelB_arms = panelB_arms, schem = schem),
         file.path(CACHE, "fig_io_imputed_proc.rds"))
 cat(sprintf("Wrote fig_io_imputed_proc.rds\n  Panel A anchors: %d (%s)\n",
             nrow(panelA_anchors), paste(unique(panelA_anchors$model), collapse=", ")))
