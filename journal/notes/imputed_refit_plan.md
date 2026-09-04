@@ -194,6 +194,17 @@ are the same variant — `variant_hyperpriors()` strips the `long_` prefix
 passed the prefixed name. `build_fig_io_cache.R` now reads the `_2k` tags
 directly (and asserts all six anchors are present).
 
+## ✅ 2026-09-03 — DONE. All six `_2k` anchors recovered, caches rebuilt
+
+Results and convergence assessment: `journal/experiments.md` #45 (🟢). σ_ξ EN 1.85 /
+NO 2.49; band [0.32, 0.58] → input share of efficiency variance EN 3.0–9.9%,
+NO 1.7–5.4%. `fig_io_imputed_proc.rds` + `io_partition.rds` rebuilt from the
+`_2k` tags; manuscript re-rendered. Scratch: 1000-iter + proc_dp CSVs deleted
+(653 GB); the six `_2k` CSV sets (1.2 TB) kept for one more pass — delete with
+`rm -rf $SCRATCH/standard_model_2/fits/csvs_no_freq_slopes*_2k` once nobody
+wants another column out of them. Do not refit these again: the residual
+slow mixing is Norwegian's (α,ζ) ridge, not iteration count.
+
 ## After the fits land
 
 1. Extract with the existing `cluster/sherlock/extract_summaries.R` flow →
