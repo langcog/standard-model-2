@@ -1,6 +1,6 @@
 ## Shared builder for the demographic composite figure (cross-sectional +
-## longitudinal). Sourced by both the notebook and the manuscript's
-## fig-demographics chunk so the paper and the analysis stay in sync.
+## longitudinal). Sourced by both the notebook and the paper's figure script
+## (paper/figures/fig_demographics.R) so the paper and the analysis stay in sync.
 ##
 ## Input: `fits` = readRDS("cross_sectional_demographics/cache/fits.rds")
 ##   $xsec      per-(language,predictor) cross-sectional eff/acc (+ se)
@@ -8,7 +8,12 @@
 ## Sex and maternal ed use INDEPENDENT language sets (each: n >= the
 ## predictor's threshold), so sex keeps its full breadth even where maternal
 ## ed is missing. Both predictors report BOTH efficiency and acceleration.
-## Returns a patchwork object: sex forest / maternal-ed forest / meta summary.
+## Returns a patchwork: sex forest (tall, left) | maternal-ed forest over the
+## meta summary (right). The forests share per-component x-limits; the meta
+## panel has its own scale, common to both components. Colour = trait (efficiency / acceleration), shape =
+## method (filled circle cross-sectional, open diamond longitudinal); the
+## paper passes its palette / theme / tinted strips, the notebook uses the
+## defaults. Panel letters are added by the caller (patchwork tags).
 
 suppressPackageStartupMessages({
   library(dplyr); library(tidyr); library(ggplot2); library(forcats)
@@ -41,8 +46,16 @@ panelC_meta <- function(fits, sex_min_n = 300, mated_min_n = 300,
 }
 
 make_demographics_composite <- function(fits, sex_min_n = 300, mated_min_n = 300,
-                                         drop_matEd = c("French (French)")) {
-  COL_XS <- "#1e88e5"; COL_LO <- "#c41e37"; comp_lev <- c("Efficiency", "Acceleration")
+                                         drop_matEd = c("French (French)"),
+                                         pal = c(Efficiency = "#0072B2", Acceleration = "#D55E00"),
+                                         base_theme = theme_minimal(base_size = 9),
+                                         strips = NULL) {
+  comp_lev <- names(pal)
+  SHP <- c("Cross-sectional" = 16, "Longitudinal" = 23)   # filled circle / open diamond
+  facet_comp <- function() {                               # efficiency | acceleration columns
+    if (is.null(strips)) facet_wrap(~ component, scales = "free_x")
+    else ggh4x::facet_wrap2(~ component, scales = "free_x", strip = strips)
+  }
 
   sex_langs   <- fits$xsec |> filter(predictor == "sex",   n_kids >= sex_min_n) |> pull(language)
   mated_langs <- fits$xsec |> filter(predictor == "matEd", n_kids >= mated_min_n,
@@ -99,32 +112,44 @@ make_demographics_composite <- function(fits, sex_min_n = 300, mated_min_n = 300
   }
   meta_sex <- meta_for("sex", sex_langs); meta_med <- meta_for("matEd", mated_langs)
 
-  ## one by-language forest (efficiency | acceleration), x-sec + longitudinal
-  forest <- function(pred, langs, meta, title) {
-    xs <- fits$xsec |> filter(predictor == pred, language %in% langs) |> to_long()
-    lo <- long_lang |> filter(predictor == pred, language %in% langs) |> to_long()
+  ## one by-language forest (efficiency | acceleration), x-sec + longitudinal;
+  ## languages ordered by their cross-sectional efficiency effect.
+  forest <- function(pred, langs, meta, title, xlab) {
+    xs <- fits$xsec |> filter(predictor == pred, language %in% langs) |> to_long() |>
+      mutate(method = "Cross-sectional")
+    lo <- long_lang |> filter(predictor == pred, language %in% langs) |> to_long() |>
+      mutate(method = "Longitudinal")
     ord <- xs |> filter(component == "Efficiency") |> arrange(estimate) |> pull(language)
-    xs$language <- factor(xs$language, levels = ord); lo$language <- factor(lo$language, levels = ord)
-    xs <- cap_acc(xs); lo <- cap_acc(lo)
+    lv  <- function(d) mutate(d, language = factor(language, levels = ord),
+                              method = factor(method, levels = names(SHP)))
+    xs <- cap_acc(lv(xs)); lo <- cap_acc(lv(lo))
     lim_df <- tibble(component = factor(rep(comp_lev, each = 2), levels = comp_lev),
-                     x = c(eff_lim, acc_lim), language = ord[1])
+                     x = c(eff_lim, acc_lim), language = factor(ord[1], levels = ord))
     ggplot(xs, aes(estimate, language)) +
-      geom_rect(data = meta, aes(xmin = ci.lb, xmax = ci.ub, ymin = -Inf, ymax = Inf),
-                inherit.aes = FALSE, fill = COL_XS, alpha = 0.08) +
-      geom_vline(xintercept = 0, linetype = "dashed", colour = "grey65", linewidth = 0.3) +
+      geom_rect(data = meta, aes(xmin = ci.lb, xmax = ci.ub, ymin = -Inf, ymax = Inf, fill = component),
+                inherit.aes = FALSE, alpha = 0.15) +
+      geom_vline(xintercept = 0, linetype = "dashed", colour = "grey60", linewidth = 0.3) +
+      geom_errorbar(aes(xmin = lo, xmax = hi, colour = component), width = 0, linewidth = 0.35) +
+      geom_point(aes(colour = component, shape = method), size = 1.1) +
+      geom_point(data = lo, aes(estimate, language, colour = component, shape = method),
+                 fill = "white", size = 1.9, stroke = 0.7) +
+      # x-limits layer LAST: a single-value layer trained first makes ggplot
+      # re-sort the discrete axis (this is what made the languages alphabetical)
       geom_blank(data = lim_df, aes(x = x, y = language)) +
-      geom_pointrange(aes(xmin = lo, xmax = hi), colour = COL_XS, shape = 16, size = 0.22) +
-      geom_point(data = lo, aes(estimate, language), colour = COL_LO, shape = 18, size = 2.4) +
-      facet_wrap(~ component, scales = "free_x") +
-      labs(x = NULL, y = NULL, title = title) +
-      theme_minimal(base_size = 9) +
-      theme(plot.title = element_text(face = "bold", size = 10),
-            axis.text.y = element_text(size = 7), strip.text = element_text(face = "bold", size = 8.5),
-            panel.grid.minor = element_blank())
+      scale_colour_manual(values = pal, guide = "none") +
+      scale_fill_manual(values = pal, guide = "none") +
+      scale_shape_manual(values = SHP, name = NULL, drop = FALSE) +
+      guides(shape = guide_legend(override.aes = list(colour = "grey20", fill = "white",
+                                                      size = c(1.4, 1.9)))) +
+      facet_comp() +
+      labs(x = xlab, y = NULL, title = title) +
+      base_theme + theme(panel.grid.minor = element_blank())
   }
-  pSex <- forest("sex", sex_langs, meta_sex, "A. Sex (female vs male)")
-  pMed <- forest("matEd", mated_langs, meta_med, "B. Maternal education (per SD)") +
-    labs(x = "effect on latent ability (logits, per SD predictor)")
+  pSex <- forest("sex", sex_langs, meta_sex, "Sex", "effect of female vs male (logits)") +
+    theme(legend.position = "bottom", legend.margin = margin(0, 0, 0, 0))
+  pMed <- forest("matEd", mated_langs, meta_med, "Maternal education",
+                 "effect per SD of maternal education (logits)") +
+    theme(legend.position = "none")
 
   ## condensed meta panel (cross-sectional vs longitudinal)
   long_meta <- fits$long_meta |> filter(predictor %in% c("sex","matEd")) |>
@@ -134,28 +159,25 @@ make_demographics_composite <- function(fits, sex_min_n = 300, mated_min_n = 300
   comb <- bind_rows(bind_rows(meta_sex, meta_med) |> mutate(method = "Cross-sectional"), long_meta) |>
     mutate(predictor = factor(recode(predictor, sex = "Sex", matEd = "Maternal ed."),
                               levels = c("Sex", "Maternal ed.")),
-           method = factor(method, levels = c("Cross-sectional", "Longitudinal")),
-           ci.lb = if_else(component == "Acceleration", pmax(ci.lb, acc_lim[1]), ci.lb),
-           ci.ub = if_else(component == "Acceleration", pmin(ci.ub, acc_lim[2]), ci.ub))
-  # same grid as A/B (efficiency | acceleration columns; sex / maternal-ed rows)
-  # and the same per-component x-limits, so all three panels align.
-  limC <- tidyr::crossing(
-    predictor = factor(c("Sex","Maternal ed."), levels = c("Sex","Maternal ed.")),
-    tibble(component = factor(rep(comp_lev, each = 2), levels = comp_lev),
-           x = c(eff_lim, acc_lim))) |>
-    mutate(method = factor("Cross-sectional", levels = c("Cross-sectional","Longitudinal")))
-  pMeta <- ggplot(comb, aes(est, fct_rev(method), colour = method)) +
-    geom_vline(xintercept = 0, linetype = "dashed", colour = "grey65", linewidth = 0.3) +
-    geom_blank(data = limC, aes(x = x, y = method)) +
-    geom_pointrange(aes(xmin = ci.lb, xmax = ci.ub), size = 0.5) +
-    facet_grid(predictor ~ component, scales = "free_x") +
-    scale_colour_manual(values = c("Cross-sectional" = COL_XS, "Longitudinal" = COL_LO), name = NULL) +
-    labs(x = "meta-analytic estimate (logits, per SD)", y = NULL, title = "C. Meta-analytic summary") +
-    theme_minimal(base_size = 9) +
-    theme(plot.title = element_text(face = "bold", size = 10), legend.position = "bottom",
-          strip.text = element_text(face = "bold", size = 8.5), panel.grid.minor = element_blank())
+           method = factor(method, levels = names(SHP)),
+           row = factor(method, levels = rev(names(SHP))))   # cross-sectional on top
+  # same grid as the forests (efficiency | acceleration columns; sex / maternal-ed
+  # rows) but its OWN x-scale, shared by the two components: the forests'
+  # acceleration axis is set by the widest per-language CIs (+/- 2.4) and would
+  # squash the meta estimates at zero; a common scale also makes efficiency and
+  # acceleration directly comparable here.
+  facet_meta <- if (is.null(strips)) facet_grid(predictor ~ component) else
+    ggh4x::facet_grid2(predictor ~ component, strip = strips)
+  pMeta <- ggplot(comb, aes(est, row, colour = component, shape = method)) +
+    geom_vline(xintercept = 0, linetype = "dashed", colour = "grey60", linewidth = 0.3) +
+    geom_errorbar(aes(xmin = ci.lb, xmax = ci.ub), width = 0, linewidth = 0.45) +
+    geom_point(fill = "white", size = 2, stroke = 0.7) +
+    scale_colour_manual(values = pal, guide = "none") +
+    scale_shape_manual(values = SHP, guide = "none") +
+    facet_meta +
+    labs(x = "meta-analytic estimate (logits)", y = NULL, title = "Meta-analytic summary") +
+    base_theme + theme(panel.grid.minor = element_blank())
 
-  (pSex / pMed / pMeta) +
-    plot_layout(heights = c(length(sex_langs) + 3, length(mated_langs) + 3, 15)) &
-    theme(plot.margin = margin(3, 8, 3, 4))
+  (pSex | ((pMed / pMeta) + plot_layout(heights = c(length(mated_langs) + 4, 10)))) +
+    plot_layout(widths = c(1, 1))
 }

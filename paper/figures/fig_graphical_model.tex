@@ -11,42 +11,54 @@
 %   q_in  ~ N(tau_s + w_i + psi log(t_n / a_0), sigma_q)           (LWL trial n)
 % Shaded = observed; circles = latent; rounded boxes = deterministic;
 % dashed circle = fixed input; small squares = study / instrument constants.
+% Colours are the paper palette (paper/figures/_common.R): input green,
+% processing purple, efficiency blue, acceleration vermillion; vocabulary grey.
+% Natural width 8.7 cm (PNAS single column) so type is printed at size:
+% node labels 8 pt (\footnotesize), small nodes / edge labels / plate labels
+% 7 pt (\scriptsize), matching the R figures. Text is Helvetica (helvet).
 % Compile: pdflatex fig_graphical_model.tex  (render_all.sh does this)
-\documentclass[border=6pt]{standalone}
+\documentclass[border=2pt]{standalone}
 \usepackage{tikz}
 \usepackage{amsmath}
+\usepackage[scaled=0.92]{helvet}
+\renewcommand{\familydefault}{\sfdefault}
 \usetikzlibrary{positioning,calc,fit,arrows.meta,backgrounds}
+\definecolor{eff}{HTML}{0072B2}
+\definecolor{acc}{HTML}{D55E00}
+\definecolor{inp}{HTML}{009E73}
+\definecolor{proc}{HTML}{AA3377}
 \tikzset{
-  lat/.style ={circle, draw=black, fill=white,   minimum size=0.9cm, inner sep=1pt},
-  res/.style ={circle, draw=black!55, fill=white, minimum size=0.6cm, inner sep=0pt, font=\small},
-  det/.style ={rectangle, rounded corners=3pt, draw=black, fill=blue!7, minimum height=0.8cm, inner sep=4pt},
-  obs/.style ={circle, draw=black, fill=black!14, minimum size=0.9cm, inner sep=1pt},
-  inp/.style ={circle, draw=black!55, dashed, fill=white, minimum size=0.62cm, inner sep=1pt, font=\small},
-  stu/.style ={rectangle, draw=black!55, fill=white, minimum size=0.6cm, inner sep=2pt, font=\small},
-  pl/.style  ={draw=black!50, rounded corners=5pt, inner sep=8pt},
-  pll/.style ={font=\footnotesize\itshape, black!55},
-  e/.style   ={-{Latex[length=1.8mm]}, draw=black!75},
-  el/.style  ={font=\small, inner sep=1.2pt, fill=white},
-  hdr/.style ={font=\footnotesize\bfseries, black!60},
+  every node/.style={font=\footnotesize},
+  lat/.style ={circle, draw=black, fill=white,    minimum size=0.68cm, inner sep=1pt},
+  obs/.style ={circle, draw=black, fill=black!14, minimum size=0.68cm, inner sep=1pt},
+  res/.style ={circle, draw=black!55, fill=white, minimum size=0.46cm, inner sep=0pt, font=\scriptsize},
+  det/.style ={rectangle, rounded corners=2.5pt, draw=black!70, fill=black!5, minimum height=0.6cm, inner sep=3pt},
+  fix/.style ={circle, draw=black!55, dashed, fill=white, minimum size=0.48cm, inner sep=1pt, font=\scriptsize},
+  stu/.style ={rectangle, draw=black!55, fill=white, minimum size=0.46cm, inner sep=2pt, font=\scriptsize},
+  pl/.style  ={draw=black!50, rounded corners=4pt, inner sep=5pt},
+  pll/.style ={font=\scriptsize\itshape, black!55, inner sep=1pt},
+  e/.style   ={-{Latex[length=1.5mm]}, draw=black!75},
+  el/.style  ={font=\scriptsize, inner sep=1pt, fill=white},
+  hdr/.style ={font=\scriptsize\bfseries, black!60},
 }
 \begin{document}
-\begin{tikzpicture}
+\begin{tikzpicture}[x=0.855cm, y=0.855cm]
 %% ---------- measurement models (top) ----------
 % input: recordings r_{iv} read the child's input deviation d_i
-\node[obs] (r)   at (-0.6, 5.2) {$r_{iv}$};
-\node[lat] (d)   at (-0.6, 3.4) {$d_i$};
+\node[obs, fill=inp!30, draw=inp!60!black] (r)   at (-0.6, 5.2) {$r_{iv}$};
+\node[lat, draw=inp!60!black, line width=0.7pt] (d)   at (-0.6, 3.4) {$d_i$};
 \node[stu] (mur) at (-2.4, 5.2) {$\mu_{r,s}$};
 \node[stu] (sme) at (-2.4, 3.9) {$\sigma_{\mathrm{m}}$};
 \draw[e] (d) -- (r);  \draw[e] (mur) -- (r); \draw[e] (sme) -- (r);
 % processing: LWL trials q_{in} read the child's processing deviation w_i
-\node[obs] (q)   at (4.6, 5.2) {$q_{in}$};
-\node[lat] (w)   at (4.6, 3.4) {$w_i$};
+\node[obs, fill=proc!25, draw=proc!60!black] (q)   at (4.6, 5.2) {$q_{in}$};
+\node[lat, draw=proc!60!black, line width=0.7pt] (w)   at (4.6, 3.4) {$w_i$};
 \node[stu] (tau) at (6.4, 5.2) {$\tau_s$};
 \node[stu] (psi) at (6.4, 3.9) {$\psi$};
 \draw[e] (w) -- (q);  \draw[e] (tau) -- (q); \draw[e] (psi) -- (q);
 %% ---------- structural links: traits ----------
-\node[det] (xi) at (1.2, 1.7) {$\xi_i$};
-\node[det] (ka) at (2.8, 1.7) {$\kappa_i$};
+\node[det, fill=eff!15, draw=eff!70!black] (xi) at (1.2, 1.7) {$\xi_i$};
+\node[det, fill=acc!15, draw=acc!70!black] (ka) at (2.8, 1.7) {$\kappa_i$};
 \node[res] (al) at (-0.4, 1.0) {$\alpha_i$};
 \node[res] (ze) at (4.4, 1.0) {$\zeta_i$};
 \draw[e] (d) -- (xi) node[el, pos=.42] {$1$};
@@ -56,15 +68,15 @@
 \draw[e] (al) -- (xi); \draw[e] (ze) -- (ka);
 %% ---------- accumulator core (bottom) ----------
 \node[det] (th) at (2.0, -0.4) {$\theta_i(t)=\xi_i+\kappa_i\log(t/a_0)$};
-\node[inp] (t)  at (-1.4, -0.4) {$t$};
+\node[fix] (t)  at (-1.4, -0.4) {$t$};
 \node[obs] (y)  at (2.0, -2.2) {$y_{ijt}$};
 \node[lat] (de) at (5.4, -1.3) {$\delta_j$};
 \draw[e] (xi) -- (th); \draw[e] (ka) -- (th); \draw[e] (t) -- (th);
 \draw[e] (th) -- (y);  \draw[e] (de) -- (y);
 %% ---------- plates ----------
 \begin{scope}[on background layer]
-\node[pl, fit=(r)]  (recpl) {};
-\node[pl, fit=(q)]  (lwlpl) {};
+\node[pl, fit=(r), inner xsep=6pt, inner ysep=7pt]  (recpl) {};
+\node[pl, fit=(q), inner xsep=6pt, inner ysep=7pt]  (lwlpl) {};
 \node[pl, fit=(recpl)(lwlpl)(d)(w)(xi)(ka)(al)(ze)(th)(y)] (childpl) {};
 \node[pl, fit=(de)] (wordpl) {};
 \node[pl, fit=(mur)] (stuA) {};
@@ -78,8 +90,8 @@
 \node[pll, anchor=south] at (stuA.north) {study $s$};
 \node[pll, anchor=south] at (stuB.north) {study $s$};
 % section headers
-\node[hdr, anchor=west] at (-3.0, 6.3) {input measurement};
-\node[hdr, anchor=east] at (7.0, 6.3) {processing measurement};
+\node[hdr, inp!60!black, anchor=west] at (-3.0, 6.3) {input measurement};
+\node[hdr, proc!60!black, anchor=east] at (7.0, 6.3) {processing measurement};
 \node[hdr, anchor=east] at (7.0, 2.6) {structural links};
 \node[hdr, anchor=west] at (-3.0, -3.1) {accumulator + vocabulary measurement};
 \end{tikzpicture}

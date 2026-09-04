@@ -1,7 +1,8 @@
 ## Demographics figure (two column): sex and maternal-education effects on
 ## efficiency and acceleration, per language, cross-sectional + longitudinal,
-## with the meta-analytic summary panel. Content unchanged from the
-## manuscript's fig-demographics chunk; only the output path/size differ.
+## with the meta-analytic summary panel. Layout: (A) sex forest, tall, on the
+## left; (B) maternal-education forest over (C) the meta summary on the right.
+## Colour = trait (TRAIT_PAL, tinted strips), shape = method.
 ##
 ## Reads: studies/cross_sectional_demographics/cache/fits.rds (committed;
 ##        xsec fits + meta, and the longitudinal BLUP effects rebuilt from
@@ -11,9 +12,6 @@ source(here::here("paper", "figures", "_common.R"))
 source(here("studies", "cross_sectional_demographics", "composite_figure.R"))
 
 xsec_fits <- readRDS(here("studies", "cross_sectional_demographics", "cache", "fits.rds"))
-p <- make_demographics_composite(xsec_fits)
-
-## Tall stacked forests: PNAS caps height at 22.5 cm, so this runs at the
-## full double-column width and the maximum height (base_size 9 inside
-## composite_figure.R keeps type >= 6 pt at this scale).
-save_fig(p, "demographics", width = PNAS_2COL, height = PNAS_MAXH)
+p <- make_demographics_composite(xsec_fits, pal = TRAIT_PAL, base_theme = theme_fig(),
+                                 strips = trait_strips())
+save_fig(tag_panels(p), "demographics", width = PNAS_2COL, height = 5.6)
