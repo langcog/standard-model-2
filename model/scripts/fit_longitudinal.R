@@ -158,6 +158,15 @@ if (is_lmm) {
 }
 if (grepl("2pl", variant)) pars <- c(pars, "sigma_lambda")
 if (grepl("_si", variant)) pars <- c(pars, "sigma_s")
-print(summarize_fit(fit, pars = pars), digits = 3)
+if (Sys.getenv("STAN_SKIP_SAVE_OBJECT", unset = "0") == "1") {
+  # summarize_fit() pulls every draw (log_lik included) into memory -- the
+  # same OOM save_object() hits on the big bundles. All six _2k imputed
+  # refits died HERE on 2026-08-19/20 after sampling cleanly, because the
+  # flag skipped save_object but not this. The slurm streams the summary
+  # from the CSVs instead (cluster/sherlock/recover_from_csvs.R).
+  cat("STAN_SKIP_SAVE_OBJECT=1: skipping in-R summarize_fit; recover from CSVs\n")
+} else {
+  print(summarize_fit(fit, pars = pars), digits = 3)
+}
 
 cat(sprintf("\nSaved: fits/%s.rds\n", out_tag))

@@ -28,6 +28,27 @@ csv_files <- sort(list.files(CSV_DIR, pattern = "\\.csv$", full.names = TRUE))
 cat(sprintf("[%s] %d CSV files in %s\n", TAG, length(csv_files), CSV_DIR))
 if (length(csv_files) == 0) stop("No CSVs found.")
 
+## Keep only COMPLETE chains: cmdstan appends an "Elapsed Time" footer when a
+## chain finishes. A cancelled or OOM'd relaunch can leave empty/partial CSVs
+## beside good ones (this is what broke the 2026-08-17 auto-recoveries with
+## "no lines available in input"). If several runs share the directory, use
+## the most recent complete set (run id = <timestamp>-<hash> in the filename).
+complete <- vapply(csv_files, function(f)
+  any(grepl("Elapsed Time", system(sprintf("tail -c 4000 %s", shQuote(f)), intern = TRUE))),
+  logical(1))
+if (any(!complete))
+  cat(sprintf("[%s] skipping %d incomplete CSV(s): %s\n", TAG, sum(!complete),
+              paste(basename(csv_files[!complete]), collapse = ", ")))
+csv_files <- csv_files[complete]
+if (length(csv_files) == 0) stop("No complete CSVs found (no 'Elapsed Time' footer).")
+run_id <- sub("^.*-(\\d{12})-\\d+-([0-9a-f]+)\\.csv$", "\\1-\\2", basename(csv_files))
+if (length(unique(run_id)) > 1) {
+  latest <- names(which.max(tapply(file.mtime(csv_files), run_id, max)))
+  cat(sprintf("[%s] %d runs share this dir; using latest complete run %s (%d chains)\n",
+              TAG, length(unique(run_id)), latest, sum(run_id == latest)))
+  csv_files <- csv_files[run_id == latest]
+}
+
 ## --- header: locate each wanted column by name (no full parse) ---
 hdr  <- system(sprintf("grep -v '^#' %s | head -1", shQuote(csv_files[1])), intern = TRUE)
 cols <- strsplit(hdr, ",", fixed = TRUE)[[1]]

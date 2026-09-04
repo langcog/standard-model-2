@@ -74,7 +74,11 @@ echo "Threads per chain: $STAN_THREADS_PER_CHAIN"
 # (cluster/gcp/run_fit_noloo.sh). Job 39218381 (NO sigma_r 0.44) died this
 # way on 2026-08-16 after 20h of clean sampling; recovered from its CSVs.
 export STAN_SKIP_SAVE_OBJECT=1
-Rscript model/scripts/fit_longitudinal.R "$VARIANT" "$DATASET"
+# Do NOT let a post-sampling death in the R script abort this job before the
+# recovery step (set -e would): the 2026-08 _2k refits all sampled fine, died
+# in R afterwards, and never reached recovery for exactly this reason.
+Rscript model/scripts/fit_longitudinal.R "$VARIANT" "$DATASET" \
+  || echo "fit_longitudinal.R exited non-zero ($?) -- attempting CSV recovery anyway"
 
 # Recover slim summary/draws from the CSVs. Tag = variant[_dataset][_sigmaR_x]
 # mirroring fit_longitudinal.R's naming.
