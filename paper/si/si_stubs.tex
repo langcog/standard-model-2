@@ -1,0 +1,303 @@
+% Supplementary-information stub text, generated 2026-09-04 from the pipeline
+% (see journal/notes/paper_technical_check_20260904.md for the source of every
+% number). Every paragraph is tagged [AI generated]; delete the tag once a human
+% has rewritten and checked it. Fragment to \input into the Overleaf SI; Table S1
+% needs \usepackage{booktabs} and the file paper/tables/out/datasets_table.tex.
+
+\section*{S1. Datasets}
+
+[AI generated] Table~\ref{tab:si-datasets} lists every dataset in its analysis
+sample, that is, after all exclusions described below: the five Wordbank
+longitudinal datasets that enter the imputed-input fits and the longitudinal
+demographic arm; the six English datasets with input or processing measures; and
+the 31 Wordbank cross-sectional languages fit for the demographic analysis, of
+which 28 (sex) and 12 (maternal education) pass the display threshold.
+
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{[AI generated] Datasets and analysis samples. Children and administrations
+are counts after exclusions; ages are administration ages in months; recordings are
+day-long LENA recordings or BabyView videos entering the input measurement model;
+LWL sessions are looking-while-listening administrations entering the processing
+measurement model. Regenerated from the fitted bundles by
+\texttt{paper/tables/datasets\_table.R}.}
+\label{tab:si-datasets}
+\input{tables/out/datasets_table.tex}
+\end{table}
+
+\subsection*{S1.1 Wordbank data}
+
+[AI generated] MB-CDI data were downloaded with the \texttt{wordbankr} package
+(version 2.0.0) from the Wordbank v2.0 release hosted on Redivis. We used Words \&
+Gestures (WG) and Words \& Sentences (WS) forms, including their short forms, and
+coded production from the instrument's logical \texttt{produces} field.
+
+[AI generated] For the longitudinal datasets, a child was identified by the
+combination of dataset and study-internal participant identifier, which links a
+child's WG and WS administrations; Wordbank's own child identifier fails to do so
+in some datasets and would split cross-form children into two. Items were
+harmonized across forms by their cross-linguistic \texttt{uni\_lemma} wherever the
+mapping is unambiguous within a form, so that a child's WG and WS administrations
+are scored on one item set. A child entered the longitudinal sample with at least
+two administrations at distinct ages.
+
+[AI generated] Trajectory quality control removed administrations that produce
+implausible ``craters'' in a child's proportion of words produced: an
+administration was dropped when a later administration fell below the child's
+earlier peak by more than 25\% of that peak and by at least 0.05, with the peak
+itself at least 0.10, together with an analogous rule for implausible jumps
+[check exact jump rule in \texttt{qc\_clean\_child()}]. This removed 90 Marchman
+and 50 Norwegian administrations.
+
+[AI generated] We restricted Wordbank to monolingual, typically developing
+samples by excluding datasets whose origin is labelled bilingual and the two
+clinical datasets (Edgin; Byers). The English longitudinal sample pools the Thal
+(653 children), Smith (316) and Marchman (2,136) datasets into one dataset of
+3,105 children, 7,329 administrations and 681 harmonized items, with the anchor
+age $a_0$ set to the median administration age (18 months); Norwegian comprises
+1,630 children and 6,446 administrations. Japanese (187 children) enters only the
+longitudinal demographic arm. Smith carries no demographic information, and Thal
+and Japanese carry sex but not caregiver education.
+
+\subsection*{S1.2 Input and processing datasets}
+
+[AI generated] Vocabulary data for the six English datasets come from item-level
+MB-CDI files: the Stanford Language Learning Lab files for Adams et al.\ (2018;
+WS only), Fernald \& Marchman (2012), Fernald, Marchman \& Weisleder (2013; two
+batches of participant identifiers, reconciled) and Fernald, Perfors \& Marchman
+(2006; WS only); webCDI administrations for BabyView, with item keys mapped to
+Wordbank items; and the SEEDLingS CDI administrations. The item set is the 681 WS
+items, grouped into four lexical classes (101, 318, 97 and 165 items) for the
+difficulty prior described in S2.1. In total 1,520 item-level administrations enter
+the Rasch likelihood; a further 95 administrations from Fernald et al.\ (2013),
+available only as WS vocabulary totals, enter through the count likelihood of
+S2.1.
+
+[AI generated] Processing speed is the looking-while-listening (LWL) reaction
+time. For the five Stanford and SEEDLingS datasets hosted in Peekbank (release
+2022.1), reaction time on each distractor-initial trial is the latency of the
+first shift from the distractor to the target picture (number of 40-Hz samples
+before the shift, plus one, times 25 ms), averaged over trials within an
+administration; the measurement model uses the log of this per-administration
+mean. The SEEDLingS reaction times were derived from EyeLink fixation reports
+(Zhu et al.) with the standard Fernald reaction-time window of 300--1800 ms after
+target-word onset and an accuracy window of 367--3500 ms; trials with too little
+looking in the window were excluded and one mean reaction time was computed per
+session. Altogether 1,374 administrations from 350 children enter the model,
+between 2 and 7 per child on average by dataset (Adams et al.\ 6.6, SEEDLingS 5.8,
+Fernald \& Marchman 3.5, Fernald et al.\ 2006 2.2, Fernald et al.\ 2013 2.1).
+
+[AI generated] Language input is measured in study-specific units and modelled on
+the log scale. The three LENA datasets contribute adult words per hour from
+day-long recordings at fixed ages: 16 and 18 months (Adams et al., 2018), 18 and
+24 months (Fernald et al., 2013) and monthly from 6 to 17 months (SEEDLingS), 808
+recordings in all. BabyView contributes, for each of 5,739 head-camera videos
+longer than 60 s, the number of adult (female and male speaker) alphabetic tokens
+in the automated transcript at a transcript-confidence threshold of 0.3, divided
+by the video's duration in hours. Every recording or video is one observation in
+the input measurement model, which has a separate measurement standard deviation
+per instrument (LENA vs.\ head camera) and a separate mean per study. Input is
+available for 219 children (BabyView 22, SEEDLingS 44, Adams et al.\ 66, Fernald
+et al.\ 2013 87) and 166 children have both input and processing data.
+
+[AI generated] [check before use] Sample composition. No participant-level
+exclusion on birth status or language delay is applied to the six datasets: the
+Adams et al.\ (2018) cohort includes preterm as well as full-term toddlers and the
+Fernald \& Marchman (2012) cohort includes late talkers. State the composition
+here and adjust the Limitations sentence accordingly.
+
+\subsection*{S1.3 Demographic variables}
+
+[AI generated] Sex is Wordbank's participant sex. Maternal education is Wordbank's
+caregiver education level converted to years of schooling (none 0, primary 6,
+some secondary 9, secondary 12, some college 14, college 16, some graduate 18,
+graduate 20) and standardized within language, so that education effects are per
+standard deviation of years.
+
+\section*{S2. Model specification and estimation}
+
+\subsection*{S2.1 The accelerating accumulator}
+
+[AI generated] The item likelihood is $P(y_{ijt} = 1) = \mathrm{logit}^{-1}\!\left(
+\xi_i + \log H + \kappa_i \log(t / a_0) - \delta_j\right)$, with $H$ a fixed
+constant ($\log H = 5.9$) so that $\xi_i$ is on the scale of a log input rate, and
+$a_0 = 21$ months in the input/processing fits. The population acceleration is
+parametrized as $\kappa = 1 + \delta$ with $\delta \sim N(0, 10)$; child effects
+are non-centred. Item difficulties have a prior by lexical class, $\delta_j \sim
+N(\mu_{c(j)}, \tau_{c(j)})$ with $\mu_c \sim N(8, 3)$ and $\tau_c \sim
+N^+(0, 1)$; collapsing to a single class changes nothing of substance.
+
+[AI generated] Administrations available only as vocabulary totals enter through
+a count likelihood: the number of words produced is modelled as a Poisson-binomial
+sum over the form's 681 items, approximated by a normal distribution with mean
+$\sum_j p_{ij}$ and variance $\sum_j p_{ij}(1 - p_{ij})$ evaluated at the child's
+$\theta_i(t)$.
+
+\subsection*{S2.2 Measurement models and structural links}
+
+[AI generated] Input: each recording $v$ of child $i$ in study $s$ gives $r_{iv}
+\sim N(\mu_{r,s} + d_i, \sigma_{m(v)})$, with study means $\mu_{r,s} \sim
+N(\bar r_s, 1)$ centred on the observed study mean, instrument-specific measurement
+standard deviations $\sigma_m \sim N^+(0, 1)$, and child deviations $d_i \sim N(0,
+\sigma_r)$ with $\sigma_r \sim N(0.44, 0.1)$. Processing: each LWL administration
+$n$ gives $q_{in} \sim N(\tau_s + w_i + \psi \log(t_n / a_0), \sigma_q)$, with
+study intercepts $\tau_s \sim N(6.84, 0.2)$ on the log-ms scale, one global
+log-age slope $\psi \sim N(-0.35, 0.1)$, child deviations $w_i \sim N(0,
+\sigma_w)$ with $\sigma_w \sim N(0.143, 0.04)$, and $\sigma_q \sim N(0.24,
+0.05)$.
+
+[AI generated] Structural links: $\xi_i = \mu_\xi + d_i + \beta_w w_i +
+\alpha_i$ and $\kappa_i = 1 + \delta + \gamma d_i + \beta'_w w_i + \zeta_i$, with
+independent residuals $\alpha_i \sim N(0, \sigma_\alpha)$, $\zeta_i \sim N(0,
+\sigma_\zeta)$, $\sigma_\alpha, \sigma_\zeta \sim N^+(0, 1)$; no residual
+correlation between $\alpha$ and $\zeta$ is estimated, the two measured channels
+carrying the covariance between efficiency and acceleration. The coefficient of
+$d_i$ in $\xi_i$ is fixed at 1 because input enters the accumulator as part of the
+log rate. Coupling priors are scaled to reference standard deviations of the
+predictors, $\gamma \sim N(0, 1/0.44)$ and $\beta_w, \beta'_w \sim N(0,
+1/0.143)$, so that each prior implies a unit-logit effect per reference SD.
+
+[AI generated] Reported effects are per standard deviation of the predictor:
+input~$\to$~efficiency equals $\sigma_r$ (a consequence of the fixed unit
+coefficient, not an estimated coupling), input~$\to$~acceleration equals $\gamma
+\sigma_r$, processing~$\to$~efficiency equals $-\beta_w \sigma_w$ and
+processing~$\to$~acceleration equals $-\beta'_w \sigma_w$, the sign flipped so that
+faster processing is positive. Efficiency effects are in logits; acceleration
+effects are in units of $\kappa$ (logits per unit of log age) and convert to
+level-equivalent logits at 30 months by the factor $\log(30/21) = 0.36$.
+
+\subsection*{S2.3 Estimation}
+
+[AI generated] The three arms are separate Stan programs on the same data: the
+joint model with both channels, an input-only program without the processing
+channel, and a processing-only program without the input channel. Couplings were
+introduced along a ladder (input coupling only; adding the processing-to-efficiency
+coupling; adding the processing-to-acceleration coupling); the reported joint and
+processing-only fits are the top rung and the input-only fit has the input coupling
+only. Models were fit with CmdStan 2.38.0 through cmdstanr 0.9.0 with 4 chains of
+1,000 warm-up and 1,000 sampling iterations, target acceptance 0.95, maximum tree
+depth 10, within-chain parallelism, and initial values at the prior means of the
+measurement parameters. Point estimates are posterior means and intervals are
+2.5/97.5\% posterior quantiles.
+
+[AI generated] Convergence, over the structural and population parameters: joint
+model maximum $\hat R$ 1.03 and minimum bulk effective sample size 163; input-only
+1.03 and 88; processing-only 1.04 and 112.
+
+[AI generated] Estimates per standard deviation with 95\% intervals, joint model
+versus each channel fit alone: input~$\to$~efficiency 0.35 [0.31, 0.40] versus 0.35
+[0.31, 0.40]; input~$\to$~acceleration 0.72 [0.02, 1.42] versus 0.76 [$-$0.11,
+1.55]; processing~$\to$~efficiency 0.76 [0.46, 1.04] versus 0.82 [0.53, 1.09];
+processing~$\to$~acceleration 0.38 [$-$0.22, 0.99] versus 0.50 [$-$0.21, 1.07].
+Population parameters agree to two decimals across arms ($\delta$ 10.29 / 10.30 /
+10.28; $\sigma_\xi$ 2.02 in all three).
+
+\subsection*{S2.4 Imputed-input model}
+
+[AI generated] The population-level analysis fits the accelerating accumulator
+without measurement channels to the pooled English and the Norwegian Wordbank
+longitudinal data, with efficiency decomposed as $\xi_i = \mu_r + r_i +
+\alpha_i$, where $r_i \sim N(0, \sigma_r)$ is the child's unobserved log input
+deviation and $\alpha_i \sim N(0, \sigma_\alpha)$ the remaining efficiency
+deviation, and $\kappa_i = 1 + \delta + \zeta_i$. The word-frequency term of the
+companion model is removed (item difficulty is absorbed by $\delta_j$) and the
+onset parameter is pinned. Because $r_i$ and $\alpha_i$ are not separately
+identified, $\sigma_r$ is fixed at 0.35, 0.44 and 0.58 in three fits per language
+and the fit estimates $\sigma_\alpha$; the share of efficiency variance
+attributable to input is $1 - \pi_\alpha$ with $\pi_\alpha = \sigma_\alpha^2 /
+(\sigma_\alpha^2 + \sigma_r^2)$, which equals $\sigma_r^2 / \sigma_\xi^2$ and is
+drawn as the analytic curve using $\sigma_\xi$ from the 0.44 fits (English 1.85,
+Norwegian 2.49).
+
+[AI generated] The three values of $\sigma_r$ are, respectively, the direct
+estimate from the recordings in the input/processing model (0.35 [0.32, 0.39],
+study-centred and therefore a lower bound on population variation), a population
+re-anchoring of that estimate to all-adult speech (0.44, the dashed line in
+Fig.~5) and an upper value from the literature (0.58); the shaded band runs from
+the direct estimate's lower 95\% limit (0.32) to 0.58.
+
+[AI generated] These fits used 4 chains of 1,000 warm-up and 2,000 sampling
+iterations at target acceptance 0.97, warm-started from shorter runs. Across the
+six fits, $\hat R$ for $\sigma_\xi$ and $\pi_\alpha$ ranged from 1.02 to 1.16 and
+bulk effective sample sizes from 19 to 152; Norwegian mixes slowly because of a
+posterior ridge between the efficiency and acceleration residual scales
+(correlation $-0.23$). The largest $\hat R$ in the full summaries (up to 2.0)
+belongs to the prior-pinned onset scale and has no bearing on the reported
+quantities. The estimated shares sit on the analytic curve to four decimals:
+English 3.6\%, 5.7\% and 9.9\% and Norwegian 2.0\%, 3.1\% and 5.4\% at
+$\sigma_r$ = 0.35, 0.44 and 0.58; across the band, English 3.0--9.9\% and
+Norwegian 1.7--5.4\%. Other population parameters: English $\delta$ 9.89 and
+$\sigma_\zeta$ 6.23; Norwegian $\delta$ 11.80 and $\sigma_\zeta$ 7.45.
+
+\section*{S3. Demographic analyses}
+
+\subsection*{S3.1 Longitudinal datasets}
+
+[AI generated] For each longitudinal dataset (Thal, Marchman, Norwegian,
+Japanese) we fit the accelerating accumulator as a generalized linear mixed model
+with \texttt{lme4} (version 1.1.37): \texttt{produces $\sim$ log\_age + (1 +
+log\_age | child) + (1 | item)}, binomial family, \texttt{nAGQ = 0}, with
+\texttt{log\_age} $= \log(t / a_0)$ and $a_0$ the dataset's median administration
+age. The child random intercept is the efficiency estimate (ability at $a_0$) and
+the child random slope the acceleration estimate; both are taken as conditional
+modes (BLUPs). Within each dataset we regressed each BLUP on sex (female minus
+male) and on standardized years of maternal education with ordinary least
+squares. Sex is available in all four datasets and education in Marchman and
+Norwegian. Figure~2A--B pools the two English datasets by inverse-variance
+weighting; the longitudinal meta-analytic estimates in Figure~2C are
+random-effects (REML) meta-analyses over datasets with \texttt{metafor} (version
+4.8.0), $k = 4$ for sex and $k = 2$ for education.
+
+\subsection*{S3.2 Cross-sectional languages}
+
+[AI generated] For each language we fit, on one randomly selected administration
+per child, the item-level Rasch GLMM \texttt{produces $\sim$ predictor $\times$
+log\_age + (1 | item) + (1 | child)} with \texttt{lme4} (\texttt{nAGQ = 0}), where
+\texttt{log\_age} $= \log(t / a_0)$ and $a_0$ is the median age of the language's
+sample. The predictor's main effect is its effect on efficiency (ability at
+$a_0$) and its interaction with log age its effect on acceleration; sex effects are
+reported as female minus male.
+
+[AI generated] Languages were monolingual, typically developing Wordbank samples
+(bilingual-origin and clinical datasets excluded) with at least 200 children with
+recorded sex; English (British) was excluded (a twin study administered with a
+short form) and French (Qu\'ebec) as bilingual, leaving 31 languages. The
+education model additionally required at least 1,000 item responses with education
+recorded and at least two education levels. Figure~2 displays languages with at
+least 300 children (28 for sex, 12 for education); French (France) is omitted
+from the education panel because its skewed education distribution gives an
+unstable estimate. Cross-language meta-analytic estimates are random-effects
+(REML) meta-analyses over the displayed languages with \texttt{metafor}, and the
+shaded bands in Figure~2A--B are their 95\% confidence intervals.
+
+[AI generated] [check before use] In an earlier validation on the languages with
+both designs, cross-sectional acceleration effects ran 1.5--2.3 times the
+corresponding longitudinal effects, so cross-sectional acceleration estimates
+should be read as upper bounds.
+
+\section*{S4. Figure conventions}
+
+[AI generated] Figure~1B uses the joint input/processing fit's population
+parameters ($\kappa = 11.3$, $\sigma_\xi = 2.02$, $\sigma_\kappa = 4.40$, $a_0
+= 21$ months, $\log H = 5.9$) for a reference child 0.5 SD below the mean
+efficiency and adds one population SD of efficiency or of acceleration; words
+produced are obtained by passing $\theta$ through an illustrative bank of 680
+items with logistic difficulties of mean 15 and scale 2.5.
+
+[AI generated] In Figure~2A--B, acceleration confidence intervals are truncated at
+$\pm$(largest absolute estimate + 0.7) so that a few small-language estimates do
+not compress the axis; the meta-analytic panel (Figure~2C) uses its own scale,
+shared by efficiency and acceleration. Figure~3 draws one line per child (BabyView
+videos averaged within calendar month; LWL administrations as session means on a
+log axis; input in study-specific units) and a loess smoother per dataset (span 1).
+Intervals in Figures~4 and~5 are 95\% posterior intervals; the dashed line in
+Figure~5 marks $\sigma_r = 0.44$.
+
+\section*{S5. Software and reproducibility}
+
+[AI generated] Analyses used R 4.5.1 with cmdstanr 0.9.0 and CmdStan 2.38.0,
+lme4 1.1.37, metafor 4.8.0 and wordbankr 2.0.0; LWL data were drawn from Peekbank
+release 2022.1. Code, the raw input and processing data files, the cached model
+summaries behind every figure and table, and the scripts that regenerate them are
+archived at \url{https://github.com/langcog/standard-model-2}; cross-linguistic
+MB-CDI data are downloaded from Wordbank by \texttt{wordbankr} at build time.

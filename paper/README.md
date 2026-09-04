@@ -62,4 +62,8 @@ bash paper/figures/render_all.sh
 ```
 
 The cache chain is unchanged (`build_cache.R`, `build_fig_io_cache.R` → `cache/`);
-the figure scripts read only those committed caches.
+the figure scripts read only those committed caches. LaTeX tables are built the
+same way in **`paper/tables/`** (`datasets_table.R` → `tables/out/datasets_table.tex`).
+Supplement stub text drafted from the pipeline, every paragraph tagged
+`[AI generated]`, is in `paper/si/si_stubs.tex` (source of each number:
+`journal/notes/paper_technical_check_20260904.md`).
