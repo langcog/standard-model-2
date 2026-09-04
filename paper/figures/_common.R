@@ -33,10 +33,13 @@ VOCAB_COL   <- "#404040"
 tint <- function(col, f = 0.2) scales::alpha(col, f)      # light fills (strips, bands)
 
 ## Facet strips for the trait columns (efficiency | acceleration), tinted
-## with the trait hues so the outcome is colour-coded the same way everywhere.
-trait_strips <- function(levels = names(TRAIT_PAL)) {
-  ggh4x::strip_themed(background_x = ggh4x::elem_list_rect(
-    fill = unname(tint(TRAIT_PAL[levels], 0.22)), colour = NA))
+## with the trait hues so the outcome is colour-coded the same way everywhere;
+## optionally tint the row strips too (e.g. the channel rows of the io-proc
+## figure with CHANNEL_PAL).
+trait_strips <- function(levels = names(TRAIT_PAL), row_pal = NULL) {
+  strip <- function(pal) ggh4x::elem_list_rect(fill = unname(tint(pal, 0.22)), colour = NA)
+  if (is.null(row_pal)) ggh4x::strip_themed(background_x = strip(TRAIT_PAL[levels]))
+  else ggh4x::strip_themed(background_x = strip(TRAIT_PAL[levels]), background_y = strip(row_pal))
 }
 
 ## ---- Type: the same sizes in every figure ----

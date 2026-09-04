@@ -2,8 +2,9 @@
 ## Render every figure in paper/figures/ to paper/figures/out/.
 ## R figures read the committed caches only (paper/cache/ + study caches);
 ## fig_data.R additionally needs data/ + the fitted io-proc bundle locally.
-## The TikZ graphical model compiles with pdflatex (TinyTeX is found even
-## when it is not on PATH). Each figure is attempted independently; failures
+## The TikZ model figure compiles with pdflatex (TinyTeX is found even when
+## it is not on PATH) and includes out/model_trajectories.pdf, so that R
+## component runs first. Each figure is attempted independently; failures
 ## are listed at the end and the exit code is non-zero if any failed.
 ##
 ##   bash paper/figures/render_all.sh            # everything
@@ -31,7 +32,8 @@ tikz_fig() {   # tikz_fig <tex basename without .tex> <out name>
   echo "wrote paper/figures/out/$out.pdf"
 }
 
-run graphical_model tikz_fig fig_graphical_model graphical_model
+run model_trajectories Rscript paper/figures/fig_model_trajectories.R   # component of graphical_model
+run graphical_model    tikz_fig fig_graphical_model graphical_model
 run demographics    Rscript paper/figures/fig_demographics.R
 run data            Rscript paper/figures/fig_data.R
 run ioproc          Rscript paper/figures/fig_ioproc.R

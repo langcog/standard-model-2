@@ -1,8 +1,15 @@
-% Graphical model (single column): the accelerating accumulator with its
-% three measurement models -- vocabulary (CDI items), input (recordings),
-% processing (looking-while-listening trials) -- and the structural links
-% that carry input and processing into efficiency (xi) and acceleration
-% (kappa). Notation follows the manuscript's Model section:
+% Model figure (two column, two panels):
+%   (A) graphical model -- the accelerating accumulator with its three
+%       measurement models (vocabulary / CDI items, input / recordings,
+%       processing / looking-while-listening trials) and the structural links
+%       that carry input and processing into efficiency (xi) and acceleration
+%       (kappa); drawn in TikZ below.
+%   (B) trajectory demo -- what +/-2 SD of input vs processing does to an
+%       average child's trajectory; out/model_trajectories.pdf, rendered by
+%       fig_model_trajectories.R (run it first; render_all.sh does).
+% The TikZ diagram is built in a savebox and placed beside the included PDF;
+% the panel letters (10 pt bold, like the R figures' tags) are added here.
+% Notation follows the manuscript's Model section:
 %   xi_i    = mu_xi    + d_i        + beta_w  w_i + alpha_i
 %   kappa_i = mu_kappa + beta_d d_i + beta'_w w_i + zeta_i
 %   theta_i(t) = xi_i + kappa_i log(t / a_0)
@@ -13,13 +20,15 @@
 % dashed circle = fixed input; small squares = study / instrument constants.
 % Colours are the paper palette (paper/figures/_common.R): input green,
 % processing purple, efficiency blue, acceleration vermillion; vocabulary grey.
-% Natural width 8.7 cm (PNAS single column) so type is printed at size:
-% node labels 8 pt (\footnotesize), small nodes / edge labels / plate labels
-% 7 pt (\scriptsize), matching the R figures. Text is Helvetica (helvet).
+% Each panel is 8.7 cm wide (PNAS single column) and the figure 17.8 cm
+% (double column), so type is printed at size: node labels 8 pt
+% (\footnotesize), small nodes / edge labels / plate labels 7 pt
+% (\scriptsize), matching the R figures. Text is Helvetica (helvet).
 % Compile: pdflatex fig_graphical_model.tex  (render_all.sh does this)
 \documentclass[border=2pt]{standalone}
 \usepackage{tikz}
 \usepackage{amsmath}
+\usepackage{graphicx}
 \usepackage[scaled=0.92]{helvet}
 \renewcommand{\familydefault}{\sfdefault}
 \usetikzlibrary{positioning,calc,fit,arrows.meta,backgrounds}
@@ -41,7 +50,10 @@
   el/.style  ={font=\scriptsize, inner sep=1pt, fill=white},
   hdr/.style ={font=\scriptsize\bfseries, black!60},
 }
+\newsavebox\diagram
 \begin{document}
+%% ===== (A) the graphical model, built in a box =====
+\sbox\diagram{%
 \begin{tikzpicture}[x=0.855cm, y=0.855cm]
 %% ---------- measurement models (top) ----------
 % input: recordings r_{iv} read the child's input deviation d_i
@@ -94,5 +106,13 @@
 \node[hdr, proc!60!black, anchor=east] at (7.0, 6.3) {processing measurement};
 \node[hdr, anchor=east] at (7.0, 2.6) {structural links};
 \node[hdr, anchor=west] at (-3.0, -3.1) {accumulator + vocabulary measurement};
+\end{tikzpicture}}
+%% ===== compose: (A) diagram | (B) trajectory demo, letters above-left =====
+\begin{tikzpicture}
+\node[anchor=north west, inner sep=0pt] (A) at (0, 0) {\usebox\diagram};
+\node[anchor=north west, inner sep=0pt] (B) at ([xshift=3mm]A.north east)
+  {\includegraphics[width=8.7cm]{out/model_trajectories.pdf}};
+\node[anchor=south west, inner sep=0pt, font=\normalsize\bfseries] at ([yshift=2pt]A.north west) {A};
+\node[anchor=south west, inner sep=0pt, font=\normalsize\bfseries] at ([yshift=2pt]B.north west) {B};
 \end{tikzpicture}
 \end{document}
