@@ -103,13 +103,15 @@ panelB_arms <- bind_rows(
            factor  = factor(factor,  levels = c("Input", "Processing")),
            model   = "Separate model"))
 
-## ---- schematic params (panel A): the SAME EN+count +proc fit, so the trajectories are
-## drawn from the estimates rather than hand-set example values. a0/log_H/mu_r are data
-## constants from the bundle; everything else is read from the fit summary above.
+## ---- schematic params (model figure B, paper/figures/fig_model_trajectories.R): the
+## SAME EN+count +proc fit, so the trajectories are drawn from the estimates rather than
+## hand-set example values. a0/log_H/mu_r are data constants from the bundle; everything
+## else is read from the fit summary above.
 schem <- list(
   a0 = 21, log_H = 5.90, mu_r = 7.34,
   kpop     = 1 + gv("delta")$mean,        # population acceleration 1 + delta
-  sigma_xi = gv("sigma_xi")$mean,         # between-child efficiency SD (curve separation)
+  sigma_xi = gv("sigma_xi")$mean,         # between-child efficiency SD (total)
+  sigma_kappa = gv("sigma_kappa")$mean,   # between-child acceleration SD (total)
   d_in_xi  = gv("sigma_r")$mean,          # input  -> efficiency  (coeff-1 identity = sigma_r)
   d_in_k   = gv("eff_input_k")$mean,      # input  -> acceleration
   d_pr_xi  = -gv("eff_proc_xi")$mean,     # processing(faster) -> efficiency

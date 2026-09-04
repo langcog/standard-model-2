@@ -20,7 +20,7 @@ plus the fitted io-proc bundle. R deps beyond the tidyverse: `patchwork`, `ggh4x
 
 | figure | script | size (in) | notes |
 |---|---|---|---|
-| Model: (A) graphical model — the three measurement models (vocabulary, input, processing) and the structural links into ξ / κ; (B) trajectory demo — ±2 SD of input vs processing for an average child, from the joint io-proc fit | `fig_graphical_model.tex` (TikZ; composes `out/model_trajectories.pdf` from `fig_model_trajectories.R`) | 2 col, 7.0 × 3.56 | nodes tinted with the palette; each panel is column width so type prints at size; the .tex adds the letters |
+| Model: (A) graphical model — the three measurement models (vocabulary, input, processing) and the structural links into ξ / κ; (B) trajectory demo — one child, then +1 SD efficiency (parallel shift) vs +1 SD acceleration (pivots on a₀), population parameters from the joint io-proc fit | `fig_graphical_model.tex` (TikZ; composes `out/model_trajectories.pdf` from `fig_model_trajectories.R`) | 2 col, 7.0 × 3.56 | nodes tinted with the palette; each panel is column width so type prints at size; the .tex adds the letters |
 | Demographics: sex and maternal-ed effects on efficiency vs acceleration, per language, cross-sectional + longitudinal, meta panel | `fig_demographics.R` → `composite_figure.R` | 2 col, 7.01 × 5.6 | (A) sex forest tall on the left, (B) maternal ed over (C) meta on the right; (C) has its own x-scale, shared by its two components (the forests' acceleration axis is set by the widest per-language CIs); languages sorted by efficiency effect (a `geom_blank` scale-training bug had left them alphabetical); longitudinal arm on the clean BLUPs (experiments.md #44) |
 | Data entering the io-proc analysis: CDI trajectories, LWL RT, observed input | `fig_data.R` → `data_check_io_panels.R` | 2 col, 7.01 × 3.7 | dataset small multiples (rows = streams, columns = datasets, empty cell = not collected), stream colours |
 | io-proc coefficients — each channel fit alone vs jointly (experiments.md #43) | `fig_ioproc.R` | 1 col, 3.43 × 2.67 | single panel, no letter, laid out like the demographics meta panel: predictor rows (channel-tinted strips) × trait columns, joint (filled circle) over separate (open diamond); acceleration in κ units like the demographics figure and the text |
@@ -52,9 +52,8 @@ plus the fitted io-proc bundle. R deps beyond the tidyverse: `patchwork`, `ggh4x
   Contrasts that are not traits or channels are carried by **shape**, not colour:
   cross-sectional = filled circle vs longitudinal = open diamond (demographics);
   joint = filled circle vs separate = open diamond (io-proc, the same main-vs-check
-  grammar); ± perturbations = solid vs dashed (model figure B). Curves are
-  direct-labelled where a legend would only repeat the colours (model figure B,
-  imputed).
+  grammar); Curves are direct-labelled where a legend would only repeat the colours
+  (model figure B, imputed).
 
 PNAS sizes used: single column 8.7 cm, 1.5 column 11.4 cm, double 17.8 cm, max height
 22.5 cm.
