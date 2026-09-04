@@ -493,8 +493,12 @@ io_nk <- function(bundle) {
   b <- readRDS(here("fits", bundle))
   if (!is.null(b$n_kids)) b$n_kids else length(unique(b$df$child_id))
 }
-en_pa <- io_pa("long_no_freq_slopes")
-no_pa <- io_pa("long_no_freq_slopes_norwegian")
+# 2026-09: the 0.44-pin clean-data convergence refits (same variant as June's
+# long_no_freq_slopes; variant_hyperpriors() strips the prefix). pi_alpha
+# = 1 - sigma_r^2/sigma_xi^2 at the main pin; see build_fig_io_cache.R for
+# the full anchor set and journal/experiments.md #45.
+en_pa <- io_pa("no_freq_slopes_sigmaR_0p44_2k")
+no_pa <- io_pa("no_freq_slopes_norwegian_sigmaR_0p44_2k")
 io_partition <- list(
   en_pi = unname(en_pa["pi"]), en_lo = unname(en_pa["lo"]), en_hi = unname(en_pa["hi"]),
   no_pi = unname(no_pa["pi"]), no_lo = unname(no_pa["lo"]), no_hi = unname(no_pa["hi"]),

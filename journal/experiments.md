@@ -2817,7 +2817,7 @@ Marchman D_log took 597 min. Summaries + ranefs committed (`fits/glmer_ladder/`)
 key is no longer a Wordbank child_id) + its wordbankr-2.0 pass, then rebuild
 `blups_demographics.rds`.
 
-## 🟡 45. Imputed-panel σ_r anchors on the clean bundles: {0.35, 0.44, 0.58} (2026-08-15 → 09-03)
+## 🟢 45. Imputed-panel σ_r anchors on the clean bundles: {0.35, 0.44, 0.58} (2026-08-15 → 09-03)
 
 **Decision (MCF, 08-15).** The old anchors {0.44, 0.53 (Sperry), 0.58} sat entirely to
 the right of the direct fits' own σ_r estimate (entry 43: 0.35 [0.32, 0.39], study-centered
@@ -2846,3 +2846,23 @@ the 08-17 auto-recoveries) and picks the latest complete run per dir; new
 `recover_csvs.slurm`. **Recovery of all six `_2k` fits running on the owned node
 (09-03).** Rule: on these bundles nothing in R may touch the full draws. Then: rebuild
 `fig_io_imputed_proc.rds` + §8 `io_partition`, delete ~1.9 TB of scratch CSVs, re-render.
+
+**Result (09-03, all six `_2k` recovered).** Anchors sit exactly on the analytic curve
+(1−π_α = σ_r²/σ_ξ² to 4 decimals), so the refits' whole information content is σ_ξ:
+
+| pin σ_r | EN σ_ξ | EN 1−π_α (input share of ξ var) | NO σ_ξ | NO 1−π_α |
+|---|---|---|---|---|
+| 0.35 | 1.848 | 3.6% | 2.488 | 2.0% |
+| 0.44 | 1.850 | 5.7% | 2.494 | 3.1% |
+| 0.58 | 1.849 | 9.9% | 2.489 | 5.4% |
+
+Band [0.32, 0.58] → EN 3.0–9.9%, NO 1.7–5.4%, bracketing the meta-analytic 4–7%. Other
+population parameters on clean data: EN δ 9.89, σ_ζ 6.23, ρ_ξζ ≈ 0; NO δ 11.80, σ_ζ 7.45,
+ρ_ξζ −0.23. Convergence: σ_ξ/π_α r̂ 1.02–1.16, ESS 19–152 (EN 0.44: 1.023/140); the three
+pins agree on σ_ξ to 3 decimals within each language, which is the real check. The
+alarming whole-summary max r̂ (up to 2.0) is entirely `sigma_s`, the prior-pinned onset
+nuisance (mean 0.0008; `s` itself ESS > 3000). Norwegian's σ_ξ mixes slowly (ESS ~20–40,
+the (α,ζ) ridge at ρ = −0.23) even at 2000 iters — report ESS honestly in the SI rather
+than burn another week. Caches rebuilt: `fig_io_imputed_proc.rds` (six anchors),
+`io_partition.rds` (0.44 pins). The 1000-iter CSVs were deleted; the six `_2k` CSV sets
+(1.2 TB) kept on scratch for one more pass in case other columns are wanted.
