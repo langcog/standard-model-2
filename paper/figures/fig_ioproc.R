@@ -10,7 +10,8 @@
 ## effects in the model's own units for both traits (logits for efficiency,
 ## kappa units for acceleration -- the same units as the demographics figure
 ## and the text; multiply acceleration by log(30/21) = 0.36 for the
-## level-equivalent effect at 30 months). 90% CIs. No panel letter.
+## level-equivalent effect at 30 months). 95% CIs (2.5 / 97.5% posterior
+## quantiles, like every other figure). No panel letter.
 ## The +/-2 SD trajectory demo that used to be panel A is panel B of the
 ## graphical-model figure now (fig_model_trajectories.R); the imputed-
 ## population sweep lives in fig_imputed_meta.R.
@@ -35,7 +36,7 @@ p <- ggplot(pb, aes(med, row, colour = component, shape = method)) +
   scale_colour_manual(values = TRAIT_PAL, guide = "none") +
   scale_shape_manual(values = SHP, guide = "none") +
   ggh4x::facet_grid2(predictor ~ component, strip = trait_strips(row_pal = CHANNEL_PAL)) +
-  labs(x = "effect of +1 SD (logits), 90% CI", y = NULL) +
+  labs(x = "effect of +1 SD (logits), 95% CI", y = NULL) +
   theme_fig()
 
 save_fig(p, "ioproc", width = PNAS_1COL, height = PNAS_1COL * 0.78)

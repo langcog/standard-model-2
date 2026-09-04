@@ -6,7 +6,7 @@
 ##   Panel B "io-proc": the joint input+processing COEFFICIENTS (per-SD effects,
 ##     the EN+count +proc fit joint_io_proc_lean_d2_enct -- all channels free) --
 ##     input vs processing effect on efficiency (xi) and acceleration (kappa),
-##     with 90% CIs. (Variance-explained partition is reported in text instead.)
+##     with 95% CIs. (Variance-explained partition is reported in text instead.)
 ##
 ## RUN LOCALLY (needs the gitignored fits/summaries). Writes the committed
 ## cache paper/cache/fig_io_imputed_proc.rds so the manuscript renders without
@@ -72,14 +72,23 @@ panelA <- list(curves = panelA_curves, anchors = panelA_anchors,
 ##   Acceleration: Input = eff_input_k,    Processing = |eff_proc_k|   (faster -> higher kappa)
 ## Processing flipped to "faster processing -> +" (eff_proc_* are negative on rt0). The qmd
 ## rescales the acceleration row x log(30/21) to level-equivalent theta units for display.
+## Intervals are 95% (2.5 / 97.5% posterior quantiles from the draws files; the
+## .summary.rds only carry CmdStan's default q5 / q95), so every figure in the
+## paper reports 95% CIs. Point estimate = posterior mean (as in the text).
 d3 <- as.data.frame(readRDS(file.path(SUMM, "joint_io_proc_lean_d2_enct_2k.summary.rds")))
 gv <- function(v) d3[d3$variable == v, ]
-panelB <- tibble::tribble(
-  ~channel,       ~factor,      ~med,                    ~lo,                     ~hi,
-  "Efficiency",   "Input",       gv("sigma_r")$mean,      gv("sigma_r")$q5,        gv("sigma_r")$q95,
-  "Efficiency",   "Processing", -gv("eff_proc_xi")$mean, -gv("eff_proc_xi")$q95,  -gv("eff_proc_xi")$q5,
-  "Acceleration", "Input",       gv("eff_input_k")$mean,  gv("eff_input_k")$q5,    gv("eff_input_k")$q95,
-  "Acceleration", "Processing", -gv("eff_proc_k")$mean,  -gv("eff_proc_k")$q95,   -gv("eff_proc_k")$q5) |>
+draws <- function(tag) readRDS(file.path(SUMM, paste0(tag, ".draws.rds")))
+d3_draws <- draws("joint_io_proc_lean_d2_enct_2k")
+## per-SD effect of `v` (sign = -1 flips "slower processing" to "faster processing -> +")
+eff_row <- function(channel, factor, dr, v, sign = 1) {
+  q <- unname(quantile(sign * dr[[v]], c(0.025, 0.975)))
+  tibble::tibble(channel = channel, factor = factor, med = sign * mean(dr[[v]]), lo = q[1], hi = q[2])
+}
+panelB <- bind_rows(
+  eff_row("Efficiency",   "Input",      d3_draws, "sigma_r"),
+  eff_row("Efficiency",   "Processing", d3_draws, "eff_proc_xi", -1),
+  eff_row("Acceleration", "Input",      d3_draws, "eff_input_k"),
+  eff_row("Acceleration", "Processing", d3_draws, "eff_proc_k",  -1)) |>
   mutate(channel = factor(channel, levels = c("Efficiency", "Acceleration")),
          factor  = factor(factor,  levels = c("Input", "Processing")))
 
@@ -88,17 +97,14 @@ panelB <- tibble::tribble(
 ## input channel) arms fit the SAME english_count bundle as the joint fit, so
 ## each channel's coefficient can be shown fit alone vs jointly (experiments.md
 ## #43). Same per-SD conventions as panelB above.
-arm <- function(tag) as.data.frame(readRDS(file.path(SUMM, paste0(tag, ".summary.rds"))))
-io_arm <- arm("joint_io_proc_lean_io_d0_enct"); pr_arm <- arm("joint_io_proc_lean_proc_d2_enct")
-ga <- function(d, v) d[d$variable == v, ]
+io_draws <- draws("joint_io_proc_lean_io_d0_enct"); pr_draws <- draws("joint_io_proc_lean_proc_d2_enct")
 panelB_arms <- bind_rows(
   panelB |> mutate(model = "Joint model"),
-  tibble::tribble(
-    ~channel,       ~factor,      ~med,                           ~lo,                            ~hi,
-    "Efficiency",   "Input",       ga(io_arm, "sigma_r")$mean,     ga(io_arm, "sigma_r")$q5,       ga(io_arm, "sigma_r")$q95,
-    "Acceleration", "Input",       ga(io_arm, "eff_input_k")$mean, ga(io_arm, "eff_input_k")$q5,   ga(io_arm, "eff_input_k")$q95,
-    "Efficiency",   "Processing", -ga(pr_arm, "eff_proc_xi")$mean, -ga(pr_arm, "eff_proc_xi")$q95, -ga(pr_arm, "eff_proc_xi")$q5,
-    "Acceleration", "Processing", -ga(pr_arm, "eff_proc_k")$mean,  -ga(pr_arm, "eff_proc_k")$q95,  -ga(pr_arm, "eff_proc_k")$q5) |>
+  bind_rows(
+    eff_row("Efficiency",   "Input",      io_draws, "sigma_r"),
+    eff_row("Acceleration", "Input",      io_draws, "eff_input_k"),
+    eff_row("Efficiency",   "Processing", pr_draws, "eff_proc_xi", -1),
+    eff_row("Acceleration", "Processing", pr_draws, "eff_proc_k",  -1)) |>
     mutate(channel = factor(channel, levels = c("Efficiency", "Acceleration")),
            factor  = factor(factor,  levels = c("Input", "Processing")),
            model   = "Separate model"))

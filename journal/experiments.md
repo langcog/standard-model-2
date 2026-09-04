@@ -2803,6 +2803,23 @@ cycle (input → faster processing → cascade) is not the compounding route. Pr
 r̂ 1.039, min ESS 112. **For the paper:** report joint as the figure, separates as the
 main-text consistency check.
 
+**Addendum (2026-09-04) — intervals switched to 95% throughout (MCF).** The table above
+and the first figure versions used CmdStan's default q5/q95 (90%); the demographics and
+imputed figures were already 95%. `build_fig_io_cache.R` now takes 2.5/97.5% quantiles
+from the draws files (the `_2k` joint draws recovered from Sherlock scratch; draws means
+match the summaries exactly), and `fig_ioproc.R` is labelled 95%. Same means, wider CIs:
+
+| | joint (io+proc) `_2k` | io only | proc only |
+|---|---|---|---|
+| input → efficiency (σ_r) | 0.35 [0.31, 0.40] | 0.35 [0.31, 0.40] | — |
+| input → acceleration | 0.72 [**0.02**, 1.42] | 0.76 [**−0.11**, 1.55] | — |
+| processing (faster) → efficiency | 0.76 [0.46, 1.04] | — | 0.82 [0.53, 1.09] |
+| processing (faster) → acceleration | 0.38 [−0.22, 0.99] | — | 0.50 [−0.21, 1.07] |
+
+Substantively: input → acceleration just excludes zero in the joint model at 95% and
+includes it in the io-only arm — the text should describe it as a positive but imprecise
+effect (posterior mass above zero ≈ 0.98 joint / 0.96 io-only), not a clean detection.
+
 ## 🟢 44. Clean-data glmer ladder refit (35 cells) — Marchman rejoins the κ band (2026-08-15/16)
 
 **Setup.** Full 5-dataset × 7-model array on the entry-42 extraction (Sherlock 39216878,
