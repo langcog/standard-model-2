@@ -2832,6 +2832,22 @@ figures — `cache.extra = tools::md5sum(<cache files>)` in the setup chunk now
 invalidates chunks whenever a cache file changes. Note for the abstract: the six
 io/proc studies span ages 6–32 months (SEEDLingS from 6, BabyView to 32), not 8–30.
 
+**Addendum 2 (2026-09-04) — longitudinal demographic arm recomputed on the clean BLUPs.**
+The figure's longitudinal effects (`long`, `long_meta`) are baked into
+`studies/cross_sectional_demographics/cache/fits.rds` by `00_build.R` from
+`blups_demographics.rds`, so they had to be recomputed (that section run in isolation;
+the 31-language cross-sectional fits are untouched). Marchman on 2,136 kids vs the broken
+314: sex→efficiency 0.61 → **0.17** (SE 0.22 → 0.08), matEd→efficiency 0.26 → **0.05**
+(SE 0.11 → 0.04), matEd→acceleration 0.41 → 0.40 (SE 0.27 → **0.14**) — the old WS-only
+16–30-month remnant inflated the level effects. Longitudinal meta (k=4 sex, k=2 matEd):
+sex→efficiency 0.67 → 0.55 [0.18, 0.91]; sex→acceleration 0.05 → −0.11 [−0.47, 0.24];
+**matEd→efficiency 0.14 [−0.03, 0.32] → 0.07 [−0.00, 0.13]; matEd→acceleration 0.28
+[−0.02, 0.58] → 0.33 [0.11, 0.56]**. Clean data sharpen the claim: sex is an efficiency
+(stable) effect only; maternal education is predominantly an acceleration (cascading)
+effect. Inline main-text β/p values come from the cross-sectional meta and are unchanged;
+the figure's longitudinal panel and its meta band move. Chunk cache key now also
+covers this cache file.
+
 ## 🟢 45. Imputed-panel σ_r anchors on the clean bundles: {0.35, 0.44, 0.58} (2026-08-15 → 09-03)
 
 **Decision (MCF, 08-15).** The old anchors {0.44, 0.53 (Sperry), 0.58} sat entirely to
