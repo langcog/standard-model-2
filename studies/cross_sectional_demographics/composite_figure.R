@@ -202,11 +202,13 @@ make_demographics_composite <- function(fits, sex_min_n = 300, mated_min_n = 300
 
 ## Main-text version (2026-09-04 prototype): ONE grid -- columns = trait,
 ## row facets = predictor -- showing the longitudinal datasets by name (raw-BLUP
-## regressions, open diamonds) above two summary rows: the longitudinal
-## meta-analysis (filled diamond) and the cross-sectional meta-analysis over the
-## displayed Wordbank languages (filled circle; its 95% CI also shaded across the
-## facet). The cross-sectional by-language forests are the SI figure
-## (make_demographics_composite(..., forests_only = TRUE)). Shared x-scale.
+## regressions; filled circles with 95% CI lines) above two summary rows drawn
+## in forest-plot convention as open diamonds whose width IS the 95% CI: the
+## longitudinal meta-analysis over datasets and the cross-sectional
+## meta-analysis over the displayed Wordbank languages. No bands, no legend
+## (the row labels name every marker). The cross-sectional by-language forests
+## are the SI figure (make_demographics_composite(..., forests_only = TRUE)).
+## Shared x-scale; sized for a single column.
 make_demographics_main <- function(fits, sex_min_n = 300, mated_min_n = 300,
                                    drop_matEd = c("French (French)"),
                                    pal = c(Efficiency = "#0072B2", Acceleration = "#D55E00"),
@@ -216,8 +218,6 @@ make_demographics_main <- function(fits, sex_min_n = 300, mated_min_n = 300,
   L <- demo_langs(fits, sex_min_n, mated_min_n, drop_matEd)
   PRED <- c(sex = "Sex\n(female \u2212 male)", matEd = "Maternal ed.\n(per SD)")
   KIND <- c("Longitudinal dataset", "Longitudinal summary", "Cross-sectional summary")
-  SHP  <- c(23, 18, 16); names(SHP) <- KIND          # open diamond / filled diamond / filled circle
-  SZ   <- c(1.9, 2.7, 2.1); names(SZ) <- KIND
 
   ## longitudinal datasets (95% CI from the BLUP regressions)
   dat <- fits$long |> filter(predictor %in% names(PRED), language %in% names(LONG_LAB)) |>
@@ -227,11 +227,11 @@ make_demographics_main <- function(fits, sex_min_n = 300, mated_min_n = 300,
     pivot_longer(-c(predictor, row, kind), names_to = c("component", ".value"), names_sep = "_")
   ## longitudinal meta (k datasets) and cross-sectional meta (k languages)
   lmeta <- fits$long_meta |> filter(predictor %in% names(PRED)) |>
-    transmute(predictor, row = sprintf("Longitudinal summary (%d datasets)", k), kind = KIND[2],
+    transmute(predictor, row = sprintf("Longitudinal (%d datasets)", k), kind = KIND[2],
               component = recode(component, efficiency = "Efficiency", acceleration = "Acceleration"),
               est = estimate, lo = ci.lb, hi = ci.ub)
   xmeta <- bind_rows(xs_meta(fits, "sex", L$sex, comp_lev), xs_meta(fits, "matEd", L$matEd, comp_lev)) |>
-    transmute(predictor, row = sprintf("Cross-sectional summary (%d languages)", k), kind = KIND[3],
+    transmute(predictor, row = sprintf("Cross-sectional (%d languages)", k), kind = KIND[3],
               component = as.character(component), est, lo = ci.lb, hi = ci.ub)
   ## row order, bottom -> top within each facet: the two summaries, then datasets
   lev <- c(unique(xmeta$row), unique(lmeta$row), rev(unname(LONG_LAB)))
@@ -239,22 +239,27 @@ make_demographics_main <- function(fits, sex_min_n = 300, mated_min_n = 300,
     mutate(component = factor(component, levels = comp_lev),
            predictor = factor(unname(PRED[predictor]), levels = unname(PRED)),
            kind = factor(kind, levels = KIND), row = factor(row, levels = lev))
-  band <- d |> filter(kind == KIND[3])
+  ## summary diamonds: width = 95% CI, at numeric rows 1 (cross-sectional) and 2
+  ## (longitudinal) of each facet -- the two bottom rows by construction of `lev`
+  H <- 0.36
+  dia <- d |> filter(kind != KIND[1]) |>
+    mutate(y = if_else(kind == KIND[3], 1, 2), id = paste(predictor, component, row)) |>
+    rowwise() |>
+    reframe(predictor, component, id, x = c(lo, est, hi, est), y = c(y, y + H, y, y - H))
   facet <- if (is.null(strips)) facet_grid(predictor ~ component, scales = "free_y", space = "free_y") else
     ggh4x::facet_grid2(predictor ~ component, scales = "free_y", space = "free_y", strip = strips)
-  ggplot(d, aes(est, row, colour = component, shape = kind)) +
-    geom_rect(data = band, aes(xmin = lo, xmax = hi, fill = component), ymin = -Inf, ymax = Inf,
-              inherit.aes = FALSE, alpha = 0.12) +
+  ggplot(d |> filter(kind == KIND[1]), aes(est, row, colour = component)) +
+    geom_blank(data = d, aes(est, row)) +   # FIRST: trains the axis on all rows in `lev` order
     geom_vline(xintercept = 0, linetype = "dashed", colour = "grey60", linewidth = 0.3) +
     geom_hline(yintercept = 2.5, colour = "grey75", linewidth = 0.3) +   # summaries | datasets
     geom_errorbar(aes(xmin = lo, xmax = hi), width = 0, linewidth = 0.4) +
-    geom_point(aes(size = kind), fill = "white", stroke = 0.7) +
-    scale_size_manual(values = SZ, guide = "none") +
-    scale_shape_manual(values = SHP, guide = "none") +   # the row labels name every marker
+    geom_point(shape = 16, size = 1.6) +
+    geom_polygon(data = dia, aes(x, y, group = id, colour = component), inherit.aes = FALSE,
+                 fill = "white", linewidth = 0.5) +
     scale_colour_manual(values = pal, guide = "none") +
-    scale_fill_manual(values = pal, guide = "none") +
     facet +
-    labs(x = "effect, 95% CI (efficiency in logits; acceleration in \u03ba units)", y = NULL) +
+    labs(x = "effect, 95% CI\n(logits; acceleration in \u03ba units)", y = NULL) +
     base_theme + theme(panel.grid.minor = element_blank(),
-                       strip.text.y = element_text(lineheight = 0.9))
+                       strip.text.y = element_text(lineheight = 0.9),
+                       axis.title.x = element_text(lineheight = 0.95))
 }

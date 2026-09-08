@@ -1,4 +1,4 @@
-## Demographics, main-text prototype (1.5 column, single panel): ONE grid --
+## Demographics, main-text prototype (single column, single panel): ONE grid --
 ## columns = trait (efficiency | acceleration, tinted strips), row facets =
 ## predictor (sex; maternal education). Within each facet: the longitudinal
 ## datasets by name (open diamonds, raw-BLUP regressions), then the
@@ -15,4 +15,4 @@ source(here("studies", "cross_sectional_demographics", "composite_figure.R"))
 xsec_fits <- readRDS(here("studies", "cross_sectional_demographics", "cache", "fits.rds"))
 p <- make_demographics_main(xsec_fits, pal = TRAIT_PAL, base_theme = theme_fig(),
                             strips = trait_strips())
-save_fig(p, "demographics_main", width = PNAS_15COL, height = 3.3)
+save_fig(p, "demographics_main", width = PNAS_1COL, height = 3.0)
