@@ -8,8 +8,10 @@
 ## Sex and maternal ed use INDEPENDENT language sets (each: n >= the
 ## predictor's threshold), so sex keeps its full breadth even where maternal
 ## ed is missing. Both predictors report BOTH efficiency and acceleration.
-## Returns a patchwork: sex forest (tall, left) | maternal-ed forest over the
-## meta summary (right). The forests share per-component x-limits; the meta
+## make_demographics_composite() returns a patchwork: sex forest (tall, left) |
+## maternal-ed forest over the meta summary (right); forests_only = TRUE drops the
+## meta panel (SI figure). make_demographics_main() is the one-grid main-text
+## version (longitudinal datasets + summaries only). The forests share per-component x-limits; the meta
 ## panel has its own scale, common to both components. Colour = trait (efficiency / acceleration), shape =
 ## method (filled circle cross-sectional, open diamond longitudinal); the
 ## paper passes its palette / theme / tinted strips, the notebook uses the
@@ -45,11 +47,34 @@ panelC_meta <- function(fits, sex_min_n = 300, mated_min_n = 300,
   rbind(rows("sex", sex_langs), rows("matEd", mated_langs))
 }
 
+## ---- shared helpers (used by every builder below) ----
+LONG_LAB <- c(thal = "English (Thal)", marchman = "English (Marchman)",
+              norwegian = "Norwegian", japanese = "Japanese")
+
+## languages displayed per predictor (n >= threshold; maternal-ed drops)
+demo_langs <- function(fits, sex_min_n = 300, mated_min_n = 300, drop_matEd = c("French (French)")) list(
+  sex   = fits$xsec |> filter(predictor == "sex",   n_kids >= sex_min_n) |> pull(language),
+  matEd = fits$xsec |> filter(predictor == "matEd", n_kids >= mated_min_n,
+                              !language %in% drop_matEd) |> pull(language))
+
+## random-effects meta per component over a set of languages (cross-sectional)
+xs_meta <- function(fits, pred, langs, comp_lev) {
+  s <- fits$xsec |> filter(predictor == pred, language %in% langs)
+  one <- function(b, se) {
+    m <- tryCatch(rma(yi = b, sei = se, method = "REML",
+                      control = list(stepadj = 0.5, maxiter = 1000)), error = function(e) NULL)
+    if (is.null(m)) c(NA, NA, NA) else c(as.numeric(m$beta), m$ci.lb, m$ci.ub)
+  }
+  e <- one(s$eff, s$eff_se); a <- one(s$acc, s$acc_se)
+  tibble(predictor = pred, component = factor(comp_lev, levels = comp_lev),
+         est = c(e[1], a[1]), ci.lb = c(e[2], a[2]), ci.ub = c(e[3], a[3]), k = nrow(s))
+}
+
 make_demographics_composite <- function(fits, sex_min_n = 300, mated_min_n = 300,
                                          drop_matEd = c("French (French)"),
                                          pal = c(Efficiency = "#0072B2", Acceleration = "#D55E00"),
                                          base_theme = theme_minimal(base_size = 9),
-                                         strips = NULL) {
+                                         strips = NULL, forests_only = FALSE) {
   comp_lev <- names(pal)
   SHP <- c("Cross-sectional" = 16, "Longitudinal" = 23)   # filled circle / open diamond
   facet_comp <- function() {                               # efficiency | acceleration columns
@@ -57,9 +82,8 @@ make_demographics_composite <- function(fits, sex_min_n = 300, mated_min_n = 300
     else ggh4x::facet_wrap2(~ component, scales = "free_x", strip = strips)
   }
 
-  sex_langs   <- fits$xsec |> filter(predictor == "sex",   n_kids >= sex_min_n) |> pull(language)
-  mated_langs <- fits$xsec |> filter(predictor == "matEd", n_kids >= mated_min_n,
-                                     !language %in% drop_matEd) |> pull(language)
+  L <- demo_langs(fits, sex_min_n, mated_min_n, drop_matEd)
+  sex_langs <- L$sex; mated_langs <- L$matEd
 
   ## longitudinal by-study units -> cross-sectional language names (pool English)
   long_map <- c(thal="English (American)", smith="English (American)",
@@ -98,19 +122,8 @@ make_demographics_composite <- function(fits, sex_min_n = 300, mated_min_n = 300
            hi = if_else(component == "Acceleration", pmin(hi, acc_lim[2]), hi))
 
   ## random-effects meta per (predictor, component) over the DISPLAYED languages
-  meta_for <- function(pred, langs) {
-    s <- fits$xsec |> filter(predictor == pred, language %in% langs)
-    one <- function(b, se) {
-      m <- tryCatch(rma(yi = b, sei = se, method = "REML",
-                        control = list(stepadj = 0.5, maxiter = 1000)), error = function(e) NULL)
-      if (is.null(m)) c(NA, NA, NA) else c(as.numeric(m$beta), m$ci.lb, m$ci.ub)
-    }
-    e <- one(s$eff, s$eff_se); a <- one(s$acc, s$acc_se)
-    tibble(predictor = pred,
-           component = factor(comp_lev, levels = comp_lev),
-           est = c(e[1], a[1]), ci.lb = c(e[2], a[2]), ci.ub = c(e[3], a[3]))
-  }
-  meta_sex <- meta_for("sex", sex_langs); meta_med <- meta_for("matEd", mated_langs)
+  meta_sex <- xs_meta(fits, "sex", sex_langs, comp_lev)
+  meta_med <- xs_meta(fits, "matEd", mated_langs, comp_lev)
 
   ## one by-language forest (efficiency | acceleration), x-sec + longitudinal;
   ## languages ordered by their cross-sectional efficiency effect.
@@ -178,6 +191,70 @@ make_demographics_composite <- function(fits, sex_min_n = 300, mated_min_n = 300
     labs(x = "meta-analytic estimate (logits)", y = NULL, title = "Meta-analytic summary") +
     base_theme + theme(panel.grid.minor = element_blank())
 
+  if (forests_only)   # SI version: the two by-language forests, no meta panel
+    return((pSex | ((pMed / plot_spacer()) +
+                      plot_layout(heights = c(length(mated_langs) + 3,
+                                              length(sex_langs) - length(mated_langs))))) +
+             plot_layout(widths = c(1, 1)))
   (pSex | ((pMed / pMeta) + plot_layout(heights = c(length(mated_langs) + 4, 10)))) +
     plot_layout(widths = c(1, 1))
+}
+
+## Main-text version (2026-09-04 prototype): ONE grid -- columns = trait,
+## row facets = predictor -- showing the longitudinal datasets by name (raw-BLUP
+## regressions, open diamonds) above two summary rows: the longitudinal
+## meta-analysis (filled diamond) and the cross-sectional meta-analysis over the
+## displayed Wordbank languages (filled circle; its 95% CI also shaded across the
+## facet). The cross-sectional by-language forests are the SI figure
+## (make_demographics_composite(..., forests_only = TRUE)). Shared x-scale.
+make_demographics_main <- function(fits, sex_min_n = 300, mated_min_n = 300,
+                                   drop_matEd = c("French (French)"),
+                                   pal = c(Efficiency = "#0072B2", Acceleration = "#D55E00"),
+                                   base_theme = theme_minimal(base_size = 9),
+                                   strips = NULL) {
+  comp_lev <- names(pal)
+  L <- demo_langs(fits, sex_min_n, mated_min_n, drop_matEd)
+  PRED <- c(sex = "Sex\n(female \u2212 male)", matEd = "Maternal ed.\n(per SD)")
+  KIND <- c("Longitudinal dataset", "Longitudinal summary", "Cross-sectional summary")
+  SHP  <- c(23, 18, 16); names(SHP) <- KIND          # open diamond / filled diamond / filled circle
+  SZ   <- c(1.9, 2.7, 2.1); names(SZ) <- KIND
+
+  ## longitudinal datasets (95% CI from the BLUP regressions)
+  dat <- fits$long |> filter(predictor %in% names(PRED), language %in% names(LONG_LAB)) |>
+    transmute(predictor, row = unname(LONG_LAB[language]), kind = KIND[1],
+              Efficiency_est = eff, Efficiency_lo = eff - 1.96 * eff_se, Efficiency_hi = eff + 1.96 * eff_se,
+              Acceleration_est = acc, Acceleration_lo = acc - 1.96 * acc_se, Acceleration_hi = acc + 1.96 * acc_se) |>
+    pivot_longer(-c(predictor, row, kind), names_to = c("component", ".value"), names_sep = "_")
+  ## longitudinal meta (k datasets) and cross-sectional meta (k languages)
+  lmeta <- fits$long_meta |> filter(predictor %in% names(PRED)) |>
+    transmute(predictor, row = sprintf("Longitudinal summary (%d datasets)", k), kind = KIND[2],
+              component = recode(component, efficiency = "Efficiency", acceleration = "Acceleration"),
+              est = estimate, lo = ci.lb, hi = ci.ub)
+  xmeta <- bind_rows(xs_meta(fits, "sex", L$sex, comp_lev), xs_meta(fits, "matEd", L$matEd, comp_lev)) |>
+    transmute(predictor, row = sprintf("Cross-sectional summary (%d languages)", k), kind = KIND[3],
+              component = as.character(component), est, lo = ci.lb, hi = ci.ub)
+  ## row order, bottom -> top within each facet: the two summaries, then datasets
+  lev <- c(unique(xmeta$row), unique(lmeta$row), rev(unname(LONG_LAB)))
+  d <- bind_rows(dat, lmeta, xmeta) |>
+    mutate(component = factor(component, levels = comp_lev),
+           predictor = factor(unname(PRED[predictor]), levels = unname(PRED)),
+           kind = factor(kind, levels = KIND), row = factor(row, levels = lev))
+  band <- d |> filter(kind == KIND[3])
+  facet <- if (is.null(strips)) facet_grid(predictor ~ component, scales = "free_y", space = "free_y") else
+    ggh4x::facet_grid2(predictor ~ component, scales = "free_y", space = "free_y", strip = strips)
+  ggplot(d, aes(est, row, colour = component, shape = kind)) +
+    geom_rect(data = band, aes(xmin = lo, xmax = hi, fill = component), ymin = -Inf, ymax = Inf,
+              inherit.aes = FALSE, alpha = 0.12) +
+    geom_vline(xintercept = 0, linetype = "dashed", colour = "grey60", linewidth = 0.3) +
+    geom_hline(yintercept = 2.5, colour = "grey75", linewidth = 0.3) +   # summaries | datasets
+    geom_errorbar(aes(xmin = lo, xmax = hi), width = 0, linewidth = 0.4) +
+    geom_point(aes(size = kind), fill = "white", stroke = 0.7) +
+    scale_size_manual(values = SZ, guide = "none") +
+    scale_shape_manual(values = SHP, guide = "none") +   # the row labels name every marker
+    scale_colour_manual(values = pal, guide = "none") +
+    scale_fill_manual(values = pal, guide = "none") +
+    facet +
+    labs(x = "effect, 95% CI (efficiency in logits; acceleration in \u03ba units)", y = NULL) +
+    base_theme + theme(panel.grid.minor = element_blank(),
+                       strip.text.y = element_text(lineheight = 0.9))
 }
