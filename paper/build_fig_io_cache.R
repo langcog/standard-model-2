@@ -66,6 +66,25 @@ stopifnot(nrow(panelA_anchors) == 6)   # all six _2k summaries must be present
 panelA <- list(curves = panelA_curves, anchors = panelA_anchors,
                sr_band = c(0.32, 0.58), sr_main = 0.44, meta = c(0.04, 0.07))
 
+## ---- Input in real units (Fig 5 top axis; SI sigma_r tables) ----
+## From the fitted bundle's recordings: each child's mean log tokens/hour, the
+## raw (measurement-noise-inclusive) SD of those means within each dataset,
+## and a reference rate = geometric mean of the four datasets' geometric means,
+## at which sigma_r is translated into words-per-hour percentile ranges.
+b_ct <- readRDS(here("fits", "joint_io_proc_english_count_subset_data.rds"))
+DS <- c(adams_marchman_2018 = "AM2018", BabyView = "BabyView", fmw_2013 = "FMW2013",
+        FMW2013 = "FMW2013", SEEDLingS = "SEEDLingS")
+kid_in <- b_ct$input_recs |>
+  left_join(b_ct$child_info |> select(ii, dataset_name), by = "ii") |>   # `study` is an integer index
+  group_by(dataset = unname(DS[dataset_name]), ii) |>
+  summarise(m = mean(log_input), n_rec = n(), .groups = "drop")
+by_ds <- kid_in |> group_by(dataset) |>
+  summarise(n_children = n(), n_recordings = sum(n_rec), gm_rate = exp(mean(m)), raw_sd = sd(m), .groups = "drop")
+panelA$input_ref <- list(
+  ref_rate = exp(mean(log(by_ds$gm_rate))),
+  by_dataset = by_ds,
+  pooled_raw_sd = sqrt(sum((by_ds$n_children - 1) * by_ds$raw_sd^2) / sum(by_ds$n_children - 1)))
+
 ## ---- Panel B: joint io-proc COEFFICIENTS (per-SD effects, EN+count +proc fit) ----
 ## The four channel x trait per-SD effects (log-odds), same numbers the schematic draws:
 ##   Efficiency:   Input = sigma_r,        Processing = |eff_proc_xi|  (faster -> higher xi)

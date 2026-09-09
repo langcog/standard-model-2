@@ -26,7 +26,7 @@ plus the fitted io-proc bundle. R deps beyond the tidyverse: `patchwork`, `ggh4x
 | **SI** cross-sectional by-language forests: (A) sex, 28 languages; (B) maternal education, 12 | `fig_S_demographics_xsec.R` → `make_demographics_composite(forests_only = TRUE)` | 2 col, 7.01 × 5.2 | the forests that leave the main figure under the prototype |
 | Data entering the io-proc analysis: CDI trajectories, LWL RT, observed input | `fig_data.R` → `data_check_io_panels.R` | 2 col, 7.01 × 3.7 | dataset small multiples (rows = streams, columns = datasets, empty cell = not collected), stream colours |
 | io-proc coefficients — each channel fit alone vs jointly (experiments.md #43) | `fig_ioproc.R` | 1 col, 3.43 × 2.67 | single panel, no letter, laid out like the demographics meta panel: predictor rows (channel-tinted strips) × trait columns, joint (filled circle) over separate (open diamond); acceleration in κ units like the demographics figure and the text; 95% CIs from the draws files (experiments.md #43 addendum) |
-| Imputed population input share vs the meta-analytic 4–7% range (σ_r sweep + six anchors) | `fig_imputed_meta.R` | 1 col, 3.43 × 3.08 | input hue, direct-labelled English / Norwegian (experiments.md #45) |
+| Imputed population input share vs the meta-analytic 4–7% range (σ_r sweep + six anchors) | `fig_imputed_meta.R` | 1 col, 3.43 × 3.08 | input hue, direct-labelled English / Norwegian (experiments.md #45); top axis = 10th–90th percentile of input in words/h at the datasets' reference rate (`panelA$input_ref`) |
 
 ## Style conventions (every figure)
 

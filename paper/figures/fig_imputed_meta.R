@@ -5,8 +5,9 @@
 ## refit anchors at sigma_r = {0.35, 0.44, 0.58} with 95% CIs, the plausible
 ## sigma_r band [0.32, 0.58] and the meta-analytic 4-7% band. Both curves are
 ## in the input hue (CHANNEL_PAL) -- the quantity is input's share -- and are
-## direct-labelled by language (solid English, dashed Norwegian). No panel
-## letter: single panel.
+## direct-labelled by language (solid English, dashed Norwegian). The top axis
+## translates sigma_r into the 10th-90th percentile range of input in words per
+## waking hour at the datasets' reference rate. No panel letter: single panel.
 ##
 ## Reads: paper/cache/fig_io_imputed_proc.rds (panelA; built by
 ##        paper/build_fig_io_cache.R from the _2k anchor fits).
@@ -15,6 +16,12 @@ source(here::here("paper", "figures", "_common.R"))
 
 io_fig <- readRDS(file.path(CACHE, "fig_io_imputed_proc.rds"))
 a <- io_fig$panelA
+## top axis: what each sigma_r means in words per waking hour -- the 10th-90th
+## percentile range of children's input at the reference rate (geometric mean of
+## the four datasets' geometric means; a$input_ref, built by build_fig_io_cache.R)
+ref  <- a$input_ref$ref_rate
+kfmt <- function(x) format(round(x, -1), big.mark = ",", trim = TRUE)
+pct_range <- function(s) sprintf("%s\u2013%s", kfmt(ref * exp(-qnorm(0.9) * s)), kfmt(ref * exp(qnorm(0.9) * s)))
 pct <- scales::percent_format(accuracy = 1)
 LANG <- c(`English (D)` = "English", `Norwegian (D)` = "Norwegian")
 curves  <- a$curves  |> mutate(model = LANG[model])
@@ -41,7 +48,10 @@ p <- ggplot() +
            parse = TRUE, size = TXT, color = "grey30") +
   scale_linetype_manual(values = c(English = "solid", Norwegian = "22"), guide = "none") +
   scale_y_continuous(labels = pct, limits = c(0, 0.22), expand = expansion(mult = c(0, 0.02))) +
-  scale_x_continuous(breaks = seq(0.3, 0.8, 0.1), expand = expansion(mult = c(0.02, 0.27))) +
+  scale_x_continuous(breaks = seq(0.3, 0.8, 0.1), expand = expansion(mult = c(0.02, 0.27)),
+                     sec.axis = sec_axis(~ ., breaks = c(0.3, 0.45, 0.6, 0.75), labels = pct_range,
+                                         name = sprintf("10th\u201390th percentile of input (words/h, at %s)",
+                                                        format(round(ref), big.mark = ",")))) +
   labs(x = expression(sigma[r] ~ "(population SD of log input rate)"),
        y = "implied input share of efficiency variance") +
   theme_fig()
