@@ -45,6 +45,7 @@ from transformers import (
 # Allow running from anywhere; ensure local imports work
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from surprisal_callback import WordSurprisalCallback
+from traj_ckpt_callback import TrajectoryCheckpointCallback
 
 
 def main():
@@ -76,6 +77,9 @@ def main():
                          "load the best-val model at end (used for the developmental "
                          "ladder, where each rung is read at convergence). Forces "
                          "per-epoch checkpointing (save_total_limit=1).")
+    ap.add_argument("--traj_save_steps", default="",
+                    help="File of global steps at which to save bf16 weights to "
+                         "output_dir/trajectory/ (plus every epoch end). Default off.")
     ap.add_argument("--max_eval_blocks", type=int, default=0,
                     help="If >0, subsample the val set to this many blocks for the "
                          "per-epoch eval_loss (used for early-stopping/best-model "
@@ -215,6 +219,9 @@ def main():
     )
 
     callbacks = [callback]
+    if args.traj_save_steps:
+        callbacks.append(TrajectoryCheckpointCallback(
+            args.traj_save_steps, args.output_dir, tokenizer))
     if early_stop:
         callbacks.append(EarlyStoppingCallback(
             early_stopping_patience=args.early_stopping_patience))
