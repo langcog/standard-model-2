@@ -30,6 +30,10 @@ class TrajectoryCheckpointCallback(TrainerCallback):
         if getattr(model.config, "tie_word_embeddings", False):
             sd.pop("lm_head.weight", None)  # tied to transformer.wte; restored on load
         model.save_pretrained(d, state_dict=sd, safe_serialization=True)
+        cfg = os.path.join(d, "config.json")  # config says fp32 (live model); weights are bf16
+        c = json.load(open(cfg))
+        c["torch_dtype"] = "bfloat16"
+        json.dump(c, open(cfg, "w"), indent=2)
         self.tokenizer.save_pretrained(d)
         lr = next((h["learning_rate"] for h in reversed(state.log_history)
                    if "learning_rate" in h), None)

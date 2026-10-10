@@ -354,6 +354,44 @@ corpus-invariant frequency structure). MCF committed to genuine interpretation e
 
 ---
 
+## 🟢 L8. ccn2 — 24M-rung retrain with log-spaced trajectory checkpoints (2026-10-09)
+
+**Why.** The HF ladder holds only best-val endpoints; no intermediate weights survived anywhere
+(ccn2 `/data2`, Oak `flatlr_grammar-archive` = final step only, Sherlock scratch purged;
+Marlowe unchecked, needs Duo). Collaborators want weights along training for the largest rung.
+
+**What.** Seeds 42, 0, 123 × the 24M rung, L6 config verbatim (byte-identical chunks, 40-epoch
+linear-decay horizon, ES patience 4) + new `--traj_save_steps` (`studies/llm/traj_ckpt_callback.py`):
+bf16 snapshots at step 0, 60 log-spaced steps to 12 epochs (67,464), and every epoch end, written
+outside the Trainer's checkpoint rotation. Per-word CDI surprisal scored offline at every
+checkpoint (`ckpt24m/score_ckpts.py`, same contexts/settings as the ladder). Spec:
+[`studies/llm/ckpt24m/SPEC.md`](../studies/llm/ckpt24m/SPEC.md).
+
+**Smoke (seed 42, 0.5M).** 74/74 expected checkpoints; with-saving run vs published r = 0.989
+(−0.040 nats) ≈ untouched control r = 0.990 (−0.039) → saving does not perturb training;
+reloaded best checkpoint reproduces in-run eval r = 1.0000.
+
+**Result — all gates pass** (`ckpt24m/check_24m.py`):
+
+| seed | ckpts | best step (epoch) / stop | best val loss (L6) | best vs published 24M |
+|---|---|---|---|---|
+| 42 | 68 | 33,732 (6) / 56,220 | 1.3199 (1.3195) | r = 0.988, +0.019 |
+| 0 | 70 | 39,326 (7) / 61,798 | 1.3242 (1.3236) | r = 0.984, −0.001 |
+| 123 | 70 | 39,347 (7) / 61,831 | 1.3238 (1.3205) | r = 0.986, +0.039 |
+
+Trajectory checkpoint at the best step = ES-selected model (r = 1.0000, |Δ| ≤ 0.0002) for all
+three. Checkpoints after the best epoch are past the val minimum (overfitting); kept and labeled.
+
+**Compute.** ~4.5 h/run on 3 A40s in parallel (3.65 it/s uncontended; briefly co-tenanted
+until the node was cleared) + ~1 h offline scoring. 17 GB GPU memory per run (not 31).
+~17 GB of bf16 checkpoints per seed.
+
+**Artifacts.** HF `mcxfrank/childes-gpt2-ladder` (public) under
+`trajectory/seed{S}/rung24M/{step-NNNNNN/, log_history.json, surprisal.csv}` + model-card
+section; ccn2 `/data2/mcfrank/ladder/ckpt24m/`; Oak `childes-ladder-trajectory/`. Checkpoint configs were saved saying fp32 (fixed post-upload: torch_dtype=bfloat16, callback patched). Commits `dc69493`, `d3605a2`.
+
+---
+
 ## Infrastructure & environment
 
 - **Data provenance.** All self-contained in the public `styfeng/TinyDialogues`
