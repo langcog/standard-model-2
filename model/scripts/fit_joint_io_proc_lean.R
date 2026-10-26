@@ -41,7 +41,13 @@ sd$delta_prior_sd <- as.numeric(Sys.getenv("STAN_DELTA_SD", unset = "10"))
 tau_sfx <- if (TAU_SLOPE != 1) sprintf("_tau%g", TAU_SLOPE) else ""
 b_sfx   <- if (grepl("inputmulti", BUNDLE)) "_imulti" else if (grepl("bilingual", BUNDLE)) "_bi" else if (grepl("english_count", BUNDLE)) "_enct" else ""
 STAN_MODEL <- Sys.getenv("STAN_MODEL", unset = "model/stan/log_irt_long_proc_dp_joint_lean.stan")
-m_sfx   <- if (grepl("rasch", STAN_MODEL)) "_rasch" else if (grepl("io_count", STAN_MODEL)) "_io" else if (grepl("proc_count", STAN_MODEL)) "_proc" else ""
+## Free-lambda variant: prior on the coefficient of d_i in xi (fixed at 1 in the other models).
+## STAN_LAMBDA_D_SD=0.001 pins it at 1, reproducing log_irt_long_proc_bilingual.stan.
+if (grepl("free_lambda", STAN_MODEL)) {
+  sd$lambda_d_prior_mean <- 1
+  sd$lambda_d_prior_sd   <- as.numeric(Sys.getenv("STAN_LAMBDA_D_SD", unset = "2"))
+}
+m_sfx   <- if (grepl("free_lambda", STAN_MODEL)) "_freelam" else if (grepl("rasch", STAN_MODEL)) "_rasch" else if (grepl("io_count", STAN_MODEL)) "_io" else if (grepl("proc_count", STAN_MODEL)) "_proc" else ""
 sub_sfx <- if (grepl("sub[0-9]", BUNDLE)) paste0("_", sub(".*(sub[0-9][^.]*)\\.rds$", "\\1", BUNDLE)) else ""
 TAG <- sprintf("joint_io_proc_lean%s_d%d%s%s%s", m_sfx, rung, b_sfx, tau_sfx, sub_sfx)
 TAG <- paste0(TAG, Sys.getenv("STAN_TAG_SFX", ""))   # optional suffix (e.g. convergence refit)
@@ -67,7 +73,7 @@ init_full <- list(
   delta = 7, s = 0.01,
   sigma_alpha = 1, sigma_zeta = 1, sigma_rt0 = 0.143, sigma_lwl = 0.24,
   mu_c = rep(8, sd$C), tau_c = rep(1, sd$C), sigma_lambda = 0.001,
-  gamma_in = 0, beta_xi = 0, beta_k0 = 0,
+  gamma_in = 0, beta_xi = 0, beta_k0 = 0, lambda_d = 1,
   sigma_r = 0.44, mu_r_s = sd$mu_r_s_prior_mean, sigma_meas = rep(0.3, sd$n_instr)
 )
 init_fun <- function() init_full[intersect(names(init_full), MPARS)]   # drop s/sigma_lambda for rasch
@@ -80,7 +86,7 @@ cat("\n=== diagnostics ===\n")
 dg <- fit$diagnostic_summary()
 cat(sprintf("divergences=%d  treedepth=%d\n", sum(dg$num_divergent), sum(dg$num_max_treedepth)))
 
-SCALARS <- c("gamma_in","beta_xi","beta_k0","eff_input_k","eff_proc_xi","eff_proc_k",
+SCALARS <- c("lambda_d","eff_input_xi","gamma_in","beta_xi","beta_k0","eff_input_k","eff_proc_xi","eff_proc_k",
              "delta","s","sigma_r","sigma_alpha","sigma_zeta","sigma_rt0","sigma_lwl","sigma_lambda","psi",
              "sigma_xi","sigma_kappa",
              "share_input_xi","share_proc_xi","share_resid_xi",
