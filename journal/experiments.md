@@ -2956,5 +2956,12 @@ max r̂ 1.024.
   LENA–vocabulary meta-analytic ruler (1.16 [0.81, 1.69]) and the SEEDLingS within-child lagged
   noun-exposure ruler (0.57 [0.51, 0.63]); it can't discriminate between them.
 
-**Next.** Option: pass a ruler as the λ_d prior (e.g. N(1.16, 0.22)) instead of pinning at 1, so
-the input→efficiency interval carries the ruler's uncertainty.
+**Ruler prior (2026-10-27).** Same fit with the LENA ruler as the prior, λ_d ~ N(1.16, 0.22)
+(normal approximation to 1.16 [0.81, 1.69]). Posterior **λ_d = 0.99 [0.58, 1.37]** (r̂ 1.001,
+ess 1361; chain means 0.98–1.00) — the precision-weighted combination of the ruler and the free
+estimate (≈ 1.00 ± 0.20), as expected when the CDI data add little. Input→eff 0.34 [0.20, 0.48]
+(vs 0.35 [0.31, 0.39] pinned: same centre, ~3.5× wider); input share of ξ var 3.0% [1.0, 5.7];
+input→accel 0.68 [−0.06, 1.44]; δ 10.29, σ_ζ 4.30, proc→eff −0.75 unchanged. 0 divergences.
+γ_in mixes slowly as in every fit of this model (ess 69, r̂ 1.095 here; 97 / 1.017 pinned).
+**For the paper:** λ = 1 is well supported, but Fig. 4's input→efficiency interval should be
+the ruler-prior one, [0.20, 0.48], not the pinned [0.31, 0.39].
