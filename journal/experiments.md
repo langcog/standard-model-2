@@ -2914,3 +2914,47 @@ the (α,ζ) ridge at ρ = −0.23) even at 2000 iters — report ESS honestly in
 than burn another week. Caches rebuilt: `fig_io_imputed_proc.rds` (six anchors),
 `io_partition.rds` (0.44 pins). The 1000-iter CSVs were deleted; the six `_2k` CSV sets
 (1.2 TB) kept on scratch for one more pass in case other columns are wanted.
+
+---
+
+## 🟢 46. Free the input coefficient on efficiency (λ_d) in the Fig. 4 io+proc model (2026-10-26)
+
+**Question (GK).** Eqs. 3–4 put the measured input deviation into efficiency with coefficient 1
+(footnote †: ξ_i = μ_ξ + d_i + …). The counts pin σ_r, but the input→efficiency effect in
+Fig. 4 (σ_r × 1 = 0.35) is then the λ = 1 assumption, not an estimate. Can the CDI trajectories
+estimate the coefficient (logits per log-token) themselves?
+
+**Setup.** `log_irt_long_proc_bilingual_free_lambda.stan` = the bi-lean model with one change:
+`xi = mu_r + lambda_d * log_r_dev + beta_xi * rt0 + log_alpha`, `lambda_d ~ N(1, 2)`
+(`STAN_LAMBDA_D_SD=0.001` pins it at 1). EN+count bundle (I=413, n_sum=95, N=829,018), rung D'2,
+priors/inits as `fit_joint_io_proc_lean.R`. Run locally with rstan (4 × 2000/1000, 3 threads,
+adapt_delta 0.95), free then pinned; ~3.3 h each. Driver: GK's `standard-model` repo,
+`models/sm2_lambda/fit_sm2_free_lambda.R` (rebuilt bundles from `prepare_*` scripts).
+
+**Pinned fit reproduces exp. 39 `_2k`** — validates the rebuilt bundle: input→accel 0.72
+[−0.02, 1.44] (journal 0.72 [0.13, 1.32]), δ 10.29, σ_ζ 4.29, proc→eff −0.74; 0 divergences,
+max r̂ 1.024.
+
+**Result.**
+
+| | λ_d pinned = 1 | λ_d free |
+|---|--:|--:|
+| λ_d | 1 | **0.35 [−0.51, 1.22]** (r̂ 1.03, ess 212) |
+| input→eff (λ_d σ_r) | 0.35 [0.31, 0.39] | 0.13 [−0.18, 0.42] |
+| input→accel (eff_input_k) | 0.72 [−0.02, 1.44] | 0.83 [0.19, 1.53] |
+| input share of ξ var | 3.0% [2.3, 3.9] | 1.0% [0.0, 4.5] |
+| proc→eff | −0.74 | −0.77 |
+| σ_r / δ / σ_ζ | 0.35 / 10.29 / 4.29 | 0.35 / 10.29 / 4.27 |
+
+- **The CDI data barely identify λ_d.** The interval spans 0 to 1.2; P(λ_d < 1) = 0.93,
+  P(λ_d > 0) = 0.80. All four chains agree (chain means 0.23–0.44), 0 divergences.
+- **So the narrow input→efficiency interval in Fig. 4 is the λ = 1 assumption.** With σ_r 0.35
+  and σ_ξ ≈ 2, input explains ~3% of efficiency variance at most; 413 children can't see the slope.
+- **Not a trade-off with acceleration:** corr(λ_d, γ_in) = −0.20. Freeing λ_d leaves σ_r, δ, σ_ζ,
+  proc→eff unchanged and slightly strengthens input→accel (CI now clears 0).
+- **External rulers are needed to pin λ.** The free estimate is consistent with the
+  LENA–vocabulary meta-analytic ruler (1.16 [0.81, 1.69]) and the SEEDLingS within-child lagged
+  noun-exposure ruler (0.57 [0.51, 0.63]); it can't discriminate between them.
+
+**Next.** Option: pass a ruler as the λ_d prior (e.g. N(1.16, 0.22)) instead of pinning at 1, so
+the input→efficiency interval carries the ruler's uncertainty.
