@@ -1,0 +1,28 @@
+
+== lr20, y = delta198, n = 195  (10-fold CV R^2, 30 repeats)
+  class only                            0.183
+  class + log_p (common slope)          0.170
+  class x log_p (class slopes)          0.212
+  class x log_p + n_ph                  0.250
+  class x log_p + log_p^2               0.398
+  class x log_p + log_p^2 + n_ph        0.401
+  class x log_p + log_p^2 + log_t       0.497
+  class x log_t (CLASSIC only)          0.416
+  class + log_t                         0.395
+  class x log_p + log_t                 0.499
+  class x log_p + class x log_t         0.502
+  class x log_p + log_t + log_tok       0.495
+
+== lr20, y = emp_diff, n = 676  (10-fold CV R^2, 30 repeats)
+  class only                            0.157
+  class + log_p (common slope)          0.178
+  class x log_p (class slopes)          0.251
+  class x log_p + n_ph                  0.262
+  class x log_p + log_p^2               0.373
+  class x log_p + log_p^2 + n_ph        0.377
+  class x log_p + log_p^2 + log_t       0.466
+  class x log_t (CLASSIC only)          0.421
+  class + log_t                         0.394
+  class x log_p + log_t                 0.467
+  class x log_p + class x log_t         0.477
+  class x log_p + log_t + log_tok       0.464

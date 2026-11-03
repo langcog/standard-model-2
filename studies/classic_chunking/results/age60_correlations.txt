@@ -1,0 +1,38 @@
+
+=== age60  y=delta198 (N=60000 utts; 195 items; mean frac learned 0.79)
+predictor  spearman_w_delta  pearson_w_delta
+    log_p             0.084            0.168
+     n_ph            -0.053           -0.030
+    log_t             0.138            0.155
+  log_tok             0.138            0.136
+     frac            -0.073           -0.137
+partials vs delta_j (Pearson of residuals):
+  log_t | log_p: +0.323   | log_p, n_ph: +0.334
+  log_tok | log_p: +0.063   | log_p, n_ph: +0.067
+R2 delta ~ log_p 0.028; + n_ph 0.032; + log_t 0.130; + log_tok 0.032; + n_ph + log_t 0.140; log_t alone 0.024
+by lexical class (spearman delta vs log_t | n):
+  cc=1: +0.557 (n=49); log_p -0.475
+  cc=2: +0.670 (n=57); log_p -0.592
+  cc=3: +0.437 (n=40); log_p +0.225
+  cc=4: +0.296 (n=49); log_p -0.129
+class-FE R2: {'class': np.float64(0.217), '+log_p': np.float64(0.218), '+log_p+n_ph': np.float64(0.242), '+log_t': np.float64(0.421), '+log_p+log_t': np.float64(0.497), '+log_p+n_ph+log_t': np.float64(0.508)}
+partial r(log_t, delta | class, log_p) = +0.598 95% boot CI [0.482 0.7  ];  dR2 over class+log_p = 0.280 CI [0.169 0.391]
+
+=== age60  y=emp_diff (N=60000 utts; 677 items; mean frac learned 0.73)
+predictor  spearman_w_delta  pearson_w_delta
+    log_p            -0.103            0.008
+     n_ph             0.011            0.026
+    log_t             0.265            0.195
+  log_tok            -0.025           -0.028
+     frac            -0.235           -0.282
+partials vs delta_j (Pearson of residuals):
+  log_t | log_p: +0.261   | log_p, n_ph: +0.267
+  log_tok | log_p: -0.038   | log_p, n_ph: -0.038
+R2 delta ~ log_p 0.000; + n_ph 0.001; + log_t 0.068; + log_tok 0.001; + n_ph + log_t 0.072; log_t alone 0.038
+by lexical class (spearman delta vs log_t | n):
+  cc=1: +0.523 (n=100); log_p -0.406
+  cc=2: +0.714 (n=323); log_p -0.672
+  cc=3: +0.434 (n=89); log_p +0.088
+  cc=4: +0.391 (n=165); log_p -0.260
+class-FE R2: {'class': np.float64(0.167), '+log_p': np.float64(0.194), '+log_p+n_ph': np.float64(0.21), '+log_t': np.float64(0.396), '+log_p+log_t': np.float64(0.416), '+log_p+n_ph+log_t': np.float64(0.418)}
+partial r(log_t, delta | class, log_p) = +0.525 95% boot CI [0.454 0.587];  dR2 over class+log_p = 0.222 CI [0.163 0.279]

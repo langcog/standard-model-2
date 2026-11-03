@@ -25,6 +25,7 @@ Two kinds of study live here:
 | Fig 5 (LLM acceleration) | `llm/` (stub) | `model/scripts/feng_eval/` | `fits/feng_eval/`, `fits/glmer_mbest_*` | `paper/cache/fig6_llm_slopes.rds` |
 | Table 1 (dataset inventory) | (all) | `paper/build_table1.R` | reads all bundles above | `paper/cache/table1_datasets.csv` |
 | σ_r literature band | `input_estimation/` | `studies/input_estimation/*.R` | `studies/input_estimation/validation_set.csv` | — |
+| (exploratory, not in paper) CLASSIC chunking vs δ_j | `classic_chunking/` | `studies/classic_chunking/run_all.sh` | `studies/classic_chunking/results/` | — |
 
 The narrative history behind each of these lives in [`/journal/experiments.md`](../journal/experiments.md)
 (child models + input/processing) and [`/journal/experiments_llm.md`](../journal/experiments_llm.md) (LLM work).
