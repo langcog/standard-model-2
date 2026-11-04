@@ -75,7 +75,7 @@ F = pd.DataFrame(rows)
 F.to_csv(f'{W}/item_features_{TAG}.csv', index=False)
 
 FEATS = ['p_final', 'p_alone', 'log_len', 'ctx_ent']
-for ycol in ('delta198', 'emp_diff'):
+for ycol in ('delta198', 'delta681', 'emp_diff'):
     with contextlib.redirect_stdout(io.StringIO()):
         d = A.table(TAG, ycol)
     d = d.merge(F, on='jj').copy()

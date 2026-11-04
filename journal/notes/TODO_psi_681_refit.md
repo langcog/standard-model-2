@@ -49,6 +49,8 @@ not in the checkout, so Fig 4 was not rebuilt here.
 4. Drop the stale `jj`-keyed copies in `fits/summaries/long_no_freq_slopes_{english_I200,norwegian}_psi.csv`
    from consumers if they are joined positionally anywhere (not audited here).
 
-## Why it matters for CLASSIC
-`studies/classic_chunking/` can now test on all 681 items with a δ_j from v2's fit instead of the 197-item
-named fit plus empirical difficulty.
+## CLASSIC study
+`studies/classic_chunking/` now also tests on all 681 items with the aligned δ_j (`delta681`, n = 677 heard in
+the streams). Result matches the 195-item and empirical-difficulty tests (CLASSIC +0.10 CV R² over the best
+frequency baseline; +0.03 once utterance-length/position/context features are in). It is the June fit re-keyed,
+so rerun after the refit.

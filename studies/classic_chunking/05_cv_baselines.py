@@ -25,7 +25,7 @@ models = {
     'class x log_p + class x log_t':       ['class*log_p', 'class*log_t'],
     'class x log_p + log_t + log_tok':     ['class*log_p', 'log_t', 'log_tok'],
 }
-for ycol in ('delta198', 'emp_diff'):
+for ycol in ('delta198', 'delta681', 'emp_diff'):
     with contextlib.redirect_stdout(io.StringIO()):
         d = A.table(tag, ycol)
     d = d.copy()

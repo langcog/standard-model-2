@@ -35,6 +35,42 @@ what predicts log_t? partial r(feature, log_t | class, log_p):
     drop n_ph     +0.003
   partial r(log_t, difficulty | class, log_p, features, n_ph) = +0.491  95% boot CI [0.374 0.609]
 
+== n120k, y = delta681, n = 677 (items with >= 5 tokens in ages 10-36 mo)
+
+item features vs frequency / difficulty (Spearman):
+         delta  log_p  log_t
+log_p    -0.10   1.00  -0.82
+log_cnt  -0.18   0.85  -0.94
+p_final  -0.34  -0.43   0.36
+p_alone  -0.40  -0.29   0.19
+log_len   0.40   0.15  -0.01
+ctx_ent   0.12   0.66  -0.59
+n_ph      0.02  -0.54   0.64
+log_t     0.26  -0.82   1.00
+
+what predicts log_t? partial r(feature, log_t | class, log_p):
+  p_final +0.03  p_alone -0.19  log_len +0.18  ctx_ent -0.26  n_ph +0.36
+  R2 of log_t on class+log_p+log_p^2 0.735; + features + n_ph 0.819 (unexplained share 0.181)
+
+10-fold CV R^2 (30 repeats):
+  B   class x log_p + log_p^2                         0.362
+  B + features                                        0.497
+  B + features + n_ph                                 0.505
+  B + log_t                                           0.459
+  B + features + n_ph + log_t                         0.538
+  Bc  class x log_cnt (CHILDES) + sq                  0.375
+  Bc + features + n_ph                                0.504
+  Bc + features + n_ph + log_t                        0.516
+  class x log_t + features + n_ph (no frequency)      0.512
+  increment of log_t over B: +0.097;  over B + features + n_ph: +0.033
+  leave-one-feature-out (from B + features + n_ph + log_t), change in CV R^2:
+    drop p_final  -0.007
+    drop p_alone  +0.002
+    drop log_len  -0.037
+    drop ctx_ent  -0.003
+    drop n_ph     +0.002
+  partial r(log_t, difficulty | class, log_p, features, n_ph) = +0.465  95% boot CI [0.398 0.527]
+
 == n120k, y = emp_diff, n = 676 (items with >= 5 tokens in ages 10-36 mo)
 
 item features vs frequency / difficulty (Spearman):

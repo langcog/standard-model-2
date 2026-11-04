@@ -13,6 +13,20 @@
   class x log_p + class x log_t         0.497
   class x log_p + log_t + log_tok       0.492
 
+== n15k, y = delta681, n = 677  (10-fold CV R^2, 30 repeats)
+  class only                            0.148
+  class + log_p (common slope)          0.162
+  class x log_p (class slopes)          0.242
+  class x log_p + n_ph                  0.258
+  class x log_p + log_p^2               0.362
+  class x log_p + log_p^2 + n_ph        0.369
+  class x log_p + log_p^2 + log_t       0.415
+  class x log_t (CLASSIC only)          0.356
+  class + log_t                         0.317
+  class x log_p + log_t                 0.406
+  class x log_p + class x log_t         0.431
+  class x log_p + log_t + log_tok       0.446
+
 == n15k, y = emp_diff, n = 676  (10-fold CV R^2, 30 repeats)
   class only                            0.157
   class + log_p (common slope)          0.178

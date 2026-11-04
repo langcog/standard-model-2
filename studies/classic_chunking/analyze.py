@@ -111,7 +111,7 @@ def fe(d, nboot=2000, seed=0):
 
 if __name__ == '__main__':
     for t in TAGS:
-        for ycol in ('delta198', 'emp_diff'):
+        for ycol in ('delta198', 'delta681', 'emp_diff'):
             d = table(t, ycol)
             fe(d)
             if t == 'main' and ycol == 'emp_diff':

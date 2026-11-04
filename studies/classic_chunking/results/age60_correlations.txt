@@ -18,6 +18,25 @@ by lexical class (spearman delta vs log_t | n):
 class-FE R2: {'class': np.float64(0.217), '+log_p': np.float64(0.218), '+log_p+n_ph': np.float64(0.242), '+log_t': np.float64(0.421), '+log_p+log_t': np.float64(0.497), '+log_p+n_ph+log_t': np.float64(0.508)}
 partial r(log_t, delta | class, log_p) = +0.598 95% boot CI [0.482 0.7  ];  dR2 over class+log_p = 0.280 CI [0.169 0.391]
 
+=== age60  y=delta681 (N=60000 utts; 678 items; mean frac learned 0.73)
+predictor  spearman_w_delta  pearson_w_delta
+    log_p            -0.099            0.026
+     n_ph             0.019            0.030
+    log_t             0.267            0.203
+  log_tok            -0.009           -0.010
+     frac            -0.226           -0.263
+partials vs delta_j (Pearson of residuals):
+  log_t | log_p: +0.287   | log_p, n_ph: +0.288
+  log_tok | log_p: -0.029   | log_p, n_ph: -0.029
+R2 delta ~ log_p 0.001; + n_ph 0.004; + log_t 0.083; + log_tok 0.002; + n_ph + log_t 0.086; log_t alone 0.041
+by lexical class (spearman delta vs log_t | n):
+  cc=1: +0.521 (n=101); log_p -0.407
+  cc=2: +0.726 (n=323); log_p -0.675
+  cc=3: +0.401 (n=89); log_p +0.113
+  cc=4: +0.409 (n=165); log_p -0.262
+class-FE R2: {'class': np.float64(0.159), '+log_p': np.float64(0.18), '+log_p+n_ph': np.float64(0.2), '+log_t': np.float64(0.386), '+log_p+log_t': np.float64(0.412), '+log_p+n_ph+log_t': np.float64(0.413)}
+partial r(log_t, delta | class, log_p) = +0.532 95% boot CI [0.46  0.596];  dR2 over class+log_p = 0.232 CI [0.17  0.297]
+
 === age60  y=emp_diff (N=60000 utts; 677 items; mean frac learned 0.73)
 predictor  spearman_w_delta  pearson_w_delta
     log_p            -0.103            0.008
