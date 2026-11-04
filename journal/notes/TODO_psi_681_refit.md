@@ -1,7 +1,10 @@
-# TODO — refit δ_j on the current 681-item bundle (psi alignment done, refit open)
+# TODO — import δ_j from the clean-bundle refit (psi alignment done; refit already ran, file not pulled)
 
 Opened 2026-11-04 (from the CLASSIC study, `studies/classic_chunking/`). Alignment fix on branch
-`fix/psi-681-alignment`; the refit itself is **not done**.
+`fix/psi-681-alignment`. **Correction (same day):** a refit on the current bundle already exists — the six
+`_2k` imputed refits (2000/1000, adapt_delta 0.97) finished sampling on Sherlock and were recovered
+2026-09-03 (`journal/notes/imputed_refit_plan.md`, `journal/experiments.md` #45). Only the scalar summaries
+were used; the per-word δ_j was never imported here.
 
 ## What was wrong
 `fits/summaries/long_no_freq_slopes_psi.csv` (682 rows, `jj, delta_j_mean, delta_j_median`, no item column)
@@ -38,12 +41,19 @@ not in the checkout, so Fig 4 was not rebuilt here.
   cor with production difficulty (22–28 mo) 0.984, cor 0.969 with the independent 197-item named fit.
 - `model/R/psi_anchor.R`: `load_en_psi_by_name()` (requires an `item` column and an item-set match with
   the bundle, else stops) and `check_anchor_coverage()` (stops on 0 anchored). The three consumers use them.
+- `--refit <psi.csv>` mode in `export_psi_aligned.R` for step 1 below (plumbing tested with a stand-in file; not
+  run on real refit output because it is not in this checkout).
 - Not changed: shipped bundles in `fits/` and everything fitted from them.
 
 ## Still open
-1. **Refit** the EN longitudinal model on the current 4.25M-row bundle (cluster; GCP/Sherlock scripts in
-   `cluster/`) and export psi with `item`; the aligned file carries June-fit values on the old data.
-   Expect δ_j to move; compare to the aligned file first (should still correlate ~0.98 with it).
+1. **Import the existing refit's δ_j (no new fit needed).** `cluster/sherlock/recover_from_csvs.R` writes
+   `$SCRATCH/standard_model_2/fits/summaries/<tag>_psi.csv` (columns `jj, delta_j_median`, jj = bundle row)
+   whenever the CSVs hold `delta_j`. Use the main pin, `no_freq_slopes_sigmaR_0p44_2k` (0p35/0p58 are
+   sensitivity). Pull it, then
+   `Rscript model/scripts/export_psi_aligned.R --refit fits/summaries/no_freq_slopes_sigmaR_0p44_2k_psi.csv`
+   (refuses a wrong-size/wrong-jj file, requires cor ≥ 0.9 with production). If the `_psi.csv` is missing,
+   re-run `recover_csvs.slurm` for that tag (the 1.2 TB of `csvs_*_2k` may still be on scratch).
+   Compare to the June-aligned file first (should still correlate ~0.98; scalar δ moved 10.7 → 9.9).
 2. Decide whether to re-anchor `io_am2018` / `seedlings` (May vintage) to the current psi, and re-fit.
 3. Rebuild Fig 4 (`paper/build_cache.R`) once the draws file is available; the name join now returns 681 rows.
 4. Drop the stale `jj`-keyed copies in `fits/summaries/long_no_freq_slopes_{english_I200,norwegian}_psi.csv`
