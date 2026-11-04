@@ -119,13 +119,9 @@ cat(sprintf("  I=%d, A=%d, J=%d, C=%d, V=%d, S=%d, meas types=%d\n",
             I, A, J, C, V, S, n_distinct(meas_of_study)))
 
 ## ---- 3. delta_j anchor from the EN longitudinal fit ---------------
-en_b   <- readRDS(file.path(PATHS$fits_dir, "long_subset_data.rds"))
-en_psi <- read_csv(file.path(PATHS$fits_dir, "summaries",
-                              "long_no_freq_slopes_psi.csv"),
-                   show_col_types = FALSE)
-en_delta <- en_b$word_info |> select(jj, item) |>
-  inner_join(en_psi |> select(jj, delta_j_median), by = "jj") |>
-  mutate(item_norm = norm_it(item)) |>
+source("model/R/psi_anchor.R")
+en_delta <- load_en_psi_by_name(PATHS$fits_dir) |>      # joined to the bundle by item NAME, never by jj
+  mutate(item_norm = norm_it(item_definition)) |>
   group_by(item_norm) |> slice(1) |> ungroup() |>
   select(item_norm, delta_anchor = delta_j_median)
 en_mu <- median(en_delta$delta_anchor)
@@ -135,6 +131,7 @@ word_info <- word_info |>
   mutate(anchored = !is.na(delta_anchor),
          delta_j_prior_mean = ifelse(anchored, delta_anchor, en_mu),
          delta_j_prior_sd   = ifelse(anchored, 0.10, 5.0))
+check_anchor_coverage(word_info$anchored, "io_pooled")
 cat(sprintf("  delta_j anchored: %d / %d (%d weak-prior)\n",
             sum(word_info$anchored), J, sum(!word_info$anchored)))
 

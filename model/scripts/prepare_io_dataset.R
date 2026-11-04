@@ -133,14 +133,9 @@ cat(sprintf("  CHILDES match: %d obs, %d items kept (%d placeholder freq, %d pla
 
 ## ---- 5. delta_j anchor from the big EN longitudinal fit -----------
 ## EN long fit delta_j (posterior median) keyed by item_definition.
-en_bundle <- readRDS(file.path(PATHS$fits_dir, "long_subset_data.rds"))
-en_psi    <- read_csv(file.path(PATHS$fits_dir, "summaries",
-                                 "long_no_freq_slopes_psi.csv"),
-                      show_col_types = FALSE)
-en_delta  <- en_bundle$word_info |>
-  select(jj, item) |>
-  inner_join(en_psi |> select(jj, delta_j_median), by = "jj") |>
-  select(item, delta_anchor = delta_j_median)
+source("model/R/psi_anchor.R")
+en_delta  <- load_en_psi_by_name(PATHS$fits_dir) |>     # joined to the bundle by item NAME, never by jj
+  select(item = item_definition, delta_anchor = delta_j_median)
 en_mu_delta <- median(en_delta$delta_anchor)   # population fallback
 cat(sprintf("  EN anchor: %d items, mu_delta=%.2f\n",
             nrow(en_delta), en_mu_delta))
@@ -166,6 +161,7 @@ word_info <- word_info |>
   mutate(anchored = !is.na(delta_anchor),
          delta_j_prior_mean = ifelse(anchored, delta_anchor, en_mu_delta),
          delta_j_prior_sd   = ifelse(anchored, 0.10, 5.0))
+check_anchor_coverage(word_info$anchored, "io dataset")
 cat(sprintf("  delta_j anchored: %d / %d items (%d weak-prior fallback)\n",
             sum(word_info$anchored), J, sum(!word_info$anchored)))
 
