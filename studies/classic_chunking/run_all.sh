@@ -21,5 +21,7 @@ python3 03_run_experiment.py work 60000 40 10 36 lr20 0.2
 for t in main n15k n120k age60 lr20; do
   python3 analyze.py work $t > results/${t}_correlations.txt
   python3 05_cv_baselines.py work $t > results/${t}_cv_r2.txt
+  if [ $t = age60 ]; then A='10 60'; else A='10 36'; fi
+  python3 06_features.py work $t $A > results/${t}_features.txt
 done
 cp work/item_table_main.csv work/growth_main.csv results/

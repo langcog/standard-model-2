@@ -1,45 +1,14 @@
 """Fairer baselines: class-specific frequency slopes (v2's M4-style), cross-validated R2.
-usage: python analyze2.py WORKDIR TAG"""
+usage: python 05_cv_baselines.py WORKDIR TAG"""
 import sys
 import io
 import contextlib
 import numpy as np
 import pandas as pd
 import analyze as A
+from cvlib import design, cv_r2  # noqa: F401
 
 tag = sys.argv[2] if len(sys.argv) > 2 else 'main'
-
-
-def design(d, terms):
-    cols = [np.ones(len(d))]
-    cls = pd.get_dummies(d.cc).astype(float)
-    for t in terms:
-        if t == 'class':
-            cols += [cls[c].values for c in cls.columns[1:]]
-        elif t.startswith('class*'):
-            v = d[t.split('*')[1]].values
-            cols += [cls[c].values * v for c in cls.columns]          # class-specific slopes
-            if 'class' not in terms:
-                cols += [cls[c].values for c in cls.columns[1:]]
-        else:
-            cols.append(d[t].values)
-    return np.column_stack(cols)
-
-
-def cv_r2(d, terms, k=10, reps=30, seed=0):
-    y = d.delta_j_median.values
-    X = design(d, terms)
-    rng = np.random.default_rng(seed)
-    vals = []
-    for _ in range(reps):
-        perm = rng.permutation(len(y))
-        pred = np.empty(len(y))
-        for f in np.array_split(perm, k):
-            tr = np.setdiff1d(perm, f)
-            b, *_ = np.linalg.lstsq(X[tr], y[tr], rcond=1e-10)
-            pred[f] = X[f] @ b
-        vals.append(1 - ((y - pred) ** 2).sum() / ((y - y.mean()) ** 2).sum())
-    return np.mean(vals)
 
 
 models = {

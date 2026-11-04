@@ -1,0 +1,72 @@
+
+== n15k, y = delta198, n = 195 (items with >= 5 tokens in ages 10-36 mo)
+
+item features vs frequency / difficulty (Spearman):
+         delta  log_p  log_t
+log_p     0.08   1.00  -0.78
+log_cnt  -0.03   0.82  -0.93
+p_final  -0.43  -0.41   0.30
+p_alone  -0.51  -0.35   0.20
+log_len   0.49   0.19   0.02
+ctx_ent   0.26   0.68  -0.58
+n_ph     -0.05  -0.57   0.72
+log_t     0.12  -0.78   1.00
+
+what predicts log_t? partial r(feature, log_t | class, log_p):
+  p_final -0.04  p_alone -0.29  log_len +0.28  ctx_ent -0.27  n_ph +0.41
+  R2 of log_t on class+log_p+log_p^2 0.735; + features + n_ph 0.813 (unexplained share 0.187)
+
+10-fold CV R^2 (30 repeats):
+  B   class x log_p + log_p^2                         0.398
+  B + features                                        0.485
+  B + features + n_ph                                 0.483
+  B + log_t                                           0.494
+  B + features + n_ph + log_t                         0.520
+  Bc  class x log_cnt (CHILDES) + sq                  0.372
+  Bc + features + n_ph                                0.453
+  Bc + features + n_ph + log_t                        0.491
+  class x log_t + features + n_ph (no frequency)      0.474
+  increment of log_t over B: +0.096;  over B + features + n_ph: +0.038
+  leave-one-feature-out (from B + features + n_ph + log_t), change in CV R^2:
+    drop p_final  +0.008
+    drop p_alone  +0.008
+    drop log_len  -0.026
+    drop ctx_ent  +0.006
+    drop n_ph     +0.004
+  partial r(log_t, difficulty | class, log_p, features, n_ph) = +0.469  95% boot CI [0.356 0.583]
+
+== n15k, y = emp_diff, n = 676 (items with >= 5 tokens in ages 10-36 mo)
+
+item features vs frequency / difficulty (Spearman):
+         delta  log_p  log_t
+log_p    -0.10   1.00  -0.80
+log_cnt  -0.19   0.85  -0.90
+p_final  -0.33  -0.43   0.36
+p_alone  -0.38  -0.29   0.22
+log_len   0.38   0.15  -0.02
+ctx_ent   0.11   0.66  -0.58
+n_ph      0.01  -0.54   0.71
+log_t     0.23  -0.80   1.00
+
+what predicts log_t? partial r(feature, log_t | class, log_p):
+  p_final +0.00  p_alone -0.17  log_len +0.18  ctx_ent -0.20  n_ph +0.29
+  R2 of log_t on class+log_p+log_p^2 0.711; + features + n_ph 0.774 (unexplained share 0.226)
+
+10-fold CV R^2 (30 repeats):
+  B   class x log_p + log_p^2                         0.373
+  B + features                                        0.484
+  B + features + n_ph                                 0.489
+  B + log_t                                           0.419
+  B + features + n_ph + log_t                         0.497
+  Bc  class x log_cnt (CHILDES) + sq                  0.407
+  Bc + features + n_ph                                0.509
+  Bc + features + n_ph + log_t                        0.522
+  class x log_t + features + n_ph (no frequency)      0.461
+  increment of log_t over B: +0.046;  over B + features + n_ph: +0.008
+  leave-one-feature-out (from B + features + n_ph + log_t), change in CV R^2:
+    drop p_final  -0.013
+    drop p_alone  +0.002
+    drop log_len  -0.029
+    drop ctx_ent  -0.007
+    drop n_ph     +0.000
+  partial r(log_t, difficulty | class, log_p, features, n_ph) = +0.334  95% boot CI [0.256 0.407]
