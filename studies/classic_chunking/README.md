@@ -79,4 +79,5 @@ one-off CHILDES pull). Intermediate data go to `work/` (gitignored, ~76 MB); sma
   length, sub-lexical structure): untested.
 - Child level: whether CLASSIC can produce v2's efficiency/acceleration structure, and CLASSIC run at the
   empirical input spread (σ_r ≈ 0.4) against v2's 4–7% input share.
-- Only 195 items have a valid named δ_j; the all-item test uses empirical difficulty.
+- Only 195 items have a valid named δ_j; the all-item test uses empirical difficulty. Full 681-item δ_j needs the
+  stale `long_no_freq_slopes_psi.csv` regenerated: see [`journal/notes/TODO_psi_681_refit.md`](../../journal/notes/TODO_psi_681_refit.md).
