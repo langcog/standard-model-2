@@ -34,6 +34,15 @@ strings that no longer match the current bundle's names. `paper/build_cache.R` (
 and stops loudly. The local `fits/summaries/long_no_freq_slopes.draws.rds` that build_cache also needs is
 not in the checkout, so Fig 4 was not rebuilt here.
 
+## How much would the refit change δ_j? Probably very little (checked 2026-11-04)
+No Sherlock access from George's machine, so the `_2k` per-word file was not imported. As a proxy,
+`fits/bayes_long/summaries/{thal,smith,marchman}_a3_m3_psi.csv` are per-word δ_j from per-dataset fits on the
+same clean data (item names match the current bundle; r̂ ≤ 1.009, ESS ≥ 4100). They are a different model on
+a different scale, so only ranks are compared. Spearman with the June-aligned δ_j: Thal 0.990, Marchman 0.988,
+Smith 0.964 (Smith is the smallest, 316 children); with empirical difficulty the June-aligned file is 0.987.
+So the aligned June file already ranks words almost exactly as clean-data estimates do. Treat the
+`--refit` import as a nice-to-have (needs someone with Sherlock access, e.g. MCF), not a blocker.
+
 ## Done on `fix/psi-681-alignment`
 - `model/scripts/export_psi_aligned.R`: re-keys the June fit to the current bundle by `item_definition`
   (recovers the June bundle from git); writes `long_no_freq_slopes_psi.csv` with `jj, item, item_definition,
