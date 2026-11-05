@@ -2965,3 +2965,73 @@ input→accel 0.68 [−0.06, 1.44]; δ 10.29, σ_ζ 4.30, proc→eff −0.75 unc
 γ_in mixes slowly as in every fit of this model (ess 69, r̂ 1.095 here; 97 / 1.017 pinned).
 **For the paper:** λ = 1 is well supported, but Fig. 4's input→efficiency interval should be
 the ruler-prior one, [0.20, 0.48], not the pinned [0.31, 0.39].
+
+## 🟢 47. CLASSIC chunking vs word difficulty δ_j — exploratory, not in the paper (2026-11-03/04)
+
+**Question.** Rowland et al. (2026, ch. 4, *Language 0–5*) explain vocabulary growth with CLASSIC,
+a chunking model of the input: words are learned as phoneme chunks merge into whole-word chunks.
+v2's RQ2 null says frequency adds nothing to a word's difficulty once δ_j is free. Does CLASSIC's
+per-word learning time predict δ_j **beyond frequency**, i.e. is δ_j partly "how hard the word is to
+chunk out of the input"?
+
+**Setup.** `studies/classic_chunking/` (`run_all.sh <cmudict>`; ~1–3 min after a one-off CHILDES pull).
+- `classic_fast.py` re-implements the OSF `classic.py` (https://osf.io/9s4d7) rule for rule: access
+  probability 1/(1+exp(−(4.5−x−1))), learning rate 0.10, parse order multiword → lexical → sublexical →
+  phonemic; a word is known once it is a lexical/multiword chunk. Read, not executed or vendored.
+- Input: CHILDES Eng-NA caregiver speech (not the British *Language 0–5* corpus), phonemized with
+  CMUdict (91% of utterances kept; 678/681 CDI items have phonemes). Main run = 40 age-ordered streams
+  × 60k utterances, ages 10–36 mo. Predictor `log_t` = mean log utterance index at which CLASSIC first
+  stores the item as a whole word.
+- Targets: `delta198` (named 197-item δ_j fit, 195 heard), `delta681` (all-item δ_j, 677 heard; June fit
+  re-keyed, see below), `emp_diff` (−logit production rate 22–28 mo, 676 items). 10-fold CV R² ×30 repeats,
+  all models with v2 lexical class. Baseline B = class × log_p + log_p².
+- Calibration only (not a replication): median CDI words known 89 / 195 / 392 / 498 at 5 / 15 / 50 /
+  100% of the stream, vs Rowland's 104 / 373 / 558 at 5 / 13 / 48%.
+
+**Result (CV R², main run).**
+
+| Model | δ_j (195) | δ_j (677) | empirical (676) |
+|---|--:|--:|--:|
+| B (best frequency baseline) | 0.398 | 0.362 | 0.373 |
+| class × log_t (CLASSIC alone) | 0.427 | 0.406 | 0.419 |
+| B + log_t | 0.521 | 0.460 | 0.461 |
+| B + features | 0.485 | 0.497 | 0.484 |
+| B + features + n_ph + log_t | 0.532 | 0.537 | 0.522 |
+
+- **CLASSIC adds to frequency:** +0.12 / +0.10 / +0.09 CV R²; partial r(log_t, difficulty | class, log_p)
+  ≈ +0.6 (δ_j) / +0.5 (empirical). Robust across 15k/120k utterances, ages 10–60 and learning rate 0.2.
+  It does **not** replace frequency: CLASSIC alone ≈ the best frequency baseline. Tokens heard before
+  learning (`log_tok`) add nothing, so the signal is learning *time*, not exposure count.
+- **But most of the increment is cheap distributional structure.** Four features of the same CHILDES
+  input — share utterance-final (`p_final`), share alone (`p_alone`), log mean length of the utterances
+  containing the word (`log_len`), neighbour entropy (`ctx_ent`) — reproduce ~70% of CLASSIC's gain on
+  δ_j-195 and all of it on the other two targets. `log_len` does the work: words heard in longer
+  utterances are harder (Spearman with δ_j +0.49 / +0.40).
+- **Residual for CLASSIC after features + phoneme count:** +0.03 to +0.05 (+0.008 in the 15k run);
+  partial r ≈ +0.46–0.52. Real but small, and not shown to be chunking-specific.
+
+**Reading.** δ_j carries input structure that a frequency count misses — mostly the utterance context
+a word arrives in (length, position, diversity). CLASSIC is one way to encode that, not demonstrably a
+better one than four summary statistics. This refines rather than overturns the RQ2 null: *frequency*
+adds nothing beyond δ_j, but δ_j is partly predictable from *how* words occur in the input.
+Caveats: features chosen after seeing the problem; no feature × class interactions; American input
+against CDI norms; same corpus for features and CLASSIC.
+
+**Side finding: the all-item δ_j file was misaligned (fixed; shipped results unaffected).**
+`fits/summaries/long_no_freq_slopes_psi.csv` was fit on the June bundle (`446820b`) and had no item
+column; the 2026-08-15 rebuild (exp. 42) renumbered `jj` and renamed items, so joined by `jj` it has
+cor ≈ 0 with production difficulty. `model/scripts/export_psi_aligned.R` now re-keys it by
+`item_definition` (681/681 matched; cor 0.984 with production) and writes an `item` column;
+`model/R/psi_anchor.R` gives the anchoring scripts (`add_io_anchor.R`, `prepare_io_pooled.R`,
+`prepare_io_dataset.R`) a name-keyed loader that stops on a mismatch. The shipped IO bundles were built
+before the rebuild and their anchors match the aligned file exactly (Fig 3 pooled/FMW2013); am2018 and
+seedlings use an older (May) δ_j vintage — self-consistent, but a re-anchoring decision is open.
+The clean-bundle `_2k` refits (exp. 45) hold a true current δ_j, but it is on Sherlock scratch and was
+not imported; the per-dataset `bayes_long` fits on clean data rank words like the June-aligned file
+(Spearman 0.99 Thal, 0.99 Marchman, 0.96 Smith), so the CLASSIC numbers should not move materially.
+Details and the remaining steps: `journal/notes/TODO_psi_681_refit.md` (`--refit` import, am2018/seedlings
+re-anchoring, Fig 4 rebuild, stale EN-I200/Norwegian psi copies).
+
+**Not done.** Sub-lexical/phonological structure as the source of the residual; child-level tests
+(can CLASSIC produce v2's efficiency/acceleration structure; CLASSIC at σ_r ≈ 0.4 vs v2's 4–7% input
+share); rerun on the imported refit δ_j.
