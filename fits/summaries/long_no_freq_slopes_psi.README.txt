@@ -1,0 +1,4 @@
+long_no_freq_slopes_psi.csv: EN longitudinal per-word difficulty, keyed to fits/long_subset_data.rds by item.
+Values: fit on the 682-item June-2026 bundle (git 446820b), psi as committed in 4d514ed.
+Re-keyed by model/scripts/export_psi_aligned.R (source_jj = jj in the old bundle). Not a refit.
+Read it through model/R/psi_anchor.R::load_en_psi_by_name().
